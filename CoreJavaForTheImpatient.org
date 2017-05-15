@@ -1877,6 +1877,7 @@
       You CANNOT import static methods of fields from a class in the default
       package.
 ** TODO 2.6 Nested Classes
+   - /nested class/: a class inside another class.
    Java has _TWO_ kinds of nested classes, with somewhat different behavior.
 *** 2.6.1 Static Nested Classes
 *** 2.6.2 Inner Classes
@@ -2731,7 +2732,8 @@
       Employee[] buttons = stream.toArray(Employee[]::new);
       #+END_SRC
 
-** TODO 3.6 Processing Lambda Expressions
+** DONE 3.6 Processing Lambda Expressions
+   CLOSED: [2017-05-14 Sun 20:02]
    This section show you how to write your own methods that can consume lambda
    expressions.
 
@@ -2795,21 +2797,322 @@
       ~IntConsumer~ instead of a ~Consumer<Integer>~
 
 *** 3.6.3 Implementing Your Own Functional Interfaces
-    - x
-** TODO 3.7 Lambda Expressions and Variable Scope
+    _Explain through Example_:
+
+    There is no standard type for a mapping ~(int, int) -> Color~.
+    You could use ~BiFunction<Integer, Integer, Color>~, BUT that involves
+    /autoboxing/.
+
+    + In this case, it makes sense to define a new interface
+      #+BEGIN_SRC java
+        @FunctionalInterface
+        public interface PixelFunction {
+            Color apply(int x, int y);
+        }
+      #+END_SRC
+
+    + Advantages of using ~@FunctionalInterface~ annotation:
+      1. The compiler checks that the annotated entity is an interface with a
+         single abstract method.
+
+      2. The _javadoc_ page includes a statement that your interface is a func-
+         tional interface.
+
+    + Implement a method can take a lambda expression parameter, and use it:
+      #+BEGIN_SRC java
+        BufferedImage createImage(int width, int height, PixelFunction f) {
+            BufferedImage image = new BufferedImage(width, height,
+                                                    BufferedImage.TYPE_INT_RGB);
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    Color color = f.apply(x, y); // IMPORTANT
+                    image.setRGB(x, y, color.getRGB());
+                }
+            }
+
+            return image;
+        }
+
+        BufferedImage frenchFlag = createImage(150, 100,
+            (x, y) -> x < 50 ? Color.BLUE : x < 100 ? Color.WHITE : Color.RED);
+      #+END_SRC
+
+** DONE 3.7 Lambda Expressions and Variable Scope
+   CLOSED: [2017-05-14 Sun 21:05]
 *** 3.7.1 Scope of a Lambda Expression
+    - It is _illegal_ to
+      + declare a parameter or a local variable in the lambda that has the same
+        name as a local variable.
+        For example,
+        #+BEGIN_SRC java
+          int first = 0;
+          Comparator<String> comp = (first, second) -> first.length() -
+              second.length();
+          // Error: Variable `first` already defined
+        #+END_SRC
+
+      + introduce same name variables in a lambda expression
+
+    - ~this~ in a lambda expression denotes the ~this~ parameter of the method
+      that creates the lambda.
+
+      For example,
+      #+BEGIN_SRC java
+        public class Application {
+            public void doWork() {
+                Runnable runner = () -> { // ...
+                                          System.out.println(this.toString());
+                                          // ...
+                };
+
+                // ...
+            }
+        }
+      #+END_SRC
+      The expression ~this.toString()~ calls the ~toString~ method of the
+      ~Application~ object, _NOT_ the ~Runnable~ instance.
+      There is nothing special about the use of this in a lambda expression.
+      The scope of the lambda expression is nested inside the ~doWork~ method,
+      and ~this~ has the same meaning anywhere in that method.
+
 *** 3.7.2 Accessing Variables from the Enclosing Scope
-** TODO 3.8 Higher-Order Functions
+    - /closure/: a block of code together with the values of free variables.
+      In Java, lambda expressions are closures.
+
+    - To ensure that the captured value is well defined,
+
+      there is an important -RESTRICTION-:
+      _In a lambda expression, you can only reference variables whose value
+      doesn't change._
+
+      For example, (here is a compile-time error):
+      #+BEGIN_SRC java
+        for (int i = 0; i < n; ++i) {
+            new Thread(() -> System.out.println(i)).start();
+            // Error -- cannot capture `i`
+        }
+      #+END_SRC
+
+    - The rule is that a lambda expression can _ONLY_ access local variables
+      from an enclosing scope that are /effectively final/.
+
+    - /effectively final/: a variable is never modified -- it either IS or COULD
+      BE declared as ~final~.
+
+    - _NOTE_:
+      The same rule applies to variables captured by local inner classes (see
+      Section 3.9, “Local Inner Classes,” on p. 122).  =TODO=
+
+      _In the past_, the rule was more draconian and required captured variables
+      to actually be declared ~final~. _This is no longer the case_.
+
+    - _NOTE_:
+      The variable of an enhanced ~for~ loop is /effectively final/ since its
+      scope is a single iteration. =TODO= =???=
+      A legal example:
+      #+BEGIN_SRC java
+        for (String arg : args) {
+            new Thread(() -> System.out.println(arg)).start();
+            // OK to capture `arg`
+        }
+      #+END_SRC
+      In contrast, the scope of ~i~ in traditional ~for~ is the entire loop.
+
+    - As a consequence of the /effectively final/ rule,
+      a lambda expression _CANNOT mutate any captured variables_.
+      For example,
+      #+BEGIN_SRC java
+        public static void repeatMessage(String text, int count, int threads) {
+            Runnable r = () -> {
+                while (count > 0) {
+                    count—; // Error: Can't mutate captured variable
+                    System.out.println(text);
+                }
+            };
+            for (int i = 0; i < threads; i++) new Thread(r).start();
+        }
+      #+END_SRC
+
+      =TODO= This is actually a good thing. As you will see in Chapter 10, if
+      two threads update count at the same time, its value is undefined.
+
+    - _NOTE_: =IMPORTANT=
+      _Don't count on the compiler to catch all concurrent access errors._
+
+      The prohibition against mutation _ONLY_ holds for _local variables_.
+
+      If ~count~ is an _instance variable_ or _static variable_ of an enclosing
+      class, then NO ERROR is reported even though the result is just as
+      undefined.
+
+    - _CAUTION_: =IMPORTANT=
+      One can circumvent the check for inappropriate mutations by using an array
+      of length 1:
+      #+BEGIN_SRC java
+      int[] counter = new int[1];
+      button.setOnAction(event -> counter[0]++);
+      #+END_SRC
+
+      The counter variable is /effectively final/ -- it is never changed since it
+      always refers to the same array, so you can access it in the lambda
+      expression.
+
+      Of course, code like this is _NOT threadsafe_. Except possibly for a
+      callback in a single-threaded UI, this is a terrible idea.
+
+      =TODO= You will see how to implement a threadsafe shared counter in
+      Chapter 10.
+
+** DONE 3.8 Higher-Order Functions
+   CLOSED: [2017-05-14 Sun 22:09]
 *** 3.8.1 Methods that Return Functions
+    Example
+    - Q: Create a method that produces the correct comparator:
+         Sometimes sort an array of strings in ascending order
+         Other times in descending order.
+
+    - A:
+      + Code
+        #+BEGIN_SRC java
+          public static Comparator<String> compareInDirection(int direction) {
+              return (x, y) -> direction * x.compareTo(y);
+          }
+        #+END_SRC
+        * call ~compareInDirection(1)~ yields an ascending comparator
+        * call ~compareInDirection(-1)~ yields a descending comparator
+
+      + Application
+        ~Arrays.sort(friends, compareInDirection(-1));~
+         
 *** 3.8.2 Methods That Modify Functions
+    Generalize the idea from the last section: Reverse any comparator.
+    #+BEGIN_SRC java
+      public static Comparator<String> reverse(Comparator<String> comp) {
+          return (x, y) -> comp.compare(y, x);
+      }
+
+      reverse(String::compareToIgnoreCase);
+    #+END_SRC
+
+    _NOTE_:
+    The ~Comparator~ interface has default method ~reversed~ that produces the
+    reverse of a given comparator in just this way.
+
 *** 3.8.3 Comparator Methods
-** TODO 3.9 Local Inner Classes
+    - The ~Comparator~ interface has a number of useful static methods that are
+      higher-order functions generating comparators.
+
+    - The comparing method takes a /"key extractor" function/ that maps a type
+      ~T~ to a comparable type (such as ~String~), and then compare them.
+
+    - For example,
+      + ~Arrays.sort(people, Comparator.comparing(Person::getName));~
+
+      + Chain comparators
+        #+BEGIN_SRC java
+          Arrays.sort(people, Comparator
+                      .comparing(Person::getLastName)
+                      .thenComparing(Person::getFirstName));
+        #+END_SRC
+
+      + Some wariations of these methods.
+        #+BEGIN_SRC java
+          Arrays.sort(people, Comparator.comparing(Person::getName,
+              (s, t) -> s.length() - t.length()));
+        #+END_SRC
+
+    - =IMPORTANT= Both the ~comparing~ and ~thenComparing~ methods have variants
+      that avoid boxing of ~int~, ~long~, or ~double~ values.
+        An easier way of sorting by name length would be
+      ~Arrays.sort(people, Comparator.comparingInt(p -> p.getName().length()));~
+
+    - If a key function can return ~null~, use static methods ~nullsFirst~ and
+      ~nullsLast~.
+
+      They take an existing comparator modify it so that no ~null~ realted exception
+      but ranks them as smaller or larger than regular values.
+
+      For example,
+      #+BEGIN_SRC java
+        import java.util.Comparator.*;
+
+        Arrays.sort(people, comparing(Person::getMiddleName,
+                                      nullsFirst(naturalOrder())));
+      #+END_SRC
+      + ~naturalOrder~: make a comparator for any class implementing ~Comparable~
+      + ~reverseOrder~: give the reverse of the natural order.
+
+** DONE 3.9 Local Inner Classes
+   CLOSED: [2017-05-14 Sun 22:41]
+   _Long before there were lambda expressions_
+   Java had a mechanism for concisely defining classes that implement a interface
+   (functional or not).
+   _For Now_
+   + For functional interfaces, use lambda expressions.
+   + For non-functional, use /local inner classes/.
+
 *** 3.9.1 Local Classes
+   - /local class/: a class inside a method.
+
+   - /local class/ occurs often when a class implements a interface and the
+     caller of the method only cares about the interface, not the class.
+     =FROM JIAN= user doesn't need to know the exact formation of this class, and
+                 only use it in the way the interface specified.
+                 The only way to get this class is through the return value of
+                 this method, or used inside this method.
+
+   - TODO
+     #+BEGIN_SRC java
+       private static Random generator = new Random();
+
+       public static IntSequence randomInts(int low, int high) {
+           class RandomSequence implements IntSequence {
+               public int next() { return low + generator.nextInt(high - low + 1); }
+               public boolean hasNext() { return true; }
+           }
+
+           return new RandomSequence();
+       }
+     #+END_SRC
+
 *** 3.9.2 Anonymous Classes
+    #+BEGIN_SRC java
+      public static IntSequence randomInts(int low, int high) {
+          return new IntSequence() {
+              public int next() { return low + generator.nextInt(high - low + 1); }
+              public boolean hasNext() { return true; }
+          }
+      }
+    #+END_SRC
+    + The expression ~new interface() { methods }~ means:
+      Define a class implementing the interface that has the given methods, and
+      construct one object of that class.
+
+    + _NOTE_:
+      As always, the ~()~ in the ~new~ expression indicate the construction
+      arguments. A default constructor of the anonymous class is invoked.
+
+    + _Before_ Java had /lambda expressions/,
+      /anonymous inner classes/ were _the most concise_ syntax available for
+      providing runnables, comparators, and other functional objects.
+      _They show up frequently in legacy code._
+
+    + Nowadays, they are only necessary when you need to provide two or more
+      methods, as in the preceding example.
+      If the ~IntSequence~ interface has a default ~hasNext~ method, as in
+      Exercise 15, you can simply use a lambda expression: =IMPORTANT=
+      #+BEGIN_SRC java
+        public static IntSequence randomInts(int low, int high) {
+            // This lambda expression is considered as a anonymous class that
+            // implements `IntSequence` with default method `hasNext`.
+            return () -> low + generator.nextInt(high - low + 1);
+        }
+      #+END_SRC
+
 ** TODO Exercises
 
 * TODO 4 INHERITANCE AND REFLECTION - PAGE 139 ~ 179
-** 4.1 Extending a Class
+** TODO 4.1 Extending a Class
 *** 4.1.1 Super- and Subclasses
 *** 4.1.2 Defining and Inheriting Subclass Methods
 *** 4.1.3 Method Overriding
@@ -2822,24 +3125,24 @@
 *** 4.1.10 Anonymous Subclasses
 *** 4.1.11 Inheritance and Default Methods
 *** 4.1.12 Method Expressions with super
-** 4.2 Object: The Cosmic Superclass
+** TODO 4.2 Object: The Cosmic Superclass
 *** 4.2.1 The toString Method
 *** 4.2.2 The equals Method
 *** 4.2.3 The hashCode Method
 *** 4.2.4 Cloning Objects
-** 4.3 Enumerations
+** TODO 4.3 Enumerations
 *** 4.3.1 Methods of Enumerations
 *** 4.3.2 Constructors, Methods, and Fields
 *** 4.3.3 Bodies of Instances
 *** 4.3.4 Static Members
 *** 4.3.5 Switching on an Enumeration
-** 4.4 Runtime Type Information and Resources
+** TODO 4.4 Runtime Type Information and Resources
 *** 4.4.1 The Class Class
 *** 4.4.2 Loading Resources
 *** 4.4.3 Class Loaders
 *** 4.4.4 The Context Class Loader
 *** 4.4.5 Service Loaders
-** 4.5 Reflection
+** TODO 4.5 Reflection
 *** 4.5.1 Enumerating Class Members
 *** 4.5.2 Inspecting Objects
 *** 4.5.3 Invoking Methods
@@ -2847,7 +3150,7 @@
 *** 4.5.5 JavaBeans
 *** 4.5.6 Working with Arrays
 *** 4.5.7 Proxies
-** Exercises
+** TODO Exercises
 
 * TODO 5 EXCEPTIONS, ASSERTIONS, AND LOGGING - PAGE 180 ~ 202
 ** 5.1 Exception Handling
