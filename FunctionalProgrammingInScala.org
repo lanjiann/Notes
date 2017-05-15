@@ -1,0 +1,1400 @@
+#+TITLE: Functional Programming in Scala
+#+VERSION: 2015
+#+AUTHOR: Paul Chiusano, Rúnar Bjarnason
+
+* Table of Contents                                      :TOC_4_org:noexport:
+ - [[foreword][foreword]]
+ - [[preface][preface]]
+ - [[acknowledgments][acknowledgments]]
+ - [[about this book][about this book]]
+   - [[How this book is structured =IMPORTANT=][How this book is structured =IMPORTANT=]]
+   - [[Audience][Audience]]
+   - [[How to read this book][How to read this book]]
+   - [[Code conventions and downloads][Code conventions and downloads]]
+   - [[Setting expectations][Setting expectations]]
+   - [[Author Online][Author Online]]
+ - [[Part 1 introduction to functional programming PAGE-1~92][Part 1 introduction to functional programming PAGE-1~92]]
+   - [[1  What is functional programming? _PAGE 3 ~ 13_][1  What is functional programming? _PAGE 3 ~ 13_]]
+     - [[1.1 The benefits of FP: a simple example][1.1 The benefits of FP: a simple example]]
+       - [[1.1.1 A program with side effects][1.1.1 A program with side effects]]
+       - [[1.1.2 A functional solution: removing the side effects][1.1.2 A functional solution: removing the side effects]]
+     - [[1.2 Exactly what is a (pure) function?][1.2 Exactly what is a (pure) function?]]
+     - [[1.3 Referential transparency, purity, and the substitution model][1.3 Referential transparency, purity, and the substitution model]]
+     - [[1.4 Summary][1.4 Summary]]
+   - [[2  Getting started with functional programming in Scala _PAGE 14 ~ 28_][2  Getting started with functional programming in Scala _PAGE 14 ~ 28_]]
+     - [[2.1 Introducing Scala the language: an example][2.1 Introducing Scala the language: an example]]
+     - [[2.2 Running our program][2.2 Running our program]]
+     - [[2.3 Modules, objects, and namespaces][2.3 Modules, objects, and namespaces]]
+     - [[2.4 Higher-order functions: passing functions to functions][2.4 Higher-order functions: passing functions to functions]]
+       - [[2.4.1 A short detour: writing loops functionally][2.4.1 A short detour: writing loops functionally]]
+       - [[2.4.2 Writing our first higher-order function][2.4.2 Writing our first higher-order function]]
+     - [[2.5 Polymorphic functions: abstracting over types][2.5 Polymorphic functions: abstracting over types]]
+       - [[2.5.1 An example of a polymorphic function][2.5.1 An example of a polymorphic function]]
+       - [[2.5.2 Calling HOFs with anonymous functions][2.5.2 Calling HOFs with anonymous functions]]
+     - [[2.6 Following types to implementations][2.6 Following types to implementations]]
+     - [[2.7 Summary][2.7 Summary]]
+   - [[3  Functional data structures 29][3  Functional data structures 29]]
+     - [[3.1 Defining functional data structures][3.1 Defining functional data structures]]
+     - [[3.2 Pattern matching][3.2 Pattern matching]]
+     - [[3.3 Data sharing in functional data structures][3.3 Data sharing in functional data structures]]
+       - [[3.3.1 The efficiency of data sharing][3.3.1 The efficiency of data sharing]]
+       - [[3.3.2 Improving type inference for higher-order functions][3.3.2 Improving type inference for higher-order functions]]
+     - [[3.4 Recursion over lists and generalizing to higher-order functions][3.4 Recursion over lists and generalizing to higher-order functions]]
+       - [[3.4.1 More functions for working with lists][3.4.1 More functions for working with lists]]
+       - [[3.4.2 Loss of efficiency when assembling list functions from simpler components][3.4.2 Loss of efficiency when assembling list functions from simpler components]]
+     - [[3.5 Trees][3.5 Trees]]
+     - [[3.6 Summary][3.6 Summary]]
+   - [[4  Handling errors without exceptions _PAGE 48 ~ 64_ =ing...=][4  Handling errors without exceptions _PAGE 48 ~ 64_ =ing...=]]
+     - [[4.1 The good and bad aspects of exceptions][4.1 The good and bad aspects of exceptions]]
+     - [[4.2 Possible alternatives to exceptions][4.2 Possible alternatives to exceptions]]
+     - [[4.3 The ~Option~ data type][4.3 The ~Option~ data type]]
+       - [[4.3.1 Usage patterns for ~Option~][4.3.1 Usage patterns for ~Option~]]
+       - [[4.3.2 ~Option~ composition, lifting, and wrapping exception-oriented APIs][4.3.2 ~Option~ composition, lifting, and wrapping exception-oriented APIs]]
+     - [[4.4 The ~Either~ data type][4.4 The ~Either~ data type]]
+     - [[4.5 Summary][4.5 Summary]]
+   - [[5  Strictness and laziness _PAGE 64 ~ 77_][5  Strictness and laziness _PAGE 64 ~ 77_]]
+     - [[5.1 Strict and non-strict functions][5.1 Strict and non-strict functions]]
+     - [[5.2 An extended example: lazy lists][5.2 An extended example: lazy lists]]
+       - [[5.2.1 Memoizing streams and avoiding recomputation][5.2.1 Memoizing streams and avoiding recomputation]]
+       - [[5.2.2 Helper functions for inspecting streams][5.2.2 Helper functions for inspecting streams]]
+     - [[5.3 Separating program description from evaluation][5.3 Separating program description from evaluation]]
+     - [[5.4 Infinite streams and corecursion][5.4 Infinite streams and corecursion]]
+     - [[5.5 Summary][5.5 Summary]]
+   - [[6  Purely functional state _PAGE 78 ~ 91_][6  Purely functional state _PAGE 78 ~ 91_]]
+     - [[6.1 Generating random numbers using side effects][6.1 Generating random numbers using side effects]]
+     - [[6.2 Purely functional random number generation][6.2 Purely functional random number generation]]
+     - [[6.3 Making stateful APIs pure][6.3 Making stateful APIs pure]]
+     - [[6.4 A better API for state actions][6.4 A better API for state actions]]
+       - [[6.4.1 Combining state actions][6.4.1 Combining state actions]]
+       - [[6.4.2 Nesting state actions][6.4.2 Nesting state actions]]
+     - [[6.5 A general state action data type][6.5 A general state action data type]]
+     - [[6.6 Purely functional imperative programming][6.6 Purely functional imperative programming]]
+     - [[6.7 Summary][6.7 Summary]]
+ - [[PART 2 FUNCTIONAL DESIGN AND COMBINATOR LIBRARIES PAGE-93][PART 2 FUNCTIONAL DESIGN AND COMBINATOR LIBRARIES PAGE-93]]
+   - [[7  Purely functional parallelism 95][7  Purely functional parallelism 95]]
+     - [[7.1 Choosing data types and functions][7.1 Choosing data types and functions]]
+       - [[7.1.1 A data type for parallel computations][7.1.1 A data type for parallel computations]]
+       - [[7.1.2 Combining parallel computations][7.1.2 Combining parallel computations]]
+       - [[7.1.3 Explicit forking][7.1.3 Explicit forking]]
+     - [[7.2 Picking a representation][7.2 Picking a representation]]
+     - [[7.3 Refining the API][7.3 Refining the API]]
+     - [[7.4 The algebra of an API][7.4 The algebra of an API]]
+       - [[7.4.1 The law of mapping][7.4.1 The law of mapping]]
+       - [[7.4.2 The law of forking][7.4.2 The law of forking]]
+       - [[7.4.3 Breaking the law: a subtle bug][7.4.3 Breaking the law: a subtle bug]]
+       - [[7.4.4 A fully non-blocking Par implementation using actors][7.4.4 A fully non-blocking Par implementation using actors]]
+     - [[7.5 Refining combinators to their most general form][7.5 Refining combinators to their most general form]]
+     - [[7.6 Summary][7.6 Summary]]
+   - [[8  Property-based testing 124][8  Property-based testing 124]]
+     - [[8.1 A brief tour of property-based testing][8.1 A brief tour of property-based testing]]
+     - [[8.2 Choosing data types and functions][8.2 Choosing data types and functions]]
+       - [[8.2.1 Initial snippets of an API][8.2.1 Initial snippets of an API]]
+       - [[8.2.2 The meaning and API of properties][8.2.2 The meaning and API of properties]]
+       - [[8.2.3 The meaning and API of generators][8.2.3 The meaning and API of generators]]
+       - [[8.2.4 Generators that depend on generated values][8.2.4 Generators that depend on generated values]]
+       - [[8.2.5 Refining the Prop data type][8.2.5 Refining the Prop data type]]
+     - [[8.3 Test case minimization][8.3 Test case minimization]]
+     - [[8.4 Using the library and improving its usability][8.4 Using the library and improving its usability]]
+       - [[8.4.1 Some simple examples][8.4.1 Some simple examples]]
+       - [[8.4.2 Writing a test suite for parallel computations][8.4.2 Writing a test suite for parallel computations]]
+     - [[8.5 Testing higher-order functions and future directions][8.5 Testing higher-order functions and future directions]]
+     - [[8.6 The laws of generators][8.6 The laws of generators]]
+     - [[8.7 Summary][8.7 Summary]]
+   - [[9  Parser combinators 146][9  Parser combinators 146]]
+     - [[9.1 Designing an algebra, first][9.1 Designing an algebra, first]]
+     - [[9.2 A possible algebra][9.2 A possible algebra]]
+       - [[9.2.1 Slicing and nonempty repetition][9.2.1 Slicing and nonempty repetition]]
+     - [[9.3 Handling context sensitivity][9.3 Handling context sensitivity]]
+     - [[9.4 Writing a JSON parser][9.4 Writing a JSON parser]]
+       - [[9.4.1 The JSON format][9.4.1 The JSON format]]
+       - [[9.4.2 A JSON parser][9.4.2 A JSON parser]]
+     - [[9.5 Error reporting][9.5 Error reporting]]
+       - [[9.5.1 A possible design][9.5.1 A possible design]]
+       - [[9.5.2 Error nesting][9.5.2 Error nesting]]
+       - [[9.5.3 Controlling branching and backtracking][9.5.3 Controlling branching and backtracking]]
+     - [[9.6 Implementing the algebra][9.6 Implementing the algebra]]
+       - [[9.6.1 One possible implementation][9.6.1 One possible implementation]]
+       - [[9.6.2 Sequencing parsers][9.6.2 Sequencing parsers]]
+       - [[9.6.3 Labeling parsers][9.6.3 Labeling parsers]]
+       - [[9.6.4 Failover and backtracking][9.6.4 Failover and backtracking]]
+       - [[9.6.5 Context-sensitive parsing][9.6.5 Context-sensitive parsing]]
+     - [[9.7 Summary][9.7 Summary]]
+ - [[PART 3 COMMON STRUCTURES IN FUNCTIONAL DESIGN PAGE-173][PART 3 COMMON STRUCTURES IN FUNCTIONAL DESIGN PAGE-173]]
+   - [[10  Monoids 175][10  Monoids 175]]
+     - [[10.1 What is a monoid?][10.1 What is a monoid?]]
+     - [[10.2 Folding lists with monoids][10.2 Folding lists with monoids]]
+     - [[10.3 Associativity and parallelism][10.3 Associativity and parallelism]]
+     - [[10.4 Example: Parallel parsing][10.4 Example: Parallel parsing]]
+     - [[10.5 Foldable data structures][10.5 Foldable data structures]]
+     - [[10.6 Composing monoids][10.6 Composing monoids]]
+       - [[10.6.1 Assembling more complex monoids][10.6.1 Assembling more complex monoids]]
+       - [[10.6.2 Using composed monoids to fuse traversals][10.6.2 Using composed monoids to fuse traversals]]
+     - [[10.7 Summary][10.7 Summary]]
+   - [[11  Monads 187][11  Monads 187]]
+     - [[11.1 Functors: generalizing the map function][11.1 Functors: generalizing the map function]]
+       - [[11.1.1 Functor laws][11.1.1 Functor laws]]
+     - [[11.2 Monads: generalizing the flatMap and unit functions][11.2 Monads: generalizing the flatMap and unit functions]]
+       - [[11.2.1 The Monad trait][11.2.1 The Monad trait]]
+     - [[11.3 Monadic combinators][11.3 Monadic combinators]]
+     - [[11.4 Monad laws][11.4 Monad laws]]
+       - [[11.4.1 The associative law][11.4.1 The associative law]]
+       - [[11.4.2 Proving the associative law for a specific monad][11.4.2 Proving the associative law for a specific monad]]
+       - [[11.4.3 The identity laws][11.4.3 The identity laws]]
+     - [[11.5 Just what is a monad?][11.5 Just what is a monad?]]
+       - [[11.5.1 The identity monad][11.5.1 The identity monad]]
+       - [[11.5.2 The State monad and partial type application][11.5.2 The State monad and partial type application]]
+     - [[11.6 Summary][11.6 Summary]]
+   - [[12  Applicative and traversable functors 205][12  Applicative and traversable functors 205]]
+     - [[12.1 Generalizing monads][12.1 Generalizing monads]]
+     - [[12.2 The Applicative trait][12.2 The Applicative trait]]
+     - [[12.3 The difference between monads and applicative functors][12.3 The difference between monads and applicative functors]]
+       - [[12.3.1 The Option applicative versus the Option monad][12.3.1 The Option applicative versus the Option monad]]
+       - [[12.3.2 The Parser applicative versus the Parser monad][12.3.2 The Parser applicative versus the Parser monad]]
+     - [[12.4 The advantages of applicative functors][12.4 The advantages of applicative functors]]
+       - [[12.4.1 Not all applicative functors are monads][12.4.1 Not all applicative functors are monads]]
+     - [[12.5 The applicative laws][12.5 The applicative laws]]
+       - [[12.5.1 Left and right identity][12.5.1 Left and right identity]]
+       - [[12.5.2 Associativity][12.5.2 Associativity]]
+       - [[12.5.3 Naturality of product][12.5.3 Naturality of product]]
+     - [[12.6 Traversable functors][12.6 Traversable functors]]
+     - [[12.7 Uses of Traverse][12.7 Uses of Traverse]]
+       - [[12.7.1 From monoids to applicative functors][12.7.1 From monoids to applicative functors]]
+       - [[12.7.2 Traversals with State][12.7.2 Traversals with State]]
+       - [[12.7.3 Combining traversable structures][12.7.3 Combining traversable structures]]
+       - [[12.7.4 Traversal fusion][12.7.4 Traversal fusion]]
+       - [[12.7.5 Nested traversals][12.7.5 Nested traversals]]
+       - [[12.7.6 Monad composition][12.7.6 Monad composition]]
+     - [[12.8 Summary][12.8 Summary]]
+ - [[PART 4 EFFECTS AND I/O PAGE-227][PART 4 EFFECTS AND I/O PAGE-227]]
+   - [[13  External effects and I/O 229][13  External effects and I/O 229]]
+     - [[13.1 Factoring effects][13.1 Factoring effects]]
+     - [[13.2 A simple IO type][13.2 A simple IO type]]
+       - [[13.2.1 Handling input effects][13.2.1 Handling input effects]]
+       - [[13.2.2 Benefits and drawbacks of the simple IO type][13.2.2 Benefits and drawbacks of the simple IO type]]
+     - [[13.3 Avoiding the StackOverflowError][13.3 Avoiding the StackOverflowError]]
+       - [[13.3.1 Reifying control flow as data constructors][13.3.1 Reifying control flow as data constructors]]
+       - [[13.3.2 Trampolining: a general solution to stack overflow][13.3.2 Trampolining: a general solution to stack overflow]]
+     - [[13.4 A more nuanced IO type][13.4 A more nuanced IO type]]
+       - [[13.4.1 Reasonably priced monads][13.4.1 Reasonably priced monads]]
+       - [[13.4.2 A monad that supports only console I/O][13.4.2 A monad that supports only console I/O]]
+       - [[13.4.3 Pure interpreters][13.4.3 Pure interpreters]]
+     - [[13.5 Non-blocking and asynchronous I/O][13.5 Non-blocking and asynchronous I/O]]
+     - [[13.6 A general-purpose IO type][13.6 A general-purpose IO type]]
+       - [[13.6.1 The main program at the end of the universe][13.6.1 The main program at the end of the universe]]
+     - [[13.7 Why the IO type is insufficient for streaming I/O][13.7 Why the IO type is insufficient for streaming I/O]]
+     - [[13.8 Summary][13.8 Summary]]
+   - [[14  Local effects and mutable state 254][14  Local effects and mutable state 254]]
+     - [[14.1 Purely functional mutable state][14.1 Purely functional mutable state]]
+     - [[14.2 A data type to enforce scoping of side effects][14.2 A data type to enforce scoping of side effects]]
+       - [[14.2.1 A little language for scoped mutation][14.2.1 A little language for scoped mutation]]
+       - [[14.2.2 An algebra of mutable references][14.2.2 An algebra of mutable references]]
+       - [[14.2.3 Running mutable state actions][14.2.3 Running mutable state actions]]
+       - [[14.2.4 Mutable arrays][14.2.4 Mutable arrays]]
+       - [[14.2.5 A purely functional in-place quicksort][14.2.5 A purely functional in-place quicksort]]
+     - [[14.3 Purity is contextual][14.3 Purity is contextual]]
+       - [[14.3.1 What counts as a side effect?][14.3.1 What counts as a side effect?]]
+     - [[14.4 Summary][14.4 Summary]]
+   - [[15  Stream processing and incremental I/O 268][15  Stream processing and incremental I/O 268]]
+     - [[15.1 Problems with imperative I/O: an example][15.1 Problems with imperative I/O: an example]]
+     - [[15.2 Simple stream transducers][15.2 Simple stream transducers]]
+       - [[15.2.1 Creating processes][15.2.1 Creating processes]]
+       - [[15.2.2 Composing and appending processes][15.2.2 Composing and appending processes]]
+       - [[15.2.3 Processing files][15.2.3 Processing files]]
+     - [[15.3 An extensible process type][15.3 An extensible process type]]
+       - [[15.3.1 Sources][15.3.1 Sources]]
+       - [[15.3.2 Ensuring resource safety][15.3.2 Ensuring resource safety]]
+       - [[15.3.3 Single-input processes][15.3.3 Single-input processes]]
+       - [[15.3.4 Multiple input streams][15.3.4 Multiple input streams]]
+       - [[15.3.5 Sinks][15.3.5 Sinks]]
+       - [[15.3.6 Effectful channels][15.3.6 Effectful channels]]
+       - [[15.3.7 Dynamic resource allocation][15.3.7 Dynamic resource allocation]]
+     - [[15.4 Applications][15.4 Applications]]
+     - [[15.5 Summary][15.5 Summary]]
+ - [[Tips][Tips]]
+
+* foreword
+  - _It would be nice_ if we could distinguish pure and impure functions in
+    Scala,
+    (but) I believe we _have not yet found_ a way to do so that is lightweight
+    and flexible enough to be added to Scala without hesitation.
+
+* preface
+* acknowledgments
+* DONE about this book
+  CLOSED: [2017-03-18 Sat 04:51]
+
+** How this book is structured =IMPORTANT=
+   - wiki: https://github.com/fpinscala/fpinscala/wiki
+** Audience
+   - We WON'T spend a lot of time and space discussing Scala's syntax and
+     language features.
+
+   - References:
+     + Book: http://scala-lang.org/documentation/books.html
+     + Doc: http://scala-lang.org/documentation/
+
+** How to read this book
+   - A _filled-in square_ next to an exercise means the exercise is _CRITICAL_.
+   - An _open square_ means the exercise is _OPTIONAL_.
+** Code conventions and downloads
+** Setting expectations
+   - Take your questions to
+     + the Google Group: https://groups.google.com/forum/#!topic/scala-functional/ or
+     + the IRC channel (=#fp-in-scala= on =irc.freenode.net=).
+
+** Author Online
+
+_EN_:
+intriguing title
+haphazardly
+a patchwork of
+mourn
+Coalesce
+
+* TODO Part 1 introduction to functional programming PAGE-1~92
+  - Outlines for the Chapter 1 ~ 6
+** DONE 1  What is functional programming? _PAGE 3 ~ 13_
+   CLOSED: [2017-03-15 Wed 21:01]
+   - A function has a /side effect/ if it does something
+     /other than simply return a result/, for example:
+     + Modifying a variable
+     + Modifying a data structure in place
+     + Setting a field on an object
+     + Throwing an exception or halting with an error =TODO=
+     + Printing to the console or reading user input
+     + Reading from or writing to a file
+     + Drawing on the screen
+
+   - Q: Then how is it even possible to write useful programs at all?
+     A: functional programming
+     + is _a restriction on_ _HOW_ we write programs,
+     + but _not_ on _WHAT_ programs we can express.
+
+   - Over the course of this book, we'll learn how to express all of our
+     programs without side effects, and that includes programs that perform I/O,
+     handle errors, and modify data.
+
+   - _tremendously beneficial_ of FP: the increase in /modularity/
+
+   - Because the increased /modularity/, pure functions are easier to
+     + test
+     + reuse
+     + parallelize
+     + generalize
+     + reason about
+
+   - /referential transparency/
+
+   - /the substitution model/
+
+*** 1.1 The benefits of FP: a simple example
+**** 1.1.1 A program with side effects
+**** 1.1.2 A functional solution: removing the side effects
+     - FP is a truly radical shift in _how programs are organized_
+       at every level -- _from_ the simplest of loops _to_ high-level program
+       architecture_.
+*** 1.2 Exactly what is a (pure) function?
+    - ~A => B~ is pronounced as "A to B" or "A arrow B".
+
+    - A function has _NO observable effect_ on the execution of the program
+      _other than_ to compute a result given its inputs;
+      we say that it has _no side effects_.
+
+    - /Referential transparency (RT)/ :: An expression e is referentially trans-
+         parent if, for all programs p, all occurrences of e in p can be replaced
+         by the result of evaluating e without affecting the meaning of p.
+
+    - /purity/ :: A function f is /pure/ if the expression f(x) is referentially
+                  transparent for all referentially transparent x.
+
+*** 1.3 Referential transparency, purity, and the substitution model
+    - Referential transparency _force/enables_ /substitution model/
+
+    - Computation proceeds by applying /substitution model/ (substituting
+      /equals for equals/).
+        In other words, RT enables /equational reasoning/ about programs.
+
+    - Two examples,
+      1. a RT example
+      2. a non-RT example
+
+    - RT featured code a purely local, and we NEED NOT mentally simulate
+      sequences of state updates to understand the code. ONLY /local reasoning/.
+
+    - RT => pure locality (only the expression being evaluated) => /modularity/
+                                                                        |
+                                                                        V
+                                                                 /composability/ 
+
+    - A pure function is /modular/ and /composable/
+      because it _separates_
+      the logic of the computation itself
+                   _from_
+      “what to do with the result” and “how to obtain the input”; it's a black
+      box.
+
+    - From the process of eliminating the side effect from the ~buyCoffee~
+      example, we were more easily to be able to reuse the logic of the function,
+      both for purposes of _testing_ and for purposes of _further composition_.
+
+*** 1.4 Summary
+
+** DONE 2  Getting started with functional programming in Scala _PAGE 14 ~ 28_
+   CLOSED: [2017-04-05 Wed 16:52]
+   - /tail recursive functions/
+   - /higher-order functions (HOFs)/
+   - /polymorphic HOFs/
+*** DONE 2.1 Introducing Scala the language: an example
+    CLOSED: [2017-03-15 Wed 21:37]
+    - A method of ~String~: ~format~ with C language like placeholder.
+
+    - If you're familiar with Java,
+      declaring an ~object~ in Scala
+      is a lot _like_
+      creating a _new instance of an anonymous class_.
+
+    - Scala has no equivalent to Java's ~static~ keyword, and ~object~ is often
+      used in Scala where you might use a class with static members in Java.
+
+    - /left-hand side/ or /signature/: the part of declaration _before_ the
+      equals sign.
+
+    - /right-hand side/ or /definition/: the part of declaration _after_ the
+      equals sign.
+
+    - Finally, our ~main~ method is an outer shell that calls into our purely
+      functional core and prints the answer to the console.
+        We'll sometimes call such methods /procedures (or impure functions)/
+      rather than functions.
+      #+BEGIN_SRC scala
+      def main(args: Array[String]): Unit =
+        println(formatAbs(-42))
+      #+END_SRC
+
+*** DONE 2.2 Running our program
+    CLOSED: [2017-03-18 Sat 03:11]
+    - Book's source code repo: http://github.com/fpinscala/fpinscala
+
+    - Compilation way:
+      #+BEGIN_SRC bash
+      #>
+      scalac MyModule.scala
+      # Then get MyModule.class
+      #>
+      scala MyModule
+      #+END_SRC
+
+    - Interpretation Way:
+      #+BEGIN_SRC bash
+      #>
+      scala MyModule.scala
+      #+END_SRC
+
+    - Interactive Interpretation Way:
+      + ~:load~
+        #+BEGIN_SRC scala
+        //> scala   # in shell
+
+        // scala> :load MyModule.scala
+        // Loading MyModule.scala...
+        // defined module MyModule
+
+        // scala>
+        MyModule.abs(-42)
+        // res0: Int = 42
+        #+END_SRC
+
+      + ~:paste~
+
+*** DONE 2.3 Modules, objects, and namespaces
+    CLOSED: [2017-03-18 Sat 03:20]
+    - /namespace/
+
+    - Every value in Scala is what's called an /object/
+
+    - /module/: An object whose _primary purpose_ is giving its members a
+      /namespace/.
+
+    - A member can be declared with ~def~, ~val~, or ~object~, etc (=TODO=).
+
+    - TWO ways to access members within their enclosing object:
+      + unqualified (without prefixing the object name)
+      + ~this~ prefixed/qualified
+
+    - Scala has no special notion of /operators/. ONLY method calls.
+
+    - Single argument methods can be used as infix operations:
+      + ~MyModule.abs(42)~ is the same as ~Module abs 42~.
+      + ~set1.union(set2)~ is the same as ~set1 union set2~.
+
+*** DONE 2.4 Higher-order functions: passing functions to functions
+    CLOSED: [2017-04-05 Wed 16:52]
+    - _functions are values_
+
+    - /higher-order function (HOF)/: A function that accepts other functions as
+      arguments.
+
+**** 2.4.1 A short detour: writing loops functionally
+     - /inner function (or local definition)/: functions that are local to the
+       body of another function.
+       =COMMENT= In functional programming, we shouldn't consider this a bigger
+                 deal than local integers or strings
+
+**** 2.4.2 Writing our first higher-order function
+     - _Variable-naming conventions_: It's a common convention to use names like
+       ~f~, ~g~, and ~h~ for parameters to a higher order function.
+          In functional programming, we tend to use very short variable names,
+       even one-letter names.
+
+     - _Rationale to Variable-naming conventions_:
+       + This is usually because HOFs are so general that they have no opinion
+         on what the argument should actually do.
+           All they know about the argument is its type.
+
+       + Many functional programmers feel that short names make code easier to
+         read, since it makes the structure of the code easier to see at a
+         glance.
+*** DONE 2.5 Polymorphic functions: abstracting over types
+    CLOSED: [2017-03-18 Sat 04:18]
+    - /monomorphic/
+    - /polymorphic/
+
+**** 2.5.1 An example of a polymorphic function
+     - a /polymorphic/ function, sometimes called a /generic/ function.
+
+     - _Type Parameter Names Convention_: Use short, one-letter, uppercase type
+       parameter names like [ ~A~, ~B~, ~C~ ].
+
+     - /type variables/
+
+**** 2.5.2 Calling HOFs with anonymous functions
+     - /anonymous functions/ and /function literals/ have the same meaning.
+       Example:
+       #+BEGIN_SRC scala
+       (x: Int) => x == 9
+       #+END_SRC
+
+     - _Functions as values in Scala_: =TODO: RE-READ=
+       + When we define a /function literal/, what is ACTUALLY being defined in
+         Scala is
+         an _object_ with a method called ~apply~.
+
+       + Scala has a special rule for this method name, so that objects that have
+         an ~apply~ method can be called _as if they were themselves methods_.
+
+       + When we define a /function literal/ like ~(a, b) => a < b~, this is
+         REALLY /syntactic sugar/ for /object/ creation:
+         #+BEGIN_SRC scala
+         val lessThan = new Function2[Int, Int, Boolean] {
+           def apply(a: Int, b: Int) = a < b
+         }
+         #+END_SRC
+         Here
+         * ~lessThan~ has type ~Function2[Int, Int, Boolean]~, which is usually
+           written ~(Int, Int) => Boolean~.
+         * ~Function2~ is an oridinary (provided by the standard Scala library)
+           trait, and it has an ~apply~ method. It represent function objects
+           that take two arguments. Also provied are ~Function1~, ~Function3~,
+           and others.
+         * ~lessThan(10, 20)~ is REALLY syntatic sugar for calling its ~apply~
+           method: ~lessThan.apply(10, 20)~
+         * /first-class values/: ordinary Scala objects.
+         * We'll often use /function/ to refer to either such a first-class
+           function or a method, _depending on context_.
+
+*** DONE 2.6 Following types to implementations
+    CLOSED: [2017-03-18 Sat 16:22]
+    - In some cases, you'll find that the universe of possibilities for a given
+      polymorphic type is constrained such that _ONLY ONE_ implementation is
+      possible!
+
+    - ~compose~:
+      #+BEGIN_SRC scala
+      def compose(f: B => C, g: A => B): A => C =
+        x => f(g(x))
+      #+END_SRC
+
+    - ~andThen~: ~g andThen f~ is the same as ~f compose g~.
+
+    - Polymorphic, higher-order functions often end up being _extremely widely
+      applicable_,
+      precisely because they say nothing about any particular domain and are
+      simply abstracting over a common pattern that occurs in many contexts.
+
+*** DONE 2.7 Summary
+    CLOSED: [2017-03-18 Sat 04:20]
+** DONE 3  Functional data structures 29
+   CLOSED: [2017-03-18 Sat 22:02]
+*** DONE 3.1 Defining functional data structures
+    CLOSED: [2017-03-18 Sat 16:37]
+    - /functional data structures/ are by definition _immutable_.
+
+    - Adding ~sealed~ in front means that all implementations of the ~trait~
+      _MUST_ be declared in this file.
+
+    - the ~+~ indicates that the type parameter ~A~ is covariant -- see sidebar
+      "More about variance" for more information.
+
+    - Each data constructor also introduces a /pattern/ that can be used for
+      /pattern matching/ as in the given examples.
+
+    - _More about variance_ =RE-READ=
+
+*** DONE 3.2 Pattern matching
+    CLOSED: [2017-03-18 Sat 17:21]
+    - _Companion objects in Scala_
+      Companion objects are more of a convention in Scala.
+
+    - _Variadic functions in Scala_ =TODO: RE-READ=
+      Example:
+      #+BEGIN_SRC scala
+      def apply[A] (as: A*): List[A] =
+        if (as.isEmpty) Nil
+        else Cons(as.head, apply(as.tail: _*))
+      #+END_SRC
+      For data types,
+      + it's a common idiom to have a _variadic_ ~apply~ method in the companion
+        object to conveniently construct instances of the data type.
+
+      + By placing it in the companion object, we can invoke it with syntax like
+        ~List(1,2,3,4)~ or ~List("hi","bye")~, with as many values as we want
+        separated by commas (we sometimes call this the /list literal/ or just
+        /literal syntax/).
+
+      + Variadic functions are just providing a little
+        _syntactic sugar_
+        for
+        creating and passing a ~Seq~ of elements explicitly.
+
+      + ~Seq~ is the interface in Scala's collections library implemented by
+        sequence. Inside apply, the argument ~as~ will be bound to a ~Seq[A]~,
+        The special ~_*~ type annotation allows us to pass a ~Seq~ to a variadic
+        method.
+
+*** DONE 3.3 Data sharing in functional data structures
+    CLOSED: [2017-03-18 Sat 18:34]
+    - /data sharing/: The new data reuses the immutable data.
+      Example:
+      1. ~Cons(1, xs)~ doesn't copy =xs=.
+      2. _tail_ operation doesn't real remove the head from a list, just returns
+         a new reference pointer to the same linked list but a different element.
+
+    - Sharing of immutable data often lets us implement functions more
+      efficiently
+
+    - footnote 6:
+      Conclusion: We find that _in the large_, FP can often achieve _greater_
+      efficiency than approaches that rely on side effects,
+      _due to much greater sharing of data and computation_.
+
+    - /persistent/
+
+    - =TODO= Exercise 3.2
+
+**** 3.3.1 The efficiency of data sharing
+     - Adds all the elements of one list to the end of another:
+       #+BEGIN_SRC scala
+       def append[A](a1: List[A], a2: List[A]): List[A] =
+         a1 match {
+           case Nil => a2
+           case Cons(h,t) => Cons(h, append(t, a2))
+         } 
+       #+END_SRC
+       The time complexity is O(a2.length)
+
+     - If we were to implement this same function for two arrays, which is
+       mutable in Scala,
+       we'd be forced to _copy all_ the elements in both arrays into the result.
+       In this case, the immutable linked list is much more efficient than an array!
+
+     - Writing purely functional data structures that support different opera-
+       tions efficiently
+       _is all about finding clever ways to exploit data sharing_. =IMPORTANT=
+
+     - Exercise 3.6,
+       Q: Why can't this function be implemented in constant time like ~tail~?
+       A: One ~case~ in pattern matching of this function body is
+          ~case Cons(hd, tl) => Cons(hd, init(tl))~, which shows a copying
+          operation and ~Cons~ construction.
+          =Jian's Sentiment=: A linked list can be pointed by multiple head, but
+                              it can't point to multiple tails.
+          =IMPORTANT=
+
+     - =TODO: Learn Vector in Scala standard library=
+
+**** 3.3.2 Improving type inference for higher-order functions
+     - We _must_ annotate the type of the argument of ~f~,
+       If we have ~dropWhile~ with the signature of
+       ~def dropWhile[A](l: List[A], f: A => Boolean): List[A]~,
+       #+BEGIN_SRC scala
+       val xs: List[Int] = List(1, 2, 3, 4, 5)
+       val ex1 = dropWhile(xs, (x: Int) => x < 4)
+       #+END_SRC
+
+     - We can group the arguments to improve type inference,
+       If we have ~dropWhile~ with the signature of
+       ~def dropWhile[A](l: List[A])(f: A => Boolean): List[A]~,
+       #+BEGIN_SRC scala
+       val xs: List[Int] = List(1, 2, 3, 4, 5)
+       val ex1 = dropWhile(xs)(x => x < 4)
+       #+END_SRC
+       
+     - We'll often group and order our function arguments into multiple argument lists
+       to maximize type inference.
+*** DONE 3.4 Recursion over lists and generalizing to higher-order functions
+    CLOSED: [2017-03-18 Sat 21:34]
+    - _Underscore notation for anonymous functions_
+      + The anonymous function ~(x,y) => x + y~ can be written as ~_ + _~ in
+        situations where the types of ~x~ and ~y~ _could be inferred_ by Scala.
+
+      + This is a useful shorthand in cases where _the function parameters are
+        mentioned just once_ in the body of the function.
+
+      + _Each underscore_ in an anonymous function expression like ~_ + _~
+        _introduces a new (unnamed) function parameter_ and references it.
+
+      + Arguments are introduced in _left-to-right order_.
+
+    - Exercise 3.7 =TODO= Return to in chapter 5
+      =Jian's Answer (now)=: For now, I can't add any short-circuit behavior
+      to them without adding a ~if...else...~ test to eache of them.
+
+**** 3.4.1 More functions for working with lists
+***** LISTS IN THE STANDARD LIBRARY
+      - We'll use the standard library version in subsequent chapters.
+
+      - Differences between
+        our ~List~ library
+        and 
+        The ~List~ in the standard library:
+        + We developed ~Cons~.
+        + In the standard library, ~Cons~ is called ~::~, which is a
+          right-associate infix operator.
+
+      - Useful ~List~ methods in the standard library:
+        + ~def take(n: Int): List[A]~
+        + ~def takeWhile(f: A => Boolean): List[A]~
+        + ~def forall(f: A => Boolean): Boolean~ is like the bulit-in ~all~ in
+          Python.
+        + ~def exists(f: A => Boolean): Boolean~ is like the bulit-in ~any~ in
+          Python.
+        + ~scanLeft~ and ~scanRight~ returns the List of partial results.
+
+**** TODO 3.4.2 Loss of efficiency when assembling list functions from simpler components
+     - One of the problems with ~List~ is that,
+       + _GOOD_: although we can often express operations and algorithms in terms
+         of _very general-purpose functions_,
+
+       + _BAD_: the resulting _implementation isn't always efficient_ -- * we may
+         * end up making _multiple passes_ over the same input, or else
+         * have to write _explicit recursive loops_ to _allow early termination_.
+
+     - =TODO= EXERCISE 3.24, improve on it in chapter 5
+
+*** DONE 3.5 Trees
+    CLOSED: [2017-03-18 Sat 22:01]
+    - /Algebraic Data Type (ADT)/
+
+    - Somewhat confusingly, ADT is sometimes used elsewhere to stand for
+      /ABSTRACT data type/.
+
+    - =TODO= footnote 14 =TODO=
+
+    - _Tuple types in Scala_
+      + ~(String,Int)~, which is syntactic sugar for ~Tuple2[String,Int]~.
+
+    - Tree data structure:
+      #+BEGIN_SRC scala
+      sealed trait Tree[+A]
+      case class Leaf[A] (value: A) extends Tree[A]
+      case class Branch[A] (left: Tree[A], right: Tree[A]) extends Tree[A]
+      #+END_SRC
+
+    - Pattern matching again provides a convenient way of operating over elements
+      of our ADT. =IMPORTANT=
+
+    - _ADTs and encapsulation_:
+      + Objection to ADTs ::
+           _algebraic data types violate encapsulation by making public the_
+           _internal representation of a type_.
+
+      + Things are different in FP ::
+           In FP, we approach concerns about encapsulation differently
+        * we don't typically have delicate mutable state which could lead to
+          bugs or violation of invariants if exposed publicly.
+
+        * _Exposing_ the _data constructors_ of a type is _often fine_, and
+          the decision to do so is approached much like any other decision about
+          what the public API of a data type should be.
+
+    - =TODO= footnote 15 I don't understand.
+
+*** DONE 3.6 Summary
+    CLOSED: [2017-03-18 Sat 22:02]
+** TODO 4  Handling errors without exceptions _PAGE 48 ~ 64_ =ing...=
+   - The functional solution, of returning errors as values, is
+     + safer and
+     + retains referential transparency,
+     and through the use of higher-order functions, we can preserve the
+     _primary benefit_ of exceptions -- /consolidation of error-handling logic/.
+
+*** DONE 4.1 The good and bad aspects of exceptions
+    CLOSED: [2017-03-19 Sun 23:05]
+    - NO RT and substitution model can be applied:
+      #+BEGIN_SRC scala
+      def failingFn(i: Int): Int = {
+        val y: Int = throw new Exception("fail!")
+
+        try {
+          val x = 42 + 5
+          x + y
+        }
+        catch { case e: Exception => 43 }
+      }
+      #+END_SRC
+
+      is different from 
+      #+BEGIN_SRC scala
+      def failingFn(i: Int): Int = {
+        try {
+          val x = 42 + 5
+          x + (throw new Exception("fail!"))
+        }
+        catch { case e: Exception => 43 }
+      }
+      #+END_SRC
+
+    - There are two main problems with exceptions:
+      1. /exceptions/ break /RT/ and
+         introduce /context dependence/,
+      2. Exceptions are not type-safe.
+         For example: There is a function ~failingFn: Int => Int~.
+         * It tells us nothing about the facct that  exceptions may occur.
+         * It doesn't force us to handle those exceptions.
+         * If we forget to check for an exception in ~failingFn~, this won't be
+           detected until runtime.
+
+    - _Checked exceptions_: Java's checked exceptions
+      + GOOD: _at least_ force a decision about whether to handle or reraise an
+        error
+
+      + BAD:
+        * significant boilerplate for callers
+
+        * Don't work for higher-order functions. For example:
+          #+BEGIN_SRC scala
+          def map[A,B](l: List[A])(f: A => B): List[B] = {
+            // ...
+          }
+          #+END_SRC
+          This ~map~ doesn't know what exceptions were possible be thrown by ~f~.
+
+    - _Primary benefit of exceptions_
+      They allow us to /consolidate/ and /centralize error-handling/ _logic_,
+
+    - The technique we use is based on an old idea:
+      _instead of throwing_ an exception,
+      _we return a value_ indicating that an exceptional condition has occurred.
+      This is like the return codes in the C language.
+
+    - However, unlike C-style error codes,
+      + the error-handling strategy we use is /completely type-safe/, and
+      + we get full assistance from the type-checker in forcing us to deal with
+        errors,
+      + with a minimum of syntactic noise.
+
+*** DONE 4.2 Possible alternatives to exceptions
+    CLOSED: [2017-03-19 Sun 23:05]
+    - /partial function/: it's not defined for some inputs.
+
+    - A function is _typically partial_
+      because it _makes some assumptions_ about its inputs that aren't implied by
+      the input types.
+
+    - One "solution" is to return some sort of bogus value of its type, this is
+      how error handling is often doen in languages without exceptions.
+      We _REJECT_ this solution for a few reasons:
+      1. It allows errors to silently propagate
+         * Callers should check this condition manually, but they may forget
+           (error-prone).
+         * If a caller forgets to check this, compiler won't alert because the
+           returned value is legal.
+         * Often the error won't be detected until much later in the code.
+
+      2. It a caller do the right thing to check the error codes, he/she at same
+         time introduces a fair amout of boilerplate code at each errorcode-check
+         required call site.
+
+      3. It's not applicable to polymorphic code. You can't find a proper value
+         for all possible types of the type variable ~A~.
+         _NOTE_: ~null~ doesn't work for primitive types.
+
+      4. It demands a special policy or calling convention of callers --
+         proper use of this kind of functions would require that callers do
+         something other than call mean and make use of the result.
+           Giving functions special policies like this makes it difficult to
+         pass them to higher-order functions, which must treat all arguments
+         uniformly.
+
+    - The second possibile "solution" is to force the call to supply an argument
+      that tells us what to do in case we don't know how to handle the input,
+      for example:
+      #+BEGIN_SRC scala
+      def mean_1(xs: IndexedSeq[Double], onEmpty: Double): Double =
+        if (xs.isEmpty) onEmpty
+        else xs.sum / xs.length
+      #+END_SRC
+      It has drawbacks: it requires that
+      1. immediate callers have direct knowledge of how to handle the undefined
+         case
+         and
+      2. limits them to returning a ~Double~ (the type of the addtional argument).
+           What if ~mean_1~ is called as part of a larger computation and we'd
+         like to abort that computation if mean is undefined?
+         Or
+           perhaps we'd like to take some completely different branch in the
+         larger computation in this case?
+
+         Simply passing an ~onEmpty~ parameter doesn't give us this freedom.
+
+*** TODO 4.3 The ~Option~ data type
+    - The solution is to represent explicitly in the return type that a function
+      may not always have an answer.
+        We can think of this as _DEFERRING_ to the caller for the error-handling
+      strategy.
+**** 4.3.1 Usage patterns for ~Option~
+***** BASIC FUNCTIONS ON OPTION     
+      - /non-strictness/ =TODO=
+
+      - WHY ~B :> A~ is required: =TODO: I don't understand=
+        It’s needed to convince Scala that it’s still safe to declare Option[+A]
+        as covariant in A. See the chapter notes for more detail—it’s
+        unfortunately somewhat complicated, but a necessary complication in
+        Scala. Fortunately, fully understanding subtyping and variance isn’t
+        essential for our purposes here.
+
+***** USAGE SCENARIOS FOR THE BASIC OPTION FUNCTIONS
+      - ~Option[A].map(f)~:
+        1. proceeding with a computation on the assumption that an error hasn't
+           occurred;
+        2. deferring the error handling to later code.
+
+      - ~Option[A].flatMap(f)~ is similar, except that the function we provide
+        to transform the result can itself fail.
+
+      - =TODO= EXERCISE 4.2: I don't like the anonymous function passed
+        ~flatMap~ in this exercise -- it's too long to understand with
+        only one glance.
+
+      - We can use ~filter~ to convert successes into failures if the successful
+        values don't match the given predicate
+
+      - _A common pattern_:
+        transform an ~Option~ via calls to ~map~, ~flatMap~, and/or ~filter~,
+        and then
+        use ~getOrElse~ to _do error handling_ at the end:
+        #+BEGIN_SRC scala
+        val dept: String =
+          lookupByName("Joe").
+          map(_.dept).
+          filter(_ != "Accounting").
+          getOrElse("Default Dept")
+        #+END_SRC
+
+      - ~orElse~: this is often useful when we need to _chain together possibly
+        failing computations_, trying the second if the first hasn't succeeded.
+
+      - A common idiom is to do ~o.getOrElse(throw new Exception("FAIL"))~ to convert
+        the ~None~ case of an ~Option~ back to an exception.
+        _The general rule of thumb_:
+        We use exceptions _ONLY if NO REASONABLE program would ever catch the
+        exception_.
+
+      - _Note_:
+        1. We don't have to check for ~None~ at each stage of the computation --
+           we can apply several transformations and then check for and handle
+           ~None~ when we're ready.
+
+        2. But we _also get additional safety_:
+           since ~Option[A]~ is a different type than ~A~, and
+           the compiler won't let us forget to explicitly defer or handle the
+           possibility of ~None~.
+
+**** 4.3.2 ~Option~ composition, lifting, and wrapping exception-oriented APIs
+     - /lift/:
+       #+BEGIN_SRC scala
+       def lift[A, B](f: A => B): Option[A] => Option[B] = _ map f
+       #+END_SRC
+
+     - With ~lift~, any function that we already have lying around can be
+       /lifted/ to operate within the context of a single ~Option~ value.
+       For example,
+       #+BEGIN_SRC scala
+       val absO: Option[Double] => Option[Double] = lift(math.abs)
+       #+END_SRC
+
+     - =TODO= note
+
+     - =TODO= Exercise 4.3  re-read the given answer
+
+     - =TODO= Exercise 4.4
+
+     - =TODO= Exercise 4.5
+
+     - _For-comprehensions_
+
+     - =IMPORTANT=
+       Between ~map~, ~lift~, ~sequence~, ~traverse~, ~map2~, ~map3~, and so on,
+       you should _NEVER_ have to modify any existing functions to work with
+       optional values.
+
+*** TODO 4.4 The ~Either~ data type
+    - The big idea in this chapter:
+      we can represent failures and exceptions with ordinary values, and write
+      functions that abstract out common patterns of error handling and recovery.
+
+    - ~Option~ never tells you what when wrong, and it only tells there is no
+      available value. Sometimes, we may need more information.
+
+    - ~Either~ basic Definition:
+      #+BEGIN_SRC scala
+      sealed trait Either[+E, +A]
+      case class Left[+E](value: E) extends Either[E, Nothing]
+      case class Right[+A](value: A) extends Either[Nothing, A]
+      #+END_SRC
+
+    - ~Either~ is also often used more generally to encode one of two
+      possibilities in cases where it isn't worth defining a fresh data type.
+      =TODO= We'll see some examples of this throughout the book.
+
+    - ~Option~ and ~Either~ in the standard library
+      + Read both API's in the Scala standard library.
+      + ~Either~ doesn't define a right-biased ~flatMap~ directly like we do here
+        (in this chapter).
+
+    - =TODO= EXERCISE 4.6
+    - =TODO= EXERCISE 4.7
+    - =TODO= EXERCISE 4.8
+
+*** TODO 4.5 Summary
+    - The bigger idea:
+      + represent exceptions _as ordinary values_ and
+      + use higher-order functions to encapsulate common patterns of
+        _handling_
+        and
+        _propagating_ errors.
+
+    - =TODO= In the next chapter, we'll look more closely at why /non-strictness/
+      is important and how it can buy us greater modularity and efficiency in our
+      functional programs.
+
+** DONE 5  Strictness and laziness _PAGE 64 ~ 77_
+   CLOSED: [2017-03-22 Wed 21:40]
+   - Inefficiency example:
+     ~List(1,2,3,4).map(_ + 10).filter(_ % 2 == 0).map(_ * 3)~
+     + _COMMENT_: During the calculation of this example, two temporary lists are
+       created, and they are used once and discard immediately.
+     + _QUESTION_: Can we create a more efficiency calculation about this, but
+       keep the same highlevel composition style (Write a ~while~ loop can
+       eliminate the intermediate temporary lists, but it won't retain the
+       highlevel composition style)?
+       
+   - =From Jian=: I think _function composition_ is a good solution, but this
+     chapter will talk about another solution: _non-strictness functions_.
+     + _I THINK_ provide an example that can't be solved simply through function
+       composition will be better.
+
+     + _function composition_ solution: from the OPERATION viewpoint.
+
+     + _non-strictness functions_ solution: from the
+       * non-strictness DATA STRUCTION
+       * non-strictness functions
+       viewpoint.
+
+   - We'll see that /non-strictness/ _is a fundamental technique_ for improving
+     on the
+     + efficiency and
+     + modularity
+     of functional programs in general.
+
+*** 5.1 Strict and non-strict functions
+    - Complete form:
+      #+BEGIN_SRC scala
+      def if2[A](cond: Boolean, onTrue: () => A, onFalse: () => A): A =
+        if (cond) onTrue() else onFalse()
+
+      // call
+      if2(a < 22,
+        () => println("a"),
+        () => println("b")
+      )
+      #+END_SRC
+
+    - Syntactic Sugared form:
+      #+BEGIN_SRC scala
+      def if2[A](cond: Boolean, onTrue: => A, onFalse: => A): A =
+        if (cond) onTrue else onFalse 
+      #+END_SRC
+
+    - That is, Scala _won't (by default) cache_ the result of evaluating an
+      argument.
+        This is not a big trouble in strict evaluation, while it is a big
+      trouble in no-strict evaluation. Use ~lazy~ to cache the value:
+      #+BEGIN_SRC scala
+      // uncached
+      def maybeTwice2(b: Boolean, i: => Int) =
+        if (b) i+i else 0
+      
+      // cached
+      def maybeTwice2(b: Boolean, i: => Int) = {
+        lazy val j = i
+        if (b) j+j else 0
+      }
+      #+END_SRC
+
+    - _Formal definition of strictness_
+      If the evaluation of an expression runs forever or throws an error instead
+      of returning a definite value, we say that the expression doesn't
+      terminate, or that it evaluates to bottom.
+
+    - /strictness/: A function f is strict if the expression f(x) evaluates to
+      bottom for all x that evaluate to bottom.
+
+    - Non-strict function in Scala takes its arguments by name rather than by
+      value.
+
+*** 5.2 An extended example: lazy lists
+**** 5.2.1 Memoizing streams and avoiding recomputation
+     - _CONVENTION_: /smart constructors/ typically lowercase the first letter of
+       the corresponding data constructor.
+
+     - Comparison of constructor ~Cons~ and the smart constructor ~cons~:
+       #+BEGIN_SRC scala
+       // #1
+       val x = Cons(() => expensive(x), tl)
+       val h1 = x.headOption
+       val h2 = x.headOption
+       
+       // #2
+       def cons[A] (hd: => A, tl: => Scream[A]): Stream[A] = {
+         lazy val head = hd
+         lazy val tail = tl
+         Cons(() => head, () => tail)
+       }
+       #+END_SRC
+       _Comment_:
+       1. Evaluate the head twice
+       2. When applying ~cons~, cache =head= and =tail= by ~lazy val~ through
+          the first force.
+          Subsequent forces will return the cached ~lazy val~'s.
+
+     - The ~empty~ smart constructor just returns ~Empty~, but annotates ~Empty~
+       as a ~Stream[A]~, which is better for type inference in some cases.
+       + _footnote 4_: Recall that Scala uses subtyping to represent data
+         constructors, but we almost always want to infer Stream as the type,
+         not Cons or Empty. Making smart constructors that return the base type
+         is a common trick. =TODO: Better for type inference for what???=
+
+**** 5.2.2 Helper functions for inspecting streams
+*** 5.3 Separating program description from evaluation
+    - A major theme in functional programming:
+      /separation of concerns/.
+
+    - For example,
+      1. First-class functions capture some computation in their bodies but only
+         execute it once they receive their arguments.
+
+      2. Used ~Option~ to capture the fact that an error occurred, where the
+         decision of what to do about it became a separate concern.
+
+      3. With ~Stream~, we're able to build up a computation that produces a
+         sequence of elements without running the steps of that computation
+         until we actually need those elements.
+
+    - More generally speaking,
+      laziness lets us _separate_
+      + the description of an expression
+        from
+      + the evaluation of that expression.
+
+    - This gives us a powerful ability:
+      we may choose to describe a "larger" expression that we need, and
+      then evaluate only a portion of it.
+
+    - =From Jian=: This is powerfull because sometimes describe the WHOLE
+      expression is simpler than decribe part of this expression. In another
+      words,
+      + The WHOLE expression contains the general calculation ONLY.
+      + Part of the whole expression contains the general calculation and the
+        boundary condition. In real calculation, put the boundary condition in
+        operation may simplify the expression, though it depneds.
+
+    - Lazy ~foldRight~ can deal with the case of terminating early.
+      #+BEGIN_SRC scala
+      // Explicit recursion version
+      def existExplicitRecur(p: A => Boolean): Boolean = this match {
+        case Cons(h, t) => p(h()) || t().exists(p)
+        case _ => false
+      }
+
+      // Lazy ```foldRight``` and ```exist``` implemented with this
+      // ```foldRight```
+      def foldRight[B] (z: => B) (f: (A, => B) => B): B =
+        this match {
+          case Cons(h, t) => f(h(), t().foldRight(z)(f))
+          case _ => z
+        }
+
+      def exists(p: A => Boolean): Boolean =
+        foldRight(false) ((a, b) => p(a) || b)
+      #+END_SRC
+
+    - Good Example: Listing 5.3 Program trace for Stream
+
+    - This ~find~ is a method of ~Stream~, with the help of (lazy method) filter
+      it only evaluate elements of ~this~ stream to the first founded element.
+      #+BEGIN_SRC scala
+      def find(p: A => Boolean): Option[A] =
+        filter(p).headOption
+      #+END_SRC
+
+    - =TODO= We'll have a lot more to say about defining memory-efficient
+      streaming calculations, in particular calculations that require I/O, in
+      part 4 of this book.
+
+*** TODO 5.4 Infinite streams and corecursion
+    - An example of /infinite streams/:
+      ~val ones: Stream[Int] = Stream.cons(1, ones)~
+
+    - It's easy to write expressions that _never terminate_ or _aren't stack-safe_.
+      =TODO: aren't stack-safe???=
+
+    - /corecursive/: Whereas a recursive function consumes data, a corecursive function
+      _produces_ data.
+
+    - =TODO= Exercise 5.11 ~ 5.16
+
+*** 5.5 Summary
+
+** TODO 6  Purely functional state _PAGE 78 ~ 91_
+*** 6.1 Generating random numbers using side effects
+*** 6.2 Purely functional random number generation
+    - Return the random number object as well as the new state together.
+      #+BEGIN_SRC scala
+      trait RNG {
+        def nextInt: (Int, RNG)
+      }
+      
+      case class SimpleRNG(seed: Long) extends RNG {
+        def nextInt: (Int, RNG) = {
+          val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
+          val nextRNG = SimpleRNG(newSeed)
+          val n = (newSeed >>> 16).toInt
+          (n, nextRNG)
+        }
+      }
+      #+END_SRC
+
+*** 6.3 Making stateful APIs pure
+    - _footnote 4_:
+      1. Efficiency loss and reason.
+      2. Efficient purely functional data structures may help.
+      3. Mutate the data in place without breaking RT, part 4 =TODO=
+
+    - _Dealing with awkwardness in functional programming_
+       Awkwardness like this is almost always a sign of some missing abstraction
+      waiting to be discovered.
+*** TODO 6.4 A better API for state actions
+    - /state action (or state transitions)/: for example ~RNG => (A, RNG)~
+
+    - /combinators/ =TODO= in this section
+      Combinators will pass the state from one action to the next automatically.
+      With combinators, we no longer need to pass the state along ourselves.
+
+**** TODO 6.4.1 Combining state actions
+     - ???
+**** TODO 6.4.2 Nesting state actions
+     - 
+*** TODO 6.5 A general state action data type
+*** TODO 6.6 Purely functional imperative programming
+*** TODO 6.7 Summary
+
+* TODO PART 2 FUNCTIONAL DESIGN AND COMBINATOR LIBRARIES PAGE-93
+** 7  Purely functional parallelism 95
+*** 7.1 Choosing data types and functions
+**** 7.1.1 A data type for parallel computations
+**** 7.1.2 Combining parallel computations
+**** 7.1.3 Explicit forking
+*** 7.2 Picking a representation
+*** 7.3 Refining the API
+*** 7.4 The algebra of an API
+**** 7.4.1 The law of mapping
+**** 7.4.2 The law of forking
+**** 7.4.3 Breaking the law: a subtle bug
+**** 7.4.4 A fully non-blocking Par implementation using actors
+*** 7.5 Refining combinators to their most general form
+*** 7.6 Summary
+
+** 8  Property-based testing 124
+*** 8.1 A brief tour of property-based testing
+*** 8.2 Choosing data types and functions
+**** 8.2.1 Initial snippets of an API
+**** 8.2.2 The meaning and API of properties
+**** 8.2.3 The meaning and API of generators
+**** 8.2.4 Generators that depend on generated values
+**** 8.2.5 Refining the Prop data type
+*** 8.3 Test case minimization
+*** 8.4 Using the library and improving its usability
+**** 8.4.1 Some simple examples
+**** 8.4.2 Writing a test suite for parallel computations
+*** 8.5 Testing higher-order functions and future directions
+*** 8.6 The laws of generators
+*** 8.7 Summary
+
+** 9  Parser combinators 146
+*** 9.1 Designing an algebra, first
+*** 9.2 A possible algebra
+**** 9.2.1 Slicing and nonempty repetition
+*** 9.3 Handling context sensitivity
+*** 9.4 Writing a JSON parser
+**** 9.4.1 The JSON format
+**** 9.4.2 A JSON parser
+*** 9.5 Error reporting
+**** 9.5.1 A possible design
+**** 9.5.2 Error nesting
+**** 9.5.3 Controlling branching and backtracking
+*** 9.6 Implementing the algebra
+**** 9.6.1 One possible implementation
+**** 9.6.2 Sequencing parsers
+**** 9.6.3 Labeling parsers
+**** 9.6.4 Failover and backtracking
+**** 9.6.5 Context-sensitive parsing
+*** 9.7 Summary
+
+* TODO PART 3 COMMON STRUCTURES IN FUNCTIONAL DESIGN PAGE-173
+** 10  Monoids 175
+   - We'll see how /monoids/ are useful in _TWO_ ways:
+     + they facilitate _parallel computation_ by giving us the freedom to break
+       our problem into chunks that can be computed in parallel; and
+
+     + they can be _composed to assemble_ complex calculations from simpler
+       pieces.
+    
+*** 10.1 What is a monoid?
+    - The _laws_ of /associativity/ and /identity/ are collectively called the
+      /monoid laws/.
+
+    - A /monoid/ consists of the following:
+      + Some type =A=;
+      + An associative binary operation, =op=, that takes two values of type =A=
+        and combines them into one: ~op(op(x,y), z) == op(x, op(y,z))~ for any
+        choice of ~x: A~, ~y: A~, ~z: A~;
+      + A value, ~zero: A~, that is an identity for that operation:
+        ~op(x, zero) == x~ and ~op(zero, x) == x~ for any ~x: A~.
+
+    - _The purely abstract nature of an algebraic structure_
+
+    - _Having versus being a monoid_
+      - terminology :: type =A= forms a /monoid/ under the operations defined by
+        the ~Monoid[A]~ instance.
+
+    - Stated tersely,
+      a /monoid/ is
+      + a type
+        together with
+      + a binary operation (op) over that type,
+      satisfying associativity and having an identity element (zero).
+
+    - =TODO= Can we write any interesting programs, knowing nothing about a type
+      other than that it forms a monoid? Absolutely! Let's look at some examples.
+
+*** 10.2 Folding lists with monoids
+*** 10.3 Associativity and parallelism
+*** 10.4 Example: Parallel parsing
+*** 10.5 Foldable data structures
+*** 10.6 Composing monoids
+**** 10.6.1 Assembling more complex monoids
+**** 10.6.2 Using composed monoids to fuse traversals
+*** 10.7 Summary
+** 11  Monads 187
+*** 11.1 Functors: generalizing the map function
+**** 11.1.1 Functor laws
+*** 11.2 Monads: generalizing the flatMap and unit functions
+**** 11.2.1 The Monad trait
+*** 11.3 Monadic combinators
+*** 11.4 Monad laws
+**** 11.4.1 The associative law
+**** 11.4.2 Proving the associative law for a specific monad
+**** 11.4.3 The identity laws
+*** 11.5 Just what is a monad?
+**** 11.5.1 The identity monad
+**** 11.5.2 The State monad and partial type application
+*** 11.6 Summary
+** 12  Applicative and traversable functors 205
+*** 12.1 Generalizing monads
+*** 12.2 The Applicative trait
+*** 12.3 The difference between monads and applicative functors
+**** 12.3.1 The Option applicative versus the Option monad
+**** 12.3.2 The Parser applicative versus the Parser monad
+*** 12.4 The advantages of applicative functors
+**** 12.4.1 Not all applicative functors are monads
+*** 12.5 The applicative laws
+**** 12.5.1 Left and right identity
+**** 12.5.2 Associativity
+**** 12.5.3 Naturality of product
+*** 12.6 Traversable functors
+*** 12.7 Uses of Traverse
+**** 12.7.1 From monoids to applicative functors
+**** 12.7.2 Traversals with State
+**** 12.7.3 Combining traversable structures
+**** 12.7.4 Traversal fusion
+**** 12.7.5 Nested traversals
+**** 12.7.6 Monad composition
+*** 12.8 Summary
+* TODO PART 4 EFFECTS AND I/O PAGE-227
+** 13  External effects and I/O 229
+*** 13.1 Factoring effects
+*** 13.2 A simple IO type
+**** 13.2.1 Handling input effects
+**** 13.2.2 Benefits and drawbacks of the simple IO type
+*** 13.3 Avoiding the StackOverflowError
+**** 13.3.1 Reifying control flow as data constructors
+**** 13.3.2 Trampolining: a general solution to stack overflow
+*** 13.4 A more nuanced IO type
+**** 13.4.1 Reasonably priced monads
+**** 13.4.2 A monad that supports only console I/O
+**** 13.4.3 Pure interpreters
+*** 13.5 Non-blocking and asynchronous I/O
+*** 13.6 A general-purpose IO type
+**** 13.6.1 The main program at the end of the universe
+*** 13.7 Why the IO type is insufficient for streaming I/O
+*** 13.8 Summary
+** 14  Local effects and mutable state 254
+*** 14.1 Purely functional mutable state
+*** 14.2 A data type to enforce scoping of side effects
+**** 14.2.1 A little language for scoped mutation
+**** 14.2.2 An algebra of mutable references
+**** 14.2.3 Running mutable state actions
+**** 14.2.4 Mutable arrays
+**** 14.2.5 A purely functional in-place quicksort
+*** 14.3 Purity is contextual
+**** 14.3.1 What counts as a side effect?
+*** 14.4 Summary
+** 15  Stream processing and incremental I/O 268
+*** 15.1 Problems with imperative I/O: an example
+*** 15.2 Simple stream transducers
+**** 15.2.1 Creating processes
+**** 15.2.2 Composing and appending processes
+**** 15.2.3 Processing files
+*** 15.3 An extensible process type
+**** 15.3.1 Sources
+**** 15.3.2 Ensuring resource safety
+**** 15.3.3 Single-input processes
+**** 15.3.4 Multiple input streams
+**** 15.3.5 Sinks
+**** 15.3.6 Effectful channels
+**** 15.3.7 Dynamic resource allocation
+*** 15.4 Applications
+*** 15.5 Summary
+* Tips
+  - Variable-naming conventions
