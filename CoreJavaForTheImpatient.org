@@ -156,11 +156,11 @@
      - [[4.1.9 Protected Access][4.1.9 Protected Access]]
      - [[4.1.10 Anonymous Subclasses][4.1.10 Anonymous Subclasses]]
      - [[4.1.11 Inheritance and Default Methods][4.1.11 Inheritance and Default Methods]]
-     - [[4.1.12 Method Expressions with super][4.1.12 Method Expressions with super]]
-   - [[4.2 Object: The Cosmic Superclass][4.2 Object: The Cosmic Superclass]]
-     - [[4.2.1 The toString Method][4.2.1 The toString Method]]
-     - [[4.2.2 The equals Method][4.2.2 The equals Method]]
-     - [[4.2.3 The hashCode Method][4.2.3 The hashCode Method]]
+     - [[4.1.12 Method Expressions with ~super~][4.1.12 Method Expressions with ~super~]]
+   - [[4.2 ~Object~: The Cosmic Superclass][4.2 ~Object~: The Cosmic Superclass]]
+     - [[4.2.1 The ~toString~ Method][4.2.1 The ~toString~ Method]]
+     - [[4.2.2 The ~equals~ Method][4.2.2 The ~equals~ Method]]
+     - [[4.2.3 The ~hashCode~ Method][4.2.3 The ~hashCode~ Method]]
      - [[4.2.4 Cloning Objects][4.2.4 Cloning Objects]]
    - [[4.3 Enumerations][4.3 Enumerations]]
      - [[4.3.1 Methods of Enumerations][4.3.1 Methods of Enumerations]]
@@ -193,7 +193,7 @@
      - [[5.1.6 The finally Clause][5.1.6 The finally Clause]]
      - [[5.1.7 Rethrowing and Chaining Exceptions][5.1.7 Rethrowing and Chaining Exceptions]]
      - [[5.1.8 The Stack Trace][5.1.8 The Stack Trace]]
-     - [[5.1.9 The Objects.requireNonNull Method][5.1.9 The Objects.requireNonNull Method]]
+     - [[5.1.9 The ~Objects.requireNonNull~ Method][5.1.9 The ~Objects.requireNonNull~ Method]]
    - [[5.2 Assertions][5.2 Assertions]]
      - [[5.2.1 Using Assertions][5.2.1 Using Assertions]]
      - [[5.2.2 Enabling and Disabling Assertions][5.2.2 Enabling and Disabling Assertions]]
@@ -1310,7 +1310,7 @@
 
 *** Exercises
     
-* TODO 2 OBJECT-ORIENTED PROGRAMMING
+* 2 OBJECT-ORIENTED PROGRAMMING
   The key points of this chapter are:
   1. _Mutator_ methods change the state of an object;
      _accessor_ methods don't.
@@ -1876,12 +1876,176 @@
     - _Caution_:
       You CANNOT import static methods of fields from a class in the default
       package.
-** TODO 2.6 Nested Classes
+** 2.6 Nested Classes
    - /nested class/: a class inside another class.
-   Java has _TWO_ kinds of nested classes, with somewhat different behavior.
+
+   - WHY Useful:
+     + restrict visibility
+
+     + avoid cluttering up a package with generic names such as =Element=,
+       =Node=, or =Item=.
+
+   - Java has _TWO_ kinds of nested classes, with somewhat different behavior.
+     =TODO= =???= 
+
 *** 2.6.1 Static Nested Classes
+    - CASE 1 ::
+                #+BEGIN_SRC java
+                  public class Invoice {
+                      // See next section for the reason of `static` here
+                      private static class Item { // `Item` is nested inside `Invoice`
+                          String description;
+                          int quantity;
+                          double unitPrice;
+                          double price() { return quantity * unitPrice; }
+                      }
+                      private ArrayList<Item> items = new ArrayList<>();
+                      // ...
+                  }
+                #+END_SRC
+
+      + Here ~Item~ is private for ~Invoice~, so only ~Invoice~ methods can
+        access it. For that reason, I did not bother making the instance
+        variables of the inner class private. =IMPORTANT=
+
+      + An example of a method that constructs an object of the inner class:
+        #+BEGIN_SRC java
+          public class Invoice {
+              // ...
+              public void addItem(String description, int quantity,
+                                  double unitPrice) {
+                  Item newItem = new Item();
+                  newItem.description = description;
+                  newItem.quantity = quantity;
+                  newItem.unitPrice = unitPrice;
+                  items.add(newItem);
+              }
+          }
+        #+END_SRC
+
+    - CASE 2 ::
+                A class can make a nested class public. In that case, one would
+                want to use the usual encapsulation mechanism.
+                #+BEGIN_SRC java
+                  public class Invoice {
+                      public static class Item { // A public nested class
+                          private String description;
+                          private int quantity;
+                          private double unitPrice;
+                          public Item(String description, int quantity, double unitPrice) {
+                              this.description = description;
+                              this.quantity = quantity;
+                              this.unitPrice = unitPrice;
+                          }
+                          public double price() { return quantity * unitPrice; }
+                          // ...
+                      }
+
+                      private ArrayList<Item> items = new ArrayList<>();
+
+                      public void add(Item item) { items.add(item); }
+                      // ...
+                  }
+                #+END_SRC
+      + In this case, anyone can construct ~Item~ objects by using the
+        qualified name ~Invoice.Item~. For example,
+        #+BEGIN_SRC java
+        Invoice.Item newItem = new Invoice.Item("Blackwell Toaster", 2, 19.95);
+        myInvoice.add(newItem);
+        #+END_SRC
+
+      + There is essentially _NO DIFFERENCE_ between this ~Invoice.Item~ class
+        and a class ~InvoiceItem~ declared outside any other class.
+          Nesting the class just makes it obvious that the ~Item~ class
+        represents items in an invoice.
+
 *** 2.6.2 Inner Classes
     - /inner classes/: non-static nested classes.
+
+    - Example:
+      A social network in which each member has friends that are also members.
+      #+BEGIN_SRC java
+        public class Network {
+            public class Member { // Member is an inner class of Network
+                private String name;
+                private ArrayList<Member> friends;
+                public Member(String name) {
+                    this.name = name;
+                    friends = new ArrayList<>();
+                }
+
+                // ...
+            }
+            private ArrayList<Member> members;
+            // ...
+        }
+      #+END_SRC
+
+      + With the ~static~ modifier dropped, a ~Member~ object knows to which
+        network it blongs
+
+      + Define a method to add a member
+        #+BEGIN_SRC java
+          public class Network {
+              // ...
+              public Member enroll(String name) {
+                  Member newMember = new Member(name);
+                  members.add(newMember);
+                  return newMember;
+              }
+          }
+        #+END_SRC
+
+      + When add a member, you can get a reference to it.
+        #+BEGIN_SRC java
+        Network myFace = new Network();
+        Network.Member fred = myFace.enroll("Fred");
+        #+END_SRC
+
+      + Define a method to leave a network.
+        #+BEGIN_SRC java
+          public class Network {
+              public class Member {
+                  // ...
+                      public void leave() {
+                      members.remove(this);
+                      // The inner class is accessing the instance variables of
+                      // the outer class object that created it.
+                  }
+              }
+              private ArrayList<Member> members;
+              // ...
+          }
+
+          fred.leave();
+        #+END_SRC
+
+        The inner class is accessing the instance variables of the outer class
+        object that created it.
+
+      + The inner class can also invoke methods of the outer class through its
+        outer class instance.
+
+        Define a method to unenroll a member.
+        #+BEGIN_SRC java
+          public class Network {
+              public class Member {
+                  // ...
+                  public void leave() {
+                      unenroll(this);
+                  }
+              }
+
+              private ArrayList<Member> members;
+
+              public Member enroll(String name) { // ... }
+              public void unenroll(Member m) { // ... }
+              // ...
+          }
+        #+END_SRC
+        ~unenroll(this);~ in this case is actually means
+        ~outer.unenroll(this);~ (not a legal syntax, just illustration).
+
 *** 2.6.3 Special Syntax Rules for Inner Classes
     - ~OuterClass.this~ denotes the outer class reference.
 
@@ -3112,23 +3276,294 @@
 ** TODO Exercises
 
 * TODO 4 INHERITANCE AND REFLECTION - PAGE 139 ~ 179
-** TODO 4.1 Extending a Class
+  - /inheritance/
+
+  - /fields/: instance variables and static variables.
+
+  - /members/: /fields/, /methods/, and /nested classes\slash{}interfaces/.
+
+  - /reflection/: the ability to find out more about classes and their members
+    in running program.
+    + _Reflection is a powerful feature, but it is undeniably COMPLEX._
+    + _Tool builders oriented_
+
+  - Key points:
+    1. Use the ~super~ keyword to invoke a superclass method or constructor.
+
+    2. A ~protected~ member of a subclass is accessible in a subclass method, but
+       only when applied to objects of the same subclass.
+
+    3. Every class is a subclass of ~Object~ which provides methods ~toString~,
+       ~equals~, ~hashCode~, and ~clone~.
+
+    4. Each enumerated type is a subclass of ~Enum~ which provides methods
+       ~toString~, ~valueOf~, and ~compareTo~.
+
+    5. The ~Class~ class provides information about a Java type, which can be a
+       class, array, interface, primitive type, or ~void~.
+
+    6. You can use a ~Class~ object to load resources that are placed alongside
+       class files. TODO =???=
+
+    7. You can load classes from locations other than the class path by using a
+       class loader. TODO =???=
+
+    8. The reflection library enables programs to discover members of arbitrary
+       objects, access variables, and invoke methods. TODO =???=
+
+    9. Proxy objects dynamically implement arbitrary interfaces, routing all
+       method invocations to a handler. TODO =???=
+
+** DONE 4.1 Extending a Class
+   CLOSED: [2017-05-15 Mon 20:53]
 *** 4.1.1 Super- and Subclasses
+    #+BEGIN_SRC java
+      public class Manager extends Employee {
+          // added fields
+          // added or overriding methods
+      }
+    #+END_SRC
+
 *** 4.1.2 Defining and Inheriting Subclass Methods
+    /inherited/
 *** 4.1.3 Method Overriding
+    - Example:
+      #+BEGIN_SRC java
+        public class Manager extends Employee {
+            // ...
+            public double getSalary() {  // Overrides superclass method
+                return super.getSalary() + bonus;
+            }
+        }
+      #+END_SRC
+
+    - _Note_: TODO =???=
+      _Unlike_ ~this~, ~super~ is NOT a reference to an object,
+      but a directive to bypass dynamic method lookup
+      (see Section 4.1.5, “Superclass Assignments,” on p. 131) and invoke a
+      specific method instead. TODO =???=
+
+    - ~@Override~ annotation
+
+    - You can change the return type to a subtype when overriding a method.
+      (/convariant return types/ are permitted)
+
+    - _Caution_: =IMPORTANT=
+      When override a method,
+      the subclass method must be _at least as visible_ as the superclass method.
+
 *** 4.1.4 Subclass Construction
+    - Subclass cannot access the private instance variables of the superclass,
+      it must initialize them through a super class constructor. For example,
+      #+BEGIN_SRC java
+        public Manager(String name, double salary) {
+            super(name, salary);
+            bonus = 0;
+        }
+      #+END_SRC
+
+    - The superclass constructor call must be the _FIRST_ statement in the
+      constructor for the subclass.
+
+    - If omit the superclass constructor call, the superclass must have a
+      no-argument constructor which is implicitly called.
+
 *** 4.1.5 Superclass Assignments
+    - /covariant/
+
+    - /dynamic method lookup/
+      For example,
+      #+BEGIN_SRC java
+        Manager boss = new Manager(/* ... */);
+        Employee empl = boss;  // OK to assign to superclass variable
+      #+END_SRC
+      Though the type of ~empl~ is ~Employee~, when it calls ~getSalary~ method
+      it calls the right one -- the method of ~Manager~, rather than ~Employee~.
+
+    - _CAUTION_:
+      In Java, assign a ~Manager[]~ array to an ~Employee[]~ variable is OK,
+      BUT it is also _unsound_.
+      #+BEGIN_SRC java
+        Manager[] bosses = new Manager[10];
+        Employee[] empls = bosses; // Legal in Java
+        empls[0] = new Employee(/* ... */); // Runtime error
+      #+END_SRC
+      + ~empls~ and ~bosses~ reference the same ~Manager[]~ array, which cannot
+        hold a lowly ~Employee~
+      + runtime exception ~ArrayStoreException~.
+
 *** 4.1.6 Casts
+    One drawback from the preceding section:
+    You can only invoke methods that belong to the superclass.
+
+    For example,
+    #+BEGIN_SRC java
+      Employee empl = new Manager(/* ... */);
+      empl.setBonus(10000); // Compile-time error
+    #+END_SRC
+    The second line is a compile-time error, though if it can pass compilation,
+    the runtime should be OK due to /dynamic method lookup/.
+
+    Solution:
+    #+BEGIN_SRC java
+      if (empl instanceof Manager) {
+          Manager mgr = (Manager) empl;
+          mgr.setBonus(10000);
+      }
+    #+END_SRC
+
 *** 4.1.7 Final Methods and Classes
+    - A good example: the ~getClass~ method of the ~Object~ class.
+      It does not allow objects to lie about the class to which they belong.
+
+    - ~final~ is good for efficiency only in the early days of Java.
+
+      Modern VM will speculatively "inline" simple methods, even if they are not
+      declared ~final~.
+
+      When overriding happens, such inlining is undone.
+
 *** 4.1.8 Abstract Methods and Classes
-*** 4.1.9 Protected Access
-*** 4.1.10 Anonymous Subclasses
+    - It is not possible to construct an instance of an abstract class.
+
+    - There can be a variable whose type is an abstract class,
+      provided it contains a reference to an object of a concrete subclass.
+      #+BEGIN_SRC java
+        public abstract class Person {
+            private String name;
+            public Person(String name) { this.name = name; }
+            public final String getName() { return name; }
+            public abstract int getId();
+        }
+
+        public class Student extends Person {
+            private int id;
+            public Student(String name, int id) { super(name); this.id = id; }
+            public int getId() { return id; }
+        }
+
+        Person p = new Student(“Fred”, 1729);
+      #+END_SRC
+*** TODO 4.1.9 Protected Access
+    - ~protected~: Restrict a method to
+      1. subclasses ONLY,
+      2. less commonly, to allow subclass methods to access an instance variable
+         of a superclass.
+
+    - _Caution_:
+      In Java,
+      ~protected~ grants package-level access, and it only protects access from
+      other packages.
+
+    - TODO =???= page 147
+
+*** TODO 4.1.10 Anonymous Subclasses
+    - 
 *** 4.1.11 Inheritance and Default Methods
-*** 4.1.12 Method Expressions with super
-** TODO 4.2 Object: The Cosmic Superclass
-*** 4.2.1 The toString Method
-*** 4.2.2 The equals Method
-*** 4.2.3 The hashCode Method
+    - In this situation, _class wins_
+      #+BEGIN_SRC java
+        public interface Named {
+            default String getName() { return ""; }
+        }
+
+        public class Person {
+            // ...
+            public String getName() { return name; }
+        }
+
+        public class Student extends Person implements Named {
+            // ...
+        }
+      #+END_SRC
+
+    - You must resolve a conflict when the same default method is inherited from
+      two interfaces.
+
+    - The "classes win" rule ensures compatibility with Java 7.
+      If you add default methods to an interface, it has no effect on code that
+      worked before there were default methods.
+
+*** 4.1.12 Method Expressions with ~super~
+    - ~super::instanceMethod~
+      Exmaple:
+      #+BEGIN_SRC java
+        public class Worker {
+            public void work() {
+                for (int i = 0; i < 100; ++i) System.out.println("Working");
+            }
+        }
+
+        public class ConcurrentWorker extends Worker {
+            public void work() {
+                Thread t = new Thread(super::work);
+                t.start();
+            }
+        }
+      #+END_SRC
+
+** TODO 4.2 ~Object~: The Cosmic Superclass
+   - When a class has no explicit superclass, it implicitly extends ~Object~.
+     ~public class Employee { /* ... */ }~
+     is equivalent to
+     ~public class Employee extends Object { /* ... */ }~
+
+   - =IMPORTANT=
+     _Table 4-1 The Methods of the ~java.lang.Object~ Class_
+     Page 149
+
+   - _NOTE_: TODO =EXAMPLE= =???=
+     Arrays are classes.
+     Therefore, it is legal to convert an array, even a primitive type array, to
+     a reference of type ~Object~
+
+*** DONE 4.2.1 The ~toString~ Method
+    CLOSED: [2017-05-16 Tue 16:00]
+    - Many ~toString~ methods follow a format:
+      the name of the class,
+      followed by the instance variables enclosed in square brackets
+      For example,
+      1. The ~toString~ method of a ~Point~ object returns a string like this:
+         ~java.awt.Point[x=10,y=20]~
+
+      2. Implement the ~toString~ method of the ~Employee~ class:
+         #+BEGIN_SRC java
+           public String toString() {
+               return getClass().getName() + "[name=" + name
+                   + ",salary=" + salary + "]";
+           }
+         #+END_SRC
+         Use ~getClass().getName()~ rather than the "Employee" literal guarantees
+         this method does the right thing for subclasses as well. 
+         #+BEGIN_SRC java
+           public class Manager extends Employee {
+               // ...
+               public String toString() {
+                   return super.toString() + "[bonus=" + bonus + "]";
+               }
+           }
+         #+END_SRC
+
+    - _TIP_:
+      ~"" + x~ is more general than ~toString~ method -- it even works for ~null~
+      and primitive type values.
+
+    - _CAUTION_:
+      #+BEGIN_SRC java
+        int[] primes = { 2, 3, 5, 7, 11, 13 };
+
+        // yield a string such as "[I@1a46e30". The prefix `[I` denotes an array of
+        // integers
+        primes.toString();
+
+        // yield the string [2, 3, 5, 7, 11, 13]
+        Arrays.toString(primes);
+      #+END_SRC
+
+*** 4.2.2 The ~equals~ Method
+    - _CAUTION_:
+    - _TIP_:
+    - _NOTE_:
+*** 4.2.3 The ~hashCode~ Method
 *** 4.2.4 Cloning Objects
 ** TODO 4.3 Enumerations
 *** 4.3.1 Methods of Enumerations
@@ -3153,20 +3588,186 @@
 ** TODO Exercises
 
 * TODO 5 EXCEPTIONS, ASSERTIONS, AND LOGGING - PAGE 180 ~ 202
-** 5.1 Exception Handling
-*** 5.1.1 Throwing Exceptions
-*** 5.1.2 The Exception Hierarchy
-*** 5.1.3 Declaring Checked Exceptions
-*** 5.1.4 Catching Exceptions
-*** 5.1.5 The Try-with-Resources Statement
-*** 5.1.6 The finally Clause
-*** 5.1.7 Rethrowing and Chaining Exceptions
-*** 5.1.8 The Stack Trace
-*** 5.1.9 The Objects.requireNonNull Method
-** 5.2 Assertions
+  - Exception-handling
+
+  - ~assert~ statement: provides a structured and efficient way of expressing
+    internal assumptions.
+
+  - logging API: use it to keep a record of the various events, be they routine
+    or suspicious, in the execution of your programs.
+
+  - The key points of this chapter are: =TODO=
+    1. In Java, /checked exceptions/ are tracked by the compiler.
+
+    2. The try-with-resources statement automatically closes resources after
+       normal execution or when an exception occurred.
+
+    3. A stack trace describes all method calls that are pending at a point of
+       execution.
+
+    4. Loggers are arranged in a hierarchy, and they can receive logging messages
+       with levels ranging from ~SEVERE~ to ~FINEST~.
+
+    5. Log handlers can send logging messages to alternate destinations, and
+       formatters control the message format.
+
+    6. You can control logging properties with a log configuration file.
+
+** TODO 5.1 Exception Handling
+*** DONE 5.1.1 Throwing Exceptions
+    CLOSED: [2017-05-15 Mon 21:55]
+    Example:
+    #+BEGIN_SRC java
+      if (low > high) {
+          throw new IllegalArgumentException(
+              String.format("low should be <= high but low is %d and high is %d",
+                  low, high));
+      }
+    #+END_SRC
+
+*** DONE 5.1.2 The Exception Hierarchy
+    CLOSED: [2017-05-15 Mon 21:55]
+    - Figure 5-1 The exception hierarchy
+
+      Throwable
+       /       \
+      Error    Exception
+       |            \ 
+       |             Runtime Exception
+       |               /   \
+      Subclasses      /     \
+      are unchecked -/       Subclasses
+      exceptions             are checked
+                             exceptions
+
+    - ~Error~: exceptions that program cannot be expected to handle, such as
+      memory exhaustion.
+
+      For ~Error~, usually the only thing you can do is to give a message to the
+      user.
+
+    - ~Exception~: This is usually (or should be) Programmer-reported. Two
+      categories:
+      + /Unchecked exceptions/ are subclasses of ~RuntimeException~.
+      + All other exceptions are /checked exceptions/.
+
+    - See in the next section TODO
+      programmers MUST
+      + either _catch_ /checked exceptions/
+        or
+      + declare them in the method header.
+
+      The compiler checks that these exceptions are handled properly.
+
+    - _Note_:
+      The exceptions that are subclasses of ~RuntimeException~ are not checked
+      during compilation.
+
+    - /Checked exceptions/ are used in situations where failure
+      _should be anticipated_.
+
+    - /Unchecked exceptions/ indicate logic errors caused by programmers, _NOT_
+      by unavoidable external risks.
+
+      For example, ~NullPointerException~
+      Just about any method might throw one, and programmers shouldn't spend
+      time on catching them. Instead, they should make sure that no ~null~'s are
+      dereferenced in the first place.
+
+    - Sometimes, Implementors need to use their judgment:
+      + ~Integer.parseInt(str)~ can throw _unchecked_ ~NumberFormatException~
+      + ~Class.forName(str)~ can throw _checked_ ~ClassNotFoundException~
+
+      Rationale:
+      It's possible to check whether a string is a valid integer before calling
+      ~Integer.parseInt~.
+
+      It's NOT possible to know whether a class can be loaded until you actually
+      try to load it.
+
+    - When create your own exception classes,
+      it is a good idea to supply both
+      + a no-argument constructor
+        and
+      + a constructor with a message string.
+
+      For example,
+      #+BEGIN_SRC java
+        public class FileFormatException extends IOException {
+            public FileFormatException() {}
+            public FileFormatException(String message) {
+                super(message);
+            }
+            // TODO: Also add constructors for chained exceptions—see Section 5.1.7
+        }
+      #+END_SRC
+
+*** TODO 5.1.3 Declaring Checked Exceptions
+*** TODO 5.1.4 Catching Exceptions
+*** TODO 5.1.5 The Try-with-Resources Statement
+*** TODO 5.1.6 The finally Clause
+*** TODO 5.1.7 Rethrowing and Chaining Exceptions
+*** TODO 5.1.8 The Stack Trace
+*** TODO 5.1.9 The ~Objects.requireNonNull~ Method
+** DONE 5.2 Assertions
+   CLOSED: [2017-05-16 Tue 14:25]
+   - The assertion mechanism allows you
+     + to put in checks during testing
+       and
+     + to have them automatically removed in the production code.
+
+   - In Java, assertions are intended
+     + as a debugging aid for validating internal assumptions,
+
+     + NOT as a mechanism for enforcing contracts.
+       (Throw an exception when you need enforce contracts)
+
 *** 5.2.1 Using Assertions
+    - Syntax:
+      1. ~assert condition;~: evaluate the given condition, and throw an
+         ~AssertionError~ if it is false.
+         For example, ~assert x >= 0;~
+
+      2. ~assert condition : expression;~: do the things above, and if the value
+         of condition is false the expression here is turned into a string that
+         becomes the message of the error object.
+         For example, ~assert x >= 0 : x;~
+
 *** 5.2.2 Enabling and Disabling Assertions
-** 5.3 Logging
+    - By default, assertions are disabled.
+
+    - Enable them with the option ~-enableassertions~ or ~-ea~.
+      For example, ~java -ea MainClass~.
+
+      + No re-compilation is required because enabling or disabling assertions is
+        handled by the class loader. =IMPORTANT=
+
+      + You can even enable assertions in specific classes or in entire packages,
+        for example:
+        ~java -ea:MyClass -ea:com.mycompany.mylib... MainClass~
+
+    - Disable assertions in certain classes and packages with the
+      ~-disableassertions~ or ~-da~ option:
+      ~java -ea:... -da:MyClass MainClass~
+
+    - ~-ea~ and ~-da~ do NOT apply to the "system classes" that loaded without
+      class loaders.
+
+        Use ~enablesystemassertions~ or ~-esa~.
+
+    - It is also possible to programmatically control the assertion status of
+      /class loaders/ with the following methods:
+      #+BEGIN_SRC java
+        void ClassLoader.setDefaultAssertionStatus(boolean enabled);
+        void ClassLoader.setClassAssertionStatus(String className, boolean enabled);
+        void ClassLoader.setPackageAssertionStatus(String packageName,
+                                                   boolean enabled);
+      #+END_SRC
+      As with the ~-enableassertions~ command-line option, the
+      ~setPackageAssertionStatus~ method sets the assertion status for the given
+      package and its subpackages.
+
+** TODO 5.3 Logging
 *** 5.3.1 Using Loggers
 *** 5.3.2 Loggers
 *** 5.3.3 Logging Levels
@@ -3174,7 +3775,7 @@
 *** 5.3.5 Logging Configuration
 *** 5.3.6 Log Handlers
 *** 5.3.7 Filters and Formatters
-** Exercises
+** TODO Exercises
    
 * TODO 6 GENERIC PROGRAMMING - PAGE 203 ~ 227
 ** 6.1 Generic Classes
