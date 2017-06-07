@@ -3559,18 +3559,189 @@
         Arrays.toString(primes);
       #+END_SRC
 
-*** 4.2.2 The ~equals~ Method
+*** TODO 4.2.2 The ~equals~ Method
     - _CAUTION_:
     - _TIP_:
     - _NOTE_:
-*** 4.2.3 The ~hashCode~ Method
-*** 4.2.4 Cloning Objects
-** TODO 4.3 Enumerations
-*** 4.3.1 Methods of Enumerations
-*** 4.3.2 Constructors, Methods, and Fields
-*** 4.3.3 Bodies of Instances
-*** 4.3.4 Static Members
-*** 4.3.5 Switching on an Enumeration
+*** TODO 4.2.3 The ~hashCode~ Method
+    - _CAUTION_:
+*** TODO 4.2.4 Cloning Objects
+    - _NOTE_:
+** DONE 4.3 Enumerations
+   CLOSED: [2017-05-16 Tue 17:43]
+   - Example:
+     #+BEGIN_SRC java
+       public enum Size { SMALL, MEDIUM, LARGE, EXTRA_LARGE };
+     #+END_SRC
+
+*** DONE 4.3.1 Methods of Enumerations
+    CLOSED: [2017-05-16 Tue 17:10]
+    - SINCE each enumerated type has a fixed set of instances,
+      ~equals~ is not necessary, use ~==~ is OK.
+
+    - No need to create the ~toString~ method for your enumeration, and it
+      automatically provided to yield the name of the enumerated object.
+
+    - A String to a value of a enumeration:
+      ~Size notMySize = Size.valueOf("SMALL");~
+      This set ~notMySize~ to ~Size.SMALL~
+
+    - ~Size[] allValues = Size.values();~
+
+    - _TIP_:
+      Traverse all instances of an enumerated type:
+      ~for (Size s : Size.values()) { System.out.println(s); }~
+
+    - The ~ordinal~ method yields the position of an instance in the ~enum~
+      declaration, counting from _zero_.
+
+    - Every enumerated type automatically implements ~Comparable<E>~, allowing
+      comparisons only against its own objects. The comparison is by oridinal values.
+
+    - _NOTE_:
+      Table 4-2 Methods of the ~java.lang.Enum<E>~ Class
+
+*** DONE 4.3.2 Constructors, Methods, and Fields
+    CLOSED: [2017-05-16 Tue 17:10]
+    - Add constructors, methods, and fields to an enumerated type, if you want.
+      For example,
+      #+BEGIN_SRC java
+        public enum Size {
+            SMALL("S"), MEDIUM("M"), LARGE("L"), EXTRA_LARGE("XL");
+
+            private String abbreviation;
+
+            Size(String abbreviation) {
+                this.abbreivation = abbreviation;
+            }
+
+            public String getAbbreviation() { return abbreviation; }
+        }
+      #+END_SRC
+      Each instance of the enumeration is guaranteed to be constructed exactly
+      once.
+
+    - _NOTE_:
+      _The constructor of an enumeration is always private_.
+      You can omit the ~private~ modifier, as in the preceding example.
+
+      It is a _syntax error_ to declare an enum constructor as ~public~ or
+      ~protected~.
+
+*** DONE 4.3.3 Bodies of Instances
+    CLOSED: [2017-05-16 Tue 17:19]
+    - You can add methods to each individual ~enum~ instance, but they have to
+      override methods defined in the enumeration.
+      For example, to implement a calculator:
+      #+BEGIN_SRC java
+        public enum Operation {
+            ADD {
+                public int eval(int arg1, int arg2) { return arg1 + arg2; }
+            },
+            SUBTRACT {
+                public int eval(int arg1, int arg2) { return arg1 - arg2; }
+            },
+            MULTIPLY {
+                public int eval(int arg1, int arg2) { return arg1 * arg2; }
+            },
+            DIVIDE {
+                public int eval(int arg1, int arg2) { return arg1 / arg2; }
+            };
+
+            public abstract int eval(int arg1, int arg2);
+        }
+
+        Operation op = /* ... */;
+        int result = op.eval(first, second);
+      #+END_SRC
+
+    - _NOTE_:
+      Technically,
+      _each of these constants belongs to an anonymous subclass of ~Operation~._
+
+      Anything that you could place into an anonymous subclass body you can also
+      add into the body of a member.
+
+*** DONE 4.3.4 Static Members
+    CLOSED: [2017-05-16 Tue 17:35]
+    - It is _LEGAL_ for an enumeration to have /static members/.
+
+      HOWEVER, you have to BE CAREFUL WITH _construction order_.
+        The enumerated constants are constructed _BEFORE_ the static members,
+      so you cannot refer to any static members in an enumeration constructor.
+
+    - An ILLEGAL example: 
+      #+BEGIN_SRC java
+        public enum Modifier {
+            PUBLIC, PRIVATE, PROTECTED, STATIC, FINAL, ABSTRACT;
+            private static int maskBit = 1;
+            private int mask;
+            public Modifier() {
+                mask = maskBit; // Error -- cannot access static variable in constructor
+                maskbit *= 2; // Error
+            }
+
+            // ...
+        }
+      #+END_SRC
+
+      REMEDY
+      #+BEGIN_SRC java
+        public enum Modifier {
+            PUBLIC, PRIVATE, PROTECTED, STATIC, FINAL, ABSTRACT;
+            private int mask;
+
+            static {
+                int maskBit = 1;
+                for (Modifier m : Modifier.values()) {
+                    m.mask = maskBit;
+                    maskBit *= 2;
+                }
+            }
+        }
+      #+END_SRC
+
+    - NOTE
+      Enumerated types can be nested inside classes.
+      Such nested enumerations are implicitly static nested classes -- that is,
+      their methods cannot reference instance variables of the enclosing class.
+
+*** DONE 4.3.5 Switching on an Enumeration
+    CLOSED: [2017-05-16 Tue 17:43]
+    - Enumeration constants can be used in a ~switch~ statement.
+      For example,
+      #+BEGIN_SRC java
+        enum Operation { ADD, SUBTRACT, MULTIPLY, DIVIDE };
+
+        public static int eval(Operation op, int arg1, int arg2) {
+            int result = 0;
+
+            switch (op) {
+            case ADD: result = arg1 + arg2; break;
+            case SUBTRACT: result = arg1 - arg2; break;
+            case MULTIPLY: result = arg1 * arg2; break;
+            case DIVIDE: result = arg1 / arg2; break;
+            }
+
+            return result;
+        }
+      #+END_SRC
+      You use ~ADD~, NOT ~Operation.ADD~, inside the ~switch~ statement -- the
+      type is _inferred_ from the type of the expression on which the ~switch~ is
+      computed.
+
+    - NOTE
+      The language specification encourages the compilers to give a WARNING if
+      a switch on an enumeration is _not exhaustive_.
+
+      _Oracle compiler does NOT produce such a warning_
+
+    - _TIP_
+      Refer to the instances of an enumeration by their simple name (rather than
+      their qualified name) outside a ~switch~, use a
+      _static import declaration_. For example,
+      ~import static com.horstmann.corejava.Size.*;~
+
 ** TODO 4.4 Runtime Type Information and Resources
 *** 4.4.1 The Class Class
 *** 4.4.2 Loading Resources
@@ -3843,37 +4014,228 @@
 ** Exercises
 
 * TODO 9 PROCESSING INPUT AND OUTPUT - PAGE 270 ~ 303
-** 9.1 Input/Output Streams, Readers, and Writers
-*** 9.1.1 Obtaining Streams
-*** 9.1.2 Reading Bytes
-*** 9.1.3 Writing Bytes
-*** 9.1.4 Character Encodings
-*** 9.1.5 Text Input
-*** 9.1.6 Text Output
-*** 9.1.7 Reading and Writing Binary Data
-*** 9.1.8 Random-Access Files
-*** 9.1.9 Memory-Mapped Files
-*** 9.1.10 File Locking
-** 9.2 Paths, Files, and Directories
+  The key points of this chapter are:
+  1. Input streams are a source of bytes, and output streams are a destination
+     for bytes.
+
+  2. Use readers and writers for processing characters. Be sure to specify a
+     character encoding.
+
+  3. The ~Files~ class has convenience methods for reading all bytes or lines of
+     a file.
+
+  4. The ~DataInput~ and ~DataOutput~ interfaces have methods for writing numbers
+     in binary format.
+
+  5. Use a ~RandomAccessFile~ or a memory-mapped file for random access.
+
+  6. A ~Path~ is an absolute or relative sequence of path components in a file
+     system. Paths can be combined (or "resolved").
+
+  7. Use the methods of the ~Files~ class to copy, move, or delete files and to
+     recursively walk through a directory tree.
+
+  8. To read or update a ZIP file, use a ZIP file system.
+
+  9. You can read the contents of a web page with the ~URL~ class. To read
+     metadata or write data, use the ~URLConnection~ class.
+
+  10. With the ~Pattern~ and ~Matcher~ classes, you can find all matches of a
+      regular expression in a string, as well as the captured groups for each match.
+
+  11. The serialization mechanism can save and restore any object implementing
+      the ~Serializable~ interface, provided its instance variables are also
+      serializable.
+
+** TODO 9.1 Input/Output Streams, Readers, and Writers
+   - /input stream/ :: (In the Java API) a source from which one can read bytes.
+
+   - =COMMENT= The /stream/ here are unrealted to the class ~Stream~ (see Ch8).
+
+   - The bytes can _come from_
+     + a file
+     + a network connection
+     + an array in memory
+
+   - /output stream/ :: a destination for bytes.
+
+   - /readers/ :: object that _consume_ sequences of characters.
+
+   - /writers/ :: object that _produce_ sequences of characters.
+
+*** DONE 9.1.1 Obtaining Streams
+    CLOSED: [2017-05-16 Tue 22:17]
+    - Obtain a stream from a _file_:
+      #+BEGIN_SRC java
+        InputStream in = Files.newInputStream(path);
+        OutputStream out = Files.newOutputStream(path);
+      #+END_SRC
+      Here ~path~ is an instance of the ~Path~ class (TODO See Sec9.2.1).
+
+    - Obtain a stream from a _URL_:
+      #+BEGIN_SRC java
+        URL url = new URL("http://horstmann.com/index.html");
+        InputStream in = url.openStream();
+      #+END_SRC
+      TODO See Sec9.3 for the ~URL~ class.
+
+    - Obtain a stream from an array of bytes.
+      The ~ByteArrayInputStream~ class.
+      #+BEGIN_SRC java
+      byte[] bytes = /* ... */;
+      InputStream in = new ByteArrayInputStream(bytes);
+      #+END_SRC
+
+    - Send output to a byte array, use ~ByteArrayOutputStream~:
+      #+BEGIN_SRC java
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      // TODO: Write to `out`, and then
+      byte[] bytes = out.toByteArray();
+      #+END_SRC
+      TODO
+
+
+*** DONE 9.1.2 Reading Bytes
+    CLOSED: [2017-05-16 Tue 22:25]
+    - The ~InputStream~ class has a method to read a single byte:
+      #+BEGIN_SRC java
+        InputStream in = /* ... */;
+        int b = in.read();
+      #+END_SRC
+      Return values:
+      + an integer 0 and 255.
+      + -1 if the end of input has been reached.
+
+    - _CAUTION_:
+      + They Java ~byte~ type has values between -128 and 127.
+      + You can cast the returned value into a ~byte~
+        (=From Jian= I think first translate 0 ~ 255 to -128 to 127)
+        after you have checked that the return value of the method ~read~ is not
+        -1.
+
+    - TWO methods to read bytes from an input stream into an array.
+      Both methods read until
+      + either the array or the specified range is filled
+      + or no further input is available.
+
+      Return values:
+      + acutal number of bytes (TODO type??? int, long, ...)
+      + -1 if no input was available at all
+
+      #+BEGIN_SRC java
+      byte[] bytes = /* ... */;
+      actualBytesRead = in.read(bytes);
+      actualBytesRead = in.read(bytes, start, length);
+      #+END_SRC
+
+    - Read all bytes from an input stream (NO method in the Java library):
+      #+BEGIN_SRC java
+        public static byte[] readAllBytes(InputStream in) throws IOException {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            copy(in, out);
+            out.close();
+            return out.toByteArray();
+        }
+      #+END_SRC
+      TODO See ~copy~ in the next section.
+
+    - _TIP_:
+      Read all bytes from a file
+      ~byte[] bytes = Files.readAllBytes(path);~
+
+*** DONE 9.1.3 Writing Bytes
+    CLOSED: [2017-05-16 Tue 23:16]
+    - Write individual bytes and byte arrays through the ~write~ methods of an
+      ~OutputStream~
+      #+BEGIN_SRC java
+        OutputStream out = /* ... */;
+        int b = /* ... */;
+        out.write(b);
+        byte[] bytes = /* ... */;
+        out.write(bytes);
+        out.write(bytes, start, length);
+      #+END_SRC
+      Close the stream when you are done in order to commit any buffered output.
+
+    - Try-with-resources statement (like the ~with~ in Python):
+      #+BEGIN_SRC java
+        try (OutputStream out = /* ... */) {
+            out.write(bytes);
+        }
+      #+END_SRC
+
+    - Copy an input stream to an output stream, use this helper method:
+      TODO
+      #+BEGIN_SRC java
+        public static void copy(InputStream in, OutputStream out) throws IOException
+        {
+            final int BLOCKSIZE = 1024;
+            byte[] bytes = new byte[BLOCKSIZE];
+            int len;
+            while ((len = in.read(bytes)) != -1) out.write(bytes, 0, len);
+        }
+      #+END_SRC
+
+    - To save an ~InputStream~ to a file, call
+      ~Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);~
+
+*** TODO 9.1.4 Character Encodings
+    -
+*** TODO 9.1.5 Text Input
+    -
+*** TODO 9.1.6 Text Output
+    -
+*** TODO 9.1.7 Reading and Writing Binary Data
+    -
+*** TODO 9.1.8 Random-Access Files
+    -
+*** TODO 9.1.9 Memory-Mapped Files
+    -
+*** DONE 9.1.10 File Locking
+    CLOSED: [2017-05-16 Tue 23:23]
+    - To lock a file, call either the ~lock~ or ~tryLock~ methods of the
+      ~FileChannel~ class.
+      #+BEGIN_SRC java
+        FileChannel = FileChannel.open(path);
+        FileLock lock = channel.lock();
+
+        // OR
+        // FileLock lock = channel.tryLock();
+      #+END_SRC
+
+    - The first call (~lock~) blocks until the lock becomes available.
+
+      The second call (~tryLock~) returns immediately, either with the lock or
+      with ~null~ if the lock is not available.
+
+      The file remains locked until the lock or the channel is closed.
+
+    - It is best to use try-with-resources statement:
+      #+BEGIN_SRC java
+        try (FileLock lock = channel.lock()) {
+            // ...
+        }
+      #+END_SRC
+** TODO 9.2 Paths, Files, and Directories
 *** 9.2.1 Paths
 *** 9.2.2 Creating Files and Directories
 *** 9.2.3 Copying, Moving, and Deleting Files
 *** 9.2.4 Visiting Directory Entries
 *** 9.2.5 ZIP File Systems
-** 9.3 URL Connections
-** 9.4 Regular Expressions
+** TODO 9.3 URL Connections
+** TODO 9.4 Regular Expressions
 *** 9.4.1 The Regular Expression Syntax
 *** 9.4.2 Finding One or All Matches
 *** 9.4.3 Groups
 *** 9.4.4 Removing or Replacing Matches
 *** 9.4.5 Flags
-** 9.5 Serialization
+** TODO 9.5 Serialization
 *** 9.5.1 The Serializable Interface
 *** 9.5.2 Transient Instance Variables
 *** 9.5.3 The readObject and writeObject Methods
 *** 9.5.4 The readResolve and writeReplace Methods
 *** 9.5.5 Versioning
-** Exercises
+** TODO Exercises
 
 * TODO 10 CONCURRENT PROGRAMMING - PAGE 304 ~ 343
 ** 10.1 Concurrent Tasks
@@ -3986,6 +4348,10 @@
 ** Exercises
 
 * Tips
+  - Static initialization occurs when the class is first loaded.
+
+  - _The constructor of an enumeration is always private_.
+
   - _NOTE_:
     _Integer types in Java are signed_ (In CLR, integer can be unsigned).
 
