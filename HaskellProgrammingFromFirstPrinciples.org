@@ -340,7 +340,7 @@
   - [[12.6 Definitions][12.6 Definitions]]
 - [[13 Building projects  ------- Page 480 ~ 522][13 Building projects  ------- Page 480 ~ 522]]
   - [[13.1 Modules][13.1 Modules]]
-  - [[13.2 Making packages with _Stack_][13.2 Making packages with _Stack_]]
+  - [[13.2 Making packages with /Stack/][13.2 Making packages with /Stack/]]
   - [[13.3 Working with a basic project][13.3 Working with a basic project]]
     - [[Building the project][Building the project]]
     - [[Loading and running code from the REPL][Loading and running code from the REPL]]
@@ -422,8 +422,8 @@
     - [[Testing QuickCheck's patience][Testing QuickCheck's patience]]
     - [[Exercise: Maybe Another Monoid][Exercise: Maybe Another Monoid]]
   - [[15.13 Semigroup][15.13 Semigroup]]
-    - [[NonEmpty, a useful datatype][NonEmpty, a useful datatype]]
-    - [[Strength can be weakness][Strength can be weakness]]
+    - [[~NonEmpty~, a useful datatype][~NonEmpty~, a useful datatype]]
+    - [[Strength can be weakness =RE-READ=][Strength can be weakness =RE-READ=]]
   - [[15.14 Chapter exercises][15.14 Chapter exercises]]
     - [[Semigroup exercises][Semigroup exercises]]
     - [[Monoid exercises][Monoid exercises]]
@@ -871,18 +871,49 @@
 - [[Tips][Tips]]
 
 * TODO Contents
-** Authors' preface
-*** Chris's story
-*** Julie's story
-** Acknowledgements
-** Introduction
-** Why This Book
+** DONE Authors' preface
+   CLOSED: [2017-06-25 Sun 21:30]
+*** DONE Chris's story
+    CLOSED: [2017-06-25 Sun 21:20]
+    - 15 years programming experience, 8 of them professionally.
+
+    - Primarily work in /Common Lisp/, /Clojure/, and /Python/.
+
+    - Start /Haskell/ 6 years ago. Notice the progress in programming language
+      research from /Haskell/.
+
+    - Show the author's experience in Clojure.
+      Explain the advantage of the language of static typing -- /Haskll/, which
+      has a good type system.
+
+    - Using /Haskell/, the author is able to refactor without fear,
+      BUT this does NOT come without learning new things.
+
+    - As human, please save the limited thinking ability to get to reason about
+      and write correct code, rather than being forced to think unnecessary
+      things in your head, which is the things dynamic typing languages always
+      let you do.
+
+    - /Haskell/ is not a difficult language to use — quite the opposite.
+      BUT /Haskell/ is difficult to teach effectively, and the ineffective
+      pedagogy has made it hard for many people to learn.
+
+    - I wrote this book because I had a hard time learning /Haskell/, and I don't
+      want others to struggle the way I did.
+
+*** DONE Julie's story
+    CLOSED: [2017-06-25 Sun 21:29]
+** DONE Acknowledgements
+   CLOSED: [2017-06-25 Sun 21:40]
+** TODO Introduction
+** TODO Why This Book
 *** OK, but I was just looking for a monad tutorial...
 *** But I've heard Haskell is hard...
-** A few words to new programmers
-** Haskevangelism
-** What's in this book?
-** Best practices for examples and exercises
+** TODO A few words to new programmers
+** TODO Haskevangelism
+** TODO What's in this book?
+** DONE Best practices for examples and exercises
+   CLOSED: [2017-06-25 Sun 20:59]
 * DONE 1 All You Need is Lambda
   CLOSED: [2017-05-19 Fri 00:01]
 ** DONE 1.1 All You Need is Lambda
@@ -4878,34 +4909,37 @@
       capitalHead'' = head . capitalize
     #+END_SRC
 
-*** DONE Ciphers
-    CLOSED: [2017-06-03 Sat 01:52]
+*** TODO Ciphers
     #+BEGIN_SRC haskell
       import Data.Char
 
       -- A - Z 65 ~ 90
       -- a - z 97 ~ 122
+      isNotLatin :: Char -> Bool
+      isNotLatin char = not $ (codePoint `elem` [65..90]) || (codePoint `elem` [97..122])
+        where
+          codePoint = ord char
 
       generatorOfCaesarCodePoint :: Int -> Char -> Int
       generatorOfCaesarCodePoint shift c
-        | isLower c && shiftedCodePoint > 122 =  shiftedCodePoint - 122 + 97
-        | isLower c = shiftedCodePoint
-        | shiftedCodePoint > 90 = shiftedCodePoint - 90 + 65
+        | isLower c && shiftedCodePoint > 122 =  shiftedCodePoint - 122 + (97 - 1)
+        | isUpper c || shiftedCodePoint > 90 = shiftedCodePoint - 90 + (65 - 1)
         | otherwise = shiftedCodePoint
         where
-          shiftedCodePoint = ord c + (shift `rem` 26)
+          shiftedCodePoint = ord c + shift
 
 
       enCaesar :: Int -> String -> String
-      enCaesar shift info = map f info
+      enCaesar shift info = map enCaesarOneChar info
         where
-          f = chr . (generatorOfCaesarCodePoint shift)
+          properShift = shift `mod` 26
+          enCaesarOneChar char
+            | isNotLatin char = char
+            | otherwise = chr $ generatorOfCaesarCodePoint properShift char
 
 
       unCaesar :: Int -> String -> String
-      unCaesar shift info = map f info
-        where
-          f = chr . (generatorOfCaesarCodePoint (-shift))
+      unCaesar shift info = enCaesar (-shift) info
     #+END_SRC
 *** DONE Writing your own standard functions
     CLOSED: [2017-06-03 Sat 02:36]
@@ -6539,6 +6573,36 @@
     3. b)
     4. c)
 *** TODO Ciphers
+    #+BEGIN_SRC haskell
+      -- vigenère
+      -- MEET AT DAWN
+      -- ALLY AL LYAL
+
+      -- Only available to capital letters
+
+      vigenere :: String -> String -> String
+      vigenere encodingWord info =
+        concat . (intersperse " ") $ go repeatedEncodingWord wordList
+        where
+          repeatedEncodingWord = encodingWord ++ repeatedEncodingWord
+          wordList = words info
+
+          f' isInside newCodePoint
+            | isInside = newCodePoint
+            | otherwise = newCodePoint + (65 - 1) - 90
+
+          f char encodingChar =
+            let newCodePoint = ord char + ord encodingChar - 65
+                isInside = newCodePoint `elem` [65..90]
+            in chr $ f' isInside newCodePoint
+
+          go _ [] = []
+          go rpw (w:ws) =
+            let (hd, tl) = splitAt (length w) rpw
+            in (zipWith f w hd) : go tl ws
+
+    #+END_SRC
+
 *** DONE As-patterns
     CLOSED: [2017-06-12 Mon 01:19]
     #+BEGIN_SRC haskell
@@ -7086,27 +7150,226 @@
      + conventions around Haskell project organization;
      + building a small interactive game.
 
-** TODO 13.2 Making packages with _Stack_
+** DONE 13.2 Making packages with /Stack/
+   CLOSED: [2017-06-24 Sat 21:04]
    - /Cabal (*C* ommon *A* rchitecture for *B* uilding *A* pplications and
      *L* ibraries)/:
      A package manager for Haskell.
 
-   - /Stack/ =TODO=
+   - /package/: A _ is a program, including all of its modules and dependencies.
 
-   - /Stackage/ and /Hackage/ =TODO=
+   - A /package/ has /dependencies/ which are the interlinked elements of that
+     program, the other packages and libraries it may depend on and any test and
+     documentation associated with the project.
+
+   - /Stack/: A project manager program. It helps you manage both projects
+     + made up of multiple packages
+       as well as
+     + individual package (It seems /Cabal/ can do a good job for this).
+
+   - /Stack/ is built on top of /Cabal/ in some important senses, so we will
+     _still_ be working with =.cabal= files.
+     HOWEVER, /Stack/ _simplifies_ the process somewhat, especially in large
+     projects with multiple dependencies, by allowing you to build those large
+     libraries only once and use the across projects.
+
+   - /Stack/ also relies on an LTS snapshot of Haskell packages from /Stackage/
+     that are guaranteed to work together, unlike packages from /Hackage/ which
+     may have conflicting dependencies.
 
    - The Haskell community does _NOT_ have a prescribed project layout,
 
      _Recommendation_ of this book:
      _the basic structure embodied in the Stack templates_.
 
-** TODO 13.3 Working with a basic project
-*** TODO Building the project
-*** TODO Loading and running code from the REPL
-*** TODO =stack exec=
-*** TODO Executable stanzas in Cabal files
+** DONE 13.3 Working with a basic project
+   CLOSED: [2017-06-24 Sat 22:47]
+   Use /Cabal/ and /Stack/ to build a sample project called =hello=.
+   https://github.com/haskellbook/hello
+
+*** DONE Building the project
+    CLOSED: [2017-06-24 Sat 21:53]
+    1. ~git clone https://github.com/haskellbook/hello~ the repository given
+       above.
+
+    2. ~stack setup~:
+       + Install the version of GHC LTS snapshot specified in the =stack.yaml=
+         (If there is a cached version which satisfies the requirement, it will
+          be used).
+
+       + Set up the other requirement of this project .
+
+    3. ~stack build~: build the project
+
+*** DONE Loading and running code from the REPL
+    CLOSED: [2017-06-24 Sat 22:09]
+    - You can start a REPL in the project folder with ~stack ghci~, run
+      the project:
+      #+BEGIN_SRC haskell
+        -- bash$ stack ghci
+        -- -- // not command output -- These two lines will show up if not run `stack build` first.
+        -- Configuring hello-0.1.0.0...
+        -- hello-0.1.0.0: initial-build-steps (exe)
+        -- -- // not command output
+        -- Configuring GHCi with the following packages: hello
+        -- Using main module: 1. Package `hello' component exe:hello with main-is file: /home/lanjian/Documents/HaskellBook/hello/src/Main.hs
+        -- GHCi, version 8.0.1: http://www.haskell.org/ghc/  :? for help
+        -- [1 of 1] Compiling Main             ( /home/lanjian/Documents/HaskellBook/hello/src/Main.hs, interpreted )
+        -- Ok, modules loaded: Main
+        -- Loaded GHCi configuration from /tmp/ghci21481/ghci-script
+
+        -- Main> main
+        -- hello world
+      #+END_SRC
+
+    - Using Stack's GHCi integration to fire up a REPL _doesn't just_ let us load
+      and run code in our project, but also enables us to make use of our
+      project's dependencies. =TODO= We'll demonstrate this later.
+
+*** DONE =stack exec=
+    CLOSED: [2017-06-24 Sat 22:19]
+    - When you ran ~build~ earlier, you may have seen something like:
+      #+BEGIN_SRC haskell
+        -- hello-0.1.0.0: build (exe)
+        -- Preprocessing executable 'hello' for hello-0.1.0.0...
+        -- [1 of 1] Compiling Main             ( src/Main.hs, .stack-work/dist/x86_64-linux-ncurses6/Cabal-1.24.0.0/build/hello/hello-tmp/Main.o )
+        -- Linking .stack-work/dist/x86_64-linux-ncurses6/Cabal-1.24.0.0/build/hello/hello ...
+        -- hello-0.1.0.0: copy/register
+        -- Installing executable(s) in
+        -- /home/lanjian/Documents/HaskellBook/hello/.stack-work/install/x86_64-linux-ncurses6/lts-7.24/8.0.1/bin
+      #+END_SRC
+
+    - This is the message to tell you /Stack/ compiles an executable binary and
+      linking to it.
+
+    - You can type the full path to run the executable in the message above:
+      =.stack-work/dist/x86_64-linux-ncurses6/Cabal-1.24.0.0/build/hello/hello=
+
+    - There is a simple way -- use the command below in the project folder:
+      #+BEGIN_SRC bash
+        # $ stack exec -- hello
+        # hello world
+      #+END_SRC
+
+*** DONE Executable stanzas in Cabal files
+    CLOSED: [2017-06-24 Sat 22:47]
+    - /Stack/ created an executable earlier because of the following stanza in
+      the ~hello.cabal~ file:
+      #+BEGIN_SRC text
+        executable hello
+        --          [1] 
+          hs-source-dirs:       src
+        --    [2] 
+          main-is:              Main.hs
+        --    [3] 
+          default-language:     Haskell2010
+        --    [4] 
+          build-depends:        base >= 4.7 && < 5
+        --    [5] 
+      #+END_SRC
+      1. This name following the declaration of an =executable= stanza tells
+         /Stack/ or /Cabal/ what to name the binary or executble it creates.
+
+         This name must match the name of the =.cabal= file.
+
+      2. Tells this stanza where to look for source code -- in this case, the
+         =src= subdirectory.
+
+      3. Execution of this binary should begin by looking for a ~main~ function
+         inside a file named ~Main~ with the module name ~Main~.
+
+         _NOTE_ that modules name have to match filenames.
+
+         Your compiler (not just /Stack/) will _reject_ using a file that isn't a
+         ~Main~ module as the entry point to executing the program.
+
+         It'll look for the ~Main.hs~ file under _all_ directories you specified
+         in =hs-source-dirs=.
+
+      4. Defines _the version of the Haskell standard to expect._ 
+
+      5. ...
+         =TODO= We'll show you how to add and install dependencies later.
+
     - *A sidebar about executables and libraries*
-** TODO 13.4 Making our project a library
+      + The .cabal file above only has an ~executable~ stanza.
+
+      + If you write a library, you need a ~library~ stanza
+        and
+        to choose which modules we want to expose.
+
+** DONE 13.4 Making our project a library
+   CLOSED: [2017-06-24 Sat 23:06]
+   - First, add a library stanza to =hello.cab=:
+     #+BEGIN_SRC text
+       (part of a cabal file)
+
+       library
+         hs-source-dirs:     src
+         exposed-modules:    Hello
+         build-depends:      base >= 4.7 && < 5
+         default-language:   Haskell2010
+     #+END_SRC
+     
+   - Create a file located at =src/Hello.hs= (according to the above library
+     stanza of =hello.cabal=): 
+     #+BEGIN_SRC haskell
+       module Hello where
+
+       sayHello :: IO ()
+       sayHello = do
+         putStrLn "hello world"
+     #+END_SRC
+
+   - Change our ~Main~ module to use this library function:
+     #+BEGIN_SRC haskell
+       module Main where
+
+       import Hello
+
+       main :: IO ()
+       main = do
+         sayHello
+     #+END_SRC
+
+   - After the steps above you can execute it with the command:
+     #+BEGIN_SRC bash
+       stack build
+       stack exec hello
+       # hello world 
+     #+END_SRC
+
+   - If you want to move the ~Main.hs~ to a separate folder =exe=:
+     1. Edit the ~executable hello~ stanza in =hello.cabal=, the ~hs-source-dirs~
+        should point to the =exe= directory.
+          If now you try to build this project, you will fail and receive some
+        error an message:
+        #+BEGIN_SRC text
+          hello/exe/Main.hs:3:8:
+          Could not find module ‘Hello’
+          It is a member of the hidden package
+          ‘hello-0.1.0.0@hello_IJIUuynUbgsHAquBKsAsb5’.
+          Perhaps you need to add ‘hello’ to the
+          build-depends in your .cabal file.
+          Use -v to see a list of the files searched for.
+        #+END_SRC
+
+     2. There are two ways to fix this, one of them is better:
+        + Add ~src~ to the source directories the executable is permitted to
+          search.
+
+        + (BETTER) Respect the boundaries of the library and executable
+          and
+          Add your won library as a dependency:
+          #+BEGIN_SRC text
+            executable hello
+              hs-source-dirs:   exe
+              main-is:          Main.hs
+              default-language: Haskell2010
+              build-depends:    base >= 4.7 && < 5
+                              , hello
+          #+END_SRC
+
 ** DONE 13.5 Module exports
    CLOSED: [2017-06-16 Fri 23:15]
    - By default,
@@ -7129,10 +7392,12 @@
 
 *** DONE Exposing modules
     CLOSED: [2017-06-16 Fri 23:15]
+    If you add a module, don't forget to add the module to the =exposed-modules=
+    of the =library= stanza.
 
 ** DONE 13.6 More on importing modules
    CLOSED: [2017-06-16 Fri 23:34]
-   - Use a pragma (or language extension) when start GHCi to turn Prelude off:
+   - Use a pragma (or language extension) when start GHCi to turn ~Prelude~ off:
      #+BEGIN_SRC haskell
        -- In shell run:
        -- stack ghci --ghci-options -XNoImplicitPrelude
@@ -7181,7 +7446,7 @@
        (sayHello)
        where
      sayHello :: String -> IO ()
-     sayHello name = putStrLn ("Hi" ++ name ++ "!")
+     sayHello name = putStrLn ("Hi" ++ name ++ "!")  -- NEW ADDED argument.
    #+END_SRC
 
    #+BEGIN_SRC haskell
@@ -7194,7 +7459,7 @@
 
      main :: IO ()
      main = do
-       name <- getLine
+       name <- getLine -- NEW ADDED
        sayHello name
        dogs
    #+END_SRC
@@ -7209,6 +7474,7 @@
    - The result of binding (~<-~ in ~do~) over the ~IO String~ is ~String~.
 
    - *What if we tried to pass getLine to sayHello?*
+     =TODO= Explaned in detail later.
 
 *** DONE Adding a prompt
     CLOSED: [2017-06-17 Sat 00:02]
@@ -7251,8 +7517,90 @@
 
 ** DONE 13.9 Hangman game
    CLOSED: [2017-06-17 Sat 00:27]
+   - ~stack new hangman simple~
+     + Create a project named =hangman= using the =simple= template
+
+     + =from Jian=
+       The output message reminds that some _parameter_ value should be set
+       * by editing the =$HOME/.stack/config.yaml=
+         This method is good to the values of =author-email=, =author-name=, and
+         =github-username=.
+
+       * by manually passing parameter values with the command line:
+         ~stack new hangman simple -p "category:<value>" -p "copyright:<value>"~
+
+         You can find the usually used categories in Hackage:
+         https://hackage.haskell.org/packages/
+
+         Copyright is usually written in the format of
+         =Copyright: (c) 2016-2017 Jian Lan=
+
+   - The other setups for this Hangman game:
+     + Use the words list located at a directory like the following:
+       #+BEGIN_SRC bash
+         # $ ls /usr/share/dict/
+
+         # american-english  british-english
+         # cracklib-small  README.select-wordlist
+         # words  wrods.pre-dictionaries-common
+       #+END_SRC
+
+     + The files and directories structure before next section should be:
+       #+BEGIN_SRC bash
+         # $ tree .
+         .
+         ├── LICENSE
+         ├── Setup.hs
+         ├── data
+         │ └── dict.txt   # a file from the location described in the last section.
+         ├── hangman.cabal
+         ├── src
+         │ └── Main.hs
+         └── stack.yaml
+       #+END_SRC
+
+     + Edit the =.cabal= file as follows:
+       #+BEGIN_SRC text
+         name:               hangman
+         version:            0.1.0.0
+         synopsis:           Playing Hangman
+         homepage:           Chris N Julie
+         license:            BSD3
+         license-file:       LICENSE
+         author:             Chris Allen and Julie Moronuki
+         maintainer:         haskellbook.com
+         category:           Game
+         build-type:         Simple
+         extra-source-files: data/dict.txt
+         cabal-version:      >=1.10
+         executable hangman
+           main-is:          Main.hs
+           hs-source-dirs:   src
+           build-depends:    base >=4.7 && <5
+                           , random
+                           , split
+           default-language: Haskell2010
+       #+END_SRC
+
 ** DONE 13.10 Step One: Importing modules
    CLOSED: [2017-06-17 Sat 01:42]
+   - We need to import some packages in the ~Main~ module:
+     #+BEGIN_SRC haskell
+       module Main where
+
+       import Control.Monad (forever)
+       import Data.Char (toLower)
+       import Data.Maybe (isJust)
+       import Data.List (intersperse)
+       import System.Exit (exitSuccess)
+       import System.Random (randomRIO)
+     #+END_SRC
+     + ~toLower \colon{}\colon{} Char -> Char~ won't change the non-letter characters.
+     + ~isJust \colon{}\colon{} Maybe a -> Bool~ won't change the non-letter characters.
+     + Combine the functions above with ~all~ (a standard function in the
+       ~Prelude~).
+     + ~intersperse \colon{}\colon{} a -> [a] -> [a]~
+
    - We can make the type more specific by asserting a type signature like so:
      #+BEGIN_SRC haskell
        -- all :: Foldable t => (a -> Bool) -> t a -> Bool
@@ -7275,7 +7623,8 @@
        your whole program.
 
    - Use ~randomRIO \colon{}\colon{} Random a => (a, a) -> IO a~ (from ~System.Random~) to
-     select a word from our dictionary at random. 
+     generate a random index in range, and then with the index select a word from
+     our dictionary at random. 
 
 ** DONE 13.11 Step Two: Generating a word list
    CLOSED: [2017-06-17 Sat 01:59]
@@ -7346,10 +7695,7 @@
    - xx
      #+BEGIN_SRC haskell
        freshPuzzle :: String -> Puzzle
-       freshPuzzle answer =
-         Puzzle answer
-                currentAnswer
-                ""
+       freshPuzzle answer = Puzzle answer currentAnswer ""
          where currentAnswer = map (const Noting) answer
      #+END_SRC
      + Here is a typical usage of ~const~.  =IMPORTANT=
@@ -7480,13 +7826,87 @@
        randomIndex <- randomRIO (0, length wl - 1)
        return $ wl !! randomIndex
    #+END_SRC
-
+   
 ** TODO 13.14 Chapter exercises
-   - x
+   - =TODO=
 *** TODO Hangman game logic
     - x
 *** TODO Modifying code
-    - x
+    1. =TODO=
+
+    2. 
+       #+BEGIN_SRC haskell
+         import Control.Monad (forever)
+         import System.Exit (exitSuccess)
+
+         palindrome :: IO ()
+         palindrome = forever $ do
+           line1 <- getLine
+           case (line1 == reverse line1) of
+             True -> putStrLn "It's a palindrome!"
+             False -> do
+               putStrLn "Nope!"
+               exitSuccess
+       #+END_SRC
+
+    3. 
+       #+BEGIN_SRC haskell
+                  import Control.Monad (forever)
+                  import System.Exit (exitSuccess)
+                  import Data.Char (toLower, isLetter)
+
+                  palindrome :: IO ()
+                  palindrome = forever $ do
+                    line1 <- getLine
+                    let onlyLowerLetters = map toLower $ filter isLetter line1
+                    case (onlyLowerLetters == reverse onlyLowerLetters) of
+                      True -> putStrLn "It's a palindrome!"
+                      False -> do
+                        putStrLn "Nope!"
+                        exitSuccess
+       #+END_SRC
+
+    4. 
+       #+BEGIN_SRC haskell
+         import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
+
+         type Name = String
+         type Age = Integer
+
+         data Person = Person Name Age deriving Show
+         data PersonInvalid = NameEmpty
+                            | AgeTooLow
+                            | PersonInvalidUnknown String
+                            deriving (Eq, Show)
+
+         mkPerson :: Name
+                  -> Age
+                  -> Either PersonInvalid Person
+         mkPerson name age
+           | name /= "" && age > 0 = Right $ Person name age
+           | name == "" = Left NameEmpty
+           | not (age > 0) = Left AgeTooLow
+           | otherwise = Left $ PersonInvalidUnknown $
+                                "Name was: " ++ show name ++
+                                " Age was: " ++ show age
+
+         gimmePerson :: IO ()
+         gimmePerson = do
+           hSetBuffering stdout NoBuffering -- For the interactive program, this line is IMPORTANT
+           putStr "Please input your name: "
+           name <- getLine
+           putStr "Please input your age: "
+           ageString <- getLine
+
+           case mkPerson name (read ageString) of
+             Right p -> do
+               putStr "Yay! Successfully got a person: "
+               putStrLn $ show p
+             Left invalidP -> do
+               putStr "Error: "
+               putStrLn $ show invalidP
+       #+END_SRC
+
 ** TODO 13.15 Follow-up resources
 * TODO 14 Testing  ------- Page 523 ~ 567
 ** DONE 14.1 Testing
@@ -7572,7 +7992,6 @@
      such as
      + the laws of monads;  =TODO= =Concrete Exmples?=
      + basic associativity. =TODO= =Concrete Exmples?=
-     
      
 ** TODO 14.3 Conventional testing
    - No deep exlanation for ~Hspec~ here.
@@ -7979,30 +8398,204 @@
      #+END_SRC
 
 ** TODO 15.10 Reusing algebras by asking for algebras
-   - x
-*** TODO Exercise: Optional Monoid
-*** TODO Associativity
-*** TODO Identity
+   - We mentioned there are more possible /monoids/ for ~Maybe~ than just ~First~
+     and ~Last~.
+       We'll now write that other ~Monoid~ instance:
+     + NOT with choosing one value out of a set of values
+     + BUT of _combining_ the ~a~ values contained within the ~Maybe a~ type.
+
+   - If you do have a datatype that has ~a~ type argument that does _NOT_ appear
+     anywhere in the terms,
+     the typechecker does _NOT_ demand that you have a ~Monoid~ instance for that
+     argument (NO need for the constraint ~Monoid a~).
+     #+BEGIN_SRC haskell
+       data Booly a =
+           False'
+         | True'
+         deriving (Eq, Show)
+
+       -- conjunction; just cause
+       instance Monoid (Booly a) where
+         mappend False' _ = False'
+         mappend _ False' = False'
+         mappend True' True' = True'
+     #+END_SRC
+     We didn't need a /monoid/ constraint for ~a~ because
+     + we're never mappending ~a~ values (we can't; none exist)
+     + we're never asking for a ~mempty~ of type ~a~.
+
+   - The above case is clear.
+
+     =TODO=
+     However, it can happen that
+     we do _NOT_ do this (constrain ~a~ with ~Monoid a~)
+     _even when_ the type _does occur_ in the datatype.
+
+*** DONE Exercise: Optional Monoid
+    CLOSED: [2017-06-22 Thu 00:20]
+    #+BEGIN_SRC haskell
+      data Optional a =
+          Nada
+        | Only a
+        deriving (Eq, Show)
+
+      instance Monoid a => Monoid (Optional a) where
+        mempty = Nada
+        mappend Nada els = els
+        mappend els Nada = els
+        mappend (Only v) (Only u) = Only (v mappend u)
+    #+END_SRC
+*** DONE Associativity
+    CLOSED: [2017-06-22 Thu 00:24]
+    =FROM JIAN= =TODO=
+    I can't by my self find out any evidence, in the _definition_ of
+    ~Monoid~ typeclass, of the /associativity/ required in mathematics.
+    =TODO=
+
+*** DONE Identity
+    CLOSED: [2017-06-22 Thu 00:30]
+    An identity is a value with a special relationship with an operation:
+    it turns the operation into the identity function.
 *** TODO The problem of orphan instances
-** TODO 15.11 Madness
-   - x
+    - /orphan instance/: it is when an instance is defined for a datatype and
+      typeclass, but _NOT in the same module_ as
+      + either the declaration of the typeclass
+        or
+      + the datatype.
+
+    - If you don't "own" the typeclass or the datatype, /newtype/ it!
+
+** DONE 15.11 Madness
+   CLOSED: [2017-06-22 Thu 00:59]
+   #+BEGIN_SRC haskell
+     module Madness where
+
+     import Data.Monoid
+
+     type Verb = String
+     type Adjective = String
+     type Adverb = String
+     type Noun = String
+     type Exclamation = String
+
+     madlibbin' :: Exclamation
+                -> Adverb
+                -> Noun
+                -> Adjective
+                -> String
+     madlibbin' e adv noun adj = mconcat [e, "! he said ",
+                                          adv, " as he jumped into his car ",
+                                          noun, " and drove off with his ",
+                                          adj, " wife."]
+   #+END_SRC
 ** TODO 15.12 Better living through QuickCheck
    - x
 *** TODO Validating associativity with QuickCheck
 *** TODO Quickchecking left and right identity
 *** TODO Testing QuickCheck's patience
 *** TODO Exercise: Maybe Another Monoid
-** TODO 15.13 Semigroup
-   - x
-   - *Not yet part of base*
-*** TODO NonEmpty, a useful datatype
-*** TODO Strength can be weakness
-** TODO 15.14 Chapter exercises
-   - x
-*** TODO Semigroup exercises
-    - *Note*
+** DONE 15.13 Semigroup
+   CLOSED: [2017-06-22 Thu 02:32]
+   #+BEGIN_SRC haskell
+     class Semigroup a where
+       (<>) :: a -> a -> a
+   #+END_SRC
+   - NO identity,
+     only associativity left: ~(a <> b) <> c = a <> (b <> c)~.
 
-    - xxx
+   - *Not yet part of base* =OUTDATED=
+
+   - From the release of GHC 8.0 on, ~Semigroup~ is
+     + a part of base
+       and
+
+     + a superclass of ~Monoid~
+
+     + ~Semigroup~ has its own more general version of ~(<>)~.
+       * You should pay attention on the difference between the ~(<>)~ in
+         ~Semigroup~ and the ~(<>)~ in ~Monoid~.
+       * You may need to solve the confliction between them when you need to
+         import them all.
+
+*** DONE ~NonEmpty~, a useful datatype
+    CLOSED: [2017-06-22 Thu 02:09]
+    #+BEGIN_SRC haskell
+      data NonEmpty a = a :| [a]
+        deriving (Eq, Ord, Show)
+    #+END_SRC
+
+    - ~NonEmpty~ is one really useful datatype, which
+      + have a ~Semigroup~ and
+
+      + don't have a ~Monoid~ instance
+
+    - ~:|~ is an infix data constructor that takes two (type) arguments.
+      + It's a product of ~a~ and ~[a]~.
+
+      + It guarantees that we always have _at least one value_ of type ~a~, which
+        ~[a]~ does not guarantee as any list might be empty.
+        =TODO=
+
+    - Data constructors
+      + with _only non-alphanumeric symbols_ and that _begin with a colon_ are
+        _infix by default_;
+
+      + those with alphanumeric names are _prefix by default_.
+
+    - Examples:
+      #+BEGIN_SRC haskell
+        import Data.List.NonEmpty as N
+        import Data.Semigroup as S
+
+        1 :| [2, 3]
+        -- 1 :| [2, 3]
+
+        -- Prelude N S> :t 1 :| [2, 3]
+        -- 1 :| [2, 3] :: Num a => NonEmpty a
+
+        -- Prelude N S> :t (<>)
+        -- (<>) :: Semigroup a => a -> a -> a
+
+        xs = 1 :| [2, 3]
+        ys = 4 :| [5, 6]
+        xs <> ys
+        -- 1 :| [2, 3, 4, 5, 6]
+
+        N.head xs
+        -- 1
+
+        N.length (xs <> ys)
+        -- 6
+      #+END_SRC
+
+    - From the examples above, you know
+      + you can _use ~NonEmpty~ just like a list._
+      + BUT no valid identity value (no "empty" thing for ~NonEmpty~ list like
+        datatype).
+          This helps you enforce a constraint by not letting you construct a
+        ~NonEmpty~ _unless you have at least one value_.
+
+*** DONE Strength can be weakness =RE-READ=
+    CLOSED: [2017-06-22 Thu 02:24]
+    - Less type constraints (applicable to more types),
+      less known operations (easy to guess possible implementations, which number
+      is relatively less), 
+      Example: ~id :: a -> a~
+
+    - More type constraints (less applicable types),
+      more known operations (hard to guess possible implementations, which number
+      is relatively greater), 
+      Example: ~freelyProcessInt :: Int -> Int~
+
+    - /magma/ is an algebra object which is weaker than /semigroup/.
+      /magma/ has no /associativity/.
+
+** TODO 15.14 Chapter exercises
+*** TODO Semigroup exercises
+    - *Note*: We expect you to know what you need to derive instances by this
+      point.
+
+    - Questions:
       #+BEGIN_SRC haskell
       -- 1
       -- ...
@@ -8016,15 +8609,44 @@
       -- 8
     #+END_SRC
 
-** TODO 15.15 Definitions
-   1. /monoid/
-   2. /semigroup/
-   3. --
-   4. /albegra/
+** DONE 15.15 Definitions
+   CLOSED: [2017-06-22 Thu 02:48]
+   1. /monoid/: a /monoid/ is a set that
+      + is _closed_ under an _associative_ _binary_ operation
+        and
+      + has an _identity element_.
+      
+      /closed/ is the posh mathematical way of saying it's type is:
+      ~mappend :: m -> m -> m~
+
+   2. /semigroup/: A /semigroup/ is a set that
+      + is _closed_ under an _associative_ _binary_ operation
+        and
+      + nothing else.
+
+   3. /Laws/ are rules about how an algebra or structure should behave.
+
+      If you detect /laws/ among different objects,
+      they are acutally different instantiations of the same sort of algebra.
+      You can exploit them all with this algebra.
+
+   4. An /algebra/ is variously: a)... b)... c)...
+
+      We are more care about the /algebra/ in Haskell:
+      When Haskellers refer to /algebras/, they're usually talking about
+      + _a somewhat informal notion of operations over a type_
+        and
+      + _its laws_,
+        such as with /semigroups/, /monoids/, /groups/, /semirings/, and /rings/.
+
 ** TODO 15.16 Follow-up resources
 * TODO 16 Functor
 ** TODO 16.1 Functor
 ** TODO 16.2 What's a functor?
+   #+BEGIN_SRC haskell
+     class Functor f where
+       fmap :: (a -> b) -> f a -> f b
+   #+END_SRC
 ** TODO 16.3 There's a whole lot of fmap going round
 ** TODO 16.4 Let's talk about f, baby
 *** TODO Shining star come into view
@@ -8101,6 +8723,11 @@
 * TODO 17 Applicative
 ** TODO 17.1 Applicative
 ** TODO 17.2 Defining Applicative
+   #+BEGIN_SRC haskell
+     class Functor f => Applicative f where
+       pure :: a -> f a
+       (<*>) :: f (a -> b) -> f a -> f b
+   #+END_SRC
 ** TODO 17.3 Functor vs. Applicative
 ** TODO 17.4 Applicative functors are monoidal functors
 *** TODO Show me the monoids
@@ -8144,6 +8771,12 @@
 * TODO 18 Monad
 ** TODO 18.1 Monad
 ** TODO 18.2 Sorry -- Monad is not a burrito
+   #+BEGIN_SRC haskell
+     class Applicative m => Monad m where
+       (>>=) :: m a -> (a -> m b) -> m b
+       (>>) :: m a -> m b -> m b
+       return :: a -> m a
+   #+END_SRC
 *** TODO Applicative m
 *** TODO Core operations
 *** TODO The novel part of Monad
@@ -8219,6 +8852,11 @@
 ** TODO 20.1 ~Foldable~
 ** TODO 20.2 The ~Foldable~ class
 ** TODO 20.3 Revenge of the monoids
+   #+BEGIN_SRC haskell
+     class Foldable (t :: * -> *) where
+       fold :: Data.Monoid.Monoid m => t m -> m
+       foldMap :: Data.Monoid.Monoid m => (a -> m) -> t a -> m
+   #+END_SRC
 *** And now for something different
 ** TODO 20.4 Demonstrating Foldable instances
 *** ~Identity~
@@ -8235,6 +8873,27 @@
 * TODO 21 ~Traversable~
 ** TODO 21.1 ~Traversable~
 ** TODO 21.2 The ~Traversable~ typeclass definition
+   #+BEGIN_SRC haskell
+     class (Functor t, Foldable t) => Traversable t where
+       {-# MINIMAL traverse | sequenceA #-}
+
+       -- | Map each element of a structure to an action,
+       -- evaluate these actions from left to right, and
+       -- collect the results. For a version that ignores
+       -- the results see 'Data.Foldable.traverse_'.
+       traverse :: Applicative f =>
+                   (a -> f b)
+                -> t a
+                -> f (t b)
+       traverse f = sequenceA . fmap f
+       -- | Evaluate each action in the structure from
+       -- left to right, and collect the results.
+       -- For a version that ignores the results see
+       -- 'Data.Foldable.sequenceA_'.
+       sequenceA :: Applicative f => t (f a) -> f (t a)
+       sequenceA = traverse id
+   #+END_SRC
+
 ** TODO 21.3 ~sequenceA~
 ** TODO 21.4 ~traverse~
 *** ~mapM~ is just ~traverse~
