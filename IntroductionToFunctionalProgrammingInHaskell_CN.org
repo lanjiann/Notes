@@ -1,0 +1,596 @@
+#+TITLE: Introduction to Functional Programming in Haskell
+#+VERSION: 2014
+#+AUTHOR: Song Zhang
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[1 Introduction to Haskell][1 Introduction to Haskell]]
+  - [[1.1 The Origin of Haskell][1.1 The Origin of Haskell]]
+  - [[1.2 The Installation of Haskell Compiler and The Setups of Coding][1.2 The Installation of Haskell Compiler and The Setups of Coding]]
+  - [[1.3 The Usage of GHCi][1.3 The Usage of GHCi]]
+    - [[1.3.1 The Commands in GHCi][1.3.1 The Commands in GHCi]]
+    - [[1.3.2 Invoke Functions in GHCi][1.3.2 Invoke Functions in GHCi]]
+  - [[1.4 =.hs= and =.lhs= files, Comments, and Library Functions][1.4 =.hs= and =.lhs= files, Comments, and Library Functions]]
+- [[2 Type System and Functions][2 Type System and Functions]]
+  - [[2.1 Types and Data in Haskell][2.1 Types and Data in Haskell]]
+    - [[2.1.1 Common Data Types in Haskell][2.1.1 Common Data Types in Haskell]]
+    - [[2.1.2 Function Types][2.1.2 Function Types]]
+    - [[2.1.3 Type Alias][2.1.3 Type Alias]]
+    - [[2.1.4 The Importance of Types][2.1.4 The Importance of Types]]
+  - [[2.2 Typeclasses in Haskell][2.2 Typeclasses in Haskell]]
+    - [[2.2.1 xxx: ~Eq~][2.2.1 xxx: ~Eq~]]
+    - [[2.2.2 XXX: ~Ord~][2.2.2 XXX: ~Ord~]]
+    - [[2.2.3 XXX: ~Enum~][2.2.3 XXX: ~Enum~]]
+    - [[2.2.4 XXX: ~Bounded~][2.2.4 XXX: ~Bounded~]]
+    - [[2.2.5 XXX: ~Num~][2.2.5 XXX: ~Num~]]
+    - [[2.2.6 XXX: ~Show~][2.2.6 XXX: ~Show~]]
+    - [[2.2.7 Section Summary][2.2.7 Section Summary]]
+  - [[2.3 Functions in Haskell][2.3 Functions in Haskell]]
+    - [[2.2.1 Values in Haskell][2.2.1 Values in Haskell]]
+    - [[2.2.2 Intro to FP Thoughts][2.2.2 Intro to FP Thoughts]]
+    - [[2.2.3 The basics of how to define a function][2.2.3 The basics of how to define a function]]
+    - [[2.2.4 \lambda{} Expressions][2.2.4 \lambda{} Expressions]]
+    - [[2.2.5 Bind Arguments][2.2.5 Bind Arguments]]
+  - [[2.4 Expressions in Haskell][2.4 Expressions in Haskell]]
+    - [[2.4.1 Condition Expressions][2.4.1 Condition Expressions]]
+    - [[2.4.2 ???][2.4.2 ???]]
+    - [[2.4.3 Guard Expressions][2.4.3 Guard Expressions]]
+    - [[2.4.4 Pattern Matching][2.4.4 Pattern Matching]]
+    - [[2.4.5 Operators and Functions][2.4.5 Operators and Functions]]
+    - [[2.4.6 Operators and User-defined Operators][2.4.6 Operators and User-defined Operators]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[3 ~Bool~ Values Based Functions][3 ~Bool~ Values Based Functions]]
+  - [[3.1 Intro to The Keywords ~module~ and ~import~][3.1 Intro to The Keywords ~module~ and ~import~]]
+  - [[3.2 xxx ~Bool~ Value Functions][3.2 xxx ~Bool~ Value Functions]]
+  - [[3.3 NAND Gates and NOR Gates][3.3 NAND Gates and NOR Gates]]
+  - [[3.4 Chapter Summary][3.4 Chapter Summary]]
+- [[4 Library Functions and Their Applications][4 Library Functions and Their Applications]]
+  - [[4.1 The Pre-loaded Library Functions][4.1 The Pre-loaded Library Functions]]
+    - [[4.1.1 Common Functions][4.1.1 Common Functions]]
+    - [[4.1.2 /List/ Fased Functions][4.1.2 /List/ Fased Functions]]
+    - [[4.1.3 Define A Calendar Formula][4.1.3 Define A Calendar Formula]]
+    - [[4.1.4 Functions to String Processing][4.1.4 Functions to String Processing]]
+  - [[4.2 Introduction to The Functions of Character or Bit][4.2 Introduction to The Functions of Character or Bit]]
+    - [[4.2.1 ~Data.Char~][4.2.1 ~Data.Char~]]
+    - [[4.2.2 ~Data.Bits~][4.2.2 ~Data.Bits~]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[5 Recursion Functions][5 Recursion Functions]]
+  - [[5.1 Concepts to Recursion Functions][5.1 Concepts to Recursion Functions]]
+  - [[5.2 Simple Recursion Functions][5.2 Simple Recursion Functions]]
+  - [[5.3 Expansion Recursion and Tail Recursion][5.3 Expansion Recursion and Tail Recursion]]
+  - [[5.4 Mutual Recursion][5.4 Mutual Recursion]]
+  - [[5.5 xxx 91 Function][5.5 xxx 91 Function]]
+  - [[5.6 Fibxxx Series][5.6 Fibxxx Series]]
+  - [[5.7 Decimal to Roman xx][5.7 Decimal to Roman xx]]
+  - [[5.8 Binary Search][5.8 Binary Search]]
+  - [[5.9 Tower of Hanoi][5.9 Tower of Hanoi]]
+  - [[5.10 Sort][5.10 Sort]]
+    - [[5.10.1 Insertion Sort][5.10.1 Insertion Sort]]
+    - [[5.10.2 Bubble Sort][5.10.2 Bubble Sort]]
+    - [[5.10.3 Selection Sort][5.10.3 Selection Sort]]
+    - [[5.10.4 Quick Sort][5.10.4 Quick Sort]]
+    - [[5.10.5 Merge Sort][5.10.5 Merge Sort]]
+    - [[Section Summary][Section Summary]]
+  - [[5.11 Recursion xxx and the base case (termination case)][5.11 Recursion xxx and the base case (termination case)]]
+  - [[5.12 Recursions and Fixed Points][5.12 Recursions and Fixed Points]]
+  - [[5.13 xxx and Lazy Evaluation][5.13 xxx and Lazy Evaluation]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[6 List =???? TOWO: how to translate=][6 List =???? TOWO: how to translate=]]
+  - [[6.1 List Generator][6.1 List Generator]]
+  - [[6.2 Primes Puzzles][6.2 Primes Puzzles]]
+  - [[6.3 Ceaser Crypoxxxx][6.3 Ceaser Crypoxxxx]]
+    - [[6.3.1 Encoding][6.3.1 Encoding]]
+    - [[6.3.2 Decoding][6.3.2 Decoding]]
+  - [[6.4 Arrange and Combination Problems][6.4 Arrange and Combination Problems]]
+    - [[6.4.1 Arrange Problems][6.4.1 Arrange Problems]]
+    - [[6.4.2 xxxx Arrange Problems][6.4.2 xxxx Arrange Problems]]
+    - [[6.4.3 Combination Problems][6.4.3 Combination Problems]]
+  - [[6.5 The Eight Queens Problem][6.5 The Eight Queens Problem]]
+  - [[6.6 Calculate Matrix Multiplication][6.6 Calculate Matrix Multiplication]]
+  - [[6.7 The Shortest Path Algorithm and Matrix Multiplication][6.7 The Shortest Path Algorithm and Matrix Multiplication]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[7 Higher Order Functions and Compound Functions][7 Higher Order Functions and Compound Functions]]
+  - [[7.1 Simple Higher Order Functions][7.1 Simple Higher Order Functions]]
+  - [[7.2 Folding Functions ~foldr~ and ~foldl~][7.2 Folding Functions ~foldr~ and ~foldl~]]
+  - [[7.3 Functions ~mapAccumL~ and ~mapAccumR~][7.3 Functions ~mapAccumL~ and ~mapAccumR~]]
+  - [[7.4 Compound Functions][7.4 Compound Functions]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[8 Define Data Types][8 Define Data Types]]
+  - [[8.1 The Definition of Data Type][8.1 The Definition of Data Type]]
+    - [[8.1.1 Enumerative Type][8.1.1 Enumerative Type]]
+    - [[8.1.2 Constructive Type][8.1.2 Constructive Type]]
+    - [[8.1.3 Parameterized Type][8.1.3 Parameterized Type]]
+    - [[8.1.4 Recursive Type][8.1.4 Recursive Type]]
+    - [[8.1.5 Mix ....][8.1.5 Mix ....]]
+  - [[8.2 Type Isomorphism][8.2 Type Isomorphism]]
+  - [[8.3 Define Type with ~newtype~][8.3 Define Type with ~newtype~]]
+  - [[8.4 The Effectiveness of Mathematical Induction][8.4 The Effectiveness of Mathematical Induction]]
+  - [[8.5 Tree][8.5 Tree]]
+  - [[8.6 Catalan Number Problem][8.6 Catalan Number Problem]]
+  - [[8.7 Huffman Coding][8.7 Huffman Coding]]
+  - [[8.8 Sovle 24 xxxxxx????][8.8 Sovle 24 xxxxxx????]]
+  - [[8.9 zipper][8.9 zipper]]
+  - [[8.10 General Algebraic Data Types][8.10 General Algebraic Data Types]]
+  - [[8.11 The /kinds/ of Types][8.11 The /kinds/ of Types]]
+    - [[8.11.1 The /kinds/ of Types][8.11.1 The /kinds/ of Types]]
+    - [[8.11.2 The Declaration of An Empty Type][8.11.2 The Declaration of An Empty Type]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[9 Define Typeclasses][9 Define Typeclasses]]
+  - [[9.1 Define Typeclass][9.1 Define Typeclass]]
+  - [[9.2 The Common Typeclasses in Haskell][9.2 The Common Typeclasses in Haskell]]
+    - [[9.2.1 Common Typeclasses][9.2.1 Common Typeclasses]]
+    - [[9.2.2 ~Functor~][9.2.2 ~Functor~]]
+    - [[9.2.3 ~Applicative~][9.2.3 ~Applicative~]]
+    - [[9.2.4 ~Alternative~][9.2.4 ~Alternative~]]
+    - [[9.2.5 Simple Character Identification Machine][9.2.5 Simple Character Identification Machine]]
+    - [[9.2.6 The ~Read~ Typeclass][9.2.6 The ~Read~ Typeclass]]
+    - [[9.2.7 ~Monoid~][9.2.7 ~Monoid~]]
+    - [[9.2.8 ~Foldable~ and ~Monoid~ Typeclasses][9.2.8 ~Foldable~ and ~Monoid~ Typeclasses]]
+    - [[9.2.9 Section Summary][9.2.9 Section Summary]]
+  - [[9.3 The Types Dependencies in Typeclasses][9.3 The Types Dependencies in Typeclasses]]
+  - [[9.4 The XXX??? Types in Typeclasses][9.4 The XXX??? Types in Typeclasses]]
+  - [[9.5 Fixed Length List][9.5 Fixed Length List]]
+  - [[9.6 Runtime Overloading][9.6 Runtime Overloading]]
+  - [[9.7 ~Existential~ Type][9.7 ~Existential~ Type]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[10 The First Step of ~Monad~][10 The First Step of ~Monad~]]
+  - [[10.1 Introduction to ~Monad~][10.1 Introduction to ~Monad~]]
+  - [[10.2 Start from The ~Identity Monad~][10.2 Start from The ~Identity Monad~]]
+    - [[Applicative m][Applicative m]]
+    - [[Core operations][Core operations]]
+    - [[The novel part of Monad][The novel part of Monad]]
+    - [[What Monad is not][What Monad is not]]
+    - [[Monad also lifts!][Monad also lifts!]]
+  - [[10.3 ~Maybe~ ~Monad~][10.3 ~Maybe~ ~Monad~]]
+  - [[10.4 The ~Monad~ Laws][10.4 The ~Monad~ Laws]]
+  - [[10.5 List ~Monad~][10.5 List ~Monad~]]
+  - [[10.6 ~Monad~ Operators][10.6 ~Monad~ Operators]]
+  - [[10.7 ~MonadPlus~][10.7 ~MonadPlus~]]
+  - [[10.8 The Relations Between ~Functor~, ~Applicative~, and ~Monad~][10.8 The Relations Between ~Functor~, ~Applicative~, and ~Monad~]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[11 System Programming and I/O][11 System Programming and I/O]]
+- [[12 Record Monad, Reader Monad, and State Monad][12 Record Monad, Reader Monad, and State Monad]]
+  - [[12.1 Record Monad][12.1 Record Monad]]
+    - [[12.1.1 ~MonadWriter~][12.1.1 ~MonadWriter~]]
+    - [[12.1.2 The Processes of Record Merge Sort][12.1.2 The Processes of Record Merge Sort]]
+  - [[12.2 Reader Monad][12.2 Reader Monad]]
+    - [[12.2.1 ~MonadReader~][12.2.1 ~MonadReader~]]
+    - [[12.2.2 The Reference to The Variables Environment][12.2.2 The Reference to The Variables Environment]]
+  - [[12.3 State Monad][12.3 State Monad]]
+    - [[12.3.1 State Monad tag machine XXX ??][12.3.1 State Monad tag machine XXX ??]]
+    - [[12.3.2 Implement Stack with State Monad][12.3.2 Implement Stack with State Monad]]
+    - [[12.3.3 The Relations State Monad, ~FunApp~ Unit semigroup, and Reader Monad.][12.3.3 The Relations State Monad, ~FunApp~ Unit semigroup, and Reader Monad.]]
+    - [[12.3.4 ~MonadState~][12.3.4 ~MonadState~]]
+    - [[12.3.5 Stack Based Calculator][12.3.5 Stack Based Calculator]]
+  - [[12.3.7 The generation of a][12.3.7 The generation of a]]
+  - [[12.3.7 State Monad][12.3.7 State Monad]]
+- [[13 ~Monad~ transformers][13 ~Monad~ transformers]]
+  - [[13.1 Start from The ~IdentityT Monad~ Transformer][13.1 Start from The ~IdentityT Monad~ Transformer]]
+  - [[13.2 The Difference Between ~Monad~ Transformer Combination and Compound ~Monad~][13.2 The Difference Between ~Monad~ Transformer Combination and Compound ~Monad~]]
+  - [[13.3 The Combination Order of The ~Monad~ Transformer][13.3 The Combination Order of The ~Monad~ Transformer]]
+  - [[13.4 ~lift~ and ~liftIO~][13.4 ~lift~ and ~liftIO~]]
+  - [[13.5 Simple ~Monad~ Compiler][13.5 Simple ~Monad~ Compiler]]
+  - [[13.6 Syntax Parser ~Monad~ Combinator][13.6 Syntax Parser ~Monad~ Combinator]]
+    - [[13.6.1 The Implementation of Simple Syntax Analyzer][13.6.1 The Implementation of Simple Syntax Analyzer]]
+    - [[13.6.2 The Introduction to ~Parsec~ Library][13.6.2 The Introduction to ~Parsec~ Library]]
+    - [[13.6.3 Context Free Syntax][13.6.3 Context Free Syntax]]
+    - [[13.6.4 Syntax Analyzer Based Calculator][13.6.4 Syntax Analyzer Based Calculator]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[14 Intro to ~QuickCheck~][14 Intro to ~QuickCheck~]]
+  - [[14.1 Test The Properties of Functions][14.1 Test The Properties of Functions]]
+  - [[14.2 Test Data Generators][14.2 Test Data Generators]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[15 Intro to Lazyness Evaluation][15 Intro to Lazyness Evaluation]]
+  - [[15.1 Intro to Lambda Calculus][15.1 Intro to Lambda Calculus]]
+    - [[1.1 All You Need is Lambda][1.1 All You Need is Lambda]]
+    - [[1.2 What is functional programming?][1.2 What is functional programming?]]
+    - [[1.3 What is a function?][1.3 What is a function?]]
+    - [[1.4 The structure of lambda terms][1.4 The structure of lambda terms]]
+      - [[Alpha equivalence][Alpha equivalence]]
+    - [[1.5 Beta reduction][1.5 Beta reduction]]
+      - [[Free varibales][Free varibales]]
+    - [[1.6 Multiple arguments][1.6 Multiple arguments]]
+    - [[Intermission: Equivalence Exercises][Intermission: Equivalence Exercises]]
+  - [[15.2 ⊥ Bottom][15.2 ⊥ Bottom]]
+  - [[15.3 Expression xingtai and ~thunk~][15.3 Expression xingtai and ~thunk~]]
+    - [[15.3.1 WHNF, HNF, AND NF][15.3.1 WHNF, HNF, AND NF]]
+    - [[15.3.2 ~thunk~ and Strict Evaluation][15.3.2 ~thunk~ and Strict Evaluation]]
+  - [[15.4 The Evaluation Strategy][15.4 The Evaluation Strategy]]
+    - [[15.4.1 Call by Value][15.4.1 Call by Value]]
+    - [[15.4.2 Call by Name][15.4.2 Call by Name]]
+    - [[15.4.3 Normal Order Evaluation][15.4.3 Normal Order Evaluation]]
+  - [[15.5 Lazy Evaluation][15.5 Lazy Evaluation]]
+  - [[15.6 Strict Pattern Matching and Lazy Pattern Matching][15.6 Strict Pattern Matching and Lazy Pattern Matching]]
+- [[16 Parallilism and concurrency Programming][16 Parallilism and concurrency Programming]]
+  - [[16.1 XXXX][16.1 XXXX]]
+  - [[16.2 Light Weight Threads][16.2 Light Weight Threads]]
+    - [[16.2.1 The Uncertainty of XXXX][16.2.1 The Uncertainty of XXXX]]
+    - [[16.2.2 The Communication Between Basic Threads][16.2.2 The Communication Between Basic Threads]]
+    - [[16.2.3 The Communication Channels][16.2.3 The Communication Channels]]
+    - [[16.2.4 A Simple Chat Server][16.2.4 A Simple Chat Server]]
+  - [[16.3 Software XXX??? Memory][16.3 Software XXX??? Memory]]
+    - [[16.3.1 Introduction to Software XXX Memory][16.3.1 Introduction to Software XXX Memory]]
+    - [[16.3.2 The Usage of Software XXX Memory][16.3.2 The Usage of Software XXX Memory]]
+    - [[16.3.3 The Dining Philosophers Problem][16.3.3 The Dining Philosophers Problem]]
+    - [[16.3.4 The Santa Claus Problem][16.3.4 The Santa Claus Problem]]
+  - [[16.4 The Introduction to The Asynchronous Concurrent Library][16.4 The Introduction to The Asynchronous Concurrent Library]]
+  - [[Chapter Summary][Chapter Summary]]
+- [[Tips][Tips]]
+
+* TODO 1 Introduction to Haskell
+** 1.1 The Origin of Haskell
+** 1.2 The Installation of Haskell Compiler and The Setups of Coding
+** 1.3 The Usage of GHCi
+*** 1.3.1 The Commands in GHCi
+*** 1.3.2 Invoke Functions in GHCi
+** 1.4 =.hs= and =.lhs= files, Comments, and Library Functions
+* TODO 2 Type System and Functions
+** TODO 2.1 Types and Data in Haskell
+*** 2.1.1 Common Data Types in Haskell
+    - ~(^) \colon{}\colon] (Num a, Integral b) => a -> b -> a~
+      ~infixr 8 ^~
+
+    - ~(*) \colon{}\colon{} Num a => a -> a -> a~
+      ~infixl 7 *~
+
+    - ~(+) \colon{}\colon{} Num a => a -> a -> a~
+      ~infixl 6 +~
+
+    - ~(-) \colon{}\colon{} Num a => a -> a -> a~
+      ~infixl 6 -~
+
+    - ~($) \colon\colon{} (a -> b) -> a -> b~
+      ~infixr 0 $~
+
+    - Since ~(*30) \colon\colon{} Num a => a -> a~,
+      ~3 (*30)~ doesn't work and ~(*30) 3)~ works.
+
+      You can't the pass the prefixed ~3~ in pattern 1 pass to the ~(*30)~
+      operator after it.
+
+*** 2.1.2 Function Types
+*** 2.1.3 Type Alias
+*** 2.1.4 The Importance of Types
+** TODO 2.2 Typeclasses in Haskell
+*** 2.2.1 xxx: ~Eq~
+*** 2.2.2 XXX: ~Ord~
+*** 2.2.3 XXX: ~Enum~
+*** 2.2.4 XXX: ~Bounded~
+*** 2.2.5 XXX: ~Num~
+*** 2.2.6 XXX: ~Show~
+*** 2.2.7 Section Summary
+
+** TODO 2.3 Functions in Haskell
+*** 2.2.1 Values in Haskell
+*** 2.2.2 Intro to FP Thoughts
+*** 2.2.3 The basics of how to define a function
+*** 2.2.4 \lambda{} Expressions
+*** 2.2.5 Bind Arguments 
+** TODO 2.4 Expressions in Haskell
+*** 2.4.1 Condition Expressions
+*** 2.4.2 ???
+*** 2.4.3 Guard Expressions
+*** 2.4.4 Pattern Matching
+*** 2.4.5 Operators and Functions
+*** 2.4.6 Operators and User-defined Operators
+** Chapter Summary
+* TODO 3 ~Bool~ Values Based Functions
+** 3.1 Intro to The Keywords ~module~ and ~import~
+** 3.2 xxx ~Bool~ Value Functions
+** 3.3 NAND Gates and NOR Gates
+** 3.4 Chapter Summary
+
+* TODO 4 Library Functions and Their Applications
+** 4.1 The Pre-loaded Library Functions
+*** 4.1.1 Common Functions
+*** 4.1.2 /List/ Fased Functions
+*** 4.1.3 Define A Calendar Formula
+*** 4.1.4 Functions to String Processing
+** 4.2 Introduction to The Functions of Character or Bit
+*** 4.2.1 ~Data.Char~
+*** 4.2.2 ~Data.Bits~
+** Chapter Summary
+* TODO 5 Recursion Functions
+** 5.1 Concepts to Recursion Functions
+** 5.2 Simple Recursion Functions
+** 5.3 Expansion Recursion and Tail Recursion
+** 5.4 Mutual Recursion
+** 5.5 xxx 91 Function
+** 5.6 Fibxxx Series
+** 5.7 Decimal to Roman xx
+** 5.8 Binary Search
+** 5.9 Tower of Hanoi
+** 5.10 Sort
+*** 5.10.1 Insertion Sort
+*** 5.10.2 Bubble Sort
+*** 5.10.3 Selection Sort
+*** 5.10.4 Quick Sort
+*** 5.10.5 Merge Sort
+*** Section Summary
+** 5.11 Recursion xxx and the base case (termination case)
+** 5.12 Recursions and Fixed Points
+** 5.13 xxx and Lazy Evaluation
+** Chapter Summary
+* TODO 6 List =???? TOWO: how to translate=
+** 6.1 List Generator
+** 6.2 Primes Puzzles
+** 6.3 Ceaser Crypoxxxx
+*** 6.3.1 Encoding
+*** 6.3.2 Decoding
+
+** 6.4 Arrange and Combination Problems
+*** 6.4.1 Arrange Problems
+*** 6.4.2 xxxx Arrange Problems
+*** 6.4.3 Combination Problems
+** 6.5 The Eight Queens Problem
+** 6.6 Calculate Matrix Multiplication
+** 6.7 The Shortest Path Algorithm and Matrix Multiplication
+** Chapter Summary
+
+* TODO 7 Higher Order Functions and Compound Functions
+** 7.1 Simple Higher Order Functions
+** 7.2 Folding Functions ~foldr~ and ~foldl~
+** 7.3 Functions ~mapAccumL~ and ~mapAccumR~
+** 7.4 Compound Functions
+** Chapter Summary
+* TODO 8 Define Data Types
+** 8.1 The Definition of Data Type
+*** 8.1.1 Enumerative Type
+*** 8.1.2 Constructive Type
+*** 8.1.3 Parameterized Type
+*** 8.1.4 Recursive Type
+*** 8.1.5 Mix ....
+** 8.2 Type Isomorphism
+** 8.3 Define Type with ~newtype~
+** 8.4 The Effectiveness of Mathematical Induction
+** 8.5 Tree
+** 8.6 Catalan Number Problem
+** 8.7 Huffman Coding
+** 8.8 Sovle 24 xxxxxx????
+** 8.9 zipper
+** 8.10 General Algebraic Data Types
+** 8.11 The /kinds/ of Types
+*** 8.11.1 The /kinds/ of Types
+*** 8.11.2 The Declaration of An Empty Type
+** Chapter Summary
+* TODO 9 Define Typeclasses
+** 9.1 Define Typeclass
+** 9.2 The Common Typeclasses in Haskell
+*** 9.2.1 Common Typeclasses
+*** 9.2.2 ~Functor~
+*** 9.2.3 ~Applicative~
+*** 9.2.4 ~Alternative~
+*** 9.2.5 Simple Character Identification Machine
+*** 9.2.6 The ~Read~ Typeclass
+*** 9.2.7 ~Monoid~
+*** 9.2.8 ~Foldable~ and ~Monoid~ Typeclasses
+*** 9.2.9 Section Summary
+** 9.3 The Types Dependencies in Typeclasses
+** 9.4 The XXX??? Types in Typeclasses
+** 9.5 Fixed Length List
+** 9.6 Runtime Overloading
+** 9.7 ~Existential~ Type
+** Chapter Summary
+* TODO 10 The First Step of ~Monad~
+** 10.1 Introduction to ~Monad~
+** 10.2 Start from The ~Identity Monad~
+   #+BEGIN_SRC haskell
+     -- class Applicative m => Monad m where
+       (>>=) :: m a -> (a -> m b) -> m b
+       (>>) :: m a -> m b -> m b
+       return :: a -> m a
+   #+END_SRC
+*** TODO Applicative m
+*** TODO Core operations
+*** TODO The novel part of Monad
+    - *The answer is the exercise*
+*** TODO What Monad is not
+*** TODO Monad also lifts!
+** 10.3 ~Maybe~ ~Monad~
+** 10.4 The ~Monad~ Laws
+** 10.5 List ~Monad~
+** 10.6 ~Monad~ Operators
+** 10.7 ~MonadPlus~
+** 10.8 The Relations Between ~Functor~, ~Applicative~, and ~Monad~
+** Chapter Summary
+* TODO 11 System Programming and I/O
+* TODO 12 Record Monad, Reader Monad, and State Monad
+** 12.1 Record Monad
+*** 12.1.1 ~MonadWriter~
+*** 12.1.2 The Processes of Record Merge Sort
+** 12.2 Reader Monad
+*** 12.2.1 ~MonadReader~
+*** 12.2.2 The Reference to The Variables Environment
+** 12.3 State Monad
+*** 12.3.1 State Monad tag machine XXX ??
+*** 12.3.2 Implement Stack with State Monad
+*** 12.3.3 The Relations State Monad, ~FunApp~ Unit semigroup, and Reader Monad.
+*** 12.3.4 ~MonadState~
+*** 12.3.5 Stack Based Calculator
+** 12.3.7 The generation of a 
+** 12.3.7 State Monad
+* TODO 13 ~Monad~ transformers
+** TODO 13.1 Start from The ~IdentityT Monad~ Transformer
+** TODO 13.2 The Difference Between ~Monad~ Transformer Combination and Compound ~Monad~
+** TODO 13.3 The Combination Order of The ~Monad~ Transformer
+** TODO 13.4 ~lift~ and ~liftIO~
+** TODO 13.5 Simple ~Monad~ Compiler
+** TODO 13.6 Syntax Parser ~Monad~ Combinator
+*** TODO 13.6.1 The Implementation of Simple Syntax Analyzer
+*** TODO 13.6.2 The Introduction to ~Parsec~ Library
+*** TODO 13.6.3 Context Free Syntax
+*** TODO 13.6.4 Syntax Analyzer Based Calculator
+** Chapter Summary
+* TODO 14 Intro to ~QuickCheck~
+** 14.1 Test The Properties of Functions
+   - We will
+     be covering _TWO_ testing libraries for Haskell (_there are others_)
+     and
+     _HOW_ and _WHEN_ to use them
+
+   - Well-specified types can enable programmers to avoid many obvious and
+     tedious tests that might otherwise be necessary to maintain in untyped
+     programming languages,
+
+     =TODO= =???=
+     BUT there's still a lot of value to be obtained in executable
+     specifications.
+
+   - This chapter will cover:
+     + the whats and whys of testing;
+     + using the testing libraries _Hspec_ and _QuickCheck_;
+     + a bit of fun with Morse code.
+
+** 14.2 Test Data Generators
+   - For the sake of simplicity, we'll say there are _TWO_ broad categories of
+     testing:
+     + unit testing
+     + property testing =???=
+
+   - /unit testing/: test the smallest atomic units of software independently of
+     one another.
+     =FROM JIAN= It seems this kind of tests require /referential transparency/.
+
+   - /spec testing/: a somewhat =???= newer version of /unit testing/.
+     =TODO= =???=
+     + Like /unit testing/, it tests specific functions independently
+
+     + Ask you to assert when given the declared input, the result of the
+       operation will be equal to the desired result.
+
+   - Some people prefer /spec testing/ to /unit testing/
+
+     because /spec testing/ is more often written in terms of assertions that
+     are in human-readable language.
+
+   - _Hspec_ for /spec testing/
+     _HUnit_ for /unit testing/
+
+   - One Limitation of both /spec testing/ and /unit testing/:
+     They do NOT verify all the pieces work _TOGETHER_ properly.
+
+   - /property testing/: test the formal properties of programs
+     without requiring formal proofs
+     by allowing you to express a truth-valued, universally qualified (that is,
+     will apply to all cases) function -- usually equality -- which will then
+     be checked _against RANDOMLY generated input_.
+
+   - /property testing/ was pioneered in Haskell
+
+     because
+     + the type system
+       and 
+     + straightforward logic
+
+     of the language lend themselves to property test,
+
+     but it has since been adopted by other languages (=???=) as well.
+
+   - _QuickCheck_ (for Haskell /property testing/)
+
+   - The inputs of /property testing/ of Haskell are generated randomly by the
+     standard functions inside the _QuickCheck_ library -- this relies on the
+     type system to know what kinds of ata to generate.
+
+     + The default setting is for 100 inputs.
+
+     + _QuickCheck_ is cleverly written to be
+       as thorough as possile and will usually check the most common edge cases,
+       for example,
+       * empty lists
+       * maxBound and minBound of the types in question.
+
+   - /Property testing/ is fantastic for ensuring that you’ve met the minimum
+     requirements to satisfy laws,
+     such as
+     + the laws of monads;  =TODO= =Concrete Exmples?=
+     + basic associativity. =TODO= =Concrete Exmples?=
+
+** Chapter Summary
+* TODO 15 Intro to Lazyness Evaluation
+** 15.1 Intro to Lambda Calculus
+*** 1.1 All You Need is Lambda
+    - /calculus/: a method of calculation or reasoning;
+
+    - /lambda calculus/: one process for formalizing a method.
+
+*** 1.2 What is functional programming?
+    - When we say the /purity/ of a functional programming language, we acutally
+      say in which level its /referential transparency/ is.
+        If we say a language is pure, we mean it has PERFECT
+      /referential transparency/.
+
+*** 1.3 What is a function?
+    - /domain/
+    - /codomain/
+    - /range/
+*** 1.4 The structure of lambda terms
+    - /lambda calculus/ has three basic components (/lambda terms/):
+      + expressions :: refer to a superset of all those things:
+        * a variable name
+        * an abstraction
+        * a combination of those things
+
+      + variables :: here variables means those have no meaning or value;
+                   they are just names for potential inputs to functions
+
+      + abstractions :: functions
+        * /head/
+        * /body/
+
+    - The variable named in the head is the /parameter/ and /binds/ all instances
+      of that same variable in the body of the function.
+
+**** Alpha equivalence
+     - /alpha equivalence/: a form of equivalence between lambda terms
+
+*** 1.5 Beta reduction
+    - /beta reduction/: apply a function to an argument.
+      =COMMENT= This reduction eliminates the head of the abstraction, since its
+                only purpose was to bind a variable.
+
+    - The process of /beta reduction/ _stops when_ there are either no more heads,
+      or lambdas, left to apply or no more arguments to apply functions to.
+
+**** Free varibales 
+     - /free variables/: variables that are not named in the head.
+
+     - /alpha equivalence/ does not apply to /free variables/.
+       For example, ~\lambda{}x.xy~ and ~\lambda{}x.xz~ are not equivalent because ~z~ and ~y~
+       might be different.
+
+*** 1.6 Multiple arguments
+    - Each lambda can only bind one parameter and can only accept one argument.
+
+    - Functions that require multiple arguments have multiple, nested heads.
+
+    - /Curry/: discovered by Moses Schönfinkel in the 1920s. Re-discovered by
+      Haskell Curry.
+
+*** Intermission: Equivalence Exercises
+** 15.2 ⊥ Bottom
+** 15.3 Expression xingtai and ~thunk~
+*** 15.3.1 WHNF, HNF, AND NF
+*** 15.3.2 ~thunk~ and Strict Evaluation
+** 15.4 The Evaluation Strategy
+*** 15.4.1 Call by Value
+*** 15.4.2 Call by Name
+*** 15.4.3 Normal Order Evaluation
+** 15.5 Lazy Evaluation
+** 15.6 Strict Pattern Matching and Lazy Pattern Matching
+* TODO 16 Parallilism and concurrency Programming
+** 16.1 XXXX
+** 16.2 Light Weight Threads
+*** 16.2.1 The Uncertainty of XXXX
+*** 16.2.2 The Communication Between Basic Threads
+*** 16.2.3 The Communication Channels
+*** 16.2.4 A Simple Chat Server
+** 16.3 Software XXX??? Memory
+*** 16.3.1 Introduction to Software XXX Memory
+*** 16.3.2 The Usage of Software XXX Memory
+*** 16.3.3 The Dining Philosophers Problem
+*** 16.3.4 The Santa Claus Problem
+** 16.4 The Introduction to The Asynchronous Concurrent Library
+** Chapter Summary
+
+* Tips
