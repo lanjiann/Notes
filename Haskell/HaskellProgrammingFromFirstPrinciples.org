@@ -1,6 +1,7 @@
 #+TITLE: Haskell Programming from First Principles
 #+VERSION: 0.12.0
 #+AUTHOR: Christopher Allen, Julie Moronuki
+#+STARTUP: overview
 #+STARTUP: entitiespretty
 
 * Table of Contents                                      :TOC_4_org:noexport:
@@ -286,7 +287,7 @@
     - [[Simple datatypes with nullary data constructors][Simple datatypes with nullary data constructors]]
     - [[Exercises: For Example][Exercises: For Example]]
     - [[Unary constructors][Unary constructors]]
-  - [[11.9 ~newtype~][11.9 ~newtype~]]
+  - [[11.9 [ =Re-READ= ] ~newtype~][11.9 [ =Re-READ= ] ~newtype~]]
     - [[Exercises: Logic Goats][Exercises: Logic Goats]]
   - [[11.10 Sum types][11.10 Sum types]]
     - [[Exercises: Pity the Bool][Exercises: Pity the Bool]]
@@ -479,7 +480,7 @@
   - [[17.4 Applicative functors are monoidal functors][17.4 Applicative functors are monoidal functors]]
     - [[Show me the monoids][Show me the monoids]]
     - [[Tuple Monoid and Applicative side by side][Tuple Monoid and Applicative side by side]]
-    - [[Maybe Monoid and Applicative][Maybe Monoid and Applicative]]
+    - [[~Maybe~ Monoid and Applicative][~Maybe~ Monoid and Applicative]]
   - [[17.5 ~Applicative~ in use][17.5 ~Applicative~ in use]]
     - [[List ~Applicative~][List ~Applicative~]]
       - [[What's the List applicative do?][What's the List applicative do?]]
@@ -504,7 +505,7 @@
     - [[Zero vs. Identity][Zero vs. Identity]]
     - [[List Applicative Exercise][List Applicative Exercise]]
     - [[ZipList Applicative Exercise][ZipList Applicative Exercise]]
-    - [[Either and Validation Applicative][Either and Validation Applicative]]
+    - [[~Either~ and ~Validation~ Applicative][~Either~ and ~Validation~ Applicative]]
       - [[Specializing the types][Specializing the types]]
       - [[~Either~ versus Validation][~Either~ versus Validation]]
       - [[Exercise: Variations on ~Either~][Exercise: Variations on ~Either~]]
@@ -515,13 +516,13 @@
 - [[18 ~Monad~][18 ~Monad~]]
   - [[18.1 ~Monad~][18.1 ~Monad~]]
   - [[18.2 Sorry -- ~Monad~ is not a burrito][18.2 Sorry -- ~Monad~ is not a burrito]]
-    - [[Applicative m][Applicative m]]
+    - [[~Applicative m~][~Applicative m~]]
     - [[Core operations][Core operations]]
-    - [[The novel part of Monad][The novel part of Monad]]
-    - [[What Monad is not][What Monad is not]]
-    - [[Monad also lifts!][Monad also lifts!]]
-  - [[18.3 Do syntax and /monads/][18.3 Do syntax and /monads/]]
-    - [[When fmap alone isn't enough][When fmap alone isn't enough]]
+    - [[The novel part of ~Monad~][The novel part of ~Monad~]]
+    - [[What ~Monad~ is not][What ~Monad~ is not]]
+    - [[~Monad~ also lifts!][~Monad~ also lifts!]]
+  - [[18.3 ~do~ syntax and /Monads/][18.3 ~do~ syntax and /Monads/]]
+    - [[=RE-READ= When ~fmap~ alone isn't enough][=RE-READ= When ~fmap~ alone isn't enough]]
   - [[18.4 Examples of ~Monad~ use][18.4 Examples of ~Monad~ use]]
     - [[List][List]]
       - [[Specializing the types][Specializing the types]]
@@ -4434,7 +4435,8 @@
 ** DONE 8.7 Definitions
    CLOSED: [2017-05-30 Tue 03:20]
    /recursion/
-* TODO 9 Lists
+* DONE 9 Lists
+  CLOSED: [2017-07-03 Mon 00:42]
   _Page 298-343_
 ** DONE 9.1 Lists
    CLOSED: [2017-05-31 Wed 01:13]
@@ -4679,10 +4681,32 @@
       length SmallTuples
     #+END_SRC
 
-** TODO 9.8 Spines and nonstrict evaluation
+** DONE 9.8 Spines and nonstrict evaluation
+   CLOSED: [2017-07-03 Mon 00:42]
    - /spine/: the connective structure that ties the collection of values
      togehter.
        lists, sequences, and trees have /spines/.
+
+   - Values in cons (~:~) cell _do NOT exist "before"_ the cons cell that
+     contains it.
+     Because of _this_ and _the way nonstrict evaluation works_,
+     =IMPORTANT=
+     _you can evaluate cons cells independently of what they contain_.
+     This means
+     It is possible to evaluate just the /spine/ (or part of the /spine/) of the
+     list _WITHOUT_ evaluating individual values.
+
+   - _Evaluation_ of the list in this representation proceeds _DOWN_ the /spine/.
+
+     _Constructing_ the list when that is necessary, however, proceeds _UP_ the
+     /spine/.
+
+   - _SETTINGS_ for the next subsections:
+     Bring the /bottom (⊥)/ back in the form of ~undefined~
+     in order to
+     demostrate some of the effects of nonstrict evaluation.
+
+     Use =_= to syntactically signify values we are ignoring and not evaluating.
 
 *** DONE Using GHCi's ~:sprint~ command
     CLOSED: [2017-05-31 Wed 16:02]
@@ -4697,9 +4721,9 @@
         introduce strictness to make code faster when it won't change how your
         code evaluates.
 
-      + Additionally polymorphism means values like Num a => a are really waiting
-        for a sort of argument which will make it concrete (this will be covered
-        in more detail in a later chapter).
+      + Additionally polymorphism means values like ~Num a => a~ are really
+        waiting for a sort of argument which will make it concrete (this will be
+        covered in more detail in a later chapter).
           To avoid this, you have to assign a more concrete type such as ~Int~ or
         ~Double~, otherwise it stays unevaluated, ~_~, in :sprint's output.
         =TODO= =EXAMPLE=
@@ -4745,7 +4769,8 @@
       the /spine/ after getting the ~length~ of =blah= is one of the
       _unfortunate aforementioned quirks of how GHCi evaluates code_.
 
-*** TODO Spines are evaluated independently of values
+*** DONE Spines are evaluated independently of values
+    CLOSED: [2017-07-03 Mon 00:34]
     - /normal form/: the expression is fully evaluated.
 
     - /weak head normal form (WHNF)/: the expression is only evaluated as far as
@@ -4791,10 +4816,10 @@
 
       + ~(1, "Papu" ++ "chon") -- WHNF~
 
-    - When we define a list and define all its values, it is in /NF/ and all its
-      values are known.
+    - When we _define_ a list and define all its values, it is in /NF/ and all
+      its values are known.
 
-    - When we construct a list through /ranges/ or /functions/ the list is in
+    - When we _construct_ a list through /ranges/ or /functions/ the list is in
       /WHNF/ but not /NF/.
 
     - The compiler _ONLY_ evaluates the head or first node of the graph,
@@ -4814,7 +4839,14 @@
         -- 3
       #+END_SRC
 
-    - 
+    - We can define our own ~length~ function. Pay attention that the ~_~ is
+      important, it's _NOT only a convention_ for a variable that will never be
+      used, it also tells the compiler NOT to evaluate this value.
+
+      _IF_ you DO _NOT_ use ~_~ below,
+      the length we will define is _different from_ the built-in's
+      behavior -- evaluate values inside cons cell when only evaluate the /spine/
+      (the cons cells structure) is enough.
       #+BEGIN_SRC haskell
         -- *Not* identical to the length function in Prelude
         length :: [a] -> Integer
@@ -4824,11 +4856,13 @@
 
     - Currently, if you try using ~_~ on the right-hand side in the definition,
       it'll think you're trying to refer to a _hole_.
+      =TODO= important feature, explained later or NOT? I don't know.
 
     - ~length~ will throw an error on a /bottom/ value if part of the /spine/
       itself is /bottom/:
       #+BEGIN_SRC haskell
         -- Prelude> let x = [1] ++ undefined ++ [3]
+        -- -- This is different from [1, undefined, 3]
 
         -- Prelude> length x
         -- *** Exception: Prelude.undefined
@@ -4846,9 +4880,11 @@
       Developing intuition for Haskell's evaluation strategies takes time and
       practice.
 
-*** TODO Exercises: Bottom Madness
-**** TODO Will it blow up?
-     1. Neither =TODO= =???=
+*** DONE Exercises: Bottom Madness
+    CLOSED: [2017-07-03 Mon 00:42]
+**** DONE Will it blow up?
+     CLOSED: [2017-07-03 Mon 00:36]
+     1. ⊥
      2. [1]
      3. ⊥
      4. 3
@@ -4858,14 +4894,19 @@
      8. [1]
      9. [1, 3]
      10. ⊥
-**** TODO Intermission: Is it in normal form?
+**** DONE Intermission: Is it in normal form?
+     CLOSED: [2017-07-03 Mon 00:41]
+     =TODO=
+     The author does NOT mentioned that if these result are the result
+     of ~:sprint~:
+
      1. WHNF & NF
-     2. =TODO= WHNF or neither???
+     2. WHNF =TODO=
      3. Neither
      4. Neither
      5. Neither
      6. Neither
-     7. =TODO=
+     7. WHNF =TODO=
 
 ** DONE 9.9 Transforming lists of values
    CLOSED: [2017-05-31 Wed 22:14]
@@ -6055,22 +6096,22 @@
 
       For cardinality this means unary constructors are the identity function.
 
-** TODO 11.9 ~newtype~
-   - A way to define a type that can _only ever have a single_ unary data
+** DONE 11.9 [ =Re-READ= ] ~newtype~
+   CLOSED: [2017-07-05 Wed 21:37]
+   - A way to define a type that can _ONLY ever have a single_ unary data
      constructor -- ~newtype~.
 
-   - The /cardinality/ of a ~newtype~ is the same as that of the type it
-     contains.
-
-   - Obviously, A ~newtype~ declared type _CANNOT_:
+   - It is obvious that a ~newtype~ declared type _CANNOT_:
      + be a product type
      + be a sum type
      + contain nullary constructors.
 
      but it has _a few advantages_ over a vanilla ~data~ declaration:
-     _NO runtime overhead, as it reuses the represnetation of the type it contains._
+     =IMPORTANT=
+     _NO runtime overhead_,
+     as it reuses the represnetation of the type it contains.
 
-     It can do this because it's NOT allowed to be
+     It can do this because it's _NOT_ allowed to be
      + a record (product type)
        or
      + tagged union (sum type).
@@ -6083,27 +6124,41 @@
      don't want to mix the count of goats with the conut of cows (or other
      animals).
      #+BEGIN_SRC haskell
+       -- A version that has a potential problem of
+       --   mixing the count of goats with the count of cows (or later animals).
+       tooManyGoats' :: Int -> Bool
+       tooManyGoats' n = n > 42
+
+       -- A `newtype` version that can help to get rid of the mix-up problem.
        newtype Goats = Goats Int deriving (Eq, Show)
        newtype Cows = Cows Int deriving (Eq, Show)
 
        tooManyGoats :: Goats -> Bool
        tooManyGoats (Goats n) = n > 42
-
-       -- tooManyGoats :: Int -> Bool
-       -- tooManyGoats n = n > 42
      #+END_SRC
 
-   - Compare type synonyms ~type~ with ~newtype~:
+   - ~newtype~ can create a new type, this is like ~data~;
+
+     ~newtype~ creates a 0-cost wrapped type -- consider the sematics, it's more
+     like ~type~.
+
+     Compare ~type~ with ~newtype~:
      + With the help of ~type~, an alias can be created.
+       * ~type~ _helps people_:
+         Alias a type to two (or more) names that have distinct semantics.
 
-       It helps people to code with some prefered alias name(s). For people two
-       (or more) names have distinct semantics, but for compiler, they have NO
-       distinction.
+       * ~type~ _does NOT help the compiler_:
+         These alias have NO distinction for the compiler.
 
-     + With the help of ~newtype~, compiler can distinct the ~newtype~ created
-       one and the underlying type of a ~newtype~.
-         For example, from the type point of view: ~34 :: Int~ are different from
-         ~Goat 34~ due to the difference between ~Int~ and ~Goat Int~.
+     + With the help of ~newtype~, a new datatype created, which, however, can be
+       considered an special type of alias.
+       * ~newtype~ _helps compiler_:
+         Compiler can distinct the ~newtype~ created one and the underlying type
+         of a ~newtype~.
+
+       * ~type~ also _helps people_:
+         Literally (or semantically) it also create a new name which is distinct
+         from the underlying type.
 
      + One KEY contrast:
        * One _CAN_ define typeclass instances for a ~newtype~ that differ from
@@ -6111,17 +6166,150 @@
 
        * One _CANNOT_ define typeclass for the ~type~ alias.
 
-   - =TODO=
+       An example:
+       #+BEGIN_SRC haskell
+         module TooMany where
+
+         class TooMany a where
+           tooMany :: a -> Bool
+
+         instance TooMany Int where
+           tooMany n = n > 42
+
+         -- tooMany (42 :: Int)
+
+         newtype Goats = Goats Int deriving Show
+
+         instance TooMany Goats where
+           tooMany (Goats n) = n > 43
+       #+END_SRC
+
+       A better example (=From Jian=):
+       #+BEGIN_SRC haskell
+         {-# LANGUAGE FlexibleInstances #-}
+         {-# LANGUAGE UndecidableInstances #-}
+         module TooMany where
+
+         class TooMany a where
+           tooMany :: a -> Bool
+
+         instance Integral a => TooMany a where
+           tooMany n = n > 42
+
+
+         -- I CANNOT make this "ad-hoc polymorphism"
+         -- Is there a way to do this?
+
+         -- pragma `DatatypeContexts` is DEPRECATED, and it seems with its help
+         --  "ad-hoc polymorphism" can be reached. =WHY=
+
+         -- pragma `ExistentialQuantification` can help to make
+         -- "ad-hoc polymorphism", BUT it only works with `data`!
+         newtype Goats =
+           Goats Int deriving Show
+
+         instance TooMany Goats where
+           tooMany (Goats n) = n > 43
+       #+END_SRC
+
+   - ~newtype~'s can use the common typeclasses built into GHC like ~Eq~, ~Ord~,
+     ~Enum~, and ~Show~ of their _underlying types_ for free, as you've seen with
+     the ~deriving~ clauses in most datatypes.
+
+   - /language pragmas/: also called /extensions/, which are special instructions
+     to the compiler. They tell the compiler to process input in ways beyond what
+     the standard provides for.
 
    - A language pragma: ~GeneralizedNewtypeDeriving~
      Allow our ~newtype~ to rely on a typeclass instance for the type it contains.
+     #+BEGIN_SRC haskell
+       {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-   - /language pragmas/: extensions, which are special instructions to the compiler.
+       class TooMany a where
+         tooMany :: a -> Bool
+
+       instance TooMany Int where
+         tooMany n = n > 42
+
+       newtype Goats =
+         Goats int deriving (Eq, Show, TooMany)
+     #+END_SRC
+     Here ~Goats~ derives an instance of ~Int~, which is its underlying type.
+
+     You don't have to define an instance of ~TooMany~ for ~Goats~ that's
+     merely identical to the ~Int~ instance.
+
+     This is NOT allowed without the /pragma/.
+
+     This is also nice for times when we want every typeclass instance to be the
+     same _except_ for the one we want to change.
 
 *** TODO Exercises: Logic Goats
-    1. =TODO=
+    1. 
+       #+BEGIN_SRC haskell
+         {-# LANGUAGE FlexibleInstances #-}
+
+         class TooMany a where
+           tooMany :: a -> Bool
+
+         instance TooMany (Int, String) where
+           tooMany (i, _) = i > 42
+
+         -- -- Test
+         -- tooMany (3::Int, "Goats")
+         -- False
+
+
+         -- -- A more general implementation
+         -- --
+         -- instance Integral a => TooMany (a, String) where
+         --   tooMany (i, _) = i > 42
+
+         -- -- Test
+         -- tooMany (3, "Goats")
+         -- False
+
+
+       #+END_SRC
+
     2. 
-    3. 
+       #+BEGIN_SRC haskell
+         {-# LANGUAGE FlexibleInstances #-}
+
+         class TooMany a where
+           tooMany :: a -> Bool
+
+         instance TooMany (Int, Int) where
+           tooMany (i, j) = i + j > 42
+
+         -- -- Test
+         -- tooMany (3 :: Int, 4 :: Int)
+         -- False
+
+         -- -- A more general implementation
+         -- --
+         -- instance Integral a => TooMany (a, a) where
+         --   tooMany (i, j) = i + j > 42
+
+         -- -- Test
+         -- tooMany (3, 4)
+         -- False
+       #+END_SRC
+
+    3. =TODO=
+       #+BEGIN_SRC haskell
+         {-# LANGUAGE FlexibleInstances #-}
+         {-# LANGUAGE UndecidableInstances #-}
+
+         class TooMany a where
+           tooMany :: a -> Bool
+
+         instance (Num a) => TooMany a where
+           tooMany i = i > 42
+
+         instance (Num a, TooMany a) => TooMany (a, a) where
+           tooMany (i, j) = tooMany (i + j)
+       #+END_SRC
 
 ** DONE 11.10 Sum types
    CLOSED: [2017-06-09 Fri 01:21]
@@ -10098,9 +10286,10 @@
         pure x = (mempty, x)
         (u, f) <*> (v, x) =
           (u `mappend` v, f x)
+          -- TODO: I don't quite understand the second term
     #+END_SRC
 
-*** TODO Maybe Monoid and Applicative
+*** TODO ~Maybe~ Monoid and Applicative
     #+BEGIN_SRC haskell
       instance Monoid a => Monoid (Maybe a) where
         mempty = Nothing
@@ -10115,84 +10304,1065 @@
         Just f <*> Just a = Just (f a)
     #+END_SRC
 
-** TODO 17.5 ~Applicative~ in use
-   - x
-*** TODO List ~Applicative~
-**** TODO What's the List applicative do?
-**** TODO Exercises: Lookups
-     #+BEGIN_SRC haskell
-     
-     #+END_SRC
-*** TODO Identity
-**** TODO Specializing the types
-**** TODO Exercise: Identity Instance
-*** TODO Constant
-**** TODO Specializing the types
-**** TODO Exercise: Constant Instance
-*** TODO ~Maybe~ ~Applicative~
-**** Specializing the types
-**** Using the ~Maybe~ Applicative
-**** Breaking down the example we just saw
-**** ~Maybe~ Functor and the Name constructor
-**** ~Maybe~ Applicative and Person
-**** Before we moooove on
-**** Exercise: Fixer Upper
+** DONE 17.5 ~Applicative~ in use
+   CLOSED: [2017-07-02 Sun 17:47]
+*** DONE List ~Applicative~
+    CLOSED: [2017-07-01 Sat 23:08]
+    #+BEGIN_SRC haskell
+      (<*>) :: f (a -> b) -> f a -> f b
 
-** TODO 17.6 ~Applicative~ laws
-   - x
+      -- f ~ []
+      -- (<*>) :: [ ] (a -> b) -> [ ] a -> [ ] b
+
+      -- more syntactically typical
+      -- (<*>) :: [(a -> b)] -> [a] -> [b]
+
+      pure :: a -> f a
+      -- pure :: a -> [a]
+    #+END_SRC
+
+**** DONE What's the List applicative do?
+     CLOSED: [2017-07-01 Sat 23:08]
+     - Equivalent forms:
+       #+BEGIN_SRC haskell
+         (,) <$> [1, 2] <*> [3, 4]
+         liftA2 (,) [1, 2] [3, 4]
+         -- [(1,3),(1,4),(2,3),(2,4)]
+
+         -- This is like a Cartesian product, but with functions
+       #+END_SRC
+
+     - ~lookup \colon{}\colon{} Eq a => a -> [(a, b)] -> Maybe b~
+
+     - BTW, if you want the use Map data structures:
+       #+BEGIN_SRC haskell
+         -- An associative List
+         lookup 3 [(3, "hello")]
+
+         -- A Map
+         Data.Map.lookup 3 (fromList [(3, "hello")])
+         -- Just "hello"
+       #+END_SRC
+
+**** DONE Exercises: Lookups
+     CLOSED: [2017-07-01 Sat 23:58]
+     #+BEGIN_SRC haskell
+       -- Exercises: Lookups
+       import Data.List (elemIndex)
+
+       --
+       -- 1
+       added :: Maybe Integer
+       added = (+3) <$> (lookup 3 $ zip [1, 2, 3] [4, 5, 6])
+
+
+       -- 2
+       y :: Maybe Integer
+       y = lookup 3 $ zip [1, 2, 3] [4, 5, 6]
+
+       z :: Maybe Integer
+       z = lookup 2 $ zip [1, 2, 3] [4, 5, 6]
+
+       tupled :: Maybe (Integer, Integer)
+       tupled = (,) <$> y <*> z
+
+
+       -- 3
+       x' :: Maybe Int
+       x' = elemIndex 3 [1, 2, 3, 4, 5]
+
+       y' :: Maybe Int
+       y' = elemIndex 4 [1, 2, 3, 4, 5]
+
+       max' :: Int -> Int -> Int
+       max' = max
+
+       maxed :: Maybe Int
+       maxed = max' <$> x' <*> y'
+
+
+       -- 4
+       xs = [1, 2, 3]
+       ys = [4, 5, 6]
+
+       x'' :: Maybe Integer
+       x'' = lookup 3 $ zip xs ys
+
+       y'' :: Maybe Integer
+       y'' = lookup 2 $ zip xs ys
+
+       summed :: Maybe Integer
+       summed = (sum <$>) $ (,) <$> x'' <*> y''
+     #+END_SRC
+*** DONE Identity
+    CLOSED: [2017-07-02 Sun 00:11]
+    The ~Identity~ type here is a way to introduce structure without changing
+    the semantics of what you're doing.
+**** DONE Specializing the types
+     CLOSED: [2017-07-02 Sun 00:11]
+     #+BEGIN_SRC haskell
+       (<*>) ::        f (a -> b) ->        f a ->        f b
+       -- (<*>) :: Identity (a -> b) -> Identity a -> Identity b
+
+       pure :: a ->        f a
+       pure :: a -> Identity a
+     #+END_SRC
+
+     Why do we need this?
+     #+BEGIN_SRC haskell
+       const <$> [1, 2, 3] <*> [9, 9, 9]
+       -- [1,1,1,2,2,2,3,3,3]
+
+       const <$> Identity [1, 2, 3] <*> Identity [9, 9, 9]
+       -- [1,2,3]
+     #+END_SRC
+
+**** DONE Exercise: Identity Instance
+     CLOSED: [2017-07-02 Sun 00:16]
+     #+BEGIN_SRC haskell
+       newtype Identity a =
+         Identity a
+         deriving (Eq, Ord, Show)
+
+       instance Functor Identity where
+         fmap f (Identity x)= Identity (f x)
+
+       instance Identity a where
+         pure x = Identity x
+         (<*>) (Identity f) (Identity x) = Identity (f x)
+     #+END_SRC
+*** DONE Constant
+    CLOSED: [2017-07-02 Sun 02:39]
+    ~Constant~ is _NOT_ so different from the ~Identity~ type,
+    _EXCEPT_ this _not only_ provides structure it _also_ acts like the const
+    function.
+
+    This datatype is like the ~const~ function in that
+    it takes two arguments _but_ one of them just gets discarded.
+    In the case of the datatype, we have to map our function over the argument
+    that gets discarded. So there is no value to map over, and the function
+    application just doesn't happen.
+
+**** DONE Specializing the types
+     CLOSED: [2017-07-02 Sun 02:39]
+     #+BEGIN_SRC haskell
+       -- f ~ Constant e
+       (<*>) ::             f (a -> b) ->          f a ->          f b
+       -- (<*>) :: Constant e (a -> b) -> Constant e a -> Constant e b
+
+       pure :: a ->          f a
+       -- pure :: a -> Constant e a
+     #+END_SRC
+
+**** DONE Exercise: Constant Instance
+     CLOSED: [2017-07-02 Sun 02:39]
+     #+BEGIN_SRC haskell
+       -- Exercises: Constant Instance
+
+       newtype Constant a b =
+         Constant { getConstant :: a }
+         deriving (Eq, Ord, Show)
+
+       instance Functor (Constant a) where
+         fmap _ (Constant av) = Constant av
+
+       instance Monoid a => Applicative (Constant a) where
+         pure _ = Constant mempty
+         Constant m1 <*> Constant m2 = Constant (m1 <> m2)
+     #+END_SRC
+
+*** DONE ~Maybe~ ~Applicative~
+    CLOSED: [2017-07-02 Sun 17:47]
+**** DONE Specializing the types
+     CLOSED: [2017-07-02 Sun 03:08]
+     #+BEGIN_SRC haskell
+       -- f ~ Maybe
+       (<*>) ::     f (a -> b) ->     f a ->     f b
+       -- (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
+
+       pure :: a ->     f a
+       -- pure :: a -> Maybe a
+     #+END_SRC
+
+**** DONE Using the ~Maybe~ Applicative
+     CLOSED: [2017-07-02 Sun 03:08]
+     #+BEGIN_SRC haskell
+       validateLength :: Int -> String -> Maybe String
+       validateLength maxLen s =
+         if (length s) > maxLen
+         then Nothing
+         else Just s
+
+       newtype Name = Name String deriving (Eq, Show)
+       newtype Address = Address String deriving (Eq, Show)
+
+       mkName :: String -> Maybe Name
+       mkName s = fmap Name $ validateLength 25 s
+
+       mkAddress :: String -> Maybe Address
+       mkAddress a = fmap Address $ validateLength 100 a
+
+       data Person =
+         Person Name Address
+         deriving (Eq, Show)
+
+       mkPerson :: String -> String -> Maybe Person
+       mkPerson n a =
+         case (mkName n, mkAddress a) of
+           (_, Nothing) -> Nothing
+           (Nothing, _) -> Nothing
+           (Just n', Just a') -> Just $ Person n' a'
+     #+END_SRC
+
+     The functions ~mkName~ and ~mkAddress~ successfully leveraged ~fmap~.
+     However, the ~mkPerson~ above didn't really make it work with a concise
+     implementation. Let's investigate this:
+     #+BEGIN_SRC haskell
+     fmap Person (mkName "Babe")  -- this one works
+
+     name = mkName "Babe"
+     address = mkAddress "old macdonald's"
+
+     fmap (fmap Person name) address  -- this doesn't work
+     -- (Person <$> name) <$> address
+
+     Person <$> name <*> address
+     #+END_SRC
+
+**** DONE Breaking down the example we just saw
+     CLOSED: [2017-07-02 Sun 03:09]
+**** DONE ~Maybe~ Functor and the Name constructor
+     CLOSED: [2017-07-02 Sun 17:26]
+     #+BEGIN_SRC haskell
+       instance Functor Maybe where
+         fmap _ Nothing = Nothing
+         fmap f (Just a) = Just (f a)
+
+       instance Applicative Maybe where
+         pure = Just
+         Nothing <*> _ = Nothing
+         _ <*> Nothing = Nothing
+         Just f <*> Just a = Just (f a)
+     #+END_SRC
+     The ~Applicative~ instance is _NOT exactly_ the same as the instance in base,
+     but that's for _simplification_.
+
+**** DONE ~Maybe~ Applicative and Person
+     CLOSED: [2017-07-02 Sun 17:36]
+
+**** DONE Before we moooove on
+     CLOSED: [2017-07-02 Sun 17:46]
+     - If you do things like
+       ~DataConstructor <$> p1 <*> p2 <*> p3~
+       You can use a conciser way: ~liftA3 DataConstructor p1 p2 p3~
+**** DONE Exercise: Fixer Upper
+     CLOSED: [2017-07-02 Sun 03:16]
+     #+BEGIN_SRC haskell
+       -- 1
+       const <$> Just "Hello" <*> pure "World"
+
+       -- 2
+       (,,,) <$> Just 90 <*> Just 10 <*> Just "Tierness" <*> pure [1, 2, 3]
+     #+END_SRC
+** DONE 17.6 ~Applicative~ laws
+   CLOSED: [2017-07-02 Sun 18:27]
+   1. /Identity/: ~pure id <*> v = v~
+
+   2. /Composition/: ~pure (.) <*> u <*> v <*> w = u <*> (v <*> w)~
+      The parentheses here are important.
+
+   3. /Homomorphism/: A homomorphism is a structure-preserving map between two
+      algebraic structures.
+      ~pure f <*> pure x = pure (f x)~
+      For example:
+      #+BEGIN_SRC haskell
+        pure (+1) <*> pure 1
+        -- 2
+        -- This result looks indistinguishable from the result `(+1) 1`
+        -- It acutally is if considered isolatedly.
+        -- However, you CANNOT do `(pure (+1) <*> pure 1) + 1`, for the reason that
+        -- `pure (+1) <*> pure 1  :: (Num a, Applicative f) => f a`
+        -- Though the `f` here is kinda of meaningless.
+
+        pure (+1) <*> pure 1 :: Maybe Int
+        -- Just 2
+
+        pure (+1) <*> pure 1 :: [Int]
+        -- [2]
+
+        pure (+1) <*> pure 1 :: Either a Int
+        -- Right 2
+      #+END_SRC
+
+   4. /Interchange/:
+      ~u <*> pure y = pure ($ y) <*> u~
+      Pay attension that it is ~$~, not ~($)~.
+
 ** TODO 17.7 You knew this was coming
-   - x
+   - =TODO= ~QuickChecking~
 ** TODO 17.8 ZipList ~Monoid~
-   - x
+   - There is another Monoid for lists: ~ZipList~.
+     ~ZipList~ is provided in ~Control.Applicative~, but NO /Monoid/ instance is
+     provided. Define ourselves:
+     #+BEGIN_SRC haskell
+       instance Monoid a => Monoid (ZipList a) where
+         mempty = ZipList []
+         mappend = liftA2 mappend
+     #+END_SRC
+     
 *** TODO Zero vs. Identity
 *** TODO List Applicative Exercise
 *** TODO ZipList Applicative Exercise
     - *Explaining and justifying the weird EqProp*
-*** TODO Either and Validation Applicative
+*** TODO ~Either~ and ~Validation~ Applicative
 **** TODO Specializing the types
 **** TODO ~Either~ versus Validation
 **** TODO Exercise: Variations on ~Either~
-** TODO 17.9 Chapter Exercises
-   - x
-*** TODO Combinations
-** TODO 17.10 Definitions
-   1. ~Applicative~: =TODO=
+** DONE 17.9 Chapter Exercises
+   CLOSED: [2017-07-02 Sun 21:26]
+   #+BEGIN_SRC haskell
+     {#- LANGUAGE NoMonomorphismRestriction #-}
+     module ChapterExercises where
+
+     import Control.Applicative (liftA3)
+
+     -- PART 1
+     --
+     -- 1.
+     -- []   is the type
+     pure' = pure :: a -> [a]
+     ap' = (<*>) :: [(a -> b)] -> [a] -> [b]
+     -- TODO: CANNOT define <*>', WHY???
+     -- instance Applicative [ ] where
+     --   pure x = [x]
+     --   (<*>) (f:fs) list = (map f list) <> (fs <*> list)
+
+     -- 2. -- Type
+     -- IO   is the type
+     pure'' = pure :: a -> IO a
+     ap'' = (<*>) :: IO (a -> b) -> IO a -> IO b
+
+     -- 3. -- Type
+     -- (,) a   is the type
+     pure''' = pure :: Monoid c => a -> (c, a)
+     ap''' = (<*>) :: Monoid c => (c, (a -> b)) -> (c, a) -> (c, b)
+
+     -- Since there is an arbitrary `Monoid c`,
+     -- when use `pure'''` and `ap'''`, it is better to suffix a type signature with
+     -- a specific datatype `c`.
+
+     -- 4. -- Type
+     -- (->) e   is the type
+     pure'''' = pure :: Monoid e => a -> (e -> a)
+     ap'''' = (<*>) :: Monoid e => (e -> (a -> b)) -> (e -> a) -> (e -> b)
+
+     --
+     -- PART 2
+     --
+     -- 1
+     data Pair a = Pair a a deriving Show
+
+     instance Applicative Pair where
+       pure x = Pair x x
+       (Pair f g) <*> (Pair x y) = Pair (f x) (g y)
+
+     -- 2
+     data Two a b = Two a b
+
+     instance Monoid a => Applicative (Two a) where
+       pure = Two mempty
+       (Two a f) <*> (Two a' b) = Two (a <> a') (f b)
+
+     -- 3
+     data Three a b c = Three a b c
+
+     instance (Monoid a, Monoid b) => Applicative (Three a b) where
+       pure = Three mempty mempty
+       (Three a b f) <*> (Three a' b' c) = Three (a <> a') (b <> b') (f c)
+
+     -- 4
+     data Three' a b = Three' a b b
+
+     instance Monoid a => Applicative (Three' a) where
+       pure x = Three' mempty x x
+       (Three' a f g) <*> (Three' a' b c) = Three' (a <> a') (f b) (g c)
+
+     -- 5
+     data Four a b c d = Four a b c d
+
+     instance (Monoid a, Monoid b, Monoid c) => Applicative (Four a b c) where
+       pure = Four mempty mempty mempty
+       (Four a b c f) <*> (Four a' b' c' d) = Four (a <> a') (b <> b') (c <> c') (f d)
+
+     -- 6
+     data Four' a b = Four' a a a b
+     instance Monoid a => Applicative (Four' a) where
+       pure = Four' mempty mempty mempty
+       (Four' a a' a'' f) <*> (Four' b b' b'' c) = Four' (a <> b) (a' <> b') (a'' <> b'') (f c)
+   #+END_SRC
+
+*** DONE Combinations
+    CLOSED: [2017-07-02 Sun 21:25]
+    #+BEGIN_SRC haskell
+      stops :: String
+      stops = "pbtdkg"
+
+      vowels :: String
+      vwwels = "aeiou"
+
+      combos :: [a] -> [b] -> [c]-> [(a, b, c)]
+      combos = liftA3 (,,) stops vowels stops
+    #+END_SRC
+
+** DONE 17.10 Definitions
+   CLOSED: [2017-07-02 Sun 03:22]
+   1. ~Applicative~: ...
 ** TODO 17.11 Follow-up resources
 * TODO 18 ~Monad~
-** TODO 18.1 ~Monad~
-** TODO 18.2 Sorry -- ~Monad~ is not a burrito
+** DONE 18.1 ~Monad~
+   CLOSED: [2017-07-03 Mon 22:35]
+   - /Monads/ are NOT, strictly speaking, necessary to Haskell.
+     Older implementations of Haskell do NOT have /Monads/.
+
+   - /Monads/ are /applicative functors/.
+
+   - In this chapter, we
+     - define Monad, its operations and laws;
+     - look at several examples of monads in practice;
+     - write the Monad instances for various types;
+     - _address some misinformation about monads_
+
+** DONE 18.2 Sorry -- ~Monad~ is not a burrito
+   CLOSED: [2017-07-04 Tue 03:07]
    #+BEGIN_SRC haskell
+     -- The `Applicative m` appears in GHC 7.10 or newer
      class Applicative m => Monad m where
        (>>=) :: m a -> (a -> m b) -> m b
        (>>) :: m a -> m b -> m b
        return :: a -> m a
    #+END_SRC
-*** TODO Applicative m
-*** TODO Core operations
-*** TODO The novel part of Monad
+
+   Let's explore this in some detail, and start with the typeclass constraint on
+   ~m~.
+
+*** DONE ~Applicative m~
+    CLOSED: [2017-07-04 Tue 00:47]
+    - Older versions of GHC did NOT have ~Applicative~ as a superclass of ~Monad~.
+      However,
+      given that ~Monad~ is stronger than ~Applicative~, and ~Applicative~ is
+      stronger than ~Functor~, you can derive ~Applicative~ and ~Functor~ in terms
+      of ~Monad~, just as you can derive ~Functor~ in terms of ~Applicative~:
+      #+BEGIN_SRC haskell
+        fmap f xs = xs >>= return . f
+        
+        fmap (+1) [1..3]
+        [1..3] >>= return . (+1)
+      #+END_SRC
+      This happens to be a law, NOT just a convenience.
+      =TODO=
+      Explore the relationship between ~Functor~, ~Applicative~, and ~Monad~ more
+      LATER.
+
+    - The chain of dependency: ~Functor -> Applicative -> Monad~
+
+      Whenever you've implemented an instance of ~Monad~ for a type you
+      _NECESSARILY_ have an ~Applicative~ and a ~Functor~ as well.
+
+*** DONE Core operations
+    CLOSED: [2017-07-04 Tue 01:00]
+    - A minimally complete ~Monad~ instance only need to define ~>>=~.
+
+    - All the four core operations:
+      #+BEGIN_SRC haskell
+        (>>=) :: m a -> (a -> m b) -> m b
+        (>>) :: m a -> m b -> m b
+        return :: a -> m a
+        fail :: String -> m a   -- This one isn't mentioned in Chris's book version 0.12
+      #+END_SRC
+
+    - ~return~ is like ~pure~, and we used it in the Modules chapter. No more to
+      say about it.
+
+    - ~>>~ has no official English-language name, but we like to call it _Mr. Pointy_.
+      A more informative name used by people is /sequencing operator/.
+      Basically _Mr. Pointy_
+      _sequences two actions while discarding any resulting value of the first action_.
+
+      Applicative has a similar operator as well,
+      although we _didn't_ talk about it in that chapter. We will see examples of
+      this operator in the upcoming section on ~do~ syntax.
+
+    - Finally, the big bind! The ~>>=~ operator is called /bind/ and is -- or, at
+      least, contains -- the things that are special about ~Monad~.
+
+*** DONE The novel part of ~Monad~
+    CLOSED: [2017-07-04 Tue 02:02]
+    - Conventionally when we use /monads/, we use the bind function, ~>>=~.
+      Sometimes we use it directly, sometimes indirectly via ~do~ syntax.
+
+    - Compare the types between ~fmap~, ~<*>~, and ~>>=~:
+      #+BEGIN_SRC haskell
+        fmap  :: Functor f     =>   (a -> b) -> f a        -> f b
+        (<*>) :: Applicative f => f (a -> b) -> f a        -> f b
+        (>>=) :: Monad f       => f a        -> (a -> f b) -> f b
+
+        -- If we change some types in `fmap` to make it more like (if flip the
+        -- first two parameters) `(>>=)`.
+
+        -- If b == f b
+        fmap :: Functor f => (a -> f b) -> f a -> f (f b)
+        -- This `fmap` (with a specific type of its first parameter) generate a
+        -- result which has one more layer of structure.
+      #+END_SRC
+
+    - The ability to _flatten those TWO layers of structure into one_ is what
+      truly makes ~Monad~ special.
+        By putting the ~join~ function together with the mapping function that we
+      get ~bind~, as known as ~>>=~.
+
     - *The answer is the exercise*
-*** TODO What Monad is not
-*** TODO Monad also lifts!
-** TODO 18.3 Do syntax and /monads/
-*** TODO When fmap alone isn't enough
+      #+BEGIN_SRC haskell
+        -- Write `bind` in terms of `fmap` and `join`.
+        bind :: Monad m => (a -> m b) -> m a -> m b
+        bind f xs = join $ fmap f xs
+      #+END_SRC
+
+*** DONE What ~Monad~ is not
+    CLOSED: [2017-07-04 Tue 02:19]
+    - ~Monad~ is _NOT_:
+      1. Impure. ~IO~ is an abstract datatype that allows for impure, or
+         effectful, actions, and it has a ~Monad~ instance.
+         BUT there's NOTHING impure about /Monads/.
+
+      2. An embedded language for imperative programming.
+         WHILE monads are often used for _sequencing actions_ in a way that
+         looks like imperative programming, there are /commutative monads/ that
+         do NOT order actions. We'll see one a few chapters down the line when we
+         talk about ~Reader~.
+
+      3. A value. A typeclass describes a specific relationship between elements
+         in a domain and defines some operations over them.
+         "a monad", "a monoid", or "a functor", NONE of them are values.
+
+      4. About strictness.
+         + ~bind~ and ~return~ are nonstrict.
+         + Some operations can be made strict within a specific instance.
+           =TODO= =Talk more later!=
+
+    - DON'T try to learn math first and use ~Monad~. It is NOT necessary.
+
+*** DONE ~Monad~ also lifts!
+    CLOSED: [2017-07-04 Tue 03:07]
+    - ~Monad~ typeclass also includes a set of /lift/ functions that are the same
+      as the ones we already saw in ~Applicative~.
+        They don't do anything different, but they are still around
+      BECAUSE some libraries used them _before applicatives were discovered_.
+
+    - Compare the types of /lifts/ from ~Applicative~ and ~Monad~:
+      #+BEGIN_SRC haskell
+        liftA :: Applicative f => (a -> b)  -> f a  -> f b
+        liftM :: Monad m =>       (a -> b) -> m a -> m b
+      #+END_SRC
+      As you may recall, from the point of view of types, they are just
+      _fmap-like_ with a different typeclass constraint.
+
+    - The above /lifts/ are not all we have:
+      + ~liftA2~ and ~liftM2~:
+        #+BEGIN_SRC haskell
+          liftA2 :: Applicative f =>
+                    (a -> b -> c)
+                    -> f a
+                    -> f b
+                    -> f c
+
+          liftM2 :: Monad m =>
+                    (a1 -> a2 -> r)
+                    -> m a1
+                    -> m a2
+                    -> m r
+
+          -- Try them:
+          liftA2 (,) (Just 3) (Just 5)
+          liftM2 (,) (Just 3) (Just 5)
+          -- Just (3,5)
+
+          -- `zipWith` is `liftA2` or `liftM2` specialized to lists --
+          -- same type signature, different behaviors.
+          zipWith (+) [3, 4] [5, 6]
+          -- [8,10]
+
+          liftA2 (+) [3, 4] [5, 6]
+          -- [8,10]
+        #+END_SRC
+
+      + ~liftA2~ and ~liftM2~:
+        #+BEGIN_SRC haskell
+          liftA3 :: Applicative f =>
+                    (a -> b -> c -> d)
+                    -> f a -> f b
+                    -> f c -> f d
+
+          liftM3 :: Monad m =>
+                    (a1 -> a2 -> a3 -> r)
+                    -> m a1 -> m a2
+                    -> m a3 -> m r
+
+          zipWith3 (,,) [1, 2] [3] [5, 6]
+          -- [(1,3,5)]
+
+          liftM3 (,,) [1, 2] [3] [5, 6]
+          -- [(1,3,5),(1,3,6),(2,3,5),(2,3,6)]
+        #+END_SRC
+
+** DONE 18.3 ~do~ syntax and /Monads/
+   CLOSED: [2017-07-04 Tue 05:43]
+   - ~do~ syntax is a syntactic sugar that allowed us to easily _sequence_
+     actions
+     by feeding the result of one action as the input value to the next.
+
+   - Use the ~IO Monad~ to explain the ~do~ syntax in this section, though
+     ~do~ syntax works with any /Monad/.
+
+   - Let's look at some correspondences:
+     #+BEGIN_SRC haskell
+       -- Same thing ,different constraints
+       (*>) :: Applicative f => f a -> f b -> f b
+       (>>) :: Monad m =>       m a -> m b -> m b
+
+       putStrLn "Hello, " >> putStrLn "World!"
+       putStrLn "Hello, " *> putStrLn "World!"
+       -- Hello,
+       -- World!
+     #+END_SRC
+     Not observably different.
+
+   - Manually desugar ~do~ syntax to say what compiler helps us do:
+     #+BEGIN_SRC haskell
+       import Control.Applicative ((*>))
+
+       -- The functions below have the same result.
+       sequencing :: IO ()
+       sequencing = do
+         putStrLn "blah"
+         putStrLn "another thing"
+
+       sequencing' :: IO ()
+       sequencing' =
+         putStrLn "blah" >>
+         putStrLn "another thing"
+
+       sequencing'' :: IO ()
+       sequencing'' =
+         putStrLn "blah" *>
+         putStrLn "another thing"
+     #+END_SRC
+
+   - Do the same with the variable binding that ~do~ syntax includes:
+     #+BEGIN_SRC haskell
+       binding :: IO ()
+       binding = do
+         name <- getLine
+         putStrLn name
+
+       binding' :: IO ()
+       binding' =
+         getLine >>= putStrLn
+     #+END_SRC
+
+*** DONE =RE-READ= When ~fmap~ alone isn't enough
+    CLOSED: [2017-07-04 Tue 05:43]
+    - ~putStrLn <$> getLine~ won't do anything -- it didn't print anything out.
+
+    - Q :: What happened?
+
+    - A :: 
+      + Let's check the type first:
+         #+BEGIN_SRC haskell
+           --   [1]  [2]  [3]
+           h :: IO  (IO   ())
+           h = putStrLn <$> getLine
+
+           -- 1. This outermost `IO` structure represents the effects `getLine`
+           --    must perform to get you a `String` that the user typed in.
+
+           -- 2. This inner `IO` structure represents the effects that would be
+           --    performed if `putStrLn` was evaluated.
+           --    TODO: AM I RIGHT? I'M STILL NOT CLEAR
+           --    From Jian: since `putStrLn` was not performed, we know
+           --               `putStrLn` isn't  evaluated.
+
+           -- 3. The unit, `()`, here is the unit that `putStrLn` returns.
+         #+END_SRC
+
+      + Conclusion: 
+        * For GHCi:
+          https://stackoverflow.com/questions/24549610/fmap-print-value-doesnt-print-anything
+          Also, GHCi has the following rules about interactive evaluation:
+          #+BEGIN_SRC text
+          2.4. Interactive evaluation at the prompt
+
+          When you type an expression at the prompt, GHCi immediately evaluates and
+          prints the result:
+          
+
+
+          2.4.1. I/O actions at the prompt
+          
+          GHCi does more than simple expression evaluation at the prompt. If you
+          type something of type  IO a for some a, then GHCi executes it as an
+          IO-computation.
+          
+          Furthermore, GHCi will print the result of the I/O action if (and only
+          if):
+          
+          + The result type is an instance of Show.
+          + The result type is not ().
+          #+END_SRC
+          _Since ~IO~ a is NOT an instance of ~Show~, it won't print the result of
+          the ~IO~ action._
+
+        * For the code in source file:
+          There will be an error!!!
+          TYPE MISS MATCH -- ~main~ must be a type of ~IO ()~,
+          and ~putStrLn <$> getLine~ has a type ~IO (IO ())~
+
+    - One of the strengths  of Haskell is that we can
+      + refer to,
+      + compose,
+      + map over
+      effectful computations without performing them or bending over backwards
+      to make the pattern work. For a simpler example of how we can wait to
+      evaluate ~IO~ actions (or any computation in general really), consider
+      the following:
+      #+BEGIN_SRC haskell
+        printOne = putStrLn "1"
+        printTwo = putStrLn "2"
+
+        twoActions = (printOne, printTwo)
+        -- Prelude> :t twoActions
+        -- twoActions :: (IO (), IO ())
+
+        fst twoActions
+        -- 1
+
+        snd twoActions
+        -- 2
+
+        fst twoActions
+        -- 1
+      #+END_SRC
+      Note that we are able to evaluate ~IO~ actions multiple times.
+      =TODO= This will be significant later.
+
+    - From the type we know, we can make it work with the help of ~join~:
+      #+BEGIN_SRC haskell
+        import Control.Monad (join)
+        join $ putStrLn <$> getLine
+      #+END_SRC
+      ~join~ megers the effects of ~putStrLn~ and ~getLine~ into a _single_
+      ~IO~ action.
+        The "order" is determined by the nesting of the ~IO~ actions.
+        As it happens, the cleanest way to express “ordering” in a lambda
+      calculus without bolting on something unpleasant is through nesting of
+      expressions or lambdas.
+
+
+    - Some examples with our now-enriched understanding of what monads do for us:
+      #+BEGIN_SRC haskell
+        bindingAndSequencing :: IO ()
+        bindingAndSequencing = do
+          putStrLn "name pls:"
+          name <- getLine
+          putStrLn ("y helo thar: " ++ name)
+
+        bindingAndSequencing' :: IO ()
+        bindingAndSequencing' =
+          putStrLn "name pls:" >>
+          getLine >>=
+          \name -> putStrLn ("y helo thar: " ++ name)
+
+
+
+        -- As the nesting intensifies, you can see how do syntax can make
+        -- things a bit cleaner and easier to read:
+
+        twoBinds :: IO ()
+        twoBinds = do
+          putStrLn "name pls:"
+          name <- getLine
+          putStrLn "age pls:"
+          age <- getLine
+          putStrLn ("y helo thar: "
+                    ++ name ++ " who is: "
+                    ++ age ++ " years old.")
+
+        twoBinds' :: IO ()
+        twoBinds' =
+          putStrLn "name pls:" >>
+          getLine >>=
+          \name ->
+            putStrLn "age pls:" >>
+            getLine >>=
+            \age ->
+              putStrLn ("y helo thar: "
+                        ++ name ++ " who is: "
+                        ++ age ++ " years old.")
+      #+END_SRC
+
 ** TODO 18.4 Examples of ~Monad~ use
-*** TODO List
-**** TODO Specializing the types
-**** TODO Example of the List Monad in use
-*** TODO ~Maybe~
-**** TODO Specializing the types
-**** TODO Using the Maybe Monad
-**** TODO Exploding a spherical cow
-**** TODO Fail fast, like an overfunded startup
+*** DONE List
+    CLOSED: [2017-07-04 Tue 06:57]
+**** DONE Specializing the types
+     CLOSED: [2017-07-04 Tue 06:57]
+**** DONE Example of the List Monad in use
+     CLOSED: [2017-07-04 Tue 06:57]
+     #+BEGIN_SRC haskell
+       twiceWhenEven :: [Integer] -> [Integer]
+       twiceWhenEven xs = do
+         x <- xs
+         if even x
+           then [x*x, x*x]
+           else [x*x]
+
+       twiceWhenEven [1..3]
+       -- [1,4,4,9]
+     #+END_SRC
+*** DONE ~Maybe~
+    CLOSED: [2017-07-04 Tue 20:01]
+**** DONE Specializing the types
+     CLOSED: [2017-07-04 Tue 06:59]
+**** DONE Using the Maybe Monad
+     CLOSED: [2017-07-04 Tue 20:01]
+     #+BEGIN_SRC haskell
+       data Cow = Cow {
+             name :: String
+             , age :: Int
+             , weight :: Int
+          } deriving (Eq, Show)
+
+       noEmpty :: String -> Maybe String
+       noEmpty "" = Nothing
+       noEmpty str = Just str
+
+       noNegative :: Int -> Maybe Int
+       noNegative n | n >= 0 = Just n
+                    | otherwise = Nothing
+
+       weightCheck :: Cow -> Maybe Cow
+       weightCheck c =
+         let w = weight c
+             n = name c
+         in
+           if n == "Bess" && w > 499
+           then Nothing
+           else Just c
+
+       mkSphericalCow :: String -> Int -> Int -> Maybe Cow
+       mkSphericalCow name' age' weight' =
+         case noEmpty name' of
+           Nothing -> Nothing
+           Just nammy ->
+             case noNegative age' of
+               Nothing -> Nothing
+               Just agey ->
+                 case noNegative weight' of
+                   Nothing -> Nothing
+                   Just weighty ->
+                     weightCheck (Cow nammy agey weighty)
+
+       mkSphericalCow "Bess" 5 499
+       -- Just (Cow {name = "Bess", age = 5, weight = 499})
+
+       mkSphericalCow "Bess" 5 500
+       -- Nothing
+     #+END_SRC
+
+**** DONE Exploding a spherical cow
+     CLOSED: [2017-07-04 Tue 20:01]
+     Walk through an example.
+**** DONE Fail fast, like an overfunded startup
+     CLOSED: [2017-07-04 Tue 20:01]
+     Since one branch of ~noEmpty~ is ~Nothing >>= _ = Nothing~ (~noNegative~ has
+     a similary branch), function ~mkSphericalcow~ is good at "Fail fast".NO
+     useless calculation.
+
 *** TODO ~Either~
-**** TODO Specializing the types
+**** DONE Specializing the types
+     CLOSED: [2017-07-04 Tue 20:38]
+     #+BEGIN_SRC haskell
+       -- m ~ Either e
+       (>>=) :: Monad m => m a -> (a ->        m b) ->        m b
+       (>>=) ::     Either e a -> (a -> Either e b) -> Either e b
+
+       -- same as pure
+       return :: Monad m => a ->        m a
+       return ::            a -> Either e a
+     #+END_SRC
 **** TODO Using the Either Monad
+     #+BEGIN_SRC haskell
+       -- years ago
+       type Founded = Int
+       -- number of programmers
+       type Coders = Int
+
+       data SoftwareShop =
+         Shop {
+             founded :: Founded
+           , programmers :: Coders
+         } deriving (Eq, Show)
+
+       data FoundedError =
+           NegativeYears Founded
+         | TooManyYears Founded
+         | NegativeCoders Coders
+         | TooManyCoders Coders
+         | TooManyCodersForYears Founded Coders
+         deriving (Eq, Show)
+
+       validateFounded :: Int -> Either FoundedError Founded
+       validateFounded n
+         | n < 0 = Left $ NegativeYears n
+         | n > 500 = Left $ TooManyYears n
+         | otherwise = Right n
+
+       -- Tho, many programmers *are* negative.
+       validateCoders :: Int -> Either FoundedError Coders
+       validateCoders n
+         | n < 0 = Left $ NegativeCoders n
+         | n > 5000 = Left $ TooManyCoders n
+         | otherwise = Right n
+
+       mkSoftware :: Int -> Int -> Either FoundedError SoftwareShop
+       mkSoftware years coders = do
+         founded <- validateFounded years
+         programmers <- validateCoders coders
+         if programmers > div founded 10
+           then Left $ TooManyCodersForYears founded programmers
+           else Right $ Shop founded programmers
+     #+END_SRC
+
+     Note that ~Either~ always short-circuits on the _first_ thing to have
+     failed. It _MUST_ becuase in the ~Monad~, later values can depend on
+     previous ones:
+     #+BEGIN_SRC haskell
+       -- Test
+       mkSoftware 0 0
+       -- Right (Shop {founded = 0, programmers = 0})
+
+       mkSoftware (-1) 0
+       -- Left (NegativeYears (-1))
+
+       mkSoftware (-1) (-1)
+       -- Left (NegativeYears (-1))
+
+       mkSoftware 0 (-1)
+       -- Left (NegativeCoders (-1))
+
+       mkSoftware 500 0
+       -- Right (Shop {founded = 500, programmers = 0})
+
+       mkSoftware 501 0
+       -- Left (TooManyYears 501)
+
+       mkSoftware 501 501
+       -- Left (TooManyYears 501)
+
+       mkSoftware 100 5001
+       -- Left (TooManyCoders 5001)
+
+       mkSoftware 0 500
+       -- Left (TooManyCodersForYears 0 500)
+     #+END_SRC
+
+     - =TODO= So, there is no Monad for ~Validation~.
+
+       ~Applicative~ and ~Monad~ instances must have the same behavior.
+       This is usually expressed in the form:
+       #+BEGIN_SRC haskell
+         import Control.Monad (ap)
+
+         (<*>) == ap
+       #+END_SRC
+       This is a way of saying the ~Applicative~ apply for a type must NOT change
+       behavior if derived from the ~Monad~ instance's bind operation.
+       #+BEGIN_SRC haskell
+         -- Keeping in mind
+         (<*>) :: Applicative f => f (a -> b) -> f a -> f b
+         ap ::          Monad m => m (a -> b) -> m a -> m b
+
+         -- Then deriving ~Applicative~ (<*>) from the stronger instance:
+         ap :: (Monad m) => m (a -> b) -> m a -> m b
+         ap m m' = do
+           x  <- m
+           x' <- m'
+           return (x x')
+       #+END_SRC
+
+       =TODO=
+       The _PROBLEM_ is 
+       you CANNOT make a ~Monad~ for ~Validation~ that accumulates the errors
+       like the ~Applicative~ does. Instead, any ~Monad~ instance for
+       ~Validation~ would be identical to the ~Either~'s monad instance.
+
 **** TODO Short Exercise: Either Monad
+     Implement the ~Either Monad~ 
+     #+BEGIN_SRC haskell
+       data Sum a b =
+           First a
+         | Second b
+         deriving (Eq, Show)
+
+       instance Functor (Sum a) where
+         fmap _ (First av) = First av
+         fmap f (Second bv) = Second (f bv)
+
+       instance Applicative (Sum a) where
+         pure = Second
+         (First av) <*> _ = First av
+         _ <*> (First av) = First av
+         (Second g) <*> (Second bv) = Second (g bv)
+
+       instance Monad (Sum a) where
+         return = pure
+         (First av) >>= _ = First av
+         (Second bv) >>= f = f bv
+     #+END_SRC
 ** TODO 18.5 ~Monad~ laws
-*** Identity laws
-*** Associativity
-*** We're doing that thing again
-*** Bad Monads and their denizens
+*** DONE Identity laws
+    CLOSED: [2017-07-04 Tue 22:17]
+    Two /Identity laws/:
+    + Right identity
+      ~m >>= return~ is equivalent to ~m~
+
+    + Left identity
+      ~return x >>= f~ is equivalent to ~f x~
+
+    Basically both of these laws are saying that ~return~ should be
+    NEUTRAL and NOT perfrom any computation.
+
+    We'll line them up with the type of ~>>=~ to clarify what's happening:
+    #+BEGIN_SRC haskell
+      (>>=) :: Monad m => m a -> (a -> m b) -> m b
+      --                  [1]       [2]        [3]
+
+      -- First, right identity
+      return :: a -> m a
+          m >>= return    ==   m
+      -- [1]      [2]         [3]
+
+      -- Second, left identity
+      return x >>= f      ==  f x
+      -- [1]      [2]         [3]
+    #+END_SRC
+
+*** TODO Associativity
+    The /associativity/ of ~Monad~ is _NOT so different_ from other laws of
+    /associativity/ we have seen. It DOES look a little bit  different because of
+    the nature of ~>>=~:
+    ~(m >>= f) >>= g~ is equivalent to ~m >>= (\x -> f x >>= g)~
+
+*** TODO We're doing that thing again
+*** TODO Bad Monads and their denizens
 ** TODO 18.6 ~Application~ and composition
 ** TODO 18.7 Chapter Exercises
    - =TODO=
@@ -10675,3 +11845,4 @@
                , age :: Int }
         deriving (Eq, Show)
     #+END_SRC
+
