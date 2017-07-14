@@ -252,7 +252,7 @@
   - [[10.1 Folds][10.1 Folds]]
   - [[10.2 Bringing you into the fold][10.2 Bringing you into the fold]]
   - [[10.3 Recursive patterns][10.3 Recursive patterns]]
-  - [[10.4 Fold right =IMPORTANT= =RE-READ=][10.4 Fold right =IMPORTANT= =RE-READ=]]
+  - [[10.4 [ =RE-READ= ] Fold right][10.4 [ =RE-READ= ] Fold right]]
     - [[How ~foldr~ evaluates][How ~foldr~ evaluates]]
   - [[10.5 Fold left][10.5 Fold left]]
     - [[Associativity and folding][Associativity and folding]]
@@ -293,7 +293,7 @@
     - [[Exercises: Pity the Bool][Exercises: Pity the Bool]]
   - [[11.11 Product types][11.11 Product types]]
     - [[Record syntax][Record syntax]]
-  - [[11.12 Normal form][11.12 Normal form]]
+  - [[11.12 [ =Re-Note= ] Normal form][11.12 [ =Re-Note= ] Normal form]]
     - [[Exercises: How Does Your Garden Grow?][Exercises: How Does Your Garden Grow?]]
   - [[11.13 Constructing and deconstructing values][11.13 Constructing and deconstructing values]]
     - [[Sum and Product][Sum and Product]]
@@ -366,7 +366,7 @@
     - [[Hangman game logic][Hangman game logic]]
     - [[Modifying code][Modifying code]]
   - [[13.15 Follow-up resources][13.15 Follow-up resources]]
-- [[14 Testing  ------- Page 523 ~ 567][14 Testing  ------- Page 523 ~ 567]]
+- [[14 [ =Reading= ] Testing  ------- Page 523 ~ 567][14 [ =Reading= ] Testing  ------- Page 523 ~ 567]]
   - [[14.1 Testing][14.1 Testing]]
   - [[14.2 A quick tour of testing for the uninitated][14.2 A quick tour of testing for the uninitated]]
   - [[14.3 Conventional testing][14.3 Conventional testing]]
@@ -374,20 +374,20 @@
     - [[Our first ~Hspec~ test][Our first ~Hspec~ test]]
     - [[Intermission: Short Exercise][Intermission: Short Exercise]]
   - [[14.4 Enter ~QuickCheck~][14.4 Enter ~QuickCheck~]]
-    - [[Arbitrary instances][Arbitrary instances]]
+    - [[[ =Re-Read= ] Arbitrary instances][[ =Re-Read= ] Arbitrary instances]]
     - [[Using ~QuickCheck~ without ~Hspec~][Using ~QuickCheck~ without ~Hspec~]]
   - [[14.5 Morse code][14.5 Morse code]]
     - [[Turning words into code][Turning words into code]]
     - [[The ~Main~ event][The ~Main~ event]]
-    - [[Make sure it's all working][Make sure it's all working]]
+    - [[[ =SOME-WARNING= ] Make sure it's all working][[ =SOME-WARNING= ] Make sure it's all working]]
     - [[Time to test!][Time to test!]]
     - [[Testing the Morse code][Testing the Morse code]]
   - [[14.6 Kicking around ~QuickCheck~][14.6 Kicking around ~QuickCheck~]]
     - [[Babby's First ~Arbitrary~][Babby's First ~Arbitrary~]]
-    - [[Identity Crisis][Identity Crisis]]
-    - [[Arbitrary Products][Arbitrary Products]]
+    - [[~Identity~ Crisis][~Identity~ Crisis]]
+    - [[~Arbitrary~ Products][~Arbitrary~ Products]]
     - [[Greater than the sum of its parts][Greater than the sum of its parts]]
-    - [[CoArbitrary][CoArbitrary]]
+    - [[~CoArbitrary~][~CoArbitrary~]]
   - [[14.7 Chapter Exercises][14.7 Chapter Exercises]]
     - [[Validating numbers into words][Validating numbers into words]]
     - [[Using QuickCheck][Using QuickCheck]]
@@ -513,7 +513,7 @@
     - [[Combinations][Combinations]]
   - [[17.10 Definitions][17.10 Definitions]]
   - [[17.11 Follow-up resources][17.11 Follow-up resources]]
-- [[18 ~Monad~][18 ~Monad~]]
+- [[18 [ =Reading= ] ~Monad~][18 [ =Reading= ] ~Monad~]]
   - [[18.1 ~Monad~][18.1 ~Monad~]]
   - [[18.2 Sorry -- ~Monad~ is not a burrito][18.2 Sorry -- ~Monad~ is not a burrito]]
     - [[~Applicative m~][~Applicative m~]]
@@ -5254,7 +5254,7 @@
      They have similar base case: it has value of the identity for that funciton:
      ~0~, ~0~, ~1~, and ~[]~
 
-** DONE 10.4 Fold right =IMPORTANT= =RE-READ=
+** DONE 10.4 [ =RE-READ= ] Fold right
    CLOSED: [2017-06-01 Thu 22:02]
    - _Fold right_ means the fold is _right associative_.
      #+BEGIN_SRC haskell
@@ -5262,14 +5262,19 @@
        foldr f z [] = z
        foldr f z (x:xs) = f x (foldr f z xs)
      #+END_SRC
-     Here ~z~ is the _zero_ of our fold, and
+     Here ~z~ is the _zero_ (or nothing, or base) of our fold, and
      it provides
      + a fallback value for the empty list case
        and
      + a second argument to begin our fold with.
 
-*** TODO How ~foldr~ evaluates
+*** DONE How ~foldr~ evaluates
+    CLOSED: [2017-07-08 Sat 01:29]
     - A trick popularized by some helpful users in the Haskell IRC community:
+
+      footnote: Idea borrowed from Cale Gibbard from the haskell Freenode IRC
+      channel and on the Haskell.org wiki https://wiki.haskell.org/Fold#Examples
+
       #+BEGIN_SRC haskell
         -- Prelude> let xs = map show [1..5]
         -- Prelude> :{
@@ -5282,10 +5287,16 @@
 
     - One initially non-obvious aspect of folding is that it happens in two
       stages:
-      + traversal: recurse over the spine.
+      + /traversal/: recurse over the /spine/.
         and
-      + folding: evaluation or reduction of the folding function applied to the
+      + /folding/: evaluation or reduction of the folding function applied to the
         values.
+
+    - All folds recurse over the /spine/ _in the same direction_;
+
+      the _difference_ between /left folds/ and /right folds/ is in the
+      association of the folding function and, thus, which direction the folding
+      or reduction proceeds.
 
     - Look at part of the definition of ~foldr~:
       ~foldr f z (x:xs) = f x (foldr f z xs)~
@@ -5303,11 +5314,12 @@
         myAny f xs =
           foldr (\x b -> f x || b) False xs
 
-        -- Prelude> myany even [1..]
+        myAny even [1..]
         -- True
 
-        -- Prelude> myAny even (repeat 1)
+        myAny even (repeat 1)
         -- -- NEVER-ENDING
+        -- -- reach the bottom
       #+END_SRC
 
     - More examples: =IMPORTANT=
@@ -5347,7 +5359,7 @@
       4. For #4, even if ~u~ is a part of the spine, with ~take~, this part of
          spine won't be visited, and no _Exception_.
 
-    - Sometimes, the spines will be evaluated _unconditionally_, but not the
+    - Sometimes, the /spines/ will be evaluated _unconditionally_, but not the
       values:
       #+BEGIN_SRC haskell
         -- Prelude> length [1, 2, 3, 4, undefined]
@@ -5362,10 +5374,7 @@
         -- 4
       #+END_SRC
 
-    - ~take~ is non-strict like everything else you've seen so far, and in this
-      case, it only returns as much list as you ask for. The difference, in what
-      it does, is that it stops returning elements of the list it was given when
-      it hits the length limit you gave it. Consider this:
+    - ~take~ is non-strict like everything else you've seen so far.
       #+BEGIN_SRC haskell
         -- Prelude> length $ take 2 $ take 4 ([1, 2]++undefined)
         -- 2
@@ -5373,7 +5382,14 @@
       It doesn't matter that ~take 4~ could've hit the /bottom/!
       Nothing forced it to because of the ~take 2~ between it and length.
 
-      =TODO= DETAILS =???=
+      =From Jian=
+      Speak this in another way: ~take 2~ doesn't happen after when
+      ~take 4 ([1, 2]++undefined)~ is done ----
+      the left ~take~ takes the first element when the right ~take~ takes the
+      first element, and the left ~take~ takes the second element when the right
+      ~take~ takes the the second element. Now the left ~take~ has finished its
+      work, then the right ~take~ would also stop doing it planed to do but no
+      longer need to do due to /laziness/.
 
     - Focus on one part of the definition
       ~foldr f z (x:xs) = f x (foldr f z xs)~,
@@ -5421,6 +5437,9 @@
       =IMPORTANT=
 
       #1 throws _Exception_ because ~undefined~ of it is the cons cell itself.
+
+    - =TODO= We will experiment later with /nonstrictness/ and /strictness/ to
+      see how it affects the way our programs evaluate.
 
     - Traversing the rest of the /spine/ _doesn't_ occur
       unless the function asks for the results of having folded the rest of the
@@ -6398,24 +6417,150 @@
         -- "Papu"
       #+END_SRC
 
-** TODO 11.12 Normal form
+** DONE 11.12 [ =Re-Note= ] Normal form
+   CLOSED: [2017-07-08 Sat 03:01]
+   - =TODO= Re-take Notes and send some suggestions to the author.
+
    - The /algebra/ behind Haskell's algebraic datatypes is NOT only related the
      to the /sum types/ and /product types/ to be used to calculate cardinality.
 
      All the existing algebraic rules for /products/ and /sums/ apply in type
      systems, and that includes the /distributive property/.
 
-   - In normal arithmetic, the expression is in normal form when it's been
+   - In normal arithmetic, the expression is in /normal form/ when it's been
      reduced to a final result.
+     2 * (3 + 4)
+     2 * 3 + 2 * 4
+     6 + 8
+     14
+     The 14 here is the /normal form/.
+
+     HOWEVER, if you think of the numerals in the above expression as
+     representations of set cardinality, then the _sum of products expression_
+     _2 * 3 + 2 * 4_ is in /normal form/, as there is no computation to perform.
+     =TODO= =???=
+     =TODO= =???=
+     =TODO= =???=
+     =TODO= =???=
+     =TODO= =???=
+
+     The distributive property can be generalized:
+     a * (b + c)  ->  (a * b) + (a * c)
+
+   - =TODO= PAGE 411  We define two types with only single, ...........
+     It seems this paragraph is used to explain the example below, but I don't
+     understand:
+
+     Example:
+     #+BEGIN_SRC haskell
+       data Fiction = Fiction deriving Show
+       data Nonfiction = Nonfiction deriving Show
+
+       data BookType = FictionBook Fiction
+                     | NonfictionBook Nonfiction
+                     deriving Show
+
+       type AuthorName = String
+
+       -- This `Author` datatype is not in NORMAL FORM
+       data Author = Author (AuthorName, BookType)
+     #+END_SRC
+
+     Below is the /normal form/. Since this definition is imcompatible with the
+     datatype definitions ~Fiction~ and ~Nonfiction~ above, we write it in this
+     separate code section.
+     #+BEGIN_SRC haskell
+       data Author =
+           Fiction AuthorName
+         | Nonfiction AuthorName
+       deriving (Eq, Show)
+     #+END_SRC
+
+     + Q :: Why NOT use ~data BookType = Fiction | Nonfiction~ and DO NOT define
+            the ~Fiction~ type and the ~Nonfiction~ type.
+
+     + A :: You CAN use this way to get a same result, BUT it's actually some
+            confusion in your mind. Let's re-write the above example to show you
+            the confusion in your mind (here suffix ~'~ is used to indicate data
+            constructor, or say non-type):
+            #+BEGIN_SRC haskell
+              data Fiction = Fiction' deriving Show
+              data Nonfiction = Nonfiction' deriving Show
+
+              data BookType = FictionBook Fiction
+                            | NonfictionBook Nonfiction
+                            deriving Show
+            #+END_SRC
+            Then we try to write out the defintion of ~Author~ step by step:
+
+       * Step 0
+         #+BEGIN_SRC haskell
+           type AuthorName = String
+
+           -- STEP 0
+           data Author = Author' (AuthorName, BookType)
+         #+END_SRC
+
+         For factoring out the ~BookType~, we should replace it with the other
+         datatypes. If we use ~BookType = Fiction' | Nonfiction'~ before, we CANNOT
+         do this replacement here -- in this definition ~Fiction'~ and
+         ~Nonfiction'~ are _NOT datatypes_, they are _data constructors_.
+         We CANNOT replace a type with data constructors.
+
+       * Step 1
+         Use the logically reasonable definition of ~BookType~, and then we have
+         #+BEGIN_SRC haskell
+           -- Since we can't re-use data constructor `Author'`, make a tiny
+           -- adjustment
+           data Author =
+               Author' (AuthorName, Fiction)
+             | Author'' (AuthorName, Nonfiction)
+         #+END_SRC
+
+       * Step 2
+         In Step 1, ~Author'~ and ~Author''~ are redundant -- we can distinguish
+         those two cases through the information only inside parentheses.
+         However,
+         ~data Author = (AuthorName, Fiction) | (AuthorName, Nonfiction)~ is
+         illegal. We can choose a equivalent but syntactically legal way to
+         correct this.
+         #+BEGIN_SRC haskell
+           data Author =
+               Fiction' AuthorName
+             | Nonfiction' AuthorName
+           deriving (Eq, Show)
+         #+END_SRC
+         One thing should be noticed is that in this step, datatypes ~Fiction~
+         and ~Nonfiction~ is no longer there, data constructors ~Fiction'~ and
+         ~Nonfiction'~ show up.
 
 *** DONE Exercises: How Does Your Garden Grow?
     CLOSED: [2017-06-09 Fri 02:02]
     #+BEGIN_SRC haskell
+      data FlowerType = Gardenia'
+                      | Daisy'
+                      | Rose'
+                      | Lilac'
+                      deriving Show
+
+      -- This is the final result. This result should be in a separate file, as it
+      -- actually re-defined the data constructors show up in the definition of the
+      -- datatype `FlowerType`.
       data Garden =
-          Gardenia Gardener
-        | Daisy Gardener
-        | Rose Gardener
-        | Lilac Gardener
+          Gardenia' Gardener
+        | Daisy' Gardener
+        | Rose' Gardener
+        | Lilac' Gardener
+        deriving Show
+
+      -- ILLEGAL,
+      -- 1. `Gardener` is a type, NOT a data constructor.
+      -- 2. A data constructor CANNOT be re-used.
+      data Garden =
+          Gardener Gardenia
+        | Gardener Daisy
+        | Gardener Rose
+        | Gardener Lilac
         deriving Show
     #+END_SRC
 
@@ -8231,7 +8376,7 @@
        #+END_SRC
 
 ** TODO 13.15 Follow-up resources
-* TODO 14 Testing  ------- Page 523 ~ 567
+* TODO 14 [ =Reading= ] Testing  ------- Page 523 ~ 567
 ** DONE 14.1 Testing
    CLOSED: [2017-06-17 Sat 04:46]
    - We will
@@ -8261,7 +8406,7 @@
 
    - /unit testing/: test the smallest atomic units of software independently of
      one another.
-     =FROM JIAN= It seems this kind of tests require /referential transparency/.
+     =FROM JIAN= It seems this kind of tests prefer /referential transparency/.
 
    - /spec testing/: a somewhat =???= newer version of /unit testing/.
      =TODO= =???=
@@ -8320,11 +8465,14 @@
      
 ** DONE 14.3 Conventional testing
    CLOSED: [2017-06-27 Tue 02:24]
-   - No deep exlanation for ~Hspec~ here.
+   - Use ~Hspec~ here
+
+   - No deep exlanation for ~Hspec~ in this section.
      =TODO= Some of the concepts ~Hspec~ leans on, such as /functor/,
      /applicative/, and /monad/, are covered later as independent concepts.
 
-   - ~hs-source-dirs: .~ in the =.cabal= file.
+   - ~hs-source-dirs: .~: Make the ~Addition~ module (exposed-modules) in the
+     same directory as our Cabal file.
 
    - Create a small /Cabal/ project (still use /Stack/):
      + Step 1: create a =.cabal= file.
@@ -8421,8 +8569,31 @@
                  | otherwise = go (n - d) d (count + 1)
       #+END_SRC
 
+    - Types:
+      #+BEGIN_SRC haskell
+        hspec :: Spec -> IO ()
+
+        describe :: String -> SpecWith a -> SpecWith a
+
+        Test.Hspec.it :: Example a => String -> a -> SpecWith (Arg a)
+        -- Don't use `:t it` in GHCi, this `it` is created and used by GHCi to save the
+        -- latest calculated value. Its type keep changing accroding to the type of the
+        -- last value.
+      #+END_SRC
+
+    - Compare the types of ~shouldBe~ and ~(==)~:
+      #+BEGIN_SRC haskell
+        shouldBe :: (Eq a, Show a) => a -> a -> Expectation
+
+        -- contrast with
+
+        (==) :: Eq a => a -> a -> Bool
+      #+END_SRC
+      In a sense, ~shouldBe~ is an augmented ~(==)~ embedded in Hspec's model of
+      the universe. It needs the ~Show~ instance in order to render a value.
+
 *** DONE Intermission: Short Exercise
-    CLOSED: [2017-06-27 Tue 02:24]
+    CLOSED: [2017-07-06 Thu 19:39]
     A LOT of warnings from the test part (~main~).
     =TODO= HOW can I get rid of these warnings.
     #+BEGIN_SRC haskell
@@ -8433,10 +8604,8 @@
             (3 `recMult` 4) `shouldBe` 12
           it "7 * 0 is 0" $ do
             (7 `recMult` 0) `shouldBe` 0
-          it "(-7.3) * 2.9 is -21.17" $ do
-            ((-7.3) `recMult` 2.9) `shouldBe` (-21.17)
 
-      recMult :: (Eq a, Ord a, Num a) => a -> a -> a
+      recMult Integer -> Integer -> Integer
       recMult x y
         | (x == 0) || (y == 0) = 0
         | otherwise = go (min xAbs yAbs) 0
@@ -8451,18 +8620,24 @@
             | otherwise = acc + n * m
     #+END_SRC
 
-** TODO 14.4 Enter ~QuickCheck~
+** DONE 14.4 Enter ~QuickCheck~
+   CLOSED: [2017-07-06 Thu 21:24]
    - ~Hspec~ can ONLY prove something about particular values.
 
-     Use ~QuickCheck~ to get assurances that are stronger, something closer to
-     proofs.
+     Use ~QuickCheck~ to get assurances that are
+     + stronger,
+     + something closer to proofs.
 
-   - ~QuickCheck~ provide "property testing".
+   - ~QuickCheck~ was the first library to offer what is today called
+     "property testing".
 
    - First, add =QuickCheck= to our ~build-depends~ in =.cabal=.
      It should already be installed, as ~Hspec~ has ~QuickCheck~ as a dependency.
+     You might need to reinstall it (~stack build~). Then open a new ~stack ghci~
+     session.
 
-   - Add the code snippets below to the ~Addition.hs~ file:
+   - ~Hspec~ has ~QuickCheck~ integration out of the box, so one that is done,
+     add the following to your module:
      #+BEGIN_SRC haskell
        import Test.QuickCheck
 
@@ -8471,11 +8646,17 @@
              property $ \x -> x + 1 > (x :: Int)
      #+END_SRC
      The type assertion here is important. Complier can't work without it.
-     DO THIS IN the ~property~  expression.
+     _DO THIS IN the ~property~  expression_.
+
+     Now you can run the tests.
 
    - The number of tests ~QuickCheck~ runs defaults to 100.
+     Most of the inputs are generated randomly, while some of the inputs of
+     common corner cases will always be tested (For example, if the input should
+     be ~Num a~, ~0~ is always be tested).
 
-*** TODO Arbitrary instances
+*** DONE [ =Re-Read= ] Arbitrary instances
+    CLOSED: [2017-07-06 Thu 21:23]
     - ~QuickCheck~ relies on
       + a typeclass called ~Arbitrary~
         and
@@ -8484,8 +8665,9 @@
     - ~arbitrary~ is a value of type ~Gen~:
       #+BEGIN_SRC haskell
         -- Prelude> :t arbitrary
-        -- arbitrary :: Arbitrary a => Gen a
+        arbitrary :: Arbitrary a => Gen a
       #+END_SRC
+      This is merely a way to set a default generator for a type.
 
     - How do we see a list of values of the correct type for ~QuickCheck~ tests?
       Use
@@ -8524,16 +8706,20 @@
       would be returned (with a warning message).
 
     - Use the ~Arbitrary~ typeclass in order to provide a generator for ~sample~.
+      It isn't a terribly principled typeclass, but it is poplular and useful for
+      this usage.
 
-    - If you try loading an _unspecified_ ~sample arbitrary~ from a source file,
-      though, you will get an affectionate message from /GHC/ about having an
-      ambiguous type.
+      We say it is unprincipled because it has no laws and nothing specific it's
+      supposed to do. It's just a convenient way of plucking a canonical
+      generator for ~Gen~ a out of thin air without having to know where it comes
+      from.
 
-      GHCi has somewhat different rules for default types than GHC does.
+    - Run ~sample arbitrary~ in /GHCi/ you will get a list of empty tuples.
 
-    - =TODO=
-      =A LOT!!!=
-      =RE-READ=
+      Write ~sample arbitrary~ into a source file, and load it in /GHCi/. Then
+      you will get some error messages from /GHC/ about having an ambiguous type.
+
+      /GHCi/ has somewhat different rules for default types than /GHC/ does.
 
     - Specify our own data for generating ~Gen~ values.
       A trivial function that always returns a ~1~ of type ~Int~:
@@ -8542,34 +8728,125 @@
         trivialInt = return 1
       #+END_SRC
 
-      ~return :: Monad m => a -> m a~, and when ~m~ here is ~Gen~,
-      ~return :: a -> Gen a~
-
       #+BEGIN_SRC haskell
         -- Prelude> sample' trivialInt
         -- [1,1,1,1,1,1,1,1,1,1]
       #+END_SRC
 
+    - ~elements :: [a] -> Gen a~
+
     - Another (not that trivial) example:
       #+BEGIN_SRC haskell
+        -- #1  Equal chance
         oneThroughThree :: Gen Int
         oneThroughThree = elements [1, 2, 3]
 
         sample' oneThroughThree
         -- [2,3,3,2,2,1,2,1,1,3,3]
         -- Only from [1, 2, 3], equal chance, random number
+
+        -- #2  Non-equal chance
+        oneThroughThree' :: Gen Int
+        oneThroughThree' = elements [1, 2, 2, 2, 2, 3]
+        -- You can adjust the chance by repeating some elements.
+        sample' oneThroughThree'
       #+END_SRC
 
     - ~choose \colon{}\colon{} System.Random.Random a => (a, a) -> Gen a~
-      and
-      ~elements :: [a] -> Gen a~
 
-    - 
+    - Examples:
+      + Simple ones:
+        #+BEGIN_SRC haskell
+          genBool :: Gen Bool
+          genBool = choose (False, True)
+
+          genBool' :: Gen Bool
+          genBool' = elements [False, True]
+
+          genOrdering :: Gen Ordering
+          genOrdering = elements [LT, EQ, GT]
+
+          genChar :: Gen Char
+          genChar = elements ['a'..'z']
+
+          -- sample genBool
+          -- sample genBool'
+          -- sample genOrdering
+          -- sample genChar
+        #+END_SRC
+
+      + Not that simple ones:
+        #+BEGIN_SRC haskell
+          genTuple :: (Arbitrary a, Arbitrary b) => Gen (a, b)
+          genTuple = do
+            a <- arbitrary
+            b <- arbitrary
+            return (a, b)
+
+          genThreeple :: (Arbitrary a, Arbitrary b, Arbitrary c) => Gen (a, b, c)
+          genThreeple = do
+            a <- arbitrary
+            b <- arbitrary
+            c <- arbitrary
+            return (a, b, c)
+
+          -- Prelude> sample genTuple
+          -- ((),())
+          -- ((),())
+          -- ((),())
+          -- ...
+
+          -- Prelude> sample (genTuple :: Gen (Int, Float))
+          -- (0, 0.0)
+          -- (-1, 0.2516606)
+          -- (3, 0.7800742)
+          -- (5, -61.62875)
+          -- ...
+
+          -- Prelude> sample (genTuple :: Gen ([()], Char))
+          -- ([],'\STX')
+          -- ([()],'X')
+          -- ([],'?')
+          -- ([],'\137')
+          -- ([(),()],'\DC1')
+          -- ([(),()],'z')
+          -- ...
+        #+END_SRC
+
+      + Generate arbitrary ~Maybe~ or ~Either~ values:
+        #+BEGIN_SRC haskell
+          genEither :: (Arbitrary a, Arbitrary b) => Gen (Either a b)
+          genEither = do
+            a <- arbitrary
+            b <- arbitrary
+            elements [Left a, Right b]
+
+
+          -- equal probability
+          genMaybe :: Arbitrary a => Gen (Maybe a)
+          genMaybe = do
+            a <- arbitrary
+            elements [Nothing, Just a]
+
+
+          -- What QuickCheck actually does
+          -- so you get more Just values
+          genMaybe' :: Arbitrary a => Gen (Maybe a)
+          genMaybe' = do
+            a <- arbitrary
+            frequency [ (1, return Nothing)
+                      , (3, return (Just a))]
+
+          -- frequency :: [(Int, Gen a)] -> Gen a
+        #+END_SRC
 
 *** DONE Using ~QuickCheck~ without ~Hspec~
     CLOSED: [2017-06-27 Tue 03:56]
-    - Use ~QuickCheck~ without ~Hspec~, and no longer need to specify ~x~ in our
-      expressions. Re-write our previous example as follows:
+    - Use ~QuickCheck~ without ~Hspec~.
+      Re-write our previous example as follows
+      (In this version, since not as a part of the parameter of ~hspec~, the type
+       is given in the type level, and there is no need to write it in term
+       level):
       #+BEGIN_SRC haskell
         prop_additionGreater :: Int -> Bool
         prop_additionGreater x = x + 1 > x
@@ -8610,19 +8887,320 @@
       ensure that it is always tested (_when appropriate, given the types_, etc
       etc).
 
-** TODO 14.5 Morse code
+** DONE 14.5 Morse code
+   CLOSED: [2017-07-06 Thu 23:15]
+   - ~stack new project-name~ create a new project and use the latest lts.
+     ~stack new project-name --resolver lts-7.24~ use a specific lts.
+
+   - ~Setup.hs~ is there. Its content is:
+     #+BEGIN_SRC haskell
+       import Distribution.Simple
+       main = defaultMain
+     #+END_SRC
+     You _rarely_ need to modify or do anything at all with it.
+     Usually you shouldn't touch it at all.
+
+     However, you should know it's there, and, occasionally, you many need to
+     edit it.
+
+   - Next, get our =.cabal= file configured properly.
+     =See the book (v0.12): page 544=
+
+   - Next, create our source file ~Morse.hs~:
+     This is just the basic setups.
+     #+BEGIN_SRC haskell
+       -- src/Morse.hs
+
+       module Morse
+              ( Morse
+              , charToMorse
+              , morseToChar
+              , stringToMorse
+              , letterToMorse
+              , morseToLetter
+              ) where
+
+       import qualified Data.Map as M
+
+       type Morse = String
+     #+END_SRC
+
    - *Nota bene*
-*** TODO Turning words into code
-*** TODO The ~Main~ event
-*** TODO Make sure it's all working
-*** TODO Time to test!
-*** TODO Testing the Morse code
+     The export setting above is unnecessary if you want to exports all.
+
+     This is good habit that put allow all the things to be exported FIRST, and
+     then remove the some of them when we realize that it's unnecessary to export
+     them as we proceed in development.
+     =For this project, we do in this way.=
+
+*** DONE Turning words into code
+    CLOSED: [2017-07-06 Thu 22:36]
+    - We import ~Data.Map~.
+      The keys of a /Map/ should be orderable (this is, must have an ~Ord~
+      instance).
+
+    - =TODO=
+      _CODE_
+
+*** DONE The ~Main~ event
+    CLOSED: [2017-07-06 Thu 22:36]
+    - Next,
+      set up a ~Main~ module that will actually handle our Morse code conversions.
+      #+BEGIN_SRC haskell
+        -- src/Main.hs
+        module Main where
+
+        import Control.Monad (forever, when)
+        import Data.List (intercalate)
+        import Data.Traversable (traverse)
+        import Morse (stringToMorse, morseToChar)
+        import System.Environment (getArgs)
+        import System.Exit (exitFailure,
+                            exitSuccess)
+        import System.IO (hGetLine, hIsEOF, stdin)
+      #+END_SRC
+
+    - =TODO= _CODE_
+
+*** DONE [ =SOME-WARNING= ] Make sure it's all working
+    CLOSED: [2017-07-06 Thu 23:01]
+    #+BEGIN_SRC bash
+    echo "hi" | stack exec morse to
+    # .... ..
+
+    echo ".... .." | stack exec morse from
+    # hi
+    #+END_SRC
+*** DONE Time to test!
+    CLOSED: [2017-07-06 Thu 23:15]
+    - =TODO=
+      _code_
+*** DONE Testing the Morse code
+    CLOSED: [2017-07-06 Thu 23:15]
+    - Step 1. ~stack build~
+      =Not mentioned in the bookv0.12=
+      Especially you build it before -- you should re-build it now
+
+    - Step 2. ~stack ghci morse:tests~
+
+    - Step 3. When see prompt =*Main>= run ~main~.
+
 ** TODO 14.6 Kicking around ~QuickCheck~
-*** TODO Babby's First ~Arbitrary~
-*** TODO Identity Crisis
-*** TODO Arbitrary Products
-*** TODO Greater than the sum of its parts
-*** TODO CoArbitrary
+   One of the more important parts of ~QuickCheck~ is learning to write instances
+   of the ~Arbitrary~ typeclass for your datatypes.
+
+   It's a somewhat unfortunate but still necessary convenience for your code to
+   integrate cleanly with QuickCheck code. =TODO= =what does this mean?=
+
+   It's initially a bit confusing for beginners because it compacts a few
+   different concepts and solutions to problems into a single typeclass.
+   =TODO=
+
+*** DONE Babby's First ~Arbitrary~
+    CLOSED: [2017-07-07 Fri 23:31]
+    First, a maximally simple ~Arbitrary~ instance for the ~Trival~ datatype.
+    #+BEGIN_SRC haskell
+      module Main where
+
+      import Test.QuickCheck
+
+      data Trival =
+        Trival
+        deriving (Eq, Show)
+
+      trivalGen :: Gen Trivial
+      trivalGen =
+        return Trival
+
+      instance Arbitrary Trivial where
+        arbitrary = trivalGen
+
+
+      main :: IO
+      main = do
+        sample trivalGen
+
+      -- Prelude> sample trivialGen
+      -- Trivial
+      -- Trivial
+      -- Trivial
+      -- Trivial
+      -- Trivial
+      -- Trivial
+      -- Trivial
+      -- Trivial
+      -- Trivial
+      -- Trivial
+    #+END_SRC
+
+*** DONE ~Identity~ Crisis
+    CLOSED: [2017-07-07 Fri 23:38]
+    #+BEGIN_SRC haskell
+      data Identity a =
+        Identity a
+        deriving (Eq, Show)
+
+      identityGen :: Arbitrary a => Gen (Identity a)
+      identityGen = do
+        a <- arbitrary
+        return (Identity a)
+
+      instance Arbitrary a => Arbitrary (Identity a) where
+        arbitrary = identityGen
+
+      identityGenInt :: Gen (Identity Int)
+      identityGenInt = identityGen
+
+      -- Prelude> sample identityGenInt
+      -- Identity 0
+      -- Identity (-1)
+      -- Identity 2
+      -- Identity 4
+      -- Identity (-3)
+      -- Identity 5
+      -- Identity 3
+      -- Identity (-1)
+      -- Identity 12
+      -- Identity 16
+      -- Identity 0
+    #+END_SRC
+
+*** DONE ~Arbitrary~ Products
+    CLOSED: [2017-07-07 Fri 23:46]
+    #+BEGIN_SRC haskell
+      data Pair a b =
+        Pair a b
+        deriving (Eq, Show)
+
+      pairGen :: (Arbitrary a,
+                  Arbitrary b) => Gen (Pair a b)
+      pairGen = do
+        a <- arbitrary
+        b <- arbitrary
+        return (Pair a b)
+
+      instance (Arbitrary a,
+                Arbitrary b) => Arbitrary (Pair a b) where
+        arbitrary = pairGen
+
+      pairGenIntString :: Gen (Pair Int String)
+      pairGenIntString = pairGen
+
+      -- Prelude> sample pairGenIntString
+      -- Pair 0 ""
+      -- Pair (-2) ""
+      -- Pair (-3) "26"
+      -- Pair (-5) "B\NUL\143:\254\S0"
+      -- Pair (-6) "\184*\239\DC4"
+      -- Pair 5 "\238\213=J\NAK!"
+      -- Pair 6 "Pv$y"
+      -- Pair (-10) "G|J^"
+      -- Pair 16 "R"
+      -- Pair (-7) "("
+      -- Pair 19 "i\ETX]\182\ENQ"
+    #+END_SRC
+
+*** DONE Greater than the sum of its parts
+    CLOSED: [2017-07-07 Fri 23:52]
+    #+BEGIN_SRC haskell
+      import Test.QuickCheck.Gen (oneof)
+
+      data Sum a b =
+          First a
+        | Second b
+        deriving (Eq, Show)
+
+      -- equal odds for each
+      sumGenEqual :: (Arbitrary a,
+                      Arbitrary b) => Gen (Sum a b)
+      sumGenEqual = do
+        a <- arbitrary
+        b <- arbitrary
+        -- `oneof` creates a `Gen a` from a list of `Gen a` by giving each value an
+        -- equal probability.
+        oneof [return $ First a,
+               return $ Second b]
+
+      sumGenCharInt :: Gen (Sum Char Int)
+      sumGenCharInt = sumGenEqual
+
+      -- Prelude> sample sumGenCharInt
+      -- First 'p'
+      -- First '\227'
+      -- First '\238'
+      -- First '.'
+      -- Second (-3)
+      -- First '\132'
+      -- Second (-12)
+      -- Second (-12)
+      -- First '\186'
+      -- Second (-11)
+      -- First '\v'
+
+
+      -- Adjust the weight
+      sumGenFirstPls :: (Arbitrary a,
+                         Arbitrary b) => Gen (Sum a b)
+      sumGenFirstPls  = do
+        a <- arbitrary
+        b <- arbitrary
+        frequency [(10, return $ First a),
+                   (1, return $ Second b)]
+
+      sumGenCharIntFirst :: Gen (Sum Char Int)
+      sumGenCharIntFirst = sumGenFirstPls
+
+      -- Prelude> sample sumGenCharIntFirst
+      -- First '\208'
+      -- First '\242'
+      -- First '\159'
+      -- First 'v'
+      -- First '\159'
+      -- First '\232'
+      -- First '3'
+      -- First 'l'
+      -- Second (-16)
+      -- First 'x'
+      -- First 'Y'
+    #+END_SRC
+
+*** TODO ~CoArbitrary~
+    ~CoArbitrary~ is a counterpart to ~Arbitrary~ that enables the generation of
+    functions fitting a particular type.
+
+    Rather than talking about random values you can get via ~Gen~, it lets you
+    provide functions with a value of type ~a~ as an argument in order to _vary_
+    a ~Gen~.
+    #+BEGIN_SRC haskell
+      arbitrary :: Arbitrary a => Gen a
+
+      coarbitrary :: CoArbitrary a =>
+                     a -> Gen b -> Gen b
+    #+END_SRC
+
+    #+BEGIN_SRC haskell
+      {-# LANGUAGE DeriveGeneric #-}
+
+      module CoArbitrary where
+
+      import GHC.Generics
+      import Test.QuickCheck
+
+      data Bool' =
+          True'
+        | False'
+        deriving (Generic)
+
+      instance CoArbitrary Bool'
+
+      -- plus the above
+
+      trueGen :: Gen Int
+      trueGen = coarbitrary True' arbitrary
+
+      falseGen :: Gen Int
+      falseGen = coarbitrary False' arbitrary
+    #+END_SRC
 ** TODO 14.7 Chapter Exercises
 *** TODO Validating numbers into words
 *** TODO Using QuickCheck
@@ -8631,12 +9209,26 @@
 *** TODO Make a Gen random generator for the datatype
 *** TODO Hangman testing
 *** TODO Validating ciphers
-** TODO 14.8 Definitions
-   1. /Unit testing/
+** DONE 14.8 Definitions
+   CLOSED: [2017-07-06 Thu 23:22]
+   1. /Unit testing/: Test the smallest parts of an application possible.
 
-   2. /Property testing/
+   2. /Property testing/: a subset of a large input space is validated, usually
+      against a property or law some code should abide by.
 
-   3. /idempotence/ =???=
+      In Haskell, this is usually done with ~QuickCheck~.
+
+      Common properties that are checked using property testing are things like
+      (=From Jian= You will see later that these properties are often possesed
+       by some typeclass. Thus, property testing is very useful for testing
+       instances of some typeclasses):
+      + identity
+      + associativity
+      + isomorphism
+      + idempotence
+
+   3. /idempotence/: We call an operation _, if apply it multiple times doesn't
+      produce a different result from the first time.
 
 ** TODO 14.9 Follow-up resources
    1. 
@@ -10718,7 +11310,7 @@
    CLOSED: [2017-07-02 Sun 03:22]
    1. ~Applicative~: ...
 ** TODO 17.11 Follow-up resources
-* TODO 18 ~Monad~
+* TODO 18 [ =Reading= ] ~Monad~
 ** DONE 18.1 ~Monad~
    CLOSED: [2017-07-03 Mon 22:35]
    - /Monads/ are NOT, strictly speaking, necessary to Haskell.
@@ -11803,6 +12395,11 @@
    4. 
    5. 
 * Tips
+  - =Note=:
+      _All_ of your _imports_ must occur
+    + _after_ the module has been declared
+      and
+    + _before_ any expressions have been defined in your module.
   - /monomorphism/ =TODO= ??? chapter 5
 
   - How to read GHC(i) error messages???
