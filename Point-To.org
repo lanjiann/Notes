@@ -14,8 +14,84 @@
 - [[7. CONCLUSION AND FUTURE WORK][7. CONCLUSION AND FUTURE WORK]]
 - [[8. REFERENCES][8. REFERENCES]]
 
-* ABSTRACT
+* ABSTRACT  
+  - We present a framework which
+    + generalizes popular points-to algorithms
+      and
+    + generates set constraints from full Java bytecode.
+      
+  - The framework exploits previously computed points-to sets in a fixpoint
+    iteration for precise resolution of dynamic binding.
+
+  - We then compare implementations of this framework for the analysis of
+    + /unification-based/
+      and
+    + /subset-based/
+
+    _Conclusion_ (in contrast to the C situation):
+    Both approaches have about the same running time, while the /subset-based/
+    algorithm is still more precise.
+
+  - The /unification-based/ method is slowed down because its inherent
+    imprecision accumulates during fixpoint iteration.
+
 * 1. INTRODUCTION
+  - /Points-to analysis/ :: A static analysis which computes for every pointer
+       a set of objects it may point to at runtime.
+
+  - For imperative languages such as C, there are many algorithms:
+    + Andersen's [2]
+    + Steensgaard's [22] (fastest [14])
+    + Das' [7]
+
+  - =TODO= =???=
+    For oo language, /dynamic binding/ can be analysed similar to function
+    pointers in C [13].
+
+  - 
+    #+BEGIN_SRC java
+      class MyException {
+          Object u;
+          MyException(Object t) {u = t;}
+      }
+
+
+      class A {
+          A f(A g) {return g;}
+      }
+
+
+      class B extends A {
+          A f(A g) {throw new MyException(g);}
+      }
+
+
+      class C extends A {
+          A f(A g) {return this;}
+      }
+
+      // ...
+
+      A a = new A(), p = null, q, r, s;
+      B b = new B();
+      C c = new C();
+
+      if (...)
+          a = b;
+
+      try {
+          p = a.f(c);
+      } catch(MyException e) {
+          q = e.u;
+      }
+
+      try {
+          r = p.f(a);
+      } catch(MyException f) {
+          s = f.u;
+      }
+    #+END_SRC
+
 * 2. POINTS-TO FOR JAVA
 * 3. GENERATING CONSTRAINTS FROM JAVA BYTECODE
 * 4. WHOLE-PROGRAM-ANALYSIS, NATIVE CODE AND REFLECTION

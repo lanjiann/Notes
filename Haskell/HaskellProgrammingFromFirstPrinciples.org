@@ -272,7 +272,7 @@
     - [[Rewriting functions using folds][Rewriting functions using folds]]
   - [[10.11 Definitions][10.11 Definitions]]
   - [[10.12 Follow-up resources][10.12 Follow-up resources]]
-- [[11 Algebraic datatypes  ------- Page 381-452][11 Algebraic datatypes  ------- Page 381-452]]
+- [[11 Algebraic datatypes][11 Algebraic datatypes]]
   - [[11.1 Algebraic datatypes][11.1 Algebraic datatypes]]
   - [[11.2 Data declarations review][11.2 Data declarations review]]
   - [[11.3 Data and type constructors][11.3 Data and type constructors]]
@@ -314,7 +314,7 @@
     - [[Write foldr for BinaryTree][Write foldr for BinaryTree]]
   - [[11.18 Chapter Exercises][11.18 Chapter Exercises]]
     - [[Multiple choice][Multiple choice]]
-    - [[Ciphers][Ciphers]]
+    - [[[TODO: NOT Perfect] Ciphers][[TODO: NOT Perfect] Ciphers]]
     - [[As-patterns][As-patterns]]
     - [[Language exercises][Language exercises]]
     - [[Phone exercise][Phone exercise]]
@@ -339,7 +339,7 @@
     - [[Write your own iterate and unfoldr][Write your own iterate and unfoldr]]
     - [[Finally something other than a list!][Finally something other than a list!]]
   - [[12.6 Definitions][12.6 Definitions]]
-- [[13 Building projects  ------- Page 480 ~ 522][13 Building projects  ------- Page 480 ~ 522]]
+- [[13 Building projects][13 Building projects]]
   - [[13.1 Modules][13.1 Modules]]
   - [[13.2 Making packages with /Stack/][13.2 Making packages with /Stack/]]
   - [[13.3 Working with a basic project][13.3 Working with a basic project]]
@@ -374,7 +374,7 @@
     - [[Our first ~Hspec~ test][Our first ~Hspec~ test]]
     - [[Intermission: Short Exercise][Intermission: Short Exercise]]
   - [[14.4 Enter ~QuickCheck~][14.4 Enter ~QuickCheck~]]
-    - [[[ =Re-Read= ] Arbitrary instances][[ =Re-Read= ] Arbitrary instances]]
+    - [[Arbitrary instances][Arbitrary instances]]
     - [[Using ~QuickCheck~ without ~Hspec~][Using ~QuickCheck~ without ~Hspec~]]
   - [[14.5 Morse code][14.5 Morse code]]
     - [[Turning words into code][Turning words into code]]
@@ -387,10 +387,10 @@
     - [[~Identity~ Crisis][~Identity~ Crisis]]
     - [[~Arbitrary~ Products][~Arbitrary~ Products]]
     - [[Greater than the sum of its parts][Greater than the sum of its parts]]
-    - [[~CoArbitrary~][~CoArbitrary~]]
+    - [[[ =Re-Read= ] ~CoArbitrary~][[ =Re-Read= ] ~CoArbitrary~]]
   - [[14.7 Chapter Exercises][14.7 Chapter Exercises]]
     - [[Validating numbers into words][Validating numbers into words]]
-    - [[Using QuickCheck][Using QuickCheck]]
+    - [[Using ~QuickCheck~][Using ~QuickCheck~]]
     - [[Failure][Failure]]
     - [[Idempotence][Idempotence]]
     - [[Make a Gen random generator for the datatype][Make a Gen random generator for the datatype]]
@@ -5849,7 +5849,8 @@
    2. 
    3. 
    4. 
-* TODO 11 Algebraic datatypes  ------- Page 381-452
+* DONE 11 Algebraic datatypes
+  CLOSED: [2017-07-21 Fri 22:41]
 ** DONE 11.1 Algebraic datatypes
    CLOSED: [2017-06-05 Mon 13:40]
    - A type can be thought of as an enumeration of constructors that have zero or
@@ -6920,14 +6921,16 @@
 
     6. 65536
        (4 ^ 4) ^ 2
-** TODO 11.15 Higher-kinded datatypes
-   - /Kinds/ are the types of type constructors, primarily encoding the number of
-     arguments they take.
+** DONE 11.15 Higher-kinded datatypes
+   CLOSED: [2017-07-20 Thu 18:35]
+   - /kinds/ :: the types of type constructors, primarily encoding the number of
+                arguments they take.
 
-   - /Kind signatures/ work like type signatures, using the same ~::~ and ~->~
+   - /kind signatures/ work like /type signatures/, using the same ~::~ and ~->~
      syntax, but there are only a few kinds and you'll most often see ~*~.
 
-   - /Kinds/ are NOT types UNTIL they are fully applied.
+   - /kinds/ are NOT types UNTIL they are fully applied.
+     ONLY types have inhabitants at the term level.
 
    - ONLY types have inhabitants at the term level.
 
@@ -7021,14 +7024,16 @@
       -- -- 210
     #+END_SRC
 
-** TODO 11.18 Chapter Exercises
+** DONE 11.18 Chapter Exercises
+   CLOSED: [2017-07-21 Fri 22:41]
 *** DONE Multiple choice
     CLOSED: [2017-06-12 Mon 00:38]
     1. a)
     2. c)
     3. b)
     4. c)
-*** TODO Ciphers
+*** DONE [TODO: NOT Perfect] Ciphers
+    CLOSED: [2017-07-20 Thu 21:15]
     #+BEGIN_SRC haskell
       -- vigenère
       -- MEET AT DAWN
@@ -7065,12 +7070,12 @@
       import Data.Char
 
       -- 1
-      isSubsequenceOf :: (Eq a) => [a] -> [a] -> Bool
-      isSubsequenceOf [] _ = True
-      isSubsequenceOf _ [] = False
-      isSubsequenceOf xs'@(x:xs) (y:ys)
-        | x == y = isSubsequenceOf xs ys
-        | otherwise = isSubsequenceOf xs' ys
+      isSubsequenceOf' :: (Eq a) => [a] -> [a] -> Bool
+      isSubsequenceOf' [] _ = True
+      isSubsequenceOf' _ [] = False
+      isSubsequenceOf' xs'@(x:xs) (y:ys)
+        | x == y = isSubsequenceOf' xs ys
+        | otherwise = isSubsequenceOf' xs' ys
 
       -- 2
       capitalizeWords :: String -> [(String, String)]
@@ -7080,10 +7085,13 @@
               withCapitalized xs'@(x:xs) = (xs', toUpper x : xs)
     #+END_SRC
 
-*** TODO Language exercises
-    =TODO=
+*** DONE Language exercises
+    CLOSED: [2017-07-21 Fri 22:35]
     #+BEGIN_SRC haskell
       import Data.Char
+      -- Non-official
+      import Data.List.Split
+      import Data.List.Extra hiding (split)
 
       -- Language exercises
       -- 1
@@ -7091,27 +7099,39 @@
       capitalizeWord "" = ""
       capitalizeWord (x:xs) = toUpper x : xs
 
-      -- 2 TODO: UGLY
+      -- 2
       capitalizeParagraph :: String -> String
-      capitalizeParagraph p = concat $ intersperse " " (map capitalizeWord $ sentences p)
-        where
-          sentences :: String -> [String]
-          sentences "" = []
-          sentences ss =
-            let
-              (firstSent, leftSents) = span (/= '.') ss
-            in
-              (firstSent ++ ".") : (sentences $ dropWhile (not . isLetter) leftSents)
+      capitalizeParagraph = concat . (intersperse " ") . (map (capitalizeWord . trimStart)) . (split (endsWith "."))
+
+
     #+END_SRC
-*** TODO Phone exercise
+*** DONE Phone exercise
+    CLOSED: [2017-07-21 Fri 22:35]
     1. 
     2. 
     3. 
     4. 
     5. 
-*** TODO Hutton's Razor
-    1. 
-    2. 
+*** DONE Hutton's Razor
+    CLOSED: [2017-07-21 Fri 22:41]
+    #+BEGIN_SRC haskell
+      -- 1.
+      data Expr
+        = Lit Integer
+        | Add Expr Expr
+
+      eval :: Expr -> Integrer
+      eval (Lit i) = i
+      eval (Add e1 e2) = (eval e1) + (eval e2)
+
+
+      -- 2.
+      printExpr :: Expr -> Integer
+      printExpr (Lit i) = show i
+      printExpr (Add e1 e2) = printExpr e1 ++ " + " ++  printExpr e2
+
+    #+END_SRC
+
 ** DONE 11.19 Definitions
    CLOSED: [2017-05-26 Fri 01:51]
    1. /datatype/: A (Haskell) datatype is made up of
@@ -7594,44 +7614,59 @@
       This is not to be confused with /higher kinded polymorphism/, which we'll
       discuss later.
 
-* TODO 13 Building projects  ------- Page 480 ~ 522
+* DONE 13 Building projects
+  CLOSED: [2017-07-28 Fri 20:37]
+  _Page 480 ~ 522_
 ** DONE 13.1 Modules
    CLOSED: [2017-06-15 Thu 14:49]
-   - We need _Cabal_, _Stack_, and _Git_ in this chapter.
+   - This chapter's primary focus is
+     + NOT so much on code
+     + but on how to set up a project in Haskell,
+       * use the package manager _Cabal_,
+       * build the project with _Stack_, and work with modules as they are in Haskell.
 
    - In this chapter, we'll cover:
      + writing Haskell programs with modules;
      + using the Cabal package manager;
      + building our project with Stack;
-     + conventions around Haskell project organization;
+     + conventions around Haskell project organization; =TODO=
      + building a small interactive game.
 
 ** DONE 13.2 Making packages with /Stack/
-   CLOSED: [2017-06-24 Sat 21:04]
-   - /Cabal (*C* ommon *A* rchitecture for *B* uilding *A* pplications and
-     *L* ibraries)/:
+   CLOSED: [2017-07-22 Sat 23:34]
+   - /Cabal (*C* ommon *A* rchitecture for *B* uilding *A* pplications and *L* ibraries)/ ::
      A package manager for Haskell.
 
-   - /package/: A _ is a program, including all of its modules and dependencies.
+   - /package/ :: A /package/ is a program, including all of its modules and
+                  dependencies.
 
-   - A /package/ has /dependencies/ which are the interlinked elements of that
-     program, the other packages and libraries it may depend on and any test and
-     documentation associated with the project.
+   - /package dependencies/ :: it includes
+     + the interlinked elements of that program,
+     + the other packages and libraries it may depend on and
+     + any test and documentation associated with the project.
 
-   - /Stack/: A project manager program. It helps you manage both projects
+   - /Stack/ :: A project manager program.
+                It helps you manage both projects
      + made up of multiple packages
        as well as
-     + individual package (It seems /Cabal/ can do a good job for this).
+     + individual package
+
+   - /Cabal/ exists primarily to describe a single package with a =.cabal= file.
 
    - /Stack/ is built on top of /Cabal/ in some important senses, so we will
      _still_ be working with =.cabal= files.
      HOWEVER, /Stack/ _simplifies_ the process somewhat, especially in large
      projects with multiple dependencies, by allowing you to build those large
-     libraries only once and use the across projects.
+     libraries only once and use the across projects. =TODO= =???=
 
-   - /Stack/ also relies on an LTS snapshot of Haskell packages from /Stackage/
-     that are guaranteed to work together, unlike packages from /Hackage/ which
-     may have conflicting dependencies.
+   - /Stackage/ :: An online Haskell packages source, which maintains many LTS
+                   snapshots.
+
+                   With in one LTS snapshots, packages are guaranteed to work
+                   together. When you use /stack/, it guarantees the packages
+                   it help you to download are from one specified LTS snapshot.
+
+   - Packages from /Hackage/ may have conflicting dependencies.
 
    - The Haskell community does _NOT_ have a prescribed project layout,
 
@@ -7645,17 +7680,17 @@
 
 *** DONE Building the project
     CLOSED: [2017-06-24 Sat 21:53]
-    1. ~git clone https://github.com/haskellbook/hello~ the repository given
-       above.
+    1. ~cd hello~ 
 
     2. ~stack setup~:
-       + Install the version of GHC LTS snapshot specified in the =stack.yaml=
-         (If there is a cached version which satisfies the requirement, it will
-          be used).
+       + Install the version of GHC LTS snapshot specified in the =stack.yaml=.
 
-       + Set up the other requirement of this project .
+         If there is a cached version which satisfies the requirement, it will be
+         used.
 
-    3. ~stack build~: build the project
+       + Set up the other requirement of this project. =TODO= =???=
+
+    3. ~stack build~
 
 *** DONE Loading and running code from the REPL
     CLOSED: [2017-06-24 Sat 22:09]
@@ -7748,7 +7783,7 @@
          =TODO= We'll show you how to add and install dependencies later.
 
     - *A sidebar about executables and libraries*
-      + The .cabal file above only has an ~executable~ stanza.
+      + The =.cabal= file above only has an ~executable~ stanza.
 
       + If you write a library, you need a ~library~ stanza
         and
@@ -7854,6 +7889,7 @@
 ** DONE 13.6 More on importing modules
    CLOSED: [2017-06-16 Fri 23:34]
    - Use a pragma (or language extension) when start GHCi to turn ~Prelude~ off:
+     =IMPORTANT=
      #+BEGIN_SRC haskell
        -- In shell run:
        -- stack ghci --ghci-options -XNoImplicitPrelude
@@ -7930,7 +7966,7 @@
    - The result of binding (~<-~ in ~do~) over the ~IO String~ is ~String~.
 
    - *What if we tried to pass getLine to sayHello?*
-     =TODO= Explaned in detail later.
+     Type error
 
 *** DONE Adding a prompt
     CLOSED: [2017-06-17 Sat 00:02]
@@ -7949,27 +7985,36 @@
         sayHello name
         dogs
     #+END_SRC
-    Make sure ~putStr~ isn't buffered and prints immediately, or you may not see
-    ~"Please input your name: "~ line.
+    ~hSetBuffering stdout NoBuffering~ guarantees ~putStr~ isn't buffered and
+    prints immediately.
 
 ** DONE 13.8 ~do~ syntax and ~IO~
    CLOSED: [2017-06-17 Sat 00:17]
    - The ~main~ executable in a Haskell program _MUST ALWAYS_ have the type
      ~IO ()~.
 
+     =TODO= =toAuthor=
+     According to this, code example in page 500 is wrong -- ~return (x1 ++ x2)~
+     shouldn't be the last expression of the do block of ~main~.
+
    - The ~do~ syntax specifically allows us to _sequence_ /monadic actions/.
 
    - Here, the instance of typeclass ~Monad~ we care about is ~IO~.
 
-   - =TODO= ~return~ in ~do~.
+   - ~<-~ is used to bind a variable, and it is part of the ~do~ sugar.
 
-*** TODO ~return~
+*** DONE ~return~
+    CLOSED: [2017-07-25 Tue 19:17]
     - ~return :: Monad m => a -> m a~ doesn't do much but return a value.
       However, it returns a value inside /monadic structure/.
 
     - *Do notation considered harmful!*
+      _Just kidding._ But sometimes enthusiastic programmers _overuse_ do blocks.
 
-    -  use ~>>=~ in single-line expressions instead of ~do~.
+      + Functions like ~putStrLn~ already have right types.
+
+      + Sometimes, you can use ~>>=~ to combine some expressions into a
+        single-line expression, and avoid to use ~do~ syntax.
 
 ** DONE 13.9 Hangman game
    CLOSED: [2017-06-17 Sat 00:27]
@@ -8284,12 +8329,13 @@
        return $ wl !! randomIndex
    #+END_SRC
    
-** TODO 13.14 Chapter exercises
-*** TODO Hangman game logic
-    - x
+** DONE 13.14 Chapter exercises
+   CLOSED: [2017-07-28 Fri 20:35]
+*** DONE Hangman game logic
+    CLOSED: [2017-07-28 Fri 20:34]
 *** DONE Modifying code
     CLOSED: [2017-06-25 Sun 22:36]
-    1. 
+    1. =TODO=
        #+BEGIN_SRC haskell
          import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 
@@ -8468,8 +8514,6 @@
    - Use ~Hspec~ here
 
    - No deep exlanation for ~Hspec~ in this section.
-     =TODO= Some of the concepts ~Hspec~ leans on, such as /functor/,
-     /applicative/, and /monad/, are covered later as independent concepts.
 
    - ~hs-source-dirs: .~: Make the ~Addition~ module (exposed-modules) in the
      same directory as our Cabal file.
@@ -8650,12 +8694,12 @@
 
      Now you can run the tests.
 
-   - The number of tests ~QuickCheck~ runs defaults to 100.
+   - The number of tests ~QuickCheck~ runs defaults to _100_.
      Most of the inputs are generated randomly, while some of the inputs of
      common corner cases will always be tested (For example, if the input should
      be ~Num a~, ~0~ is always be tested).
 
-*** DONE [ =Re-Read= ] Arbitrary instances
+*** DONE Arbitrary instances
     CLOSED: [2017-07-06 Thu 21:23]
     - ~QuickCheck~ relies on
       + a typeclass called ~Arbitrary~
@@ -8733,7 +8777,7 @@
         -- [1,1,1,1,1,1,1,1,1,1]
       #+END_SRC
 
-    - ~elements :: [a] -> Gen a~
+    - ~elements \colon{}\colon{} [a] -> Gen a~
 
     - Another (not that trivial) example:
       #+BEGIN_SRC haskell
@@ -8840,6 +8884,8 @@
           -- frequency :: [(Int, Gen a)] -> Gen a
         #+END_SRC
 
+        * ~frequency~
+
 *** DONE Using ~QuickCheck~ without ~Hspec~
     CLOSED: [2017-06-27 Tue 03:56]
     - Use ~QuickCheck~ without ~Hspec~.
@@ -8854,7 +8900,7 @@
         runQc :: IO ()
         runQc = quickCheck prop_additionGreater
       #+END_SRC
-      =TODO= For now, we don’t need to worry about how runQc does its work. 
+      =TODO= For now, we DON'T need to worry about how ~runQc~ does its work. 
 
       #+BEGIN_SRC haskell
         -- Prelude> runQc
@@ -8940,7 +8986,68 @@
       instance).
 
     - =TODO=
-      _CODE_
+      #+BEGIN_SRC haskell
+        letterToMorse :: (M.Map Char Morse)
+        letterToMorse = M.fromList [
+              ('a', ".-")
+            , ('b', "-...")
+            , ('c', "-.-.")
+            , ('d', "-..")
+            , ('e', ".")
+
+            , ('f', "..-.")
+            , ('g', "--.")
+            , ('h', "....")
+            , ('i', "..")
+            , ('j', ".---")
+            , ('k', "-.-")
+
+            , ('l', ".-..")
+            , ('m', "--")
+            , ('n', "-.")
+            , ('o', "---")
+            , ('p', ".--.")
+            , ('q', "--.-")
+
+            , ('r', ".-.")
+            , ('s', "...")
+            , ('t', "-")
+            , ('u', "..-")
+            , ('v', "...-")
+            , ('w', ".--")
+
+            , ('x', "-..-")
+            , ('y', "-.--")
+            , ('z', "--..")
+            , ('1', ".----")
+            , ('2', "..---")
+            , ('3', "...--")
+            , ('4', "....-")
+            , ('5', ".....")
+            , ('6', "-....")
+            , ('7', "--...")
+            , ('8', "---..")
+            , ('9', "----.")
+            , ('0', "-----")
+            ]
+
+        morseToLetter :: M.Map Morse Char
+        morseToLetter =
+          M.foldWithKey (flip M.insert) M.empty
+                        letterToMorse
+
+        charToMorse :: Char -> Maybe Morse
+        charToMorse c =
+          M.lookup c letterToMorse
+
+        stringToMorse :: String -> Maybe [Morse]
+        stringToMorse s =
+          sequence $ fmap charToMorse s
+
+        morseToChar :: Morse -> Maybe Char
+        morseToChar m =
+          M.lookup m morseToLetter
+      #+END_SRC
 
 *** DONE The ~Main~ event
     CLOSED: [2017-07-06 Thu 22:36]
@@ -8971,10 +9078,45 @@
     echo ".... .." | stack exec morse from
     # hi
     #+END_SRC
+
+    - Use ~stack exec which morse~ to find the =morse= excutable.
+
+    - You can use ~stack install~ to copy the binaries from your project into a
+      common directory (=.local/bin= on Mac and Linux).
+
 *** DONE Time to test!
     CLOSED: [2017-07-06 Thu 23:15]
-    - =TODO=
-      _code_
+    #+BEGIN_SRC haskell
+      -- tests/tests.hs
+
+      module Main where
+
+      import qualified Data.Map as M
+      import Morse
+      import Test.QuickCheck
+
+      allowedChars :: [Char]
+      allowedChars = M.keys letterToMorse
+
+      allowedMorse :: [Morse]
+      allowedMorse = M.elems letterToMorse
+
+      charGen :: Gen Char
+      charGen = elements allowedChars
+
+      morseGen :: Gen Morse
+      morseGen = elements allowedMorse
+
+      prop_thereAndBackAgain :: Property
+      prop_thereAndBackAgain =
+        forAll charGen
+        (\c -> ((charToMorse c)
+          >>= morseToChar) == Just c)
+
+      main :: IO ()
+      main = quickCheck prop_thereAndBackAgain
+    #+END_SRC
+
 *** DONE Testing the Morse code
     CLOSED: [2017-07-06 Thu 23:15]
     - Step 1. ~stack build~
@@ -8985,7 +9127,8 @@
 
     - Step 3. When see prompt =*Main>= run ~main~.
 
-** TODO 14.6 Kicking around ~QuickCheck~
+** DONE 14.6 Kicking around ~QuickCheck~
+   CLOSED: [2017-07-29 Sat 06:03]
    One of the more important parts of ~QuickCheck~ is learning to write instances
    of the ~Arbitrary~ typeclass for your datatypes.
 
@@ -9164,7 +9307,8 @@
       -- First 'Y'
     #+END_SRC
 
-*** TODO ~CoArbitrary~
+*** DONE [ =Re-Read= ] ~CoArbitrary~
+    CLOSED: [2017-07-29 Sat 06:02]
     ~CoArbitrary~ is a counterpart to ~Arbitrary~ that enables the generation of
     functions fitting a particular type.
 
@@ -9202,10 +9346,17 @@
       falseGen = coarbitrary False' arbitrary
     #+END_SRC
 ** TODO 14.7 Chapter Exercises
-*** TODO Validating numbers into words
-*** TODO Using QuickCheck
-*** TODO Failure
-*** TODO Idempotence
+*** DONE Validating numbers into words
+    CLOSED: [2017-07-29 Sat 06:24]
+    1. ~digitToWord 1 `shouldBe` "one"~
+    2. ~digits 100 `shouldBe` [1, 0, 0]~
+    3. ~wordNumber 9001 `shouldBe` "nine-zero-zero-one"~
+
+*** TODO Using ~QuickCheck~
+*** DONE Failure
+    CLOSED: [2017-07-31 Mon 00:19]
+*** DONE Idempotence
+    CLOSED: [2017-07-31 Mon 00:50]
 *** TODO Make a Gen random generator for the datatype
 *** TODO Hangman testing
 *** TODO Validating ciphers

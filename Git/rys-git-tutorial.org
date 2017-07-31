@@ -183,10 +183,11 @@
   - [[Quick Reference][Quick Reference]]
 
 * TODO Introduction
-** A Brief History of Revision Control
-** The Birth of Git
-** Installation
-** Get Ready!
+** TODO A Brief History of Revision Control
+** TODO The Birth of Git
+** DONE Installation
+   CLOSED: [2017-07-16 Sun 02:57]
+** TODO Get Ready!
 * DONE The Basics
   CLOSED: [2017-07-09 Sun 05:10]
   - /working directory/
@@ -1765,40 +1766,355 @@
    - ~git remote rm <remote-name>~
      Remove the specified remote from your bookmarked connections.
 
-* TODO Distributed Workflows
-** TODO Create a Bitbucket Account
-** TODO Create a Public Repository (You)
-** TODO Push to the Public Repository (You)
-** TODO Browse the Public Repository (You)
-** TODO Clone the Repository (John)
-** TODO Add the Pink Page (John)
-** TODO Publish the Pink Page (John)
-** TODO View John's Contributions (You)
-** TODO Integrate John's Contributions (You)
-** TODO Publish John's Contributions (You)
-** TODO Update Mary's Repository (Mary)
-** TODO Update John's Repository (John)
-** TODO Conclusion
-* TODO Patch Workflows
-** TODO Change the Pink Page (Mary)
-** TODO Create a Patch (Mary)
-** TODO Add a Pink Block (Mary)
-** TODO Create Patch of Entire Branch (Mary)
-** TODO Mail the Patches (Mary)
-** TODO Apply the Patches (You)
-** TODO Integrate the Patches (You)
-** TODO Update Mary's Repository (Mary)
-** TODO Conclusion
-** TODO Quick Reference
+* DONE Distributed Workflows
+  CLOSED: [2017-07-16 Sun 02:51]
+** DONE Create a Bitbucket Account
+   CLOSED: [2017-07-16 Sun 01:40]
+** DONE Create a Public Repository (You)
+   CLOSED: [2017-07-16 Sun 01:47]
+   - The steps of creating a public repository
+     1. Clik (Left bar) _+_ and then _Repository_. Use ~my-git-repo~ as the
+        Repository Name.
+
+     2. Add some words to the "Description" box.
+
+     3. For simplicity, uncheck "a private repository" field.
+
+     4. Select HTML/CSS for Language field, then go a head and click "Create
+        repository".
+
+   - The above steps is essentially just like run ~git init --bare~ on a
+     Bitbucket server.
+
+   - Now we can use this repository as the =central-repo.git= in the previous
+     module.
+
+** DONE Push to the Public Repository (You)
+   CLOSED: [2017-07-16 Sun 01:49]
+   #+BEGIN_SRC bash
+     cd /path-to/my-git-repo
+
+     git remote rm origin  # remote the old orgin central-repo.git
+     git remote add origin https://<username>@bitbucket.org/<username>/my-git-repo.git
+     #  https://lanjiann@bitbucket.org/lanjiann/my-git-repo.git
+
+     git push origin master
+   #+END_SRC
+** DONE Browse the Public Repository (You)
+   CLOSED: [2017-07-16 Sun 01:51]
+** DONE Clone the Repository (John)
+   CLOSED: [2017-07-16 Sun 01:54]
+   #+BEGIN_SRC bash
+     cd /path-to/my-git-repo
+     cd ..
+     git clone http://bitbucket.org/<username>/my-git-repo.git johns-repo
+     cd johns-repo
+
+     git config user.name "John"
+     git config user.email john.example@rypress.com
+   #+END_SRC
+
+** DONE Add the Pink Page (John)
+   CLOSED: [2017-07-16 Sun 01:57]
+   #+BEGIN_SRC bash
+     git checkout -b pink-page
+   #+END_SRC
+
+   Create a file =pink.html= and add a link to it to =index.html=.
+
+** DONE Publish the Pink Page (John)
+   CLOSED: [2017-07-16 Sun 02:07]
+   - Simulate the untrusted developer John, and he does NOT have the permission
+     of push-access to our repository.
+
+   - =TODO= https, http =RE-READ=
+     Note that John used a different path for pushing to his public repository
+     than the one he gave us for fetching from it. The most important
+     distinction is the transport protocol: the former used https:// while the
+     latter used http://. Accessing a repository over HTTPS (or SSH) lets you
+     fetch or push, but as we saw, requires a password. This prevents unknown
+     developers from overwriting commits. On the other hand, fetching over HTTP
+     requires no username or password, but pushing is not possible. This lets
+     anyone fetch from a repository without compromising its security. In the
+     integrator workflow, other developers access your repository via HTTP,
+     while you publish changes via HTTPS. This is also the reason why John can’t
+     push to his origin remote. Of course, if you’re working on a private
+     project, anonymous HTTP access would be disabled for that repository.
+
+** DONE View John's Contributions (You)
+   CLOSED: [2017-07-16 Sun 02:10]
+   #+BEGIN_SRC bash
+     cd ../my-git-repo
+     git remote add john http://bitbucket.org/<username>/johns-repo.git
+
+     git fetch john
+     git branch -r
+     git log master..john/pink-page --stat
+
+     git diff master..john/pink-page
+     # Always do content check to the untrusted developers pushed code
+   #+END_SRC
+
+   - RULE:
+     _NEVER_ blindly merge content from a third-party contributor.
+
+** DONE Integrate John's Contributions (You)
+   CLOSED: [2017-07-16 Sun 02:34]
+   #+BEGIN_SRC bash
+     # After confirming that the code from John is safe, merge.
+     git merge john/pink-page
+   #+END_SRC
+
+** DONE Publish John's Contributions (You)
+   CLOSED: [2017-07-16 Sun 02:38]
+   ~git push origin master~
+** DONE Update Mary's Repository (Mary)
+   CLOSED: [2017-07-16 Sun 02:41]
+   #+BEGIN_SRC bash
+     cd ../marys-repo
+     git remote rm origin
+     git remote add origin http://bitbucket.org/<username>/my-git-repo.git
+
+     git checkout master
+     git fetch origin
+     git rebase origin/master  # fast-forward merge, no commit message required.
+   #+END_SRC
+
+** DONE Update John's Repository (John)
+   CLOSED: [2017-07-16 Sun 02:49]
+   John shouldn't merge. If he wanted, he should do merge before push.
+
+   Use pull
+   #+BEGIN_SRC bash
+     cd ../johns-repo
+     git checkout master
+     git fetch origin
+     git rebase origin/master
+   #+END_SRC
+
+   If John had updated ~master~ directly from his local ~pink-page~ (BAD idea:
+   change after push -- remember! John pushed ~pink-page~ rather than ~master~),
+   it could have wound up out-of-sync from the main project. For this reason,
+   the /integrator workflow/ requires that
+   + everyone _pull_ from a single, official repository,
+   + while they all _push_ to _their own_ public repositories.
+
+** DONE Conclusion
+   CLOSED: [2017-07-16 Sun 02:51]
+   - /integrator workflow/
+* DONE Patch Workflows
+  CLOSED: [2017-07-19 Wed 21:56]
+** DONE Change the Pink Page (Mary)
+   CLOSED: [2017-07-19 Wed 21:43]
+   #+BEGIN_SRC bash
+     cd /path-to/marys-repo
+     git checkout -b pink-page
+
+     # Edit `pink.html`
+
+     git commit -a -m "Change pink to a manly color"
+   #+END_SRC
+
+** DONE Create a Patch (Mary)
+   CLOSED: [2017-07-19 Wed 21:48]
+   The command is ~git format-patch~.
+
+   Use ~git format-patch master~ to tell Git to generate patches for every commit
+   in the current branch that's missing from =master=.
+
+   We'll use this command later.
+
+** DONE Add a Pink Block (Mary)
+   CLOSED: [2017-07-19 Wed 21:46]
+   #+BEGIN_SRC bash
+     # Edit `pink.html` again
+
+     git commit -a -m "Add a pink block of color"
+   #+END_SRC
+
+** DONE Create Patch of Entire Branch (Mary)
+   CLOSED: [2017-07-19 Wed 21:48]
+   #+BEGIN_SRC bash
+     git format-patch master
+   #+END_SRC
+
+   Two patch files are generated (one for each commit):
+   + =0001-Change-pink-to-a-manly-color.patch=
+   + =0002-Add-a-pink-block-of-color.patch=
+
+** DONE Mail the Patches (Mary)
+   CLOSED: [2017-07-19 Wed 21:51]
+   Three ways:
+   + Copy and past patches into your email, and send. 
+
+     This isn't the recommended way. With this method, you must pay much
+     attention to the format after pasting.
+
+   + Sending the patch file as an attachment to a normal email.
+
+   + Use ~git send-email~ command. Check the /official Git documentation/ for
+     details.
+
+** DONE Apply the Patches (You)
+   CLOSED: [2017-07-19 Wed 21:54]
+   =IMPORTANT= Assume you are the project maintainer
+
+   #+BEGIN_SRC bash
+     cd /path-to/my-git-repo
+     git checkout -b patch-integration
+     git am < 0001-Change-pink-to-a-manly-color.patch
+     git log master..HEAD --stat
+
+     git am < 0002-Add-a-pink-block-of--color.patch
+     git log master..HEAD --stat
+   #+END_SRC
+
+** DONE Integrate the Patches (You)
+   CLOSED: [2017-07-19 Wed 21:55]
+   #+BEGIN_SRC bash
+     # inside my-git-repo
+
+     git checkout master
+     git merge patch-integration
+     git branch -d patch-integration
+     git clean -f
+     git push origin master
+   #+END_SRC
+** DONE Update Mary's Repository (Mary)
+   CLOSED: [2017-07-19 Wed 21:56]
+   #+BEGIN_SRC bash
+     cd /path-to/mary-repo
+
+     git checkout master
+     git fetch origin
+     git rebase origin/master
+     git branch -D pink-page
+     git clean -f
+   #+END_SRC
+
+** DONE Conclusion
+   CLOSED: [2017-07-19 Wed 21:38]
+   - Whereas remote repositories are a way to share entire branches,
+
+     patches are a way to send individual commits to another developer.
+
+   - Keep in mind:
+     patches are usually only sent to a project maintainer.
+
+     This is important! You MUSTN'T send your patches to multiple user, who may
+     apply these patches in different order.
+** DONE Quick Reference
+   CLOSED: [2017-07-19 Wed 21:40]
+   - ~git format-patch <branch-name>~
+     Create a patch for each commit contained in the current branch but not in
+     =<branch-name>=. You can also specify a commit ID instead of
+     =<branch-name>=.
+
+   - ~git am < <patch-file>~
+     Apply a patch to the current branch.
+
 * TODO Tips & Tricks
-** TODO Archive The Repository
-** TODO Bundle the Repository
-** TODO Ignore a File
-** TODO Stash Uncommitted Changes
+** DONE Archive The Repository
+   CLOSED: [2017-07-19 Wed 22:12]
+   Use ~archive~, the result is the indicated version, and NO =.git= folder.
+   This is NOT the way used to send git repository.
+
+   #+BEGIN_SRC bash
+     git archieve master --format=zip --output=../website-12-10-2012.zip
+
+     git archieve master --format=tar --output=../website-12-10-2012.tar
+   #+END_SRC
+
+** DONE Bundle the Repository
+   CLOSED: [2017-07-19 Wed 22:14]
+   A =.bundle= includes =.git= folder, and it can be used as a git repository.
+
+   #+BEGIN_SRC bash
+     git bundle create ../repo.bundle master
+     cd ..
+     git clone repo.bundle repo-copy -b master  # `clone`, and checkout to the `master` branch
+     cd repo-copy
+     git log
+     cd ../my-git-repo
+   #+END_SRC
+** DONE Ignore a File
+   CLOSED: [2017-07-19 Wed 22:19]
+   #+BEGIN_SRC bash
+     # create a `.gitignore` file
+     # Add something like *.o, *.out, or *.exe to it
+     git add .gitignore
+     git commit -m "Add .gitignore file"
+     git status
+   #+END_SRC
+
+** DONE Stash Uncommitted Changes
+   CLOSED: [2017-07-19 Wed 22:23]
+   #+BEGIN_SRC bash
+     git stash
+
+     # retrive, can be applied to any branch,
+     # NOT only the one we use the `git stash` command.
+     git stash apply
+   #+END_SRC
+
+   ~git stash~ takes the uncommitted modificatoins, stores them internally, then
+   does a ~git reset --hard~ to give us a clean working directory.
+
 ** TODO Hook into Git's Internals
-** TODO View Diffs Between Commits
+** DONE View Diffs Between Commits
+   CLOSED: [2017-07-19 Wed 23:00]
+   #+BEGIN_SRC bash
+     git diff HEAD~2..HEAD~1
+
+     git diff master..john/pink-page
+
+     # EDIT `blue.html`
+
+     # compare the HEAD and the current working directory
+     git diff
+
+     # I you have `git add` the changed file, `git diff` won't work.
+     # Use the command below
+
+     # compare the staged snapshot and the most recent commit:
+     git add blue.html
+     git diff --cached
+   #+END_SRC
 ** TODO Reset and Checkout Files
-** TODO Aliases and Other Configurations
+   ~git reset~ and ~git checkout~ can NOT only work with branches/commits,
+   but also work with individual files, which slightly alters the behavior of
+   both commands.
+
+   x
+** DONE Aliases and Other Configurations
+   CLOSED: [2017-07-19 Wed 22:40]
+   - Alias
+      #+BEGIN_SRC bash
+        git config --global alias.co checkout
+        git config --global alias.ci commit
+        git config --global alias.br branch
+      #+END_SRC
+
+   - The location of git global configuration file: =~/.gitconfig=
+
+   - The git repository configuration file: =<repository>/.git/config=
+
+   - Content of the git configuration file:
+     #+BEGIN_SRC text
+       [user]
+           name = Ryan
+           email = ryan.example@rypress.com
+       [alias]
+           co = checkout
+           ci = commit
+           br = branch
+       [color]
+           status = always
+       [core]
+           editor = vim
+     #+END_SRC
+
+
 ** TODO Conclusion
 ** TODO Quick Reference
 * TODO Plumbing

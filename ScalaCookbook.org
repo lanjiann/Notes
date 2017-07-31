@@ -1,0 +1,1214 @@
+#+TITLE: Scala Cookbook
+#+VERSION: 1st
+#+AUTHOR: Alvin Alexander
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface][Preface]]
+  - [[Acknowledgements][Acknowledgements]]
+- [[1. Strings][1. Strings]]
+  - [[1.1. Testing String Equality 4][1.1. Testing String Equality 4]]
+  - [[1.2. Creating Multiline Strings 6][1.2. Creating Multiline Strings 6]]
+  - [[1.3. Splitting Strings 8][1.3. Splitting Strings 8]]
+  - [[1.4. Substituting Variables into Strings 9][1.4. Substituting Variables into Strings 9]]
+  - [[1.5. Processing a String One Character at a Time 13][1.5. Processing a String One Character at a Time 13]]
+  - [[1.6. Finding Patterns in Strings 18][1.6. Finding Patterns in Strings 18]]
+  - [[1.7. Replacing Patterns in Strings 21][1.7. Replacing Patterns in Strings 21]]
+  - [[1.8. Extracting Parts of a String That Match Patterns 22][1.8. Extracting Parts of a String That Match Patterns 22]]
+  - [[1.9. Accessing a Character in a String 24][1.9. Accessing a Character in a String 24]]
+  - [[1.10. Add Your Own Methods to the String Class 25][1.10. Add Your Own Methods to the String Class 25]]
+- [[2. Numbers][2. Numbers]]
+  - [[2.1. Parsing a Number from a String 32][2.1. Parsing a Number from a String 32]]
+  - [[2.2. Converting Between Numeric Types (Casting) 36][2.2. Converting Between Numeric Types (Casting) 36]]
+  - [[2.3. Overriding the Default Numeric Type 37][2.3. Overriding the Default Numeric Type 37]]
+  - [[2.4. Replacements for ++ and −− 39][2.4. Replacements for ++ and −− 39]]
+  - [[2.5. Comparing Floating-Point Numbers 41][2.5. Comparing Floating-Point Numbers 41]]
+  - [[2.6. Handling Very Large Numbers 43][2.6. Handling Very Large Numbers 43]]
+  - [[2.7. Generating Random Numbers 45][2.7. Generating Random Numbers 45]]
+  - [[2.8. Creating a Range, List, or Array of Numbers 47][2.8. Creating a Range, List, or Array of Numbers 47]]
+  - [[2.9. Formatting Numbers and Currency 49][2.9. Formatting Numbers and Currency 49]]
+- [[3. Control Structures][3. Control Structures]]
+  - [[3.1. Looping with for and foreach][3.1. Looping with for and foreach]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+      - [[Returning values from a for loop][Returning values from a for loop]]
+      - [[~for~ loop counters][~for~ loop counters]]
+      - [[Generators and guards][Generators and guards]]
+      - [[Looping over a Map][Looping over a Map]]
+    - [[Discussioin][Discussioin]]
+      - [[How ~for~ loops are translated][How ~for~ loops are translated]]
+  - [[3.2. Using for Loops with Multiple Counters 60][3.2. Using for Loops with Multiple Counters 60]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.3. Using a for Loop with Embedded if Statements (Guards) 62][3.3. Using a for Loop with Embedded if Statements (Guards) 62]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.4. Creating a for Comprehension (for/yield Combination) 63][3.4. Creating a for Comprehension (for/yield Combination) 63]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.5. Implementing break and continue 65][3.5. Implementing break and continue 65]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+      - [[The *break* example][The *break* example]]
+      - [[The *continue* example][The *continue* example]]
+      - [[General syntax][General syntax]]
+      - [[About that *continue* example..][About that *continue* example..]]
+      - [[Nested loops and /labeled breaks/][Nested loops and /labeled breaks/]]
+    - [[Discussion][Discussion]]
+  - [[3.6. Using the if Construct Like a Ternary Operator 71][3.6. Using the if Construct Like a Ternary Operator 71]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.7. Using a Match Expression Like a switch Statement 72][3.7. Using a Match Expression Like a switch Statement 72]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+      - [[The ~@switch~ annotation][The ~@switch~ annotation]]
+    - [[Discussion][Discussion]]
+      - [[Handling the default case][Handling the default case]]
+      - [[Do you really need a switch statement?][Do you really need a switch statement?]]
+  - [[3.8. Matching Multiple Conditions with One Case Statement 76][3.8. Matching Multiple Conditions with One Case Statement 76]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.9. Assigning the Result of a Match Expression to a Variable 77][3.9. Assigning the Result of a Match Expression to a Variable 77]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.10. Accessing the Value of the Default Case in a Match Expression 78][3.10. Accessing the Value of the Default Case in a Match Expression 78]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.11. Using Pattern Matching in Match Expressions 79][3.11. Using Pattern Matching in Match Expressions 79]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.12. Using Case Classes in Match Expressions 86][3.12. Using Case Classes in Match Expressions 86]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.13. Adding if Expressions (Guards) to Case Statements 87][3.13. Adding if Expressions (Guards) to Case Statements 87]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.14. Using a Match Expression Instead of isInstanceOf 88][3.14. Using a Match Expression Instead of isInstanceOf 88]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.15. Working with a List in a Match Expression 89][3.15. Working with a List in a Match Expression 89]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.16. Matching One or More Exceptions with try/catch 91][3.16. Matching One or More Exceptions with try/catch 91]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.17. Declaring a Variable Before Using It in a try/catch/finally Block 92][3.17. Declaring a Variable Before Using It in a try/catch/finally Block 92]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+  - [[3.18. Creating Your Own Control Structures 95][3.18. Creating Your Own Control Structures 95]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+    - [[Discussion][Discussion]]
+- [[4. Classes and Properties 99][4. Classes and Properties 99]]
+  - [[4.1. Creating a Primary Constructor 100][4.1. Creating a Primary Constructor 100]]
+  - [[4.2. Controlling the Visibility of Constructor Fields 104][4.2. Controlling the Visibility of Constructor Fields 104]]
+  - [[4.3. Defining Auxiliary Constructors 108][4.3. Defining Auxiliary Constructors 108]]
+  - [[4.4. Defining a Private Primary Constructor 112][4.4. Defining a Private Primary Constructor 112]]
+  - [[4.5. Providing Default Values for Constructor Parameters 114][4.5. Providing Default Values for Constructor Parameters 114]]
+  - [[4.6. Overriding Default Accessors and Mutators 116][4.6. Overriding Default Accessors and Mutators 116]]
+  - [[4.7. Preventing Getter and Setter Methods from Being Generated 119][4.7. Preventing Getter and Setter Methods from Being Generated 119]]
+  - [[4.8. Assigning a Field to a Block or Function 121][4.8. Assigning a Field to a Block or Function 121]]
+  - [[4.9. Setting Uninitialized var Field Types 122][4.9. Setting Uninitialized var Field Types 122]]
+  - [[4.10. Handling Constructor Parameters When Extending a Class 124][4.10. Handling Constructor Parameters When Extending a Class 124]]
+  - [[4.11. Calling a Superclass Constructor 127][4.11. Calling a Superclass Constructor 127]]
+  - [[4.12. When to Use an Abstract Class 129][4.12. When to Use an Abstract Class 129]]
+  - [[4.13. Defining Properties in an Abstract Base Class (or Trait) 131][4.13. Defining Properties in an Abstract Base Class (or Trait) 131]]
+  - [[4.14. Generating Boilerplate Code with Case Classes 136][4.14. Generating Boilerplate Code with Case Classes 136]]
+  - [[4.15. Defining an equals Method (Object Equality) 140][4.15. Defining an equals Method (Object Equality) 140]]
+  - [[4.16. Creating Inner Classes 143][4.16. Creating Inner Classes 143]]
+- [[5. Methods 147][5. Methods 147]]
+  - [[5.1. Controlling Method Scope 148][5.1. Controlling Method Scope 148]]
+  - [[5.2. Calling a Method on a Superclass 152][5.2. Calling a Method on a Superclass 152]]
+  - [[5.3. Setting Default Values for Method Parameters 154][5.3. Setting Default Values for Method Parameters 154]]
+  - [[5.4. Using Parameter Names When Calling a Method 157][5.4. Using Parameter Names When Calling a Method 157]]
+  - [[5.5. Defining a Method That Returns Multiple Items (Tuples) 159][5.5. Defining a Method That Returns Multiple Items (Tuples) 159]]
+  - [[5.6. Forcing Callers to Leave Parentheses off Accessor Methods 161][5.6. Forcing Callers to Leave Parentheses off Accessor Methods 161]]
+  - [[5.7. Creating Methods That Take Variable-Argument Fields 163][5.7. Creating Methods That Take Variable-Argument Fields 163]]
+  - [[5.8. Declaring That a Method Can Throw an Exception 165][5.8. Declaring That a Method Can Throw an Exception 165]]
+  - [[5.9. Supporting a Fluent Style of Programming 167][5.9. Supporting a Fluent Style of Programming 167]]
+- [[6. Objects 171][6. Objects 171]]
+  - [[6.1. Object Casting 172][6.1. Object Casting 172]]
+  - [[6.2. The Scala Equivalent of Java’s .class 174][6.2. The Scala Equivalent of Java’s .class 174]]
+  - [[6.3. Determining the Class of an Object 174][6.3. Determining the Class of an Object 174]]
+  - [[6.4. Launching an Application with an Object 176][6.4. Launching an Application with an Object 176]]
+  - [[6.5. Creating Singletons with object 178][6.5. Creating Singletons with object 178]]
+  - [[6.6. Creating Static Members with Companion Objects 180][6.6. Creating Static Members with Companion Objects 180]]
+  - [[6.7. Putting Common Code in Package Objects 182][6.7. Putting Common Code in Package Objects 182]]
+  - [[6.8. Creating Object Instances Without Using the new Keyword 185][6.8. Creating Object Instances Without Using the new Keyword 185]]
+  - [[6.9. Implement the Factory Method in Scala with apply 189][6.9. Implement the Factory Method in Scala with apply 189]]
+- [[7. Packaging and Imports 191][7. Packaging and Imports 191]]
+  - [[7.1. Packaging with the Curly Braces Style Notation 192][7.1. Packaging with the Curly Braces Style Notation 192]]
+  - [[7.2. Importing One or More Members 193][7.2. Importing One or More Members 193]]
+  - [[7.3. Renaming Members on Import 195][7.3. Renaming Members on Import 195]]
+  - [[7.4. Hiding a Class During the Import Process 196][7.4. Hiding a Class During the Import Process 196]]
+  - [[7.5. Using Static Imports 197][7.5. Using Static Imports 197]]
+  - [[7.6. Using Import Statements Anywhere 199][7.6. Using Import Statements Anywhere 199]]
+- [[8. Traits 203][8. Traits 203]]
+  - [[8.1. Using a Trait as an Interface 203][8.1. Using a Trait as an Interface 203]]
+  - [[8.2. Using Abstract and Concrete Fields in Traits 206][8.2. Using Abstract and Concrete Fields in Traits 206]]
+  - [[8.3. Using a Trait Like an Abstract Class 207][8.3. Using a Trait Like an Abstract Class 207]]
+  - [[8.4. Using Traits as Simple Mixins 208][8.4. Using Traits as Simple Mixins 208]]
+  - [[8.5. Limiting Which Classes Can Use a Trait by Inheritance 209][8.5. Limiting Which Classes Can Use a Trait by Inheritance 209]]
+  - [[8.6. Marking Traits So They Can Only Be Used by Subclasses of a Certain Type 211][8.6. Marking Traits So They Can Only Be Used by Subclasses of a Certain Type 211]]
+  - [[8.7. Ensuring a Trait Can Only Be Added to a Type That Has a Specific Method 213][8.7. Ensuring a Trait Can Only Be Added to a Type That Has a Specific Method 213]]
+  - [[8.8. Adding a Trait to an Object Instance 215][8.8. Adding a Trait to an Object Instance 215]]
+  - [[8.9. Extending a Java Interface Like a Trait 216][8.9. Extending a Java Interface Like a Trait 216]]
+- [[9. Functional Programming 217][9. Functional Programming 217]]
+  - [[9.1. Using Function Literals (Anonymous Functions) 218][9.1. Using Function Literals (Anonymous Functions) 218]]
+  - [[9.2. Using Functions as Variables 219][9.2. Using Functions as Variables 219]]
+  - [[9.3. Defining a Method That Accepts a Simple Function Parameter 223][9.3. Defining a Method That Accepts a Simple Function Parameter 223]]
+  - [[9.4. More Complex Functions 226][9.4. More Complex Functions 226]]
+  - [[9.5. Using Closures 229][9.5. Using Closures 229]]
+  - [[9.6. Using Partially Applied Functions 234][9.6. Using Partially Applied Functions 234]]
+  - [[9.7. Creating a Function That Returns a Function 236][9.7. Creating a Function That Returns a Function 236]]
+  - [[9.9. A Real-World Example 242][9.9. A Real-World Example 242]]
+- [[10. Collections 245][10. Collections 245]]
+  - [[10.1. Understanding the Collections Hierarchy 246][10.1. Understanding the Collections Hierarchy 246]]
+  - [[10.2. Choosing a Collection Class 250][10.2. Choosing a Collection Class 250]]
+  - [[10.3. Choosing a Collection Method to Solve a Problem 255][10.3. Choosing a Collection Method to Solve a Problem 255]]
+  - [[10.4. Understanding the Performance of Collections 261][10.4. Understanding the Performance of Collections 261]]
+  - [[10.5. Declaring a Type When Creating a Collection 264][10.5. Declaring a Type When Creating a Collection 264]]
+  - [[10.6. Understanding Mutable Variables with Immutable Collections 265][10.6. Understanding Mutable Variables with Immutable Collections 265]]
+  - [[10.7. Make Vector Your “Go To” Immutable Sequence 266][10.7. Make Vector Your “Go To” Immutable Sequence 266]]
+  - [[10.8. Make ArrayBuffer Your “Go To” Mutable Sequence 268][10.8. Make ArrayBuffer Your “Go To” Mutable Sequence 268]]
+  - [[10.9. Looping over a Collection with foreach 270][10.9. Looping over a Collection with foreach 270]]
+  - [[10.10. Looping over a Collection with a for Loop 272][10.10. Looping over a Collection with a for Loop 272]]
+  - [[10.11. Using zipWithIndex or zip to Create Loop Counters 276][10.11. Using zipWithIndex or zip to Create Loop Counters 276]]
+  - [[10.12. Using Iterators 278][10.12. Using Iterators 278]]
+  - [[10.13. Transforming One Collection to Another with for/yield 279][10.13. Transforming One Collection to Another with for/yield 279]]
+  - [[10.14. Transforming One Collection to Another with map 282][10.14. Transforming One Collection to Another with map 282]]
+  - [[10.15. Flattening a List of Lists with flatten 285][10.15. Flattening a List of Lists with flatten 285]]
+  - [[10.16. Combining map and flatten with flatMap 286][10.16. Combining map and flatten with flatMap 286]]
+  - [[10.17. Using filter to Filter a Collection 289][10.17. Using filter to Filter a Collection 289]]
+  - [[10.18. Extracting a Sequence of Elements from a Collection 291][10.18. Extracting a Sequence of Elements from a Collection 291]]
+  - [[10.19. Splitting Sequences into Subsets (groupBy, partition, etc.) 293][10.19. Splitting Sequences into Subsets (groupBy, partition, etc.) 293]]
+  - [[10.20. Walking Through a Collection with the reduce and fold Methods 295][10.20. Walking Through a Collection with the reduce and fold Methods 295]]
+  - [[10.21. Extracting Unique Elements from a Sequence 300][10.21. Extracting Unique Elements from a Sequence 300]]
+  - [[10.22. Merging Sequential Collections 302][10.22. Merging Sequential Collections 302]]
+  - [[10.23. Merging Two Sequential Collections into Pairs with zip 304][10.23. Merging Two Sequential Collections into Pairs with zip 304]]
+  - [[10.24. Creating a Lazy View on a Collection 306][10.24. Creating a Lazy View on a Collection 306]]
+  - [[10.25. Populating a Collection with a Range 309][10.25. Populating a Collection with a Range 309]]
+  - [[10.26. Creating and Using Enumerations 311][10.26. Creating and Using Enumerations 311]]
+  - [[10.27. Tuples, for When You Just Need a Bag of Things 312][10.27. Tuples, for When You Just Need a Bag of Things 312]]
+  - [[10.28. Sorting a Collection 315][10.28. Sorting a Collection 315]]
+  - [[10.29. Converting a Collection to a String with mkString 318][10.29. Converting a Collection to a String with mkString 318]]
+- [[11. List, Array, Map, Set (and More) 321][11. List, Array, Map, Set (and More) 321]]
+  - [[11.1. Different Ways to Create and Populate a List 322][11.1. Different Ways to Create and Populate a List 322]]
+  - [[11.2. Creating a Mutable List 324][11.2. Creating a Mutable List 324]]
+  - [[11.3. Adding Elements to a List 325][11.3. Adding Elements to a List 325]]
+  - [[11.4. Deleting Elements from a List (or ListBuffer) 328][11.4. Deleting Elements from a List (or ListBuffer) 328]]
+  - [[11.5. Merging (Concatenating) Lists 330][11.5. Merging (Concatenating) Lists 330]]
+  - [[11.6. Using Stream, a Lazy Version of a List 331][11.6. Using Stream, a Lazy Version of a List 331]]
+  - [[11.7. Different Ways to Create and Update an Array 333][11.7. Different Ways to Create and Update an Array 333]]
+  - [[11.8. Creating an Array Whose Size Can Change (ArrayBuffer) 335][11.8. Creating an Array Whose Size Can Change (ArrayBuffer) 335]]
+  - [[11.9. Deleting Array and ArrayBuffer Elements 335][11.9. Deleting Array and ArrayBuffer Elements 335]]
+  - [[11.10. Sorting Arrays 337][11.10. Sorting Arrays 337]]
+  - [[11.11. Creating Multidimensional Arrays 338][11.11. Creating Multidimensional Arrays 338]]
+  - [[11.12. Creating Maps 341][11.12. Creating Maps 341]]
+  - [[11.13. Choosing a Map Implementation 343][11.13. Choosing a Map Implementation 343]]
+  - [[11.14. Adding, Updating, and Removing Elements with a Mutable Map 345][11.14. Adding, Updating, and Removing Elements with a Mutable Map 345]]
+  - [[11.15. Adding, Updating, and Removing Elements with Immutable Maps 347][11.15. Adding, Updating, and Removing Elements with Immutable Maps 347]]
+  - [[11.16. Accessing Map Values 349][11.16. Accessing Map Values 349]]
+  - [[11.17. Traversing a Map 350][11.17. Traversing a Map 350]]
+  - [[11.18. Getting the Keys or Values from a Map 352][11.18. Getting the Keys or Values from a Map 352]]
+  - [[11.19. Reversing Keys and Values 352][11.19. Reversing Keys and Values 352]]
+  - [[11.20. Testing for the Existence of a Key or Value in a Map 353][11.20. Testing for the Existence of a Key or Value in a Map 353]]
+  - [[11.21. Filtering a Map 354][11.21. Filtering a Map 354]]
+  - [[11.22. Sorting an Existing Map by Key or Value 357][11.22. Sorting an Existing Map by Key or Value 357]]
+  - [[11.23. Finding the Largest Key or Value in a Map 360][11.23. Finding the Largest Key or Value in a Map 360]]
+  - [[11.24. Adding Elements to a Set 361][11.24. Adding Elements to a Set 361]]
+  - [[11.25. Deleting Elements from Sets 363][11.25. Deleting Elements from Sets 363]]
+  - [[11.26. Using Sortable Sets 365][11.26. Using Sortable Sets 365]]
+  - [[11.27. Using a Queue 367][11.27. Using a Queue 367]]
+  - [[11.28. Using a Stack 369][11.28. Using a Stack 369]]
+  - [[11.29. Using a Range 371][11.29. Using a Range 371]]
+- [[12. Files and Processes 375][12. Files and Processes 375]]
+  - [[12.1. How to Open and Read a Text File 375][12.1. How to Open and Read a Text File 375]]
+  - [[12.2. Writing Text Files 381][12.2. Writing Text Files 381]]
+  - [[12.3. Reading and Writing Binary Files 382][12.3. Reading and Writing Binary Files 382]]
+  - [[12.4. How to Process Every Character in a Text File 383][12.4. How to Process Every Character in a Text File 383]]
+  - [[12.5. How to Process a CSV File 384][12.5. How to Process a CSV File 384]]
+  - [[12.6. Pretending that a String Is a File 387][12.6. Pretending that a String Is a File 387]]
+  - [[12.7. Using Serialization 389][12.7. Using Serialization 389]]
+  - [[12.8. Listing Files in a Directory 391][12.8. Listing Files in a Directory 391]]
+  - [[12.9. Listing Subdirectories Beneath a Directory 392][12.9. Listing Subdirectories Beneath a Directory 392]]
+  - [[12.10. Executing External Commands 394][12.10. Executing External Commands 394]]
+  - [[12.11. Executing External Commands and Using STDOUT 397][12.11. Executing External Commands and Using STDOUT 397]]
+  - [[12.12. Handling STDOUT and STDERR for External Commands 399][12.12. Handling STDOUT and STDERR for External Commands 399]]
+  - [[12.13. Building a Pipeline of Commands 401][12.13. Building a Pipeline of Commands 401]]
+  - [[12.14. Redirecting the STDOUT and STDIN of External Commands 402][12.14. Redirecting the STDOUT and STDIN of External Commands 402]]
+  - [[12.15. Using AND (&&) and OR (||) with Processes 404][12.15. Using AND (&&) and OR (||) with Processes 404]]
+  - [[12.16. Handling Wildcard Characters in External Commands 405][12.16. Handling Wildcard Characters in External Commands 405]]
+  - [[12.17. How to Run a Process in a Different Directory 406][12.17. How to Run a Process in a Different Directory 406]]
+  - [[12.18. Setting Environment Variables When Running Commands 407][12.18. Setting Environment Variables When Running Commands 407]]
+  - [[12.19. An Index of Methods to Execute External Commands 408][12.19. An Index of Methods to Execute External Commands 408]]
+- [[13. Actors and Concurrency 411][13. Actors and Concurrency 411]]
+  - [[13.1. Getting Started with a Simple Actor 414][13.1. Getting Started with a Simple Actor 414]]
+  - [[13.2. Creating an Actor Whose Class Constructor Requires Arguments 418][13.2. Creating an Actor Whose Class Constructor Requires Arguments 418]]
+  - [[13.3. How to Communicate Between Actors 419][13.3. How to Communicate Between Actors 419]]
+  - [[13.4. Understanding the Methods in the Akka Actor Lifecycle 422][13.4. Understanding the Methods in the Akka Actor Lifecycle 422]]
+  - [[13.5. Starting an Actor 425][13.5. Starting an Actor 425]]
+  - [[13.6. Stopping Actors 427][13.6. Stopping Actors 427]]
+  - [[13.7. Shutting Down the Akka Actor System 432][13.7. Shutting Down the Akka Actor System 432]]
+  - [[13.8. Monitoring the Death of an Actor with watch 433][13.8. Monitoring the Death of an Actor with watch 433]]
+  - [[13.9. Simple Concurrency with Futures 436][13.9. Simple Concurrency with Futures 436]]
+  - [[13.10. Sending a Message to an Actor and Waiting for a Reply 445][13.10. Sending a Message to an Actor and Waiting for a Reply 445]]
+  - [[13.11. Switching Between Different States with become 446][13.11. Switching Between Different States with become 446]]
+  - [[13.12. Using Parallel Collections 448][13.12. Using Parallel Collections 448]]
+- [[14. Command-Line Tasks 453][14. Command-Line Tasks 453]]
+  - [[14.1. Getting Started with the Scala REPL 454][14.1. Getting Started with the Scala REPL 454]]
+  - [[14.2. Pasting and Loading Blocks of Code into the REPL 459][14.2. Pasting and Loading Blocks of Code into the REPL 459]]
+  - [[14.3. Adding JAR Files and Classes to the REPL Classpath 461][14.3. Adding JAR Files and Classes to the REPL Classpath 461]]
+  - [[14.4. Running a Shell Command from the REPL 462][14.4. Running a Shell Command from the REPL 462]]
+  - [[14.5. Compiling with scalac and Running with scala 465][14.5. Compiling with scalac and Running with scala 465]]
+  - [[14.6. Disassembling and Decompiling Scala Code 466][14.6. Disassembling and Decompiling Scala Code 466]]
+  - [[14.7. Finding Scala Libraries 471][14.7. Finding Scala Libraries 471]]
+  - [[14.8. Generating Documentation with scaladoc 472][14.8. Generating Documentation with scaladoc 472]]
+  - [[14.9. Faster Command-Line Compiling with fsc 479][14.9. Faster Command-Line Compiling with fsc 479]]
+  - [[14.10. Using Scala as a Scripting Language 480][14.10. Using Scala as a Scripting Language 480]]
+  - [[14.11. Accessing Command-Line Arguments from a Script 483][14.11. Accessing Command-Line Arguments from a Script 483]]
+  - [[14.12. Prompting for Input from a Scala Shell Script 485][14.12. Prompting for Input from a Scala Shell Script 485]]
+  - [[14.13. Make Your Scala Scripts Run Faster 489][14.13. Make Your Scala Scripts Run Faster 489]]
+- [[15. Web Services491][15. Web Services491]]
+  - [[15.1. Creating a JSON String from a Scala Object 491][15.1. Creating a JSON String from a Scala Object 491]]
+  - [[15.2. Creating a JSON String from Classes That Have Collections 495][15.2. Creating a JSON String from Classes That Have Collections 495]]
+  - [[15.3. Creating a Simple Scala Object from a JSON String 500][15.3. Creating a Simple Scala Object from a JSON String 500]]
+  - [[15.4. Parsing JSON Data into an Array of Objects 501][15.4. Parsing JSON Data into an Array of Objects 501]]
+  - [[15.5. Creating Web Services with Scalatra 503][15.5. Creating Web Services with Scalatra 503]]
+  - [[15.6. Replacing XML Servlet Mappings with Scalatra Mounts 507][15.6. Replacing XML Servlet Mappings with Scalatra Mounts 507]]
+  - [[15.7. Accessing Scalatra Web Service GET Parameters 509][15.7. Accessing Scalatra Web Service GET Parameters 509]]
+  - [[15.8. Accessing POST Request Data with Scalatra 510][15.8. Accessing POST Request Data with Scalatra 510]]
+  - [[15.9. Creating a Simple GET Request Client 514][15.9. Creating a Simple GET Request Client 514]]
+  - [[15.10. Sending JSON Data to a POST URL 518][15.10. Sending JSON Data to a POST URL 518]]
+  - [[15.11. Getting URL Headers 519][15.11. Getting URL Headers 519]]
+  - [[15.12. Setting URL Headers When Sending a Request 520][15.12. Setting URL Headers When Sending a Request 520]]
+  - [[15.13. Creating a GET Request Web Service with the Play Framework 521][15.13. Creating a GET Request Web Service with the Play Framework 521]]
+  - [[15.14. POSTing JSON Data to a Play Framework Web Service 524][15.14. POSTing JSON Data to a Play Framework Web Service 524]]
+- [[16. Databases and Persistence 527][16. Databases and Persistence 527]]
+  - [[16.1. Connecting to MySQL with JDBC 528][16.1. Connecting to MySQL with JDBC 528]]
+  - [[16.2. Connecting to a Database with the Spring Framework 530][16.2. Connecting to a Database with the Spring Framework 530]]
+  - [[16.3. Connecting to MongoDB and Inserting Data 533][16.3. Connecting to MongoDB and Inserting Data 533]]
+  - [[16.4. Inserting Documents into MongoDB with insert, save, or += 537][16.4. Inserting Documents into MongoDB with insert, save, or += 537]]
+  - [[16.5. Searching a MongoDB Collection 539][16.5. Searching a MongoDB Collection 539]]
+  - [[16.6. Updating Documents in a MongoDB Collection 542][16.6. Updating Documents in a MongoDB Collection 542]]
+  - [[16.7. Accessing the MongoDB Document ID Field 544][16.7. Accessing the MongoDB Document ID Field 544]]
+  - [[16.8. Deleting Documents in a MongoDB Collection 545][16.8. Deleting Documents in a MongoDB Collection 545]]
+  - [[16.9. A Quick Look at Slick 547][16.9. A Quick Look at Slick 547]]
+- [[17. Interacting with Java 549][17. Interacting with Java 549]]
+  - [[17.1. Going to and from Java Collections 549][17.1. Going to and from Java Collections 549]]
+  - [[17.2. Add Exception Annotations to Scala Methods to Work with Java 554][17.2. Add Exception Annotations to Scala Methods to Work with Java 554]]
+  - [[17.3. Using @SerialVersionUID and Other Annotations 556][17.3. Using @SerialVersionUID and Other Annotations 556]]
+  - [[17.4. Using the Spring Framework 557][17.4. Using the Spring Framework 557]]
+  - [[17.5. Annotating varargs Methods 560][17.5. Annotating varargs Methods 560]]
+  - [[17.6. When Java Code Requires JavaBeans 562][17.6. When Java Code Requires JavaBeans 562]]
+  - [[17.7. Wrapping Traits with Implementations 565][17.7. Wrapping Traits with Implementations 565]]
+- [[18. The Simple Build Tool (SBT) 569][18. The Simple Build Tool (SBT) 569]]
+  - [[18.1. Creating a Project Directory Structure for SBT 570][18.1. Creating a Project Directory Structure for SBT 570]]
+  - [[18.2. Compiling, Running, and Packaging a Scala Project with SBT 574][18.2. Compiling, Running, and Packaging a Scala Project with SBT 574]]
+  - [[18.3. Running Tests with SBT and ScalaTest 579][18.3. Running Tests with SBT and ScalaTest 579]]
+  - [[18.4. Managing Dependencies with SBT 581][18.4. Managing Dependencies with SBT 581]]
+  - [[18.5. Controlling Which Version of a Managed Dependency Is Used 584][18.5. Controlling Which Version of a Managed Dependency Is Used 584]]
+  - [[18.6. Creating a Project with Subprojects 586][18.6. Creating a Project with Subprojects 586]]
+  - [[18.7. Using SBT with Eclipse 588][18.7. Using SBT with Eclipse 588]]
+  - [[18.8. Generating Project API Documentation 590][18.8. Generating Project API Documentation 590]]
+  - [[18.9. Specifying a Main Class to Run 591][18.9. Specifying a Main Class to Run 591]]
+  - [[18.10. Using GitHub Projects as Project Dependencies 593][18.10. Using GitHub Projects as Project Dependencies 593]]
+  - [[18.11. Telling SBT How to Find a Repository (Working with Resolvers) 595][18.11. Telling SBT How to Find a Repository (Working with Resolvers) 595]]
+  - [[18.12. Resolving Problems by Getting an SBT Stack Trace 596][18.12. Resolving Problems by Getting an SBT Stack Trace 596]]
+  - [[18.13. Setting the SBT Log Level 597][18.13. Setting the SBT Log Level 597]]
+  - [[18.14. Deploying a Single, Executable JAR File 597][18.14. Deploying a Single, Executable JAR File 597]]
+  - [[18.15. Publishing Your Library 601][18.15. Publishing Your Library 601]]
+  - [[18.16. Using Build.scala Instead of build.sbt 602][18.16. Using Build.scala Instead of build.sbt 602]]
+  - [[18.17. Using a Maven Repository Library with SBT 604][18.17. Using a Maven Repository Library with SBT 604]]
+  - [[18.18. Building a Scala Project with Ant 606][18.18. Building a Scala Project with Ant 606]]
+- [[19. Types 611][19. Types 611]]
+  - [[19.1. Creating Classes That Use Generic Types 614][19.1. Creating Classes That Use Generic Types 614]]
+  - [[19.2. Creating a Method That Takes a Simple Generic Type 617][19.2. Creating a Method That Takes a Simple Generic Type 617]]
+  - [[19.3. Using Duck Typing (Structural Types) 618][19.3. Using Duck Typing (Structural Types) 618]]
+  - [[19.4. Make Mutable Collections Invariant 620][19.4. Make Mutable Collections Invariant 620]]
+  - [[19.5. Make Immutable Collections Covariant 622][19.5. Make Immutable Collections Covariant 622]]
+  - [[19.6. Create a Collection Whose Elements Are All of Some Base Type 624][19.6. Create a Collection Whose Elements Are All of Some Base Type 624]]
+  - [[19.7. Selectively Adding New Behavior to a Closed Model 627][19.7. Selectively Adding New Behavior to a Closed Model 627]]
+  - [[19.8. Building Functionality with Types 630][19.8. Building Functionality with Types 630]]
+- [[20. Idioms 635][20. Idioms 635]]
+  - [[20.1. Create Methods with No Side Effects (Pure Functions) 636][20.1. Create Methods with No Side Effects (Pure Functions) 636]]
+  - [[20.2. Prefer Immutable Objects 644][20.2. Prefer Immutable Objects 644]]
+  - [[20.3. Think “Expression-Oriented Programming” 647][20.3. Think “Expression-Oriented Programming” 647]]
+  - [[20.4. Use Match Expressions and Pattern Matching 650][20.4. Use Match Expressions and Pattern Matching 650]]
+  - [[20.5. Eliminate null Values from Your Code 654][20.5. Eliminate null Values from Your Code 654]]
+  - [[20.6. Using the Option/Some/None Pattern 658][20.6. Using the Option/Some/None Pattern 658]]
+- [[Index 667][Index 667]]
+- [[TodoList][TodoList]]
+
+* Preface
+** Acknowledgements
+* 1. Strings
+  =1=
+** 1.1. Testing String Equality 4
+** 1.2. Creating Multiline Strings 6
+** 1.3. Splitting Strings 8
+** 1.4. Substituting Variables into Strings 9
+** 1.5. Processing a String One Character at a Time 13
+** 1.6. Finding Patterns in Strings 18
+** 1.7. Replacing Patterns in Strings 21
+** 1.8. Extracting Parts of a String That Match Patterns 22
+** 1.9. Accessing a Character in a String 24
+** 1.10. Add Your Own Methods to the String Class 25
+* 2. Numbers
+  =31=
+** 2.1. Parsing a Number from a String 32
+** 2.2. Converting Between Numeric Types (Casting) 36
+** 2.3. Overriding the Default Numeric Type 37
+** 2.4. Replacements for ++ and −− 39
+** 2.5. Comparing Floating-Point Numbers 41
+** 2.6. Handling Very Large Numbers 43
+** 2.7. Generating Random Numbers 45
+** 2.8. Creating a Range, List, or Array of Numbers 47
+** 2.9. Formatting Numbers and Currency 49
+* TODO 3. Control Structures
+  =53=
+** DONE 3.1. Looping with for and foreach
+   CLOSED: [2017-07-18 Tue 13:40]
+   =54=
+*** DONE Problem
+    CLOSED: [2017-07-18 Tue 12:03]
+*** DONE Solution
+    CLOSED: [2017-07-18 Tue 12:09]
+   - Loops in Scala:
+     + ~for~ loop
+     + ~while~ loop
+     + collection methods:
+       * ~foreach~
+       * ~map~
+       * ~flatMap~, and more
+
+   - This section concentrate on ~for~ loop and ~foreach~ method.
+     
+**** DONE Returning values from a for loop
+     CLOSED: [2017-07-18 Tue 12:04]
+     ~yield~
+
+**** DONE ~for~ loop counters
+     CLOSED: [2017-07-18 Tue 12:07]
+     #+BEGIN_SRC scala
+       for (i <- 0 until a.length) {
+         println(s"$i is ${a(i)}")
+       }
+
+       for ((e, count) <- a.zipWithIndex) {
+         println(s"$count is $e")
+       }
+     #+END_SRC
+
+     =TODO= Recipe 10.11 ~zipWithIndex~
+**** DONE Generators and guards
+     CLOSED: [2017-07-18 Tue 12:07]
+     ~Range~
+     #+BEGIN_SRC scala
+       for (i <- 1 to 3) println(i)
+
+       // With guard
+       for (i <- 1 to 10 if i < 4) println(i)
+     #+END_SRC
+**** DONE Looping over a Map
+     CLOSED: [2017-07-18 Tue 12:09]
+     #+BEGIN_SRC scala
+       for ((k,v) <- names) println(s"key: $k, value: $v")
+     #+END_SRC
+
+     =TODO= Recipe 11.17, "Traversing a Map"
+*** DONE Discussioin
+    CLOSED: [2017-07-18 Tue 13:40]
+**** DONE How ~for~ loops are translated
+     CLOSED: [2017-07-18 Tue 13:40]
+     - A _simplification_ of the rules in /Scala Language Specification/:
+       1. a ~for~ loop on a collection -> ~foreach~ method;
+
+       2. a ~for~ loop with a guard -> a ~withFilter~ methods call on the
+          collection followed by a ~foreach~ call;
+
+       3. a ~for~ comprehension -> ~map~ method;
+
+       4. a ~for~ comprehension with a guard -> a ~withFilter~ methods call on
+          the collection followed by a ~map~ call;
+
+     - Example:
+       #+BEGIN_SRC scala
+         class Main {
+           for (i <- 1 to 10) println(i)
+         }
+
+         // In CLI:
+         // scalac -Xprint:parse Main.scala
+
+         // [[syntax trees at end of parser]] // Main.scala
+         // package <empty> {
+         //   class Main extends scala.AnyRef {
+         //     def <init>() = {
+         //       super.<init>();
+         //       ()
+         //     };
+         //     1.to(10).foreach(((i) => println(i)))
+         //   }
+         // }
+       #+END_SRC
+
+     - ~-Xprint:parse~ shows the result after the first step.
+
+     - ~-Xprint:all~ shows the result after all steps in the compilation process.
+
+** DONE 3.2. Using for Loops with Multiple Counters 60
+   CLOSED: [2017-07-18 Tue 13:45]
+*** DONE Problem
+    CLOSED: [2017-07-18 Tue 13:45]
+
+*** DONE Solution
+    CLOSED: [2017-07-18 Tue 13:44]
+    #+BEGIN_SRC scala
+      val array = Array.ofDim[Int](2, 2)
+      array(0)(0) = 0
+      array(0)(1) = 1
+      array(1)(0) = 2
+      array(1)(1) = 3
+
+      for {
+        i <- 0 to 1
+        j <- 0 to 1
+      } println(s"($i)($j) = ${array(i)(j)}")
+    #+END_SRC
+
+*** DONE Discussion
+    CLOSED: [2017-07-18 Tue 13:45]
+
+** DONE 3.3. Using a for Loop with Embedded if Statements (Guards) 62
+   CLOSED: [2017-07-18 Tue 13:47]
+*** Problem
+*** Solution
+*** Discussion
+** DONE 3.4. Creating a for Comprehension (for/yield Combination) 63
+   CLOSED: [2017-07-18 Tue 13:50]
+*** Problem
+*** Solution
+*** Discussion
+** DONE 3.5. Implementing break and continue 65
+   CLOSED: [2017-07-19 Wed 01:08]
+*** DONE Problem
+    CLOSED: [2017-07-18 Tue 13:52]
+    Scala doesn't have ~break~ or ~continue~ keywords.
+
+*** DONE Solution
+    CLOSED: [2017-07-18 Tue 23:37]
+    ~break~-like and ~continue~-like functionalities are provided through
+    ~scala.util.control.Breaks~
+
+    #+BEGIN_SRC scala
+      package com.alvinalexander.breakandcontinue
+
+      import util.control.Breaks._
+
+      object BreakAndContinueDemo extends App {
+        println("\n=== BREAK EXAMPLE ===")
+        breakable {
+          for (i <- 1 to 10) {
+            println(i)
+            if (i > 4) break  // break out of the for loop
+          }
+        }
+
+        println("\n===CONTINUE EXAMPLE ===")
+
+        val searchMe = "peter piper picked a peck of pickled peppers"
+        var numPs = 0
+
+        for (i <- 0 until searchMe.length) {
+          breakable {
+            if (searchMe.charAt(i) ! = 'p') {
+              break  // break out of the 'breakable', continue the outside loop
+            } else {
+              numPs += 1
+            }
+          }
+        }
+        println("Found " + numPs + " p's in the string.")
+      }
+
+      // === BREAK EXAMPLE ===
+      // 1
+      // 2
+      // 3
+      // 4
+      // 5
+      //
+      // === CONTINUE EXAMPLE ===
+      // Found 9 p's in the string.
+    #+END_SRC
+
+**** DONE The *break* example
+     CLOSED: [2017-07-18 Tue 23:37]
+     - ~break~ will throw a ~BreakControl~ exception when it's called. 
+       #+BEGIN_SRC scala
+         private val breakException = new BreakControl
+         def break(): Nothing = { throw breakException }
+       #+END_SRC
+
+     - ~breakable~ will catch a ~BreakControl~ exception.
+       #+BEGIN_SRC scala
+         def breakable(op: => Unit) {
+           try {
+             op
+           } catch {
+             case ex: BreakControl =>
+               // TODO: ???
+               if (ex ne breakException) throw ex
+           }
+         }
+       #+END_SRC
+
+     - =TODO= rECIPE 3.18
+
+**** DONE The *continue* example
+     CLOSED: [2017-07-19 Wed 00:16]
+     Use ~break~ and ~breakable~ to implement ~continue~-like functionality.
+     #+BEGIN_SRC scala
+       package com.alvinalexander.breakandcontinue
+
+       // import util.control.Breaks._
+       val searchMe = "peter piper picked a peck of pickled peppers"
+       var numPs = 0
+
+       for (i <- 0 until searchMe.length) {
+         breakable {
+           if (searchMe.charAt(i) ! = 'p') {
+             break  // break out of the 'breakable', continue the outside loop
+           } else {
+             numPs += 1
+           }
+         }
+       }
+       println("Found " + numPs + " p's in the string.")
+     #+END_SRC
+
+**** DONE General syntax
+     CLOSED: [2017-07-19 Wed 00:20]
+     - _break_ functionality
+       #+BEGIN_SRC scala
+         breakable {
+           for (x <- xs) {
+             if (cond)
+               break
+           }
+         }
+       #+END_SRC
+
+       Corresponds to this Java:
+
+       #+BEGIN_SRC java
+         for (X x : xs) {
+             if (cond) break;
+         }
+       #+END_SRC
+
+     - _continue_ functionality
+       #+BEGIN_SRC scala
+         for (x <- xs) {
+           breakable {
+             if (cond)
+               break
+           }
+         }
+       #+END_SRC
+
+       Corresponds to this Java:
+
+       #+BEGIN_SRC java
+         for (X x : xs) {
+             if (cond) continue;
+         }
+       #+END_SRC
+
+**** DONE About that *continue* example..
+     CLOSED: [2017-07-19 Wed 00:23]
+     ~val count = searchMe.count(_=='p')~
+
+**** DONE Nested loops and /labeled breaks/
+     CLOSED: [2017-07-19 Wed 00:55]
+     - Example
+       #+BEGIN_SRC scala
+         package com.alvinalexander.labeledbreaks
+
+         object LabeldBreakDemo extends App {
+           import scala.util.control._
+
+           // TODO: Why capital
+           val Inner = new Breaks
+           // TODO: Why capital
+           val Outer = new Breaks
+
+           Outer.breakable {
+             for (i <- 1 to 5) {
+               Inner.breakable {
+                 for (j <- 'a' to 'e') {
+                   if (i == 1 && j == 'c') Inner.break else println(s"i: $i, j: $j")
+                   if (i == 2 && j == 'b') Outer.break
+                 }
+               }
+             }
+           }
+         }
+       #+END_SRC
+
+     - Use one labeled break, the pattern below is like the _continue_ pattern.
+       However, since we used the labeled break, we actually implement a _break_
+       pattern.
+       #+BEGIN_SRC scala
+         import scala.util.control._
+
+         val Exit = new Breaks
+         Exit.breakable {
+           for (j <- 'a' to 'e') {
+             if (j == 'c') Exit.break else println(s"j: $j")
+           }
+         }
+       #+END_SRC
+
+*** DONE Discussion
+    CLOSED: [2017-07-19 Wed 01:08]
+    If you don't like the _break_ pattern and the _continue_ pattern, try
+    + guard
+
+    + write a function, use ~return~ to break
+
+    + Use recursive algorithm -- calculation stops when the base case/cases
+      is/are reached.
+
+** DONE 3.6. Using the if Construct Like a Ternary Operator 71
+   CLOSED: [2017-07-19 Wed 01:09]
+*** Problem
+*** Solution
+*** Discussion
+** DONE 3.7. Using a Match Expression Like a switch Statement 72
+   CLOSED: [2017-07-19 Wed 02:07]
+*** DONE Problem
+    CLOSED: [2017-07-19 Wed 02:03]
+*** DONE Solution
+    CLOSED: [2017-07-19 Wed 02:03]
+**** DONE The ~@switch~ annotation
+     CLOSED: [2017-07-19 Wed 02:03]
+     Issue a warning if the pattern matching can't be compiled to ~tableswitch~
+     or ~lookupswitch~.
+
+     ~tableswitch~ and ~lookupswitch~ have good performance, because they are
+     /branch tables/ rather than /decision trees/. They use _jump_ rather than
+     walk through the decision tree.
+
+     - Example: =SwitchDemo.scala= Version _1_, which has no warning.
+       #+BEGIN_SRC scala
+         // Version 1 - compiles to a tableswitch
+         import scala.annotation.switch
+
+         class SwitchDemo {
+           val i = 1
+           val x = (i: @switch) match {
+             case 1 => "One"
+             case 2 => "Two"
+             case _ => "Other"
+           }
+         }
+       #+END_SRC
+       =SwitchDemo.scala= can be compiled without warnings
+
+       The output of ~javap -c SwitchDemo~
+       #+BEGIN_SRC text
+         16:  tableswitch{ //1 to 2
+                     1: 50;
+                     2: 45;
+                     defalut: 40 }
+       #+END_SRC
+
+     - Example: =SwitchDemo.scala= Version _2_, which has a warning.
+       #+BEGIN_SRC scala
+         // Version 2 - leads to a compiler warning
+         import scala.annotation.switch
+
+         class SwitchDemo {
+           val i = 1
+           val Two = 2  // added compared to Ver 1
+           val x = (i: @switch) match {
+             case 1 => "One"
+             case Two => "Two"   // replaced the '2'
+             case _ => "Other"
+           }
+         }
+       #+END_SRC
+
+       ~scalac SwitchDemo.scala~ will issue a warning:
+       #+BEGIN_SRC text
+         SwitchDemo.scala:7: warning: could not emit switch for @switch annotated match
+         val x = (i: @switch) match {
+         ^
+         one warning found
+       #+END_SRC
+
+     - Rules (from the book *Scala In Depth* by Joshua Suereth) for Scala to
+       apply the ~tableswitch~ optimization:
+       1. The matched value must be a known integer
+
+       2. The matched expression must be "simple". It can't contain any type
+          checks, if statements, or extractors.
+
+       3. The expression must also have its value available at compile time.
+
+       4. There should be more than two ~case~ statements.
+
+     - =From Jian= Where are the rules for ~lookupswitch~???
+
+*** DONE Discussion
+    CLOSED: [2017-07-19 Wed 02:07]
+**** DONE Handling the default case
+     CLOSED: [2017-07-19 Wed 02:05]
+     =TODO= Recipe 9.8, "Creating Partial Functions".
+**** DONE Do you really need a switch statement?
+     CLOSED: [2017-07-19 Wed 02:07]
+     Use ~Map~.
+
+     #+BEGIN_SRC scala
+       val monthNumberToName = Map(
+         1 -> "January",
+         2 -> "February",
+         3 -> "March",
+         4 -> "April",
+         5 -> "May",
+         6 -> "June",
+         7 -> "July",
+         8 -> "August",
+         9 -> "September",
+         10 -> "October",
+         11 -> "November",
+         12 -> "December"
+       )
+
+       val monthName = monthNumberToName(4)
+       println(monthName) // prints "April"
+     #+END_SRC
+
+** DONE 3.8. Matching Multiple Conditions with One Case Statement 76
+   CLOSED: [2017-07-19 Wed 02:08]
+*** DONE Problem
+    CLOSED: [2017-07-19 Wed 02:09]
+*** DONE Solution
+    CLOSED: [2017-07-19 Wed 02:09]
+    Use ~|~ to separate patterns
+*** DONE Discussion
+    CLOSED: [2017-07-19 Wed 02:09]
+
+** DONE 3.9. Assigning the Result of a Match Expression to a Variable 77
+   CLOSED: [2017-07-19 Wed 02:11]
+*** Problem
+*** Solution
+*** Discussion
+
+** DONE 3.10. Accessing the Value of the Default Case in a Match Expression 78
+   CLOSED: [2017-07-19 Wed 02:12]
+*** DONE Problem
+    CLOSED: [2017-07-19 Wed 02:11]
+
+*** DONE Solution
+    CLOSED: [2017-07-19 Wed 02:11]
+    In the last case use a name, rather than ~_~.
+
+*** DONE Discussion
+    CLOSED: [2017-07-19 Wed 02:12]
+
+** TODO 3.11. Using Pattern Matching in Match Expressions 79
+*** Problem
+*** Solution
+*** Discussion
+
+** DONE 3.12. Using Case Classes in Match Expressions 86
+   CLOSED: [2017-07-19 Wed 02:13]
+*** Problem
+*** Solution
+*** Discussion
+
+** DONE 3.13. Adding if Expressions (Guards) to Case Statements 87
+   CLOSED: [2017-07-19 Wed 02:13]
+*** Problem
+*** Solution
+*** Discussion
+
+** DONE 3.14. Using a Match Expression Instead of isInstanceOf 88
+   CLOSED: [2017-07-19 Wed 02:31]
+*** DONE Problem
+    CLOSED: [2017-07-19 Wed 02:28]
+
+*** DONE Solution
+    CLOSED: [2017-07-19 Wed 02:28]
+    ~if (x.isInstanceOf[Foo]) { do something ... }~
+    NOT ALWAYS BAD! This is good ONLY for some simple cases.
+
+    For most situations use the TWO solutions listed below:
+    #+BEGIN_SRC scala
+      // 1
+      def isPerson(x: Any): Boolean = x match {
+        case p: Person => true
+        case _ => false
+      }
+
+
+
+      // 2: case classes extended from some base class
+      trait SentientBeing
+      trait Animal extends SentientBeing
+      case class Dog(name: String) extends Animal
+      case class Person(name: String, age: Int) extends SentientBeing
+
+      def printInfo(x: SentientBeing) = x match {
+        case Person(name, age) => // handle the Person
+        case Dog(name) => // handle the Dog
+      }
+    #+END_SRC
+
+*** DONE Discussion
+    CLOSED: [2017-07-19 Wed 02:30]
+
+** DONE 3.15. Working with a List in a Match Expression 89
+   CLOSED: [2017-07-19 Wed 02:31]
+*** Problem
+*** Solution
+*** Discussion
+
+** DONE 3.16. Matching One or More Exceptions with try/catch 91
+   CLOSED: [2017-07-19 Wed 02:43]
+*** DONE Problem
+    CLOSED: [2017-07-19 Wed 02:32]
+
+*** DONE Solution
+    CLOSED: [2017-07-19 Wed 02:34]
+    The Scala ~try/catch/finally~ syntax is _similar_ to Java,
+    BUT it uses the _match expression approach_ in the ~catch~ block:
+    #+BEGIN_SRC scala
+      val s = "Foo"
+
+      try {
+        val i = s.toInt
+      } catch {
+        case e: Exception => e.printStackTrace
+        // case ...
+      }
+    #+END_SRC
+*** DONE Discussion
+    CLOSED: [2017-07-19 Wed 02:43]
+    A catch-all ~try ... catch~ should use a type ~Throwable~ case variable,
+    rather than just ~_~ with no type specified.
+
+    (NOTE form Jian: ~Throwable~ is a super class of ~Exception~,
+     as well as ~Error~)
+
+    #+BEGIN_SRC scala
+      try {
+        openAndReadAFile("foo")
+      } catch {
+        case t: Throwable => t.printStackTrace()
+      }
+    #+END_SRC
+
+    If you prefer to declare the exceptions that your method throws,
+    or you need to interact with Java,
+    add the ~@throws~ annotation to your method definition:
+    #+BEGIN_SRC scala
+      @throws(classOf[NumberFormatException])
+      def toInt(s: String): Option[Int] =
+        try {
+          Some(s.toInt)
+        } catch {
+          case e: NumberFormatException => throw e
+        }
+    #+END_SRC
+
+** DONE 3.17. Declaring a Variable Before Using It in a try/catch/finally Block 92
+   CLOSED: [2017-07-19 Wed 02:53]
+*** Problem
+*** Solution
+    #+BEGIN_SRC scala
+      import java.io._
+
+      object CopyBytes extends App {
+        var in = None: Option[FileInputStream]
+        var out = None: Option[FileOutputStream]
+        try {
+          in = Some(new FileInputStream("/tmp/Test.class"))
+          out = Some(new FileOutputStream("/tmp/Test.class.copy"))
+          var c = 0
+          while ({c = in.get.read; c != −1}) {
+            out.get.write(c)
+          }
+        } catch {
+          case e: IOException => e.printStackTrace
+        } finally {
+          println("entered finally ...")
+          if (in.isDefined) in.get.close
+          if (out.isDefined) out.get.close
+        }
+      }
+    #+END_SRC
+*** Discussion
+
+** TODO 3.18. Creating Your Own Control Structures 95
+*** Problem
+*** Solution
+*** Discussion
+
+* 4. Classes and Properties 99
+** 4.1. Creating a Primary Constructor 100
+** 4.2. Controlling the Visibility of Constructor Fields 104
+** 4.3. Defining Auxiliary Constructors 108
+** 4.4. Defining a Private Primary Constructor 112
+** 4.5. Providing Default Values for Constructor Parameters 114
+** 4.6. Overriding Default Accessors and Mutators 116
+** 4.7. Preventing Getter and Setter Methods from Being Generated 119
+** 4.8. Assigning a Field to a Block or Function 121
+** 4.9. Setting Uninitialized var Field Types 122
+** 4.10. Handling Constructor Parameters When Extending a Class 124
+** 4.11. Calling a Superclass Constructor 127
+** 4.12. When to Use an Abstract Class 129
+** 4.13. Defining Properties in an Abstract Base Class (or Trait) 131
+** 4.14. Generating Boilerplate Code with Case Classes 136
+** 4.15. Defining an equals Method (Object Equality) 140
+** 4.16. Creating Inner Classes 143
+* 5. Methods 147
+** 5.1. Controlling Method Scope 148
+** 5.2. Calling a Method on a Superclass 152
+** 5.3. Setting Default Values for Method Parameters 154
+** 5.4. Using Parameter Names When Calling a Method 157
+** 5.5. Defining a Method That Returns Multiple Items (Tuples) 159
+** 5.6. Forcing Callers to Leave Parentheses off Accessor Methods 161
+** 5.7. Creating Methods That Take Variable-Argument Fields 163
+** 5.8. Declaring That a Method Can Throw an Exception 165
+** 5.9. Supporting a Fluent Style of Programming 167
+* 6. Objects 171
+** 6.1. Object Casting 172
+** 6.2. The Scala Equivalent of Java’s .class 174
+** 6.3. Determining the Class of an Object 174
+** 6.4. Launching an Application with an Object 176
+** 6.5. Creating Singletons with object 178
+** 6.6. Creating Static Members with Companion Objects 180
+** 6.7. Putting Common Code in Package Objects 182
+** 6.8. Creating Object Instances Without Using the new Keyword 185
+** 6.9. Implement the Factory Method in Scala with apply 189
+* 7. Packaging and Imports 191
+** 7.1. Packaging with the Curly Braces Style Notation 192
+** 7.2. Importing One or More Members 193
+** 7.3. Renaming Members on Import 195
+** 7.4. Hiding a Class During the Import Process 196
+** 7.5. Using Static Imports 197
+** 7.6. Using Import Statements Anywhere 199
+* 8. Traits 203
+** 8.1. Using a Trait as an Interface 203
+** 8.2. Using Abstract and Concrete Fields in Traits 206
+** 8.3. Using a Trait Like an Abstract Class 207
+** 8.4. Using Traits as Simple Mixins 208
+** 8.5. Limiting Which Classes Can Use a Trait by Inheritance 209
+** 8.6. Marking Traits So They Can Only Be Used by Subclasses of a Certain Type 211
+** 8.7. Ensuring a Trait Can Only Be Added to a Type That Has a Specific Method 213
+** 8.8. Adding a Trait to an Object Instance 215
+** 8.9. Extending a Java Interface Like a Trait 216
+* 9. Functional Programming 217
+** 9.1. Using Function Literals (Anonymous Functions) 218
+** 9.2. Using Functions as Variables 219
+** 9.3. Defining a Method That Accepts a Simple Function Parameter 223
+** 9.4. More Complex Functions 226
+** 9.5. Using Closures 229
+** 9.6. Using Partially Applied Functions 234
+** 9.7. Creating a Function That Returns a Function 236
+** 9.9. A Real-World Example 242
+* 10. Collections 245
+** 10.1. Understanding the Collections Hierarchy 246
+** 10.2. Choosing a Collection Class 250
+** 10.3. Choosing a Collection Method to Solve a Problem 255
+** 10.4. Understanding the Performance of Collections 261
+** 10.5. Declaring a Type When Creating a Collection 264
+** 10.6. Understanding Mutable Variables with Immutable Collections 265
+** 10.7. Make Vector Your “Go To” Immutable Sequence 266
+** 10.8. Make ArrayBuffer Your “Go To” Mutable Sequence 268
+** 10.9. Looping over a Collection with foreach 270
+** 10.10. Looping over a Collection with a for Loop 272
+** 10.11. Using zipWithIndex or zip to Create Loop Counters 276
+** 10.12. Using Iterators 278
+** 10.13. Transforming One Collection to Another with for/yield 279
+** 10.14. Transforming One Collection to Another with map 282
+** 10.15. Flattening a List of Lists with flatten 285
+** 10.16. Combining map and flatten with flatMap 286
+** 10.17. Using filter to Filter a Collection 289
+** 10.18. Extracting a Sequence of Elements from a Collection 291
+** 10.19. Splitting Sequences into Subsets (groupBy, partition, etc.) 293
+** 10.20. Walking Through a Collection with the reduce and fold Methods 295
+** 10.21. Extracting Unique Elements from a Sequence 300
+** 10.22. Merging Sequential Collections 302
+** 10.23. Merging Two Sequential Collections into Pairs with zip 304
+** 10.24. Creating a Lazy View on a Collection 306
+** 10.25. Populating a Collection with a Range 309
+** 10.26. Creating and Using Enumerations 311
+** 10.27. Tuples, for When You Just Need a Bag of Things 312
+** 10.28. Sorting a Collection 315
+** 10.29. Converting a Collection to a String with mkString 318
+* 11. List, Array, Map, Set (and More) 321
+** 11.1. Different Ways to Create and Populate a List 322
+** 11.2. Creating a Mutable List 324
+** 11.3. Adding Elements to a List 325
+** 11.4. Deleting Elements from a List (or ListBuffer) 328
+** 11.5. Merging (Concatenating) Lists 330
+** 11.6. Using Stream, a Lazy Version of a List 331
+** 11.7. Different Ways to Create and Update an Array 333
+** 11.8. Creating an Array Whose Size Can Change (ArrayBuffer) 335
+** 11.9. Deleting Array and ArrayBuffer Elements 335
+** 11.10. Sorting Arrays 337
+** 11.11. Creating Multidimensional Arrays 338
+** 11.12. Creating Maps 341
+** 11.13. Choosing a Map Implementation 343
+** 11.14. Adding, Updating, and Removing Elements with a Mutable Map 345
+** 11.15. Adding, Updating, and Removing Elements with Immutable Maps 347
+** 11.16. Accessing Map Values 349
+** 11.17. Traversing a Map 350
+** 11.18. Getting the Keys or Values from a Map 352
+** 11.19. Reversing Keys and Values 352
+** 11.20. Testing for the Existence of a Key or Value in a Map 353
+** 11.21. Filtering a Map 354
+** 11.22. Sorting an Existing Map by Key or Value 357
+** 11.23. Finding the Largest Key or Value in a Map 360
+** 11.24. Adding Elements to a Set 361
+** 11.25. Deleting Elements from Sets 363
+** 11.26. Using Sortable Sets 365
+** 11.27. Using a Queue 367
+** 11.28. Using a Stack 369
+** 11.29. Using a Range 371
+* 12. Files and Processes 375
+** 12.1. How to Open and Read a Text File 375
+** 12.2. Writing Text Files 381
+** 12.3. Reading and Writing Binary Files 382
+** 12.4. How to Process Every Character in a Text File 383
+** 12.5. How to Process a CSV File 384
+** 12.6. Pretending that a String Is a File 387
+** 12.7. Using Serialization 389
+** 12.8. Listing Files in a Directory 391
+** 12.9. Listing Subdirectories Beneath a Directory 392
+** 12.10. Executing External Commands 394
+** 12.11. Executing External Commands and Using STDOUT 397
+** 12.12. Handling STDOUT and STDERR for External Commands 399
+** 12.13. Building a Pipeline of Commands 401
+** 12.14. Redirecting the STDOUT and STDIN of External Commands 402
+** 12.15. Using AND (&&) and OR (||) with Processes 404
+** 12.16. Handling Wildcard Characters in External Commands 405
+** 12.17. How to Run a Process in a Different Directory 406
+** 12.18. Setting Environment Variables When Running Commands 407
+** 12.19. An Index of Methods to Execute External Commands 408
+* 13. Actors and Concurrency 411
+** 13.1. Getting Started with a Simple Actor 414
+** 13.2. Creating an Actor Whose Class Constructor Requires Arguments 418
+** 13.3. How to Communicate Between Actors 419
+** 13.4. Understanding the Methods in the Akka Actor Lifecycle 422
+** 13.5. Starting an Actor 425
+** 13.6. Stopping Actors 427
+** 13.7. Shutting Down the Akka Actor System 432
+** 13.8. Monitoring the Death of an Actor with watch 433
+** 13.9. Simple Concurrency with Futures 436
+** 13.10. Sending a Message to an Actor and Waiting for a Reply 445
+** 13.11. Switching Between Different States with become 446
+** 13.12. Using Parallel Collections 448
+* 14. Command-Line Tasks 453
+** 14.1. Getting Started with the Scala REPL 454
+** 14.2. Pasting and Loading Blocks of Code into the REPL 459
+** 14.3. Adding JAR Files and Classes to the REPL Classpath 461
+** 14.4. Running a Shell Command from the REPL 462
+** 14.5. Compiling with scalac and Running with scala 465
+** 14.6. Disassembling and Decompiling Scala Code 466
+** 14.7. Finding Scala Libraries 471
+** 14.8. Generating Documentation with scaladoc 472
+** 14.9. Faster Command-Line Compiling with fsc 479
+** 14.10. Using Scala as a Scripting Language 480
+** 14.11. Accessing Command-Line Arguments from a Script 483
+** 14.12. Prompting for Input from a Scala Shell Script 485
+** 14.13. Make Your Scala Scripts Run Faster 489
+* 15. Web Services491
+** 15.1. Creating a JSON String from a Scala Object 491
+** 15.2. Creating a JSON String from Classes That Have Collections 495
+** 15.3. Creating a Simple Scala Object from a JSON String 500
+** 15.4. Parsing JSON Data into an Array of Objects 501
+** 15.5. Creating Web Services with Scalatra 503
+** 15.6. Replacing XML Servlet Mappings with Scalatra Mounts 507
+** 15.7. Accessing Scalatra Web Service GET Parameters 509
+** 15.8. Accessing POST Request Data with Scalatra 510
+** 15.9. Creating a Simple GET Request Client 514
+** 15.10. Sending JSON Data to a POST URL 518
+** 15.11. Getting URL Headers 519
+** 15.12. Setting URL Headers When Sending a Request 520
+** 15.13. Creating a GET Request Web Service with the Play Framework 521
+** 15.14. POSTing JSON Data to a Play Framework Web Service 524
+* 16. Databases and Persistence 527
+** 16.1. Connecting to MySQL with JDBC 528
+** 16.2. Connecting to a Database with the Spring Framework 530
+** 16.3. Connecting to MongoDB and Inserting Data 533
+** 16.4. Inserting Documents into MongoDB with insert, save, or += 537
+** 16.5. Searching a MongoDB Collection 539
+** 16.6. Updating Documents in a MongoDB Collection 542
+** 16.7. Accessing the MongoDB Document ID Field 544
+** 16.8. Deleting Documents in a MongoDB Collection 545
+** 16.9. A Quick Look at Slick 547
+* 17. Interacting with Java 549
+** 17.1. Going to and from Java Collections 549
+** 17.2. Add Exception Annotations to Scala Methods to Work with Java 554
+** 17.3. Using @SerialVersionUID and Other Annotations 556
+** 17.4. Using the Spring Framework 557
+** 17.5. Annotating varargs Methods 560
+** 17.6. When Java Code Requires JavaBeans 562
+** 17.7. Wrapping Traits with Implementations 565
+* 18. The Simple Build Tool (SBT) 569
+** 18.1. Creating a Project Directory Structure for SBT 570
+** 18.2. Compiling, Running, and Packaging a Scala Project with SBT 574
+** 18.3. Running Tests with SBT and ScalaTest 579
+** 18.4. Managing Dependencies with SBT 581
+** 18.5. Controlling Which Version of a Managed Dependency Is Used 584
+** 18.6. Creating a Project with Subprojects 586
+** 18.7. Using SBT with Eclipse 588
+** 18.8. Generating Project API Documentation 590
+** 18.9. Specifying a Main Class to Run 591
+** 18.10. Using GitHub Projects as Project Dependencies 593
+** 18.11. Telling SBT How to Find a Repository (Working with Resolvers) 595
+** 18.12. Resolving Problems by Getting an SBT Stack Trace 596
+** 18.13. Setting the SBT Log Level 597
+** 18.14. Deploying a Single, Executable JAR File 597
+** 18.15. Publishing Your Library 601
+** 18.16. Using Build.scala Instead of build.sbt 602
+** 18.17. Using a Maven Repository Library with SBT 604
+** 18.18. Building a Scala Project with Ant 606
+* 19. Types 611
+** 19.1. Creating Classes That Use Generic Types 614
+** 19.2. Creating a Method That Takes a Simple Generic Type 617
+** 19.3. Using Duck Typing (Structural Types) 618
+** 19.4. Make Mutable Collections Invariant 620
+** 19.5. Make Immutable Collections Covariant 622
+** 19.6. Create a Collection Whose Elements Are All of Some Base Type 624
+** 19.7. Selectively Adding New Behavior to a Closed Model 627
+** 19.8. Building Functionality with Types 630
+* 20. Idioms 635
+** 20.1. Create Methods with No Side Effects (Pure Functions) 636
+** 20.2. Prefer Immutable Objects 644
+** 20.3. Think “Expression-Oriented Programming” 647
+** 20.4. Use Match Expressions and Pattern Matching 650
+** 20.5. Eliminate null Values from Your Code 654
+** 20.6. Using the Option/Some/None Pattern 658
+* Index 667
+* TODO TodoList
