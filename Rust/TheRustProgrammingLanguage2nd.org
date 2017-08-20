@@ -1,0 +1,2649 @@
+#+TITLE: The Rust Programming Language
+#+VERSION: 2nd
+#+AUTHOR: Community
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[1. Introduction][1. Introduction]]
+  - [[1.1. Installation][1.1. Installation]]
+    - [[Installing on Linux or Mac][Installing on Linux or Mac]]
+    - [[Installing on Windows][Installing on Windows]]
+    - [[Custom installations][Custom installations]]
+    - [[Updating][Updating]]
+    - [[Uninstalling][Uninstalling]]
+    - [[Troubleshooting][Troubleshooting]]
+    - [[Local documentation][Local documentation]]
+  - [[1.2. Hello, World!][1.2. Hello, World!]]
+    - [[Creating a Project Directory][Creating a Project Directory]]
+    - [[Writing and Running a Rust Program][Writing and Running a Rust Program]]
+    - [[Anatomy of a Rust Program][Anatomy of a Rust Program]]
+    - [[Compiling and Running Are Separate Steps][Compiling and Running Are Separate Steps]]
+    - [[Hello, Cargo!][Hello, Cargo!]]
+      - [[Creating a Project with Cargo][Creating a Project with Cargo]]
+      - [[Building and Running a Cargo Project][Building and Running a Cargo Project]]
+      - [[Building for Release][Building for Release]]
+      - [[Cargo as Convention][Cargo as Convention]]
+- [[2. Guessing Game Tutorial][2. Guessing Game Tutorial]]
+  - [[Setting Up a New Project][Setting Up a New Project]]
+    - [[Processing a Guess][Processing a Guess]]
+    - [[Storing Values with Variables][Storing Values with Variables]]
+    - [[Handling Potential Failure with the ~Result~ Type][Handling Potential Failure with the ~Result~ Type]]
+    - [[Printing Values with ~println!~ Placeholders][Printing Values with ~println!~ Placeholders]]
+    - [[Testing the First Part][Testing the First Part]]
+  - [[Generating a Secret Number][Generating a Secret Number]]
+    - [[Using a Crate to Get More Functionality][Using a Crate to Get More Functionality]]
+    - [[The =Cargo.lock= File Ensures Reproducible Builds][The =Cargo.lock= File Ensures Reproducible Builds]]
+    - [[Updating a Crate to Get a New Version][Updating a Crate to Get a New Version]]
+    - [[Generating a Random Number][Generating a Random Number]]
+  - [[Comparing the Guess to the Secret Number][Comparing the Guess to the Secret Number]]
+  - [[Allowing Multiple Guesses with Looping][Allowing Multiple Guesses with Looping]]
+    - [[Quitting After a Correct Guess][Quitting After a Correct Guess]]
+    - [[Handling Invalid Input][Handling Invalid Input]]
+  - [[Summary][Summary]]
+- [[3. Common Programming Concepts][3. Common Programming Concepts]]
+  - [[3.1. Variables and Mutability][3.1. Variables and Mutability]]
+    - [[Differences Between Variables and Constants][Differences Between Variables and Constants]]
+    - [[Shadowing][Shadowing]]
+  - [[3.2. Data Types][3.2. Data Types]]
+    - [[Scalar Types][Scalar Types]]
+      - [[Integer Types][Integer Types]]
+      - [[Floating-Point Types][Floating-Point Types]]
+      - [[Numeric Operations][Numeric Operations]]
+      - [[The Boolean Type][The Boolean Type]]
+      - [[The Character Type][The Character Type]]
+    - [[Compound Types][Compound Types]]
+      - [[Grouping Values into Tuples][Grouping Values into Tuples]]
+      - [[Arrays][Arrays]]
+  - [[3.3. How Functions Work][3.3. How Functions Work]]
+    - [[Function Parameters][Function Parameters]]
+    - [[Function Bodies][Function Bodies]]
+    - [[Statements and Expressions][Statements and Expressions]]
+    - [[Functions with Return Values][Functions with Return Values]]
+  - [[3.4. Comments][3.4. Comments]]
+  - [[3.5. Control Flow][3.5. Control Flow]]
+    - [[~if~ Expressions][~if~ Expressions]]
+    - [[Multiple Conditions with ~else if~][Multiple Conditions with ~else if~]]
+    - [[Using ~if~ in a ~let~ statement][Using ~if~ in a ~let~ statement]]
+    - [[Repetition with Loops][Repetition with Loops]]
+      - [[Repeating Code with ~loop~][Repeating Code with ~loop~]]
+      - [[Conditional Loops with ~while~][Conditional Loops with ~while~]]
+      - [[Looping Through a Collection with ~for~][Looping Through a Collection with ~for~]]
+    - [[Summary][Summary]]
+- [[4. Understanding Ownership][4. Understanding Ownership]]
+  - [[4.1. What is Ownership?][4.1. What is Ownership?]]
+    - [[Ownership Rules][Ownership Rules]]
+    - [[Variable Scope][Variable Scope]]
+    - [[The ~String~ Type][The ~String~ Type]]
+    - [[Memory and Allocation][Memory and Allocation]]
+      - [[Ways Variables and Data Interact: Move][Ways Variables and Data Interact: Move]]
+      - [[Ways Variables and Data Interact: Clone][Ways Variables and Data Interact: Clone]]
+      - [[Stack-Only Data: Copy][Stack-Only Data: Copy]]
+    - [[Ownership and Functions][Ownership and Functions]]
+    - [[Return Values and Scope][Return Values and Scope]]
+  - [[4.2. References & Borrowing][4.2. References & Borrowing]]
+    - [[Mutable References][Mutable References]]
+    - [[Dangling References][Dangling References]]
+    - [[The Rules of References][The Rules of References]]
+  - [[4.3. Slices][4.3. Slices]]
+    - [[String Slices][String Slices]]
+    - [[String Literals Are Slices][String Literals Are Slices]]
+    - [[String Slices as Parameters][String Slices as Parameters]]
+    - [[Other Slices][Other Slices]]
+    - [[Summary][Summary]]
+- [[5. Using Structs to Structure Related Data][5. Using Structs to Structure Related Data]]
+  - [[5.1. Defining and Instantiating Structs][5.1. Defining and Instantiating Structs]]
+    - [[Field Init Shorthand when Variables Have the Same Name as Fields][Field Init Shorthand when Variables Have the Same Name as Fields]]
+    - [[Creating Instances From Other Instances With Struct Update Syntax][Creating Instances From Other Instances With Struct Update Syntax]]
+    - [[Tuple Structs without Named Fields to Create Different Types][Tuple Structs without Named Fields to Create Different Types]]
+    - [[Unit-Like Structs without Any Fields][Unit-Like Structs without Any Fields]]
+  - [[5.2. An Example Program Using Structs][5.2. An Example Program Using Structs]]
+    - [[Refactoring with Tuples][Refactoring with Tuples]]
+    - [[Refactoring with Structs: Adding More Meaning][Refactoring with Structs: Adding More Meaning]]
+    - [[Adding Useful Functionality with Derived Traits][Adding Useful Functionality with Derived Traits]]
+  - [[5.3. Method Syntax][5.3. Method Syntax]]
+    - [[Defining Methods][Defining Methods]]
+    - [[Methods with More Parameters][Methods with More Parameters]]
+    - [[Associated Functions][Associated Functions]]
+    - [[Summary][Summary]]
+- [[6. Enums and Pattern Matching][6. Enums and Pattern Matching]]
+  - [[6.1. Defining an Enum][6.1. Defining an Enum]]
+    - [[Enum Values][Enum Values]]
+    - [[The ~Option~ Enum and Its Advantages Over Null Values][The ~Option~ Enum and Its Advantages Over Null Values]]
+  - [[6.2. The ~match~ Control Flow Operator][6.2. The ~match~ Control Flow Operator]]
+    - [[Patterns that Bind to Values][Patterns that Bind to Values]]
+    - [[Matching with ~Option<T>~][Matching with ~Option<T>~]]
+    - [[Matching ~Some(T)~][Matching ~Some(T)~]]
+    - [[Matching ~None~][Matching ~None~]]
+    - [[Matches Are Exhaustive][Matches Are Exhaustive]]
+    - [[The ~_~ Placeholder][The ~_~ Placeholder]]
+  - [[6.3. Concise Control Flow with ~if let~][6.3. Concise Control Flow with ~if let~]]
+    - [[Summary][Summary]]
+- [[7. Modules][7. Modules]]
+  - [[7.1. ~mod~ and the Filesystem][7.1. ~mod~ and the Filesystem]]
+    - [[Module Definitions][Module Definitions]]
+    - [[Moving Modules to Other Files][Moving Modules to Other Files]]
+    - [[Rules of Module Filesystems][Rules of Module Filesystems]]
+  - [[7.2. Controlling Visibility with ~pub~][7.2. Controlling Visibility with ~pub~]]
+    - [[Making a Function Public][Making a Function Public]]
+    - [[Privacy Rules][Privacy Rules]]
+    - [[Privacy Examples][Privacy Examples]]
+      - [[Looking at the Errors][Looking at the Errors]]
+      - [[Fixing the Errors][Fixing the Errors]]
+  - [[7.3. Importing Names with use][7.3. Importing Names with use]]
+    - [[Concise Imports with ~use~][Concise Imports with ~use~]]
+    - [[Glob Imports with ~*~][Glob Imports with ~*~]]
+    - [[Using ~super~ to Access a Parent Module][Using ~super~ to Access a Parent Module]]
+    - [[Summary][Summary]]
+- [[8. Common Collections][8. Common Collections]]
+  - [[8.1. Vectors][8.1. Vectors]]
+    - [[Creating a New Vector][Creating a New Vector]]
+    - [[Updating a Vector][Updating a Vector]]
+    - [[Dropping a Vector Drops its Elements][Dropping a Vector Drops its Elements]]
+    - [[Reading Elements of Vectors][Reading Elements of Vectors]]
+      - [[Invalid References][Invalid References]]
+    - [[Using an Enum to Store Multiple Types][Using an Enum to Store Multiple Types]]
+  - [[8.2. Strings][8.2. Strings]]
+    - [[What is a String?][What is a String?]]
+    - [[Creating a New String][Creating a New String]]
+    - [[Updating a String][Updating a String]]
+      - [[Appending to a String with Push][Appending to a String with Push]]
+      - [[Concatenation with the ~+~ Operator or the ~format!~ Macro][Concatenation with the ~+~ Operator or the ~format!~ Macro]]
+    - [[Indexing into String][Indexing into String]]
+      - [[Internal Representation][Internal Representation]]
+      - [[Bytes and Scalar Values and Grapheme Clusters! Oh my!][Bytes and Scalar Values and Grapheme Clusters! Oh my!]]
+      - [[Slicing Strings][Slicing Strings]]
+      - [[Methods for Iterating Over Strings][Methods for Iterating Over Strings]]
+      - [[Strings are Not so Simple][Strings are Not so Simple]]
+  - [[8.3. Hash Maps][8.3. Hash Maps]]
+    - [[Creating a New Hash Map][Creating a New Hash Map]]
+    - [[Hash Maps and Ownership][Hash Maps and Ownership]]
+    - [[Accessing Values in a Hash Map][Accessing Values in a Hash Map]]
+    - [[Updating a Hash Map][Updating a Hash Map]]
+      - [[Overwriting a Value][Overwriting a Value]]
+      - [[Only Insert If the Key Has No Value][Only Insert If the Key Has No Value]]
+      - [[Update a Value Based on the Old Value][Update a Value Based on the Old Value]]
+      - [[Hashing Function][Hashing Function]]
+      - [[Summary][Summary]]
+- [[9. Error Handling][9. Error Handling]]
+  - [[9.1. Unrecoverable Errors with ~panic!~][9.1. Unrecoverable Errors with ~panic!~]]
+    - [[Using a ~panic!~ Backtrace][Using a ~panic!~ Backtrace]]
+  - [[9.2. Recoverable Errors with ~Result~][9.2. Recoverable Errors with ~Result~]]
+    - [[Matching on Different Errors][Matching on Different Errors]]
+    - [[Shortcuts for Panic on Error: ~unwrap~ and ~expect~][Shortcuts for Panic on Error: ~unwrap~ and ~expect~]]
+    - [[Propagating Errors][Propagating Errors]]
+    - [[A Shortcut for Propagating Errors: ~?~][A Shortcut for Propagating Errors: ~?~]]
+    - [[~?~ Can Only Be Used in Functions That Return ~Result~][~?~ Can Only Be Used in Functions That Return ~Result~]]
+  - [[9.3. To ~panic!~ or Not To ~panic!~][9.3. To ~panic!~ or Not To ~panic!~]]
+    - [[Examples, Prototype Code, and Tests: Perfectly Fine to Panic][Examples, Prototype Code, and Tests: Perfectly Fine to Panic]]
+    - [[Cases When You Have More Information Than The Compiler][Cases When You Have More Information Than The Compiler]]
+    - [[Guidelines for Error Handling][Guidelines for Error Handling]]
+    - [[Creating Custom Types for Validation][Creating Custom Types for Validation]]
+    - [[Summary][Summary]]
+- [[10. Generic Types, Traits, and Lifetimes][10. Generic Types, Traits, and Lifetimes]]
+    - [[Removing Duplication by Extracting a Function][Removing Duplication by Extracting a Function]]
+  - [[10.1. Generic Data Types][10.1. Generic Data Types]]
+    - [[Using Generic Data Types in Function Definitions][Using Generic Data Types in Function Definitions]]
+    - [[Using Generic Data Types in Struct Definitions][Using Generic Data Types in Struct Definitions]]
+    - [[Using Generic Data Types in Enum Definitions][Using Generic Data Types in Enum Definitions]]
+    - [[Using Generic Data Types in Method Definitions][Using Generic Data Types in Method Definitions]]
+    - [[Performance of Code Using Generics][Performance of Code Using Generics]]
+  - [[10.2. Traits: Defining Shared Behavior][10.2. Traits: Defining Shared Behavior]]
+    - [[Defining a Trait][Defining a Trait]]
+    - [[Implementing a Trait on a Type][Implementing a Trait on a Type]]
+    - [[Default Implementations][Default Implementations]]
+    - [[Trait Bounds][Trait Bounds]]
+    - [[Fixing the ~largest~ Function with Trait Bounds][Fixing the ~largest~ Function with Trait Bounds]]
+  - [[10.3. Validating References with Lifetimes][10.3. Validating References with Lifetimes]]
+    - [[Lifetimes Prevent Dangling References][Lifetimes Prevent Dangling References]]
+    - [[The Borrow Checker][The Borrow Checker]]
+    - [[Generic Lifetimes in Functions][Generic Lifetimes in Functions]]
+    - [[Lifetime Annotation Syntax][Lifetime Annotation Syntax]]
+    - [[Lifetime Annotations in Function Signatures][Lifetime Annotations in Function Signatures]]
+    - [[Thinking in Terms of Lifetimes][Thinking in Terms of Lifetimes]]
+    - [[Lifetime Annotations in Struct Definitions][Lifetime Annotations in Struct Definitions]]
+    - [[Lifetime Elision][Lifetime Elision]]
+    - [[Lifetime Annotations in Method Definitions][Lifetime Annotations in Method Definitions]]
+    - [[The Static Lifetime][The Static Lifetime]]
+    - [[Generic Type Parameters, Trait Bounds, and Lifetimes Together][Generic Type Parameters, Trait Bounds, and Lifetimes Together]]
+    - [[Summary][Summary]]
+- [[11. Testing][11. Testing]]
+  - [[11.1. How to Write Tests][11.1. How to Write Tests]]
+    - [[The Anatomy of a Test Function][The Anatomy of a Test Function]]
+    - [[Checking Results with the ~assert!~ Macro][Checking Results with the ~assert!~ Macro]]
+    - [[Testing Equality with the ~assert_eq!~ and ~assert_ne!~ Macros][Testing Equality with the ~assert_eq!~ and ~assert_ne!~ Macros]]
+    - [[Custom Failure Messages][Custom Failure Messages]]
+    - [[Checking for Panics with ~should_panic~][Checking for Panics with ~should_panic~]]
+  - [[11.2. Controlling How Tests are Run][11.2. Controlling How Tests are Run]]
+    - [[Running Tests in Parallel or Consecutively][Running Tests in Parallel or Consecutively]]
+    - [[Showing Function Output][Showing Function Output]]
+    - [[Running a Subset of Tests by Name][Running a Subset of Tests by Name]]
+      - [[Running Single Tests][Running Single Tests]]
+      - [[Filtering to Run Multiple][Filtering to Run Multiple]]
+      - [[Ignore Some Tests Unless Specifically Requested][Ignore Some Tests Unless Specifically Requested]]
+  - [[11.3. Test Organization][11.3. Test Organization]]
+    - [[Unit Tests][Unit Tests]]
+      - [[The Tests Module and ~#[cfg(test)]~][The Tests Module and ~#[cfg(test)]~]]
+      - [[Testing Private Functions][Testing Private Functions]]
+    - [[Integration Tests][Integration Tests]]
+      - [[The =tests= Directory][The =tests= Directory]]
+      - [[Submodules in integration Tests][Submodules in integration Tests]]
+      - [[Integration Tests for Binary Crates][Integration Tests for Binary Crates]]
+    - [[Summary][Summary]]
+- [[12. An I/O Project][12. An I/O Project]]
+  - [[12.1. Accepting Command Line Arguments][12.1. Accepting Command Line Arguments]]
+    - [[Reading the Argument Values][Reading the Argument Values]]
+    - [[Saving the Argument Values in Variables][Saving the Argument Values in Variables]]
+  - [[12.2. Reading a File][12.2. Reading a File]]
+  - [[12.3. Refactoring to Improve Modularity and Error Handling][12.3. Refactoring to Improve Modularity and Error Handling]]
+      - [[Separation of Concerns for Binary Projects][Separation of Concerns for Binary Projects]]
+      - [[Extracting the Argument Parser][Extracting the Argument Parser]]
+      - [[Grouping Configuration Values][Grouping Configuration Values]]
+      - [[Creating a Constructor for ~Config~][Creating a Constructor for ~Config~]]
+      - [[Fixing the Error Handling][Fixing the Error Handling]]
+      - [[Extracting a ~run~ Function][Extracting a ~run~ Function]]
+      - [[Split Code into a Library Crate][Split Code into a Library Crate]]
+      - [[Calling the Library Crate from the Binary Crate][Calling the Library Crate from the Binary Crate]]
+  - [[12.4. Testing the Library's Functionality][12.4. Testing the Library's Functionality]]
+    - [[Writing a Failing Test][Writing a Failing Test]]
+    - [[Writing Code that Gets the Test to Pass][Writing Code that Gets the Test to Pass]]
+      - [[Iterating Through Lines with the ~lines~ method][Iterating Through Lines with the ~lines~ method]]
+      - [[Searching Each Line for the Query][Searching Each Line for the Query]]
+      - [[Storing Matching Lines][Storing Matching Lines]]
+      - [[Using the ~search~ Function in the ~run~ Function][Using the ~search~ Function in the ~run~ Function]]
+  - [[12.5. Working with Environment Variables][12.5. Working with Environment Variables]]
+    - [[Writing a Failing Test for the Case-Insensitive search Function][Writing a Failing Test for the Case-Insensitive search Function]]
+    - [[Implementing the ~search_case_insensitive~ Function][Implementing the ~search_case_insensitive~ Function]]
+  - [[12.6. Writing to ~stderr~ instead of ~stdout~][12.6. Writing to ~stderr~ instead of ~stdout~]]
+    - [[Summary][Summary]]
+- [[13. Functional Language Features in Rust][13. Functional Language Features in Rust]]
+  - [[13.1. Closures: Anonymous Functions that can Capture their Environment][13.1. Closures: Anonymous Functions that can Capture their Environment]]
+    - [[Creating an Abstraction of Behavior Using a Closure][Creating an Abstraction of Behavior Using a Closure]]
+    - [[Closures Store Code to be Extracted Later][Closures Store Code to be Extracted Later]]
+    - [[Closures Type Inference and Annotation][Closures Type Inference and Annotation]]
+    - [[Using Closures with Generic Parameters and the ~Fn~ Traits][Using Closures with Generic Parameters and the ~Fn~ Traits]]
+    - [[Closures Can Capture Their Environment][Closures Can Capture Their Environment]]
+  - [[13.2. Processing a Series of Items with Iterators][13.2. Processing a Series of Items with Iterators]]
+    - [[The ~Iterator~ trait and the ~next~ method][The ~Iterator~ trait and the ~next~ method]]
+    - [[Methods in the ~Iterator~ Trait that Consume the Iterator][Methods in the ~Iterator~ Trait that Consume the Iterator]]
+    - [[Methods in the ~Iterator~ Trait that Produce Other Iterators][Methods in the ~Iterator~ Trait that Produce Other Iterators]]
+    - [[Using Closures that Capture their Environment with Iterators][Using Closures that Capture their Environment with Iterators]]
+    - [[Implementing the ~Iterator~ Trait to Create Our Own Iterators][Implementing the ~Iterator~ Trait to Create Our Own Iterators]]
+      - [[Using Our ~Counter~ Iterator's ~next~ Method][Using Our ~Counter~ Iterator's ~next~ Method]]
+      - [[Using Other ~Iterator~ Trait Methods on Our Iterator][Using Other ~Iterator~ Trait Methods on Our Iterator]]
+  - [[13.3. Improving our I/O Project][13.3. Improving our I/O Project]]
+    - [[Removing a ~clone~ Using an Iterator][Removing a ~clone~ Using an Iterator]]
+      - [[Using the Iterator Returned by ~env::args~ Directly][Using the Iterator Returned by ~env::args~ Directly]]
+      - [[Using ~Iterator~ Trait Methods Instead of Indexing][Using ~Iterator~ Trait Methods Instead of Indexing]]
+    - [[Making Code Clearer with Iterator Adaptors][Making Code Clearer with Iterator Adaptors]]
+  - [[13.4. Comparing Performance: Loops versus Iterators][13.4. Comparing Performance: Loops versus Iterators]]
+    - [[Summary][Summary]]
+- [[14. More about Cargo and Crates.io][14. More about Cargo and Crates.io]]
+  - [[14.1. Release Profiles][14.1. Release Profiles]]
+  - [[14.2. Publishing a Crate to Crates.io][14.2. Publishing a Crate to Crates.io]]
+    - [[Documentation Comments][Documentation Comments]]
+    - [[Exporting a Convenient Public API with ~pub use~][Exporting a Convenient Public API with ~pub use~]]
+    - [[Before Your First Publish][Before Your First Publish]]
+    - [[Before Publishing a New Crate][Before Publishing a New Crate]]
+    - [[Publishing to Crates.io][Publishing to Crates.io]]
+    - [[Publishing a New Version of an Existing Crate][Publishing a New Version of an Existing Crate]]
+    - [[Removing Versions from Crate.io with ~cargo yank~][Removing Versions from Crate.io with ~cargo yank~]]
+  - [[14.3. Cargo Workspaces][14.3. Cargo Workspaces]]
+  - [[14.4. Installing Binaries from Crates.io with ~cargo install~][14.4. Installing Binaries from Crates.io with ~cargo install~]]
+  - [[14.5. Extending Cargo with Custom Commands][14.5. Extending Cargo with Custom Commands]]
+    - [[Summary][Summary]]
+- [[15. Smart Pointers][15. Smart Pointers]]
+  - [[15.1. ~Box<T>~ Points to Data on the Heap and Has a Known Size][15.1. ~Box<T>~ Points to Data on the Heap and Has a Known Size]]
+  - [[15.2. The ~Deref~ Trait Allows Access to the Data Through a Reference][15.2. The ~Deref~ Trait Allows Access to the Data Through a Reference]]
+    - [[Implicit Deref Coercions with Functions and Methods][Implicit Deref Coercions with Functions and Methods]]
+  - [[15.3. The ~Drop~ Trait Runs Code on Cleanup][15.3. The ~Drop~ Trait Runs Code on Cleanup]]
+  - [[15.4. ~Rc<T>~, the Reference Counted Smart Pointer][15.4. ~Rc<T>~, the Reference Counted Smart Pointer]]
+    - [[Using ~Rc<T>~ to Share Data][Using ~Rc<T>~ to Share Data]]
+    - [[Cloning an ~Rc<T>~ Increases the Reference Count][Cloning an ~Rc<T>~ Increases the Reference Count]]
+  - [[15.5. ~RefCell<T>~ and the Interior Mutability Pattern][15.5. ~RefCell<T>~ and the Interior Mutability Pattern]]
+    - [[~RefCell<T>~ has Interior Mutability][~RefCell<T>~ has Interior Mutability]]
+    - [[Borrowing Rules are Checked at Runtime on ~RefCell<T>~][Borrowing Rules are Checked at Runtime on ~RefCell<T>~]]
+    - [[Multiple Owners of Mutable Data by Combining ~Rc<T>~ and ~RefCell<T>~][Multiple Owners of Mutable Data by Combining ~Rc<T>~ and ~RefCell<T>~]]
+  - [[15.6. Creating Reference Cycles and Leaking Memory is Safe][15.6. Creating Reference Cycles and Leaking Memory is Safe]]
+    - [[Prevent Reference Cycles: Turn an ~Rc<T>~ into a ~Weak<T>~][Prevent Reference Cycles: Turn an ~Rc<T>~ into a ~Weak<T>~]]
+    - [[Summary][Summary]]
+- [[16. Fearless Concurrency][16. Fearless Concurrency]]
+  - [[16.1. Using Threads to Run Code Simultaneously][16.1. Using Threads to Run Code Simultaneously]]
+    - [[Creating a New Thread with ~spawn~][Creating a New Thread with ~spawn~]]
+    - [[Waiting for All Threads to Finish Using ~join~ Handles][Waiting for All Threads to Finish Using ~join~ Handles]]
+    - [[Using ~move~ Closures with Threads][Using ~move~ Closures with Threads]]
+  - [[16.2. Message Passing to Transfer Data Between Threads][16.2. Message Passing to Transfer Data Between Threads]]
+    - [[How Channels Interact with Ownership][How Channels Interact with Ownership]]
+    - [[Sending Multiple Values and Seeing the Receiver Waiting][Sending Multiple Values and Seeing the Receiver Waiting]]
+    - [[Create Multiple Producers by Cloning the Transmitter][Create Multiple Producers by Cloning the Transmitter]]
+  - [[16.3. Shared State Concurrency][16.3. Shared State Concurrency]]
+    - [[Mutexes Allow Access to Data from One Thread at a Time][Mutexes Allow Access to Data from One Thread at a Time]]
+    - [[The API of ~Mutex<T>~][The API of ~Mutex<T>~]]
+    - [[Sharing a ~Mutex<T>~ Between Multiple Threads][Sharing a ~Mutex<T>~ Between Multiple Threads]]
+    - [[Multiple Ownership with Multiple Threads][Multiple Ownership with Multiple Threads]]
+    - [[Atomic Reference Counting with ~Arc<T>~][Atomic Reference Counting with ~Arc<T>~]]
+  - [[16.4. Extensible Concurrency with the ~Sync~ and ~Send~ Traits][16.4. Extensible Concurrency with the ~Sync~ and ~Send~ Traits]]
+    - [[~Send~ for Indicating Ownership May Be Transferred to Another Thread][~Send~ for Indicating Ownership May Be Transferred to Another Thread]]
+    - [[~Sync~ for Indicating Access from Multiple Threads is Safe][~Sync~ for Indicating Access from Multiple Threads is Safe]]
+    - [[Implementing ~Send~ and ~Sync~ Manually is Unsafe][Implementing ~Send~ and ~Sync~ Manually is Unsafe]]
+    - [[Summary][Summary]]
+- [[17. Is Rust an Object-Oriented Programming Language?][17. Is Rust an Object-Oriented Programming Language?]]
+  - [[17.1. What Does Object-Oriented Mean?][17.1. What Does Object-Oriented Mean?]]
+    - [[Objects Contain Data and Behavior][Objects Contain Data and Behavior]]
+    - [[Encapsulation that Hides Implementation Details][Encapsulation that Hides Implementation Details]]
+    - [[Inheritance as a Type System and as Code Sharing][Inheritance as a Type System and as Code Sharing]]
+  - [[17.2. Trait Objects for Using Values of Different Types][17.2. Trait Objects for Using Values of Different Types]]
+    - [[Defining a Trait for the Common Behavior][Defining a Trait for the Common Behavior]]
+    - [[Implementations of the Trait from Us or Library Users][Implementations of the Trait from Us or Library Users]]
+    - [[Trait Objects Perform Dynamic Dispatch][Trait Objects Perform Dynamic Dispatch]]
+    - [[Object Safety is Required for Trait Objects][Object Safety is Required for Trait Objects]]
+  - [[17.3. Object-Oriented Design Pattern Implementations][17.3. Object-Oriented Design Pattern Implementations]]
+    - [[Defining Post and Creating a New Instance in the Draft State][Defining Post and Creating a New Instance in the Draft State]]
+    - [[Storing the Text of the Post Content][Storing the Text of the Post Content]]
+    - [[Content of a Draft Post is Empty][Content of a Draft Post is Empty]]
+    - [[Requesting a Review of the Post Changes its State][Requesting a Review of the Post Changes its State]]
+    - [[Approving a Post Changes the Behavior of ~content~][Approving a Post Changes the Behavior of ~content~]]
+    - [[Tradeoffs of the State Pattern][Tradeoffs of the State Pattern]]
+      - [[Encoding States and Behavior as Types][Encoding States and Behavior as Types]]
+      - [[Implementing Transitions as Transformations into Different Types][Implementing Transitions as Transformations into Different Types]]
+    - [[Summary][Summary]]
+- [[18. Patterns Match the Structure of Values][18. Patterns Match the Structure of Values]]
+  - [[18.1. All the Places Patterns May be Used][18.1. All the Places Patterns May be Used]]
+    - [[~match~ Arms][~match~ Arms]]
+    - [[Exhaustiveness and the Default Pattern ~_~][Exhaustiveness and the Default Pattern ~_~]]
+    - [[~if let~ Expressions][~if let~ Expressions]]
+    - [[~while let~][~while let~]]
+    - [[~for~ loops][~for~ loops]]
+    - [[~let~ Statements][~let~ Statements]]
+    - [[Function Parameters][Function Parameters]]
+  - [[18.2. Refutability: Whether a Pattern Might Fail to Match][18.2. Refutability: Whether a Pattern Might Fail to Match]]
+  - [[18.3. All the Pattern Syntax][18.3. All the Pattern Syntax]]
+    - [[Literals][Literals]]
+    - [[Named Variables][Named Variables]]
+    - [[Multiple patterns][Multiple patterns]]
+    - [[Matching Ranges of Values with ~...~][Matching Ranges of Values with ~...~]]
+    - [[Destructuring to Break Apart Values][Destructuring to Break Apart Values]]
+    - [[Ignoring Values in a Pattern][Ignoring Values in a Pattern]]
+      - [[Ignoring an Entire Value with ~_~][Ignoring an Entire Value with ~_~]]
+      - [[Ignoring Parts of a Value with a Nested ~_~][Ignoring Parts of a Value with a Nested ~_~]]
+      - [[Ignoring an Unused Variable by Starting its Name with an Underscore][Ignoring an Unused Variable by Starting its Name with an Underscore]]
+      - [[Ignoring Remaining Parts of a Value with ~..~][Ignoring Remaining Parts of a Value with ~..~]]
+    - [[~ref~ and ~ref mut~ to Create References in Patterns][~ref~ and ~ref mut~ to Create References in Patterns]]
+    - [[Extra Conditionals with March Guards][Extra Conditionals with March Guards]]
+    - [[~@~ Bindings][~@~ Bindings]]
+    - [[Summary][Summary]]
+- [[19. Advanced Features][19. Advanced Features]]
+  - [[19.1. Unsafe Rust][19.1. Unsafe Rust]]
+    - [[Unsafe Superpowers][Unsafe Superpowers]]
+    - [[Dereferencing a Raw Pointer][Dereferencing a Raw Pointer]]
+    - [[Calling an Unsafe Function or Method][Calling an Unsafe Function or Method]]
+      - [[creating a Safe Abstraction Over Unsafe Code][creating a Safe Abstraction Over Unsafe Code]]
+      - [[~extern~ Functions for Calling External Code are Unsafe][~extern~ Functions for Calling External Code are Unsafe]]
+      - [[Calling Rust Functions from Other Languages][Calling Rust Functions from Other Languages]]
+    - [[Accessing or Modifying a Mutable Static Variable][Accessing or Modifying a Mutable Static Variable]]
+    - [[Implementing an Unsafe Trait][Implementing an Unsafe Trait]]
+  - [[19.2. Advanced Lifetimes][19.2. Advanced Lifetimes]]
+    - [[Lifetime Subtyping][Lifetime Subtyping]]
+    - [[Lifetime Bounds][Lifetime Bounds]]
+    - [[Trait Object Lifetimes][Trait Object Lifetimes]]
+  - [[19.3. Advanced Traits][19.3. Advanced Traits]]
+    - [[Associated Types][Associated Types]]
+      - [[Associated Types Versus Generics][Associated Types Versus Generics]]
+      - [[Trait Objects with Associated Types][Trait Objects with Associated Types]]
+    - [[Operator Overloading and Default Type Parameters][Operator Overloading and Default Type Parameters]]
+    - [[Fully Qualified Syntax for Disambiguation][Fully Qualified Syntax for Disambiguation]]
+    - [[Supertraits to Use One Trait's Functionality Within Another Trait][Supertraits to Use One Trait's Functionality Within Another Trait]]
+    - [[The Newtype Pattern to Implement External Traits on External Types][The Newtype Pattern to Implement External Traits on External Types]]
+  - [[19.4. Advanced Types][19.4. Advanced Types]]
+    - [[Using the Newtype Pattern for Type Safety and Abstraction][Using the Newtype Pattern for Type Safety and Abstraction]]
+    - [[Type Aliases Create Type Synonyms][Type Aliases Create Type Synonyms]]
+    - [[The Never Type, ~!~, that Never Returns][The Never Type, ~!~, that Never Returns]]
+    - [[Dynamically Sized Types & ~Sized~][Dynamically Sized Types & ~Sized~]]
+      - [[The ~Sized~ Trait][The ~Sized~ Trait]]
+  - [[19.5. Advanced Functions & Closures][19.5. Advanced Functions & Closures]]
+    - [[Function pointers][Function pointers]]
+    - [[Returning Closures][Returning Closures]]
+    - [[Summary][Summary]]
+- [[20. Final Project: Building a Multithreaded Web Server][20. Final Project: Building a Multithreaded Web Server]]
+  - [[20.1. A Single Threaded Web Server][20.1. A Single Threaded Web Server]]
+    - [[Reading the Request][Reading the Request]]
+    - [[Writing a Response][Writing a Response]]
+    - [[Returning Real HTML][Returning Real HTML]]
+    - [[Validating the Request and Selectively Responding][Validating the Request and Selectively Responding]]
+  - [[20.2. How Slow Requests Affect Throughput][20.2. How Slow Requests Affect Throughput]]
+    - [[Simulating a Slow Request in the Current Server Implementation][Simulating a Slow Request in the Current Server Implementation]]
+    - [[Improving Throughput with a Thread Pool][Improving Throughput with a Thread Pool]]
+  - [[20.3. Designing the Thread Pool Interface][20.3. Designing the Thread Pool Interface]]
+    - [[Code Structure if We Could Use ~thread::spawn~][Code Structure if We Could Use ~thread::spawn~]]
+    - [[Creating a Similar Interface for ~ThreadPool~][Creating a Similar Interface for ~ThreadPool~]]
+    - [[Compiler Driven Development to Get the API Compiling][Compiler Driven Development to Get the API Compiling]]
+  - [[20.4. Creating the Thread Pool and Storing Threads][20.4. Creating the Thread Pool and Storing Threads]]
+    - [[Validating the Number of Threads in the Pool][Validating the Number of Threads in the Pool]]
+    - [[Storing Threads in the Pool][Storing Threads in the Pool]]
+  - [[20.5. Sending Requests to Threads Via Channels][20.5. Sending Requests to Threads Via Channels]]
+  - [[20.6. Graceful Shutdown and Cleanup][20.6. Graceful Shutdown and Cleanup]]
+    - [[Summary][Summary]]
+- [[21. Appendix][21. Appendix]]
+  - [[21.1. A - Keywords][21.1. A - Keywords]]
+    - [[Keywords Currently in Use][Keywords Currently in Use]]
+    - [[Keywords Reserved for Future Use][Keywords Reserved for Future Use]]
+  - [[21.2. B - Operators][21.2. B - Operators]]
+    - [[Unary operator expressions][Unary operator expressions]]
+    - [[Binary Operator expressions][Binary Operator expressions]]
+      - [[Arithmetic operators][Arithmetic operators]]
+      - [[Bitwise operators][Bitwise operators]]
+      - [[Lazy boolean operators][Lazy boolean operators]]
+      - [[Comparison operators][Comparison operators]]
+      - [[Type cast expressions][Type cast expressions]]
+      - [[Assignment expressions][Assignment expressions]]
+      - [[Compound assignment expressions][Compound assignment expressions]]
+      - [[Operator precedence][Operator precedence]]
+  - [[21.3. C - Derivable Traits][21.3. C - Derivable Traits]]
+  - [[21.4. D - Nightly Rust][21.4. D - Nightly Rust]]
+  - [[21.5. E - Macros][21.5. E - Macros]]
+  - [[21.6. F - Translations][21.6. F - Translations]]
+  - [[21.7. G - Newest Features][21.7. G - Newest Features]]
+    - [[Field init shorthand][Field init shorthand]]
+    - [[Returning from loops][Returning from loops]]
+
+* DONE 1. Introduction
+  CLOSED: [2017-08-16 Wed 01:46]
+  - Rust package registry site, [[https://crates.io/][crates.io]]
+
+** DONE 1.1. Installation
+   CLOSED: [2017-08-16 Wed 00:43]
+   - Convention: =$= prompt means normal user, and =#= means super user.
+
+*** DONE Installing on Linux or Mac
+    CLOSED: [2017-08-16 Wed 00:35]
+    ~$ curl https://sh.rustup.rs -sSf | sh~
+
+*** TODO Installing on Windows
+*** TODO Custom installations
+*** DONE Updating
+    CLOSED: [2017-08-16 Wed 00:37]
+    ~$ rustup update~
+
+*** DONE Uninstalling
+    CLOSED: [2017-08-16 Wed 00:37]
+    ~$ rustup self uninstall~
+
+*** DONE Troubleshooting
+    - Rust version info:
+      ~$ rustc --version~
+      The output is like:
+      =rustc v.subv.subsubv (abcabcabc yyyy-mm-dd)=
+
+    - =Useful= Where you can get help
+      + IRC channel: irc.mozilla.org
+        This can be accessed through *Mibbit* (a website).
+
+      + the Users forum
+
+    - A silly nickname for rust users: *Rustaceans*
+
+*** DONE Local documentation
+    Run ~rustup doc~ to open the local documentation in your browser.
+
+** DONE 1.2. Hello, World!
+   CLOSED: [2017-08-16 Wed 00:53]
+*** DONE Creating a Project Directory
+    CLOSED: [2017-08-16 Wed 00:48]
+*** DONE Writing and Running a Rust Program
+    CLOSED: [2017-08-16 Wed 00:53]
+    The source code:
+    #+BEGIN_SRC rust
+      // main.rs
+      fn main() {
+          println!("Hello, world!");
+      }
+    #+END_SRC
+
+    ~$ rustc main.rs~
+
+    ~$ ./main~
+    =From Jian=: NOT ~a.out~ anymore!!!
+    The output is ="Hello, world!"=
+
+*** DONE Anatomy of a Rust Program
+    CLOSED: [2017-08-16 Wed 00:53]
+    - ~println!~ is a /Rust macro/.
+      =TODO= Discuss Rust macros in more details in Appendix E.
+      ~!~ means you're calling a macro instead of a normal function.
+
+*** DONE Compiling and Running Are Separate Steps
+    CLOSED: [2017-08-16 Wed 00:53]
+    The command is mentioned in the _Writing and Running a Rust Program_ section.
+
+*** DONE Hello, Cargo!
+    CLOSED: [2017-08-16 Wed 01:46]
+    If you installed Rust with the given command (Section 1.1)
+    ~$ curl https://sh.rustup.rs -sSf | sh~, *Cargo* should have been installed. 
+     
+**** DONE Creating a Project with Cargo
+     CLOSED: [2017-08-16 Wed 01:14]
+     ~cargo new hello_cargo --bin~
+     - ~--bin~ argument (to ~cargo new~):
+       make an _executable application_, as opposed to a _library_.
+
+     - The new project contains two visible files:
+       + =Cargo.toml=: a structured plain text file.
+       + =src= folder
+
+     - The new project is also initialized as a _git repository_ with a
+       =.gitignore= file.
+         You can change this to use a different version control system, or no
+       version control system, by using the =-vcs= flag.
+
+     - This simple =Cargo.toml= file:
+       #+BEGIN_SRC toml
+         [package]
+         name = "hello_cargo"
+         version = "0.1.0"
+         authors = ["Your Name <you@example.com>"]
+
+         [dependencies]
+       #+END_SRC
+       This file is the *TOML* (Tom's Obvious, Minimal Language) format.
+       *TOML* is similar to *INI* but has some extra goodies and is used as
+       Cargo's configuration format.
+
+     - The =src/main.rs= file is initialized as a simple _hello world_ program.
+
+     - Cargo expects your source files to live inside the =src= directory
+       so that top-level project directory is just for
+       + =READMEs=
+       + license info
+       + configuration files
+       + anything else not related to your code
+
+     - The first step of converting a non-Cargo Rust project to a Cargo Rust
+       project is to move all the source code to the =src= folder.
+
+**** DONE Building and Running a Cargo Project
+     CLOSED: [2017-08-16 Wed 01:34]
+     - Building:
+       ~$ cargo build~
+
+       The output:
+       =Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)=
+
+     - This should have created an executable file in =target/debug/hello_cargo=.
+
+     - Running:
+       ~$ ./target/debug/hello_cargo~
+
+       The output:
+       ="Hello, world!"=
+
+     - The first time you run ~cargo build~ in a project, a =Cargo.lock= file
+       will be added in the top level of this project.
+       #+BEGIN_SRC toml
+         [root]
+         name = "hello_cargo"
+         version = "0.1.0"
+       #+END_SRC
+
+     - Building and Running:
+       ~$ cargo run~
+
+     - With the help of Cargo, we can use OS independent instructions to work
+       with Rust.
+       
+**** DONE Building for Release
+     CLOSED: [2017-08-16 Wed 01:44]
+     Run ~cargo build --release~, and optimizations will be applied to the
+     compilation process. The executable will be save to the =./target/release=
+     folder.
+
+     - NO flag ~cargo build~ is for quick compile. That's why the output
+       executable is save in a =debug= folder -- it is used for debugging and
+       continuing development.
+
+     - With the ~--release~ flag.
+       To release, the developer should use the send the optimized version (good
+       performance) to the end users, who don't care about the length of the
+       compilation time.
+         This is what ~--release~ do: to get a good performance, compile with
+       optimizations, it can be a slower compilation.
+
+**** DONE Cargo as Convention
+     CLOSED: [2017-08-16 Wed 01:45]
+     You can always expect to do this:
+     ~$ git clone someurl.com/someproject~
+     ~$ cd someproject~
+     ~$ cargo build~
+
+* DONE 2. Guessing Game Tutorial
+  CLOSED: [2017-08-16 Wed 23:32]
+  Generate a random integer between 1 and 100.
+  Try to guess.
+  The program tells you if it is right, too low, or to high?
+  If not right keep guessing.
+  If right print congratulations and exit.
+
+** DONE Setting Up a New Project
+   CLOSED: [2017-08-16 Wed 04:08]
+   ~$ cargo new guessing_game --bin~
+   ~$ cd guessing_game~
+*** DONE Processing a Guess
+    CLOSED: [2017-08-16 Wed 03:47]
+    #+BEGIN_SRC rust
+      // src/main.rs
+
+      use std::io;
+
+      fn main() {
+          println!("Guess the number!");
+
+          println!("Please input your guess.");
+
+          let mut guess = String::new();
+
+          io::stdin().read_line(&mut guess)
+              .expect("Failed to read line");
+
+          println!("You guessed: {}", guess);
+      }
+    #+END_SRC
+
+    - ~std~ means the standard library. ~io~ library comes from the standard
+      library.
+
+    - Use ~use~ when the required libraries are not in the /prelude/.
+
+*** DONE Storing Values with Variables
+    CLOSED: [2017-08-16 Wed 03:47]
+    - ~String~ is a string type provided by the standard library that is a
+      growable, UTF-8 encoded bit of text.
+
+      + The ~::~ syntax in the ~::new~ line indicates that new is an /associated
+        function/ of the ~String~ type.
+
+      + /an associated function/ :: a function that is implemented _on a type_, in
+           this case ~String~, _rather than on a particular instance_ of a ~String~
+           (Some languages call this a static method).
+
+      + ~String::new~ create a new empty string.
+
+    - ~io::stdin~ should be written as ~std::io::stdin~ if you did NOT
+      ~use std::io~.
+
+    - ~read_line(&mut guess)~
+      + A ~read_line~ requires a place to save the string it reads in.
+        That's why ~&~ and ~mut~ are there.
+      + ~&~ indicate that this argument is a /reference/.
+      + ~mut~ gives the permission to make changes to the reference (=??= content).
+
+    - /references/ give you a way to let multiple parts of your code access one
+      piece of data without needing to copy that data into memory multiple
+      times.
+      =TODO=
+
+      + /reference/ is a COMPLEX feature,
+        and
+        one of Rust's major advantages advantages is how safe and easy it is to
+        use /references/.
+        =TODO= Chapter 4
+
+*** DONE Handling Potential Failure with the ~Result~ Type
+    CLOSED: [2017-08-16 Wed 04:05]
+    - ~read_line~ also returns a value -- an ~io::Result~ typed value.
+
+    - Rust has a number of types named ~Result~ in its standard library:
+      a generic ~Rusult~ as well as
+      specific versions for submodules, such as ~io::Result~.
+
+    - The ~Result~ types are /enumerations/, often referred to as ~enums~.
+
+      An enumeration is a type that can have a fixed set of values, and those
+      values are called the enum's /variants/.
+
+      =TODO= CHAPTER 6
+
+    - For ~Result~, the variants are ~Ok~ or ~Err~.
+      + ~Ok~ indicates the operation was successful, and it contains the success-
+        fully generated value.
+
+      + ~Err~ indicates the operation was failed, and it contains info about
+        _how_ and _why_ the operation failed.
+
+    - ~io::Result~ has an ~expect~ method that you can call.
+      + With an ~Err~ value, ~expect~ will cause the program to crash and
+        display the message that you passed as an argument to ~expect~.
+
+      + With an ~Ok~ value, ~expect~ will take the return value that ~Ok~ is
+        holding and return just the value to you.
+
+    - If you have a ~Result~ type value, and you don't use ~expect~ method or try
+      to catch the error (=TODO= CHAPTER 9), The compiler will issue a warning.
+
+*** DONE Printing Values with ~println!~ Placeholders
+    CLOSED: [2017-08-16 Wed 04:07]
+    The ~{}~ syntax for ~println!~ ......
+*** DONE Testing the First Part
+    CLOSED: [2017-08-16 Wed 04:08]
+    ~cargo run~ and try it (we currently only finished the input part).
+** DONE Generating a Secret Number
+   CLOSED: [2017-08-16 Wed 21:26]
+   =This section should re-write=
+   Rust does NOT yet include random number functionality in its standard library.
+   However, the Rust team does provide a ~rand~ crate.
+
+*** DONE Using a Crate to Get More Functionality
+    CLOSED: [2017-08-16 Wed 16:38]
+    - /crate/ is a package of Rust code.
+
+      + The project we've been building is a /binary crate/, which is an
+        executable.
+
+      + The ~rand~ crate is a /library crate/, which contains code intended to be
+        used in other programs.
+
+    - To use a crate in a Rust project, we need to modify the =Cargo.toml= -- add
+      a dependency:
+      #+BEGIN_SRC toml
+        [dependencies]
+        rand = "0.3.14"
+      #+END_SRC
+
+    - Cargo understand [[http://semver.org][Semantic Versioning]] (/SemVer/ for short), which is a
+      standard for writing version numbers.
+        The =0.3.14= is a shorthand for =^0.3.14=, which means "any version that
+      has
+
+    - /Crates.io/ :: a place people in the Rust ecosystem post their open source
+                     Rust projects for others to use.
+
+    - /registry/ :: a copy of data from Crates.io.
+
+    - Now that we have an _external dependency_,
+      Cargo fetches the latest versions of everything from the /registry/.
+
+    - ~$ cargo build~
+      The output is:
+      #+BEGIN_SRC text
+            Updating registry `https://github.com/rust-lang/crates.io-index`
+           Compiling libc v0.2.29
+           Compiling rand v0.3.16
+           Compiling guessing_game v0.3.16 (file:///path_to_your_project_folder_location/guessing_game)
+            Finished dev [unoptimized + debuginfo] target(s) in 3.37 secs
+      #+END_SRC
+
+      =IMPORTANT=:
+      We write the version info as 0.3.14 in =Cargo.toml=.
+      However, when we run ~$ cargo build~, Cargo automatically find and use the
+      latest version that can fit -- according to the SemVer, the =14= and =16=
+      represent version =0.13= with patches with patches, and there shouldn't be
+      API differences.
+      
+*** DONE The =Cargo.lock= File Ensures Reproducible Builds
+    CLOSED: [2017-08-16 Wed 21:26]
+    The first time you run ~$ cargo build~ (or ~$cargo run~) Cargo tries to
+    figure out the versions of the dependencies that fit the criteria and then
+    writes them to the =Cargo.lock= file.
+
+    When you build in the future, Cargo will read =Cargo.lock= rather then tries
+    to figure out the verions of dependencies again through parsing =Cargo.toml=.
+
+    _Remember_: the acutally used versions of dependencies (info is in
+    =Cargo.lock=) are different from the ones written in =Cargo.toml= -- Cargo
+    may choose a higher but fit version.
+
+*** DONE Updating a Crate to Get a New Version
+    CLOSED: [2017-08-16 Wed 21:00]
+    - ~$ cargo update~ will help you to update the dependencies to the lastest
+      fit version.
+
+    - Remember! When you the first time run ~$ cargo build~, Cargo will find the
+      latest fit version. The later build won't change this. If you want to use a
+      newer version, use ~$ cargo update~.
+
+    - If the first time you run ~$ cargo build~ it used version 0.13.14, the
+      later ~$ cargo update~ will choose version _exclusively_ between 0.13.14
+      and 0.4.0.
+
+      If you want a higher version, you must manually update the =Cargo.toml=
+      file.
+
+*** DONE Generating a Random Number
+    CLOSED: [2017-08-16 Wed 21:19]
+    Use ~rand~ and update the =src/main.rs=.
+
+    #+BEGIN_SRC rust
+      extern crate rand;
+
+      use std::io;
+      use rand::Rng;
+
+      fn main() {
+          println!("Guess the number!");
+
+          let secret_number = rand::thread_rng().gen_range(1, 101);
+
+          println!("The secret number is: {}", secret_number);
+
+          println!("Please input your guess.");
+
+          let mut guess = String::new();
+
+          io::stdin().read_line(&mut guess)
+              .expect("Failed to read line");
+
+          println!("You guessed: {}", guess);
+      }
+    #+END_SRC
+
+    - ~Rng~ is a /trait/ that defines methods that random number generators
+      implement, and this /trait/ must be in scope for us to use those methods.
+
+      =TODO= CHAPTER 10
+
+    - ~rand::thread_rng~ function will give us the particular random number
+      generator to be used:
+      one that is
+      + local to the current thread of execution
+      + seeded by the operating system.
+
+    - The ~gen_range~ method is defined by the ~Rng~ trait.
+
+    - Run the ~cargo doc --open~ command that will build documentation provided
+      by all of your dependencies locally and open it in your browser.
+      =IMPORTANT= Then you know what /traits/ you should ~use~.
+
+** DONE Comparing the Guess to the Secret Number
+   CLOSED: [2017-08-16 Wed 23:06]
+   #+BEGIN_SRC rust
+     extern crate rand;
+
+     use std::io;
+     use std::cmp::Ordering;
+     use rand::Rng;
+
+     fn main() {
+         println!("Guess the number!");
+         let secret_number = rand::thread_rng().gen_range(1, 101);
+         println!("The secret number is: {}", secret_number);
+         println!("Please input your guess.");
+         let mut guess = String::new();
+
+         io::stdin().read_line(&mut guess)
+             .expect("Failed to read line");
+
+         println!("You guessed: {}", guess);
+
+         match guess.cmp(&secret_number) {
+             Ordering::Less    => println!("Too small!"),
+             Ordering::Greater => println!("Too big!"),
+             Ordering::Equal   => println!("You win!"),
+         }
+     }
+   #+END_SRC
+
+   - ~Ordering~ is a type, and it has three variants:
+     ~Less~, ~Greater~, and ~Equal~.
+
+   - A ~match~ expression is made up of /arms/.
+
+   - An /arm/ consists of a /pattern/ and the code that should be run when
+     pattern matching can be applied.
+
+   - The code above CANNOT be compiled -- type mismatching:
+     ~guess~ should be a number if we want to compare it with ~secret_number~.
+
+   - Integer types: ~i32~, ~u32~, ~i64~.
+     Rust defaults to an ~i32~, which is the type of ~secret_number~.
+     Here, ~u32~ is more reasonable.
+
+   - The corrected code:
+     #+BEGIN_SRC rust
+       extern crate rand;
+
+       use std::io;
+       use std::cmp::Ordering;
+       use rand::Rng;
+
+       fn main() {
+           println!("Guess the number!");
+           let secret_number = rand::thread_rng().gen_range(1, 101);
+           println!("The secret number is: {}", secret_number);
+           println!("Please input your guess.");
+
+           let mut guess = String::new();
+
+           io::stdin().read_line(&mut guess)
+               .expect("Failed to read line");
+
+           println!("You guessed: {}", guess);
+
+           let guess: u32 = guess.trim().parse()
+               .expect("Please type a number!");
+
+           match guess.cmp(&secret_number) {
+               Ordering::Less    => println!("Too small!"),
+               Ordering::Greater => println!("Too big!"),
+               Ordering::Equal   => println!("You win!"),
+           }
+       }
+     #+END_SRC
+
+     + I DO NOT like the /shadow/ feature. Here is what I prefered:
+       =TODO= CHAPTER 3 - about the /shadow/ feature.
+       #+BEGIN_SRC rust
+         extern crate rand;
+
+         use std::io;
+         use std::cmp::Ordering;
+         use rand::Rng;
+
+         fn main() {
+             println!("Guess the number!");
+             let secret_number = rand::thread_rng().gen_range(1, 101);
+             println!("The secret number is: {}", secret_number);
+             println!("Please input your guess.");
+
+             // `line` can be an alternative name.
+             let mut input = String::new();
+
+             io::stdin().read_line(&mut input)
+                 .expect("Failed to read line");
+
+             println!("You guessed: {}", input);
+
+             let guess: u32 = input.trim().parse()
+                 .expect("Please type a number!");
+
+             match guess.cmp(&secret_number) {
+                 Ordering::Less    => println!("Too small!"),
+                 Ordering::Greater => println!("Too big!"),
+                 Ordering::Equal   => println!("You win!"),
+             }
+         }
+       #+END_SRC
+
+     + ~trim~ eliminate any whitespace at the beginning and end.
+
+     + with the help of ~u32~, ~parse~ knows what's essential type (_essential_
+       here means the cotent of the ~Result~ value) of its result.
+
+** DONE Allowing Multiple Guesses with Looping
+   CLOSED: [2017-08-16 Wed 23:09]
+   Make a simple forever loop with ~loop~
+   #+BEGIN_SRC rust
+     extern crate rand;
+
+     use std::io;
+     use std::cmp::Ordering;
+     use rand::Rng;
+
+     fn main() {
+         println!("Guess the number!");
+         let secret_number = rand::thread_rng().gen_range(1, 101);
+         println!("The secret number is: {}", secret_number);
+
+         loop {
+             println!("Please input your guess.");
+
+             // `line` can be an alternative name.
+             let mut input = String::new();
+
+             io::stdin().read_line(&mut input)
+                 .expect("Failed to read line");
+
+             println!("You guessed: {}", input);
+
+             let guess: u32 = input.trim().parse()
+                 .expect("Please type a number!");
+
+             match guess.cmp(&secret_number) {
+                 Ordering::Less    => println!("Too small!"),
+                 Ordering::Greater => println!("Too big!"),
+                 Ordering::Equal   => println!("You win!"),
+             }
+         }
+     }
+   #+END_SRC
+
+*** DONE Quitting After a Correct Guess
+    CLOSED: [2017-08-16 Wed 23:11]
+    ~break~ when ="You win!"=.
+
+   #+BEGIN_SRC rust
+     extern crate rand;
+
+     use std::io;
+     use std::cmp::Ordering;
+     use rand::Rng;
+
+     fn main() {
+         println!("Guess the number!");
+         let secret_number = rand::thread_rng().gen_range(1, 101);
+         println!("The secret number is: {}", secret_number);
+
+         loop {
+             println!("Please input your guess.");
+
+             // `line` can be an alternative name.
+             let mut input = String::new();
+
+             io::stdin().read_line(&mut input)
+                 .expect("Failed to read line");
+
+             println!("You guessed: {}", input);
+
+             let guess: u32 = input.trim().parse()
+                 .expect("Please type a number!");
+
+             match guess.cmp(&secret_number) {
+                 Ordering::Less    => println!("Too small!"),
+                 Ordering::Greater => println!("Too big!"),
+                 Ordering::Equal   => {
+                     println!("You win!");
+                     break;
+                 }
+             }
+         }
+     }
+   #+END_SRC
+
+*** TODO Handling Invalid Input
+    Change the ~let guess: u32~ line.
+    The final version is:
+    #+BEGIN_SRC rust
+      extern crate rand;
+
+      use std::io;
+      use std::cmp::Ordering;
+      use rand::Rng;
+
+      fn main() {
+          println!("Guess the positive integer number!");
+
+          let secret_number = rand::thread_rng().gen_range(1, 101);
+
+          loop {
+              println!("Please input your guess.");
+
+              let mut input = String::new();
+
+              io::stdin().read_line(&mut input)
+                  .expect("Failed to read line");
+
+              let guess: u32 = match input.trim().parse() {
+                  Ok(num) => num,
+                  Err(_) => {
+                      println!("NOT a unsigned integer number!");
+                      continue;
+                  }
+              };
+
+              println!("You guessed: {}", guess);
+
+              match guess.cmp(&secret_number) {
+                  Ordering::Less    => println!("Too small!"),
+                  Ordering::Greater => println!("Too big!"),
+                  Ordering::Equal   => {
+                      println!("You win!");
+                      break;
+                  }
+              }
+          }
+      }
+    #+END_SRC
+
+** DONE Summary
+   CLOSED: [2017-08-16 Wed 23:32]
+* DONE 3. Common Programming Concepts
+  CLOSED: [2017-08-17 Thu 23:57]
+  *Keywords* See Appendix A =TODO=
+** DONE 3.1. Variables and Mutability
+   CLOSED: [2017-08-17 Thu 00:51]
+*** DONE Differences Between Variables and Constants
+    CLOSED: [2017-08-17 Thu 00:41]
+    - Rust has ~const~ keyword.
+
+    - Constants are NOT only immutable by default, they're always immutable.
+
+    - The type of constant (declared with ~const~) _must_ be annotated.
+
+    - Constants can be declared in any scope, including the global scope.
+
+    - A constant can ONLY be set to a constant expression,
+      NOT
+      + the result of a function call
+        or
+      + any other value that could only be computed at runtime.
+
+    - ~_~'s are allowed when you write a number, and they will be ignored when do
+      evaluation.
+
+*** DONE Shadowing
+    CLOSED: [2017-08-17 Thu 00:44]
+    _I the /shadowing/ feature is BAD._
+
+    =From Jian=
+    From my point of view, the only natural way of shadowing is in embeded scope.
+    I don't want to see shadowing happend in a flat structure.
+
+    There should a feature to let you write down the transition of types of
+    a varaible, and this transition only describes the type transition in the
+    local scope.
+** DONE 3.2. Data Types
+   CLOSED: [2017-08-17 Thu 21:53]
+   Sometime the type CANNOT be inferred, you must add the type annotation.
+
+   For example, ~parse~ below need to know the type of its result, or it does NOT
+   know what to do: ~let guess: u32 = "42".parse().expect("Not a number!");~
+
+*** DONE Scalar Types
+    CLOSED: [2017-08-17 Thu 21:53]
+    - /scala types/ :: The types of some single values.
+
+    - Four primary scalar types in Rust:
+      + integers
+      + floating-point numbers
+      + booleans
+      + characters
+
+**** DONE Integer Types
+     CLOSED: [2017-08-17 Thu 04:15]
+     Table 3-1: Integer Types in Rust
+
+     | Length | Signed | Unsigned |
+     |--------+--------+----------|
+     | 8-bit  | i8     | u8       |
+     | 16-bit | i16    | u16      |
+     | 32-bit | i32    | u32      |
+     | 64-bit | i64    | u64      |
+     | arch   | isize  | usize    |
+
+     - signed numbers range: -(2 ^ (n-1)) to (2 ^ (n-1)) - 1 inclusive.
+
+     - unsigned variants can store numbers from 0 to 2^n - 1
+
+     - ~isize~ and ~usize~ depend on the architectures:
+       32-bit for 32-bit architecture;
+       64-bit for 64-bit architecture.
+
+     - All number literals _except the byte literal_ allow a /type suffix/, for
+       example: ~57u8~
+       =IMPORTANT=
+
+     - ~_~ as a visual separator, such as ~1_000~. You can put the ~_~ anywhere
+       in numbers.
+
+     - Table 3-2: Integer Literals in Rust
+       | Number literals | Example     |
+       |-----------------+-------------|
+       | Decimal         | 98\under222      |
+       | Hex             | 0xff        |
+       | Octal           | 0o77        |
+       | Binary          | 0b1111\under0000 |
+       | Byte(~u8~ only) | b'A'        |
+
+     - If you don't know which type of integer to use, use the default ~i32~.
+       It is generally the fastest, even on 64-bit systems.
+
+     - The primary situation in which you'd use ~isize~ or ~usize~ is when
+       indexing some sort of collection.
+       =From Jian= This sounds like the ~size_t~ type in C.
+
+**** DONE Floating-Point Types
+     CLOSED: [2017-08-17 Thu 21:50]
+     ~f32~ (IEEE-754 single-precision) and ~f64~ (IEEE-754 double-precision).
+     The performance of ~f32~ is bettern in the 32bit systems.
+     The performance of ~f64~ is bettern in the 64bit systems.
+     #+BEGIN_SRC rust
+       fn main() {
+           let x = 2.0; // f64
+           let y: f32 = 3.0; // f32
+       }
+     #+END_SRC
+
+**** DONE Numeric Operations
+     CLOSED: [2017-08-17 Thu 21:51]
+     ~+~, ~-~, ~*~, ~/~, ~%~
+     Read Appendix B.
+
+**** DONE The Boolean Type
+     CLOSED: [2017-08-17 Thu 21:53]
+     Type name ~bool~. Its values: ~true~ and ~false~.
+
+**** DONE The Character Type
+     CLOSED: [2017-08-17 Thu 04:19]
+     In Rust, ~char~ type values are Unicode Scalar Values.
+     Range: from =U+0000= to =U+D7FF= and =U+E000= to =U+10FFFF= inclusive.
+
+     However, a "character" is NOT really a concept in Unicode, so your human
+     intuition for what a "charactr" is may NOT match up with what a ~char~ is in
+     Rust.
+     =TODO= Chapter 8
+
+*** DONE Compound Types
+    CLOSED: [2017-08-17 Thu 03:57]
+**** DONE Grouping Values into Tuples
+     CLOSED: [2017-08-17 Thu 00:54]
+    - ~let tup: (i32, f64, u8) = (500, 6.4, 1);~
+      + Pattern matching is a good way to extract value(s) from a tuple.
+        ~let (x, y, z) = tup;~
+
+      + ~.~ syntax
+        ~tup.0~ is ~(500 : i32)~.
+
+**** DONE Arrays
+     CLOSED: [2017-08-17 Thu 03:57]
+     Rust /arrays/ have a fixed length: once declared, they CANNOT grow or shrink
+     in size.
+     ~let a = [1, 2, 3, 4, 5];~
+
+     - Arrays are useful
+       + when you want your data allocated on the /stack/ _rather than_ the
+         /heap/ (=TODO= we will discuss the /stack/ and the /heap/ more in
+         Chapter 4),
+         or
+       + when you want to ensure you always have a fixed number of elements.
+
+***** DONE Accessing Array Elements
+      CLOSED: [2017-08-17 Thu 03:57]
+      ~a[0]~
+***** DONE Invalid Array Element Access
+      CLOSED: [2017-08-17 Thu 03:57]
+      - When this happens, compilation wouldn't produce any errors, but the
+        program would result in a /runtime error/.
+
+      - /panic/ :: a program exits with an error.
+
+      - =TODO= Chapter 9 error handling.
+
+** DONE 3.3. How Functions Work
+   CLOSED: [2017-08-17 Thu 22:30]
+   /snake case/: all letters are lowercase and underscores separate words.
+
+*** DONE Function Parameters
+    CLOSED: [2017-08-17 Thu 22:14]
+    - Technically, the concrete values are called /arguments/.
+
+    - In casual conversation people tend to use the words "parameter" and
+      "argument" interchangeably.
+
+    - Example:
+      #+BEGIN_SRC rust
+        // src/main.rs
+        fn main() {
+            another_function(5, 6);
+        }
+
+        fun another_function(x: i32, y: i32) {
+            println!("The value of x is: {}", x);
+            println!("The vlaue of y is: {}", y);
+        }
+      #+END_SRC
+
+*** DONE Function Bodies
+    CLOSED: [2017-08-17 Thu 22:15]
+*** DONE Statements and Expressions
+    CLOSED: [2017-08-17 Thu 22:29]
+    - /statements/ :: instructions that perform some action and do not return a
+                      value.
+
+    - /expressions/ :: evaluate to a resulting value.
+
+    - Calling a _function_ is an expression.
+
+    - Calling a _macro_ is an expression.
+
+    - The _block_ that we use to create new scopes, {}, is an expression.
+      #+BEGIN_SRC rust
+        let y = {
+            let x = 3;
+            x + 1
+        };
+      #+END_SRC
+
+    - =IMPORTANT=
+      Expressions do NOT include ending semicolons.
+      If you add a semicolon to the end of an expression, you turn it into a
+      statement, which _will then NOT return a value_.
+
+*** DONE Functions with Return Values
+    CLOSED: [2017-08-17 Thu 22:29]
+    - Anotate the return value type of a function:
+      #+BEGIN_SRC rust
+        fn plus_one(x: i32) -> i32 {
+            x + 1
+            // NO ;
+        }
+
+        fn main() {
+            let x = plus_one(5);
+            println!("The value of x is: {}", x);
+        }
+      #+END_SRC
+
+** DONE 3.4. Comments
+   CLOSED: [2017-08-17 Thu 21:53]
+   ~//~
+** DONE 3.5. Control Flow
+   CLOSED: [2017-08-17 Thu 23:57]
+*** DONE ~if~ Expressions
+    CLOSED: [2017-08-17 Thu 22:33]
+    #+BEGIN_SRC rust
+      if number < 5 {
+          println!("condition was true");
+      } else {
+          println!("condition was false");
+      }
+    #+END_SRC
+
+    The branches of a ~if ... else~ structure is also called /arms/.
+
+*** DONE Multiple Conditions with ~else if~
+    CLOSED: [2017-08-17 Thu 22:34]
+    In many cases, ~match~ is a better way.
+    =TODO= CHAPTER 6
+*** DONE Using ~if~ in a ~let~ statement
+    CLOSED: [2017-08-17 Thu 22:35]
+*** DONE Repetition with Loops
+    CLOSED: [2017-08-17 Thu 23:57]
+**** DONE Repeating Code with ~loop~
+     CLOSED: [2017-08-17 Thu 22:37]
+     ~loop~ is like the ~while(true)~ in the C programming language.
+
+**** DONE Conditional Loops with ~while~
+     CLOSED: [2017-08-17 Thu 22:38]
+     #+BEGIN_SRC rust
+       while number != 0 {
+           println!("{}!", number);
+           number = number - 1;
+       }
+     #+END_SRC
+
+**** DONE Looping Through a Collection with ~for~
+     CLOSED: [2017-08-17 Thu 22:42]
+     #+BEGIN_SRC rust
+       fn main() {
+           let a = [10, 20, 30, 40, 50];
+
+           for element in a.iter() {
+               println!("the value is: {}", element);
+           }
+       }
+     #+END_SRC
+
+     We prefer ~for~ to ~while~. We use ~for~ to iterate a collection of data,
+     and no boundary check is needed.
+
+     Use type ~Range~ values:
+     #+BEGIN_SRC rust
+       fn main() {
+           for number in (1..4).rev() {
+               println!("{}!", number);
+           }
+           println!("LIFTOFF!!!");
+       }
+     #+END_SRC
+
+*** DONE Summary
+    CLOSED: [2017-08-17 Thu 23:57]
+* DONE 4. Understanding Ownership
+  CLOSED: [2017-08-19 Sat 00:31]
+  /ownership/ is Rust's most unique feature, and it enables Rust to make memory
+  safety guarantees without needing a garbage collector.
+
+  This chapter will talk about several related features:
+  - borrowing
+  - slice
+  - how Rust lays data out in memory.
+    
+** DONE 4.1. What is Ownership?
+   CLOSED: [2017-08-18 Fri 01:15]
+   - ~ownership~ is the central feature of Rust.
+
+   - *The Stack and the Heap*
+     =TODO=
+     We'll describe parts of /ownership/ in relation to the /stack/
+     and
+     the /heap/ _later_ in this chapter,
+
+     so here is a brief explanation in preparation.
+
+     + Both the /stack/ and the /heap/ are parts of memory that is available to
+       your code _at runtime_.
+
+     + /stack/ -- LIFO.
+       /push on to/ and /pop off/
+
+     + Use the dat in /stack/ is fast:
+       * no need to search
+       * fixed size
+
+     + The process of get space from heap is called /allocating on the heap/
+
+     + /pointers/ are known and have fixed size.
+       They can be stored on the /stack/.
+
+     + Keeping track of what parts of code are using what data on the heap,
+       minimizing the amount of duplicate data on the heap, and cleaning up
+       unused data on the heap so we don't run out of space are all problems
+       that /ownership/ addresses.
+
+       Once you understand /ownership/, you won't need to think about the /stack/
+       and the /heap/ very often, but knowing that managing /heap/ data is why
+       /ownership/ exists can help explain why it works the way it does.
+
+*** DONE Ownership Rules
+    CLOSED: [2017-08-18 Fri 01:17]
+    1. EACH value in Rust has a variable that's called its /owner/.
+    2. There can ONLY be ONE /owner/ at a time.
+    3. When the /owner/ goes out of scope, the value will be dropped.
+
+*** DONE Variable Scope
+    CLOSED: [2017-08-18 Fri 01:20]
+*** DONE The ~String~ Type
+    CLOSED: [2017-08-18 Fri 01:41]
+    To illustrate the rules of /ownership/, we need data that stored on the
+    /heap/. The data type we mentioned in Chapter 3 are all stored on the
+    /stack/ (they will be popped off the /stack/ when their scope is over, NO
+    need for /ownership/).
+
+    - String literals are not enough.
+      String literals are immutable, and they have known size.
+
+      What if we want _immutable_, and _unknow size_ space to store a sequence of
+      characters? Then we need ~String~ variables.
+
+    - WHY ~String~ CAN be mutated but literals CANNOT?
+      #+BEGIN_SRC rust
+        let mut s = String::from("hello");
+        s.push_str(", world!");
+        println!("{}", s);  // This will print "hello, world!"
+      #+END_SRC
+
+      _The difference is how these two types deal with memory._ 
+      =TODO=
+
+*** DONE Memory and Allocation
+    CLOSED: [2017-08-18 Fri 03:41]
+    - WHY string literals are immutable?
+
+      All the info about string literals are fixed, they are hardcoded directly
+      into the final executable, making string literals fast and efficient.
+      These properties only come from its immutability.
+
+    - For ~String~, we need /heap/:
+      1. The memory must be requested from the operating system at runtime.
+      2. We need a way of returning this memory to the operating system when
+         we're done with our ~String~.
+
+    - 1. is done when we call ~String::from~.
+      This is pretty much universal in programming languages.
+
+    - 2. is different.
+      + Some languages use GC.
+
+      + Without GC, it is usually hard
+        * if we forget, we'll waste memory.
+        * if we do it too early, we'll have an invalid variable.
+        * if we do it twice (or more), that's a but too. This happens frequently.
+
+    - We need to pair exactly one ~allocate~ with exactly one ~free~.
+
+    - Rust does NOT use GC, but it takes a different path:
+      the memory is automatically returned once the variable that owns it goes
+      out of scope.
+
+      Rust calls the special function ~drop~ automatically and implicitly at the
+      closing ~}~.
+
+    - Note: =TODO=
+      In C++, this pattern of deallocating resources at the end of an item's
+      lifetime is sometimes called Resource Acquisition Is Initialization
+      (RAII). The drop function in Rust will be familiar to you if you've used
+      RAII patterns.
+
+    - =IMPORTANT=
+      The Rust way seems simple, but it can be unexpected in more complicated
+      situations when we want to have multiple variables use the data we've
+      allocated on the /heap/.
+
+**** DONE Ways Variables and Data Interact: Move
+     CLOSED: [2017-08-18 Fri 03:25]
+     #+BEGIN_SRC rust
+       let s1 = String::from("hello");
+       let s2 = s1;
+     #+END_SRC
+
+     - A ~String~ basic info is made up of three parts:
+       + a pointer to the (/heap/) memory that holds the contents of the string,
+       + a length
+       + a capacity.
+
+       This group of data is stored on the /stack/.
+
+     - /length/ :: how much memory, in bytes, the contents of the ~String~ is
+                   currently using.
+
+     - /capacity/ :: the total amount of memory, in bytes, that the ~String~ has
+                     received from the OS.
+
+     - The _different_ between /length/ and /capacity/ matters,
+       BUT _NOT in the context_, so for now, it's fine to ignore the capacity.
+
+     - When we assign ~s1~ to ~s2~, the ~String~ info data is copied, meaning
+       we copy the pointer, the length, and the capacity that are on the /stack/.
+
+       We do _NOT_ copy the data on the /heap/ that the pointer refers to.
+
+     - For the example above, if ~drop~ is naive, there will be a
+       /double free error/, and it is one of the memory safety bugs.
+
+     - Complie the code below
+       #+BEGIN_SRC rust
+         let s1 = String::from("hello");
+         let s2 = s1;
+
+         println!("{}", s1);
+       #+END_SRC
+       You'll get an error message that tells you the ~s1~ in the ~println!~ line
+       is "value used here after move".
+
+     - /move/
+
+**** DONE Ways Variables and Data Interact: Clone
+     CLOSED: [2017-08-18 Fri 03:25]
+     If you DO want to copy the heap data of the ~String~:
+     #+BEGIN_SRC rust
+       let s1 = String::from("hello");
+       let s2 = s1.clone();
+
+       println!("s1 = {}, s2 = {}", s1, s2);
+     #+END_SRC
+
+     This is called /clone/.
+
+**** DONE Stack-Only Data: Copy
+     CLOSED: [2017-08-18 Fri 03:41]
+     #+BEGIN_SRC rust
+       let x = 5;
+       let y = x;
+
+       println!("x = {}, y = {}", x, y);
+     #+END_SRC
+
+     - No compile error, ~x~ is still valid in the ~println!~ line.
+
+     - Values of types like integer are stored on /stack/.
+       Copy is NOT expensive. No reason to prevent ~x~ from being valid after we
+       create ~y~.
+
+     - ~Copy~ trait:
+       + If a type ahs the ~Copy~ trait, an older variable is still usable after
+         assignment.
+
+       + Rust WON'T let us annotate a type with the ~Copy~ trait if the type, or
+         any of its parts, has implemented the ~Drop~ trait.
+
+       + If the type needs something special to happen when the value goes out of
+         scope and we add the ~Copy~ annotation to that type, we'll get a
+         compile time error.
+
+       =From Jian= The last two points indicate that ~Copy~ trait and ~Drop~
+       trait are mutually exclusive.
+
+     - Examples of the types that are ~Copy~:
+       + All integer types
+       + The boolean type
+       + All floating point types
+       + Tuples, but ONLY if they contain types that are also ~Copy~:
+         Values of type ~(i32, i32)~ are ~Copy~.
+         Values of type ~(i32, String)~ are NOT.
+
+*** DONE Ownership and Functions
+    CLOSED: [2017-08-18 Fri 03:44]
+    The semantics for passing a value to a function are similar to assigning a
+    value to a variable -- /move/ or /copy/.
+
+*** DONE Return Values and Scope
+    CLOSED: [2017-08-18 Fri 03:52]
+    Returning values can also transfer ownership.
+
+    - ~drop~ won't touch variables whose values have been /moved/.
+
+    - If we pass the value of a variable into a function and we still want to use
+      this value after this call, we can return this value back:
+      #+BEGIN_SRC rust
+        fn main() {
+            let s1 = String::from("hello");
+
+            let (s2, len) = calculate_length(s1);
+
+            println!("The length of '{}' is {}.", s2, len);
+        }
+
+        fn calculate_length(s: String) -> (String, usize) {
+            let length = s.len(); // len() returns the length of a String.
+
+            (s, length)
+        }
+      #+END_SRC
+
+      However, this is tedious. Luckily for us, Rust has a feature called
+      /references/.
+
+** DONE 4.2. References & Borrowing
+   CLOSED: [2017-08-18 Fri 18:23]
+   The last example of the last section, with the help of /reference/:
+   #+BEGIN_SRC rust
+     fn main() {
+         let s1 = String::from("hello");
+         let len = calculate_length(&s1);
+         println!("The length of '{}' is {}.", s1, len);
+     }
+
+     fn calculate_length(s: &String) -> usize {
+         s.len()
+     }
+   #+END_SRC
+
+   - These _ampersands_ above are /references/.
+
+   - A /reference/ is essentially a pointer points to the basic info data (a
+     pointer, string length, and its capacity) of ~s1~.
+
+   - The name /reference/ indicates NOT OWN. NO ~drop~ will be applied to the
+     data it refers to when ~s~ goes out of scope.
+       On the other hand, since pointers are on /stack/, they will be poped out
+     automatically.
+
+   - We call having references as function parameters /borrowing/ -- when it's
+     done, give it back.
+
+   - If you try to modify the borrowed value, the compiler will issue an error
+     =error: cannot borrow immutable borrowed content `*some_string` as mutable=
+     Just as variables are immutable by default, so are references.
+
+   - =TODO= =Question from Jian=
+     WHAT IF _refers to_ a mutable variable.
+
+*** DONE Mutable References
+    CLOSED: [2017-08-18 Fri 04:29]
+    #+BEGIN_SRC rust
+      fn main() {
+          let mut s = String::from("hello");
+          change(&mut s);
+      }
+
+      fn change(some_string: &mut String) {
+          some_string.push_str(", world");
+      }
+    #+END_SRC
+    
+    =IMPORATN=
+    ONE big _restriction_ to /mutable references/:
+    you can only have _one_ /mutable reference/ to a particular piece of data
+    _in a particular scope_.
+
+    - Example of fail (CANNOT be compiled):
+      =error[E0499]: cannot borrow `s` as mutable more than once at a time=
+      #+BEGIN_SRC rust
+        let mut s = String::from("hello");
+
+        let r1 = &mut s;
+        let r2 = &mut s;
+      #+END_SRC
+
+    - This restriction allows for mutation but _in a very controlled fashion_.
+      + pro: Rust can prevent data races at compile time.
+      + con: new Rustaceans struggle with this restriction.
+
+    - A /data race/ is a particular type of race condition in which these three
+      behaviors occur:
+      1. Two or more pointers access the same data at the same time.
+      2. At least one of the pointers is being used to write to the data.
+      3. There's no mechanism being used to synchronize access to the data.
+
+    - Data races cause undefined behavior and can be difficult to diagnose and
+      fix when you're trying to track them down at runtime;
+
+      Rust prevents this problem from happening because it won't even compile
+      code with data races!
+
+    - As always, we can use curly brackets to create a new scope, allowing for
+      multiple mutable references, just NOT simultaneous ones:
+      #+BEGIN_SRC rust
+        let mut s = String::from("hello");
+
+        {
+            let r1 = &mut s;
+        } // r1 goes out of scope here, so we can make a new reference with no problems.
+
+        let r2 = &mut s;
+      #+END_SRC
+
+    - A similar rule exists for combining mutable and immutable references.
+      #+BEGIN_SRC rust
+        let mut s = String::from("hello");
+
+        let r1 = &s;  // NO problem
+        let r2 = &s;  // NO problem
+        let r3 = &mut s;  // BIT PROBLEM
+      #+END_SRC
+      With compile the error:
+      =error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable=
+
+    - /A mutable reference/ is exclusive with the other /references/ (both
+      mutable or immutable).
+
+      /immutable references/ are compatible with the other /immutable references/.
+
+      This is reasonable. Users of an _immutable references_ don't expect the
+      value to suddenly change out from under them.
+
+      On the other hand, ONLY multiple /immutable references/ have NO problem.
+
+*** TODO Dangling References
+    - /a dangling pointer/ :: a pointer that references a location in memory that
+         may have been given to someone else, by freeing some memory while
+         preserving a pointer to that memory.
+
+    - Rust compiler guarantees that references will _NEVER_ be dangling
+      references: if we have a reference to some data, the compiler will ensure
+      that the data will not go out of scope before the reference to the data
+      does. =Mechanism???=
+
+    - Example of trying to create a dangling reference (but fail to do so):
+      #+BEGIN_SRC rust
+        fn main() {
+            let references_to_nothing = dangle();
+        }
+
+        fn dangle() -> &String {
+            let s = String::from("hello");
+            &s
+        }
+      #+END_SRC
+
+      The error message:
+      #+BEGIN_SRC text
+        error[E0106]: missing lifetime specifier
+         --> dangle.rs:5:16
+          |
+        5 | fn dangle() -> &String {
+          |                ^^^^^^^
+          |
+          = help: this function's return type contains a borrowed value, but there is no
+            value for it to be borrowed from
+          = help: consider giving it a 'static lifetime
+
+        error: aborting due to previous error
+      #+END_SRC
+
+      + /lifetimes/: =TODO= Chapter 10
+
+      + The way to correct this error:
+        #+BEGIN_SRC rust
+          fn no_dangle() -> String {
+              let s = String::from("hello");
+              s
+          }
+        #+END_SRC
+
+*** DONE The Rules of References
+    CLOSED: [2017-08-18 Fri 03:54]
+    1. At any given time, you can have either but NOT both of:
+       + One mutable /reference/.
+       + Any number of immutable /references/.
+
+    2. /References/ must always be valid.
+
+    Next, we'll look at a different kind of /reference/: /slices/.
+** DONE 4.3. Slices
+   CLOSED: [2017-08-19 Sat 00:31]
+   - Another data type that does _NOT_ have ownership is the /slice/.
+
+   - /slices/ let you reference a contiguous sequence of elements in a collection
+     rather than the whole collection.
+
+   - Write a small program to get the first word of a string.
+     Since we don't want the ownership of the string, we pass a reference.
+
+     What should we return?
+     Since we don't really have a way to talk about part of a string, we choose
+     to return the index of the end of the word.
+
+     #+BEGIN_SRC rust
+       fn first_word(s: &String) -> usize {
+           let bytes = a.as_bytes();
+
+           for (i, &item) in bytes.itre().enumerate() {
+               if item == b' ' {
+                   return i;
+               }
+           }
+
+           s.len()
+       }
+     #+END_SRC
+
+     There is a potential bug: the returned value can be available even the
+     refered string is no longer there (for a mutable string).
+     #+BEGIN_SRC rust
+       fn main() {
+           let mut s = String::from("hello world");
+           let word = first_word(&s);
+           s.clear();
+
+           // operate `s` with `word` can lead to a crash.
+       }
+     #+END_SRC
+
+*** DONE String Slices
+    CLOSED: [2017-08-19 Sat 00:31]
+    #+BEGIN_SRC rust
+      let s = String::from("hello world");
+      let hello = &s[0..5];
+      let hello_ = &s[..5]; // for short
+      let world = &s[6..11];
+      let world_ = &s[6..]; // for short
+    #+END_SRC
+
+    - Then, let's re-write the ~first_word~ function ("string slice" is written
+      as ~&str~):
+      #+BEGIN_SRC rust
+        fn first_word(s: &String) -> &str {
+            let bytes = a.as_bytes();
+
+            for (i, &item) in bytes.itre().enumerate() {
+                if item == b' ' {
+                    return &s[0..i];
+                }
+            }
+
+            &s[..]
+        }
+      #+END_SRC
+
+    - With the help of /slice/, invalid code cannot be compiled:
+      #+BEGIN_SRC rust
+        fn main() {
+            let mut s = String::from("hello world");
+            let word = first_word(&s);
+            s.clear(); // ERROR!
+        }
+      #+END_SRC
+
+      + The error message is:
+        #+BEGIN_SRC text
+          17:6 error: cannot borrow `s` as mutable because it is also borrowed as
+                      immutable [E0502]
+              s.clear(); // Error!
+              ^
+          15:29 note: previous borrow of `s` occurs here; the immutable borrow prevents
+                      subsequent moves or mutable borrows of `s` until the borrow ends
+              let word = first_word(&s);
+                                     ^
+          18:2 note: previous borrow ends here
+          fn main() {
+
+          }
+          ^
+        #+END_SRC
+
+      + Explanation to the error message:
+        ~clear~ needs to truncate the ~String~, it tries to take a /mutable
+        reference/, which fails due to the rule that if we have an /immutable
+        reference/ to a variable, we _CANNOT_ also take a /mutable reference/.
+
+*** DONE String Literals Are Slices
+    CLOSED: [2017-08-19 Sat 00:19]
+    Recall that we talked about /string literals/ being stored inside the
+    binary. Now that we know about /slices/, we can properly understand /string
+    literals/: ~let s = "Hello, world!";~
+    The type of s here is ~&str~:
+    it's a slice pointing to that specific point of the binary. This is also why
+    string literals are immutable; ~&str~ is an ~immutable reference~.
+
+*** DONE String Slices as Parameters
+    CLOSED: [2017-08-19 Sat 00:27]
+    One move improvement on ~first_word~:
+    change its type signature to ~fn first_word(s: &str) -> &str {~
+
+    This change makes our API more general and useful without losing any
+    functionality:
+    #+BEGIN_SRC rust
+      fn main() {
+          let my_string = String::from("hello world");
+
+          // first_word works on slices of `String`s
+          let word_1 = first_word(&my_string[..]);
+
+          let my_string_literal = "hello world";
+
+          // first_word works on slices of string literals
+          let word_2 = first_word(&my_string_literal[..]);
+
+          // since string literals *are* string slices already,
+          // this works too, without the slice syntax!
+          let word_3 = first_word(my_string_literal);
+      }
+    #+END_SRC
+*** DONE Other Slices
+    CLOSED: [2017-08-19 Sat 00:29]
+    For example,
+    #+BEGIN_SRC rust
+      let a = [1, 2, 3, 4, 5];
+      let slice = &a[1..3];
+    #+END_SRC
+
+    Here the type of ~slice~ is ~&[i32]~.
+
+    =TODO= Chapter 8
+
+*** DONE Summary
+    CLOSED: [2017-08-19 Sat 00:30]
+* DONE 5. Using Structs to Structure Related Data
+  CLOSED: [2017-08-19 Sat 23:48]
+  - ~struct~ :: a custom data type that lets us name and package together
+                multiple related values that make up a meaningful group.
+
+  - If you're familiar with an object-oriented language, a /struct/ is like an
+    object's data attributes.
+
+  - In this chapter, we'll
+    + compare and contrast /tuples/ with /structs/, demonstrate how to use /structs/,
+
+    + discuss how to define /methods/ and /associated functions on structs/ to
+      specify behavior associated with a struct's data.
+
+  - The /struct/ and /enum/ (which is discussed in Chapter 6) concepts are the
+    building blocks for creasing new types in your program's domain to take full
+    advantage of Rust's compile time type checking.
+
+** DONE 5.1. Defining and Instantiating Structs
+   CLOSED: [2017-08-19 Sat 04:55]
+   #+BEGIN_SRC rust
+     struct User {
+         username: String,
+         email: String,
+         sign_in_count: u64,
+         active: bool,
+     }
+   #+END_SRC
+
+   - Create an /instance/ of a /struct/ by specifying concrete values for each of
+     the fields. The order of fields is not important.
+     #+BEGIN_SRC rust
+       let user1 = User {
+           email: String::from("someone@example.com"),
+           username: String::from("someusername123"),
+           active: true,
+           sign_in_count: 1,
+       };
+     #+END_SRC
+
+   - Dot notation:
+     + get the value of a field:
+       ~user1.email~
+
+     + if the field is mutable:
+       ~user1.email = String::from("someone-else@example.com");~
+
+*** DONE Field Init Shorthand when Variables Have the Same Name as Fields
+    CLOSED: [2017-08-19 Sat 04:32]
+    If some variables have the same names as struct fields, we can do
+    /field init shorthand/
+    #+BEGIN_SRC rust
+      fn build_user(email: String, username: String) -> User {
+          User {
+              email,
+              username,
+              active: true,
+              sign_in_count: 1,
+          }
+      }
+    #+END_SRC
+
+*** DONE Creating Instances From Other Instances With Struct Update Syntax
+    CLOSED: [2017-08-19 Sat 04:32]
+    #+BEGIN_SRC rust
+      // Suppose `user1` is in scope, and
+      // the `active` field and `sign_in_count` of `user2` are the same as `user1`
+      let user2 = User {
+          email: String::from("another@example.com"),
+          username: String::from("anotherusername567"),
+          ..user1
+      };
+    #+END_SRC
+*** DONE Tuple Structs without Named Fields to Create Different Types
+    CLOSED: [2017-08-19 Sat 04:38]
+    /tuple struct/
+    #+BEGIN_SRC rust
+      struct Color(i32, i32, i32);
+      struct Point(i32, i32, i32);
+
+      // The types in the definitions of `Color` and `Point` are the same,
+      // but we can use the *name* to differentiate them.
+      let black = Color(0, 0, 0);
+      let origin = Point(0, 0, 0);
+    #+END_SRC
+
+*** DONE Unit-Like Structs without Any Fields
+    CLOSED: [2017-08-19 Sat 04:55]
+    - /unit-like struct/
+      + it behave similarly to ~()~, the unit type.
+
+      + it is useful in situations such as when you need to implement a trait on
+        some type, but you don't have any data you want to store in the type
+        itself. =TODO= CHAPTER 10
+
+    - *Ownership of Struct Data*
+      + in the examples above, when we define a /struct/, for its field, we
+        chose ~String~ rather than ~&str~. This means for the cases here, we want
+        instances of this /struct/ to own all of its data and for that data to
+        be valid for as long as the entire struct is valid.
+
+      + if we use reference type for a field, we need to specify /lifetime/.
+        =TODO= CHAPTER 10.
+        For now, we just not use reference.
+
+** DONE 5.2. An Example Program Using Structs
+   CLOSED: [2017-08-19 Sat 06:24]
+   The evalution of a example (finally) with a ~struct~
+   #+BEGIN_SRC rust
+     // Ver 1
+     fn main() {
+         let length1 = 50;
+         let width1 = 30;
+
+         println!(
+             "The area of the rectangle is {} square pixels.",
+             area(length1, width1)
+         );
+     }
+
+     fn area(length: u32, width: u32) -> u32 {
+         length * width
+     }
+   #+END_SRC
+
+*** DONE Refactoring with Tuples
+    CLOSED: [2017-08-19 Sat 05:56]
+    #+BEGIN_SRC rust
+      fn main() {
+          let rect1 = (50, 30);
+
+          println!(
+              "The area of the rectangle is {} square pixels.",
+              area(rect1)
+          );
+      }
+
+      fn area(dimensions: (u32, u32)) -> u32 {
+          dimensions.0 * dimensions.1
+      }
+    #+END_SRC
+
+*** DONE Refactoring with Structs: Adding More Meaning
+    CLOSED: [2017-08-19 Sat 05:59]
+    #+BEGIN_SRC rust
+      struct Rectangle {
+          length: u32,
+          width: u32,
+      }
+
+      fn main() {
+          let rect1 = Rectangle { length: 50, width: 30 };
+
+          println!(
+              "The area of the rectangle is {} square pixels.",
+              area(&rect1)
+          );
+      }
+
+      fn area(rectangle: &Rectangle) -> u32 {
+          rectangle.length * rectangle.width
+      }
+    #+END_SRC
+
+*** TODO Adding Useful Functionality with Derived Traits
+    If we try to print the struct we defined with
+    ~println!("rect1 is {}", rect1);~
+    , we will receive an error message:
+    =error[E0277]: the trait bound `Rectangle: std::fmt::Display` is not satisfied=
+
+    Read the message below the last line, we can get some hints:
+    =note: `Rectangle` cannot be formatted with the default formatter; try using=
+    =`:?` instead if you are using a format string=
+
+    Then try ~println!("rect1 is {:?}", rect1);~
+    This output format is called ~Debug~. ~Debug~ is a trait that enables us to
+    print out our struct in a way that is useful for developers so we can see its
+    value while we're debugging our code.
+
+    We see =error: the trait bound `Rectangle: std::fmt::Debug` is not satisfied=
+    But we also see
+    =note: `Rectangle` cannot be formatted using `:?`; if it is defined in your=
+    =crate, add `#[derive(Debug)]` or manually implement it=
+
+    #+BEGIN_SRC rust
+      #[derive(Debug)]
+
+      struct Rectangle {
+          length: u32,
+          width: u32,
+      }
+
+      fn main() {
+          let rect1 = Rectangle { length: 50, width: 30 };
+
+          println!("rect1 is {:?}", rect1);
+      }
+    #+END_SRC
+
+    The output is =rect1 is Rectangle { length: 50, width: 30 }=
+    Use ~{:#?}~ instead of ~{:?}~, we can a different style of print:
+    #+BEGIN_SRC text
+      rect1 is Rectangle {
+          length: 50,
+          width: 30
+      }
+    #+END_SRC
+
+
+** DONE 5.3. Method Syntax
+   CLOSED: [2017-08-19 Sat 23:48]
+   /methods/ are different from /functions/ in that they're defined within the
+   context of
+   + a struct
+   + an enum =TODO= Chapter 6
+   + a trait object =TODO= Chapter 17
+
+   Their first parameter is always ~self~, which represents the instance of the
+   /struct/ the method is being called on.
+
+*** TODO Defining Methods
+    =RE-READ=
+    Re-write the example in the last section, make ~area~ a method of the
+    ~Rectangle~ struct.
+    #+BEGIN_SRC rust
+      #[derive(Debug)]
+      struct Rectangle {
+          length: u32,
+          width: u32,
+      }
+
+      impl Rectangle {
+          fn area(&self) -> u32 {
+              self.length * self.width
+          }
+      }
+
+      fn main() {
+          let rect1 = Rectangle { length: 50, width: 30 };
+
+          println!(
+              "The area of the rectangle is {} square pixels.",
+              rect1.area()
+          );
+      }
+    #+END_SRC
+
+    - ~impl~ block.
+
+    - Methods can, just like any other parameter,
+      + take ownership of ~self~,
+      + borrow ~self~ immutably as we've done here,
+      + borrow ~self~ mutably.
+
+    - Having a method that takes ownership of the instance by using just self as
+      the first parameter is _RARE_;
+      this technique is usually used when the method transforms ~self~ into
+      something else and we want to prevent the caller from using the original
+      instance after the transformation.
+      =TODO= you can imagine -- it's rare to call a method and then the passed in
+      object is no longer valid. Of course, this method can return a new object
+      and disable the old one (=FROM Jian= a functional way, but I doubt if this
+      is often used in Rust).
+
+    - *Where's the -> Operator?* =TODO=
+      + In C++, if ~object~ is a pointer, there are two ways to call a method:
+        - ~object->something()~
+        - ~(*object).something()~
+
+      + Rust does NOT have an equivalent to the ~->~ operator;
+        Rust has a feature called /automatic referencing and dereferencing/.
+        Calling methods is one of the few places in Rust that has this behavior.
+
+        =TODO= BAD example ...
+        This means the usually method call form is ~object.something()~.
+          Rust automatically adds in ~&~, ~&mut~, or ~*~ so ~object~ matches the
+        signatue of the method. In other words, the following are the same:
+        * ~p1.distance(&p2);~
+        * ~(&p1).distance(&p2);~
+
+      + The first one looks much cleaner.
+        This automatic referencing behavior works because methods have a clear
+        receiver -- the type of ~self~. Given the receiver and name of a method,
+        Rust can figure out definitively whether the method is reading
+        (~&self~), mutating (~&mut self~), or consuming (~self~). The fact that
+        Rust makes borrowing implicit for method receivers is a big part of
+        making ownership ergonomic in practice.
+
+*** DONE Methods with More Parameters
+    CLOSED: [2017-08-19 Sat 23:19]
+    #+BEGIN_SRC rust
+      impl Rectangle {
+          fn area(&self) -> u32 {
+              self.length * self.width
+          }
+
+          fn can_hold() -> bool {
+              self.length > other.length && self.width > other.width
+          }
+      }
+
+      fn main() {
+          let rect1 = Rectangle { length: 50, width: 30 };
+          let rect2 = Rectangle { length: 40, width: 10 };
+          let rect3 = Rectangle { length: 45, width: 60 };
+
+          println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));  // true
+          println!("Can rect1 hold rect3? {}", rect1.can_hold(&rect3));  // false
+      }
+    #+END_SRC
+*** DONE Associated Functions
+    CLOSED: [2017-08-19 Sat 23:46]
+    - /associated functions/: functions that don't take ~self~ as the first
+      parameter.
+
+    - I think this is the /static methods/ in the other OOP languages.
+
+    - Example:
+      #+BEGIN_SRC rust
+        impl Rectangle {
+            fn square(size: u32) -> Rectangle {
+                Rectangle { length: size, width: size }
+            }
+        }
+      #+END_SRC
+
+      Call /associated functions/ with the syntax like ~Rectangle::square(3);~
+
+    - The ~::~ syntax is used for both associated functions and namespaces crated
+      by modules.
+      =From Jian=
+        From the point of view of semantics, ~Rectangle~ is essentially a
+      namespace for ~square~.
+
+*** DONE Summary
+    CLOSED: [2017-08-19 Sat 23:48]
+    - Structs ... =TODO=
+
+    - Structs are NOT the only way we can create custom types: let's turn to
+      Rust's _enum_ feature to add another tool to our toolbox.
+
+* TODO 6. Enums and Pattern Matching
+** TODO 6.1. Defining an Enum
+*** TODO Enum Values
+*** TODO The ~Option~ Enum and Its Advantages Over Null Values
+** TODO 6.2. The ~match~ Control Flow Operator
+*** TODO Patterns that Bind to Values
+*** TODO Matching with ~Option<T>~
+*** TODO Matching ~Some(T)~
+*** TODO Matching ~None~
+*** TODO Matches Are Exhaustive
+*** TODO The ~_~ Placeholder
+** TODO 6.3. Concise Control Flow with ~if let~
+*** Summary
+* TODO 7. Modules
+  _Using Modules to Reuse and Orgnize Code_
+** TODO 7.1. ~mod~ and the Filesystem
+*** TODO Module Definitions
+*** TODO Moving Modules to Other Files
+*** TODO Rules of Module Filesystems
+** TODO 7.2. Controlling Visibility with ~pub~
+*** TODO Making a Function Public
+*** TODO Privacy Rules
+*** TODO Privacy Examples
+**** TODO Looking at the Errors
+**** TODO Fixing the Errors
+** TODO 7.3. Importing Names with use
+*** TODO Concise Imports with ~use~
+*** TODO Glob Imports with ~*~
+*** TODO Using ~super~ to Access a Parent Module
+*** TODO Summary
+* TODO 8. Common Collections
+** TODO 8.1. Vectors
+*** TODO Creating a New Vector
+*** TODO Updating a Vector
+*** TODO Dropping a Vector Drops its Elements
+*** TODO Reading Elements of Vectors
+**** TODO Invalid References
+*** TODO Using an Enum to Store Multiple Types
+** TODO 8.2. Strings
+*** TODO What is a String?
+*** TODO Creating a New String
+*** TODO Updating a String
+**** TODO Appending to a String with Push
+**** TODO Concatenation with the ~+~ Operator or the ~format!~ Macro
+*** TODO Indexing into String
+**** TODO Internal Representation
+**** TODO Bytes and Scalar Values and Grapheme Clusters! Oh my!
+**** TODO Slicing Strings
+**** TODO Methods for Iterating Over Strings
+**** TODO Strings are Not so Simple
+** TODO 8.3. Hash Maps
+*** TODO Creating a New Hash Map
+*** TODO Hash Maps and Ownership
+*** TODO Accessing Values in a Hash Map
+*** TODO Updating a Hash Map
+**** TODO Overwriting a Value
+**** TODO Only Insert If the Key Has No Value
+**** TODO Update a Value Based on the Old Value
+**** TODO Hashing Function
+**** TODO Summary
+* TODO 9. Error Handling
+** TODO 9.1. Unrecoverable Errors with ~panic!~
+   *Unwinding the Stack Versus Aborting on Panic*
+*** TODO Using a ~panic!~ Backtrace
+** TODO 9.2. Recoverable Errors with ~Result~
+*** TODO Matching on Different Errors
+*** TODO Shortcuts for Panic on Error: ~unwrap~ and ~expect~
+*** TODO Propagating Errors
+*** TODO A Shortcut for Propagating Errors: ~?~
+*** TODO ~?~ Can Only Be Used in Functions That Return ~Result~
+** TODO 9.3. To ~panic!~ or Not To ~panic!~
+*** TODO Examples, Prototype Code, and Tests: Perfectly Fine to Panic
+*** TODO Cases When You Have More Information Than The Compiler
+*** TODO Guidelines for Error Handling
+*** TODO Creating Custom Types for Validation
+*** TODO Summary
+* TODO 10. Generic Types, Traits, and Lifetimes
+*** TODO Removing Duplication by Extracting a Function
+** TODO 10.1. Generic Data Types
+*** TODO Using Generic Data Types in Function Definitions
+*** TODO Using Generic Data Types in Struct Definitions
+*** TODO Using Generic Data Types in Enum Definitions
+*** TODO Using Generic Data Types in Method Definitions
+*** TODO Performance of Code Using Generics
+** TODO 10.2. Traits: Defining Shared Behavior
+*** TODO Defining a Trait
+*** TODO Implementing a Trait on a Type
+*** TODO Default Implementations
+*** TODO Trait Bounds
+*** TODO Fixing the ~largest~ Function with Trait Bounds
+** TODO 10.3. Validating References with Lifetimes
+*** TODO Lifetimes Prevent Dangling References
+    *Uninitialized Variables Cannot Be Used*
+*** TODO The Borrow Checker
+*** TODO Generic Lifetimes in Functions
+*** TODO Lifetime Annotation Syntax
+*** TODO Lifetime Annotations in Function Signatures
+*** TODO Thinking in Terms of Lifetimes
+*** TODO Lifetime Annotations in Struct Definitions
+*** TODO Lifetime Elision
+*** TODO Lifetime Annotations in Method Definitions
+*** TODO The Static Lifetime
+*** TODO Generic Type Parameters, Trait Bounds, and Lifetimes Together
+*** TODO Summary
+* TODO 11. Testing
+** TODO 11.1. How to Write Tests
+*** TODO The Anatomy of a Test Function
+*** TODO Checking Results with the ~assert!~ Macro
+*** TODO Testing Equality with the ~assert_eq!~ and ~assert_ne!~ Macros
+*** TODO Custom Failure Messages
+*** TODO Checking for Panics with ~should_panic~
+** TODO 11.2. Controlling How Tests are Run
+*** TODO Running Tests in Parallel or Consecutively
+*** TODO Showing Function Output
+*** TODO Running a Subset of Tests by Name
+**** TODO Running Single Tests
+**** TODO Filtering to Run Multiple
+**** TODO Ignore Some Tests Unless Specifically Requested
+** TODO 11.3. Test Organization
+*** TODO Unit Tests
+**** TODO The Tests Module and ~#[cfg(test)]~
+**** TODO Testing Private Functions
+
+*** TODO Integration Tests
+**** TODO The =tests= Directory
+**** TODO Submodules in integration Tests
+**** TODO Integration Tests for Binary Crates
+
+*** TODO Summary
+* TODO 12. An I/O Project
+** TODO 12.1. Accepting Command Line Arguments
+*** TODO Reading the Argument Values
+*** TODO Saving the Argument Values in Variables
+** TODO 12.2. Reading a File
+** TODO 12.3. Refactoring to Improve Modularity and Error Handling
+   - Improving Error Handling and Modularity
+**** TODO Separation of Concerns for Binary Projects
+**** TODO Extracting the Argument Parser
+**** TODO Grouping Configuration Values
+     *The Tradeoffs of Using* ~clone~
+**** TODO Creating a Constructor for ~Config~
+**** TODO Fixing the Error Handling
+***** TODO Improving the Error Message
+***** TODO Returning a ~Result~ from ~new~ Instead of Calling ~panic!~
+***** TODO Calling ~Config::new~ and Handling Errors
+**** TODO Extracting a ~run~ Function
+***** TODO Returning Errors from the ~run~ Function
+***** TODO Handling Errors Returned from ~run~ in ~main~
+**** TODO Split Code into a Library Crate
+**** TODO Calling the Library Crate from the Binary Crate
+
+** TODO 12.4. Testing the Library's Functionality
+*** TODO Writing a Failing Test
+*** TODO Writing Code that Gets the Test to Pass
+**** TODO Iterating Through Lines with the ~lines~ method
+**** TODO Searching Each Line for the Query
+**** TODO Storing Matching Lines
+**** TODO Using the ~search~ Function in the ~run~ Function
+** TODO 12.5. Working with Environment Variables
+*** TODO Writing a Failing Test for the Case-Insensitive search Function
+*** TODO Implementing the ~search_case_insensitive~ Function
+** TODO 12.6. Writing to ~stderr~ instead of ~stdout~
+*** TODO Summary
+* TODO 13. Functional Language Features in Rust
+** TODO 13.1. Closures: Anonymous Functions that can Capture their Environment
+*** TODO Creating an Abstraction of Behavior Using a Closure
+*** TODO Closures Store Code to be Extracted Later
+*** TODO Closures Type Inference and Annotation
+*** TODO Using Closures with Generic Parameters and the ~Fn~ Traits
+*** TODO Closures Can Capture Their Environment
+** TODO 13.2. Processing a Series of Items with Iterators
+*** TODO The ~Iterator~ trait and the ~next~ method
+*** TODO Methods in the ~Iterator~ Trait that Consume the Iterator
+*** TODO Methods in the ~Iterator~ Trait that Produce Other Iterators
+*** TODO Using Closures that Capture their Environment with Iterators
+*** TODO Implementing the ~Iterator~ Trait to Create Our Own Iterators
+**** TODO Using Our ~Counter~ Iterator's ~next~ Method
+**** TODO Using Other ~Iterator~ Trait Methods on Our Iterator
+** TODO 13.3. Improving our I/O Project
+*** TODO Removing a ~clone~ Using an Iterator
+**** TODO Using the Iterator Returned by ~env::args~ Directly
+**** TODO Using ~Iterator~ Trait Methods Instead of Indexing
+*** TODO Making Code Clearer with Iterator Adaptors
+** TODO 13.4. Comparing Performance: Loops versus Iterators
+*** TODO Summary
+* TODO 14. More about Cargo and Crates.io
+** TODO 14.1. Release Profiles
+** TODO 14.2. Publishing a Crate to Crates.io
+*** TODO Documentation Comments
+*** TODO Exporting a Convenient Public API with ~pub use~
+*** TODO Before Your First Publish
+*** TODO Before Publishing a New Crate
+*** TODO Publishing to Crates.io
+*** TODO Publishing a New Version of an Existing Crate
+*** TODO Removing Versions from Crate.io with ~cargo yank~
+** TODO 14.3. Cargo Workspaces
+** TODO 14.4. Installing Binaries from Crates.io with ~cargo install~
+** TODO 14.5. Extending Cargo with Custom Commands
+*** TODO Summary
+* TODO 15. Smart Pointers
+** TODO 15.1. ~Box<T>~ Points to Data on the Heap and Has a Known Size
+   *More Information About the Cons List*
+** TODO 15.2. The ~Deref~ Trait Allows Access to the Data Through a Reference
+*** TODO Implicit Deref Coercions with Functions and Methods
+** TODO 15.3. The ~Drop~ Trait Runs Code on Cleanup
+** TODO 15.4. ~Rc<T>~, the Reference Counted Smart Pointer
+*** TODO Using ~Rc<T>~ to Share Data
+*** TODO Cloning an ~Rc<T>~ Increases the Reference Count
+** TODO 15.5. ~RefCell<T>~ and the Interior Mutability Pattern
+*** TODO ~RefCell<T>~ has Interior Mutability
+*** TODO Borrowing Rules are Checked at Runtime on ~RefCell<T>~
+*** TODO Multiple Owners of Mutable Data by Combining ~Rc<T>~ and ~RefCell<T>~
+** TODO 15.6. Creating Reference Cycles and Leaking Memory is Safe
+*** TODO Prevent Reference Cycles: Turn an ~Rc<T>~ into a ~Weak<T>~
+*** TODO Summary
+* TODO 16. Fearless Concurrency
+** TODO 16.1. Using Threads to Run Code Simultaneously
+   +Threads+
+*** TODO Creating a New Thread with ~spawn~
+*** TODO Waiting for All Threads to Finish Using ~join~ Handles
+*** TODO Using ~move~ Closures with Threads
+** TODO 16.2. Message Passing to Transfer Data Between Threads
+   +Message Passing+
+*** TODO How Channels Interact with Ownership
+*** TODO Sending Multiple Values and Seeing the Receiver Waiting
+*** TODO Create Multiple Producers by Cloning the Transmitter
+
+** TODO 16.3. Shared State Concurrency
+   +Shared State+
+*** TODO Mutexes Allow Access to Data from One Thread at a Time
+*** TODO The API of ~Mutex<T>~
+*** TODO Sharing a ~Mutex<T>~ Between Multiple Threads
+*** TODO Multiple Ownership with Multiple Threads
+*** TODO Atomic Reference Counting with ~Arc<T>~
+** TODO 16.4. Extensible Concurrency with the ~Sync~ and ~Send~ Traits
+   +Extensible Concurrency: Sync and Send+
+*** TODO ~Send~ for Indicating Ownership May Be Transferred to Another Thread
+*** TODO ~Sync~ for Indicating Access from Multiple Threads is Safe
+*** TODO Implementing ~Send~ and ~Sync~ Manually is Unsafe
+*** TODO Summary
+* TODO 17. Is Rust an Object-Oriented Programming Language?
+** TODO 17.1. What Does Object-Oriented Mean?
+*** TODO Objects Contain Data and Behavior
+*** TODO Encapsulation that Hides Implementation Details
+*** TODO Inheritance as a Type System and as Code Sharing
+
+** TODO 17.2. Trait Objects for Using Values of Different Types
+*** TODO Defining a Trait for the Common Behavior
+*** TODO Implementations of the Trait from Us or Library Users
+*** TODO Trait Objects Perform Dynamic Dispatch
+*** TODO Object Safety is Required for Trait Objects
+
+** TODO 17.3. Object-Oriented Design Pattern Implementations
+*** TODO Defining Post and Creating a New Instance in the Draft State
+*** TODO Storing the Text of the Post Content
+*** TODO Content of a Draft Post is Empty
+*** TODO Requesting a Review of the Post Changes its State
+*** TODO Approving a Post Changes the Behavior of ~content~
+*** TODO Tradeoffs of the State Pattern
+**** TODO Encoding States and Behavior as Types
+**** TODO Implementing Transitions as Transformations into Different Types
+*** TODO Summary
+* TODO 18. Patterns Match the Structure of Values
+** TODO 18.1. All the Places Patterns May be Used
+*** TODO ~match~ Arms
+*** TODO Exhaustiveness and the Default Pattern ~_~
+*** TODO ~if let~ Expressions
+*** TODO ~while let~
+*** TODO ~for~ loops
+*** TODO ~let~ Statements
+*** TODO Function Parameters
+** TODO 18.2. Refutability: Whether a Pattern Might Fail to Match
+** TODO 18.3. All the Pattern Syntax
+*** TODO Literals
+*** TODO Named Variables
+*** TODO Multiple patterns
+*** TODO Matching Ranges of Values with ~...~
+*** TODO Destructuring to Break Apart Values
+*** TODO Ignoring Values in a Pattern
+**** TODO Ignoring an Entire Value with ~_~
+**** TODO Ignoring Parts of a Value with a Nested ~_~
+**** TODO Ignoring an Unused Variable by Starting its Name with an Underscore
+**** TODO Ignoring Remaining Parts of a Value with ~..~
+*** TODO ~ref~ and ~ref mut~ to Create References in Patterns
+*** TODO Extra Conditionals with March Guards
+*** TODO ~@~ Bindings
+*** TODO Summary
+* TODO 19. Advanced Features
+** TODO 19.1. Unsafe Rust
+*** TODO Unsafe Superpowers
+*** TODO Dereferencing a Raw Pointer
+*** TODO Calling an Unsafe Function or Method
+**** TODO creating a Safe Abstraction Over Unsafe Code
+**** TODO ~extern~ Functions for Calling External Code are Unsafe
+**** TODO Calling Rust Functions from Other Languages
+*** TODO Accessing or Modifying a Mutable Static Variable
+*** TODO Implementing an Unsafe Trait
+** TODO 19.2. Advanced Lifetimes
+*** TODO Lifetime Subtyping
+*** TODO Lifetime Bounds
+*** TODO Trait Object Lifetimes
+** TODO 19.3. Advanced Traits
+*** TODO Associated Types
+**** TODO Associated Types Versus Generics
+**** TODO Trait Objects with Associated Types
+*** TODO Operator Overloading and Default Type Parameters
+*** TODO Fully Qualified Syntax for Disambiguation
+*** TODO Supertraits to Use One Trait's Functionality Within Another Trait
+*** TODO The Newtype Pattern to Implement External Traits on External Types
+
+** TODO 19.4. Advanced Types
+*** TODO Using the Newtype Pattern for Type Safety and Abstraction
+*** TODO Type Aliases Create Type Synonyms
+*** TODO The Never Type, ~!~, that Never Returns
+*** TODO Dynamically Sized Types & ~Sized~
+**** TODO The ~Sized~ Trait
+** TODO 19.5. Advanced Functions & Closures
+*** TODO Function pointers
+*** TODO Returning Closures
+*** TODO Summary
+* TODO 20. Final Project: Building a Multithreaded Web Server
+** TODO 20.1. A Single Threaded Web Server
+*** TODO Reading the Request
+*** TODO Writing a Response
+*** TODO Returning Real HTML
+*** TODO Validating the Request and Selectively Responding
+
+** TODO 20.2. How Slow Requests Affect Throughput
+*** TODO Simulating a Slow Request in the Current Server Implementation
+*** TODO Improving Throughput with a Thread Pool
+** TODO 20.3. Designing the Thread Pool Interface
+*** TODO Code Structure if We Could Use ~thread::spawn~
+*** TODO Creating a Similar Interface for ~ThreadPool~
+*** TODO Compiler Driven Development to Get the API Compiling
+** TODO 20.4. Creating the Thread Pool and Storing Threads
+*** TODO Validating the Number of Threads in the Pool
+*** TODO Storing Threads in the Pool
+** TODO 20.5. Sending Requests to Threads Via Channels
+** TODO 20.6. Graceful Shutdown and Cleanup
+*** TODO Summary
+* TODO 21. Appendix
+** TODO 21.1. A - Keywords
+*** TODO Keywords Currently in Use
+*** TODO Keywords Reserved for Future Use
+** TODO 21.2. B - Operators
+*** TODO Unary operator expressions
+*** TODO Binary Operator expressions
+**** TODO Arithmetic operators
+**** TODO Bitwise operators
+**** TODO Lazy boolean operators
+**** TODO Comparison operators
+**** TODO Type cast expressions
+**** TODO Assignment expressions
+**** TODO Compound assignment expressions
+**** TODO Operator precedence
+** 21.3. C - Derivable Traits
+   [in process]
+** 21.4. D - Nightly Rust
+   [in process]
+** 21.5. E - Macros
+   [in process]
+** 21.6. F - Translations
+   [in process]
+** TODO 21.7. G - Newest Features
+*** TODO Field init shorthand
+*** TODO Returning from loops

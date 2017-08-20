@@ -1,0 +1,106 @@
+#+TITLE: The language of languages
+#+AUTHOR: Matthew Might
+#+Year: 20xx
+
+* Table of Contents                                      :TOC_4_org:noexport:
+ - [[Defining a language][Defining a language]]
+ - [[Components of context-free grammer][Components of context-free grammer]]
+ - [[Backus-Naur Form (BNF) notation][Backus-Naur Form (BNF) notation]]
+ - [[Extended BNF (EBNF) notation][Extended BNF (EBNF) notation]]
+   - [[Option][Option]]
+   - [[Repetition][Repetition]]
+   - [[Grouping][Grouping]]
+   - [[Concatenation][Concatenation]]
+ - [[Augmented BNF (ABNF) notation][Augmented BNF (ABNF) notation]]
+ - [[Regular extensions to BNF][Regular extensions to BNF]]
+ - [[Grammars in mathematics][Grammars in mathematics]]
+ - [[Beyond context-free grammars][Beyond context-free grammars]]
+ - [[Parsing][Parsing]]
+
+* Defining a language
+The focus of this article is the _context-free grammar_. Grammars beyond
+context-free will be discusses at the end.
+
+* Components of context-free grammer
+examples
+
+* Backus-Naur Form (BNF) notation
+Every rule in Backus-Naur form has the following structure:
+#+BEGIN_EXAMPLE
+name ::= expansion
+#+END_EXAMPLE
+The symbol ::= means "may expand into" and "may be replaced with."
+
+In some texts, a /name/ is also called a /non-terminal symbol/.
+
+Every ~name~ in Backus-Naur form is surrounded by angle brackets, < >,
+whether it appears on the left- or right-hand side of the rule.
+
+An ~expansion~ is an expression containing terminal symbols and non-
+terminal symbols, joined together by sequencing and choice.
+
+A terminal symbol is a literal like ("+" or "function") or a class of
+literals (like =integer=).
+
+Naturally, we can define a grammar for rules in BNF:
+#+BEGIN_EXAMPLE
+rule → name ::= expansion 
+name → <identifier> 
+expansion → expansion expansion 
+expansion → expansion | expansion 
+expansion → name 
+expansion → terminal
+#+END_EXAMPLE
+We define /identifier/s as using the regular expression ~[-A-Za-z_0-9]+~.
+
+A terminal could be a quoted literal (like "+", "switch" or "<<=") or
+the name of a class of literals (like ~integer~).
+
+The name of a class of literals is usually defined by other means, such
+as a regular expression or even prose.
+
+* Extended BNF (EBNF) notation
+
+** Option
+
+** Repetition
+
+** Grouping
+
+** Concatenation
+
+* Augmented BNF (ABNF) notation
+Protocol specifications often use _Augmented Backus-Naur Form (ABNF)_.
+
+RFC 5234 defines ABNF.
+
+ABNF is similar to EBNF in principle, except that its notations for
+choice, option and repetition differs.
+
+ABNF also provides the ability to specify specific byte values exactly
+-- detail which matters in protocols.
+
+In ABNF:
+   + choice is ~/~; and
+   + option uses square brackets: ~[ ]~; and
+   + repetition is /prefix*/; and
+   + repetition /n/ or more times is /prefix n*/; and
+   + repetition /n/ to /m/ times is /prefix n*m/.
+ 
+EBNF's ~{ expansion }~ becomes ~*(expansion)~ in ABNF.
+
+* Regular extensions to BNF
+It's common to find regular-expression-like operations inside grammars.
+
+In these grammars:
+   + postfix * means "repeated 0 or more times"
+   + postfix + means "repeated 1 or more times"
+   + postfix ? means "0 or 1 times"
+
+* Grammars in mathematics
+
+* Beyond context-free grammars
+Context-sensitivity means that terminal symbols may also appear in the
+left-hand sides of rules.
+
+* Parsing
