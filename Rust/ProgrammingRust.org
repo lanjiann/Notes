@@ -1,0 +1,204 @@
+#+TITLE: Programming Rust
+#+VERSION: 2nd
+#+AUTHOR: Community
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[1. Why Rust? 7][1. Why Rust? 7]]
+  - [[Type Safety 8][Type Safety 8]]
+- [[2. A Tour of Rust 13][2. A Tour of Rust 13]]
+  - [[Downloading and installing Rust 13][Downloading and installing Rust 13]]
+  - [[A simple function 16][A simple function 16]]
+  - [[Writing and running unit tests 17][Writing and running unit tests 17]]
+  - [[Handling command-line arguments 18][Handling command-line arguments 18]]
+  - [[A simple web server 21][A simple web server 21]]
+  - [[Concurrency 28][Concurrency 28]]
+    - [[Parsing pair command-line arguments 29][Parsing pair command-line arguments 29]]
+    - [[Mapping from pixels to complex numbers 31][Mapping from pixels to complex numbers 31]]
+    - [[Mandelbrot membership calculation 32][Mandelbrot membership calculation 32]]
+    - [[Writing bitmap files 34][Writing bitmap files 34]]
+    - [[A concurrent Mandelbrot program 35][A concurrent Mandelbrot program 35]]
+    - [[Running the Mandelbrot plotter 38][Running the Mandelbrot plotter 38]]
+    - [[Safety is invisible 40][Safety is invisible 40]]
+- [[3. Basic types 41][3. Basic types 41]]
+  - [[Machine types 44][Machine types 44]]
+    - [[Integer types 44][Integer types 44]]
+    - [[Floating-point types 47][Floating-point types 47]]
+    - [[The ~bool~ type 48][The ~bool~ type 48]]
+    - [[Characters 49][Characters 49]]
+  - [[Tuples 50][Tuples 50]]
+  - [[Pointer types 52][Pointer types 52]]
+    - [[References 53][References 53]]
+    - [[Boxes 53][Boxes 53]]
+    - [[Raw pointers 53][Raw pointers 53]]
+  - [[Arrays, Vectors, and Slices 53][Arrays, Vectors, and Slices 53]]
+    - [[Arrays 54][Arrays 54]]
+    - [[Vectors 55][Vectors 55]]
+    - [[Slices 58][Slices 58]]
+  - [[String types 60][String types 60]]
+    - [[String literals 60][String literals 60]]
+    - [[Byte strings 61][Byte strings 61]]
+    - [[Strings in memory 61][Strings in memory 61]]
+    - [[~String~ 62][~String~ 62]]
+    - [[Using strings 63][Using strings 63]]
+    - [[Other string-like types 63][Other string-like types 63]]
+  - [[Beyond the basics 64][Beyond the basics 64]]
+- [[4. Ownership and moves 65][4. Ownership and moves 65]]
+  - [[Ownership 66][Ownership 66]]
+  - [[Moves 71][Moves 71]]
+    - [[More operations that move 77][More operations that move 77]]
+    - [[Moves and control flow 78][Moves and control flow 78]]
+  - [[~Copy~ types: the exception to moves 81][~Copy~ types: the exception to moves 81]]
+  - [[~Rc~ and ~Arc~: shared ownership 83][~Rc~ and ~Arc~: shared ownership 83]]
+- [[5. References and borrowing 87][5. References and borrowing 87]]
+  - [[References as values 90][References as values 90]]
+    - [[Implicit dereferencing 90][Implicit dereferencing 90]]
+    - [[Assigning references 92][Assigning references 92]]
+    - [[References to slices and trait objects 93][References to slices and trait objects 93]]
+    - [[References are never null 93][References are never null 93]]
+    - [[Borrowing references to arbitrary expressions 94][Borrowing references to arbitrary expressions 94]]
+  - [[Reference safety 94][Reference safety 94]]
+    - [[Borrowing a local variable 94][Borrowing a local variable 94]]
+    - [[Receiving references as parameters 98][Receiving references as parameters 98]]
+    - [[Passing references as arguments 100][Passing references as arguments 100]]
+    - [[Returning references 101][Returning references 101]]
+    - [[Structures containing references 102][Structures containing references 102]]
+    - [[Distinct lifetime parameters 104][Distinct lifetime parameters 104]]
+  - [[Sharing versus mutation 105][Sharing versus mutation 105]]
+  - [[Reference counting: ~Rc~ and ~Arc~ 113][Reference counting: ~Rc~ and ~Arc~ 113]]
+- [[6. Expressions 115][6. Expressions 115]]
+  - [[An expression language 115][An expression language 115]]
+  - [[Blocks and statements 116][Blocks and statements 116]]
+  - [[Declarations 117][Declarations 117]]
+  - [[~if~ and match 119][~if~ and match 119]]
+  - [[Loops 121][Loops 121]]
+  - [[~return~ expressions 123][~return~ expressions 123]]
+  - [[Why Rust has ~loop~ 124][Why Rust has ~loop~ 124]]
+  - [[Names, paths, and ~use~ 125][Names, paths, and ~use~ 125]]
+  - [[Closures 126][Closures 126]]
+  - [[Function and method calls 126][Function and method calls 126]]
+  - [[Fields and elements 127][Fields and elements 127]]
+  - [[Reference operators 128][Reference operators 128]]
+  - [[Arithmetic, bitwise, comparison, and logical operators 129][Arithmetic, bitwise, comparison, and logical operators 129]]
+  - [[Assignment 130][Assignment 130]]
+  - [[Type casts 130][Type casts 130]]
+  - [[Precedence and associativity 131][Precedence and associativity 131]]
+  - [[Onward 133][Onward 133]]
+- [[7. Enums and patterns 135][7. Enums and patterns 135]]
+  - [[Enums 135][Enums 135]]
+    - [[Tuple and struct variants 137][Tuple and struct variants 137]]
+    - [[Enums in memory 138][Enums in memory 138]]
+    - [[Rich data structures using enums 139][Rich data structures using enums 139]]
+    - [[Generic enums 141][Generic enums 141]]
+  - [[Patterns 143][Patterns 143]]
+    - [[Tuple and struct patterns 144][Tuple and struct patterns 144]]
+    - [[Reference patterns 146][Reference patterns 146]]
+    - [[Matching multiple possibilities 147][Matching multiple possibilities 147]]
+    - [[Pattern guards 148][Pattern guards 148]]
+    - [[@ patterns 148][@ patterns 148]]
+    - [[Where patterns are allowed 149][Where patterns are allowed 149]]
+    - [[Populating a binary tree 150][Populating a binary tree 150]]
+  - [[The big picture 151][The big picture 151]]
+
+* 1. Why Rust? 7
+** Type Safety 8
+
+* 2. A Tour of Rust 13
+** Downloading and installing Rust 13
+** A simple function 16
+** Writing and running unit tests 17
+** Handling command-line arguments 18
+** A simple web server 21
+** Concurrency 28
+*** Parsing pair command-line arguments 29
+*** Mapping from pixels to complex numbers 31
+*** Mandelbrot membership calculation 32
+*** Writing bitmap files 34
+*** A concurrent Mandelbrot program 35
+*** Running the Mandelbrot plotter 38
+*** Safety is invisible 40
+
+* 3. Basic types 41
+** Machine types 44
+*** Integer types 44
+*** Floating-point types 47
+*** The ~bool~ type 48
+*** Characters 49
+** Tuples 50
+** Pointer types 52
+*** References 53
+*** Boxes 53
+*** Raw pointers 53
+** Arrays, Vectors, and Slices 53
+*** Arrays 54
+*** Vectors 55
+*** Slices 58
+** String types 60
+*** String literals 60
+*** Byte strings 61
+*** Strings in memory 61
+*** ~String~ 62
+*** Using strings 63
+*** Other string-like types 63
+** Beyond the basics 64
+
+* 4. Ownership and moves 65
+** Ownership 66
+** Moves 71
+*** More operations that move 77
+*** Moves and control flow 78
+** ~Copy~ types: the exception to moves 81
+** ~Rc~ and ~Arc~: shared ownership 83
+
+* 5. References and borrowing 87
+** References as values 90
+*** Implicit dereferencing 90
+*** Assigning references 92
+*** References to slices and trait objects 93
+*** References are never null 93
+*** Borrowing references to arbitrary expressions 94
+** Reference safety 94
+*** Borrowing a local variable 94
+*** Receiving references as parameters 98
+*** Passing references as arguments 100
+*** Returning references 101
+*** Structures containing references 102
+*** Distinct lifetime parameters 104
+** Sharing versus mutation 105
+** Reference counting: ~Rc~ and ~Arc~ 113
+
+* 6. Expressions 115
+** An expression language 115
+** Blocks and statements 116
+** Declarations 117
+** ~if~ and match 119
+** Loops 121
+** ~return~ expressions 123
+** Why Rust has ~loop~ 124
+** Names, paths, and ~use~ 125
+** Closures 126
+** Function and method calls 126
+** Fields and elements 127
+** Reference operators 128
+** Arithmetic, bitwise, comparison, and logical operators 129
+** Assignment 130
+** Type casts 130
+** Precedence and associativity 131
+** Onward 133
+
+* 7. Enums and patterns 135
+** Enums 135
+*** Tuple and struct variants 137
+*** Enums in memory 138
+*** Rich data structures using enums 139
+*** Generic enums 141
+
+** Patterns 143
+*** Tuple and struct patterns 144
+*** Reference patterns 146
+*** Matching multiple possibilities 147
+*** Pattern guards 148
+*** @ patterns 148
+*** Where patterns are allowed 149
+*** Populating a binary tree 150
+** The big picture 151
