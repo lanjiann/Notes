@@ -5207,7 +5207,7 @@
   _Page 344-380_
 ** DONE 10.1 Folds
    CLOSED: [2017-06-01 Thu 18:46]
-   - /Folding/ is a concept that extends in usefulness and importance beyound
+   - /Folding/ is a concept that extends in _usefulness_ and _importance_ BEYOUND
      lists.
        Lists are just the data structure being used to introduce this concpet.
 
@@ -5216,7 +5216,9 @@
    - /catamorphisms/:
      + "morphism" from polymorphism.
      + "Cata-" means "down" or "against", as in "catacombs."
-     Catamorphisms are a means of deconstructing data.
+     Catamorphisms are a means of deconstructing data (but it doesn't say the
+     structure won't be constructed again in this process -- constructions can
+     also happen, though it is usually not).
        If the spine of a list is the structure of a list, then a fold is what can
      reduce that structure.
 
@@ -5228,16 +5230,31 @@
 
 ** DONE 10.2 Bringing you into the fold
    CLOSED: [2017-06-01 Thu 18:59]
+   For GHC 7.10 and newer
    ~foldr \colon{}\colon{} Foldable t => (a -> b -> b) -> b -> t a -> b~:
 
-   - Short for "fold right".
-
    - _This is the fold you'll most often want to use with lists._
+     (NOT ~foldl~)
 
    - The type signature for list datatype is:
      ~foldr \colon{}\colon{} (a -> b -> b) -> b -> [] a -> b~
      or
      ~foldr \colon{}\colon{} (a -> b -> b) -> b -> [a] -> b~
+
+   - We can even recover the more concrete type because we can always make a
+     type more concrete, but never more generic:
+     #+BEGIN_SRC haskell
+      -- Prelude> :{
+      -- Prelude> let listFoldr :: (a -> b -> b)
+      -- Prelude>               -> b
+      -- Prelude>               -> [] a
+      -- Prelude>               -> b
+      -- Prelude>     listFoldr = foldr
+      -- Prelude> :}
+      -- Prelude> :t listFoldr
+
+     listFoldr :: (a -> b -> b) -> b [a] -> b
+     #+END_SRC
 
    - ~map~ applies a function to each member of a list and returns a list,
 
@@ -5246,46 +5263,96 @@
 
 ** DONE 10.3 Recursive patterns
    CLOSED: [2017-06-01 Thu 19:19]
-   - /fold/ pattern can be abstracted from functions like:
-     + ~sum~
-     + ~length~
-     + ~product~
-     + ~concat~
-     They have similar base case: it has value of the identity for that funciton:
-     ~0~, ~0~, ~1~, and ~[]~
+   Compare /fold/ and /map/:
+   - /fold/ (applicable to all the foldable data structures):
+     _fold folding-function fallback-val foldable-data_ 
+     1. replace the constructor of the foldable data structure with the folding
+        function;
+
+     2. use passed in operator to reduce the foldable structure -- the last
+        argument;
+
+     3. get a single value, whose type depends on
+        * the type of the original value in the passed in foldable structure
+        * the passed in initial value
+        * the operator used to replace the constructor
+
+
+   - /map/ (only applicable to lists):
+     _map mapping-function list_
+     1. Apply the mapping-function to each element of the list;
+
+     2. Keep the /cons/ operator, and use it to combine the calculated values;
+
+     3. Get a list with modified inside values.
+        The type of those values depends on
+        * The mapping function
+        * the type of the original values in the passed in list
 
 ** DONE 10.4 [ =RE-READ= ] Fold right
    CLOSED: [2017-06-01 Thu 22:02]
-   - _Fold right_ means the fold is _right associative_.
-     #+BEGIN_SRC haskell
-       foldr :: (a -> b -> c) -> b -> [a] -> b
-       foldr f z [] = z
-       foldr f z (x:xs) = f x (foldr f z xs)
-     #+END_SRC
-     Here ~z~ is the _zero_ (or nothing, or base) of our fold, and
-     it provides
-     + a fallback value for the empty list case
-       and
-     + a second argument to begin our fold with.
+   ~foldr~ is called _fold right_ because the fold is _right associative_.
 
+   #+BEGIN_SRC haskell
+     foldr :: (a -> b -> c) -> b -> [a] -> b
+     foldr f z [] = z
+     foldr f z (x:xs) = f x (foldr f z xs)
+   #+END_SRC
+
+   + The "rest of the fold," ~(foldr f z xs)~ is an argument to the function ~f~
+     we're folding with.
+
+   + The ~z~ is the /zero of our fold/. It provides a /fallback value/ for the
+     empty list case and a second argument to begin our fold with.
+
+     The zero is often the identity for whatever function we're folding with,
+     such as 0 for ~(+)~ and 1 for ~(*)~.
+     
 *** DONE How ~foldr~ evaluates
     CLOSED: [2017-07-08 Sat 01:29]
-    - A trick popularized by some helpful users in the Haskell IRC community:
-
-      footnote: Idea borrowed from Cale Gibbard from the haskell Freenode IRC
-      channel and on the Haskell.org wiki https://wiki.haskell.org/Fold#Examples
-
+    - Re-write our simple ~foldr~ definition (only works for lists) with
+      ~case ... of~, pass concrete arguments to it, evaluate it step by step, and
+      then you can see some indented code, which is clearer for you to understand
+      the evaluation processes of the ~foldr~.
       #+BEGIN_SRC haskell
-        -- Prelude> let xs = map show [1..5]
-        -- Prelude> :{
-        -- *Prelude| foldr (\x y -> concat ["(",x,"+",y,")"])
-        -- *Prelude| "0" xs
-        -- *Prelude| :}
-        -- "(1+(2+(3+(4+(5+0)))))"
+        foldr :: (a -> b -> b) -> b -> [a] -> b
+        foldr f z xs =
+          case xs of
+            [] -> z
+            (x:xs) -> f x (foldr f z xs)
       #+END_SRC
-      =IMPORTANT=
 
-    - One initially non-obvious aspect of folding is that it happens in two
+      Step one:
+      #+BEGIN_SRC haskell
+        foldr (+) 0 [2, 3] =
+          case [2, 3] of
+            [] ->
+              0
+            (1 : [2, 3]) ->
+              (+) 1 (foldr (+) 0 [2, 3])
+      #+END_SRC
+      + Critically, ~(foldr (+) 0 [2, 3])~ should be expanded only because
+        ~(\plus{})~ is /strict/ in _both_ of its arguments (NOT ONLY this is true for
+        ~(\plus{})~, BUT ALSO this operation is _unconditional_), so it definitely
+        forces the next iteration.
+
+      + We could have a function which doesn't continually force the rest
+        of the fold. If it were to stop on the first case here, then it
+        would've returned the value ~1~. One such function is ~const~ which
+        always returns the first argument.
+
+    - A trick popularized by some helpful users in the Haskell IRC community (see
+      footnote https://wiki.haskell.org/Fold#Examples):
+
+      A method used to show the process of ~foldr~ (=IMPORTANT=):
+      #+BEGIN_SRC haskell
+        xs = map show [1..5]
+        y = foldr (\x y -> concat ["(",x,"+",y,")"])
+                  "0"
+                  xs
+      #+END_SRC
+
+    - One initially non-obvious aspect of folding is that it happens in _TWO_
       stages:
       + /traversal/: recurse over the /spine/.
         and
@@ -5293,94 +5360,101 @@
         values.
 
     - All folds recurse over the /spine/ _in the same direction_;
+      =IMPORTANT=
 
-      the _difference_ between /left folds/ and /right folds/ is in the
+      the _DIFFERENCE_ between /left folds/ and /right folds/ is in the
       association of the folding function and, thus, which direction the folding
       or reduction proceeds.
 
     - Look at part of the definition of ~foldr~:
       ~foldr f z (x:xs) = f x (foldr f z xs)~
-      if ~f~ doesn't evaluate its second argument (rest of the /fold/),
-      _since Haskell is lazy in default this can happen often_,
+      If ~f~ doesn't evaluate its second argument (rest of the /fold/),
       no more of the /spine/ will be forced.
-        One of the consequences of this is that ~foldr~ can _avoid_ evaluating
-      + not just some or all of the values in the list,
-      + but some or all of the list's /spine/ as well!
 
-      For this reason, ~foldr~ can be used with lists that are potentially
-      infinite (though sometimes it can only reach the /bottom/). For example:
-      #+BEGIN_SRC haskell
-        myAny :: (a -> Bool) -> [a] -> Bool
-        myAny f xs =
-          foldr (\x b -> f x || b) False xs
+      _Since Haskell is lazy by default, non-immediate evaluation can happen
+      often._ One of the CONSEQUENCES of this is that ~foldr~ can _avoid_
+      evaluating
+      + NOT ONLY some or all of the /values/ in the list,
 
-        myAny even [1..]
-        -- True
+        which means ~foldr~ can be used with foldable data that are potentially
+        infinite (though sometimes it can only reach the /bottom/). For example:
+        #+BEGIN_SRC haskell
+          myAny :: (a -> Bool) -> [a] -> Bool
+          myAny f xs =
+            foldr (\x b -> f x || b) False xs
 
-        myAny even (repeat 1)
-        -- -- NEVER-ENDING
-        -- -- reach the bottom
-      #+END_SRC
+          myAny even [1..]
+          -- True
 
-    - More examples: =IMPORTANT=
-      #+BEGIN_SRC haskell
-        -- Prelude> let u = undefined
+          myAny even (repeat 1)
+          -- -- NEVER-ENDING
+          -- -- reach the bottom
+        #+END_SRC
 
-        -- #1
-        -- -- here, we give an undefined value
-        -- Prelude> foldr (+) 0 [1, 2, 3, 4, u]
-        -- *** Exception: Prelude.undefined
+      + BUT ALSO some or all of the list's /spine/ as well!
+        =IMPORTANT=
+        More examples:
+        #+BEGIN_SRC haskell
+          u = undefined
 
-        -- #2
-        -- Prelude> foldr (+) 0 (take 4 [1, 2, 3, 4, u])
-        -- 10
+          -- #1
+          foldr (+) 0 [1, 2, 3, 4, u]
+          -- -- *** Exception: Prelude.undefined
 
-        -- #3
-        -- -- here, the undefined is part of the spine
-        -- Prelude> foldr (+) 0 ([1, 2, 3, 4] ++ u)
-        -- *** Exception: Prelude.undefined
+          -- #2
+          foldr (+) 0 (take 4 [1, 2, 3, 4, u])
+          -- 10
 
-        -- #4
-        -- Prelude> foldr (+) 0 (take 4 ([1, 2, 3, 4] ++ u))
-        -- 10
-      #+END_SRC
-      1. For #1, this expression _requires_ the evaluation of ~u~, which is
-         ~undefined~.
-         This run into /bottom/.
+          -- #3
+          -- Here, the undefined is part of the spine
+          foldr (+) 0 ([1, 2, 3, 4] ++ u)
+          -- -- *** Exception: Prelude.undefined
 
-      2. For #2, this expression _DOESN'T require_ the evaluation of ~u~.
+          -- #4
+          foldr (+) 0 (take 4 ([1, 2, 3, 4] ++ u))
+          -- 10
+        #+END_SRC
+        + For #1, this expression _requires_ the evaluation of ~u~, which is
+          ~undefined~.
+          This run into /bottom/.
 
-      3. For #3, here ~u~ is a part of the spine.
+        + For #2, this expression _DOESN'T require_ the evaluation of ~u~.
 
-         Here the evaluation of ~u~ is required. _However_, even if the
-         evaluation DOESN'T required, since ~u~ is part of the spine, the
-         _Exception_ will be thrown out.
+        + For #3, here ~u~ is a part of the spine.
 
-      4. For #4, even if ~u~ is a part of the spine, with ~take~, this part of
-         spine won't be visited, and no _Exception_.
+          Here the evaluation of ~u~ is required. _However_, even if the inside
+          values evaluation DOESN'T required, since ~u~ is part of the /spine/,
+          the _Exception_ will be thrown out.
+
+        + For #4, even if ~u~ is a part of the /spine/, with ~take~, this part of
+          /spine/ won't be visited, and no _Exception_.
 
     - Sometimes, the /spines/ will be evaluated _unconditionally_, but not the
       values:
       #+BEGIN_SRC haskell
-        -- Prelude> length [1, 2, 3, 4, undefined]
+        length [1, 2, 3, 4, undefined]
         -- 5
 
-        -- Prelude> length ([1, 2, 3, 4] ++ undefined)
+        length ([1, 2, 3, 4] ++ undefined)
         -- *** Exception: Prelude.undefined
       #+END_SRC
-      However, we can still drop this part of spine (as in the last example #4):
+
+      However, we can still drop this part of spine (as in #4 the last example):
       #+BEGIN_SRC haskell
-        -- Prelude> length (take 4 ([1, 2, 3, 4] ++ undefined))
+        length (take 4 ([1, 2, 3, 4] ++ undefined))
         -- 4
       #+END_SRC
 
     - ~take~ is non-strict like everything else you've seen so far.
       #+BEGIN_SRC haskell
-        -- Prelude> length $ take 2 $ take 4 ([1, 2]++undefined)
+        xs = [1, 2] ++ undefined
+        length $ take 2 $ take 4 xs
         -- 2
       #+END_SRC
-      It doesn't matter that ~take 4~ could've hit the /bottom/!
+      It doesn't matter that if there only ~take 4~ it could've hit the /bottom/!
       Nothing forced it to because of the ~take 2~ between it and length.
+
+      + =TODO=   page 357 - _START HERE_
 
       =From Jian=
       Speak this in another way: ~take 2~ doesn't happen after when

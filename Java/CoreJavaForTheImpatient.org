@@ -300,8 +300,6 @@
     - [[9.5.4 The readResolve and writeReplace Methods][9.5.4 The readResolve and writeReplace Methods]]
     - [[9.5.5 Versioning][9.5.5 Versioning]]
   - [[Exercises][Exercises]]
-- [[][]]
-- [[][]]
 - [[10 CONCURRENT PROGRAMMING - PAGE 304 ~ 343][10 CONCURRENT PROGRAMMING - PAGE 304 ~ 343]]
   - [[10.1 Concurrent Tasks][10.1 Concurrent Tasks]]
     - [[10.1.1 Running Tasks][10.1.1 Running Tasks]]
@@ -2304,8 +2302,8 @@
   - An interface is a supertype of any class that implements it. Therefore, one
     can assign instances of the class to variables of the interface type.
 
-  - An interface can contain static methods. All variables of an interface are
-    automatically static and final.
+  - An interface can contain /static methods/.
+    All variables of an interface are automatically /static/ and /final/.
 
   - An interface can contain default methods that an implementing class can
     inherit or override.
@@ -2325,6 +2323,10 @@
 
 ** DONE 3.1 Interfaces
    CLOSED: [2017-05-11 Thu 15:07]
+   An /interface/ is a mechanism for spelling out a contract between two parties:
+   the supplier of a service and the classes that want their objects to be
+   usable with the service.
+
 *** 3.1.1 Declaring an Interface
     - Consider a service that works on sequences of integers, reporting the
       _average_ of the first ~n~ values:
@@ -2493,7 +2495,7 @@
       }
       #+END_SRC
 
-    - _Note\under{}(history):
+    - _Note\under{}(history): =IMPORTANT=
       In the past, it had been common to place static methods in a companion
       class, and you can find pairs of interfaces and utility classes, such as
       ~Collection/Collections~ or ~Path/Paths~, in the standard library.
@@ -2780,13 +2782,12 @@
 
 *** DONE 3.4.2 Functional Interfaces
     CLOSED: [2017-05-11 Thu 15:50]
-    - As you already saw, there are many interfaces in Java that express actions,
-      such as ~Runnable~ or ~Comparator~.
-      Lambda expressions are compatible with these interfaces.
+    - In Java there are many interfaces, such as ~Runnable~ or ~Comparator~, that
+      express actions. Lambda expressions are compatible with these interfaces.
 
-    - /functional interface/: You can supply a lambda expression whenever an
-      object of an interface with a _single_ /abstract method/ is expected.
-      For example,
+    - functional interface :: a interface that has
+         a _single_ /abstract method/.
+
       #+BEGIN_SRC java
       Arrays.sort(words,
           (first, second) -> first.length() - second.length());
@@ -2798,9 +2799,9 @@
         invoke them.
 
     - In /Java/ you can _ONLY_ do _ONE_ thing:
-      put the lambda expression in a variable whose type is a
-      /functional interface/ (can't be class), so that it is converted to an
-      instance of that interface.
+      put the lambda expression in a variable typed as a /functional interface/
+      (can't be any class), so that it is converted to an instance of that
+      interface.
 
     - Note: =IMPORTANT=
       You _CANNOT_ assign a lambda expression to a variable of type ~Object~,
@@ -2813,6 +2814,7 @@
       #+BEGIN_SRC java
       public interface Predicate<T> {
           boolean test(T t);
+          // Additional default and static methods
       }
       #+END_SRC
       =TODO=
@@ -2825,7 +2827,8 @@
 
 ** DONE 3.5 Method and Constructor References
    CLOSED: [2017-05-12 Fri 12:29]
-*** 3.5.1 Method References
+*** DONE 3.5.1 Method References
+    CLOSED: [2017-09-15 Fri 14:40]
     - Introduce /method reference/ by examples:
       #+BEGIN_SRC java
       // #1
@@ -2848,22 +2851,22 @@
       #+END_SRC
 
     - Three variations of /method reference/:
-      1. _Class::instanceMethod_:
-         The first parameter becomes the receiver of the method, and any other
-         parameters are passed to the method.
+      + Class::instanceMethod ::
+        The first parameter becomes the receiver of the method, and any other
+        parameters are passed to the method.
 
-         ~String::compareToIgnoreCase~ is the same as
-         ~(x, y) -> x.compareToIgnoreCase(y)~
+        ~String::compareToIgnoreCase~ is the same as
+        ~(x, y) -> x.compareToIgnoreCase(y)~
 
-      2. _Class::staticMethod_:
-         all parameters are passed to the static method.
+      + Class::staticMethod ::
+        all parameters are passed to the static method.
 
-         ~Objects::isNull~ is equivalent to ~x -> Objects.isNull(x)~
+        ~Objects::isNull~ is equivalent to ~x -> Objects.isNull(x)~
 
-      3. _object::instanceMethod_:
-         the method is invoked on the given object, and the parameters are passed
-         to the instance method.
-         ~System.out::println~ is equivalent to ~x -> System.out.println(x)~
+      + object::instanceMethod ::
+        the method is invoked on the given object, and the parameters are passed
+        to the instance method.
+        ~System.out::println~ is equivalent to ~x -> System.out.println(x)~
 
     - _NOTE_:
       Compiler will try to find from the context which overloaded method is
@@ -2876,20 +2879,29 @@
       In an inner class, you can capture the ~this~ reference of an enclosing
       class as ~EnclosingClass.this::method~.
 
-      You can also capture super - See Chapter 4   =TODO=
+      You can also capture ~super~ - See Chapter 4   =TODO=
       
-*** 3.5.2 Constructor References
+*** DONE 3.5.2 Constructor References
+    CLOSED: [2017-09-18 Mon 23:37]
     - ~ClassName::new~
-      If the class has more than one constructor, then it depends on the context.
+      If the class has more than one constructor, then which one is called
+      depends on the context.
 
-    - Examples,
-      + ~Stream<Employee> stream = names.stream().map(Employee::new);~
-      + ~int[]::new~ is equivalent to ~n -> new int[n]~
+    - Example
+      #+BEGIN_SRC java
+        List<String> names = ...;
+        Stream<Employee> stream = names.stream().map(Employee::new);
+        // Here the `Employee(String)` constructor is called.
+      #+END_SRC
 
-    - One of Java limitation (_NO possible_ to construct an array of generic
-      type)
+    - Form constructor references with array types, for example:
+      ~int[]::new~,
+      which is equivalent to ~n -> new int[n]~
+
+    - Use /constructor reference/ to overcome one of Java's limitation:
+      it's usually _NOT_ possible to construct an array of generic type!
       =TODO= See Chapter 6
-      can be overcome through using /constructor reference/:
+
       =IMPORTANT=
       #+BEGIN_SRC java
       // Usual `toArray` method return an `Object`, not an array of the element
@@ -2902,12 +2914,13 @@
 
 ** DONE 3.6 Processing Lambda Expressions
    CLOSED: [2017-05-14 Sun 20:02]
-   This section show you how to write your own methods that can consume lambda
-   expressions.
+   Topic: how to write your own methods that can consume lambda expressions.
 
-*** 3.6.1 Implementing Deferred Execution
+*** DONE 3.6.1 Implementing Deferred Execution
+    CLOSED: [2017-09-18 Mon 22:15]
     - The point of using lambdas is /deferred execution/.
-      Reasons, such as:
+
+      You need it for many reasons, such as:
       + Running the code in a separate thread
 
       + Running the code multiple times
@@ -2922,35 +2935,53 @@
 
     - Example:
       #+BEGIN_SRC java
-      // #1
-        // pass
-      repeat(10, () -> System.out.println("Hello, World!"));
-        // as the parameter `action` to the method
-      public static void repeat(int n, Runnable action) {
-          for (int i = 0; i < n; ++i) action.run();
-      }
+        // #1
+        repeat(10, () -> System.out.println("Hello, World!"));
+
+        // a method
+        public static void repeat(int n, Runnable action) {
+            for (int i = 0; i < n; ++i) action.run();
+        }
 
 
-      // #2
-      public interface IntConsumer {
-          void accept(int value);
-      }
-      
-      public static void repeat(int n, IntConsumer action) {
-          for (int i = 0; i < n; ++ i) action.accept(i);
-      }
+        // #2 The improved version
+        public interface IntConsumer {
+            void accept(int value);
+        }
+
+        public static void repeat(int n, IntConsumer action) {
+            for (int i = 0; i < n; ++ i) action.accept(i);
+        }
+
+        repeat(10, i -> System.out.println("Countdown: " + (9 - i)));
       #+END_SRC
-*** 3.6.2 Choosing a Functional Interface
+
+*** DONE 3.6.2 Choosing a Functional Interface
+    CLOSED: [2017-09-18 Mon 23:30]
     - In most functional programming languages, function types are /structural/.
       They are in the form of (input: two strings input; output: int)
       + ~Function2<String, String, Integer>~
         OR
       + ~(String, String) -> int~
 
-    - In Java, use functional interface such as ~Comparator<String>~. In the
-      theory this is called /nominal typing/. =TODO= =???=
+    - In Java, use functional interface such as ~Comparator<String>~.
+      In theory this is called /nominal typing/. =TODO= =???=
 
-    - Provided: Table 3-1 =IMPORTANT=
+    - Provided: Table 3-1 Common Functional Interfaces
+      =IMPORTANT=
+      |----------------------+-----------------+-------------+----------------------+-------------+---------------|
+      | Functional Interface | Parameter types | Return type | Abstract method name | Description | Other methods |
+      |----------------------+-----------------+-------------+----------------------+-------------+---------------|
+      | Runnable             | none            | void        | run                  |             |               |
+      | Supplier<T>          | none            | T           | get                  |             |               |
+      | Consumer<T>          | T               | void        | accept               |             |               |
+      | BiConsumer<T, U>     | T, U            | void        | accept               |             |               |
+      | Function<T, R>       | T               | R           | apply                |             |               |
+      | BiFunction<T, U, R>  | T, U            | R           | apply                |             |               |
+      | UnaryOperator<T>     | T               | T           | apply                |             |               |
+      | BinaryOperator<T>    | T, T            | T           | apply                |             |               |
+      | Predicate<T>         | T               | boolean     | test                 |             |               |
+      | Bipredicate<T, U>    | T, U            | boolean     | test                 |             |               |
 
     - _NOTE_:
       Most of the standard functional interfaces have nonabstract methods for
@@ -2959,34 +2990,39 @@
       ~Predicate.isEqual(a).or(Predicate.isEqual(b))~, which is the same as
       ~x -> a.equals(x) || b.equals(x)~.
 
+    - Use /functional interfaces/ for primitive types can help you reduce
+      autoboxing.
+
+      For this reason, we use ~IntConsumer~ instead of a ~Consumer<Integer>~ in
+      the example of the preceeding section.
+
     - Table 3-2 =IMPORTANT=
-      34 available specializations for primitive types ~int~, ~long~, and
-      ~double~. Use them can reduce autoboxing. This is why the author use
-      ~IntConsumer~ instead of a ~Consumer<Integer>~
+      Functional Interfaces for Primitive Types ~p~, ~q~ is ~int~, ~long~,
+      ~double~; ~P~, ~Q~ is ~Int~, ~Long~, ~Double~.
 
-*** 3.6.3 Implementing Your Own Functional Interfaces
-    _Explain through Example_:
-
-    There is no standard type for a mapping ~(int, int) -> Color~.
-    You could use ~BiFunction<Integer, Integer, Color>~, BUT that involves
+*** DONE 3.6.3 Implementing Your Own Functional Interfaces
+    CLOSED: [2017-09-18 Mon 23:30]
+    Exaplain through an example:
+      There is no standard type for a mapping ~(int, int) -> Color~. Of course,
+    you could use ~BiFunction<Integer, Integer, Color>~, BUT that involves
     /autoboxing/.
 
-    + In this case, it makes sense to define a new interface
-      #+BEGIN_SRC java
-        @FunctionalInterface
-        public interface PixelFunction {
-            Color apply(int x, int y);
-        }
-      #+END_SRC
+    In this case, it makes sense to define a new interface
+    #+BEGIN_SRC java
+      @FunctionalInterface
+      public interface PixelFunction {
+          Color apply(int x, int y);
+      }
+    #+END_SRC
 
-    + Advantages of using ~@FunctionalInterface~ annotation:
-      1. The compiler checks that the annotated entity is an interface with a
-         single abstract method.
+    - Advantages of using ~@FunctionalInterface~ annotation:
+      1. The compiler checks that the annotated entity is a functional interface
+         -- an interface with a single abstract method.
 
       2. The _javadoc_ page includes a statement that your interface is a func-
          tional interface.
 
-    + Implement a method can take a lambda expression parameter, and use it:
+    - Implement a method can take a lambda expression parameter, and use it:
       #+BEGIN_SRC java
         BufferedImage createImage(int width, int height, PixelFunction f) {
             BufferedImage image = new BufferedImage(width, height,
@@ -2997,7 +3033,6 @@
                     image.setRGB(x, y, color.getRGB());
                 }
             }
-
             return image;
         }
 
@@ -3007,7 +3042,9 @@
 
 ** DONE 3.7 Lambda Expressions and Variable Scope
    CLOSED: [2017-05-14 Sun 21:05]
-*** 3.7.1 Scope of a Lambda Expression
+   TOPIC: How variables work inside lambda expressions.
+*** DONE 3.7.1 Scope of a Lambda Expression
+    CLOSED: [2017-09-19 Tue 00:19]
     - It is _illegal_ to
       + declare a parameter or a local variable in the lambda that has the same
         name as a local variable.
@@ -3043,15 +3080,25 @@
       The scope of the lambda expression is nested inside the ~doWork~ method,
       and ~this~ has the same meaning anywhere in that method.
 
-*** 3.7.2 Accessing Variables from the Enclosing Scope
+*** DONE 3.7.2 Accessing Variables from the Enclosing Scope
+    CLOSED: [2017-09-19 Tue 00:33]
+    - A lambda expression has THREE ingredients:
+      1. A block of code
+      2. Parameters
+      3. Values for the free variables -- that is, the variables that are not
+         parameters and not defined inside the code.
+
     - /closure/: a block of code together with the values of free variables.
+
       In Java, lambda expressions are closures.
 
     - To ensure that the captured value is well defined,
+      =IMPORTANT=
 
       there is an important -RESTRICTION-:
       _In a lambda expression, you can only reference variables whose value
-      doesn't change._
+      doesn't change_ -- /effective/ ~final~, which means it either is or could
+      be declared as ~final~.
 
       For example, (here is a compile-time error):
       #+BEGIN_SRC java
@@ -3061,15 +3108,8 @@
         }
       #+END_SRC
 
-    - The rule is that a lambda expression can _ONLY_ access local variables
-      from an enclosing scope that are /effectively final/.
-
-    - /effectively final/: a variable is never modified -- it either IS or COULD
-      BE declared as ~final~.
-
     - _NOTE_:
-      The same rule applies to variables captured by local inner classes (see
-      Section 3.9, “Local Inner Classes,” on p. 122).  =TODO=
+      The same rule applies to variables captured by /local (inner) classes/.
 
       _In the past_, the rule was more draconian and required captured variables
       to actually be declared ~final~. _This is no longer the case_.
@@ -3084,16 +3124,17 @@
             // OK to capture `arg`
         }
       #+END_SRC
-      In contrast, the scope of ~i~ in traditional ~for~ is the entire loop.
+      In contrast, the scope of ~i~ in traditional ~for~ is the entire loop (if
+      NOT, why there is ~++i~ or ~i++~).
 
     - As a consequence of the /effectively final/ rule,
-      a lambda expression _CANNOT mutate any captured variables_.
+      a lambda expression CANNOT _mutate any captured variables_.
       For example,
       #+BEGIN_SRC java
         public static void repeatMessage(String text, int count, int threads) {
             Runnable r = () -> {
                 while (count > 0) {
-                    count—; // Error: Can't mutate captured variable
+                    count--; // Error: Can't mutate captured variable
                     System.out.println(text);
                 }
             };
@@ -3131,8 +3172,7 @@
       =TODO= You will see how to implement a threadsafe shared counter in
       Chapter 10.
 
-** DONE 3.8 Higher-Order Functions
-   CLOSED: [2017-05-14 Sun 22:09]
+** TODO 3.8 Higher-Order Functions
 *** 3.8.1 Methods that Return Functions
     Example
     - Q: Create a method that produces the correct comparator:
@@ -3219,7 +3259,8 @@
    + For functional interfaces, use lambda expressions.
    + For non-functional, use /local inner classes/.
 
-*** 3.9.1 Local Classes
+*** DONE 3.9.1 Local Classes
+    CLOSED: [2017-09-19 Tue 00:10]
    - /local class/: a class inside a method.
 
    - /local class/ occurs often when a class implements a interface and the
@@ -3229,7 +3270,9 @@
                  The only way to get this class is through the return value of
                  this method, or used inside this method.
 
-   - TODO
+   - The users don't need to know the exact information of the /local class/
+     here. Know the ~IntSequence~ interface is enough to guide the user to use
+     the return value.
      #+BEGIN_SRC java
        private static Random generator = new Random();
 
@@ -3243,7 +3286,23 @@
        }
      #+END_SRC
 
-*** 3.9.2 Anonymous Classes
+   - _Note_:
+     A /local class/ is NOT declared as ~public~ or ~private~ since it is never
+     accessible outside the method.
+
+   - Two advantages of making a class LOCAL.
+     * This helps avoid namespace pollution -- if we put it outside, even if it
+       doesn't conflict with the other classes, it is also a kind of noise to the
+       users (user don't need to know its existence, they only need to know how
+       to use it through its interface).
+
+     * The method of the /local class/ can access variables from the enclosing
+       scope, just like the variables of a lambda expression.
+
+*** DONE 3.9.2 Anonymous Classes
+    CLOSED: [2017-09-19 Tue 00:15]
+    The /local class/ ~RandomSequence~ in the preceding section was used only
+    once, it can be made _anonymous_:
     #+BEGIN_SRC java
       public static IntSequence randomInts(int low, int high) {
           return new IntSequence() {
@@ -3252,21 +3311,23 @@
           }
       }
     #+END_SRC
-    + The expression ~new interface() { methods }~ means:
+    - The expression ~new interface() { methods }~ means:
       Define a class implementing the interface that has the given methods, and
       construct one object of that class.
 
-    + _NOTE_:
+      =TODO= =FROM JIAN= How about the multiple interfaces case???
+
+    * _NOTE_:
       As always, the ~()~ in the ~new~ expression indicate the construction
       arguments. A default constructor of the anonymous class is invoked.
 
-    + _Before_ Java had /lambda expressions/,
+    * _Before_ Java had /lambda expressions/,
       /anonymous inner classes/ were _the most concise_ syntax available for
       providing runnables, comparators, and other functional objects.
       _They show up frequently in legacy code._
 
-    + Nowadays, they are only necessary when you need to provide two or more
-      methods, as in the preceding example.
+    * NOWADAYS, _they are only necessary when you need to provide two or more
+      methods_, as in the preceding example.
       If the ~IntSequence~ interface has a default ~hasNext~ method, as in
       Exercise 15, you can simply use a lambda expression: =IMPORTANT=
       #+BEGIN_SRC java
@@ -3278,6 +3339,22 @@
       #+END_SRC
 
 ** TODO Exercises
+   1. 
+   2. 
+   3. ~String~ has (directly) supertypes ~Object~, ~Serializable~,
+      ~CharSequence~, ~Comparable<String>~. ~String~ is also ~String~'s
+      supertype.
+
+      ~Scanner~ has (directly) supertypes ~Object~, ~Closeable~, ~AutoCloseable~,
+      ~Iterator<String>~. ~Scanner~ is also ~Scanner~'s supertype.
+        ~Closeable~ also has a supertype ~AutoCloseable~, which is alreay in the
+      list of types above.
+
+      ~ImageOutputStream~ has (directly) supertypes ~Object~, ~AutoCloseable~,
+      ~Closeable~, ~DataInput~, ~DataOutput~, and ~ImageInputStream~.
+      ~ImageOutputStream~ is also ~ImageOutputStream~'s supertype.
+        ~ImageInputStream~ also has supertypes ~AutoCloseable~, ~Closeable~, and
+      ~DataInput~, all of which are alreay in the list of types above.
 
 * TODO 4 INHERITANCE AND REFLECTION - PAGE 139 ~ 179
   - /inheritance/
@@ -4255,10 +4332,6 @@
 *** 9.5.4 The readResolve and writeReplace Methods
 *** 9.5.5 Versioning
 ** TODO Exercises
-
-
-* 
-* 
 
 * TODO 10 CONCURRENT PROGRAMMING - PAGE 304 ~ 343
 ** TODO 10.1 Concurrent Tasks
