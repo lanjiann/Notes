@@ -2573,9 +2573,11 @@
 
 ** DONE 3.3 Examples of Interfaces
    CLOSED: [2017-05-12 Fri 00:41]
-*** 3.3.1 The ~Comparable~ Interface
+*** DONE 3.3.1 The ~Comparable~ Interface
+    CLOSED: [2017-09-21 Thu 22:33]
     - If a class wants to enable sorting for its objects, it should implement the
       ~Comparable~ interface.
+
       #+BEGIN_SRC java
       public interface Comparable<T> {
           int compareTo(T other);
@@ -2586,9 +2588,9 @@
       ~ArrayList~.
 
     - For objects that implement ~Comparable~, ~x.compareTo(y)~ returns
-      + a positive value
-      + 0
-      + a negative value
+      + a positive value => ~x~ should _after_ ~y~
+      + 0                => ~x~ and ~y~ are considered equal.
+      + a negative value => ~x~ should _before_ ~y~
 
     - For example:
       #+BEGIN_SRC java
@@ -2601,12 +2603,12 @@
       }
       #+END_SRC
 
-    - _Caution_: =TODO= =PAGE-117=
+      _Caution_: =Important=
       Returning a difference of integers _does not work_ if the integers can be
       negative. Then the difference can overflow for large operands of opposite
       sign.
         In that case, use the ~Integer.compare~ method that works correctly for
-      all integers. =???=
+      all integers. =TODO= =Read API=
 
     - Compare floating-point values, you cannot just return the difference.
       Use static ~Double.compare~ method. It does right thing, even for +-\infty and
@@ -2621,7 +2623,7 @@
       #+END_SRC
 
     - _Note_:
-      In Java, a method can access private features of any object of its class.
+      In Java, a method can access /private features/ of any object of its class.
 
     - Use ~Array.sort~ method to sort an array of ~Comparable~ objects:
       #+BEGIN_SRC java
@@ -2629,14 +2631,15 @@
       Arrays.sort(friends);  // friends is now ["Mary", "Paul", "Peter"] 
       #+END_SRC
 
-    - _Note_:
+    - _Note_: =WHY= =???= =TODO= _NO Answer in this book_
       Strangely, the ~Arrays.sort~ method does NOT check _at compile time_
       whether the argument is an array of ~Comparable~ objects.
 
       Instead, it throws an exception if it encounters an element of a class
       that doesn't implement the ~Comparable~ interface.
 
-*** 3.3.2 The ~Comparator~ Interface
+*** DONE 3.3.2 The ~Comparator~ Interface
+    CLOSED: [2017-09-21 Thu 22:33]
     - A second version of the ~Arrays.sort~ method whose parameters are an array
       and a /comparator/.
 
@@ -2676,9 +2679,8 @@
       Arrays.sort(friends, new LengthComparator());
       #+END_SRC
 
-    - =TODO= See Section 3.4.2 "Functional Interfaces".
-
-*** 3.3.3 The ~Runnable~ Interface
+*** DONE 3.3.3 The ~Runnable~ Interface
+    CLOSED: [2017-09-21 Thu 22:37]
     - You may want to run certain tasks in a separate thread, or give them to a
       thread pool for execution.
         To define the task, you implement the ~Runnable~ interface. It has just
@@ -2692,12 +2694,13 @@
           }
       }
 
+      // Excute in a new thread
       Runnable task = new HelloTask();
       Thread thread = new Thread(task);
       thread.start();
      #+END_SRC
-     Now the ~run~ (typo??? ~start~ ???) method executes in a separate thread,
-     and the current thread can proceed with other work.
+     Now the ~run~ method executes in a separate thread, and the current thread
+      can proceed with other work.
 
     - _Note_: =TODO=
       See Chapter 10, other ways of executing a ~Runnable~.
@@ -2705,8 +2708,9 @@
     - There is also a ~Callable<T>~ interface for tasks that return a result of
       type ~T~.
 
-*** 3.3.4 User Interface Callbacks
-    - /call back/
+*** DONE 3.3.4 User Interface Callbacks
+    CLOSED: [2017-09-21 Thu 22:40]
+    - call back :: some code gets called back when a user action occurs.
 
     - In Java-based GUI libraries, interfaces are used for callbacks.
 
@@ -3172,48 +3176,51 @@
       =TODO= You will see how to implement a threadsafe shared counter in
       Chapter 10.
 
-** TODO 3.8 Higher-Order Functions
-*** 3.8.1 Methods that Return Functions
-    Example
-    - Q: Create a method that produces the correct comparator:
-         Sometimes sort an array of strings in ascending order
-         Other times in descending order.
+** DONE 3.8 Higher-Order Functions
+   CLOSED: [2017-09-21 Thu 23:20]
+*** DONE 3.8.1 Methods that Return Functions
+    CLOSED: [2017-09-21 Thu 22:44]
+    - Example
+      #+BEGIN_SRC java
+        public static Comparator<String> compareInDirection(int direction) {
+            return (x, y) -> direction * x.compareTo(y);
+        }
+      #+END_SRC
+      + call ~compareInDirection(1)~ yields an ascending comparator
+      + call ~compareInDirection(-1)~ yields a descending comparator
 
-    - A:
-      + Code
-        #+BEGIN_SRC java
-          public static Comparator<String> compareInDirection(int direction) {
-              return (x, y) -> direction * x.compareTo(y);
-          }
-        #+END_SRC
-        * call ~compareInDirection(1)~ yields an ascending comparator
-        * call ~compareInDirection(-1)~ yields a descending comparator
-
-      + Application
-        ~Arrays.sort(friends, compareInDirection(-1));~
+    - Application
+      ~Arrays.sort(friends, compareInDirection(-1));~
          
-*** 3.8.2 Methods That Modify Functions
+*** DONE 3.8.2 Methods That Modify Functions
+    CLOSED: [2017-09-21 Thu 22:47]
     Generalize the idea from the last section: Reverse any comparator.
     #+BEGIN_SRC java
       public static Comparator<String> reverse(Comparator<String> comp) {
           return (x, y) -> comp.compare(y, x);
       }
 
-      reverse(String::compareToIgnoreCase);
+      Arrays.sort(friends, reverse(compareInDirection(1)));
     #+END_SRC
+
+    =From Jian=
+    ~Arrays.sort(friends, reverse(compareInDirection(1)));~ is equivalent to the
+    ~Arrays.sort(friends, compareInDirection(-1));~ in the last section.
+
 
     _NOTE_:
     The ~Comparator~ interface has default method ~reversed~ that produces the
     reverse of a given comparator in just this way.
 
-*** 3.8.3 Comparator Methods
+*** DONE 3.8.3 Comparator Methods
+    CLOSED: [2017-09-21 Thu 23:20]
     - The ~Comparator~ interface has a number of useful static methods that are
       higher-order functions generating comparators.
 
-    - The comparing method takes a /"key extractor" function/ that maps a type
+    - The ~comparing~ method takes a /"key extractor" function/ that maps a type
       ~T~ to a comparable type (such as ~String~), and then compare them.
 
-    - For example,
+      For example,
       + ~Arrays.sort(people, Comparator.comparing(Person::getName));~
 
       + Chain comparators
@@ -3223,11 +3230,13 @@
                       .thenComparing(Person::getFirstName));
         #+END_SRC
 
-      + Some wariations of these methods.
+      + Some variations of these methods.
         #+BEGIN_SRC java
           Arrays.sort(people, Comparator.comparing(Person::getName,
               (s, t) -> s.length() - t.length()));
         #+END_SRC
+
+        =TODO= =Practice= Write code that implement ~comparing~
 
     - =IMPORTANT= Both the ~comparing~ and ~thenComparing~ methods have variants
       that avoid boxing of ~int~, ~long~, or ~double~ values.

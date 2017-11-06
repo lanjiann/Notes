@@ -222,6 +222,7 @@
       - [[10.2.1 Overflow Pages, Locking Considerations][10.2.1 Overflow Pages, Locking Considerations]]
     - [[10.3 B+ Trees: A Dynamic Index Structure][10.3 B+ Trees: A Dynamic Index Structure]]
       - [[10.3.1 Format of a Node][10.3.1 Format of a Node]]
+      - [[10.3.1 Format of a Node][10.3.1 Format of a Node]]
     - [[10.4 Search][10.4 Search]]
     - [[10.5 Insert][10.5 Insert]]
     - [[10.6 Delete][10.6 Delete]]
@@ -903,12 +904,126 @@
 **** 9.7.2 Variable-Length Records
 *** 9.8 Review Questions
 
-** Chapter 10 TREE-STRUCTURED INDEXING
+** TODO Chapter 10 TREE-STRUCTURED INDEXING
+   - Topics:
+     + What is the intuition behind tree-structured indexes?
+       Why are they good for range selections?
+
+     + How does an ISAM index handle search, insert, and delete?
+
+     + How does a B+ tree index handle search, insert, and delete?
+
+     + What is the impact of duplicate key values on index implementation'?
+
+     + What is key compression, and why is it important?
+
+     + What is bulk-loading, and why is it important?
+
+     + What happens to record identifiers when dynamic indexes are updated?
+
+     + How does this affect clustered indexes?
+
+   - Key concepts:
+     + ISAM, static indexes, overflow pages, locking issues;
+
+     + B+ trees, dynamic indexes, balance, sequence sets, node format;
+
+     + B+ tree insert operation, node splits, delete operation, merge versus
+       redistribution, minimum occupancy;
+
+     + duplicates, overflow pages, including rids in search keys;
+
+     + key compression;
+
+     + bulk-loading;
+
+     + effects of splits on rids in clustered indexes.
+
+   - ISAM tree :: a static index structure
+     + effective when the file is not frequently updated
+     + unsuitable for files that grow and shrink a lot
+
+     =TODO= 10.2
+
+   - 
+
 *** 10.1 Intuition For Tree Indexes
 *** 10.2 Indexed Sequential Access Method (ISAM)
 **** 10.2.1 Overflow Pages, Locking Considerations
 *** 10.3 B+ Trees: A Dynamic Index Structure
 **** 10.3.1 Format of a Node
+     - The defect of /static structures of searching/ as the /ISAM index/:
+       it suffers from the problem that _LONG overflow chains_ can develop as the
+       file grows, leading to POOR performance.
+
+     - B+ tree :: a kind of balanced tree =TOOD= =more details=
+       + the internal nodes direct the search
+       + the leaf nodes contain the data entries
+
+     - Since the tree structure grows and shrinks dynamically,
+       it is NOT feasible to allocate the leaf pages sequentially as in ISAM,
+       where the set of primary leaf pages was static.
+
+       + Solution:
+         To retrieve all leaf pages efficiently, we have to link them using page
+         pointers.
+
+       + Implementation:
+         By organizing them into a /doubly linked list/, we can easily traverse
+         the sequence of leaf pages (sometimes called the /sequence set/) in
+         EITHER direction. See Figure 10.7
+
+     - The following are some of the _main characteristics_ of a /B+ tree/: 
+       + Operations (insert, delete) on the tree keep it balanced.
+
+       + A minimum occupancy of 50 percent is guaranteed for each node
+         except the root if the deletion algorithm discussed in Section 10.6 is
+         implemented.
+
+         However, deletion is often implemented by _simply locating the data
+         entry and removing it_, =WITHOUT= adjusting the tree as needed to
+         guarantee the 50 percent occupancy, because files typically grow rather
+         than shrink.
+
+       + Searching for a record requires just a traversal from the root to the
+         appropriate leaf. We refer to the length of a path from the root to a
+         leaJ any leaf, because the tree is balanced as the height of the tree.
+
+         For example,
+         * a tree with ouly a leaf level and a single index level, such as the
+           tree shown in Figure 10.9, has height 1,
+
+         * a tree that has only the root node has height 0.
+
+         Because of high fan-out, the height of a B+ tree is rarely more than 3
+         or 4.
+
+     - We will study B+ trees in which every node contains _m_ entries, where
+       d \le{} m \le{} 2d. The value d is a parameter of the B+ tree, called the /order/
+       of the tree, and is a measure of the capacity of a tree node.
+
+       The /root node/ is the ONLY _exception_ to this requirement on the number
+       of entries; for the root, it is simply required that 1 \le{} m \le{} 2d.
+
+     - If a file of records is updated frequently and sorted access is important,
+       maintaining a B+ tree index with data records stored as data entries is
+       almost always superior to maintaining a sorted file.
+
+       For the space overhead of storing the index entries, we obtain all the
+       advantages of a sorted file plus efficient insertion and deletion
+       algorithms. B+ trees typically maintain 67 percent space occupancy. B+
+       trees are usually also preferable to ISAM indexing because inserts are
+       handled gracefully without overflow chains. However, if the dataset size
+       and distribution remain fairly static, overflow chains may not be a major
+       problem. In this case, two factors favor ISAM: the leaf pages are
+       allocated in sequence ( making scans over a large range more efficient
+       than in a B+ in which pages are likely to out of sequence on disk over
+       time, even if they were in sequence after bulk-loading), and the locking
+       overhead ofISAM is lower than that for B+ trees. As a general rule,
+       however, B+ trees are likely to perform better than ISAM.
+
+**** 10.3.1 Format of a Node
+
 *** 10.4 Search
 *** 10.5 Insert
 *** 10.6 Delete

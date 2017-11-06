@@ -1,0 +1,737 @@
+#+TITLE: The Java\reg{} Virtual Machine Specifiction
+#+VERSION: Java SE 9 Edtion - 2017-08-07
+#+AUTHOR: Tim Lindholm, Frank Yellin, Gilad Bracha, Alex Buckley
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[1 Introduction - 1][1 Introduction - 1]]
+  - [[1.1 A Bit of History 1][1.1 A Bit of History 1]]
+  - [[1.2 The Java Virtual Machine 2][1.2 The Java Virtual Machine 2]]
+  - [[1.3 Organization of the Specification 3][1.3 Organization of the Specification 3]]
+  - [[1.4 Notation 4][1.4 Notation 4]]
+  - [[1.5 Feedback 4][1.5 Feedback 4]]
+- [[2 The Structure of the Java Virtual Machine - 5][2 The Structure of the Java Virtual Machine - 5]]
+  - [[2.1 The class File Format 5][2.1 The class File Format 5]]
+  - [[2.2 Data Types 6][2.2 Data Types 6]]
+  - [[2.3 Primitive Types and Values 6][2.3 Primitive Types and Values 6]]
+    - [[2.3.1 Integral Types and Values 7][2.3.1 Integral Types and Values 7]]
+    - [[2.3.2 Floating-Point Types, Value Sets, and Values 8][2.3.2 Floating-Point Types, Value Sets, and Values 8]]
+    - [[2.3.3 The returnAddress Type and Values 10][2.3.3 The returnAddress Type and Values 10]]
+    - [[2.3.4 The boolean Type 10][2.3.4 The boolean Type 10]]
+  - [[2.4 Reference Types and Values 11][2.4 Reference Types and Values 11]]
+  - [[2.5 Run-Time Data Areas 11][2.5 Run-Time Data Areas 11]]
+    - [[2.5.1 The pc Register 12][2.5.1 The pc Register 12]]
+    - [[2.5.2 Java Virtual Machine Stacks 12][2.5.2 Java Virtual Machine Stacks 12]]
+    - [[2.5.3 Heap 13][2.5.3 Heap 13]]
+    - [[2.5.4 Method Area 13][2.5.4 Method Area 13]]
+    - [[2.5.5 Run-Time Constant Pool 14][2.5.5 Run-Time Constant Pool 14]]
+    - [[2.5.6 Native Method Stacks 14][2.5.6 Native Method Stacks 14]]
+  - [[2.6 Frames 15][2.6 Frames 15]]
+    - [[2.6.1 Local Variables 16][2.6.1 Local Variables 16]]
+    - [[2.6.2 Operand Stacks 17][2.6.2 Operand Stacks 17]]
+    - [[2.6.3 Dynamic Linking 18][2.6.3 Dynamic Linking 18]]
+    - [[2.6.4 Normal Method Invocation Completion 18][2.6.4 Normal Method Invocation Completion 18]]
+    - [[2.6.5 Abrupt Method Invocation Completion 18][2.6.5 Abrupt Method Invocation Completion 18]]
+  - [[2.7 Representation of Objects 19][2.7 Representation of Objects 19]]
+  - [[2.8 Floating-Point Arithmetic 19][2.8 Floating-Point Arithmetic 19]]
+    - [[2.8.1 Java Virtual Machine Floating-Point Arithmetic and IEEE 754 19][2.8.1 Java Virtual Machine Floating-Point Arithmetic and IEEE 754 19]]
+    - [[2.8.2 Floating-Point Modes 20][2.8.2 Floating-Point Modes 20]]
+    - [[2.8.3 Value Set Conversion 20][2.8.3 Value Set Conversion 20]]
+  - [[2.9 Special Methods 22][2.9 Special Methods 22]]
+    - [[2.9.1 Instance Initialization Methods 22][2.9.1 Instance Initialization Methods 22]]
+    - [[2.9.2 Class Initialization Methods 22][2.9.2 Class Initialization Methods 22]]
+    - [[2.9.3 Signature Polymorphic Methods 23][2.9.3 Signature Polymorphic Methods 23]]
+  - [[2.10 Exceptions 23][2.10 Exceptions 23]]
+  - [[2.11 Instruction Set Summary 26][2.11 Instruction Set Summary 26]]
+    - [[2.11.1 Types and the Java Virtual Machine 26][2.11.1 Types and the Java Virtual Machine 26]]
+    - [[2.11.2 Load and Store Instructions 29][2.11.2 Load and Store Instructions 29]]
+    - [[2.11.3 Arithmetic Instructions 30][2.11.3 Arithmetic Instructions 30]]
+    - [[2.11.4 Type Conversion Instructions 32][2.11.4 Type Conversion Instructions 32]]
+    - [[2.11.5 Object Creation and Manipulation 34][2.11.5 Object Creation and Manipulation 34]]
+    - [[2.11.6 Operand Stack Management Instructions 34][2.11.6 Operand Stack Management Instructions 34]]
+    - [[2.11.7 Control Transfer Instructions 34][2.11.7 Control Transfer Instructions 34]]
+    - [[2.11.8 Method Invocation and Return Instructions 35][2.11.8 Method Invocation and Return Instructions 35]]
+    - [[2.11.9 Throwing Exceptions 36][2.11.9 Throwing Exceptions 36]]
+    - [[2.11.10 Synchronization 36][2.11.10 Synchronization 36]]
+  - [[2.12 Class Libraries 37][2.12 Class Libraries 37]]
+  - [[2.13 Public Design, Private Implementation 37][2.13 Public Design, Private Implementation 37]]
+- [[3 Compiling for the Java Virtual Machine - 39][3 Compiling for the Java Virtual Machine - 39]]
+  - [[3.1 Format of Examples 39][3.1 Format of Examples 39]]
+  - [[3.2 Use of Constants, Local Variables, and Control Constructs 40][3.2 Use of Constants, Local Variables, and Control Constructs 40]]
+  - [[3.3 Arithmetic 45][3.3 Arithmetic 45]]
+  - [[3.4 Accessing the Run-Time Constant Pool 46][3.4 Accessing the Run-Time Constant Pool 46]]
+  - [[3.5 More Control Examples 47][3.5 More Control Examples 47]]
+  - [[3.6 Receiving Arguments 50][3.6 Receiving Arguments 50]]
+  - [[3.7 Invoking Methods 51][3.7 Invoking Methods 51]]
+  - [[3.8 Working with Class Instances 53][3.8 Working with Class Instances 53]]
+  - [[3.9 Arrays 55][3.9 Arrays 55]]
+  - [[3.10 Compiling Switches 57][3.10 Compiling Switches 57]]
+  - [[3.11 Operations on the Operand Stack 59][3.11 Operations on the Operand Stack 59]]
+  - [[3.12 Throwing and Handling Exceptions 60][3.12 Throwing and Handling Exceptions 60]]
+  - [[3.13 Compiling finally 63][3.13 Compiling finally 63]]
+  - [[3.14 Synchronization 66][3.14 Synchronization 66]]
+  - [[3.15 Annotations 67][3.15 Annotations 67]]
+  - [[3.16 Modules 68][3.16 Modules 68]]
+- [[4 The class File Format - 71][4 The class File Format - 71]]
+  - [[4.1 The ClassFile Structure 72][4.1 The ClassFile Structure 72]]
+  - [[4.2 Names 77][4.2 Names 77]]
+    - [[4.2.1 Binary Class and Interface Names 77][4.2.1 Binary Class and Interface Names 77]]
+    - [[4.2.2 Unqualified Names 77][4.2.2 Unqualified Names 77]]
+    - [[4.2.3 Module and Package Names 77][4.2.3 Module and Package Names 77]]
+  - [[4.3 Descriptors 78][4.3 Descriptors 78]]
+    - [[4.3.1 Grammar Notation 78][4.3.1 Grammar Notation 78]]
+    - [[4.3.2 Field Descriptors 79][4.3.2 Field Descriptors 79]]
+    - [[4.3.3 Method Descriptors 80][4.3.3 Method Descriptors 80]]
+  - [[4.4 The Constant Pool 81][4.4 The Constant Pool 81]]
+    - [[4.4.1 The ~CONSTANT_Class_info~ Structure 82][4.4.1 The ~CONSTANT_Class_info~ Structure 82]]
+    - [[4.4.2 The ~CONSTANT_Fieldref_info~, ~CONSTANT_Methodref_info~, and ~CONSTANT_InterfaceMethodref_info~ Structures 83][4.4.2 The ~CONSTANT_Fieldref_info~, ~CONSTANT_Methodref_info~, and ~CONSTANT_InterfaceMethodref_info~ Structures 83]]
+    - [[4.4.3 The ~CONSTANT_String_info~ Structure 85][4.4.3 The ~CONSTANT_String_info~ Structure 85]]
+    - [[4.4.4 The ~CONSTANT_Integer_info~ and ~CONSTANT_Float_info~ Structures 85][4.4.4 The ~CONSTANT_Integer_info~ and ~CONSTANT_Float_info~ Structures 85]]
+    - [[4.4.5 The ~CONSTANT_Long_info~ and ~CONSTANT_Double_info~ Structures 87][4.4.5 The ~CONSTANT_Long_info~ and ~CONSTANT_Double_info~ Structures 87]]
+    - [[4.4.6 The ~CONSTANT_NameAndType_info~ Structure 88][4.4.6 The ~CONSTANT_NameAndType_info~ Structure 88]]
+    - [[4.4.7 The ~CONSTANT_Utf~8_info~ Structure 89][4.4.7 The ~CONSTANT_Utf~8_info~ Structure 89]]
+    - [[4.4.8 The ~CONSTANT_MethodHandle_info~ Structure 91][4.4.8 The ~CONSTANT_MethodHandle_info~ Structure 91]]
+    - [[4.4.9 The ~CONSTANT_MethodType_info~ Structure 93][4.4.9 The ~CONSTANT_MethodType_info~ Structure 93]]
+    - [[4.4.10 The ~CONSTANT_InvokeDynamic_info~ Structure 93][4.4.10 The ~CONSTANT_InvokeDynamic_info~ Structure 93]]
+    - [[4.4.11 The ~CONSTANT_Module_info~ Structure 94][4.4.11 The ~CONSTANT_Module_info~ Structure 94]]
+    - [[4.4.12 The ~CONSTANT_Package_info~ Structure 94][4.4.12 The ~CONSTANT_Package_info~ Structure 94]]
+  - [[4.5 Fields 95][4.5 Fields 95]]
+  - [[4.6 Methods 97][4.6 Methods 97]]
+  - [[4.7 Attributes 100][4.7 Attributes 100]]
+    - [[4.7.1 Defining and Naming New Attributes 107][4.7.1 Defining and Naming New Attributes 107]]
+    - [[4.7.2 The ConstantValue Attribute 107][4.7.2 The ConstantValue Attribute 107]]
+    - [[4.7.3 The Code Attribute 108][4.7.3 The Code Attribute 108]]
+    - [[4.7.4 The StackMapTable Attribute 112][4.7.4 The StackMapTable Attribute 112]]
+    - [[4.7.5 The Exceptions Attribute 119][4.7.5 The Exceptions Attribute 119]]
+    - [[4.7.6 The InnerClasses Attribute 120][4.7.6 The InnerClasses Attribute 120]]
+    - [[4.7.7 The EnclosingMethod Attribute 123][4.7.7 The EnclosingMethod Attribute 123]]
+    - [[4.7.8 The Synthetic Attribute 124][4.7.8 The Synthetic Attribute 124]]
+    - [[4.7.9 The Signature Attribute 125][4.7.9 The Signature Attribute 125]]
+      - [[4.7.9.1 Signatures 126][4.7.9.1 Signatures 126]]
+    - [[4.7.10 The SourceFile Attribute 130][4.7.10 The SourceFile Attribute 130]]
+    - [[4.7.11 The SourceDebugExtension Attribute 130][4.7.11 The SourceDebugExtension Attribute 130]]
+    - [[4.7.12 The LineNumberTable Attribute 131][4.7.12 The LineNumberTable Attribute 131]]
+    - [[4.7.13 The LocalVariableTable Attribute 132][4.7.13 The LocalVariableTable Attribute 132]]
+    - [[4.7.14 The LocalVariableTypeTable Attribute 134][4.7.14 The LocalVariableTypeTable Attribute 134]]
+    - [[4.7.15 The Deprecated Attribute 136][4.7.15 The Deprecated Attribute 136]]
+    - [[4.7.16 The RuntimeVisibleAnnotations Attribute 137][4.7.16 The RuntimeVisibleAnnotations Attribute 137]]
+      - [[4.7.16.1 The element_value structure 139][4.7.16.1 The element_value structure 139]]
+    - [[4.7.17 The RuntimeInvisibleAnnotations Attribute 142][4.7.17 The RuntimeInvisibleAnnotations Attribute 142]]
+    - [[4.7.18 The RuntimeVisibleParameterAnnotations Attribute 143][4.7.18 The RuntimeVisibleParameterAnnotations Attribute 143]]
+    - [[4.7.19 The RuntimeInvisibleParameterAnnotations Attribute 144][4.7.19 The RuntimeInvisibleParameterAnnotations Attribute 144]]
+    - [[4.7.20 The RuntimeVisibleTypeAnnotations Attribute 146][4.7.20 The RuntimeVisibleTypeAnnotations Attribute 146]]
+      - [[4.7.20.1 The target_info union 152][4.7.20.1 The target_info union 152]]
+      - [[4.7.20.2 The type_path structure 156][4.7.20.2 The type_path structure 156]]
+    - [[4.7.21 The RuntimeInvisibleTypeAnnotations Attribute 160][4.7.21 The RuntimeInvisibleTypeAnnotations Attribute 160]]
+    - [[4.7.22 The AnnotationDefault Attribute 161][4.7.22 The AnnotationDefault Attribute 161]]
+    - [[4.7.23 The BootstrapMethods Attribute 162][4.7.23 The BootstrapMethods Attribute 162]]
+    - [[4.7.24 The MethodParameters Attribute 164][4.7.24 The MethodParameters Attribute 164]]
+    - [[4.7.25 The Module Attribute 166][4.7.25 The Module Attribute 166]]
+    - [[4.7.26 The ModulePackages Attribute 173][4.7.26 The ModulePackages Attribute 173]]
+    - [[4.7.27 The ModuleMainClass Attribute 174][4.7.27 The ModuleMainClass Attribute 174]]
+  - [[4.8 Format Checking 175][4.8 Format Checking 175]]
+  - [[4.9 Constraints on Java Virtual Machine Code 176][4.9 Constraints on Java Virtual Machine Code 176]]
+    - [[4.9.1 Static Constraints 176][4.9.1 Static Constraints 176]]
+    - [[4.9.2 Structural Constraints 180][4.9.2 Structural Constraints 180]]
+  - [[4.10 Verification of class Files 183][4.10 Verification of class Files 183]]
+    - [[4.10.1 Verification by Type Checking 185][4.10.1 Verification by Type Checking 185]]
+      - [[4.10.1.1 Accessors for Java Virtual Machine Artifacts 187][4.10.1.1 Accessors for Java Virtual Machine Artifacts 187]]
+      - [[4.10.1.2 Verification Type System 191][4.10.1.2 Verification Type System 191]]
+      - [[4.10.1.3 Instruction Representation 195][4.10.1.3 Instruction Representation 195]]
+      - [[4.10.1.4 Stack Map Frames and Type Transitions 196][4.10.1.4 Stack Map Frames and Type Transitions 196]]
+      - [[4.10.1.5 Type Checking Abstract and Native Methods 201][4.10.1.5 Type Checking Abstract and Native Methods 201]]
+      - [[4.10.1.6 Type Checking Methods with Code 204][4.10.1.6 Type Checking Methods with Code 204]]
+      - [[4.10.1.7 Type Checking Load and Store Instructions 213][4.10.1.7 Type Checking Load and Store Instructions 213]]
+      - [[4.10.1.8 Type Checking for protected Members 215][4.10.1.8 Type Checking for protected Members 215]]
+      - [[4.10.1.9 Type Checking Instructions 218][4.10.1.9 Type Checking Instructions 218]]
+    - [[4.10.2 Verification by Type Inference 336][4.10.2 Verification by Type Inference 336]]
+      - [[4.10.2.1 The Process of Verification by Type Inference 336][4.10.2.1 The Process of Verification by Type Inference 336]]
+      - [[4.10.2.2 The Bytecode Verifier 336][4.10.2.2 The Bytecode Verifier 336]]
+      - [[4.10.2.3 Values of Types long and double 340][4.10.2.3 Values of Types long and double 340]]
+      - [[4.10.2.4 Instance Initialization Methods and Newly Created Objects 340][4.10.2.4 Instance Initialization Methods and Newly Created Objects 340]]
+      - [[4.10.2.5 Exceptions and finally 342][4.10.2.5 Exceptions and finally 342]]
+  - [[4.11 Limitations of the Java Virtual Machine 344][4.11 Limitations of the Java Virtual Machine 344]]
+- [[5 Loading, Linking, and Initializing - 347][5 Loading, Linking, and Initializing - 347]]
+  - [[5.1 The Run-Time Constant Pool 347][5.1 The Run-Time Constant Pool 347]]
+  - [[5.2 Java Virtual Machine Startup 350][5.2 Java Virtual Machine Startup 350]]
+  - [[5.3 Creation and Loading 350][5.3 Creation and Loading 350]]
+    - [[5.3.1 Loading Using the Bootstrap Class Loader 352][5.3.1 Loading Using the Bootstrap Class Loader 352]]
+    - [[5.3.2 Loading Using a User-defined Class Loader 353][5.3.2 Loading Using a User-defined Class Loader 353]]
+    - [[5.3.3 Creating Array Classes 354][5.3.3 Creating Array Classes 354]]
+    - [[5.3.4 Loading Constraints 354][5.3.4 Loading Constraints 354]]
+    - [[5.3.5 Deriving a Class from a class File Representation 356][5.3.5 Deriving a Class from a class File Representation 356]]
+    - [[5.3.6 Modules and Layers 357][5.3.6 Modules and Layers 357]]
+  - [[5.4 Linking 359][5.4 Linking 359]]
+    - [[5.4.1 Verification 360][5.4.1 Verification 360]]
+    - [[5.4.2 Preparation 360][5.4.2 Preparation 360]]
+    - [[5.4.3 Resolution 361][5.4.3 Resolution 361]]
+      - [[5.4.3.1 Class and Interface Resolution 363][5.4.3.1 Class and Interface Resolution 363]]
+      - [[5.4.3.2 Field Resolution 363][5.4.3.2 Field Resolution 363]]
+      - [[5.4.3.3 Method Resolution 364][5.4.3.3 Method Resolution 364]]
+      - [[5.4.3.4 Interface Method Resolution 366][5.4.3.4 Interface Method Resolution 366]]
+      - [[5.4.3.5 Method Type and Method Handle Resolution 368][5.4.3.5 Method Type and Method Handle Resolution 368]]
+      - [[5.4.3.6 Call Site Specifier Resolution 372][5.4.3.6 Call Site Specifier Resolution 372]]
+    - [[5.4.4 Access Control 373][5.4.4 Access Control 373]]
+    - [[5.4.5 Overriding 374][5.4.5 Overriding 374]]
+  - [[5.5 Initialization 374][5.5 Initialization 374]]
+  - [[5.6 Binding Native Method Implementations 377][5.6 Binding Native Method Implementations 377]]
+  - [[5.7 Java Virtual Machine Exit 377][5.7 Java Virtual Machine Exit 377]]
+- [[6 The Java Virtual Machine Instruction Set - 379][6 The Java Virtual Machine Instruction Set - 379]]
+  - [[6.1 Assumptions: The Meaning of "Must" - 379][6.1 Assumptions: The Meaning of "Must" - 379]]
+  - [[6.2 Reserved Opcodes - 380][6.2 Reserved Opcodes - 380]]
+  - [[6.3 Virtual Machine Errors - 380][6.3 Virtual Machine Errors - 380]]
+  - [[6.4 Format of Instruction Descriptions - 381][6.4 Format of Instruction Descriptions - 381]]
+  - [[6.5 Instructions 384][6.5 Instructions 384]]
+    - [[~aaload~ 385][~aaload~ 385]]
+    - [[~aastore~ 386][~aastore~ 386]]
+    - [[~aconst_null~ 388][~aconst_null~ 388]]
+    - [[~aload~ 389][~aload~ 389]]
+    - [[~aload_<n>~ 390][~aload_<n>~ 390]]
+    - [[~anewarray~ 391][~anewarray~ 391]]
+    - [[~areturn~ 392][~areturn~ 392]]
+    - [[~arraylength~ 393][~arraylength~ 393]]
+    - [[~astore~ 394][~astore~ 394]]
+    - [[~astore_<n>~ 395][~astore_<n>~ 395]]
+    - [[~athrow~ 396][~athrow~ 396]]
+    - [[~baload~ 398][~baload~ 398]]
+    - [[~bastore~ 399][~bastore~ 399]]
+    - [[~bipush~ 400][~bipush~ 400]]
+    - [[~caload~ 401][~caload~ 401]]
+    - [[~castore~ 402][~castore~ 402]]
+    - [[~checkcast~ 403][~checkcast~ 403]]
+    - [[~d2f~ 405][~d2f~ 405]]
+    - [[~d2i~ 406][~d2i~ 406]]
+    - [[~d2l~ 407][~d2l~ 407]]
+    - [[~dadd~ 408][~dadd~ 408]]
+    - [[~daload~ 410][~daload~ 410]]
+    - [[~dastore~ 411][~dastore~ 411]]
+    - [[~dcmp<op>~ 412][~dcmp<op>~ 412]]
+    - [[~dconst_<d>~ 414][~dconst_<d>~ 414]]
+    - [[~ddiv~ 415][~ddiv~ 415]]
+    - [[~dload~ 417][~dload~ 417]]
+    - [[~dload_<n>~ 418][~dload_<n>~ 418]]
+    - [[~dmul~ 419][~dmul~ 419]]
+    - [[~dneg~ 421][~dneg~ 421]]
+    - [[~drem~ 422][~drem~ 422]]
+    - [[~dreturn~ 424][~dreturn~ 424]]
+    - [[~dstore~ 425][~dstore~ 425]]
+    - [[~dstore_<n>~ 426][~dstore_<n>~ 426]]
+    - [[~dsub~ 427][~dsub~ 427]]
+    - [[~dup~ 428][~dup~ 428]]
+    - [[~dup_x1~ 429][~dup_x1~ 429]]
+    - [[~dup_x2~ 430][~dup_x2~ 430]]
+    - [[~dup2~ 431][~dup2~ 431]]
+    - [[~dup2_x1~ 432][~dup2_x1~ 432]]
+    - [[~dup2_x2~ 433][~dup2_x2~ 433]]
+    - [[~f2d~ 435][~f2d~ 435]]
+    - [[~f2i~ 436][~f2i~ 436]]
+    - [[~f2l~ 437][~f2l~ 437]]
+    - [[~fadd~ 438][~fadd~ 438]]
+    - [[~faload~ 440][~faload~ 440]]
+    - [[~fastore~ 441][~fastore~ 441]]
+    - [[~fcmp<op>~ 442][~fcmp<op>~ 442]]
+    - [[~fconst_<f>~ 444][~fconst_<f>~ 444]]
+    - [[~fdiv~ 445][~fdiv~ 445]]
+    - [[~fload~ 447][~fload~ 447]]
+    - [[~fload_<n>~ 448][~fload_<n>~ 448]]
+    - [[~fmul~ 449][~fmul~ 449]]
+    - [[~fneg~ 451][~fneg~ 451]]
+    - [[~frem~ 452][~frem~ 452]]
+    - [[~freturn~ 454][~freturn~ 454]]
+    - [[~fstore~ 455][~fstore~ 455]]
+    - [[~fstore_<n>~ 456][~fstore_<n>~ 456]]
+    - [[~fsub~ 457][~fsub~ 457]]
+    - [[~getfield~ 458][~getfield~ 458]]
+    - [[~getstatic~ 459][~getstatic~ 459]]
+    - [[~goto~ 461][~goto~ 461]]
+    - [[~goto_w~ 462][~goto_w~ 462]]
+    - [[~i2b~ 463][~i2b~ 463]]
+    - [[~i2c~ 464][~i2c~ 464]]
+    - [[~i2d~ 465][~i2d~ 465]]
+    - [[~i2f~ 466][~i2f~ 466]]
+    - [[~i2l~ 467][~i2l~ 467]]
+    - [[~i2s~ 468][~i2s~ 468]]
+    - [[~iadd~ 469][~iadd~ 469]]
+    - [[~iaload~ 470][~iaload~ 470]]
+    - [[~iand~ 471][~iand~ 471]]
+    - [[~iastore~ 472][~iastore~ 472]]
+    - [[~iconst_<i>~ 473][~iconst_<i>~ 473]]
+    - [[~idiv~ 474][~idiv~ 474]]
+    - [[~if_acmp<cond>~ 475][~if_acmp<cond>~ 475]]
+    - [[~if_icmp<cond>~ 476][~if_icmp<cond>~ 476]]
+    - [[~if<cond>~ 478][~if<cond>~ 478]]
+    - [[~ifnonnull~ 480][~ifnonnull~ 480]]
+    - [[~ifnull~ 481][~ifnull~ 481]]
+    - [[~iinc~ 482][~iinc~ 482]]
+    - [[~iload~ 483][~iload~ 483]]
+    - [[~iload_<n>~ 484][~iload_<n>~ 484]]
+    - [[~imul~ 485][~imul~ 485]]
+    - [[~ineg~ 486][~ineg~ 486]]
+    - [[~instanceof~ 487][~instanceof~ 487]]
+    - [[~invokedynamic~ 489][~invokedynamic~ 489]]
+    - [[~invokeinterface~ 494][~invokeinterface~ 494]]
+    - [[~invokespecial~ 498][~invokespecial~ 498]]
+    - [[~invokestatic~ 502][~invokestatic~ 502]]
+    - [[~invokevirtual~ 505][~invokevirtual~ 505]]
+    - [[~ior~ 512][~ior~ 512]]
+    - [[~irem~ 513][~irem~ 513]]
+    - [[~ireturn~ 514][~ireturn~ 514]]
+    - [[~ishl~ 516][~ishl~ 516]]
+    - [[~ishr~ 517][~ishr~ 517]]
+    - [[~istore~ 518][~istore~ 518]]
+    - [[~istore_<n>~ 519][~istore_<n>~ 519]]
+    - [[~isub~ 520][~isub~ 520]]
+    - [[~iushr~ 521][~iushr~ 521]]
+    - [[~ixor~ 522][~ixor~ 522]]
+    - [[~jsr~ 523][~jsr~ 523]]
+    - [[~jsr_w~ 524][~jsr_w~ 524]]
+    - [[~l2d~ 525][~l2d~ 525]]
+    - [[~l2f~ 526][~l2f~ 526]]
+    - [[~l2i~ 527][~l2i~ 527]]
+    - [[~ladd~ 528][~ladd~ 528]]
+    - [[~laload~ 529][~laload~ 529]]
+    - [[~land~ 530][~land~ 530]]
+    - [[~lastore~ 531][~lastore~ 531]]
+    - [[~lcmp~ 532][~lcmp~ 532]]
+    - [[~lconst_<l>~ 533][~lconst_<l>~ 533]]
+    - [[~ldc~ 534][~ldc~ 534]]
+    - [[~ldc_w~ 536][~ldc_w~ 536]]
+    - [[~ldc2_w~ 538][~ldc2_w~ 538]]
+    - [[~ldiv~ 539][~ldiv~ 539]]
+    - [[~lload~ 540][~lload~ 540]]
+    - [[~lload_<n>~ 541][~lload_<n>~ 541]]
+    - [[~lmul~ 542][~lmul~ 542]]
+    - [[~lneg~ 543][~lneg~ 543]]
+    - [[~lookupswitch~ 544][~lookupswitch~ 544]]
+    - [[~lor~ 546][~lor~ 546]]
+    - [[~lrem~ 547][~lrem~ 547]]
+    - [[~lreturn~ 548][~lreturn~ 548]]
+    - [[~lshl~ 549][~lshl~ 549]]
+    - [[~lshr~ 550][~lshr~ 550]]
+    - [[~lstore~ 551][~lstore~ 551]]
+    - [[~lstore_<n>~ 552][~lstore_<n>~ 552]]
+    - [[~lsub~ 553][~lsub~ 553]]
+    - [[~lushr~ 554][~lushr~ 554]]
+    - [[~lxor~ 555][~lxor~ 555]]
+    - [[~monitorenter~ 556][~monitorenter~ 556]]
+    - [[~monitorexit~ 558][~monitorexit~ 558]]
+    - [[~multianewarray~ 560][~multianewarray~ 560]]
+    - [[~new~ 562][~new~ 562]]
+    - [[~newarray~ 564][~newarray~ 564]]
+    - [[~nop~ 566][~nop~ 566]]
+    - [[~pop~ 567][~pop~ 567]]
+    - [[~pop~2 568][~pop~2 568]]
+    - [[~putfield~ 569][~putfield~ 569]]
+    - [[~putstatic~ 571][~putstatic~ 571]]
+    - [[~ret~ 573][~ret~ 573]]
+    - [[~return~ 574][~return~ 574]]
+    - [[~saload~ 575][~saload~ 575]]
+    - [[~sastore~ 576][~sastore~ 576]]
+    - [[~sipush~ 577][~sipush~ 577]]
+    - [[~swap~ 578][~swap~ 578]]
+    - [[~tableswitch~ 579][~tableswitch~ 579]]
+    - [[~wide~ 581][~wide~ 581]]
+- [[7 Opcode Mnemonics by Opcode - 583][7 Opcode Mnemonics by Opcode - 583]]
+- [[Index - 587][Index - 587]]
+- [[A Limited License Grant - 605][A Limited License Grant - 605]]
+
+* 1 Introduction - 1
+** 1.1 A Bit of History 1
+** 1.2 The Java Virtual Machine 2
+** 1.3 Organization of the Specification 3
+** 1.4 Notation 4
+** 1.5 Feedback 4
+
+* 2 The Structure of the Java Virtual Machine - 5
+** 2.1 The class File Format 5
+** 2.2 Data Types 6
+** 2.3 Primitive Types and Values 6
+*** 2.3.1 Integral Types and Values 7
+*** 2.3.2 Floating-Point Types, Value Sets, and Values 8
+*** 2.3.3 The returnAddress Type and Values 10
+*** 2.3.4 The boolean Type 10
+** 2.4 Reference Types and Values 11
+** 2.5 Run-Time Data Areas 11
+*** 2.5.1 The pc Register 12
+*** 2.5.2 Java Virtual Machine Stacks 12
+*** 2.5.3 Heap 13
+*** 2.5.4 Method Area 13
+*** 2.5.5 Run-Time Constant Pool 14
+*** 2.5.6 Native Method Stacks 14
+** 2.6 Frames 15
+*** 2.6.1 Local Variables 16
+*** 2.6.2 Operand Stacks 17
+*** 2.6.3 Dynamic Linking 18
+*** 2.6.4 Normal Method Invocation Completion 18
+*** 2.6.5 Abrupt Method Invocation Completion 18
+** 2.7 Representation of Objects 19
+** 2.8 Floating-Point Arithmetic 19
+*** 2.8.1 Java Virtual Machine Floating-Point Arithmetic and IEEE 754 19
+*** 2.8.2 Floating-Point Modes 20
+*** 2.8.3 Value Set Conversion 20
+** 2.9 Special Methods 22
+*** 2.9.1 Instance Initialization Methods 22
+*** 2.9.2 Class Initialization Methods 22
+*** 2.9.3 Signature Polymorphic Methods 23
+** 2.10 Exceptions 23
+** 2.11 Instruction Set Summary 26
+*** 2.11.1 Types and the Java Virtual Machine 26
+*** 2.11.2 Load and Store Instructions 29
+*** 2.11.3 Arithmetic Instructions 30
+*** 2.11.4 Type Conversion Instructions 32
+*** 2.11.5 Object Creation and Manipulation 34
+*** 2.11.6 Operand Stack Management Instructions 34
+*** 2.11.7 Control Transfer Instructions 34
+*** 2.11.8 Method Invocation and Return Instructions 35
+*** 2.11.9 Throwing Exceptions 36
+*** 2.11.10 Synchronization 36
+** 2.12 Class Libraries 37
+** 2.13 Public Design, Private Implementation 37
+
+* 3 Compiling for the Java Virtual Machine - 39
+** 3.1 Format of Examples 39
+** 3.2 Use of Constants, Local Variables, and Control Constructs 40
+** 3.3 Arithmetic 45
+** 3.4 Accessing the Run-Time Constant Pool 46
+** 3.5 More Control Examples 47
+** 3.6 Receiving Arguments 50
+** 3.7 Invoking Methods 51
+** 3.8 Working with Class Instances 53
+** 3.9 Arrays 55
+** 3.10 Compiling Switches 57
+** 3.11 Operations on the Operand Stack 59
+** 3.12 Throwing and Handling Exceptions 60
+** 3.13 Compiling finally 63
+** 3.14 Synchronization 66
+** 3.15 Annotations 67
+** 3.16 Modules 68
+
+* 4 The class File Format - 71
+** 4.1 The ClassFile Structure 72
+** 4.2 Names 77
+*** 4.2.1 Binary Class and Interface Names 77
+*** 4.2.2 Unqualified Names 77
+*** 4.2.3 Module and Package Names 77
+** 4.3 Descriptors 78
+*** 4.3.1 Grammar Notation 78
+*** 4.3.2 Field Descriptors 79
+*** 4.3.3 Method Descriptors 80
+** 4.4 The Constant Pool 81
+*** 4.4.1 The ~CONSTANT_Class_info~ Structure 82
+*** 4.4.2 The ~CONSTANT_Fieldref_info~, ~CONSTANT_Methodref_info~, and ~CONSTANT_InterfaceMethodref_info~ Structures 83
+*** 4.4.3 The ~CONSTANT_String_info~ Structure 85
+*** 4.4.4 The ~CONSTANT_Integer_info~ and ~CONSTANT_Float_info~ Structures 85
+*** 4.4.5 The ~CONSTANT_Long_info~ and ~CONSTANT_Double_info~ Structures 87
+*** 4.4.6 The ~CONSTANT_NameAndType_info~ Structure 88
+*** 4.4.7 The ~CONSTANT_Utf~8_info~ Structure 89
+*** 4.4.8 The ~CONSTANT_MethodHandle_info~ Structure 91
+*** 4.4.9 The ~CONSTANT_MethodType_info~ Structure 93
+*** 4.4.10 The ~CONSTANT_InvokeDynamic_info~ Structure 93
+*** 4.4.11 The ~CONSTANT_Module_info~ Structure 94
+*** 4.4.12 The ~CONSTANT_Package_info~ Structure 94
+** 4.5 Fields 95
+** 4.6 Methods 97
+** 4.7 Attributes 100
+*** 4.7.1 Defining and Naming New Attributes 107
+*** 4.7.2 The ConstantValue Attribute 107
+*** 4.7.3 The Code Attribute 108
+*** 4.7.4 The StackMapTable Attribute 112
+*** 4.7.5 The Exceptions Attribute 119
+*** 4.7.6 The InnerClasses Attribute 120
+*** 4.7.7 The EnclosingMethod Attribute 123
+*** 4.7.8 The Synthetic Attribute 124
+*** 4.7.9 The Signature Attribute 125
+**** 4.7.9.1 Signatures 126
+*** 4.7.10 The SourceFile Attribute 130
+*** 4.7.11 The SourceDebugExtension Attribute 130
+*** 4.7.12 The LineNumberTable Attribute 131
+*** 4.7.13 The LocalVariableTable Attribute 132
+*** 4.7.14 The LocalVariableTypeTable Attribute 134
+*** 4.7.15 The Deprecated Attribute 136
+*** 4.7.16 The RuntimeVisibleAnnotations Attribute 137
+**** 4.7.16.1 The element_value structure 139
+*** 4.7.17 The RuntimeInvisibleAnnotations Attribute 142
+*** 4.7.18 The RuntimeVisibleParameterAnnotations Attribute 143
+*** 4.7.19 The RuntimeInvisibleParameterAnnotations Attribute 144
+*** 4.7.20 The RuntimeVisibleTypeAnnotations Attribute 146
+**** 4.7.20.1 The target_info union 152
+**** 4.7.20.2 The type_path structure 156
+*** 4.7.21 The RuntimeInvisibleTypeAnnotations Attribute 160
+*** 4.7.22 The AnnotationDefault Attribute 161
+*** 4.7.23 The BootstrapMethods Attribute 162
+*** 4.7.24 The MethodParameters Attribute 164
+*** 4.7.25 The Module Attribute 166
+*** 4.7.26 The ModulePackages Attribute 173
+*** 4.7.27 The ModuleMainClass Attribute 174
+
+** 4.8 Format Checking 175
+** 4.9 Constraints on Java Virtual Machine Code 176
+*** 4.9.1 Static Constraints 176
+*** 4.9.2 Structural Constraints 180
+** 4.10 Verification of class Files 183
+*** 4.10.1 Verification by Type Checking 185
+**** 4.10.1.1 Accessors for Java Virtual Machine Artifacts 187
+**** 4.10.1.2 Verification Type System 191
+**** 4.10.1.3 Instruction Representation 195
+**** 4.10.1.4 Stack Map Frames and Type Transitions 196
+**** 4.10.1.5 Type Checking Abstract and Native Methods 201
+**** 4.10.1.6 Type Checking Methods with Code 204
+**** 4.10.1.7 Type Checking Load and Store Instructions 213
+**** 4.10.1.8 Type Checking for protected Members 215
+**** 4.10.1.9 Type Checking Instructions 218
+*** 4.10.2 Verification by Type Inference 336
+**** 4.10.2.1 The Process of Verification by Type Inference 336
+**** 4.10.2.2 The Bytecode Verifier 336
+**** 4.10.2.3 Values of Types long and double 340
+**** 4.10.2.4 Instance Initialization Methods and Newly Created Objects 340
+**** 4.10.2.5 Exceptions and finally 342
+** 4.11 Limitations of the Java Virtual Machine 344
+
+* 5 Loading, Linking, and Initializing - 347
+** 5.1 The Run-Time Constant Pool 347
+** 5.2 Java Virtual Machine Startup 350
+** 5.3 Creation and Loading 350
+*** 5.3.1 Loading Using the Bootstrap Class Loader 352
+*** 5.3.2 Loading Using a User-defined Class Loader 353
+*** 5.3.3 Creating Array Classes 354
+*** 5.3.4 Loading Constraints 354
+*** 5.3.5 Deriving a Class from a class File Representation 356
+*** 5.3.6 Modules and Layers 357
+** 5.4 Linking 359
+*** 5.4.1 Verification 360
+*** 5.4.2 Preparation 360
+*** 5.4.3 Resolution 361
+**** 5.4.3.1 Class and Interface Resolution 363
+**** 5.4.3.2 Field Resolution 363
+**** 5.4.3.3 Method Resolution 364
+**** 5.4.3.4 Interface Method Resolution 366
+**** 5.4.3.5 Method Type and Method Handle Resolution 368
+**** 5.4.3.6 Call Site Specifier Resolution 372
+*** 5.4.4 Access Control 373
+*** 5.4.5 Overriding 374
+** 5.5 Initialization 374
+** 5.6 Binding Native Method Implementations 377
+** 5.7 Java Virtual Machine Exit 377
+* 6 The Java Virtual Machine Instruction Set - 379
+** DONE 6.1 Assumptions: The Meaning of "Must" - 379
+   CLOSED: [2017-10-16 Mon 10:56]
+   - The description here always satisfy the static and structural constraints of
+     $4 (the class file format).
+
+   - If some constraint (a "must" or "must not") in an instruction description is
+     _NOT satisfied_ at run time, the behavior of the Java Virtual Machine is
+     _undefined_.
+
+   - =.class= file verifier ($4.10)
+
+** DONE 6.2 Reserved Opcodes - 380
+   CLOSED: [2017-10-16 Mon 10:56]
+   - Three reserved opcodes:
+     + 254 (0xFE) - ~impdep1~
+     + 255 (0xFF) - ~impdep2~
+     + 202 (0xCA) - ~breakpoint~
+
+   - These three reserved opcodes CANNOT appear in valid =.class= files.
+
+   - Tools such as debuggers or JIT code generators ($2.13) may encounter these
+     opcodes.
+
+     =From Jian= I think these opcodes are inserted by the code already loaded
+     by JVM.
+
+** DONE 6.3 Virtual Machine Errors - 380
+   CLOSED: [2017-10-16 Mon 10:56]
+   Subclasses of ~VirtualMachineError~:
+   - ~InternalError~
+   - ~OutOfMemoryError~
+   - ~StackOverflowError~
+   - ~UnknownError~
+
+** DONE 6.4 Format of Instruction Descriptions - 381
+   CLOSED: [2017-10-16 Mon 11:04]
+   - Example instruction ~mnemonic~
+     ......
+
+   - Values of types ~long~ and ~double~ are represented by a _SINGLE entry_ on
+     the operand stack.
+
+     In JVM Spec V1, they need _TWO entries_.
+
+** TODO 6.5 Instructions 384
+*** ~aaload~ 385
+*** ~aastore~ 386
+*** ~aconst_null~ 388
+*** ~aload~ 389
+    - Operation    Load ~reference~ from array
+
+    - Format       ~aaload~
+                   ~index~
+
+    - Forms        ~aload = 25 (0x19)~
+
+    - Operand      ... →
+
+    - Stack        ..., objectref
+
+    - Description  The /index/ is an unsigned byte that must be an index into the local
+                   variable array of the current frame ($2.6). The local variable at
+                   /index/ must contain a /reference/. The /objectref/ in the local variable
+                   at /index/ is pushed onto the operand stack.
+
+    - Notes        The /aload/ instruction cannot be used to load a value of type
+                   ~returnAddress~ from a local variable onto the operand stack. This 
+                   asymmetry with the /astore/ instruction ($astore) is intentional.
+
+                   The /aload/ opcode can be used in conjunction with the /wide/
+                   instruction ($wide) to access a local variable using a two-byte
+                   unsigned index.
+
+*** ~aload_<n>~ 390
+*** ~anewarray~ 391
+*** ~areturn~ 392
+*** ~arraylength~ 393
+*** ~astore~ 394
+*** ~astore_<n>~ 395
+*** ~athrow~ 396
+*** ~baload~ 398
+*** ~bastore~ 399
+*** ~bipush~ 400
+*** ~caload~ 401
+*** ~castore~ 402
+*** ~checkcast~ 403
+*** ~d2f~ 405
+*** ~d2i~ 406
+*** ~d2l~ 407
+*** ~dadd~ 408
+*** ~daload~ 410
+*** ~dastore~ 411
+*** ~dcmp<op>~ 412
+*** ~dconst_<d>~ 414
+*** ~ddiv~ 415
+*** ~dload~ 417
+*** ~dload_<n>~ 418
+*** ~dmul~ 419
+*** ~dneg~ 421
+*** ~drem~ 422
+*** ~dreturn~ 424
+*** ~dstore~ 425
+*** ~dstore_<n>~ 426
+*** ~dsub~ 427
+*** ~dup~ 428
+*** ~dup_x1~ 429
+*** ~dup_x2~ 430
+*** ~dup2~ 431
+*** ~dup2_x1~ 432
+*** ~dup2_x2~ 433
+*** ~f2d~ 435
+*** ~f2i~ 436
+*** ~f2l~ 437
+*** ~fadd~ 438
+*** ~faload~ 440
+*** ~fastore~ 441
+*** ~fcmp<op>~ 442
+*** ~fconst_<f>~ 444
+*** ~fdiv~ 445
+*** ~fload~ 447
+*** ~fload_<n>~ 448
+*** ~fmul~ 449
+*** ~fneg~ 451
+*** ~frem~ 452
+*** ~freturn~ 454
+*** ~fstore~ 455
+*** ~fstore_<n>~ 456
+*** ~fsub~ 457
+*** ~getfield~ 458
+*** ~getstatic~ 459
+*** ~goto~ 461
+*** ~goto_w~ 462
+*** ~i2b~ 463
+*** ~i2c~ 464
+*** ~i2d~ 465
+*** ~i2f~ 466
+*** ~i2l~ 467
+*** ~i2s~ 468
+*** ~iadd~ 469
+*** ~iaload~ 470
+*** ~iand~ 471
+*** ~iastore~ 472
+*** ~iconst_<i>~ 473
+*** ~idiv~ 474
+*** ~if_acmp<cond>~ 475
+*** ~if_icmp<cond>~ 476
+*** ~if<cond>~ 478
+*** ~ifnonnull~ 480
+*** ~ifnull~ 481
+*** ~iinc~ 482
+*** ~iload~ 483
+*** ~iload_<n>~ 484
+*** ~imul~ 485
+*** ~ineg~ 486
+*** ~instanceof~ 487
+*** ~invokedynamic~ 489
+*** ~invokeinterface~ 494
+*** ~invokespecial~ 498
+*** ~invokestatic~ 502
+*** ~invokevirtual~ 505
+*** ~ior~ 512
+*** ~irem~ 513
+*** ~ireturn~ 514
+*** ~ishl~ 516
+*** ~ishr~ 517
+*** ~istore~ 518
+*** ~istore_<n>~ 519
+*** ~isub~ 520
+*** ~iushr~ 521
+*** ~ixor~ 522
+*** ~jsr~ 523
+*** ~jsr_w~ 524
+*** ~l2d~ 525
+*** ~l2f~ 526
+*** ~l2i~ 527
+*** ~ladd~ 528
+*** ~laload~ 529
+*** ~land~ 530
+*** ~lastore~ 531
+*** ~lcmp~ 532
+*** ~lconst_<l>~ 533
+*** ~ldc~ 534
+*** ~ldc_w~ 536
+*** ~ldc2_w~ 538
+*** ~ldiv~ 539
+*** ~lload~ 540
+*** ~lload_<n>~ 541
+*** ~lmul~ 542
+*** ~lneg~ 543
+*** ~lookupswitch~ 544
+*** ~lor~ 546
+*** ~lrem~ 547
+*** ~lreturn~ 548
+*** ~lshl~ 549
+*** ~lshr~ 550
+*** ~lstore~ 551
+*** ~lstore_<n>~ 552
+*** ~lsub~ 553
+*** ~lushr~ 554
+*** ~lxor~ 555
+*** ~monitorenter~ 556
+*** ~monitorexit~ 558
+*** ~multianewarray~ 560
+*** ~new~ 562
+*** ~newarray~ 564
+*** ~nop~ 566
+*** ~pop~ 567
+*** ~pop~2 568
+*** ~putfield~ 569
+*** ~putstatic~ 571
+*** ~ret~ 573
+*** ~return~ 574
+*** ~saload~ 575
+*** ~sastore~ 576
+*** ~sipush~ 577
+*** ~swap~ 578
+*** ~tableswitch~ 579
+*** ~wide~ 581
+
+* 7 Opcode Mnemonics by Opcode - 583
+* Index - 587
+* A Limited License Grant - 605
