@@ -1,0 +1,330 @@
+#+TITLE: sbt In Action
+#+SUBTITLE: The simple Scala build tool
+#+VERSION: 2016
+#+AUTHOR: Joshua Suereth, Matthew Farwell
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Contents][Contents]]
+- [[Preface xi][Preface xi]]
+- [[Acknowledgments xiii][Acknowledgments xiii]]
+- [[About this book xv][About this book xv]]
+- [[About the cover illustration xviii][About the cover illustration xviii]]
+- [[PART 1 WHY SBT? - 1][PART 1 WHY SBT? - 1]]
+  - [[1 Why sbt? - 3][1 Why sbt? - 3]]
+    - [[1.1 Why a build tool? - 4][1.1 Why a build tool? - 4]]
+    - [[1.2 Apache Ant - 6][1.2 Apache Ant - 6]]
+    - [[1.3 Apache Maven - 8][1.3 Apache Maven - 8]]
+      - [[Build definition - 8][Build definition - 8]]
+      - [[Maven workflow—default lifecycle - 9][Maven workflow—default lifecycle - 9]]
+      - [[Adding another task to a Maven build - 11][Adding another task to a Maven build - 11]]
+      - [[Advantages of Maven - 11][Advantages of Maven - 11]]
+      - [[Limitations of Maven - 11][Limitations of Maven - 11]]
+    - [[1.4 Gradle - 12][1.4 Gradle - 12]]
+      - [[What is Gradle? - 12][What is Gradle? - 12]]
+      - [[Gradle workflow - 13][Gradle workflow - 13]]
+      - [[Adding another task to a Gradle build - 13][Adding another task to a Gradle build - 13]]
+      - [[Advantages of Gradle - 14][Advantages of Gradle - 14]]
+      - [[Limitations of Gradle - 14][Limitations of Gradle - 14]]
+    - [[1.5 Why sbt? - 15][1.5 Why sbt? - 15]]
+      - [[How sbt works - 15][How sbt works - 15]]
+      - [[Plugin architecture vs. tasks - 16][Plugin architecture vs. tasks - 16]]
+      - [[Phases vs. task dependencies - 18][Phases vs. task dependencies - 18]]
+      - [[Passing information around your build - 18][Passing information around your build - 18]]
+      - [[Working with Scala - 19][Working with Scala - 19]]
+      - [[Multiproject builds - 20][Multiproject builds - 20]]
+      - [[Dependency resolution 21][Dependency resolution 21]]
+    - [[1.6 Interactivity/reactivity of sbt - 21][1.6 Interactivity/reactivity of sbt - 21]]
+      - [[Quicker compilation and testing cycle - 21][Quicker compilation and testing cycle - 21]]
+      - [[Quicker compilation and testing cycle - 21][Quicker compilation and testing cycle - 21]]
+      - [[sbt and the Scala REPL—the console command - 22][sbt and the Scala REPL—the console command - 22]]
+    - [[1.7 Summary - 23][1.7 Summary - 23]]
+  - [[2 Getting started - 24][2 Getting started - 24]]
+    - [[2.1 Setting up sbt - 25][2.1 Setting up sbt - 25]]
+      - [[Setting the PATH in bash (for Linux/Mac) - 25][Setting the PATH in bash (for Linux/Mac) - 25]]
+      - [[Running sbt - 26][Running sbt - 26]]
+    - [[2.2 Setting up a build - 27][2.2 Setting up a build - 27]]
+      - [[Tasks - 28][Tasks - 28]]
+      - [[Settings - 29][Settings - 29]]
+    - [[2.3 Running code - 31][2.3 Running code - 31]]
+    - [[2.4 Testing code - 35][2.4 Testing code - 35]]
+      - [[Running tasks when sources change - 37][Running tasks when sources change - 37]]
+      - [[Selecting tests with interactive tasks - 38][Selecting tests with interactive tasks - 38]]
+    - [[2.5 Summary - 39][2.5 Summary - 39]]
+- [[PART 2 UNDERSTANDING SBT'S CORE CONCEPTS - 41][PART 2 UNDERSTANDING SBT'S CORE CONCEPTS - 41]]
+  - [[3 Core concepts - 43][3 Core concepts - 43]]
+    - [[3.1 Creating builds - 44][3.1 Creating builds - 44]]
+    - [[3.2 Defining settings - 44][3.2 Defining settings - 44]]
+      - [[Initializations - 47][Initializations - 47]]
+    - [[3.3 Creating and executing tasks - 49][3.3 Creating and executing tasks - 49]]
+      - [[Task dependencies - 52][Task dependencies - 52]]
+    - [[3.4 Using configurations - 54][3.4 Using configurations - 54]]
+    - [[3.5 Defining with subprojects - 55][3.5 Defining with subprojects - 55]]
+    - [[3.6 Putting it all together - 60][3.6 Putting it all together - 60]]
+    - [[3.7 Summary - 64][3.7 Summary - 64]]
+  - [[4 The default build - 66][4 The default build - 66]]
+    - [[4.1 Compiling your code - 67][4.1 Compiling your code - 67]]
+    - [[4.2 Finding your sources - 68][4.2 Finding your sources - 68]]
+      - [[Standard organization of sources - 68][Standard organization of sources - 68]]
+      - [[Testing sources - 71][Testing sources - 71]]
+      - [[Custom organization of sources - 72][Custom organization of sources - 72]]
+      - [[Filtering the source you want - 74][Filtering the source you want - 74]]
+    - [[4.3 Depending on libraries - 75][4.3 Depending on libraries - 75]]
+      - [[Unmanaged dependencies - 76][Unmanaged dependencies - 76]]
+      - [[Managed dependencies - 76][Managed dependencies - 76]]
+      - [[Managed dependencies and configurations - 79][Managed dependencies and configurations - 79]]
+    - [[4.4 Packaging your project - 80][4.4 Packaging your project - 80]]
+      - [[Identifying your project - 82][Identifying your project - 82]]
+    - [[4.5 Summary - 83][4.5 Summary - 83]]
+- [[PART 3 WORKING WITH SBT - 85][PART 3 WORKING WITH SBT - 85]]
+  - [[5 Testing - 87][5 Testing - 87]]
+    - [[5.1 Configuring specs2 with sbt - 88][5.1 Configuring specs2 with sbt - 88]]
+      - [[Reports and forking tests - 90][Reports and forking tests - 90]]
+      - [[Digging deeper: other options for forking - 93][Digging deeper: other options for forking - 93]]
+    - [[5.2 JUnit and using custom code - 94][5.2 JUnit and using custom code - 94]]
+      - [[Report generation with JUnit - 95][Report generation with JUnit - 95]]
+    - [[5.3 ScalaCheck - 98][5.3 ScalaCheck - 98]]
+    - [[5.4 Integration testing - 102][5.4 Integration testing - 102]]
+      - [[ScalaTest and Selenium - 102][ScalaTest and Selenium - 102]]
+      - [[Challenges of integration testing - 104][Challenges of integration testing - 104]]
+      - [[Adding integration tests to sbt - 105][Adding integration tests to sbt - 105]]
+    - [[5.5 Summary - 109][5.5 Summary - 109]]
+  - [[6 The IO and Process libraries - 110][6 The IO and Process libraries - 110]]
+    - [[6.1 Packaging using processes - 111][6.1 Packaging using processes - 111]]
+    - [[6.2 Packaging using the sbt.IO library - 114][6.2 Packaging using the sbt.IO library - 114]]
+    - [[6.3 More mappings - 116][6.3 More mappings - 116]]
+    - [[6.4 Task dependencies - 118][6.4 Task dependencies - 118]]
+    - [[6.5 Logging using the sbt logger - 119][6.5 Logging using the sbt logger - 119]]
+    - [[6.6 Running your build using fork - 121][6.6 Running your build using fork - 121]]
+    - [[6.7 Linking everything together: dependencies - 122][6.7 Linking everything together: dependencies - 122]]
+    - [[6.8 Linking everything together: processes - 124][6.8 Linking everything together: processes - 124]]
+    - [[6.9 Summary - 127][6.9 Summary - 127]]
+  - [[7 Accepting user input - 128][7 Accepting user input - 128]]
+    - [[7.1 Accepting user input with input tasks - 130][7.1 Accepting user input with input tasks - 130]]
+    - [[7.2 Defining an interface with parsers - 133][7.2 Defining an interface with parsers - 133]]
+    - [[7.3 Defining a database evolution parser - 136][7.3 Defining a database evolution parser - 136]]
+    - [[7.4 Helping the user with autocomplete - 142][7.4 Helping the user with autocomplete - 142]]
+    - [[7.5 Summary - 144][7.5 Summary - 144]]
+  - [[8 Using plugins and external libraries - 146][8 Using plugins and external libraries - 146]]
+    - [[8.1 Using plugins to check your code - 147][8.1 Using plugins to check your code - 147]]
+    - [[8.2 Using the Revolver plugin to restart the application - 151][8.2 Using the Revolver plugin to restart the application - 151]]
+    - [[8.3 Creating your uber jar using the assembly plugin - 153][8.3 Creating your uber jar using the assembly plugin - 153]]
+    - [[8.4 Including a library in your plugin build - 155][8.4 Including a library in your plugin build - 155]]
+    - [[8.5 Adding a plugin for use in all of your projects-signing your projects - 159][8.5 Adding a plugin for use in all of your projects-signing your projects - 159]]
+    - [[8.6 Adding local credentials for deployment - 161][8.6 Adding local credentials for deployment - 161]]
+    - [[8.7 Summary - 161][8.7 Summary - 161]]
+  - [[9 Debugging your build - 162][9 Debugging your build - 162]]
+    - [[9.1 Running sbt - 163][9.1 Running sbt - 163]]
+    - [[9.2 Making your build compile - 165][9.2 Making your build compile - 165]]
+    - [[9.3 Ensuring tasks are run - 168][9.3 Ensuring tasks are run - 168]]
+    - [[9.4 Resolving dependency conflicts - 172][9.4 Resolving dependency conflicts - 172]]
+      - [[Fixing resolution failures - 173][Fixing resolution failures - 173]]
+      - [[Fixing resolution conflicts - 175][Fixing resolution conflicts - 175]]
+    - [[9.5 Summary - 179][9.5 Summary - 179]]
+- [[PART 4 EXTENDING SBT - 181][PART 4 EXTENDING SBT - 181]]
+  - [[10 Automating workflows with commands - 183][10 Automating workflows with commands - 183]]
+    - [[10.1 Creating a simple command - 184][10.1 Creating a simple command - 184]]
+    - [[10.2 Running tasks in parallel - 186][10.2 Running tasks in parallel - 186]]
+    - [[10.3 Parsing input with commands - 187][10.3 Parsing input with commands - 187]]
+    - [[10.4 Creating useful help messages - 194][10.4 Creating useful help messages - 194]]
+    - [[10.5 Summary - 197][10.5 Summary - 197]]
+  - [[11 Defining a plugin - 198][11 Defining a plugin - 198]]
+    - [[11.1 Reusing code using Scala files - 200][11.1 Reusing code using Scala files - 200]]
+    - [[11.2 Introducing the AutoPlugin interface - 200][11.2 Introducing the AutoPlugin interface - 200]]
+      - [[Taking a closer look—the plugin definition - 203][Taking a closer look—the plugin definition - 203]]
+      - [[Taking a closer look—task and setting dependencies - 204][Taking a closer look—task and setting dependencies - 204]]
+    - [[11.3 Testing a plugin with the scripted plugin - 206][11.3 Testing a plugin with the scripted plugin - 206]]
+    - [[11.4 Using configurations in your plugin - 211][11.4 Using configurations in your plugin - 211]]
+    - [[11.5 Adding incremental tasks - 215][11.5 Adding incremental tasks - 215]]
+      - [[Adding incremental tasks with .previous—a sneak preview of 1.0 - 217][Adding incremental tasks with .previous—a sneak preview of 1.0 - 217]]
+    - [[11.6 Making things easy for the user--more about the AutoPlugin interface - 218][11.6 Making things easy for the user--more about the AutoPlugin interface - 218]]
+    - [[11.7 Summary - 222][11.7 Summary - 222]]
+- [[PART 5 DEPLOYING YOUR PROJECTS - 223][PART 5 DEPLOYING YOUR PROJECTS - 223]]
+  - [[12 Distributing your projects - 225][12 Distributing your projects - 225]]
+    - [[12.1 Publishing a library - 226][12.1 Publishing a library - 226]]
+    - [[12.2 Publishing locally - 229][12.2 Publishing locally - 229]]
+    - [[12.3 Publishing a simple server - 230][12.3 Publishing a simple server - 230]]
+    - [[12.4 Generating a distribution - 232][12.4 Generating a distribution - 232]]
+    - [[12.5 Creating a Linux distribution - 236][12.5 Creating a Linux distribution - 236]]
+    - [[12.6 Summary - 239][12.6 Summary - 239]]
+  - [[appendix A What you need to know about Ivy - 240][appendix A What you need to know about Ivy - 240]]
+  - [[appendix B Migrating to autoplugins - 251][appendix B Migrating to autoplugins - 251]]
+  - [[appendix C Advanced setting/task API - 254][appendix C Advanced setting/task API - 254]]
+  - [[index - 257][index - 257]]
+
+* Contents
+* Preface xi
+* Acknowledgments xiii
+* About this book xv
+* About the cover illustration xviii
+* PART 1 WHY SBT? - 1
+** 1 Why sbt? - 3
+*** 1.1 Why a build tool? - 4
+*** 1.2 Apache Ant - 6
+*** 1.3 Apache Maven - 8
+**** Build definition - 8
+**** Maven workflow—default lifecycle - 9
+**** Adding another task to a Maven build - 11
+**** Advantages of Maven - 11
+**** Limitations of Maven - 11
+
+*** 1.4 Gradle - 12
+**** What is Gradle? - 12
+**** Gradle workflow - 13
+**** Adding another task to a Gradle build - 13
+**** Advantages of Gradle - 14
+**** Limitations of Gradle - 14
+
+*** 1.5 Why sbt? - 15
+**** How sbt works - 15
+**** Plugin architecture vs. tasks - 16
+**** Phases vs. task dependencies - 18
+**** Passing information around your build - 18
+**** Working with Scala - 19
+**** Multiproject builds - 20
+**** Dependency resolution 21
+
+*** 1.6 Interactivity/reactivity of sbt - 21
+**** Quicker compilation and testing cycle - 21
+**** Quicker compilation and testing cycle - 21
+**** sbt and the Scala REPL—the console command - 22
+
+*** 1.7 Summary - 23
+
+** 2 Getting started - 24
+*** 2.1 Setting up sbt - 25
+**** Setting the PATH in bash (for Linux/Mac) - 25
+**** Running sbt - 26
+
+*** 2.2 Setting up a build - 27
+**** Tasks - 28
+**** Settings - 29
+
+*** 2.3 Running code - 31
+*** 2.4 Testing code - 35
+**** Running tasks when sources change - 37
+**** Selecting tests with interactive tasks - 38
+
+*** 2.5 Summary - 39
+
+* PART 2 UNDERSTANDING SBT'S CORE CONCEPTS - 41
+** 3 Core concepts - 43
+*** 3.1 Creating builds - 44
+*** 3.2 Defining settings - 44
+**** Initializations - 47
+
+*** 3.3 Creating and executing tasks - 49
+**** Task dependencies - 52
+
+*** 3.4 Using configurations - 54
+*** 3.5 Defining with subprojects - 55
+*** 3.6 Putting it all together - 60
+*** 3.7 Summary - 64
+
+** 4 The default build - 66
+*** 4.1 Compiling your code - 67
+*** 4.2 Finding your sources - 68
+**** Standard organization of sources - 68
+**** Testing sources - 71
+**** Custom organization of sources - 72
+**** Filtering the source you want - 74
+
+*** 4.3 Depending on libraries - 75
+**** Unmanaged dependencies - 76
+**** Managed dependencies - 76
+**** Managed dependencies and configurations - 79
+
+*** 4.4 Packaging your project - 80
+**** Identifying your project - 82
+
+*** 4.5 Summary - 83
+
+* PART 3 WORKING WITH SBT - 85
+** 5 Testing - 87
+*** 5.1 Configuring specs2 with sbt - 88
+**** Reports and forking tests - 90
+**** Digging deeper: other options for forking - 93
+
+*** 5.2 JUnit and using custom code - 94
+**** Report generation with JUnit - 95
+
+*** 5.3 ScalaCheck - 98
+*** 5.4 Integration testing - 102
+**** ScalaTest and Selenium - 102
+**** Challenges of integration testing - 104
+**** Adding integration tests to sbt - 105
+
+*** 5.5 Summary - 109
+
+** 6 The IO and Process libraries - 110
+*** 6.1 Packaging using processes - 111
+*** 6.2 Packaging using the sbt.IO library - 114
+*** 6.3 More mappings - 116
+*** 6.4 Task dependencies - 118
+*** 6.5 Logging using the sbt logger - 119
+*** 6.6 Running your build using fork - 121
+*** 6.7 Linking everything together: dependencies - 122
+*** 6.8 Linking everything together: processes - 124
+*** 6.9 Summary - 127
+
+** 7 Accepting user input - 128
+*** 7.1 Accepting user input with input tasks - 130
+*** 7.2 Defining an interface with parsers - 133
+*** 7.3 Defining a database evolution parser - 136
+*** 7.4 Helping the user with autocomplete - 142
+*** 7.5 Summary - 144
+
+** 8 Using plugins and external libraries - 146
+*** 8.1 Using plugins to check your code - 147
+*** 8.2 Using the Revolver plugin to restart the application - 151
+*** 8.3 Creating your uber jar using the assembly plugin - 153
+*** 8.4 Including a library in your plugin build - 155
+*** 8.5 Adding a plugin for use in all of your projects-signing your projects - 159
+*** 8.6 Adding local credentials for deployment - 161
+*** 8.7 Summary - 161
+
+** 9 Debugging your build - 162
+*** 9.1 Running sbt - 163
+*** 9.2 Making your build compile - 165
+*** 9.3 Ensuring tasks are run - 168
+*** 9.4 Resolving dependency conflicts - 172
+**** Fixing resolution failures - 173
+**** Fixing resolution conflicts - 175
+
+*** 9.5 Summary - 179
+
+* PART 4 EXTENDING SBT - 181
+** 10 Automating workflows with commands - 183
+*** 10.1 Creating a simple command - 184
+*** 10.2 Running tasks in parallel - 186
+*** 10.3 Parsing input with commands - 187
+*** 10.4 Creating useful help messages - 194
+*** 10.5 Summary - 197
+
+** 11 Defining a plugin - 198
+*** 11.1 Reusing code using Scala files - 200
+*** 11.2 Introducing the AutoPlugin interface - 200
+**** Taking a closer look—the plugin definition - 203
+**** Taking a closer look—task and setting dependencies - 204
+
+*** 11.3 Testing a plugin with the scripted plugin - 206
+*** 11.4 Using configurations in your plugin - 211
+*** 11.5 Adding incremental tasks - 215
+**** Adding incremental tasks with .previous—a sneak preview of 1.0 - 217
+
+*** 11.6 Making things easy for the user--more about the AutoPlugin interface - 218
+*** 11.7 Summary - 222
+
+* PART 5 DEPLOYING YOUR PROJECTS - 223
+** 12 Distributing your projects - 225
+*** 12.1 Publishing a library - 226
+*** 12.2 Publishing locally - 229
+*** 12.3 Publishing a simple server - 230
+*** 12.4 Generating a distribution - 232
+*** 12.5 Creating a Linux distribution - 236
+*** 12.6 Summary - 239
+
+** appendix A What you need to know about Ivy - 240
+** appendix B Migrating to autoplugins - 251
+** appendix C Advanced setting/task API - 254
+** index - 257
