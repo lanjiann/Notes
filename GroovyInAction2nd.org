@@ -1,0 +1,1072 @@
+#+TITLE: Groovy in Action, 2nd
+#+VERSION: 2015, Covers Groovy 2.4
+#+AUTHOR: Dierk Konig, Paul King
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[foreword to the first edition - xix][foreword to the first edition - xix]]
+- [[preface - xx][preface - xx]]
+- [[acknowledgments - xxiii][acknowledgments - xxiii]]
+- [[about this book - xxv][about this book - xxv]]
+- [[about the authors - xxx][about the authors - xxx]]
+- [[PART 1 THE GROOVY LANGUAGE - 1][PART 1 THE GROOVY LANGUAGE - 1]]
+- [[1 Your way to Groovy 3][1 Your way to Groovy 3]]
+  - [[1.1 The Groovy story 4][1.1 The Groovy story 4]]
+    - [[What is Groovy? 5][What is Groovy? 5]]
+    - [[Playing nicely with Java: seamless integration 6][Playing nicely with Java: seamless integration 6]]
+    - [[Power in your code: a feature-rich language 9][Power in your code: a feature-rich language 9]]
+    - [[Community driven but corporate backed 13][Community driven but corporate backed 13]]
+  - [[1.2 What Groovy can do for you 14][1.2 What Groovy can do for you 14]]
+    - [[Groovy for the busy Java professional 14][Groovy for the busy Java professional 14]]
+    - [[Groovy for the polyglot programmer 15][Groovy for the polyglot programmer 15]]
+    - [[Groovy for pragmatic programmers, extremos, and agilists 16][Groovy for pragmatic programmers, extremos, and agilists 16]]
+  - [[1.3 Running Groovy 17][1.3 Running Groovy 17]]
+    - [[Using groovysh for a welcome message 18][Using groovysh for a welcome message 18]]
+    - [[Using groovyConsole 18][Using groovyConsole 18]]
+    - [[Using the groovy command 20][Using the groovy command 20]]
+  - [[1.4 Compiling and running Groovy 22][1.4 Compiling and running Groovy 22]]
+    - [[Compiling Groovy with groovyc 22][Compiling Groovy with groovyc 22]]
+    - [[Running a compiled][Running a compiled]]
+    - [[Groovy script with Java 23][Groovy script with Java 23]]
+  - [[1.5 Groovy IDE and editor support 23][1.5 Groovy IDE and editor support 23]]
+    - [[IntelliJ IDEA plug-in 24][IntelliJ IDEA plug-in 24]]
+    - [[NetBeans IDE plug-in 25][NetBeans IDE plug-in 25]]
+    - [[Eclipse plug-in 26][Eclipse plug-in 26]]
+    - [[Groovy support in other editors 26][Groovy support in other editors 26]]
+  - [[1.6 Summary 26][1.6 Summary 26]]
+- [[2 Overture: Groovy basics 28][2 Overture: Groovy basics 28]]
+  - [[2.1 General code appearance 29][2.1 General code appearance 29]]
+    - [[Commenting Groovy code 29][Commenting Groovy code 29]]
+    - [[Comparing Groovy and Java syntax 29][Comparing Groovy and Java syntax 29]]
+    - [[Beauty through brevity 30][Beauty through brevity 30]]
+  - [[2.2 Probing the language with assertions 31][2.2 Probing the language with assertions 31]]
+  - [[2.3 Groovy at a glance 34][2.3 Groovy at a glance 34]]
+    - [[Declaring classes 35][Declaring classes 35]]
+    - [[Using scripts 35][Using scripts 35]]
+    - [[GroovyBeans 36][GroovyBeans 36]]
+    - [[Annotations 37][Annotations 37]]
+    - [[Using grapes 38][Using grapes 38]]
+    - [[Handling text 39][Handling text 39]]
+    - [[Numbers are objects 40][Numbers are objects 40]]
+    - [[Using lists, maps, and ranges 40][Using lists, maps, and ranges 40]]
+    - [[Code as objects: closures 43][Code as objects: closures 43]]
+    - [[Groovy control structures 45][Groovy control structures 45]]
+  - [[2.4 Groovy’s place in the Java environment 46][2.4 Groovy’s place in the Java environment 46]]
+    - [[My class is your class 47][My class is your class 47]]
+    - [[GDK: the Groovy library 48][GDK: the Groovy library 48]]
+    - [[Groovy compiler lifecycle 49][Groovy compiler lifecycle 49]]
+  - [[2.5 Summary 53][2.5 Summary 53]]
+- [[3 Simple Groovy datatypes 54][3 Simple Groovy datatypes 54]]
+  - [[3.1 Objects, objects everywhere 55][3.1 Objects, objects everywhere 55]]
+    - [[Java’s type system: primitives and references 55][Java’s type system: primitives and references 55]]
+    - [[Groovy’s answer: everything’s an object 56][Groovy’s answer: everything’s an object 56]]
+    - [[Interoperating with Java: automatic boxing and unboxing 57][Interoperating with Java: automatic boxing and unboxing 57]]
+    - [[No intermediate unboxing 58][No intermediate unboxing 58]]
+  - [[3.2 The concept of optional typing 58][3.2 The concept of optional typing 58]]
+    - [[Assigning types 59][Assigning types 59]]
+    - [[Dynamic Groovy is type safe 59][Dynamic Groovy is type safe 59]]
+    - [[Let the casting work for you 62][Let the casting work for you 62]]
+    - [[The case for optional typing 63][The case for optional typing 63]]
+  - [[3.3 Overriding operators 64][3.3 Overriding operators 64]]
+    - [[Overview of overridable operators 64][Overview of overridable operators 64]]
+    - [[Overridden operators in action 66][Overridden operators in action 66]]
+    - [[Making coercion work for you 68][Making coercion work for you 68]]
+  - [[3.4 Working with strings 69][3.4 Working with strings 69]]
+    - [[Varieties of string literals 69][Varieties of string literals 69]]
+    - [[Working with GStrings 72][Working with GStrings 72]]
+    - [[From Java to Groovy 74][From Java to Groovy 74]]
+  - [[3.5 Working with regular expressions 76][3.5 Working with regular expressions 76]]
+    - [[Specifying patterns in string literals 77][Specifying patterns in string literals 77]]
+    - [[Applying patterns 79][Applying patterns 79]]
+    - [[Patterns in action 81][Patterns in action 81]]
+    - [[Patterns and performance 83][Patterns and performance 83]]
+    - [[Patterns for classification 84][Patterns for classification 84]]
+  - [[3.6 Working with numbers 85][3.6 Working with numbers 85]]
+    - [[Coercion with numeric operators 85][Coercion with numeric operators 85]]
+    - [[GDK methods for numbers 88][GDK methods for numbers 88]]
+  - [[3.7 Summary 89][3.7 Summary 89]]
+- [[4 Collective Groovy datatypes 91][4 Collective Groovy datatypes 91]]
+  - [[4.1 Working with ranges 92][4.1 Working with ranges 92]]
+    - [[Specifying ranges 93][Specifying ranges 93]]
+    - [[Ranges are objects 94][Ranges are objects 94]]
+    - [[Ranges in action 95][Ranges in action 95]]
+  - [[4.2 Working with lists 97][4.2 Working with lists 97]]
+    - [[Specifying lists 97][Specifying lists 97]]
+    - [[Using list operators 98][Using list operators 98]]
+    - [[Using list methods 101][Using list methods 101]]
+    - [[Lists in action 105][Lists in action 105]]
+  - [[4.3 Working with maps 107][4.3 Working with maps 107]]
+    - [[Specifying maps 108][Specifying maps 108]]
+    - [[Using map operators 109][Using map operators 109]]
+    - [[Maps in action 113][Maps in action 113]]
+  - [[4.4 Notes on Groovy collections 114][4.4 Notes on Groovy collections 114]]
+    - [[Understanding concurrent modification 114][Understanding concurrent modification 114]]
+    - [[Distinguishing between copy and modify semantics 115][Distinguishing between copy and modify semantics 115]]
+  - [[4.5 Summary 116][4.5 Summary 116]]
+- [[5 Working with closures 117][5 Working with closures 117]]
+  - [[5.1 A gentle introduction to closures 118][5.1 A gentle introduction to closures 118]]
+  - [[5.2 The case for closures 119][5.2 The case for closures 119]]
+    - [[Using iterators 119][Using iterators 119]]
+    - [[Handling resources with a protocol 121][Handling resources with a protocol 121]]
+  - [[5.3 Declaring closures 123][5.3 Declaring closures 123]]
+    - [[Simple declaration 123][Simple declaration 123]]
+    - [[Using assignments for][Using assignments for]]
+    - [[declaration 124][declaration 124]]
+    - [[Referring to methods as closures 125][Referring to methods as closures 125]]
+    - [[Comparing the available options 126][Comparing the available options 126]]
+  - [[5.4 Using closures 127][5.4 Using closures 127]]
+    - [[Calling a closure 127][Calling a closure 127]]
+    - [[More closure capabilities 130][More closure capabilities 130]]
+  - [[5.5 Understanding closure scope 134][5.5 Understanding closure scope 134]]
+    - [[Simple variable scope 135][Simple variable scope 135]]
+    - [[Inspecting closure scope 136][Inspecting closure scope 136]]
+    - [[Scoping at work: the classic accumulator test 139][Scoping at work: the classic accumulator test 139]]
+  - [[5.6 Returning from closures 140][5.6 Returning from closures 140]]
+  - [[5.7 Support for design patterns 141][5.7 Support for design patterns 141]]
+    - [[Relationship to the Visitor pattern 142][Relationship to the Visitor pattern 142]]
+    - [[Relationship to the][Relationship to the]]
+    - [[Builder pattern 143][Builder pattern 143]]
+    - [[Relationship to other patterns 143][Relationship to other patterns 143]]
+  - [[5.8 Summary 144][5.8 Summary 144]]
+- [[6 Groovy control structures 145][6 Groovy control structures 145]]
+  - [[6.1 Groovy truth 146][6.1 Groovy truth 146]]
+    - [[Evaluating Boolean tests 146][Evaluating Boolean tests 146]]
+    - [[Assignments within Boolean tests 147][Assignments within Boolean tests 147]]
+  - [[6.2 Conditional execution structures 149][6.2 Conditional execution structures 149]]
+    - [[The humble if statement 149][The humble if statement 149]]
+    - [[The conditional ?: operator and Elvis 150][The conditional ?: operator and Elvis 150]]
+    - [[The switch statement and the in operator 151][The switch statement and the in operator 151]]
+    - [[Sanity checking with assertions 154][Sanity checking with assertions 154]]
+  - [[6.3 Looping 157][6.3 Looping 157]]
+    - [[Looping with while 157][Looping with while 157]]
+    - [[Looping with for 158][Looping with for 158]]
+  - [[6.4 Exiting blocks and methods 160][6.4 Exiting blocks and methods 160]]
+    - [[Normal termination: return/break/continue 160][Normal termination: return/break/continue 160]]
+    - [[Exceptions: throw/try-catch-finally 161][Exceptions: throw/try-catch-finally 161]]
+  - [[6.5 Summary 162][6.5 Summary 162]]
+- [[7 Object orientation, Groovy style 164][7 Object orientation, Groovy style 164]]
+  - [[7.1 Defining classes and scripts 165][7.1 Defining classes and scripts 165]]
+    - [[Defining fields and local variables 165][Defining fields and local variables 165]]
+    - [[Methods and parameters 168][Methods and parameters 168]]
+    - [[Safe dereferencing with the ?. operator 172][Safe dereferencing with the ?. operator 172]]
+    - [[Constructors 173][Constructors 173]]
+  - [[7.2 Organizing classes and scripts 175][7.2 Organizing classes and scripts 175]]
+    - [[File to class relationship 176][File to class relationship 176]]
+    - [[Organizing classes in packages 177][Organizing classes in packages 177]]
+    - [[Further classpath considerations 180][Further classpath considerations 180]]
+  - [[7.3 Advanced object-oriented features 181][7.3 Advanced object-oriented features 181]]
+    - [[Using inheritance 181][Using inheritance 181]]
+    - [[Using interfaces 182][Using interfaces 182]]
+    - [[Multimethods 183][Multimethods 183]]
+    - [[Using traits 185][Using traits 185]]
+  - [[7.4 Working with GroovyBeans 187][7.4 Working with GroovyBeans 187]]
+    - [[Declaring beans 187][Declaring beans 187]]
+    - [[Working with beans 189][Working with beans 189]]
+    - [[Using bean methods for any object 192][Using bean methods for any object 192]]
+    - [[Fields, accessors, maps, and Expando 193][Fields, accessors, maps, and Expando 193]]
+  - [[7.5 Using advanced syntax features 194][7.5 Using advanced syntax features 194]]
+    - [[Querying objects with GPaths 194][Querying objects with GPaths 194]]
+    - [[Injecting the spread operator 197][Injecting the spread operator 197]]
+    - [[Concise syntax with command chains 198][Concise syntax with command chains 198]]
+  - [[7.6 Summary 199][7.6 Summary 199]]
+- [[8 Dynamic programming with Groovy 200][8 Dynamic programming with Groovy 200]]
+  - [[8.1 What is dynamic programming? 202][8.1 What is dynamic programming? 202]]
+  - [[8.2 Meta Object Protocol 202][8.2 Meta Object Protocol 202]]
+  - [[8.3 Customizing the MOP with hook methods 204][8.3 Customizing the MOP with hook methods 204]]
+    - [[Customizing methodMissing 204][Customizing methodMissing 204]]
+    - [[Customizing propertyMissing 206][Customizing propertyMissing 206]]
+    - [[Using closures for dynamic hooks 207][Using closures for dynamic hooks 207]]
+    - [[Customizing GroovyObject methods 208][Customizing GroovyObject methods 208]]
+  - [[8.4 Modifying behavior through the metaclass 210][8.4 Modifying behavior through the metaclass 210]]
+    - [[MetaClass knows it all 210][MetaClass knows it all 210]]
+    - [[How to find the metaclass and invoke methods 211][How to find the metaclass and invoke methods 211]]
+    - [[Setting other metaclasses 213][Setting other metaclasses 213]]
+    - [[Expanding the metaclass 214][Expanding the metaclass 214]]
+    - [[Temporary MOP modifications using category classes 219][Temporary MOP modifications using category classes 219]]
+    - [[Writing extension modules 222][Writing extension modules 222]]
+    - [[Using the @Category annotation 223][Using the @Category annotation 223]]
+    - [[Merging classes with Mixins 224][Merging classes with Mixins 224]]
+  - [[8.5 Real-world dynamic programming in action 227][8.5 Real-world dynamic programming in action 227]]
+    - [[Calculating with metrics 227][Calculating with metrics 227]]
+    - [[Replacing constructors with factory methods 228][Replacing constructors with factory methods 228]]
+    - [[Fooling IDEs for fun and profit 228][Fooling IDEs for fun and profit 228]]
+    - [[Undoing metaclass modifications 230][Undoing metaclass modifications 230]]
+    - [[The Intercept/Cache/Invoke pattern 231][The Intercept/Cache/Invoke pattern 231]]
+  - [[8.6 Summary 232][8.6 Summary 232]]
+- [[9 Compile-time metaprogramming and AST transformations 233][9 Compile-time metaprogramming and AST transformations 233]]
+  - [[9.1 A brief history 234][9.1 A brief history 234]]
+    - [[Generating bytecode, not source code 234][Generating bytecode, not source code 234]]
+    - [[Putting the power of code generation in the hands of developers 235][Putting the power of code generation in the hands of developers 235]]
+  - [[9.2 Making Groovy cleaner and leaner 235][9.2 Making Groovy cleaner and leaner 235]]
+    - [[Code-generation transformations 236][Code-generation transformations 236]]
+    - [[Class design and design pattern annotations 245][Class design and design pattern annotations 245]]
+    - [[Logging improvements 252][Logging improvements 252]]
+    - [[Declarative concurrency 254][Declarative concurrency 254]]
+    - [[Easier cloning and externalizing 258][Easier cloning and externalizing 258]]
+    - [[Scripting support 263][Scripting support 263]]
+    - [[More transformations 267][More transformations 267]]
+  - [[9.3 Exploring AST 268][9.3 Exploring AST 268]]
+    - [[Tools of the trade 270][Tools of the trade 270]]
+    - [[Other tools 271][Other tools 271]]
+  - [[9.4 AST by example: creating ASTs 272][9.4 AST by example: creating ASTs 272]]
+    - [[Creating by hand 272][Creating by hand 272]]
+    - [[AstBuilder.buildFromSpec 273][AstBuilder.buildFromSpec 273]]
+    - [[AstBuilder.buildFromString 274][AstBuilder.buildFromString 274]]
+    - [[AstBuilder.buildFromCode 275][AstBuilder.buildFromCode 275]]
+  - [[9.5 AST by example: local transformations 276][9.5 AST by example: local transformations 276]]
+  - [[9.6 AST by example: global transformations 282][9.6 AST by example: global transformations 282]]
+  - [[9.7 Testing AST transformations 286][9.7 Testing AST transformations 286]]
+  - [[9.8 Limitations 290][9.8 Limitations 290]]
+    - [[It’s early binding 290][It’s early binding 290]]
+    - [[It’s fragile 290][It’s fragile 290]]
+    - [[It adds complexity 290][It adds complexity 290]]
+    - [[Its syntax is fixed 291][Its syntax is fixed 291]]
+    - [[It’s not typed 291][It’s not typed 291]]
+    - [[It’s unhygienic 291][It’s unhygienic 291]]
+  - [[9.9 Next steps 292][9.9 Next steps 292]]
+  - [[9.10 Summary 292][9.10 Summary 292]]
+- [[10 Groovy as a static language 294][10 Groovy as a static language 294]]
+  - [[10.1 Motivation for optional static typing 295][10.1 Motivation for optional static typing 295]]
+    - [[The role of types in Groovy 296][The role of types in Groovy 296]]
+    - [[Type checking a dynamic language? 296][Type checking a dynamic language? 296]]
+  - [[10.2 Using @TypeChecked 298][10.2 Using @TypeChecked 298]]
+    - [[Finding typos 299][Finding typos 299]]
+    - [[Resolving method calls 300][Resolving method calls 300]]
+    - [[Checking assignments 301][Checking assignments 301]]
+    - [[Type inference 303][Type inference 303]]
+    - [[Type-checked Grooviness 306][Type-checked Grooviness 306]]
+    - [[Type checking closures 310][Type checking closures 310]]
+    - [[Revisiting dynamic features in light of type checking 316][Revisiting dynamic features in light of type checking 316]]
+    - [[Mixing type-checked code with dynamic code 319][Mixing type-checked code with dynamic code 319]]
+  - [[10.3 Flow typing 320][10.3 Flow typing 320]]
+    - [[Least upper bound 323][Least upper bound 323]]
+    - [[Smart instanceof inference 325][Smart instanceof inference 325]]
+    - [[Closure-shared variables 326][Closure-shared variables 326]]
+  - [[10.4 Static compilation 327][10.4 Static compilation 327]]
+    - [[@CompileStatic 328][@CompileStatic 328]]
+    - [[Method dispatch 329][Method dispatch 329]]
+  - [[10.5 Static type checking extensions 332][10.5 Static type checking extensions 332]]
+    - [[@DelegatesTo revisited 334][@DelegatesTo revisited 334]]
+    - [[Type checking][Type checking]]
+    - [[extension scripts 335][extension scripts 335]]
+    - [[Limits 339][Limits 339]]
+  - [[10.6 Summary 340][10.6 Summary 340]]
+- [[PART 2 AROUND THE GROOVY LIBRARY - 341][PART 2 AROUND THE GROOVY LIBRARY - 341]]
+- [[11 Working with builders 343][11 Working with builders 343]]
+  - [[11.1 Learning by example: Using a builder 345][11.1 Learning by example: Using a builder 345]]
+  - [[11.2 Building object trees with NodeBuilder 347][11.2 Building object trees with NodeBuilder 347]]
+    - [[NodeBuilder in action: a closer look at builder code 348][NodeBuilder in action: a closer look at builder code 348]]
+    - [[Understanding the builder concept 350][Understanding the builder concept 350]]
+    - [[Smart building with logic 350][Smart building with logic 350]]
+  - [[11.3 Working with MarkupBuilder 352][11.3 Working with MarkupBuilder 352]]
+    - [[Building XML 352][Building XML 352]]
+    - [[Building HTML 354][Building HTML 354]]
+  - [[11.4 Working with StreamingMarkupBuilder 355][11.4 Working with StreamingMarkupBuilder 355]]
+  - [[11.5 Task automation with AntBuilder 356][11.5 Task automation with AntBuilder 356]]
+    - [[From Ant scripts to Groovy scripts 357][From Ant scripts to Groovy scripts 357]]
+    - [[How AntBuilder works 358][How AntBuilder works 358]]
+    - [[Smart automation scripts with logic 359][Smart automation scripts with logic 359]]
+  - [[11.6 Easy GUIs with SwingBuilder 360][11.6 Easy GUIs with SwingBuilder 360]]
+    - [[Reading a password with SwingBuilder 361][Reading a password with SwingBuilder 361]]
+    - [[Creating Swing widgets 363][Creating Swing widgets 363]]
+    - [[Arranging your widgets 366][Arranging your widgets 366]]
+    - [[Referring to widgets 370][Referring to widgets 370]]
+    - [[Using Swing actions 372][Using Swing actions 372]]
+    - [[Using models 374][Using models 374]]
+    - [[Binding made easy 377][Binding made easy 377]]
+    - [[Putting it all together 380][Putting it all together 380]]
+  - [[11.7 Modern UIs with GroovyFX SceneGraphBuilder 386][11.7 Modern UIs with GroovyFX SceneGraphBuilder 386]]
+    - [[Application design with FXML 388][Application design with FXML 388]]
+    - [[Properties and binding 389][Properties and binding 389]]
+    - [[Groovy desktop applications 389][Groovy desktop applications 389]]
+  - [[11.8 Creating your own builder 390][11.8 Creating your own builder 390]]
+    - [[Subclassing BuilderSupport 391][Subclassing BuilderSupport 391]]
+    - [[Subclassing FactoryBuilderSupport 395][Subclassing FactoryBuilderSupport 395]]
+    - [[Rolling your own 398][Rolling your own 398]]
+  - [[11.9 Summary 399][11.9 Summary 399]]
+- [[12 Working with the GDK 401][12 Working with the GDK 401]]
+  - [[12.1 Working with objects 402][12.1 Working with objects 402]]
+    - [[Interactive objects 402][Interactive objects 402]]
+    - [[Convenient Object methods 405][Convenient Object methods 405]]
+    - [[Iterative Object methods 408][Iterative Object methods 408]]
+  - [[12.2 Working with files and I/O 411][12.2 Working with files and I/O 411]]
+    - [[Traversing the filesystem 412][Traversing the filesystem 412]]
+    - [[Reading from input sources 417][Reading from input sources 417]]
+    - [[Writing to output destinations 418][Writing to output destinations 418]]
+    - [[Filters and conversions 420][Filters and conversions 420]]
+    - [[Streaming serialized objects 422][Streaming serialized objects 422]]
+    - [[Temporary data and file copying 422][Temporary data and file copying 422]]
+  - [[12.3 Working with threads and processes 423][12.3 Working with threads and processes 423]]
+    - [[Groovy multithreading 424][Groovy multithreading 424]]
+    - [[Integrating external processes 426][Integrating external processes 426]]
+  - [[12.4 Working with templates 429][12.4 Working with templates 429]]
+    - [[Understanding the template format 430][Understanding the template format 430]]
+    - [[Templates in action 431][Templates in action 431]]
+    - [[Advanced template issues 433][Advanced template issues 433]]
+  - [[12.5 Working with Groovlets 434][12.5 Working with Groovlets 434]]
+    - [[Starting with “Hello world” 435][Starting with “Hello world” 435]]
+    - [[Groovlet binding 437][Groovlet binding 437]]
+    - [[Templating Groovlets 441][Templating Groovlets 441]]
+  - [[12.6 Summary 443][12.6 Summary 443]]
+- [[13 Database programming with Groovy 445][13 Database programming with Groovy 445]]
+  - [[13.1 Groovy SQL: a better JDBC 446][13.1 Groovy SQL: a better JDBC 446]]
+    - [[Setting up for database access 447][Setting up for database access 447]]
+    - [[Executing SQL 452][Executing SQL 452]]
+  - [[13.2 Advanced Groovy SQL 463][13.2 Advanced Groovy SQL 463]]
+    - [[Performing transactional updates 463][Performing transactional updates 463]]
+    - [[Working with batches 464][Working with batches 464]]
+    - [[Working with pagination 466][Working with pagination 466]]
+    - [[Fetching metadata 466][Fetching metadata 466]]
+    - [[Working with named and namedordinal parameters 469][Working with named and namedordinal parameters 469]]
+    - [[Using stored procedures 471][Using stored procedures 471]]
+  - [[13.3 DataSets for SQL without SQL 474][13.3 DataSets for SQL without SQL 474]]
+    - [[Using DataSet operations 475][Using DataSet operations 475]]
+    - [[DataSets on database views 479][DataSets on database views 479]]
+  - [[13.4 Organizing database work 481][13.4 Organizing database work 481]]
+    - [[Architectural overview 481][Architectural overview 481]]
+    - [[Specifying the application behavior 483][Specifying the application behavior 483]]
+    - [[Implementing the infrastructure 484][Implementing the infrastructure 484]]
+    - [[Using a transparent domain model 488][Using a transparent domain model 488]]
+    - [[Implementing the application layer 489][Implementing the application layer 489]]
+  - [[13.5 Groovy and NoSQL 492][13.5 Groovy and NoSQL 492]]
+    - [[MongoDB: A document-style database 492][MongoDB: A document-style database 492]]
+    - [[Neo4J: A graph database 495][Neo4J: A graph database 495]]
+  - [[13.6 Other approaches 503][13.6 Other approaches 503]]
+  - [[13.7 Summary 504][13.7 Summary 504]]
+- [[14 Working with XML and JSON 506][14 Working with XML and JSON 506]]
+  - [[14.1 Reading XML documents 507][14.1 Reading XML documents 507]]
+    - [[Working with a DOM parser 508][Working with a DOM parser 508]]
+    - [[Reading with a Groovy parser 513][Reading with a Groovy parser 513]]
+    - [[Reading with a SAX parser 518][Reading with a SAX parser 518]]
+    - [[Reading with a StAX parser 519][Reading with a StAX parser 519]]
+  - [[14.2 Processing XML 521][14.2 Processing XML 521]]
+    - [[In-place processing 522][In-place processing 522]]
+    - [[Streaming processing 524][Streaming processing 524]]
+    - [[Updating XML 529][Updating XML 529]]
+    - [[Combining with XPath 531][Combining with XPath 531]]
+  - [[14.3 Parsing and building JSON 538][14.3 Parsing and building JSON 538]]
+    - [[Parsing JSON 538][Parsing JSON 538]]
+    - [[Building JSON 540][Building JSON 540]]
+  - [[14.4 Summary 542][14.4 Summary 542]]
+- [[15 Interacting with Web Services 543][15 Interacting with Web Services 543]]
+  - [[15.1 An overview of Web Services 544][15.1 An overview of Web Services 544]]
+  - [[15.2 Reading RSS and ATOM 545][15.2 Reading RSS and ATOM 545]]
+  - [[15.3 Using a REST-based API 547][15.3 Using a REST-based API 547]]
+  - [[15.4 Using XML-RPC 553][15.4 Using XML-RPC 553]]
+  - [[15.5 Applying SOAP 555][15.5 Applying SOAP 555]]
+    - [[Doing SOAP with plain Groovy 556][Doing SOAP with plain Groovy 556]]
+    - [[Simplifying SOAP][Simplifying SOAP]]
+    - [[access using HTTPBuilder 558][access using HTTPBuilder 558]]
+    - [[Simplifying SOAP access][Simplifying SOAP access]]
+    - [[using groovy-wslite 559][using groovy-wslite 559]]
+  - [[15.6 Summary 560][15.6 Summary 560]]
+- [[16 Integrating Groovy 561][16 Integrating Groovy 561]]
+  - [[16.1 Prelude to integration 562][16.1 Prelude to integration 562]]
+    - [[Integrating appropriately 563][Integrating appropriately 563]]
+    - [[Setting up dependencies 564][Setting up dependencies 564]]
+  - [[16.2 Evaluating expressions and scripts with GroovyShell 565][16.2 Evaluating expressions and scripts with GroovyShell 565]]
+    - [[Starting simply 565][Starting simply 565]]
+    - [[Passing parameters within a binding 567][Passing parameters within a binding 567]]
+    - [[Generating dynamic classes at runtime 569][Generating dynamic classes at runtime 569]]
+    - [[Parsing scripts 569][Parsing scripts 569]]
+    - [[Running scripts or classes 571][Running scripts or classes 571]]
+    - [[Further parameterization of GroovyShell 571][Further parameterization of GroovyShell 571]]
+  - [[16.3 Using the Groovy script engine 575][16.3 Using the Groovy script engine 575]]
+    - [[Setting up the engine 575][Setting up the engine 575]]
+    - [[Running scripts 576][Running scripts 576]]
+    - [[Defining a different resource connector 576][Defining a different resource connector 576]]
+  - [[16.4 Working with the GroovyClassLoader 577][16.4 Working with the GroovyClassLoader 577]]
+    - [[Parsing and loading Groovy classes 577][Parsing and loading Groovy classes 577]]
+    - [[The chicken and egg dependency problem 579][The chicken and egg dependency problem 579]]
+    - [[Providing a custom resource loader 580][Providing a custom resource loader 580]]
+    - [[Playing it safe in a secured sandbox 581][Playing it safe in a secured sandbox 581]]
+  - [[16.5 Spring integration 584][16.5 Spring integration 584]]
+    - [[Wiring GroovyBeans 585][Wiring GroovyBeans 585]]
+    - [[Refreshable beans 587][Refreshable beans 587]]
+    - [[Inline scripts 587][Inline scripts 587]]
+  - [[16.6 Riding Mustang and JSR-223 588][16.6 Riding Mustang and JSR-223 588]]
+    - [[Introducing JSR-223 588][Introducing JSR-223 588]]
+    - [[The script engine manager and its script engines 589][The script engine manager and its script engines 589]]
+    - [[Compilable and invocable script engines 590][Compilable and invocable script engines 590]]
+    - [[Polyglot programming 592][Polyglot programming 592]]
+  - [[16.7 Mastering CompilerConfiguration 592][16.7 Mastering CompilerConfiguration 592]]
+    - [[The import customizer 594][The import customizer 594]]
+    - [[The source-aware customizer 595][The source-aware customizer 595]]
+    - [[Writing your own customizer 597][Writing your own customizer 597]]
+    - [[The configscript compilation option 598][The configscript compilation option 598]]
+  - [[16.8 Choosing an integration mechanism 600][16.8 Choosing an integration mechanism 600]]
+  - [[16.9 Summary 601][16.9 Summary 601]]
+- [[PART 3 APPLIED GROOVY - 603][PART 3 APPLIED GROOVY - 603]]
+- [[17 Unit testing with Groovy 605][17 Unit testing with Groovy 605]]
+  - [[17.1 Getting started 606][17.1 Getting started 606]]
+    - [[Writing tests is easy 607][Writing tests is easy 607]]
+    - [[GroovyTestCase: an introduction 608][GroovyTestCase: an introduction 608]]
+    - [[Working with GroovyTestCase 610][Working with GroovyTestCase 610]]
+  - [[17.2 Unit testing Groovy code 611][17.2 Unit testing Groovy code 611]]
+  - [[17.3 Unit testing Java code 614][17.3 Unit testing Java code 614]]
+  - [[17.4 Organizing your tests 617][17.4 Organizing your tests 617]]
+    - [[Test suites 617][Test suites 617]]
+    - [[Parameterized or data-driven testing 618][Parameterized or data-driven testing 618]]
+    - [[Property-based testing 619][Property-based testing 619]]
+  - [[17.5 Advanced testing techniques 621][17.5 Advanced testing techniques 621]]
+    - [[Testing made groovy 622][Testing made groovy 622]]
+    - [[Stubbing and mocking 623][Stubbing and mocking 623]]
+    - [[Using GroovyLogTestCase 628][Using GroovyLogTestCase 628]]
+    - [[Unit testing performance 629][Unit testing performance 629]]
+    - [[Code coverage with Groovy 631][Code coverage with Groovy 631]]
+  - [[17.6 IDE integration 634][17.6 IDE integration 634]]
+    - [[Using GroovyTestSuite 635][Using GroovyTestSuite 635]]
+    - [[Using AllTestSuite 637][Using AllTestSuite 637]]
+  - [[17.7 Testing with the Spock framework 638][17.7 Testing with the Spock framework 638]]
+    - [[Testing with mocks 639][Testing with mocks 639]]
+    - [[Data-driven Spock tests 642][Data-driven Spock tests 642]]
+  - [[17.8 Build automation 644][17.8 Build automation 644]]
+    - [[Build integration with Gradle 644][Build integration with Gradle 644]]
+    - [[Build integration with Maven 647][Build integration with Maven 647]]
+  - [[17.9 Summary 649][17.9 Summary 649]]
+- [[18 Concurrent Groovy with GPars 650][18 Concurrent Groovy with GPars 650]]
+  - [[18.1 Concurrency for the rest of us 651][18.1 Concurrency for the rest of us 651]]
+    - [[Concurrent != parallel 651][Concurrent != parallel 651]]
+    - [[Introducing new concepts 653][Introducing new concepts 653]]
+  - [[18.2 Concurrent collection processing 654][18.2 Concurrent collection processing 654]]
+    - [[Transparently concurrent collections 655][Transparently concurrent collections 655]]
+    - [[Available fork/join methods 657][Available fork/join methods 657]]
+  - [[18.3 Becoming more efficient with map/filter/reduce 659][18.3 Becoming more efficient with map/filter/reduce 659]]
+  - [[18.4 Dataflow for implicit task coordination 662][18.4 Dataflow for implicit task coordination 662]]
+    - [[Testing for deadlocks 662][Testing for deadlocks 662]]
+    - [[Dataflow on sequential datatypes 663][Dataflow on sequential datatypes 663]]
+    - [[Final thoughts on dataflow 665][Final thoughts on dataflow 665]]
+  - [[18.5 Actors for explicit task coordination 665][18.5 Actors for explicit task coordination 665]]
+    - [[Using the strengths of Groovy 669][Using the strengths of Groovy 669]]
+  - [[18.6 Agents for delegated task coordination 671][18.6 Agents for delegated task coordination 671]]
+  - [[18.7 Concurrency in action 671][18.7 Concurrency in action 671]]
+  - [[18.8 Summary 675][18.8 Summary 675]]
+- [[19 Domain-specific languages 676][19 Domain-specific languages 676]]
+  - [[19.1 Groovy’s flexible nature 677][19.1 Groovy’s flexible nature 677]]
+    - [[Back to omitting parentheses 677][Back to omitting parentheses 677]]
+  - [[19.2 Variables, constants, and method injection 681][19.2 Variables, constants, and method injection 681]]
+    - [[Injecting constants through the binding 682][Injecting constants through the binding 682]]
+    - [[Injecting methods into a script 684][Injecting methods into a script 684]]
+    - [[Adding imports and static imports automatically 685][Adding imports and static imports automatically 685]]
+    - [[Injecting methods (revisited) 687][Injecting methods (revisited) 687]]
+    - [[Adding closures to the binding 688][Adding closures to the binding 688]]
+  - [[19.3 Adding properties to numbers 690][19.3 Adding properties to numbers 690]]
+  - [[19.4 Leveraging named arguments 693][19.4 Leveraging named arguments 693]]
+  - [[19.5 Command chains 696][19.5 Command chains 696]]
+  - [[19.6 Defining your own control structures 699][19.6 Defining your own control structures 699]]
+  - [[19.7 Context switching with closures 710][19.7 Context switching with closures 710]]
+  - [[19.8 Another technique for builders 715][19.8 Another technique for builders 715]]
+  - [[19.9 Securing your DSLs 718][19.9 Securing your DSLs 718]]
+    - [[Introducing SecureASTCustomizer 718][Introducing SecureASTCustomizer 718]]
+    - [[The ArithmeticShell 719][The ArithmeticShell 719]]
+    - [[Stopping the execution of your programs 721][Stopping the execution of your programs 721]]
+    - [[Preventing cheating with metaprogramming 723][Preventing cheating with metaprogramming 723]]
+  - [[19.10 Testing and error reporting 725][19.10 Testing and error reporting 725]]
+  - [[19.11 Summary 731][19.11 Summary 731]]
+- [[20 The Groovy ecosystem 732][20 The Groovy ecosystem 732]]
+  - [[20.1 Groovy Grapes for self-contained scripts 733][20.1 Groovy Grapes for self-contained scripts 733]]
+  - [[20.2 Scriptom for Windows automation 735][20.2 Scriptom for Windows automation 735]]
+  - [[20.3 GroovyServ for quick startup 737][20.3 GroovyServ for quick startup 737]]
+  - [[20.4 Gradle for project automation 738][20.4 Gradle for project automation 738]]
+  - [[20.5 CodeNarc for static code analysis 741][20.5 CodeNarc for static code analysis 741]]
+  - [[20.6 GContracts for improved design 743][20.6 GContracts for improved design 743]]
+  - [[20.7 Grails for web development 745][20.7 Grails for web development 745]]
+  - [[20.8 Griffon for desktop applications 749][20.8 Griffon for desktop applications 749]]
+  - [[20.9 Gaelyk for Groovy in the cloud 752][20.9 Gaelyk for Groovy in the cloud 752]]
+  - [[20.10 Summary 754][20.10 Summary 754]]
+- [[appendix A Installation and documentation - 756][appendix A Installation and documentation - 756]]
+- [[appendix B Groovy language information - 759][appendix B Groovy language information - 759]]
+- [[appendix C GDK API quick reference - 762][appendix C GDK API quick reference - 762]]
+- [[appendix D Cheat sheets - 819][appendix D Cheat sheets - 819]]
+- [[appendix E Annotation parameters - 825][appendix E Annotation parameters - 825]]
+- [[appendix F Compiler phases - 842][appendix F Compiler phases - 842]]
+- [[appendix G AST visitors - 844][appendix G AST visitors - 844]]
+- [[appendix H Type checking extensions - 850][appendix H Type checking extensions - 850]]
+- [[appendix I Android support - 861][appendix I Android support - 861]]
+- [[index - 863][index - 863]]
+
+* foreword to the first edition - xix
+* preface - xx
+* acknowledgments - xxiii
+* about this book - xxv
+* about the authors - xxx
+* PART 1 THE GROOVY LANGUAGE - 1
+* 1 Your way to Groovy 3
+** 1.1 The Groovy story 4
+*** What is Groovy? 5
+*** Playing nicely with Java: seamless integration 6
+*** Power in your code: a feature-rich language 9
+*** Community driven but corporate backed 13
+
+** 1.2 What Groovy can do for you 14
+*** Groovy for the busy Java professional 14
+*** Groovy for the polyglot programmer 15
+*** Groovy for pragmatic programmers, extremos, and agilists 16
+
+** 1.3 Running Groovy 17
+*** Using groovysh for a welcome message 18
+*** Using groovyConsole 18
+*** Using the groovy command 20
+
+** 1.4 Compiling and running Groovy 22
+*** Compiling Groovy with groovyc 22
+*** Running a compiled
+*** Groovy script with Java 23
+
+** 1.5 Groovy IDE and editor support 23
+*** IntelliJ IDEA plug-in 24
+*** NetBeans IDE plug-in 25
+*** Eclipse plug-in 26
+*** Groovy support in other editors 26
+
+** 1.6 Summary 26
+
+* 2 Overture: Groovy basics 28
+** 2.1 General code appearance 29
+*** Commenting Groovy code 29
+*** Comparing Groovy and Java syntax 29
+*** Beauty through brevity 30
+
+** 2.2 Probing the language with assertions 31
+** 2.3 Groovy at a glance 34
+*** Declaring classes 35
+*** Using scripts 35
+*** GroovyBeans 36
+*** Annotations 37
+*** Using grapes 38
+*** Handling text 39
+*** Numbers are objects 40
+*** Using lists, maps, and ranges 40
+*** Code as objects: closures 43
+*** Groovy control structures 45
+
+** 2.4 Groovy’s place in the Java environment 46
+*** My class is your class 47
+*** GDK: the Groovy library 48
+*** Groovy compiler lifecycle 49
+
+** 2.5 Summary 53
+
+* 3 Simple Groovy datatypes 54
+** 3.1 Objects, objects everywhere 55
+*** Java’s type system: primitives and references 55
+*** Groovy’s answer: everything’s an object 56
+*** Interoperating with Java: automatic boxing and unboxing 57
+*** No intermediate unboxing 58
+
+** 3.2 The concept of optional typing 58
+*** Assigning types 59
+*** Dynamic Groovy is type safe 59
+*** Let the casting work for you 62
+*** The case for optional typing 63
+
+** 3.3 Overriding operators 64
+*** Overview of overridable operators 64
+*** Overridden operators in action 66
+*** Making coercion work for you 68
+
+** 3.4 Working with strings 69
+*** Varieties of string literals 69
+*** Working with GStrings 72
+*** From Java to Groovy 74
+
+** 3.5 Working with regular expressions 76
+*** Specifying patterns in string literals 77
+*** Applying patterns 79
+*** Patterns in action 81
+*** Patterns and performance 83
+*** Patterns for classification 84
+
+** 3.6 Working with numbers 85
+*** Coercion with numeric operators 85
+*** GDK methods for numbers 88
+
+** 3.7 Summary 89
+
+* 4 Collective Groovy datatypes 91
+** 4.1 Working with ranges 92
+*** Specifying ranges 93
+*** Ranges are objects 94
+*** Ranges in action 95
+
+** 4.2 Working with lists 97
+*** Specifying lists 97
+*** Using list operators 98
+*** Using list methods 101
+*** Lists in action 105
+
+** 4.3 Working with maps 107
+*** Specifying maps 108
+*** Using map operators 109
+*** Maps in action 113
+
+** 4.4 Notes on Groovy collections 114
+*** Understanding concurrent modification 114
+*** Distinguishing between copy and modify semantics 115
+
+** 4.5 Summary 116
+
+* 5 Working with closures 117
+** 5.1 A gentle introduction to closures 118
+** 5.2 The case for closures 119
+*** Using iterators 119
+*** Handling resources with a protocol 121
+
+** 5.3 Declaring closures 123
+*** Simple declaration 123
+*** Using assignments for
+*** declaration 124
+*** Referring to methods as closures 125
+*** Comparing the available options 126
+
+** 5.4 Using closures 127
+*** Calling a closure 127
+*** More closure capabilities 130
+
+** 5.5 Understanding closure scope 134
+*** Simple variable scope 135
+*** Inspecting closure scope 136
+*** Scoping at work: the classic accumulator test 139
+
+** 5.6 Returning from closures 140
+** 5.7 Support for design patterns 141
+*** Relationship to the Visitor pattern 142
+*** Relationship to the
+*** Builder pattern 143
+*** Relationship to other patterns 143
+
+** 5.8 Summary 144
+
+* 6 Groovy control structures 145
+** 6.1 Groovy truth 146
+*** Evaluating Boolean tests 146
+*** Assignments within Boolean tests 147
+
+** 6.2 Conditional execution structures 149
+*** The humble if statement 149
+*** The conditional ?: operator and Elvis 150
+*** The switch statement and the in operator 151
+*** Sanity checking with assertions 154
+
+** 6.3 Looping 157
+*** Looping with while 157
+*** Looping with for 158
+
+** 6.4 Exiting blocks and methods 160
+*** Normal termination: return/break/continue 160
+*** Exceptions: throw/try-catch-finally 161
+
+** 6.5 Summary 162
+
+* 7 Object orientation, Groovy style 164
+** 7.1 Defining classes and scripts 165
+*** Defining fields and local variables 165
+*** Methods and parameters 168
+*** Safe dereferencing with the ?. operator 172
+*** Constructors 173
+
+** 7.2 Organizing classes and scripts 175
+*** File to class relationship 176
+*** Organizing classes in packages 177
+*** Further classpath considerations 180
+
+** 7.3 Advanced object-oriented features 181
+*** Using inheritance 181
+*** Using interfaces 182
+*** Multimethods 183
+*** Using traits 185
+
+** 7.4 Working with GroovyBeans 187
+*** Declaring beans 187
+*** Working with beans 189
+*** Using bean methods for any object 192
+*** Fields, accessors, maps, and Expando 193
+
+** 7.5 Using advanced syntax features 194
+*** Querying objects with GPaths 194
+*** Injecting the spread operator 197
+*** Concise syntax with command chains 198
+
+** 7.6 Summary 199
+
+* 8 Dynamic programming with Groovy 200
+** 8.1 What is dynamic programming? 202
+** 8.2 Meta Object Protocol 202
+** 8.3 Customizing the MOP with hook methods 204
+*** Customizing methodMissing 204
+*** Customizing propertyMissing 206
+*** Using closures for dynamic hooks 207
+*** Customizing GroovyObject methods 208
+
+** 8.4 Modifying behavior through the metaclass 210
+*** MetaClass knows it all 210
+*** How to find the metaclass and invoke methods 211
+*** Setting other metaclasses 213
+*** Expanding the metaclass 214
+*** Temporary MOP modifications using category classes 219
+*** Writing extension modules 222
+*** Using the @Category annotation 223
+*** Merging classes with Mixins 224
+
+** 8.5 Real-world dynamic programming in action 227
+*** Calculating with metrics 227
+*** Replacing constructors with factory methods 228
+*** Fooling IDEs for fun and profit 228
+*** Undoing metaclass modifications 230
+*** The Intercept/Cache/Invoke pattern 231
+
+** 8.6 Summary 232
+
+* 9 Compile-time metaprogramming and AST transformations 233
+** 9.1 A brief history 234
+*** Generating bytecode, not source code 234
+*** Putting the power of code generation in the hands of developers 235
+
+** 9.2 Making Groovy cleaner and leaner 235
+*** Code-generation transformations 236
+*** Class design and design pattern annotations 245
+*** Logging improvements 252
+*** Declarative concurrency 254
+*** Easier cloning and externalizing 258
+*** Scripting support 263
+*** More transformations 267
+
+** 9.3 Exploring AST 268
+*** Tools of the trade 270
+*** Other tools 271
+
+** 9.4 AST by example: creating ASTs 272
+*** Creating by hand 272
+*** AstBuilder.buildFromSpec 273
+*** AstBuilder.buildFromString 274
+*** AstBuilder.buildFromCode 275
+
+** 9.5 AST by example: local transformations 276
+** 9.6 AST by example: global transformations 282
+** 9.7 Testing AST transformations 286
+** 9.8 Limitations 290
+*** It’s early binding 290
+*** It’s fragile 290
+*** It adds complexity 290
+*** Its syntax is fixed 291
+*** It’s not typed 291
+*** It’s unhygienic 291
+
+** 9.9 Next steps 292
+** 9.10 Summary 292
+
+* 10 Groovy as a static language 294
+** 10.1 Motivation for optional static typing 295
+*** The role of types in Groovy 296
+*** Type checking a dynamic language? 296
+
+** 10.2 Using @TypeChecked 298
+*** Finding typos 299
+*** Resolving method calls 300
+*** Checking assignments 301 
+*** Type inference 303
+*** Type-checked Grooviness 306
+*** Type checking closures 310
+*** Revisiting dynamic features in light of type checking 316
+*** Mixing type-checked code with dynamic code 319
+
+** 10.3 Flow typing 320
+*** Least upper bound 323
+*** Smart instanceof inference 325
+*** Closure-shared variables 326
+
+** 10.4 Static compilation 327
+*** @CompileStatic 328
+*** Method dispatch 329
+
+** 10.5 Static type checking extensions 332
+*** @DelegatesTo revisited 334
+*** Type checking
+*** extension scripts 335
+*** Limits 339
+
+** 10.6 Summary 340
+
+* PART 2 AROUND THE GROOVY LIBRARY - 341
+* 11 Working with builders 343
+** 11.1 Learning by example: Using a builder 345
+** 11.2 Building object trees with NodeBuilder 347
+*** NodeBuilder in action: a closer look at builder code 348
+*** Understanding the builder concept 350
+*** Smart building with logic 350
+
+** 11.3 Working with MarkupBuilder 352
+*** Building XML 352
+*** Building HTML 354
+
+** 11.4 Working with StreamingMarkupBuilder 355
+** 11.5 Task automation with AntBuilder 356
+*** From Ant scripts to Groovy scripts 357
+*** How AntBuilder works 358
+*** Smart automation scripts with logic 359
+
+** 11.6 Easy GUIs with SwingBuilder 360
+*** Reading a password with SwingBuilder 361
+*** Creating Swing widgets 363
+*** Arranging your widgets 366
+*** Referring to widgets 370
+*** Using Swing actions 372
+*** Using models 374
+*** Binding made easy 377
+*** Putting it all together 380
+
+** 11.7 Modern UIs with GroovyFX SceneGraphBuilder 386
+*** Application design with FXML 388
+*** Properties and binding 389
+*** Groovy desktop applications 389
+
+** 11.8 Creating your own builder 390
+*** Subclassing BuilderSupport 391
+*** Subclassing FactoryBuilderSupport 395
+*** Rolling your own 398
+
+** 11.9 Summary 399
+
+* 12 Working with the GDK 401
+** 12.1 Working with objects 402
+*** Interactive objects 402
+*** Convenient Object methods 405
+*** Iterative Object methods 408
+
+** 12.2 Working with files and I/O 411
+*** Traversing the filesystem 412
+*** Reading from input sources 417
+*** Writing to output destinations 418
+*** Filters and conversions 420
+*** Streaming serialized objects 422
+*** Temporary data and file copying 422
+
+** 12.3 Working with threads and processes 423
+*** Groovy multithreading 424
+*** Integrating external processes 426
+
+** 12.4 Working with templates 429
+*** Understanding the template format 430
+*** Templates in action 431
+*** Advanced template issues 433
+
+** 12.5 Working with Groovlets 434
+*** Starting with “Hello world” 435
+*** Groovlet binding 437
+*** Templating Groovlets 441
+
+** 12.6 Summary 443
+
+* 13 Database programming with Groovy 445
+** 13.1 Groovy SQL: a better JDBC 446
+*** Setting up for database access 447
+*** Executing SQL 452
+
+** 13.2 Advanced Groovy SQL 463
+*** Performing transactional updates 463
+*** Working with batches 464
+*** Working with pagination 466
+*** Fetching metadata 466
+*** Working with named and namedordinal parameters 469
+*** Using stored procedures 471
+
+** 13.3 DataSets for SQL without SQL 474
+*** Using DataSet operations 475
+*** DataSets on database views 479
+
+** 13.4 Organizing database work 481
+*** Architectural overview 481
+*** Specifying the application behavior 483
+*** Implementing the infrastructure 484
+*** Using a transparent domain model 488
+*** Implementing the application layer 489
+
+** 13.5 Groovy and NoSQL 492
+*** MongoDB: A document-style database 492
+*** Neo4J: A graph database 495
+
+** 13.6 Other approaches 503
+** 13.7 Summary 504
+
+* 14 Working with XML and JSON 506
+** 14.1 Reading XML documents 507
+*** Working with a DOM parser 508
+*** Reading with a Groovy parser 513
+*** Reading with a SAX parser 518
+*** Reading with a StAX parser 519
+
+** 14.2 Processing XML 521
+*** In-place processing 522 
+*** Streaming processing 524
+*** Updating XML 529 
+*** Combining with XPath 531
+
+** 14.3 Parsing and building JSON 538
+*** Parsing JSON 538
+*** Building JSON 540
+
+** 14.4 Summary 542
+
+* 15 Interacting with Web Services 543
+** 15.1 An overview of Web Services 544
+** 15.2 Reading RSS and ATOM 545
+** 15.3 Using a REST-based API 547
+** 15.4 Using XML-RPC 553
+** 15.5 Applying SOAP 555
+*** Doing SOAP with plain Groovy 556
+*** Simplifying SOAP
+*** access using HTTPBuilder 558
+*** Simplifying SOAP access
+*** using groovy-wslite 559
+
+** 15.6 Summary 560
+
+* 16 Integrating Groovy 561
+** 16.1 Prelude to integration 562
+*** Integrating appropriately 563
+*** Setting up dependencies 564
+
+** 16.2 Evaluating expressions and scripts with GroovyShell 565
+*** Starting simply 565
+*** Passing parameters within a binding 567
+*** Generating dynamic classes at runtime 569
+*** Parsing scripts 569
+*** Running scripts or classes 571
+*** Further parameterization of GroovyShell 571
+
+** 16.3 Using the Groovy script engine 575
+*** Setting up the engine 575
+*** Running scripts 576
+*** Defining a different resource connector 576
+
+** 16.4 Working with the GroovyClassLoader 577
+*** Parsing and loading Groovy classes 577
+*** The chicken and egg dependency problem 579
+*** Providing a custom resource loader 580
+*** Playing it safe in a secured sandbox 581
+
+** 16.5 Spring integration 584
+*** Wiring GroovyBeans 585
+*** Refreshable beans 587
+*** Inline scripts 587
+
+** 16.6 Riding Mustang and JSR-223 588
+*** Introducing JSR-223 588
+*** The script engine manager and its script engines 589
+*** Compilable and invocable script engines 590
+*** Polyglot programming 592
+
+** 16.7 Mastering CompilerConfiguration 592
+*** The import customizer 594
+*** The source-aware customizer 595
+*** Writing your own customizer 597
+*** The configscript compilation option 598
+
+** 16.8 Choosing an integration mechanism 600
+** 16.9 Summary 601
+
+* PART 3 APPLIED GROOVY - 603
+* 17 Unit testing with Groovy 605
+** 17.1 Getting started 606
+*** Writing tests is easy 607
+*** GroovyTestCase: an introduction 608
+*** Working with GroovyTestCase 610
+
+** 17.2 Unit testing Groovy code 611
+** 17.3 Unit testing Java code 614
+** 17.4 Organizing your tests 617
+*** Test suites 617
+*** Parameterized or data-driven testing 618
+*** Property-based testing 619
+
+** 17.5 Advanced testing techniques 621
+*** Testing made groovy 622
+*** Stubbing and mocking 623
+*** Using GroovyLogTestCase 628
+*** Unit testing performance 629
+*** Code coverage with Groovy 631
+
+** 17.6 IDE integration 634
+*** Using GroovyTestSuite 635
+*** Using AllTestSuite 637
+
+** 17.7 Testing with the Spock framework 638
+*** Testing with mocks 639 
+*** Data-driven Spock tests 642
+
+** 17.8 Build automation 644
+*** Build integration with Gradle 644
+*** Build integration with Maven 647
+
+** 17.9 Summary 649
+
+* 18 Concurrent Groovy with GPars 650
+** 18.1 Concurrency for the rest of us 651
+*** Concurrent != parallel 651
+*** Introducing new concepts 653
+
+** 18.2 Concurrent collection processing 654
+*** Transparently concurrent collections 655
+*** Available fork/join methods 657
+
+** 18.3 Becoming more efficient with map/filter/reduce 659
+** 18.4 Dataflow for implicit task coordination 662
+*** Testing for deadlocks 662
+*** Dataflow on sequential datatypes 663
+*** Final thoughts on dataflow 665
+
+** 18.5 Actors for explicit task coordination 665
+*** Using the strengths of Groovy 669
+
+** 18.6 Agents for delegated task coordination 671
+** 18.7 Concurrency in action 671
+** 18.8 Summary 675
+
+* 19 Domain-specific languages 676
+** 19.1 Groovy’s flexible nature 677
+*** Back to omitting parentheses 677
+
+** 19.2 Variables, constants, and method injection 681
+*** Injecting constants through the binding 682
+*** Injecting methods into a script 684
+*** Adding imports and static imports automatically 685
+*** Injecting methods (revisited) 687
+*** Adding closures to the binding 688
+
+** 19.3 Adding properties to numbers 690
+** 19.4 Leveraging named arguments 693
+** 19.5 Command chains 696
+** 19.6 Defining your own control structures 699
+** 19.7 Context switching with closures 710
+** 19.8 Another technique for builders 715
+** 19.9 Securing your DSLs 718
+*** Introducing SecureASTCustomizer 718
+*** The ArithmeticShell 719
+*** Stopping the execution of your programs 721
+*** Preventing cheating with metaprogramming 723
+
+** 19.10 Testing and error reporting 725
+** 19.11 Summary 731
+
+* 20 The Groovy ecosystem 732
+** 20.1 Groovy Grapes for self-contained scripts 733
+** 20.2 Scriptom for Windows automation 735
+** 20.3 GroovyServ for quick startup 737
+** 20.4 Gradle for project automation 738
+** 20.5 CodeNarc for static code analysis 741
+** 20.6 GContracts for improved design 743
+** 20.7 Grails for web development 745
+** 20.8 Griffon for desktop applications 749
+** 20.9 Gaelyk for Groovy in the cloud 752
+** 20.10 Summary 754
+
+* appendix A Installation and documentation - 756
+* appendix B Groovy language information - 759
+* appendix C GDK API quick reference - 762
+* appendix D Cheat sheets - 819
+* appendix E Annotation parameters - 825
+* appendix F Compiler phases - 842
+* appendix G AST visitors - 844
+* appendix H Type checking extensions - 850
+* appendix I Android support - 861
+* index - 863

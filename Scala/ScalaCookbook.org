@@ -21,7 +21,7 @@
   - [[2.1. Parsing a Number from a String 32][2.1. Parsing a Number from a String 32]]
   - [[2.2. Converting Between Numeric Types (Casting) 36][2.2. Converting Between Numeric Types (Casting) 36]]
   - [[2.3. Overriding the Default Numeric Type 37][2.3. Overriding the Default Numeric Type 37]]
-  - [[2.4. Replacements for ++ and −− 39][2.4. Replacements for ++ and −− 39]]
+  - [[2.4. Replacements for ~++~ and ~−−~ 39][2.4. Replacements for ~++~ and ~−−~ 39]]
   - [[2.5. Comparing Floating-Point Numbers 41][2.5. Comparing Floating-Point Numbers 41]]
   - [[2.6. Handling Very Large Numbers 43][2.6. Handling Very Large Numbers 43]]
   - [[2.7. Generating Random Numbers 45][2.7. Generating Random Numbers 45]]
@@ -236,8 +236,17 @@
   - [[11.27. Using a Queue 367][11.27. Using a Queue 367]]
   - [[11.28. Using a Stack 369][11.28. Using a Stack 369]]
   - [[11.29. Using a Range 371][11.29. Using a Range 371]]
-- [[12. Files and Processes 375][12. Files and Processes 375]]
-  - [[12.1. How to Open and Read a Text File 375][12.1. How to Open and Read a Text File 375]]
+- [[12. Files and Processes - 375][12. Files and Processes - 375]]
+  - [[12.1. How to Open and Read a Text File - 375][12.1. How to Open and Read a Text File - 375]]
+    - [[Problem][Problem]]
+    - [[Solution][Solution]]
+      - [[Using the concise syntax][Using the concise syntax]]
+      - [[Properly closing the file][Properly closing the file]]
+    - [[Discussion][Discussion]]
+      - [[Leaving files open][Leaving files open]]
+      - [[Automatically closing the resource][Automatically closing the resource]]
+      - [[Handling exceptions][Handling exceptions]]
+      - [[Multiple fromFile methods][Multiple fromFile methods]]
   - [[12.2. Writing Text Files 381][12.2. Writing Text Files 381]]
   - [[12.3. Reading and Writing Binary Files 382][12.3. Reading and Writing Binary Files 382]]
   - [[12.4. How to Process Every Character in a Text File 383][12.4. How to Process Every Character in a Text File 383]]
@@ -251,7 +260,7 @@
   - [[12.12. Handling STDOUT and STDERR for External Commands 399][12.12. Handling STDOUT and STDERR for External Commands 399]]
   - [[12.13. Building a Pipeline of Commands 401][12.13. Building a Pipeline of Commands 401]]
   - [[12.14. Redirecting the STDOUT and STDIN of External Commands 402][12.14. Redirecting the STDOUT and STDIN of External Commands 402]]
-  - [[12.15. Using AND (&&) and OR (||) with Processes 404][12.15. Using AND (&&) and OR (||) with Processes 404]]
+  - [[12.15. Using AND (~&&~) and OR (~||~) with Processes 404][12.15. Using AND (~&&~) and OR (~||~) with Processes 404]]
   - [[12.16. Handling Wildcard Characters in External Commands 405][12.16. Handling Wildcard Characters in External Commands 405]]
   - [[12.17. How to Run a Process in a Different Directory 406][12.17. How to Run a Process in a Different Directory 406]]
   - [[12.18. Setting Environment Variables When Running Commands 407][12.18. Setting Environment Variables When Running Commands 407]]
@@ -373,7 +382,7 @@
 ** 2.1. Parsing a Number from a String 32
 ** 2.2. Converting Between Numeric Types (Casting) 36
 ** 2.3. Overriding the Default Numeric Type 37
-** 2.4. Replacements for ++ and −− 39
+** 2.4. Replacements for ~++~ and ~−−~ 39
 ** 2.5. Comparing Floating-Point Numbers 41
 ** 2.6. Handling Very Large Numbers 43
 ** 2.7. Generating Random Numbers 45
@@ -1095,8 +1104,72 @@
 ** 11.27. Using a Queue 367
 ** 11.28. Using a Stack 369
 ** 11.29. Using a Range 371
-* 12. Files and Processes 375
-** 12.1. How to Open and Read a Text File 375
+* 12. Files and Processes - 375
+  - ~scala.io.Source~
+    =TODO=
+
+  - In other cases:
+    such as when reading a YAML file or working with directories, you simply
+    _fall back to use existing Java libraries_.
+
+  - Execute system commands:
+    Scala makes it much easier.
+    Scala has a clean API to let you run external commands.
+
+** 12.1. How to Open and Read a Text File - 375
+*** Problem
+    1. open a plain-text file
+
+    2. process the lines in that file
+
+*** Solution
+    - _TWO_ primary ways:
+      + A concise one-line syntax.
+        * With side-effect of leaving the file open
+        * Be useful in short-lived programs, like shell scripts.
+
+      + A slightly longer approach that properly closes the file.
+
+**** Using the concise syntax
+     #+BEGIN_SRC scala
+       import scala.io.Source
+
+       val filename = "fileopen.scala"
+       for (line <- Source.fromFile(filename).getLines) {
+         println(line)
+       }
+     #+END_SRC
+
+     - Some variation:
+       #+BEGIN_SRC scala
+         val lines = Source.fromFile("/Users/Al/.bash_profile").getLines.toList
+         val lines = Source.fromFile("/Users/Al/.bash_profile").getLines.toArray
+       #+END_SRC
+
+     - ~fromFile~ method returns a ~BufferedSource~, and its ~getLines~ method
+       treats any =\r\n=, =\r=, or =\n= as a line separator.
+
+**** Properly closing the file
+     #+BEGIN_SRC scala
+       val bufferedSource = Source.fromFile("example.txt")
+
+       for (line <- bufferedSource.getLines) {
+         println(line.toUpperCase)
+       }
+
+       bufferedSource.close
+     #+END_SRC
+
+     - =TODO=
+       For automated methods of closing the file, see the "Loan Pattern" examples
+       in the *Discussion*.
+
+*** TODO Discussion
+**** Leaving files open
+**** Automatically closing the resource
+**** Handling exceptions
+**** Multiple fromFile methods
+
 ** 12.2. Writing Text Files 381
 ** 12.3. Reading and Writing Binary Files 382
 ** 12.4. How to Process Every Character in a Text File 383
@@ -1110,7 +1183,7 @@
 ** 12.12. Handling STDOUT and STDERR for External Commands 399
 ** 12.13. Building a Pipeline of Commands 401
 ** 12.14. Redirecting the STDOUT and STDIN of External Commands 402
-** 12.15. Using AND (&&) and OR (||) with Processes 404
+** 12.15. Using AND (~&&~) and OR (~||~) with Processes 404
 ** 12.16. Handling Wildcard Characters in External Commands 405
 ** 12.17. How to Run a Process in a Different Directory 406
 ** 12.18. Setting Environment Variables When Running Commands 407

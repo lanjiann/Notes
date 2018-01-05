@@ -293,7 +293,7 @@
   - [[20.7 Path-dependent types - 457][20.7 Path-dependent types - 457]]
   - [[20.8 Refinement types - 460][20.8 Refinement types - 460]]
   - [[20.9 Enumerations - 461][20.9 Enumerations - 461]]
-  - [[20.10 Case study: Currencies - 463][20.10 Case study: Currencies - 463]]
+  - [[20.10 Case study: Currencies - 463 - =RE-READ=][20.10 Case study: Currencies - 463 - =RE-READ=]]
   - [[20.11 Conclusion - 473][20.11 Conclusion - 473]]
 - [[21 Implicit Conversions and Parameters - 474][21 Implicit Conversions and Parameters - 474]]
   - [[21.1 Implicit conversions - 474][21.1 Implicit conversions - 474]]
@@ -304,7 +304,7 @@
   - [[21.4 Converting the receiver - 482][21.4 Converting the receiver - 482]]
     - [[Interoperating with new types][Interoperating with new types]]
     - [[Simulating new syntax][Simulating new syntax]]
-    - [[Implicit classes][Implicit classes]]
+    - [[Implicit classes =Re-READ=][Implicit classes =Re-READ=]]
   - [[21.5 Implicit parameters - 485][21.5 Implicit parameters - 485]]
     - [[A style rule for implicit parameters][A style rule for implicit parameters]]
   - [[21.6 Context bounds - 491][21.6 Context bounds - 491]]
@@ -340,7 +340,7 @@
   - [[24.2 Collections consistency - 531][24.2 Collections consistency - 531]]
   - [[24.3 Trait ~Traversable~ - 533][24.3 Trait ~Traversable~ - 533]]
   - [[24.4 Trait ~Iterable~ - 538][24.4 Trait ~Iterable~ - 538]]
-    - [[Why have both ~Traversable~ and ~Iterable~?][Why have both ~Traversable~ and ~Iterable~?]]
+    - [[Why have both ~Traversable~ and ~Iterable~?  =RE-READ=][Why have both ~Traversable~ and ~Iterable~?  =RE-READ=]]
     - [[Subcategories of ~Iterable~][Subcategories of ~Iterable~]]
   - [[24.5 The sequence traits ~Seq~, ~IndexedSeq~, and ~LinearSeq~ - 542][24.5 The sequence traits ~Seq~, ~IndexedSeq~, and ~LinearSeq~ - 542]]
     - [[Buffers][Buffers]]
@@ -401,7 +401,7 @@
     - [[Forming regular expressions][Forming regular expressions]]
     - [[Searching for regular expressions][Searching for regular expressions]]
     - [[Extracting with regular expressions][Extracting with regular expressions]]
-  - [[26.8 Conclusion - 636][26.8 Conclusion - 636]]
+  - [[26.8 Conclusion - 636 =Re-Read=][26.8 Conclusion - 636 =Re-Read=]]
 - [[27 Annotations - 637 *Learn MORE*][27 Annotations - 637 *Learn MORE*]]
   - [[27.1 Why have annotations? - 637][27.1 Why have annotations? - 637]]
   - [[27.2 Syntax of annotations - 638][27.2 Syntax of annotations - 638]]
@@ -3287,7 +3287,6 @@
      }
    #+END_SRC
 
-
 ** TODO 10.15 Putting it all together - 244
    - x
 ** DONE 10.16 Conclusion - 245
@@ -5353,51 +5352,959 @@
 
 ** DONE 19.4 Checking variance annotations - 429 - =Re-READ=
    CLOSED: [2017-11-05 Sun 05:43]
-** TODO 19.5 Lower bounds - 432
-** TODO 19.6 Contravariance - 434
+** DONE 19.5 Lower bounds - 432
+   CLOSED: [2017-11-07 Tue 00:14]
+   #+BEGIN_SRC scala
+     class Queue[+T] (private val leading: List[T],
+                      private val trailing: List[T]) {
+       def enqueue[U >: T](x: U) =
+         new Queue[U](leading, x :: trailing) //...
+     }
+   #+END_SRC
+
+** DONE 19.6 Contravariance - 434
+   CLOSED: [2017-11-07 Tue 00:34]
+   - It is safe to assume that a type ~T~ is a /subtype/ of a type ~U~ if you can
+     substitute a value of type ~T~ wherever a value of type ~U~ is required.
+
+       This is called the /Liskov Substitution Principle/.
+
+   - The principle holds if ~T~ supports the same operations as ~U~, and all of
+     ~T~'s operations _require less and provide more_ than the corresponding
+     operations in ~U~.
+
+     For example,
+     #+BEGIN_SRC scala
+       trait OutputChannel[-T] {
+         def write(x: T)
+       }
+     #+END_SRC
+     ~OutputChannel[AnyRef]~ is a subtype of ~OutputChannel[String]~.
+
+   - Example:
+     #+BEGIN_SRC scala
+       trait Function1[-S, +T] {
+         def apply(x: S): T
+       }
+     #+END_SRC
+
+     ~Function1~ is
+     + /contravariant/ in the function argument type ~S~
+     + /convariant/ in the reulst type ~T~.
+
+   - =TODO= Listing 19.9
+
 ** TODO 19.7 Object private data - 437
 ** TODO 19.8 Upper bounds - 439
 ** TODO 19.9 Conclusion - 442
-* TODO 20 Abstract Members - 443
-** TODO 20.1 A quick tour of abstract members - 443
-** TODO 20.2 Type members - 444
-** TODO 20.3 Abstract ~val~'s - 445
-** TODO 20.4 Abstract ~var~'s - 446
-** TODO 20.5 Initializing abstract ~val~'s - 447
+* DONE 20 Abstract Members - 443
+  CLOSED: [2017-11-12 Sun 01:26]
+  - abstract member :: A member of a /class/ or /trait/ is abstract if the member
+       does _not have a complete definition_.
+
+  - In Scala you can declare /abstract fields/ and even /abstract types/ as
+    members of /classes/ and /traits/. This goes beyond Java, which only lets you
+    declare /abstract methods/.
+
+  - In this chapter
+    we'll describe all _FOUR_ kinds of /abstract member/:
+    + vals
+    + vars
+    + methods
+    + types
+
+  - Along the way of describing all four kinds of /abstract member/,
+    we'll discuss
+    + pre-initialized fields
+    + lazy vals
+    + path-dependent types =TODO= =???=
+    + enumerations
+
+** DONE 20.1 A quick tour of abstract members - 443
+   CLOSED: [2017-11-09 Thu 20:54]
+   - A /trait/ includes four kinds of /abstract members/:
+     #+BEGIN_SRC scala
+       trait Abstract {
+         type T
+         def transform(x: T): T
+         val initial: T
+         var current: T
+       }
+     #+END_SRC
+
+     A concrete implementation of the ~Abstract~ /trait/.
+     #+BEGIN_SRC scala
+       class Concrete extends Abstract {
+         type T = String
+         def transform(x: String) = x + x
+         val initial = "hi"
+         var current = initial
+       }
+     #+END_SRC
+
+** DONE 20.2 Type members - 444
+   CLOSED: [2017-11-09 Thu 20:58]
+   A type /alias/ that uses the ~type~ keyword to declare.
+
+** DONE 20.3 Abstract ~val~'s - 445
+   CLOSED: [2017-11-09 Thu 21:04]
+   An abstract ~val~ can't be /overrided/ by a subtype with ~def~.
+
+** DONE 20.4 Abstract ~var~'s - 446
+   CLOSED: [2017-11-09 Thu 21:09]
+   When you declare an abstract ~var~, you implicitly declare an abstract
+   /getter/ and /setter/. For instance, there are two exactly equivalent
+   definitions:
+   #+BEGIN_SRC scala
+     trait AbstractTime {
+       var hour: Int
+       var minute: Int
+     }
+   #+END_SRC
+
+   #+BEGIN_SRC scala
+     trait AbstractTime {
+       def hour: Int      // getter for `hour`
+       def hour_=: Int    // setter for `hour`
+       def minute: Int    // getter for `minute`
+       def minute_=: Int  // setter for `minute`
+     }
+   #+END_SRC
+
+** DONE 20.5 Initializing abstract ~val~'s - 447
+   CLOSED: [2017-11-11 Sat 21:03]
+   - Create a /instance/ of an /anonymous class/ that /mixes in/ the /trait/ and
+     is defined by the body.
+     #+BEGIN_SRC scala
+       trait RationalTrait {
+         val numerArg: Int
+         val denomArg: Int
+       }
+
+       val r = new RationalTrait {
+         val numerArg = 1
+         val denomArg = 2
+       }
+     #+END_SRC
+
+   - This particular /anonymous class instantiation/ has an effect _analogous to_
+     the instance creation ~new Rational(1, 2)~.
+
+     However, this analogy is NOT perfect.
+     + For classes, When you write: ~new Rational(expr1, expr2)~, the two
+       expressions, ~expr1~ and ~expr2~, are evaluated before class ~Rational~
+       is initialized, so the values of ~expr1~ and ~expr2~ are available for
+       the initialization of class ~Rational~.
+
+     + For traits, When you write:
+       #+BEGIN_SRC scala
+         new RationalTrait {
+           val numerArg = expr1
+           val denomArg = expr2
+         }
+       #+END_SRC
+       * ~expr1~ and ~expr2~, are evaluated as part of the initialization of the
+         /anonymous class/,
+
+       * but the /anonymous class/ is _initialized AFTER_ the ~RationalTrait~.
+
+       So the /values/ of ~numerArg~ and ~denomArg~ are _NOT available_ during
+       the initialization of ~RationalTrait~ (more precisely, a selection of
+       either value would yield the /default value/ for type ~Int~, ~0~).
+         This is NOT a problem for the example above.
+         A problematic example is showed below.
+
+   - Example:
+     #+BEGIN_SRC scala
+       trait RationalTrait {
+         val numerArg: Int
+         val denomArg: Int
+
+         require(denomArg != 0)
+
+         private val g = gcd(numerArg, denomArg)
+         val numer = numerArg / g
+         val denom = denomArg / g
+
+         private def gcd(a: Int, b: Int): Int =
+           if (b == 0) a else gcd(b, a % b)
+
+         override def toString = numer + "/" + denom
+       }
+
+       val x = 2
+
+       new RationalTrait {
+         val numerArg = 1 * x
+         val denomArg = 2 * x
+       }
+
+       // java.lang.IllegalArgumentException: requirement failed
+       //   at scala.Predef$.require(Predef.scala:207)
+       //   at RationalTrait$class.$init$(<console>:10)
+       //   ... 28 elided
+     #+END_SRC
+
+     The pre-requisite is not fullfilled due to the reason mentioned above.
+
+   - Scala offers _TWO_ alternative solutions to this problem:
+     + /pre-initialized fields/
+     + /lazy vals/
+
+     =TODO= They are presented in the remainder of this section.
+
 *** Pre-initialized fields
+    - pre-initialized fields :: A syntax that lets you initialize a field of a
+         /subclass/ _BEFORE_ the /superclass/ is called.
+
+    - Example:
+      #+BEGIN_SRC scala
+        //// initialize an anonymous class
+        new {
+          val numerArg = 1 * x
+          val denomArg = 2 * x
+        } with RationalTrait
+
+
+        //// define object
+        object twoThirds extends {
+          val numerArg = 2
+          val denomArg = 3
+        } with RationalTrait
+
+
+        //// define class
+        class RationalClass(n: Int, d: Int) extends {
+          val numerArg = n
+          val denomArg = d
+        } with RationalTrait {
+          def + (that: RationalClass) = new RationalClass(
+            numer * that.denom + that.numer * denom,
+            denom * that.denom
+          )
+        }
+      #+END_SRC
+
+    - Because /pre-initialized fields/ are initialized _BEFORE_ the /superclass
+      constructor/ is called, their initializers CANNOT refer to the object
+      that's being constructed.
+
+      Consequently, if such an initializer refers to ~this~, the reference goes
+      to
+      + the object CONTAINING the class
+        (=From Jian= if this is successful, the result is usually not the wanted)
+
+      + object that's _being constructed_,
+        (=From Jian= this can always be an error???)
+
+      NOT the _constructed object_ itself.
+
+    - Example (in REPL):
+      #+BEGIN_SRC scala
+        // scala>
+        new {
+          val numerArg = 1
+          val denomArg = this.numerArg * 2
+        } with RationalTrait
+
+        // <console>:11: error: value numerArg is not a member of object
+        //  $iw
+        //                 val denomArg = this.numerArg * 2
+      #+END_SRC
+      =Re-READ=
+      The example did _NOT compile_ because the reference ~this.numerArg~ was
+      looking for a ~numerArg~ field in _the object containing this ~new~
+      expression_ (which in this case was the synthetic object named ~$iw~, into
+      which the interpreter puts user input lines). Once more, pre-initialized
+      fields behave in this respect like class constructor arguments.
+
 *** Lazy ~val~'s
+    - Comparison:
+      + Strict
+        #+BEGIN_SRC scala
+          // scala>
+          object Demo {
+            val x = { println("initializing x"); "done" }
+          }
 
-** TODO 20.6 Abstract types - 455
-** TODO 20.7 Path-dependent types - 457
-** TODO 20.8 Refinement types - 460
-** TODO 20.9 Enumerations - 461
-** TODO 20.10 Case study: Currencies - 463
-** TODO 20.11 Conclusion - 473
+          // scala>
+          Demo
+          // initializing x
+          // res3: Demo.type = Demo$@2129a843
 
-* TODO 21 Implicit Conversions and Parameters - 474
-** TODO 21.1 Implicit conversions - 474
-** TODO 21.2 Rules for implicits - 477
-   - Marking rule ::
-   - Scope rule ::
-   - One-at-a-time ::
-   - Explicits-first rule ::
-*** Naming an implicit conversion
-*** Where implicits are tried
+          // scala>
+          Demo.x
+          // res4: String = done
+        #+END_SRC
 
-** TODO 21.3 Implicit conversion to an expected type - 480
-** TODO 21.4 Converting the receiver - 482
-*** Interoperating with new types
-*** Simulating new syntax
-*** Implicit classes
+      + Lazy
+        #+BEGIN_SRC scala
+          // scala>
+          object Demo {
+            lazy val x = { println("initializing x"); "done" }
+          }
+          // define object Demo
 
-** TODO 21.5 Implicit parameters - 485
-*** A style rule for implicit parameters
+          // scala>
+          Demo
+          // res5: Demo.type = Demo$@5b1769c
 
-** TODO 21.6 Context bounds - 491
-** TODO 21.7 When multiple conversions apply - 494
-** TODO 21.8 Debugging implicits - 496
-** TODO 21.9 Conclusion - 497
+          // scala>
+          Demo.x
+          // initializing x
+          // res6: String = done
+
+        #+END_SRC
+
+    - Unlike a ~def~, a /lazy/ ~val~ is NEVER evaluated more than once.
+      The evaluted value is cached for later use.
+
+    - Reformulate ~RationalTrait~ to ~LazyRationalTrait~:
+      #+BEGIN_SRC scala
+        trait LazyRationalTrait {
+          val numerArg: Int
+          val denomArg: Int
+          lazy val numer = numerArg / g
+          lazy val denom = denomArg / g
+          override def toString = numer + "/" + denom
+          private lazy val g = {
+            require(denomArg ! = 0)
+            gcd(numerArg, denomArg)
+          }
+          private def gcd(a: Int, b: Int): Int =
+            if (b == 0) a else gcd(b, a % b)
+        }
+      #+END_SRC
+      + If we put the ~require~ statement in the original position as in
+        ~RationalTrait~, ~denomArg~ will be forced to evaluate too early.
+        Thus, we put the ~require~ statement just before the call to ~gcd~, where
+        the condition ~denomArg != 0~ is important.
+
+      + One important property of lazy ~val~'s:
+        The textual order of their definitions does NOT matter because values get
+        initialized on demand.
+          However, this advantage holds only as long as the initialization of
+        lazy ~val~'s neither produces side effects nor depends on them.
+          So _lazy ~val~'s are an ideal complement to functional objects_, where
+        the order of initializations does NOT matter, as long as everything gets
+        initialized eventually.
+
+** DONE 20.6 Abstract types - 455
+   CLOSED: [2017-11-11 Sat 21:46]
+   - Example (why do we need /abstract types/):
+     + Wrong way
+       #+BEGIN_SRC scala
+         class Food
+  
+         abstract class Animal {
+           def eat(food: Food)
+         }
+  
+  
+         class Grass extends Food
+  
+         class Cow extends Animal {
+           override def eat(food: Grass) = {}  // This won't compile
+         }
+       #+END_SRC
+
+     + Wrong way but compilable
+       #+BEGIN_SRC scala
+         class Food
+
+         abstract class Animal {
+           def eat(food: Food)
+         }
+
+         class Cow extends Animal {
+           override def eat(food: Food) = {}
+         }
+
+         class Fish extends Food
+         val bessy: Animal = new Cow
+         bessy eat (new Fish)  // Everything is OK, but the meaning in the real world.
+       #+END_SRC
+
+     + Right way
+       #+BEGIN_SRC scala
+         class Food
+
+         abstract class Animal {
+           type SuitableFood <: Food
+           def eat(food: SuitableFood)
+         }
+
+
+         class Grass extends Food
+
+         class Cow extends Animal {
+           type SuitableFood = Grass
+           override def eat(food: Grass) = {}
+         }
+       #+END_SRC
+
+** DONE 20.7 Path-dependent types - 457
+   CLOSED: [2017-11-11 Sat 22:39]
+   - path-dependent type :: A type like ~bessy.SuitableFood~
+
+   - A /path-dependent type/ resembles the syntax for an /innter class type/
+     _in Java_, _but there is a CRUCIAL difference_:
+     + a /path-dependent type/ names an /outer object/
+     + an /inner class/ type names an /outer class/.
+
+   - Scala can also create /inner class/ types.
+     The sytax of definition is similar to Java, while the syntax of usage is
+     different, use ~Outer#Inner~ -- Scala keep ~.~ for objects ONLY.
+
+     For example,
+     #+BEGIN_SRC scala
+       class Outer {
+         class Inner
+       }
+
+       val o1 = new Outer
+       val o2 = new Outer
+     #+END_SRC
+     Here ~o1.Inner~ and ~o2.Inner~ are two /path-dependent types/ (and they are
+     _DIFFERENT_ types). Both of these types conform to (are subtypes of) the more
+     general type ~Outer#Inner~, which represents the ~Inner~ class with an
+     arbitrary outer object of type Outer.
+
+     By contrast, type ~o1.Inner~ refers to the ~Inner~ class with a specific
+     outer object (the one referenced from ~o1~). Likewise, type ~o2.Inner~
+     refers to the ~Inner~ class with a different, specific outer object (the one
+     referenced from ~o2~).
+
+   - In Scala, as in Java, /inner class instances/ _hold a reference to an
+     enclosing_ /outer class instance/. This allows an /inner class/, for
+     example, to access members of its /outer class/.
+
+     Thus you _CANNOT_ instantiate an /inner class/ without in some way
+     specifying an /outer class instance/.
+
+   - You can ~new o1.Inner~ -- it knows its outer object is ~o1~.
+     You cannot ~new Outer#Inner~ -- NO outer object specified.
+
+** DONE 20.8 Refinement types - 460
+   CLOSED: [2017-11-11 Sat 22:48]
+   - nominal subtype ::
+
+   - structural subtyping ::
+
+   - Use the /nominal subtype/ way, if you want to define a class ~Pasture~ that
+     can contain animals that eat grass, you need to first define a trait
+     ~AnimalThatEatsGrass~ and mix it into every class where it applies. This is
+     _VERBOSE_.
+
+   - Use the /structural subtyping/ way (use /refinement type/):
+     #+BEGIN_SRC scala
+       class Pasture {
+         var animals: List[Animal { type SuitableFood = Grass }] = Nil
+         //...
+       }
+     #+END_SRC
+
+** DONE 20.9 Enumerations - 461
+   CLOSED: [2017-11-11 Sat 23:46]
+   Extend the ~scala.Enumeration~ class to create /enumerations/.
+
+   - Syntax:
+     #+BEGIN_SRC scala
+       object Color extends Enumeration {
+         val Red = Value
+         val Green = Value
+         val Blue = Value
+       }
+     #+END_SRC
+
+   - syntactic sugared version:
+     #+BEGIN_SRC scala
+       object Color extends Enumeration {
+         val Red, Green, Blue = Value
+       }
+     #+END_SRC
+
+   - /Enumeration/ defines an /inner class/ named ~Value~, and the same-named
+     parameterless ~Value~ method returns a fresh instance of that class.
+       It means in the above example, ~Color.Red~, ~Color.Green~, ~Color.Blue~ is
+     of type ~Color.Value~.
+
+   - Associate names to the variants of a /enumeration/.
+     #+BEGIN_SRC scala
+       object Direction extends Enumeration {
+         val North = Value("North")
+         val East = Value("East")
+         val South = Value("South")
+         val West = Value("West")
+       }
+
+       for (d <- Direction.values) print(d + " ")
+       // North East South West
+     #+END_SRC
+
+   - Values of an enumeration are numbered from 0, and use the ~id~ method to
+     find out them: ~Direction.East.id~
+
+   - Get a variant of /enumeration/ from a integer. For example the result of
+     ~Direction(1)~ is ~Direction.East~
+
+** DONE 20.10 Case study: Currencies - 463 - =RE-READ=
+   CLOSED: [2017-11-12 Sun 01:26]
+** DONE 20.11 Conclusion - 473
+   CLOSED: [2017-11-12 Sun 01:26]
+
+* DONE 21 Implicit Conversions and Parameters - 474
+  CLOSED: [2017-11-18 Sat 00:02]
+** DONE 21.1 Implicit conversions - 474
+   CLOSED: [2017-11-16 Thu 03:34]
+   - /Implicit conversions/ help by _reducing_ the number of _explicit_
+     conversions that are needed from one type to another.
+
+   - Example:
+     #+BEGIN_SRC scala
+       // Use Swing
+       val button = new JButton
+
+       // If no implicit convertion
+       button.addActionListener(
+         new ActionListener {
+           def actionPerformed(event: ActionEvent) = {
+             println("pressed!")
+           }
+         }
+       )
+
+
+       // Eliminate information-free boilerplate code.
+       // (Scala 2.12, which includes support to Java 8 feature, can compile the code
+       // below)
+       button.addActionListener(
+         // Type mismatch if no implicit conversion or Scala that < 2.12!
+         (_: ActionEvent) => println("pressed!")
+       )
+
+
+       // With implicit convertion
+       implicit def function2ActionListener(f: ActionEvent => Unit) =
+         new ActionListener {
+           def actionPerformed(event: ActionEvent) = f(event)
+         }
+
+       button.addActionListener(
+         (_: ActionEvent) => println("pressed!")
+       )
+     #+END_SRC
+
+** DONE 21.2 Rules for implicits - 477
+   CLOSED: [2017-11-17 Fri 23:58]
+   - Marking rule :: Only definitions marked ~implicit~ are available.
+     + You can use ~implicit~ to mark any
+       * /variable/ definition =???=
+       * /function/ definition
+       * /object/ definition =???=
+
+   - Scope rule :: An inserted /implicit conversion/ must
+     + be in scope as a /single identifier/
+       For example, ~someVariable.convert~ won't be considered (not a /single
+       indentifier/), you must import and use ~convert~ directly
+
+       or
+
+     + be associated with the source or target type of the
+       conversion.
+
+       The companion object will be considered without explicitly import.
+       #+BEGIN_SRC scala
+         object Dollar {
+           implicit def dollarToEuro(x: Dollar): Euro = ...
+         }
+
+         class Dollar { ... }
+       #+END_SRC
+       The /implicit conversion/ function can also be in the ~Euro~ companion
+       object. Both works.
+
+   - It is common for libraries to include a ~Preamble~ object including a number
+     of useful implicit conversions. Code that uses the library can then do a
+     single ~import Preamble._~ to access the library's /implicit conversions/.
+
+   - One-at-a-time rule :: Only one implicit is inserted.
+
+   - Explicits-first rule :: Whenever code type checks as it is written, no
+        implicits are attempted.
+
+*** DONE Naming an implicit conversion
+    CLOSED: [2017-11-16 Thu 04:31]
+    - The name of an /implicit conversion/ matters only in _TWO_ situations:
+      + If you want to write it explicitly in a method application
+      + for determining which implicit conversions are available at any place in
+        the program -- you can import (by name) only the ones you need.
+
+*** DONE Where implicits are tried
+    CLOSED: [2017-11-17 Fri 23:59]
+    - There are _THREE_ places /implicits/ are used in the language:
+      + conversions to an expected type:
+        /Implicit conversions/ to an expected type let you use one type in a
+        context where a different type is expected.
+        For example, ~String~ to ~IndexedSeq[Char]~
+
+      + conversions of the receiver of a selection:
+        Conversions of the receiver let you adapt the receiver of a method call
+        (i.e., the object on which a method is invoked), if the method is not
+        applicable on the original type.
+
+        For example, ~"abc".exists~ to ~stringWrapper("abc").exists~
+        (~exist~ is available on ~IndexedSeq~'s rather than ~String~'s)
+
+
+      + implicit parameters: like the type class in Haskell - add /implicit
+        parameters/ to a generic function to provide more information to the
+        generic type(s).
+
+** DONE 21.3 Implicit conversion to an expected type - 480
+   CLOSED: [2017-11-16 Thu 04:31]
+   Example:
+   #+BEGIN_SRC scala
+     // This is in `Predef`
+     implicit def int2double(x: Int): Double = x.toDouble
+   #+END_SRC
+   That's why in Scala ~Int~ values can be stored in variables of type ~Double~.
+     There's _NO_ special rule in the type system for this; it's just an
+   /implicit conversion/ that gets applied.
+
+   The Scala compiler backend will treat the conversion specially, however,
+   translating it to a special ~i2d~ bytecode. So the compiled image is the same
+   as in Java.
+
+** DONE 21.4 Converting the receiver - 482
+   CLOSED: [2017-11-16 Thu 06:19]
+*** DONE Interoperating with new types
+    CLOSED: [2017-11-16 Thu 05:48]
+    #+BEGIN_SRC scala
+      class Rational(n: Int, d: Int) {
+        // ...
+        def + (that: Rational): Rational = ...
+        def + (that: Int): Rational = ...
+      }
+
+      val oneHalf = new Rational(1, 2)
+      oneHalf + oneHalf  // res0: Rational = 1/1
+      oneHalf + 1        // res1: Rational = 3/2
+
+      // BUT this doesn't compile
+      1 + oneHalf
+
+      // Then
+      implicit def intToRational(x: Int) = new Rational(x, 1)
+
+      1 + oneHalf
+      // res2: Rational = 3/2
+      //// In the background: `intToRational(1) + oneHalf`
+    #+END_SRC
+
+*** DONE Simulating new syntax
+    CLOSED: [2017-11-16 Thu 06:03]
+    - Consider the ~->~ in a ~Map~ like ~Map(1 -> "one", 2 -> "two",
+      3 -> "three")~
+      + It is NOT syntax!
+
+      + It is a method of the class ~ArrowAssoc~, a class defined inside the
+        standard Scala preamble (~scala.Predef)~.
+
+        The preamble also defines an /implicit conversion/ from ~Any~ to
+        ~ArrowAssoc~ (the the ~->~ method can be used).
+
+      #+BEGIN_SRC scala
+        package scala
+
+        object Predef {
+          class ArrowAssoc[A](x: A) {
+            def -> [B](y: B): Tuple2[A, B] = Tuple2(x, y)
+          }
+
+          implicit def any2ArrowAssoc[A](x: A): ArrowAssoc[A] =
+            new ArrowAssoc(x)
+
+          //...
+        }
+      #+END_SRC
+
+    - There are a lot of ~RichSomething~ classes.
+      That class is likely adding syntax-like methods to type ~Something~.
+
+    - An internal DSL can be defined as a library with the help of /implicit
+      conversion/.
+
+*** DONE Implicit classes =Re-READ=
+    CLOSED: [2017-11-16 Thu 06:19]
+    - /Implicit classes/ were added in Scala _2.10_ to make it easier to write
+      /rich wrapper classes/.
+
+      For any such class, the compiler generates an /implicit conversion/
+
+      *from* the class's constructor parameter *to* the class itself.
+
+      Such a conversion is just what you need if you plan to use the class for
+      the /rich wrappers pattern/.
+
+    - Example:
+      #+BEGIN_SRC scala
+        case class Rectangle(width: Int, height: Int)
+
+        implicit class RectangleMaker(width: Int) {
+          def x(height: Int) = Rectangle(width, height)
+        }
+
+        // Then we can do
+        val myRectangle = 3 x 4
+        // myRectangle: Rectangle = Rectangle(3, 4)
+      #+END_SRC
+
+    - NOT any class can have ~implicit~ put in front of it.
+
+      An /implicit class/
+      + CANNOT be a /case class/
+      + its constructor MUST have exactly _ONE_ parameter.
+      + an /implicit class/ MUST be located within some other /object/, /class/,
+        or /trait/.
+
+      In practice, so long as you use /implicit classes/ as /rich wrappers/ to
+      add a few methods onto an _existing class_, these restrictions should NOT
+      matter.
+
+** DONE 21.5 Implicit parameters - 485
+   CLOSED: [2017-11-16 Thu 18:38]
+   - Example (default parameters):
+     #+BEGIN_SRC scala
+       class PreferredPrompt(val preference: String)
+       class PreferredDrink(val preference: String)
+  
+       object Greeter {
+         def greet(name: String)(implicit prompt: PreferredPrompt,
+                                 drink: PreferredDrink) = {
+           println("Welcome, " + name + ". The system is ready.")
+           print("But while you work, ")
+           println("why not enjoy a cup of " + drink.preference + "?")
+           println(prompt.preference)
+         }
+       }
+  
+       object JoesPrefs {
+         implicit val prompt = new PreferredPrompt("Yes, master> ")
+         implicit val drink = new PreferredDrink("tea")
+       }
+  
+       Greeter.greet("Joe")(prompt, drink)
+       // OR
+       Greeter.greet("Joe")
+  
+       // Welcome, Joe. The system is ready.
+       // But while you work, why not enjoy a cup of tea?
+       // Yes, master>
+     #+END_SRC
+
+
+   - They are perhaps most often used to provide information about a type
+     mentioned _explicitly_ in an earlier parameter list, similar to the /type
+     classes/ of Haskell.
+
+   - Example (type-classes-like):
+     #+BEGIN_SRC scala
+       //// _Replace_
+       // def maxListOrdering[T](elements: List[T])
+       //                    (ordering: Ordering[T]): T =
+       //// _With_
+       def maxListOrdering[T](elements: List[T])
+                          (implicit ordering: Ordering[T]): T =
+         elements match {
+           case List() =>
+             throw new IllegalArgumentException("empty list!")
+           case List(x) => x
+           case x :: rest =>
+             val maxRest = maxListOrdering(rest)(ordering)
+             if (ordering.gt(x, maxRest)) x
+             else maxRest
+         }
+     #+END_SRC
+
+     This pattern is so common that the standard Scala library provides implicit
+     "ordering" methods for many common types. That's way we can mostly use
+     ~maxListImpParm~ without providing the implicit ~ordering~ argument.
+
+*** DONE A style rule for implicit parameters
+    CLOSED: [2017-11-16 Thu 18:38]
+    It is best to use a custom named type in the types of /implicit parameters/.
+    As a counterexample,
+    #+BEGIN_SRC scala
+      def maxListPoorStyle[T](elements: List[T])
+                          (implicit orderer: (T, T) => Boolean): T
+    #+END_SRC
+    - The ~(T, T) => Boolean~ is a farily generic type that, however, without
+      indicating anything at all about what the type is for -- it could be
+      + a equality test
+      + a less than test
+      + a greater-than test
+      + a something else
+
+    - The good style one is of type ~Ordering[T]~, which is informative.
+
+    - Thus *the style rule*:
+      Use at least one role-determining name within the type of an /implicit
+      parameter/.
+
+** DONE 21.6 Context bounds - 491
+   CLOSED: [2017-11-17 Fri 15:07]
+   #+BEGIN_SRC scala
+     def maxList[T](elements: List[T])
+                (implicit ordering: Ordering[T]): T =
+       elements match {
+         case List() =>
+           throw new IllegalArgumentException("empty list!")
+         case List(x) => x
+         case x :: rest =>
+           val maxRest = maxList(rest)
+           if (implicitly[Ordering[T]].gt(x, maxRest)) x
+           else maxRest
+     }
+   #+END_SRC
+   We can get rid of the ~ordering~ inside the body of ~maxList~ by
+   - Use the already in-scope implicit argument(s):
+     ~maxList(rest)(ordering)~ is simplified to ~maxList(rest)~
+
+   - Use the ~implicitly[T]~ function, which is defined in the standard library
+     as ~def implicitly[T](implicit t: T) = t~:
+     ~ordering.gt(x, maxRest)~ is simplified (globally, rather than locally --
+     the length is longer) to ~implicitly[Ordering[T]].gt(x, maxRest)~
+
+     =TODO= =RE-READ= page 492
+
+     After applying the two steps above, there is no ~ordering~ inside the body
+     of ~maxList~, which is good that when changing the name of the /implicit
+     parameter/, there is no need to change the body of this function.
+
+   - This pattern if common, Scala lets you leave out the name of this parameter
+     and shorten the method header by using a /context bound/.
+     #+BEGIN_SRC scala
+       def maxList[T : Ordering](elements: List[T]): T = ...
+     #+END_SRC
+     With /context bound/ we don't have the name of the implicit parameter, the
+     use of ~implicitly[T]~ is then not just "another way", but the only way.
+
+   - Comparison
+     + ~[T <: Ordered[T]]~: ~T~ is an ~Ordered[T]~.
+
+     + ~[T : Ordering]~: some form of ordering associated with ~T~.
+       This is more flexible than the ~[T <: Ordered[T]]~.
+
+** DONE 21.7 When multiple conversions apply - 494
+   CLOSED: [2017-11-17 Fri 15:36]
+   If MULTIPLE implicit conversions exist,
+   - Up through Scala 2.7, this triggers compiler error
+
+   - Scala 2.8+ lossened this rule -- the more specific one is chosen. 
+
+     What does the "specific" here means?
+     + The argument type of the former is a subtype of the latter's.
+
+     + Both conversions are methods, and the enclosing class of the former
+       extends the enclosing class of the latter.
+       For example, ~Predef~ extends ~LowPriorityImplicits~
+
+   - In Scala 2.7, for example, since Java ~String~ doesn't have the ~reverse~
+     method,
+     + in ~val cba = "abc".reverse~, ~cba~ is a collection.
+
+     + ~"abc" == "abc".reverse.reverse~ was ~false~
+
+   - With Scala 2.8, the type of ~cba~ is ~String~.
+
+     The old implicit conversion to a Scala collection (~WrappedString~) is
+     retained. HOWEVER, there is a more specific conversion supplied from
+     ~String~ to a new type called ~StringOps~.
+       The conversion to ~StringOps~ is defined directly in ~Predef~, whereas the
+     conversion to a Scala collection is defined in a new class,
+     ~LowPriorityImplicits~, which is extended by ~Predef~. Apply the second
+     rule, we know the /implicit conversion/ in ~Predef~ is preferred.
+
+** DONE 21.8 Debugging implicits - 496
+   CLOSED: [2017-11-17 Fri 23:22]
+   - Some debug tips:
+     1. When you see some error you don't quite get it, try to convert the
+        /implicit conversion/ explicitly. Then the error message may become
+        clear.
+        #+BEGIN_SRC scala
+          // scala>
+          val chars: List[Char] = "xyz"
+          // <console>:24: error: type mismatch;
+          //  found : String("xyz")
+          //  required: List[Char]
+          //        val chars: List[Char] = "xyz"
+          //                                ^
+
+          scala> val chars: List[Char] = wrapString("xyz")
+          // <console>:24: error: type mismatch;
+          //  found : scala.collection.immutable.WrappedString
+          //  required: List[Char]
+          //        val chars: List[Char] = wrapString("xyz")
+          //                                          ^
+        #+END_SRC
+
+     2. After applying 1, if there is not any error, you need to consider the
+        other reasons (such as the Scope Rule) that prevent the /implicit
+        conversion/ from being applied.
+
+     3. Try the ~-Xprint:typer~ option of ~scalac~, and the compiler will show
+        you what your code looks like after all implicit conversions have been
+        added by the type checker.
+        #+BEGIN_SRC scala
+          object Mocha extends App {
+            class PreferredDrink(val preference: String)
+            implicit val pref = new PreferredDrink("mocha")
+            def enjoy(name: String)(implicit drink: PreferredDrink) = {
+              print("Welcome, " + name)
+              print(". Enjoy a ")
+              print(drink.preference)
+              println("!")
+            }
+            enjoy("reader")
+          }
+
+          // $ scalac -Xprint:typer mocha.scala
+          // [[syntax trees at end of typer]]// Scala source: mocha.scala
+          // package <empty> {
+          //   final object Mocha extends java.lang.Object with Application
+          //       with ScalaObject {
+          //     // ...
+          //     private[this] val pref: Mocha.PreferredDrink =
+          //       new Mocha.this.PreferredDrink("mocha");
+          //     implicit <stable> <accessor>
+          //     def pref: Mocha.PreferredDrink = Mocha.this.pref;
+          //     def enjoy(name: String)
+          //              (implicit drink: Mocha.PreferredDrink): Unit = {
+          //       scala.this.Predef.print("Welcome, ".+(name));
+          //       scala.this.Predef.print(". Enjoy a ");
+          //       scala.this.Predef.print(drink.preference);
+          //       scala.this.Predef.println("!")
+          //     };
+          //     Mocha.this.enjoy("reader")(Mocha.this.pref)
+          //   }
+          // }
+        #+END_SRC
+
+** DONE 21.9 Conclusion - 497
+   CLOSED: [2017-11-17 Fri 23:54]
+   - /Implicit/ are a powerful, _code-condensing_ feature of Scala.
+
+   - Warning:
+     /implicits/ can make code confusing if they are used too frequently.
+
+   - Before adding a new implicit conversion, first try other means, such as
+     + inheritance
+     + mixin composition
+     + method overloading
+
 * TODO 22 Implementing Lists - 499
+  =DONE= without notes
 ** TODO 22.1 The ~List~ class in principle - 499
 *** The ~Nil~ object
 *** The ~::~ class
@@ -5408,6 +6315,7 @@
 ** TODO 22.3 The ~List~ class in practice - 507
 ** TODO 22.4 Functional on the outside - 509
 ** TODO 22.5 Conclusion - 510
+
 * TODO 23 For Expressions Revisited - 512 =ALMOST DONE=
   - More generally,
     + ALL ~for~ expressions that ~yield~ a result are _translated_ by the
@@ -5574,24 +6482,448 @@
    CLOSED: [2017-10-21 Sat 22:29]
 
 * TODO 24 Collections in Depth - 528
-  - Easy to use:
-  - Concise:
-  - Safe:
-  - Fast:
-  - Universal:
+  - Easy to use
+  - Concise
+  - Safe
+  - Fast
+  - Universal
 
-** TODO 24.1 Mutable and immutable collections - 529
-** TODO 24.2 Collections consistency - 531
-** TODO 24.3 Trait ~Traversable~ - 533
+** DONE 24.1 Mutable and immutable collections - 529
+   CLOSED: [2017-11-21 Tue 05:51]
+   - All /collection/ classes are found in the package ~scala.collection~ or one
+     of its subpackages: ~mutable~, ~immutable~, and ~generic~.
+
+   - Most /collection/ classes needed by client code exist in _THREE_ variants,
+     each of which has DIFFERENT characteristics with respect to /mutability/.
+       The three variants are located in packages
+     + ~scala.collection~
+     + ~scala.collection.immutable~
+     + ~scala.collection.mutable~
+
+   - A /collection/ in package ~scala.collection~ can be _either /mutable/ or
+     /immutable/_.
+       For instance, ~scala.collection.IndexedSeq[T]~ is a /supertrait/ of both
+     ~scala.collection.immutable.IndexedSeq[T]~ and its mutable sibling
+     ~scala.collection.mutable.IndexedSeq[T]~.
+
+       Generally, the /root collections/ in package ~scala.collection~ define the
+     _SAME interface as the /immutable/ collections_. And typically, the /mutable
+     collections/ in package ~scala.collection.mutable~ add some side-effecting
+     modification operations to this immutable interface.
+
+   - =TODO= =???= 530 
+     The _DIFFERENCE_ between /root collections/ and /immutable collections/
+     + clients of an /immutable collection/ have a guarantee that nobody can
+       mutate the collection,
+
+     + whereas clients of a /root collection/ only know that they can't change
+       the collection themselves.
+
+   - =TODO= ~collection.generic~
+     This package contains _building blocks_ for _IMPLEMENTING_ collections.
+     Typically, collection classes defer the implementations of some of their
+     operations to classes in ~generic~.
+
+** DONE 24.2 Collections consistency - 531
+   CLOSED: [2017-11-21 Tue 05:55]
+   - All collections support the API provided by ~Traversable~.
+
+   - Figure 24.1  Colleciton hierarchy
+     #+BEGIN_SRC text
+       Traversable
+           Iterable
+               Seq
+                   IndexedSeq
+                       Vector
+                       ResizableArray
+                       GenericArray
+                   LinearSeq
+                       MutableList
+                       List
+                       Stream
+                   Buffer
+                       ListBuffer
+                       ArrayBuffer
+               Set
+                   SortedSet
+                       TreeSet
+                   HashSet (mutable)
+                   LinkedHashSet
+                   HashSet (immutable)
+                   BitSet
+                   EmptySet, Set1, Set2, Set3, Set4
+               Map
+                   SortedMap
+                       TreeMap
+                   HashMap (mutable)
+                   LinkedHashMap (mutable)
+                   HashMap (immutable)
+                   EmptyMap, Map1, Map2, Map3, Map4
+     #+END_SRC
+
+   - Most of the classes above exist in _THREE_ variants:
+     + root
+     + mutable
+     + immutable
+
+     The ONLY EXCEPTION is the ~Buffer~ trait, which ONLY exists as a /mutable
+     collection/.
+
+** DONE 24.3 Trait ~Traversable~ - 533
+   CLOSED: [2017-12-03 Sun 00:22]
+   - Its ONLY abstract operation is ~foreach~:
+     ~def foreach[U](f: Elem => U)~
+
+   - ~Traversable~ also defines many concrete methods, which are all listed in
+     _Table 24.1 on page 535_. These methods fall into the following categories:
+     + Addtion ~++~
+       * append two /traversables/ together
+       * append all elements of an /iterator/ to a /traversable/.
+
+     + Map operations ~map~, ~flatMap~, and ~collect~
+
+     + Conversions ~toIndexedSeq~, ~toIterable~, ~toStream~, ~toArray~, ~toList~,
+       ~toSeq~, ~toSet~, and ~toMap~.
+
+         general traversables --> specific traversables
+
+         If the receiver of these method is already the target type, nothing will
+       be transformed -- just return the receiver value.
+
+     + Copying operations ~copyToBuffer~ and ~copyToArray~
+
+     + Size operations ~isEmpty~, ~nonEmpty~, ~size~, and ~hasDefiniteSize~
+
+       /Collections/ that are traversable can be /finite/ or /infinite/.
+
+       DO NOT use ~traversable.size == 0~ to check if a /traversable/ is empty or
+       not! Two reasons:
+       * Complexity:
+         ~size~ is ~O(n)~
+         ~isEmpty~, ~nonEmpty~, and ~hasDefiniteSize~ are ~O(1)~'s
+
+       * Get a size of an /infinite traversable/ is a disaster. 
+
+       ~hashDefiniteSize~
+       * returns true, the collection is certainly _finite_.
+       * returns false, the collection might be _infinite_, in which case ~size~
+         will emit an error or not return.
+
+     + Element retrieval operations ~head~, ~last~, ~headOption~, ~lastOption~,
+       and ~find~.
+         A _pitfall_: NOT all /traversables/ have definite order. DO NOT apply
+       these methods to NO order /traversables/.
+
+     + Subcollection retrieval operations ~takeWhile~, ~tail~, ~init~, ~slice~,
+       ~take~, ~drop~, ~filter~, ~dropWhile~, ~filterNot~, and ~withFilter~.
+
+       They return some subcollection identified by
+       * an index range
+         or
+       * a predicate
+
+     + Subdivision operations ~splitAt~, ~span~, ~partition~, and ~groupBy~
+       =TODO=
+
+     + Element tests ~exists~, ~forall~ and ~count~
+       Test collection elements with a given predicate.
+
+     + Folds ~foldLeft~, ~foldRight~, ~/:~, ~:\~, ~reduceLeft~, ~reduceRight~
+       They apply a binary operation to successive elements.
+       =TODO=
+
+     + Specific folds ~sum~, ~product~, ~min~, and ~max~
+       They works to specific types (numeric or comparable).
+
+     + String operations ~mkString~, ~addString~, and ~stringPrefix~
+       They provide alternative ways of converting a collection to a string.
+
+       #+BEGIN_SRC scala
+         List(1, 2, 3).
+           addString(new StringBuilder, "List(", ", ", ")").
+           toString
+
+         // "List(1, 2, 3)"
+
+         List(1, 2, 3).stringPrefix
+         // "List"
+       #+END_SRC
+
+     + View operations consisting of two overloaded variants of the ~view~ method
+       A view is a collection that's evaluated lazily.
+       =TODO= more about view in Section 24.14
+
+   - Table 24.1  Operations in trait ~Traversable~
+
 ** TODO 24.4 Trait ~Iterable~ - 538
-*** TODO Why have both ~Traversable~ and ~Iterable~?
-*** TODO Subcategories of ~Iterable~
+   - All methods in ~Iterable~ trait are defined in terms of an abstract method,
+     ~iterator~, which yields the collection's elements one by one.
 
-** TODO 24.5 The sequence traits ~Seq~, ~IndexedSeq~, and ~LinearSeq~ - 542
+   - The abstract ~foreach~ method inherited from ~Traversable~ is implemented in
+     ~Iterable~ in terms of ~iterator~.
+     #+BEGIN_SRC scala
+       def foreach[U](f: Elem => U): Unit = {
+         val it = iterator
+         while (it.hasNext) f(it.next())
+       }
+     #+END_SRC
+
+   - Quite a few subclasses of ~Iterable~ override this standard implementation
+     of ~foreach~ in ~Iterable~, because they can provide a _more efficient_
+     implementation.
+
+       Remember that ~foreach~ is the basis of the implementation of _all_
+     operations in ~Traversable~, so _its performance matters_.
+
+   - _TWO_ more methods exist in ~Iterable~ that return /iterators/:
+     + ~grouped~
+       For example,
+       ~List(1, 2, 3, 4, 5) grouped 3~ generates an /interator/ includes
+       ~List(1, 2, 3)~ and ~List(4, 5)~ in order.
+
+     + ~sliding~
+       For example,
+       ~List(1, 2, 3, 4, 5) sliding 3~ generates an /interator/ includes
+       ~List(1, 2, 3)~, ~List(2, 3, 4)~, and ~List(3, 4, 5)~ in order.
+
+   - Trait ~Iterable~ also adds some other methods to ~Traversable~ that can be
+     implemented efficiently ONLY if an ~iterator~ is available.
+       They are summarized in Table 24.2, page 540
+
+*** TODO Why have both ~Traversable~ and ~Iterable~?  =RE-READ=
+    One reason for having ~Traversable~ is that sometimes it is _easier or more
+    efficient_ to provide an implementation of ~foreach~ than to provide an
+    implementation of ~iterator~.
+
+    For example: =TODO=
+    + Make a binary tree traversable,
+      With ~Traversable~, the cost of visiting all leaves takes O(N) time --
+      N + N - 1 steps.
+      #+BEGIN_SRC scala
+        sealed abstract class Tree extends Traversable[Int] {
+          def foreach[U](f: Int => U) = this match {
+            case Node(elem) => f(elem)
+            case Branch(l, r) => l foreach f; r foreach f
+          }
+        }
+
+        case class Branch(left: Tree, right: Tree) extends Tree
+        case class Node(elem: Int) extends Tree
+      #+END_SRC
+
+    + Make a binary tree iterable,
+      With ~Iterable~, the cost of visiting all leaves takes O(N*logN) --
+      logN for indirection.
+      =TODO=
+      #+BEGIN_SRC scala
+        sealed abstract class Tree extends Iterable[Int] {
+          def iterator: Iterator[Int] = this match {
+            case Node(elem) => Iterator.single(elem)
+            case Branch(l, r) => l.iterator ++ r.iterator
+          }
+        }
+
+        case class Branch(left: Tree, right: Tree) extends Tree
+        case class Node(elem: Int) extends Tree
+      #+END_SRC
+
+*** DONE Subcategories of ~Iterable~
+    CLOSED: [2017-12-03 Sun 02:07]
+    In the inheritance hierarchy below ~Iterable~ you find _THREE_ traits:
+    ~Seq~, ~Set~, ~Map~
+
+    All of these three implement the ~PartialFunction~ trait with its ~apply~ and
+    ~isDefineAt~ methods. However, in _DIFFERENT_ way.
+
+    - The ~apply~ of ~Seq~ news and returns a ~Seq~
+
+    - The ~apply~ of ~Set~ check if the element is in this set.
+
+    - The ~apply~ of ~Map~ is a selection.
+
+** DONE 24.5 The sequence traits ~Seq~, ~IndexedSeq~, and ~LinearSeq~ - 542
+   CLOSED: [2017-12-07 Thu 12:44]
+   - A sequence (~Seq~) is
+     + a kind of iterable that has a ~length~
+     + its elements have fixed index positions, starting from 0.
+
+   - Methods
+     + *Indexing and length operations* ~apply~, ~isDefinedAt~, ~length~,
+       ~indices~, and ~lengthCompare~
+       * ~apply~ (for ~Seq~) means /indexing/ -- hence ~Seq[T]~ extends
+         ~PartialFunction[Int, T]~.
+
+       * ~length~ is an alias of ~size~ in more general collections.
+
+       * ~lengthCompare~ time complexity is _O(min(seq1.length, seq2.length))_,
+         rather than _O(seq1.length + seq2.length)_ when you try to get the exact
+         values of two sequences to compare, which is a _BAD idea_.
+
+     + *Index search operations* ~indexOf~, ~lastIndexOf~, ~indexOfSlice~,
+       ~lastIndexOfSlice~, ~indexWhere~, ~lastIndexWhere~, ~segmentLength~, and
+       ~prefixLength~
+       They return a index.
+
+     + *Addition operations* ~+:~, ~:+~, and ~padTo~
+
+     + *Update operations* ~updated~ and ~patch~
+       =TODO= Read API ~patch~
+
+     + *Sorting operations* ~sorted~, ~sortWith~, and ~sortBy~
+
+     + *Reversal operations* ~reverse~, ~reverseIterator~, and ~reverseMap~
+       =IMPORTANT= Never use a pattern like ~seq.map(...).reverse~
+
+     + *Comparison operations* ~startsWith~, ~endsWith~, ~contains~,
+       ~corresponds~, and ~containsSlice~
+       =TODO= Read API
+
+     + *Multiset operations* ~intersect~, ~diff~, ~union~, and ~distinct~
+
+     + mutable sequences have a side-effecting update method ~update~.
+       =From Jian= Why NOT use name ~updateInPlace~, which is much clearer.
+
+   - Table 24.3 · Operations in trait ~Seq~
+     =IMPORTANT=
+
+   - Two subtraits of ~Seq~ (NO additional operations, but different performance
+     characteristics):
+     + ~LinearSeq~: for example ~List~
+       It is good at ~head~ and ~tail~
+
+     + ~IndexedSeq~: for example ~Array~, ~ArrayBuffer~ (actually this is a
+       ~Buffer~, not a ~IndexedSeq~)
+
+       It is good at ~apply~, ~length~, and (if mutable) ~update~ operations.
+
+     + ~Vector~ is a ~IndexedSeq~, but it has balanced performance -- CONSTANT
+       time for both linear access and indexing.
+         Because of this, vectors are a good foundation for mixed access
+       patterns.
+     
 *** Buffers
+    - ~Buffer~ is a MUTABLE sequence subtrait.
+
+    - ~Buffer~'s allow
+      + NOT only _updates_ of existing elements
+      + BUT ALSO element _insertions_, element _removals_, and _efficient
+        additions_ of new elements _at the end_ of the buffer.
+
+    - Table 24.4 · Operations in trait ~Buffer~
+      =From Jian= I modified some description of this Table to clarify something.
 
 ** TODO 24.6 Sets - 547
-** TODO 24.7 Maps - 552
+   - ~Set~'s :: ~Iterable~ that contain NO duplicate elements.
+
+   - Table 24.5 · Operations in trait ~Set~
+
+   - Table 24.6 · Operations in trait ~mutable.Set~
+
+   - Methods
+     + *Tests* ~contains~, ~apply~, and ~subsetOf~
+
+     + *Additions* ~+~ and ~++~
+
+     + *Removals* ~-~ and ~--~
+
+     + *Set operations* /union/, /intersection/, and /difference/.
+       These operations have two forms:
+       * alphabetic: ~intersect~, ~union~, and ~diff~
+       * symbolic: ~&~, ~|~, ~&~~
+
+     + The ~++~ that ~Set~ inherits from ~Traversable~ can be seen as yet
+       _another alias_ of ~union~ or ~|~, _EXCEPT_ that
+       * ~++~ takes a ~Traversable~ argument
+       * whereas ~union~ and ~|~ take /sets/.
+
+   - =TODO=
+     =TODO=
+     =TODO=
+
+   - For small sets (size <= 4), /immutable sets/ are 
+     + more compact
+     + more effcient
+     than /mutable sets/.
+
+** DONE 24.7 Maps - 552
+   CLOSED: [2017-12-17 Sun 03:11]
+   - ~Map~'s :: ~Iterable~'s of pairs of keys and values.
+
+   - /Maps/ are also named /mappings/ or /associations/.
+
+   - In Scala, /maps/ can be written in two forms:
+     + ~Map("x" -> 24, "y" -> 25, "z" -> 26)~
+
+     + ~Map(("x", 24), ("y", 25), ("z", 26))~
+
+     The first one will be implicitly converted (by a function imported from
+     ~Predef~) to the second one.
+
+   - A TYPO in this page (I've already submitted this type to the official
+     errata):
+     ~Predef~ class _should be_ ~Predef~ object.
+
+   - Methods (Table 24.7):
+     + *Lookups* ~apply~, ~get~, ~getOrElse~, ~contains~, and ~isDefinedAt~
+       * ~apply~ and ~isiDefineAt~ come from the ~PartialFunction~ /trait/.
+
+       * One ~apply(key: K): V~ from ~PartialFunction~ and
+         one ~apply[A, B](elems: (A, B)*): Map[A, B]~ from the ~Map~ /object/.
+
+       * ~get~ returns a ~Option[V]~ type value, while
+         the ~apply~ from ~PartialFunction~ returns a ~V~ type value (if the
+         given key doesn't exist, throw an exception).
+
+     + *Additions and updates* ~+~, ~++~, and ~updated~
+
+     + *Removals* ~-~ and ~--~
+
+     + *Subcollection producers* ~keys~, ~keySet~, ~keysIterator~,
+       ~valuesIterator~, and ~values~,
+
+     + *Transformations* ~filterKeys~ and ~mapValues~
+
+   - Table 24.7 · Operations in trait ~Map~
+
+   - Table 24.8 · Operations in trait ~mutable.Map~
+
+   - Like all other /immutable/ and /mutable/ collections, /mutable maps/ support
+     no side-effect (or called not destructive) operations like ~+~, ~-~, but
+     they are rarely used -- if frequently use them, why not just use the
+     /immutable maps/.
+
+   - The ~getOrElseUpdate~ is useful for accessing maps that act as /caches/.
+     #+BEGIN_SRC scala
+       def f(x: String) = {
+         println("taking my time.");
+         Thread.sleep(100)
+         x.reverse
+       }
+
+       val cache = collection.mutable.Map.empty[String, String]
+       def cacheF(s: String) = cache.getOrElseUpdate(s, f(s))
+
+       cacheF("abc")
+       // take my time.
+       // res16: String = cba
+
+       cacheF("abc")
+       // res17: String = cba
+     #+END_SRC
+     It is obvious that the second parameter of ~getOrElseUpdate~ is defined lazy.
+
+     This is much simpler than the equivalent code with out ~getOrElseUpdate~:
+
+     #+BEGIN_SRC scala
+       def cacheF(arg: String) = cache get arg match {
+         case Some(result) => result
+         case None =>
+           val result = f(arg)
+           cache(arg) = result
+           result
+       }
+     #+END_SRC
+
 ** TODO 24.8 Concrete immutable collection classes - 556
 *** TODO List
 *** TODO Streams
@@ -5635,24 +6967,418 @@
 ** TODO 25.1 Builders - 597 
 ** TODO 25.2 Factoring out common operations - 599
 ** TODO 25.3 Integrating new collections - 604
-*** Integrating sequences
-*** Integrating new sets and maps
-*** Summary
+*** TODO Integrating sequences
+*** TODO Integrating new sets and maps
+*** TODO Summary
 
 ** TODO 25.4 Conclusion - 620
-* TODO 26 Extractors - 621
-** TODO 26.1 An example: extracting email addresses - 621
-** TODO 26.2 Extractors - 622
-** TODO 26.3 Patterns with zero or one variables - 625
-** TODO 26.4 Variable argument extractors - 627
-** TODO 26.5 Extractors and sequence patterns - 630
-** TODO 26.6 Extractors versus case classes - 631
-** TODO 26.7 Regular expressions - 632
-*** Forming regular expressions
-*** Searching for regular expressions
-*** Extracting with regular expressions
+* DONE 26 Extractors - 621
+  CLOSED: [2017-12-02 Sat 23:56]
+  This chapter explains what /extractors/ are and how you can use them to define
+  patterns that are decoupled from an object's representation.
 
-** TODO 26.8 Conclusion - 636
+** DONE 26.1 An example: extracting email addresses - 621
+   CLOSED: [2017-12-02 Sat 01:34]
+   - =FROM JIAN= =TODO=
+     All the examples before are oversimplified, modify them to runnable real
+     world code later!!!
+
+   - Compare
+     + Access function:
+       #+BEGIN_SRC scala
+         def isEMail(s: String): Boolean = ???
+         def domain(s: String): String = ???
+         def user(s: String): String = ???
+
+         if (isEMail(s)) println(user(s) + " AT " + domain(s))
+         else            println("not an email address")
+       #+END_SRC
+
+     + Pattern matching:
+       #+BEGIN_SRC scala
+         toEmail(s) match {
+           case EMail(user, domain) => println(user + " AT " + domain)
+           case _                   => println("not an email address")
+         }
+       #+END_SRC
+
+   - More complicated example - find two successive email addresses with the same
+     user part:
+     + Access function:
+       #+BEGIN_SRC scala
+         def isEMail(s: String): Boolean = ???
+         def domain(s: String): String = ???
+         def user(s: String): String = ???
+
+         val sep: String = ???
+
+         val result: Option[List[EMail]] = ss.
+           split(sep).
+           sliding(2).
+           find { case List(e1, e2) =>
+             isEMail(e1) && isEMail(e2) && user(e1) == user(e2)
+           }
+
+         if (result.isEmpty)
+           println("not successive email addresses with the same user part")
+         else
+           println(f"Two successive email addresses with the same user part ${user(reslt.get.head)}")
+       #+END_SRC
+
+     + Pattern matching:
+       #+BEGIN_SRC scala
+         @annotation.tailrec
+         def findSuccessiveSameUser(ss: List[EMail]): Unit = {
+           ss match {
+             case Nil =>
+               println("not successive email addresses with the same user part")
+             case EMail(u1, d1) :: EMail(u2, d2) :: _ if u1 == u2 =>
+               println(f"Two successive email addresses with the same user part ${u1}")
+             case _ :: tl =>
+               findSuccessiveSameUser(tl)
+           }
+         }
+
+         findSuccessiveSameUser(ss.split(sep).sliding(2).map(toEmail))
+       #+END_SRC
+
+   - Scala's /extractors/  let you define new /patterns/ for _preexisting_ types,
+     where the /pattern/ need NOT follow the internal representation of the type.
+
+** DONE 26.2 Extractors - 622
+   CLOSED: [2017-12-02 Sat 05:57]
+   - extractor :: an object that has a method called ~unapply~ as one of its
+                  members.
+
+   - xxx
+     #+BEGIN_SRC scala
+       object EMail {
+         // The injection method (optional)
+         def apply(user: String, domain: String) = user + "@" + domain
+
+         def unapply(str: String): Option[(String, String)] =
+           (str split "@") match {
+             case List(u, d) => Some(u, d)
+             case _          => None
+           }
+       }
+     #+END_SRC
+
+   - ~selectorString match { case EMail(user, domain) => ... }~
+     would lead to the call:
+     ~EMail.unapply(selectorString)~. This call will lead to two kinds of return
+     value:
+     + ~Some(user, domain)~
+       If this is the case, then bind and run the expression after ~=>~
+
+     + ~None~
+       If this is the case, then try next pattern or fail (when NO pattern left)
+       with a ~MatchError~ exception.
+
+   - If the being matched value's annotated doesn't conform the parameter type
+     that ~unapply~ require, check if this value can be the required type:
+     + If it is, just cast and proceed.
+     + If not, the pattern fails immediately.
+       
+   - injection :: ~apply~
+
+   - extraction :: ~unapply~
+
+   - Design principle:
+     Dual methods ~apply~ and ~unapply~, it they both exist in a class, should
+     satisfy the requirements:
+     #+BEGIN_SRC scala
+       // #1 - a direction
+       Email.unapply(EMail.apply(user, domain))
+       // SHOULD return `Some(user, domain)`
+
+
+       // #2 - another redirection
+       EMail.unapply(obj) match {
+         case Some(u,d) => EMail.apply(u, d)
+       }
+       // The generated `EMail` SHOULD be equal to the input `obj`
+     #+END_SRC
+
+** DONE 26.3 Patterns with zero or one variables - 625
+   CLOSED: [2017-12-02 Sat 21:44]
+   - To return just one pattern element: 
+     Since there is NO one-tuple in Scala, the ~unapply~ method simply wraps the
+     element itself directly into a ~Some~. 
+       This time ~Some(v)~ is NOT ~Some(Tuple1(v))~, which is a special case for
+     ~unapply~, though write it in this way is so much natural.
+
+     Example:
+     #+BEGIN_SRC scala
+       object Twice {
+         def apply(s: String): String = s + s
+
+         def unapply(s: String): Option[String] = {
+           val length = s.length / 2
+           val half = s.substring(0, length)
+           if (half == s.substring(length)) Some(half) else None
+         }
+       }
+     #+END_SRC
+
+   - It's also possible that an extractor pattern does _NOT bind any_ variables.
+     In this case the corresponding ~unapply~ method returns a boolean.
+
+     Example:
+     #+BEGIN_SRC scala
+       object UpperCase {
+         def unapply(s: String): Boolean = s.toUpperCase == s
+       }
+     #+END_SRC
+     In this case, only ~unapply~, NO ~apply~:
+     it would make NO sense to define an ~apply~, as there's _nothing to
+     construct_.
+
+   - Apply all the previously defined extractors together in its pattern matching
+     code:
+     #+BEGIN_SRC scala
+       def userTwiceUpper(s: String) = s match {
+         case EMail(Twice(x @ UpperCase()), domain) =>
+           "match: " + x + " in domain " + domain
+         case _ =>
+           "no match"
+       }
+     #+END_SRC
+
+     The pattern here is a little complicated:
+     1. You MUSTN'T omit the empty parameter list in ~UpperCase()~, otherwise the
+        match would test for equality with object UpperCase!
+
+     2. You can consider the code like this:
+     #+BEGIN_SRC scala
+       val unapplyEMail = Email.unapply(s)
+
+       if (unapplyEMail.nonEmpty) {
+         Some(user, domain) = unapplyEMail
+         val unapplyTwice = Twice.unapply(user)
+
+         if (unapplyTwice.nonEmpty && Uppercase.unapply(unapplyTwice.get)) {
+             "match: " + x + " in domain " + domain
+         } else  // the catch all pattern `_`
+             "no match"
+       } else  // the catch all pattern `_`
+           "no match"
+     #+END_SRC
+
+** DONE 26.4 Variable argument extractors - 627
+   CLOSED: [2017-12-02 Sat 22:20]
+   - Use ~unapplySeq~ can do something like
+     #+BEGIN_SRC scala
+       dom match {
+         case Domain("org", "acm") => println("acm.org")
+         case Domain("com", "sun", "java") => println("java.sun.com")
+         case Domain("net", _*) => println("a .net domain")
+       }
+     #+END_SRC
+
+   - Implementation of ~Domain~:
+     #+BEGIN_SRC scala
+       object Domain {
+         // The injection method (optional)
+         def apply(parts: String*): String =
+           parts.reverse.mkString(".")
+
+         // The extraction method (mandatory)
+         def unapplySeq(whole: String): Option[Seq[String]] =
+           Some(whole.split("\\.").reverse)
+       }
+     #+END_SRC
+
+   - Example:
+     #+BEGIN_SRC scala
+       def isTomInDotCom(s: String): Boolean = s match {
+         case EMail("tom", Domain("com", _*)) => true
+         case _ => false
+       }
+
+       isTomInDotCom("tom@sun.com")    // true
+       isTomInDotCom("peter@sun.com")  // false
+       isTomInDotCom("tom@acm.org")    // false
+     #+END_SRC
+
+   - It's also possible to _return some fixed elements_ from an ~unapplySeq~
+     _together with the variable part_.
+
+     This is expressed by returning _all elements in a tuple_, where the variable
+     part comes last, as usual.
+
+     Example:
+     #+BEGIN_SRC scala
+       object ExpandedEMail {
+         def unapplySeq(email: String)
+             : Option[(String, Seq[String])] = {
+           val parts = email split "@"
+
+           if (parts.length == 2)
+             Some(parts(0), parts(1).split("\\.").reverse)
+           else
+             None
+         }
+       }
+
+       val s = "tom@support.epfl.ch"
+
+       val ExpandedEMail(name, topdom, subdoms @ _*) = s
+       // name: String = tom
+       // topdom: String = ch
+       // subdoms: Seq[String] = WrappedArray(epfl, support)
+     #+END_SRC
+
+** DONE 26.5 Extractors and sequence patterns - 630
+   CLOSED: [2017-12-02 Sat 22:24]
+   In the standard library
+   #+BEGIN_SRC scala
+     package scala
+
+     object List {
+       def apply[T](elems: T*) = elems.toList
+
+       def unapplySeq[T](x: List[T]): Option[Seq[T]] = Some(x)
+     }
+   #+END_SRC
+   Similar to ~Array~
+
+** DONE 26.6 Extractors versus case classes - 631
+   CLOSED: [2017-12-02 Sat 23:56]
+   - Even though they are very useful, /case classes/ have one _SHORTCOMING_:
+     they _expose the concrete representation of data_.
+
+       This means that the name of the class in a constructor pattern
+     corresponds to the concrete representation type of the selector object.
+
+   - /Extractors/ _BREAK_
+     this link between /data representations/ and /patterns/.
+
+   - /representation independence/ allows you to change an implementation type
+     used in a set of components without affecting clients of these components.
+
+   - Since /case classes/ have no /representation independence/, if your
+     component had _defined and exported_ a set of /case classes/, you'd be stuck
+     with them BECAUSE
+     client code could already contain pattern matches against these case classes.
+
+   - /Representation independence/ is an important advantage of /extractors/
+     over /case classes/.
+
+   - /Case classes/ have some advantages:
+     + More concise
+
+     + Usually more efficient pattern matches than extractors.
+         The Scala compiler can optimize patterns over /case classes/ much better
+       than patterns over /extractors/ -- the mechanisms of /case classes/ are
+       fixed, whereas an ~unapply~ or ~unapplySeq~ method in an /extractor/
+       could do almost anything.
+
+     + /Exhaustiveness check/ for /case classes/ inherit from /sealed classes/.
+
+   - Summary: It depends
+     + closed application: you usually prefer /case classes/
+
+     + Expose a type to unknown clients: /extractors/ can help you maintain
+       /representation independence/.
+
+   - If it is NOT clear when you start a new project, you can always start from
+     /case classes/, and then, when you think you need /representation
+     independence/, change to /extractors/.
+
+     You can do this because the syntax for /pattern matching/ is always the
+     same, NO MATTER there are /extractors/ or /case classes/.
+
+** DONE 26.7 Regular expressions - 632
+   CLOSED: [2017-12-02 Sat 23:26]
+   - One particularly useful application area of /extractors/ are /regular
+     expressions/.
+
+     Like Java, Scala provides /regular expressions/ through a library, but
+     /extractors/ make it much nicer to interact with them.
+     =TODO= =???=
+
+*** DONE Forming regular expressions
+    CLOSED: [2017-12-02 Sat 23:13]
+    - Review some basic pattern of Java regex (~java.util.regex.Pattern~)
+      page 632 - 633
+
+    - ~scala.util.matching.Regex~
+
+    - Example:
+      #+BEGIN_SRC scala
+        // The pattern is `(-)?(\d+)(\.\d*)?`
+        val Decimal = new Regex("(-)?(\\d+)(\\.\\d*)?")
+
+        // Use raw string
+        val Decimal = new Regex("""(-)?(\d+)(\.\d*)?""")
+
+        // Use raw string and method `r`
+        val Decimal = """(-)?(\d+)(\.\d*)?""".r
+      #+END_SRC
+
+    - The definition of ~r~ is
+      #+BEGIN_SRC scala
+        package scala.runtime
+
+        import scala.util.matching.Regex
+
+        class StringOps(self: String) ... {
+          // ...
+          def r = new Regex(self)
+        }
+      #+END_SRC
+
+*** DONE Searching for regular expressions
+    CLOSED: [2017-12-02 Sat 23:13]
+    - ~regex findFirstIn str~
+      Return an ~Option~ value
+
+    - ~regex findAllIn str~
+      Return an ~Iterator~ value
+
+    - ~regex findPrefixOf str~
+      Return an ~Option~ value
+
+    - Example:
+      #+BEGIN_SRC scala
+        val input = "for -1.0 to 99 by 3"
+
+        for (s <- Decimal findAllIn input)
+          println(s)
+
+        Decimal findFirstIn input
+        // Some("-1.0")
+
+        Decimal findPrefixOf input
+        // None
+      #+END_SRC
+
+*** DONE Extracting with regular expressions
+    CLOSED: [2017-12-02 Sat 23:26]
+    #+BEGIN_SRC scala
+      val Decimal(sign, integerPart, decimalPart) = "-1.23"
+      // sign: String = -
+      // integerPart: String = 1
+      // decimalPart: String = .23
+
+
+      val Decimal(sign, integerPart, decimalPart) = "1.0"
+      // sign: String = null
+      // integerPart: String = 1
+      // decimalPart: String = .0
+
+
+      for (Decimal(s, i, d) <- Decimal findAllIn input)
+        println("sign: " + s + ", integer: " +
+            i + ", decimal: " + d)
+      // sign: -, integer: 1, decimal: .0
+      // sign: null, integer: 99, decimal: null
+      // sign: null, integer: 3, decimal: null
+    #+END_SRC
+
+** DONE 26.8 Conclusion - 636 =Re-Read=
+   CLOSED: [2017-12-02 Sat 23:27]
 * DONE 27 Annotations - 637 *Learn MORE*
   CLOSED: [2017-10-21 Sat 19:01]
   - annotations :: structured information added to program source code.
@@ -5843,17 +7569,253 @@
 ** TODO 29.6 Tracking module instances - 671
 ** TODO 29.7 Conclusion - 673
 * TODO 30 Object Equality - 674
-** TODO 30.1 Equality in Scala - 674
-** TODO 30.2 Writing an equality method - 675
-*** Pitfall #1: Defining ~equals~ with the wrong signature
-*** Pitfall #2: Changing ~equals~ without also changing ~hashCode~
-*** Pitfall #3: Defining ~equals~ in terms of mutable fields
-*** Pitfall #4: Failing to define ~equals~ as an equivalence relation
+  Define object equality is more tricky than it looks at first glance.
 
-** TODO 30.3 Defining equality for parameterized types - 688
+** DONE 30.1 Equality in Scala - 674
+   CLOSED: [2017-11-25 Sat 00:39]
+   - As mentioned in Section 11.2, the definition of equality is _DIFFERENT_ in
+     Scala and Java.
+
+   - Java has _TWO_ equality comparisons:
+     + ~==~ operator :: natural equality check for /value types/ and /object
+                        identity for reference types/
+
+     + ~equals~ method :: (user-defined) canonical equality for reference types.
+
+   - Java's _TWO_ equality comparisons are problematic -- the more natural
+     symbol, ~==~, does NOT always correspond to the natural notion of equality.
+
+   - Scala also has an equality method signifying /object identity/, but it is
+     not used much -- ~eq~.
+
+   - In Scala ~==~ is value comparison, just like in Java.
+
+     For reference types, ~==~ is the same as ~equals~ in Scala.
+     You can redefine the behavior of ~==~ of new types by overriding the
+     ~equals~ method, which is _always inherited from_ class ~Any~.
+
+     This inherited ~equals~, which takes effect _unless_ overridden, is /object
+     identity/, as in the case in Java. So ~equals~ (and with it, ~==~) is by
+     default the same as ~eq~, but you can change its behavior by overriding the
+     ~equals~ method in the classes you define.
+
+   - It is not possible to override ~==~ directly, as it is defined as a /final
+     method/ in class ~Any~.
+     #+BEGIN_SRC scala
+       // In the class `Any`
+       final def == (that: Any): Boolean =
+         if (null eq this) {null eq that} else {this equals that}
+     #+END_SRC
+
+** TODO 30.2 Writing an equality method - 675
+   - footnote:
+     All but the _third_ pitfall are described in the context of Java in the
+     book, Effective Java Second Edition, by Joshua Bloch.
+
+   - ~class Point(val x: Int, val y: Int)~
+
+*** DONE Pitfall #1: Defining ~equals~ with the wrong signature
+    CLOSED: [2017-11-25 Sat 00:54]
+    #+BEGIN_SRC scala
+      // An utterly WRONG definition of equals
+      def equals(other: Point): Boolean =
+        this.x = other.x && this.y == other.y
+
+      val p1, p2 = new Point(1, 2)
+      // p1: Point = Point@37d7d90f
+      // p2: Point = Point@3beb846d
+
+      val coll = mutable.HashSet(p1)
+      // coll: scala.collection.mutable.HashSet[Point] =
+      // Set(Point@37d7d90f)
+
+      coll contains p2
+      // res2: Boolean = false
+
+      val p2a: Any = p2
+      // p2a: Any = Point@3beb846d
+
+      p1 equals p2a
+      // res3: Boolean = false
+    #+END_SRC
+
+    The given ~equals~ above is NOT /overridden/ -- it is /overload/, which is
+    wrong.
+      The *RIGHT* input type should be ~Any~, as in the ~Any~ class, and then the
+    definition is:
+    #+BEGIN_SRC scala
+      // A better definition, but still not perfect
+      override def equals(other: Any) = other match {
+        case that: Point => this.x == that.x && this.y == that.y
+        case _ => false
+      }
+    #+END_SRC
+
+*** DONE Pitfall #2: Changing ~equals~ without also changing ~hashCode~
+    CLOSED: [2017-11-25 Sat 01:25]
+    #+BEGIN_SRC scala
+      val p1, p2 = new Point(1, 2)
+      // p1: Point = Point@122c1533
+      // p2: Point = Point@c23d097
+
+      collection.mutable.HashSet(p1) contains p2
+      //// The output is NOT certain: can be `true` or `false`
+    #+END_SRC
+    - The ~contains~ method of a ~HashSet~ instance will search ~p2~ in the same
+      "hash bucket" of ~p1~. The result is true when ~p1~ and ~p2~ can be put in
+      the same "hash bucket" . However, since ~hashCode~ is NOT overridden for
+      ~Point~, ~p1~ and ~p2~ have different hash code, and they can be in the
+      same or different "hash bucket". Then the result can be ~true~ or ~false~.
+
+    - The problem is that the last implementation of ~Point~ _violated the
+      contract_ on ~hashCode~ as defined for class ~Any~:
+      #+BEGIN_QUOTE
+      If two objects are equal according to the equals method, then calling the
+      ~hashCode~ method on each of the two objects must produce the same integer
+      result.
+      #+END_QUOTE
+
+    - footnote:
+      The text of ~Any~'s ~hashCode~ contract is inspired by the Javadoc
+      documentation of class ~java.lang.Object~.
+
+    - The new implementation (Better but not all right):
+      #+BEGIN_SRC scala
+        class Point(val x: Int, val y: Int) {
+          override def hashCode = (x, y).##
+          override def equals(other: Any) = other match {
+            case that: Point => this.x == that.x && this.y == that.y
+            case _ => false
+          }
+        }
+      #+END_SRC
+      + This is just ONE of many possible implementations of ~hashCode~.
+
+      + ~##~ method :: a shorthand for computing hash codes that works for
+        * primitive values
+        * reference types
+        * ~null~
+
+        When invoked on a collection or a tuple, it computes a mixed hash that
+        is _sensitive to the hash codes of all the elements_ in the collection.
+
+*** DONE Pitfall #3: Defining ~equals~ in terms of mutable fields
+    CLOSED: [2017-11-25 Sat 01:35]
+    You put an object into a ~HashSet~, this object is then put in a specific
+    "hash bucket" according to its hash code. After modifing its mutable fields,
+    its hash code is changed. Only a similar to the original hash code object
+    will be equality checked in this "hash bucket", a similar to the new hash
+    code object will mostly be equality checked in other "hash bucket".
+
+    - Solution:
+      1. Hash codes shouldn't depend on mutable fields.
+
+      2. If hash codes depend on mutable fields, try NOT modify them.
+
+      3. If all the above can be satisfied, try to define your own method to
+         check equality without hash code, for example, use a name like
+         ~equalContents~.
+
+*** TODO Pitfall #4: Failing to define ~equals~ as an equivalence relation
+
+** DONE 30.3 Defining equality for parameterized types - 688
+   CLOSED: [2017-11-25 Sat 01:50]
+   This is special due to /type erasure/.
+
+   - Example code with parameterized types:
+     #+BEGIN_SRC scala
+       trait Tree[+T] {
+         def elem: T
+         def left: Tree[T]
+         def right: Tree[T]
+       }
+
+       object EmptyTree extends Tree[Nothing] {
+         def elem =
+           throw new NoSuchElementException("EmptyTree.elem")
+         def left =
+           throw new NoSuchElementException("EmptyTree.left")
+         def right =
+           throw new NoSuchElementException("EmptyTree.right")
+       }
+
+       class Branch[+T](
+         val elem: T,
+         val left: Tree[T],
+         val right: Tree[T]
+       ) extends Tree[T]
+     #+END_SRC
+
+   - No overridden ~equals~, ~hashCode~, and ~canEqual~ is required for ~EmptyTree~.
+     =Explained in Page 689=
+
+   - Define ~equals~
+     #+BEGIN_SRC scala
+       class Branch[T](
+         val elem: T,
+         val left: Tree[T],
+         val right: Tree[T]
+       ) extends Tree[T] {
+         override def equals(other: Any) = other match {
+           case that: Branch[T] => this.elem == that.elem &&
+               this.left == that.left &&
+               this.right == that.right
+           case _ => false
+         }
+       }
+     #+END_SRC
+     This code will issue an unchecked warnings.
+     Use ~fsc -unchecked Tree.scala~ to check:
+     #+BEGIN_QUOTE
+     $ fsc unchecked
+     Tree.scala
+     Tree.scala:14: warning: non variable typeargument T in type
+     pattern is unchecked since it is eliminated by erasure
+         case that: Branch[T] => this.elem == that.elem && 
+     #+END_QUOTE
+     This is due to /type erasure/.
+
+     + Fix it
+       ~case that: Branch[T]~ to
+       * ~case that: Branch[t]~ =TODO= details
+         OR
+       * ~case that: Branch[_]~
+
+   - Define ~hashCode~ for ~Branch~ as usual
+     ~override def hashCode: Int = (elem, left, right).##~
+
+   - Define ~canEqual~ for ~Branch~:
+     #+BEGIN_SRC scala
+       def canEqual(other: Any) = other match {
+         case that: Branch[_] => true
+         case _ => false
+       }
+
+       // OR
+
+       def canEqual(other: Any) = otherisInstanceOf[Branch[_]]
+     #+END_SRC
+     =TODO=
+     The type parameter, rather than type pattern, ~_~ is explained in the next
+     chapter.
+     
 ** TODO 30.4 Recipes for ~equals~ and ~hashCode~ - 692
 *** Recipe for ~equals~
+    1. x
+    2. 
+    3. 
+    4. 
+    5. 
+    6. 
+    7. 
+
 *** Recipe for ~hashCode~
+    - If the ~equals~ method invokes ~super.equals(that)~ as part of its calcula-
+      tion, you should start your ~hashCode~ calculation with an invocation of
+      ~super.hashCode~. For example,
+      #+BEGIN_SRC scala
+        override def hashCode: Int = (super.hashCode, numer, denom).##
+      #+END_SRC
 
 ** TODO 30.5 Conclusion - 697
 * TODO 31 Combining Scala and Java - 698
@@ -5864,6 +7826,9 @@
 *** Traits as interfaces
 
 ** TODO 31.2 Annotations - 701
+   Scala's general annotations system is discussed in Chapter 27.
+   This section discusses Java-specific aspects of annotations.
+
 *** Additional effects from standard annotations
 *** Exceptions thrown
 *** Java annotations
@@ -5902,17 +7867,99 @@
 *** Symbolic versus alphanumeric names
 
 ** TODO 33.6 Implementing combinator parsers - 749
-*** Parser input
-*** Parser results
-*** The ~Parser~ class
-*** Aliasing ~this~
-*** Single-token parsers
-*** Sequential composition
-*** Alternative composition
-*** Dealing with recursion
-*** Result conversion
-*** Parsers that don't read any input
-*** Option and repetition
+   - The core of Scala's combinator parsing framework is contained in the /trait/
+     ~scala.util.parsing.combinator.Parsers~.
+
+     This trait defines the ~Parser~ type as well as _all fundamental
+     combinators_. If not being stated explicitly, 
+
+     (Except where stated explicitly otherwise, the definitions explained in the
+      following two subsections all reside in this trait.)
+
+   - As a first _approximation_, the type could be written as follows:
+     ~type Parser[T] = Input => ParseResult[T]~
+
+*** DONE Parser input
+    CLOSED: [2017-11-23 Thu 01:21]
+    - ~type Input = Reader[Elem]~
+      The class ~Reader~ comes from the package ~scala.util.parsing.input~
+
+      A ~Reader~ is similar to a ~Stream~, but also keeps track of the positions
+      of all the elements it reads.
+
+    - ~type Elem~
+      ~Elem~ is abstract.
+
+      For instance, the subtraits of ~Parser~, ~RegexParsers~ and
+      ~JavaTokenParsers~ fix ~Elem~ to be equal to ~Char~.
+
+*** DONE Parser results
+    CLOSED: [2017-11-23 Thu 01:32]
+    A parser might either _succeed_ or _fail_ on some given input.
+    Consequently class ~ParseResult~ has two subclasses for representing them:
+    #+BEGIN_SRC scala
+      sealed abstract class ParseResult[+T]
+      case class Success[T](result: T, in: Input)
+        extends ParseResult[T]
+      case class Failure(msg: String, in: Input)
+        extends ParseResult[Nothing]
+    #+END_SRC
+
+    - ~Success~: the field ~in~ is needed for chaining parsers.
+
+    - ~Failure~: the field ~in~ is, of course, not used for chaining, but to
+      position the error message at the correct place in the input stream.
+
+    - That ~ParseResult~'s are defined to be /covariant/ in the type parameter
+      ~T~. That is, a parser returning ~Strings~ as result, say, is compatible
+      with a parser returning ~AnyRefs~.
+
+*** DONE The ~Parser~ class
+    CLOSED: [2017-11-23 Thu 03:04]
+    #+BEGIN_SRC scala
+      abstract class Parser[+T] extends (Input => ParseResult[T])
+      { p =>
+        // An unspecified method that defines
+        // the behavior of this parser.
+        def apply(in: Input): ParseResult[T]
+        def ~ ...
+        def | ...
+        ...
+      }
+    #+END_SRC
+
+*** DONE Aliasing ~this~
+    CLOSED: [2017-11-23 Thu 03:18]
+    - The definition given in the last subsection
+      ~abstract class Parser[+T] extends ... { p =>~
+
+      A clause such as ~id =>~ immediately after the opening brace of a class
+      template defines the identifier ~id~ as an alias for ~this~ in the class.
+
+      From the alias point of view, it's like ~val id = this~. However, this is not
+      what exactly it is -- ~id~ will be considered as a normal identifier.
+      =???= =re-read= =why not??=
+
+    - Aliasing can also be a good abbreviation when you need to access the ~this~
+      of an outer class. Here's an example:
+      #+BEGIN_SRC scala
+        class Outer { outer =>
+          class Inner {
+            println(Outer.this eq outer)  // prints: true
+          }
+        }
+      #+END_SRC
+      The ~Outer.this~ is the Java way, and the ~outer~ is the Scala way. The
+      are same things (point to same thing) in this example.
+
+
+*** TODO Single-token parsers
+*** TODO Sequential composition
+*** TODO Alternative composition
+*** TODO Dealing with recursion
+*** TODO Result conversion
+*** TODO Parsers that don't read any input
+*** TODO Option and repetition
 
 ** TODO 33.7 String literals and regular expressions - 758
 ** TODO 33.8 Lexing and parsing - 759
@@ -5979,4 +8026,9 @@
 * About the Authors - 822
 * Index - 823
 * Tips (Added by Jian)
+  + You can leave off one pair of parentheses when passing a tuple to a function
+    that takes a single argument. ---- footnote 1 - page 624
+
+    For example, ~Some(a, b)~ means the same as ~Some((a, b))~
+
 * TodoList (Added by Jian)

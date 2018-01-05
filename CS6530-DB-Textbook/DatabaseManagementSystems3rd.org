@@ -268,7 +268,7 @@
     - [[13.2 A Simple Two-Way Merge Sort][13.2 A Simple Two-Way Merge Sort]]
     - [[13.3 External Merge Sort][13.3 External Merge Sort]]
       - [[13.3.1 Minimizing the Number of Runs][13.3.1 Minimizing the Number of Runs]]
-    - [[13.4 Minimizing I/O Cost versus Number of I/Os][13.4 Minimizing I/O Cost versus Number of I/Os]]
+    - [[13.4 Minimizing I/O Cost versus Number of I/O's][13.4 Minimizing I/O Cost versus Number of I/O's]]
       - [[13.4.1 Blocked I/O][13.4.1 Blocked I/O]]
       - [[13.4.2 Double Buffering][13.4.2 Double Buffering]]
     - [[13.5 Using B+ Trees for Sorting][13.5 Using B+ Trees for Sorting]]
@@ -672,6 +672,7 @@
 - [[REFERENCES][REFERENCES]]
 - [[AUTHOR INDEX][AUTHOR INDEX]]
 - [[SUBJECT INDEX][SUBJECT INDEX]]
+- [[Lecture Notes to CS6530 Advanced Database System (University of Utah)][Lecture Notes to CS6530 Advanced Database System (University of Utah)]]
 
 * PREFACE
 * Part I FOUNDATIONS
@@ -1067,17 +1068,95 @@
 **** 12.6.2 Estimating the Cost of a Plan
 *** 12.7 Review Questions
 ** Chapter 13 EXTERNAL SORTING
-*** 13.1 When Does a DBMS Sort Data?
-*** 13.2 A Simple Two-Way Merge Sort
-*** 13.3 External Merge Sort
+   - *Sorting in Commercial RDBMSs* =TODO=
+
+*** DONE 13.1 When Does a DBMS Sort Data?
+    CLOSED: [2017-12-04 Mon 17:12]
+    Include (NOT be limited to) the following important ones:
+    - Users may want answer in some order (Sec 5.2)
+
+    - Sorting records is the first step in bulk loading a tree index (Sec 10.8.2)
+
+    - It is useful for eliminating duplicate copies (Sec 14.3)
+
+    - /join/ operation requires a sorting step (Sec 14.4.2)
+
+*** DONE 13.2 A Simple Two-Way Merge Sort
+    CLOSED: [2017-12-04 Mon 18:51]
+    - When sorting a file, several sorted subfiles are typically generated in
+      intermediate steps.
+
+      In this chapter,
+      + run :: each sorted subfile
+
+    - If the number of pages in the input file is 2^{k}, for some k, then:
+      + Pass 0 produces 2^{k} sorted runs of 2^0 page each,
+      + Pass 1 produces 2^{k-1} sorted runs of 2^{2} page each,
+      + Pass 2 produces 2^{k-2} sorted runs of 2^{2} page each,
+      + ...
+      + Pass k produces 2^{0} sorted runs of 2^{k} page.
+
+    - Cost 2*N*(ceiling(log_2 N) + 1) I/O's.
+      + Everytime read, sort, and write every pages.
+        2I/O's for each page of N pages -- 2*N I/O's.
+
+      + (ceiling(log_2 N) + 1) passes.
+
+      In summary, 2*N*(ceiling(log_2 N) + 1) I/O's.
+
+    - This algorithm requires just _THREE_ buffer pages in main memory.
+
+      This means with this algorithm, even if we have more buffer space
+      available, this simple algorithm does _NOT utilize it effectively_.
+
+*** TODO 13.3 External Merge Sort
+    - The intuition behind the generalized algorithm:
+      _retain the basic structure of making multiple passes_ while _trying to
+      MINIMIZE the number of passes._
+
+    - _TWO_ Important modifications to the two-way merge sort algorithm:
+      1. _In Pass 0_,
+         read in _B pages_ (in Feifei's lecture this is ???) at a
+         time and _sort internally_ to produce _celing(N/B)_ runs of _B_ pages
+         each (except for the last run -- it may contain fewer pages).
+
+         Figure 13.2 (use input file from Figure 13.4)
+
+      2. In Passes i = 1, 2, ...,
+         + *Settings*:
+           * use _B - 1_ buffer pages for input
+           * use the remaining (ONE) page for output;
+
+         Hence, you do a _(B - 1)-way merge_ in each pass.
+
+         Figure 13.5
+
+    - Cost Comparison: =IMPORTANT=
+      - Pass 0 (less important):
+        N1 = ceiling(N Page / Buffer size in page)
+           = ceiling(N / B)
+
+        N1 =vs= N
+
+      - Pass 1 (more important): (Assume _(B - 1)-way merge_) 
+        ceiling(log_{B - 1} N1) + 1 =vs= ceiling(log_{2} N) + 1
+
+        Since B is typically quite large, the savings can be substantial.
+
+      - =TODO=
+
+      - For large values of B, more sophisticated techniques can be used (_NOT_
+        discussed here).
+
 **** 13.3.1 Minimizing the Number of Runs
-*** 13.4 Minimizing I/O Cost versus Number of I/Os
+
+*** TODO 13.4 Minimizing I/O Cost versus Number of I/O's
 **** 13.4.1 Blocked I/O
 **** 13.4.2 Double Buffering
-*** 13.5 Using B+ Trees for Sorting
+*** TODO 13.5 Using B+ Trees for Sorting
 **** 13.5.1 Clustered Index
 **** 13.5.2 Unclustered Index
-*** 13.6 Review Questions
+*** TODO 13.6 Review Questions
 ** Chapter 14 EVALUATING RELATIONAL OPERATORS
 *** 14.1 The' Selection Operation
 **** 14.1.1 No Index, Unsorted Data
@@ -1491,3 +1570,12 @@
 * REFERENCES
 * AUTHOR INDEX
 * SUBJECT INDEX
+* Lecture Notes to CS6530 Advanced Database System (University of Utah)
+  - B :: block size
+
+  - M :: memory size
+
+  - N :: data size
+
+  - (From wiki) the operating system retrieves data from /secondary storage/ in
+    /same-size blocks/ called /pages/.

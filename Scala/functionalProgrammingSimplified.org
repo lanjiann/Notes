@@ -1,0 +1,315 @@
+#+TITLE: Functional Programming, Simplified
+#+VERSION: 0.1.5, published October 19, 2017
+#+AUTHOR: Alvin Alexander
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[1 Changelog - 1][1 Changelog - 1]]
+- [[2 Introduction (or, Why I Wrote This Book) - 5][2 Introduction (or, Why I Wrote This Book) - 5]]
+- [[3 Who This Book is For - 9][3 Who This Book is For - 9]]
+- [[4 Goals, Part 1: "Soft" Goals of This Book - 13][4 Goals, Part 1: "Soft" Goals of This Book - 13]]
+- [[5 Goals, Part 2: Concrete Goals - 19][5 Goals, Part 2: Concrete Goals - 19]]
+- [[6 Goals, Part 3: A Disclaimer - 21][6 Goals, Part 3: A Disclaimer - 21]]
+- [[7 Question Everything - 23][7 Question Everything - 23]]
+- [[8 Rules for Programming in this Book - 31][8 Rules for Programming in this Book - 31]]
+- [[9 One Rule for Reading this Book - 35][9 One Rule for Reading this Book - 35]]
+- [[10 What is "Functional Programming"? - 37][10 What is "Functional Programming"? - 37]]
+- [[11 What is This Lambda You Speak Of ? - 47][11 What is This Lambda You Speak Of ? - 47]]
+- [[12 The Benefits of Functional Programming - 63][12 The Benefits of Functional Programming - 63]]
+- [[13 Disadvantages of Functional Programming - 85][13 Disadvantages of Functional Programming - 85]]
+- [[14 The "Great FP Terminology Barrier" - 105][14 The "Great FP Terminology Barrier" - 105]]
+- [[15 Pure Functions - 113][15 Pure Functions - 113]]
+- [[16 Grandma's Cookies (and Pure Functions) - 121][16 Grandma's Cookies (and Pure Functions) - 121]]
+- [[17 Benefits of Pure Functions - 131][17 Benefits of Pure Functions - 131]]
+- [[18 Pure Functions and I/O - 139][18 Pure Functions and I/O - 139]]
+- [[19 Pure Function Signatures Tell All - 147][19 Pure Function Signatures Tell All - 147]]
+  - [[OOP function signatures][OOP function signatures]]
+  - [[Signatures of pure functions][Signatures of pure functions]]
+  - [[A game called, "What can this pure function possible do?"][A game called, "What can this pure function possible do?"]]
+  - [[A second game example][A second game example]]
+  - [[A third game example][A third game example]]
+  - [[Trying to play the game with an impure method][Trying to play the game with an impure method]]
+  - [[Summary][Summary]]
+  - [[What's next][What's next]]
+- [[20 Functional Programming as Algebra - 153][20 Functional Programming as Algebra - 153]]
+- [[21 A Note About Expression-Oriented Programming - 167][21 A Note About Expression-Oriented Programming - 167]]
+- [[22 Functional Programming is Like Unix Pipelines - 171][22 Functional Programming is Like Unix Pipelines - 171]]
+- [[23 Functions Are Variables, Too - 191][23 Functions Are Variables, Too - 191]]
+- [[24 Using Methods As If They Were Functions - 207][24 Using Methods As If They Were Functions - 207]]
+- [[25 How to Write Functions That Take Functions as Input Parameters- 219][25 How to Write Functions That Take Functions as Input Parameters- 219]]
+- [[26 How to Write a 'map' Function - 239][26 How to Write a 'map' Function - 239]]
+- [[27 How to Use By-Name Parameters - 247][27 How to Use By-Name Parameters - 247]]
+- [[28 Functions Can Have Multiple Parameter Groups - 261][28 Functions Can Have Multiple Parameter Groups - 261]]
+- [[29 Partially-Applied Functions (and Currying) - 281][29 Partially-Applied Functions (and Currying) - 281]]
+- [[30 Recursion: Introduction - 295][30 Recursion: Introduction - 295]]
+- [[31 Recursion: Motivation - 297][31 Recursion: Motivation - 297]]
+- [[32 Recursion: Let's Look at Lists - 301][32 Recursion: Let's Look at Lists - 301]]
+- [[33 Recursion: How to Write a 'sum' Function - 309][33 Recursion: How to Write a 'sum' Function - 309]]
+- [[34 Recursion: How Recursive Function Calls Work - 317][34 Recursion: How Recursive Function Calls Work - 317]]
+- [[35 Visualizing the Recursive sum Function - 323][35 Visualizing the Recursive sum Function - 323]]
+- [[36 Recursion: A Conversation Between Two Developers - 331][36 Recursion: A Conversation Between Two Developers - 331]]
+- [[37 Recursion: Thinking Recursively - 335][37 Recursion: Thinking Recursively - 335]]
+- [[38 JVM Stacks and Stack Frames - 343][38 JVM Stacks and Stack Frames - 343]]
+- [[39 A Visual Look at Stacks and Frames - 351][39 A Visual Look at Stacks and Frames - 351]]
+- [[40 Tail-Recursive Algorithms - 359][40 Tail-Recursive Algorithms - 359]]
+- [[41 A First Look at "State" - 371][41 A First Look at "State" - 371]]
+- [[42 A Functional Game (With a Little Bit of State) - 375][42 A Functional Game (With a Little Bit of State) - 375]]
+- [[43 A Quick Review of Case Classes - 391][43 A Quick Review of Case Classes - 391]]
+- [[44 Update as You Copy, Don't Mutate - 399][44 Update as You Copy, Don't Mutate - 399]]
+- [[45 A Quick Review of for Expressions - 409][45 A Quick Review of for Expressions - 409]]
+- [[46 How to Write a Class That Can Be Used in a for Expression - 417][46 How to Write a Class That Can Be Used in a for Expression - 417]]
+- [[47 Creating a Sequence Class to be Used in a for Comprehension - 421][47 Creating a Sequence Class to be Used in a for Comprehension - 421]]
+- [[48 Making Sequence Work in a Simple ~for~ Loop - 427][48 Making Sequence Work in a Simple ~for~ Loop - 427]]
+- [[49 How To Make Sequence Work as a Single Generator in a ~for~ Expression - 431][49 How To Make Sequence Work as a Single Generator in a ~for~ Expression - 431]]
+- [[50 Enabling Filtering in a ~for~ Expression - 437][50 Enabling Filtering in a ~for~ Expression - 437]]
+- [[51 How to Enable the Use of Multiple Generators in a for Expression- 445][51 How to Enable the Use of Multiple Generators in a for Expression- 445]]
+- [[52 A Summary of the for Expression Lessons - 457][52 A Summary of the for Expression Lessons - 457]]
+- [[53 Pure Functions Tell No Lies - 461][53 Pure Functions Tell No Lies - 461]]
+- [[54 Functional Error Handling (Option, Try, or Either) - 469][54 Functional Error Handling (Option, Try, or Either) - 469]]
+- [[55 Embrace The Idioms! - 481][55 Embrace The Idioms! - 481]]
+- [[56 What to Think When You See That Opening Curly Brace - 485][56 What to Think When You See That Opening Curly Brace - 485]]
+- [[57 A Quick Review of How flatMap Works - 501][57 A Quick Review of How flatMap Works - 501]]
+- [[58 ~Option~ Naturally Leads to ~flatMap~ - 507][58 ~Option~ Naturally Leads to ~flatMap~ - 507]]
+- [[59 ~flatMap~ Naturally Leads to ~for~ - 513][59 ~flatMap~ Naturally Leads to ~for~ - 513]]
+- [[60 ~for~ Expressions are Better Than ~getOrElse~ - 515][60 ~for~ Expressions are Better Than ~getOrElse~ - 515]]
+- [[61 Recap: ~Option~ -> ~flatMap~ -> ~for~ - 519][61 Recap: ~Option~ -> ~flatMap~ -> ~for~ - 519]]
+- [[62 A Note About Things That Can Be Mapped-Over - 529][62 A Note About Things That Can Be Mapped-Over - 529]]
+- [[63 A Quick Review of Companion Objects and ~apply~ - 531][63 A Quick Review of Companion Objects and ~apply~ - 531]]
+- [[64 Starting to Glue Functions Together - 533][64 Starting to Glue Functions Together - 533]]
+- [[65 The “Bind” Concept - 537][65 The “Bind” Concept - 537]]
+- [[66 Getting Close to Using bind in for Expressions - 543][66 Getting Close to Using bind in for Expressions - 543]]
+- [[67 Using a "Wrapper" Class in a for Expression - 545][67 Using a "Wrapper" Class in a for Expression - 545]]
+- [[68 Making Wrapper More Generic - 555][68 Making Wrapper More Generic - 555]]
+- [[69 Changing "new Wrapper" to "Wrapper" - 557][69 Changing "new Wrapper" to "Wrapper" - 557]]
+- [[70 Using bind in a for Expression - 565][70 Using bind in a for Expression - 565]]
+- [[71 How Debuggable, f, g, and h Work - 579][71 How Debuggable, f, g, and h Work - 579]]
+- [[72 A Generic Version of Debuggable - 593][72 A Generic Version of Debuggable - 593]]
+- [[73 One Last Debuggable: Using List Instead of String - 597][73 One Last Debuggable: Using List Instead of String - 597]]
+- [[74 Key Points About Monads - 603][74 Key Points About Monads - 603]]
+- [[75 Signpost: Where We're Going Next - 605][75 Signpost: Where We're Going Next - 605]]
+- [[76 Introduction: The IO Monad - 607][76 Introduction: The IO Monad - 607]]
+- [[77 How to Use an IO Monad - 609][77 How to Use an IO Monad - 609]]
+- [[78 Assigning a for Expression to a Function - 615][78 Assigning a for Expression to a Function - 615]]
+- [[79 The IO Monad and a for Expression That Uses Recursion - 617][79 The IO Monad and a for Expression That Uses Recursion - 617]]
+- [[80 Diving Deeper Into the IO Monad - 619][80 Diving Deeper Into the IO Monad - 619]]
+- [[81 I'll Come Back to the IO Monad - 627][81 I'll Come Back to the IO Monad - 627]]
+- [[82 Functional Composition - 629][82 Functional Composition - 629]]
+- [[83 An Introduction to Handling State - 633][83 An Introduction to Handling State - 633]]
+- [[84 Handling State Manually - 635][84 Handling State Manually - 635]]
+- [[85 Getting State Working in a for Expression - 641][85 Getting State Working in a for Expression - 641]]
+- [[86 Handling My Golfing State with a State Monad - 643][86 Handling My Golfing State with a State Monad - 643]]
+- [[87 The State Monad Source Code - 649][87 The State Monad Source Code - 649]]
+- [[88 Signpost: Getting IO and State Working Together - 655][88 Signpost: Getting IO and State Working Together - 655]]
+- [[89 Trying to Write a for Expression with IO and State - 657][89 Trying to Write a for Expression with IO and State - 657]]
+- [[90 Seeing the Problem: Trying to Use State and IO Together - 659][90 Seeing the Problem: Trying to Use State and IO Together - 659]]
+- [[91 Solving the Problem with Monad Transformers - 663][91 Solving the Problem with Monad Transformers - 663]]
+- [[92 Beginning the Process of Understanding StateT - 665][92 Beginning the Process of Understanding StateT - 665]]
+- [[93 Getting Started: We're Going to Need a Monad Trait - 669][93 Getting Started: We're Going to Need a Monad Trait - 669]]
+- [[94 Now We Can Create StateT - 673][94 Now We Can Create StateT - 673]]
+- [[95 Using StateT in a for Expression - 675][95 Using StateT in a for Expression - 675]]
+- [[96 Trying to Combine IO and StateT in a for Expression - 681][96 Trying to Combine IO and StateT in a for Expression - 681]]
+- [[97 Fixing the IO Functions With Monadic Lifting - 685][97 Fixing the IO Functions With Monadic Lifting - 685]]
+- [[98 A First IO/StateT for Expression - 689][98 A First IO/StateT for Expression - 689]]
+- [[99 The Final IO/StateT for Expression - 693][99 The Final IO/StateT for Expression - 693]]
+- [[100 Summary of the StateT Lessons - 697][100 Summary of the StateT Lessons - 697]]
+- [[101 Signpost: Modeling the world with Scala/FP - 699][101 Signpost: Modeling the world with Scala/FP - 699]]
+- [[102 What is a Domain Model? - 701][102 What is a Domain Model? - 701]]
+- [[103 A Review of OOP Data Modeling - 705][103 A Review of OOP Data Modeling - 705]]
+- [[104 Modeling the "Data" Portion of the Pizza POS System with Scala/FP - 713][104 Modeling the "Data" Portion of the Pizza POS System with Scala/FP - 713]]
+- [[105 First Attempts to Organize Pure Functions - 717][105 First Attempts to Organize Pure Functions - 717]]
+- [[106 Implementing FP Behavior with Modules - 723][106 Implementing FP Behavior with Modules - 723]]
+- [[107 Implementing the Pizza POS System Using a Modular Approach - 731][107 Implementing the Pizza POS System Using a Modular Approach - 731]]
+- [[108 The "Functional Objects" Approach - 749][108 The "Functional Objects" Approach - 749]]
+- [[109 Demonstrating the "Functional Objects" Approach - 753][109 Demonstrating the "Functional Objects" Approach - 753]]
+- [[110 Summary of the Domain Modeling Approaches - 759][110 Summary of the Domain Modeling Approaches - 759]]
+- [[111 ScalaCheck 1: Introduction - 761][111 ScalaCheck 1: Introduction - 761]]
+- [[112 ScalaCheck 2: A More-Complicated Example - 773][112 ScalaCheck 2: A More-Complicated Example - 773]]
+- [[113 The Problem with the IO Monad - 789][113 The Problem with the IO Monad - 789]]
+- [[114 Signpost: Type Classes - 795][114 Signpost: Type Classes - 795]]
+- [[115 Type Classes 101: Introduction - 797][115 Type Classes 101: Introduction - 797]]
+- [[116 Type Classes 102: The Pizza Class - 807][116 Type Classes 102: The Pizza Class - 807]]
+- [[117 Type Classes 103: The Cats Library - 813][117 Type Classes 103: The Cats Library - 813]]
+- [[118 Lenses, to Simplify "Update as You Copy" - 817][118 Lenses, to Simplify "Update as You Copy" - 817]]
+- [[119 Signpost: Concurrency - 821][119 Signpost: Concurrency - 821]]
+- [[120 Concurrency and Mutability Don't Mix - 823][120 Concurrency and Mutability Don't Mix - 823]]
+- [[121 Scala Concurrency Tools - 831][121 Scala Concurrency Tools - 831]]
+- [[122 Akka Actors - 835][122 Akka Actors - 835]]
+- [[123 Akka Actor Examples - 843][123 Akka Actor Examples - 843]]
+- [[124 Scala Futures - 855][124 Scala Futures - 855]]
+- [[125 A Second Futures Example - 865][125 A Second Futures Example - 865]]
+- [[126 Key Points About Futures - 879][126 Key Points About Futures - 879]]
+- [[A Explaining Scala's ~val~ Function Syntax - 887][A Explaining Scala's ~val~ Function Syntax - 887]]
+- [[B The Differences Between ~val~ and ~def~ When Creating Functions - 903][B The Differences Between ~val~ and ~def~ When Creating Functions - 903]]
+- [[C A Review of Anonymous Functions - 921][C A Review of Anonymous Functions - 921]]
+- [[D Recursion is Great, But … - 929][D Recursion is Great, But … - 929]]
+- [[E ~for~ expression translation examples - 955][E ~for~ expression translation examples - 955]]
+- [[F On Using ~def~ vs ~val~ To Define Abstract Members in Traits - 965][F On Using ~def~ vs ~val~ To Define Abstract Members in Traits - 965]]
+- [[G Algebraic Data Types - 969][G Algebraic Data Types - 969]]
+
+* 1 Changelog - 1
+* 2 Introduction (or, Why I Wrote This Book) - 5
+* 3 Who This Book is For - 9
+* 4 Goals, Part 1: "Soft" Goals of This Book - 13
+* 5 Goals, Part 2: Concrete Goals - 19
+* 6 Goals, Part 3: A Disclaimer - 21
+* 7 Question Everything - 23
+* 8 Rules for Programming in this Book - 31
+* 9 One Rule for Reading this Book - 35
+* 10 What is "Functional Programming"? - 37
+* 11 What is This Lambda You Speak Of ? - 47
+* 12 The Benefits of Functional Programming - 63
+* 13 Disadvantages of Functional Programming - 85
+* 14 The "Great FP Terminology Barrier" - 105
+* 15 Pure Functions - 113
+* 16 Grandma's Cookies (and Pure Functions) - 121
+* 17 Benefits of Pure Functions - 131
+* DONE 18 Pure Functions and I/O - 139
+  CLOSED: [2017-11-26 Sun 23:30]
+  - [] =TODO= See also
+
+* DONE 19 Pure Function Signatures Tell All - 147
+  CLOSED: [2017-11-26 Sun 23:12]
+** DONE OOP function signatures
+   CLOSED: [2017-11-26 Sun 23:06]
+   - A programmer, even with only few experience, will never trust the
+     /signature/ of a function -- they know they must read the source code.
+
+   - For a pure function, a /signature/ can provide a lot of information.
+
+** DONE Signatures of pure functions
+   CLOSED: [2017-11-26 Sun 23:06]
+   - No side effects
+
+   - Output only depends on inputs.
+
+   - All values are immutable.
+
+** DONE A game called, "What can this pure function possible do?"
+   CLOSED: [2017-11-26 Sun 23:06]
+
+** DONE A second game example
+   CLOSED: [2017-11-26 Sun 23:06]
+
+** DONE A third game example
+   CLOSED: [2017-11-26 Sun 23:10]
+** DONE Trying to play the game with an impure method
+   CLOSED: [2017-11-26 Sun 23:12]
+** DONE Summary
+   CLOSED: [2017-11-26 Sun 23:12]
+** DONE What's next
+   CLOSED: [2017-11-26 Sun 23:12]
+
+* 20 Functional Programming as Algebra - 153
+* 21 A Note About Expression-Oriented Programming - 167
+* 22 Functional Programming is Like Unix Pipelines - 171
+* 23 Functions Are Variables, Too - 191
+* 24 Using Methods As If They Were Functions - 207
+* 25 How to Write Functions That Take Functions as Input Parameters- 219
+* 26 How to Write a 'map' Function - 239
+* 27 How to Use By-Name Parameters - 247
+* 28 Functions Can Have Multiple Parameter Groups - 261
+* 29 Partially-Applied Functions (and Currying) - 281
+* 30 Recursion: Introduction - 295
+* 31 Recursion: Motivation - 297
+* 32 Recursion: Let's Look at Lists - 301
+* 33 Recursion: How to Write a 'sum' Function - 309
+* 34 Recursion: How Recursive Function Calls Work - 317
+* 35 Visualizing the Recursive sum Function - 323
+* 36 Recursion: A Conversation Between Two Developers - 331
+* 37 Recursion: Thinking Recursively - 335
+* 38 JVM Stacks and Stack Frames - 343
+* 39 A Visual Look at Stacks and Frames - 351
+* 40 Tail-Recursive Algorithms - 359
+* 41 A First Look at "State" - 371
+* 42 A Functional Game (With a Little Bit of State) - 375
+* 43 A Quick Review of Case Classes - 391
+* 44 Update as You Copy, Don't Mutate - 399
+* 45 A Quick Review of for Expressions - 409
+* 46 How to Write a Class That Can Be Used in a for Expression - 417
+* 47 Creating a Sequence Class to be Used in a for Comprehension - 421
+* 48 Making Sequence Work in a Simple ~for~ Loop - 427
+* 49 How To Make Sequence Work as a Single Generator in a ~for~ Expression - 431
+* 50 Enabling Filtering in a ~for~ Expression - 437
+* 51 How to Enable the Use of Multiple Generators in a for Expression- 445
+* 52 A Summary of the for Expression Lessons - 457
+* 53 Pure Functions Tell No Lies - 461
+* 54 Functional Error Handling (Option, Try, or Either) - 469
+* 55 Embrace The Idioms! - 481
+* 56 What to Think When You See That Opening Curly Brace - 485
+* 57 A Quick Review of How flatMap Works - 501
+* 58 ~Option~ Naturally Leads to ~flatMap~ - 507
+* 59 ~flatMap~ Naturally Leads to ~for~ - 513
+* 60 ~for~ Expressions are Better Than ~getOrElse~ - 515
+* 61 Recap: ~Option~ -> ~flatMap~ -> ~for~ - 519
+* 62 A Note About Things That Can Be Mapped-Over - 529
+* 63 A Quick Review of Companion Objects and ~apply~ - 531
+* 64 Starting to Glue Functions Together - 533
+* 65 The “Bind” Concept - 537
+* 66 Getting Close to Using bind in for Expressions - 543
+* 67 Using a "Wrapper" Class in a for Expression - 545
+* 68 Making Wrapper More Generic - 555
+* 69 Changing "new Wrapper" to "Wrapper" - 557
+* 70 Using bind in a for Expression - 565
+* 71 How Debuggable, f, g, and h Work - 579
+* 72 A Generic Version of Debuggable - 593
+* 73 One Last Debuggable: Using List Instead of String - 597
+* 74 Key Points About Monads - 603
+* 75 Signpost: Where We're Going Next - 605
+* 76 Introduction: The IO Monad - 607
+* 77 How to Use an IO Monad - 609
+* 78 Assigning a for Expression to a Function - 615
+* 79 The IO Monad and a for Expression That Uses Recursion - 617
+* 80 Diving Deeper Into the IO Monad - 619
+* 81 I'll Come Back to the IO Monad - 627
+* 82 Functional Composition - 629
+* 83 An Introduction to Handling State - 633
+* 84 Handling State Manually - 635
+* 85 Getting State Working in a for Expression - 641
+* 86 Handling My Golfing State with a State Monad - 643
+* 87 The State Monad Source Code - 649
+* 88 Signpost: Getting IO and State Working Together - 655
+* 89 Trying to Write a for Expression with IO and State - 657
+* 90 Seeing the Problem: Trying to Use State and IO Together - 659
+* 91 Solving the Problem with Monad Transformers - 663
+* 92 Beginning the Process of Understanding StateT - 665
+* 93 Getting Started: We're Going to Need a Monad Trait - 669
+* 94 Now We Can Create StateT - 673
+* 95 Using StateT in a for Expression - 675
+* 96 Trying to Combine IO and StateT in a for Expression - 681
+* 97 Fixing the IO Functions With Monadic Lifting - 685
+* 98 A First IO/StateT for Expression - 689
+* 99 The Final IO/StateT for Expression - 693
+* 100 Summary of the StateT Lessons - 697
+* 101 Signpost: Modeling the world with Scala/FP - 699
+* 102 What is a Domain Model? - 701
+* 103 A Review of OOP Data Modeling - 705
+* 104 Modeling the "Data" Portion of the Pizza POS System with Scala/FP - 713
+* 105 First Attempts to Organize Pure Functions - 717
+* 106 Implementing FP Behavior with Modules - 723
+* 107 Implementing the Pizza POS System Using a Modular Approach - 731
+* 108 The "Functional Objects" Approach - 749
+* 109 Demonstrating the "Functional Objects" Approach - 753
+* 110 Summary of the Domain Modeling Approaches - 759
+* 111 ScalaCheck 1: Introduction - 761
+* 112 ScalaCheck 2: A More-Complicated Example - 773
+* 113 The Problem with the IO Monad - 789
+* 114 Signpost: Type Classes - 795
+* 115 Type Classes 101: Introduction - 797
+* 116 Type Classes 102: The Pizza Class - 807
+* 117 Type Classes 103: The Cats Library - 813
+* 118 Lenses, to Simplify "Update as You Copy" - 817
+* 119 Signpost: Concurrency - 821
+* 120 Concurrency and Mutability Don't Mix - 823
+* 121 Scala Concurrency Tools - 831
+* 122 Akka Actors - 835
+* 123 Akka Actor Examples - 843
+* 124 Scala Futures - 855
+* 125 A Second Futures Example - 865
+* 126 Key Points About Futures - 879
+* A Explaining Scala's ~val~ Function Syntax - 887
+* B The Differences Between ~val~ and ~def~ When Creating Functions - 903
+* C A Review of Anonymous Functions - 921
+* D Recursion is Great, But … - 929
+* E ~for~ expression translation examples - 955
+* F On Using ~def~ vs ~val~ To Define Abstract Members in Traits - 965
+* G Algebraic Data Types - 969

@@ -4,201 +4,846 @@
 #+STARTUP: entitiespretty
 
 * Table of Contents                                      :TOC_4_org:noexport:
-- [[1. Why Rust? 7][1. Why Rust? 7]]
-  - [[Type Safety 8][Type Safety 8]]
-- [[2. A Tour of Rust 13][2. A Tour of Rust 13]]
-  - [[Downloading and installing Rust 13][Downloading and installing Rust 13]]
-  - [[A simple function 16][A simple function 16]]
-  - [[Writing and running unit tests 17][Writing and running unit tests 17]]
-  - [[Handling command-line arguments 18][Handling command-line arguments 18]]
-  - [[A simple web server 21][A simple web server 21]]
-  - [[Concurrency 28][Concurrency 28]]
-    - [[Parsing pair command-line arguments 29][Parsing pair command-line arguments 29]]
-    - [[Mapping from pixels to complex numbers 31][Mapping from pixels to complex numbers 31]]
-    - [[Mandelbrot membership calculation 32][Mandelbrot membership calculation 32]]
-    - [[Writing bitmap files 34][Writing bitmap files 34]]
-    - [[A concurrent Mandelbrot program 35][A concurrent Mandelbrot program 35]]
-    - [[Running the Mandelbrot plotter 38][Running the Mandelbrot plotter 38]]
-    - [[Safety is invisible 40][Safety is invisible 40]]
-- [[3. Basic types 41][3. Basic types 41]]
-  - [[Machine types 44][Machine types 44]]
-    - [[Integer types 44][Integer types 44]]
-    - [[Floating-point types 47][Floating-point types 47]]
-    - [[The ~bool~ type 48][The ~bool~ type 48]]
-    - [[Characters 49][Characters 49]]
-  - [[Tuples 50][Tuples 50]]
-  - [[Pointer types 52][Pointer types 52]]
-    - [[References 53][References 53]]
-    - [[Boxes 53][Boxes 53]]
-    - [[Raw pointers 53][Raw pointers 53]]
-  - [[Arrays, Vectors, and Slices 53][Arrays, Vectors, and Slices 53]]
-    - [[Arrays 54][Arrays 54]]
-    - [[Vectors 55][Vectors 55]]
-    - [[Slices 58][Slices 58]]
-  - [[String types 60][String types 60]]
-    - [[String literals 60][String literals 60]]
-    - [[Byte strings 61][Byte strings 61]]
-    - [[Strings in memory 61][Strings in memory 61]]
-    - [[~String~ 62][~String~ 62]]
-    - [[Using strings 63][Using strings 63]]
-    - [[Other string-like types 63][Other string-like types 63]]
-  - [[Beyond the basics 64][Beyond the basics 64]]
-- [[4. Ownership and moves 65][4. Ownership and moves 65]]
-  - [[Ownership 66][Ownership 66]]
-  - [[Moves 71][Moves 71]]
-    - [[More operations that move 77][More operations that move 77]]
-    - [[Moves and control flow 78][Moves and control flow 78]]
-  - [[~Copy~ types: the exception to moves 81][~Copy~ types: the exception to moves 81]]
-  - [[~Rc~ and ~Arc~: shared ownership 83][~Rc~ and ~Arc~: shared ownership 83]]
-- [[5. References and borrowing 87][5. References and borrowing 87]]
-  - [[References as values 90][References as values 90]]
-    - [[Implicit dereferencing 90][Implicit dereferencing 90]]
-    - [[Assigning references 92][Assigning references 92]]
-    - [[References to slices and trait objects 93][References to slices and trait objects 93]]
-    - [[References are never null 93][References are never null 93]]
-    - [[Borrowing references to arbitrary expressions 94][Borrowing references to arbitrary expressions 94]]
-  - [[Reference safety 94][Reference safety 94]]
-    - [[Borrowing a local variable 94][Borrowing a local variable 94]]
-    - [[Receiving references as parameters 98][Receiving references as parameters 98]]
-    - [[Passing references as arguments 100][Passing references as arguments 100]]
-    - [[Returning references 101][Returning references 101]]
-    - [[Structures containing references 102][Structures containing references 102]]
-    - [[Distinct lifetime parameters 104][Distinct lifetime parameters 104]]
-  - [[Sharing versus mutation 105][Sharing versus mutation 105]]
-  - [[Reference counting: ~Rc~ and ~Arc~ 113][Reference counting: ~Rc~ and ~Arc~ 113]]
-- [[6. Expressions 115][6. Expressions 115]]
-  - [[An expression language 115][An expression language 115]]
-  - [[Blocks and statements 116][Blocks and statements 116]]
-  - [[Declarations 117][Declarations 117]]
-  - [[~if~ and match 119][~if~ and match 119]]
-  - [[Loops 121][Loops 121]]
-  - [[~return~ expressions 123][~return~ expressions 123]]
-  - [[Why Rust has ~loop~ 124][Why Rust has ~loop~ 124]]
-  - [[Names, paths, and ~use~ 125][Names, paths, and ~use~ 125]]
-  - [[Closures 126][Closures 126]]
-  - [[Function and method calls 126][Function and method calls 126]]
-  - [[Fields and elements 127][Fields and elements 127]]
-  - [[Reference operators 128][Reference operators 128]]
-  - [[Arithmetic, bitwise, comparison, and logical operators 129][Arithmetic, bitwise, comparison, and logical operators 129]]
-  - [[Assignment 130][Assignment 130]]
-  - [[Type casts 130][Type casts 130]]
-  - [[Precedence and associativity 131][Precedence and associativity 131]]
-  - [[Onward 133][Onward 133]]
-- [[7. Enums and patterns 135][7. Enums and patterns 135]]
-  - [[Enums 135][Enums 135]]
-    - [[Tuple and struct variants 137][Tuple and struct variants 137]]
-    - [[Enums in memory 138][Enums in memory 138]]
-    - [[Rich data structures using enums 139][Rich data structures using enums 139]]
-    - [[Generic enums 141][Generic enums 141]]
-  - [[Patterns 143][Patterns 143]]
-    - [[Tuple and struct patterns 144][Tuple and struct patterns 144]]
-    - [[Reference patterns 146][Reference patterns 146]]
-    - [[Matching multiple possibilities 147][Matching multiple possibilities 147]]
-    - [[Pattern guards 148][Pattern guards 148]]
-    - [[@ patterns 148][@ patterns 148]]
-    - [[Where patterns are allowed 149][Where patterns are allowed 149]]
-    - [[Populating a binary tree 150][Populating a binary tree 150]]
-  - [[The big picture 151][The big picture 151]]
+- [[1. Why Rust? - 1][1. Why Rust? - 1]]
+  - [[Type Safety 3][Type Safety 3]]
+- [[2. A Tour of Rust - 7][2. A Tour of Rust - 7]]
+  - [[Downloading and installing Rust - 7][Downloading and installing Rust - 7]]
+  - [[A Simple Function - 10][A Simple Function - 10]]
+  - [[Writing and Running Unit Tests - 11][Writing and Running Unit Tests - 11]]
+  - [[Handling Command-Line Arguments - 12][Handling Command-Line Arguments - 12]]
+  - [[A Simple Web Server - 17][A Simple Web Server - 17]]
+  - [[Concurrency - 23][Concurrency - 23]]
+    - [[What the Mandelbrot Set Actually Is - 24][What the Mandelbrot Set Actually Is - 24]]
+    - [[Parsing Pair Command-Line Arguments 28][Parsing Pair Command-Line Arguments 28]]
+    - [[Mapping from Pixels to Complex Numbers 31][Mapping from Pixels to Complex Numbers 31]]
+    - [[Plotting the Set - 32][Plotting the Set - 32]]
+    - [[Writing Image Files 34][Writing Image Files 34]]
+    - [[A Concurrent Mandelbrot Program 35][A Concurrent Mandelbrot Program 35]]
+    - [[Running the Mandelbrot Plotter 40][Running the Mandelbrot Plotter 40]]
+    - [[Safety Is Invisible 41][Safety Is Invisible 41]]
+- [[3. Basic types - 43][3. Basic types - 43]]
+  - [[Machine Types - 46][Machine Types - 46]]
+    - [[Integer Types 47][Integer Types 47]]
+    - [[Floating-Point Types 50][Floating-Point Types 50]]
+    - [[The ~bool~ Type 51][The ~bool~ Type 51]]
+    - [[Characters 52][Characters 52]]
+  - [[Tuples - 54][Tuples - 54]]
+  - [[Pointer types - 55][Pointer types - 55]]
+    - [[References 56][References 56]]
+    - [[Boxes 56][Boxes 56]]
+    - [[Raw Pointers 57][Raw Pointers 57]]
+  - [[Arrays, Vectors, and Slices - 57][Arrays, Vectors, and Slices - 57]]
+    - [[Arrays 58][Arrays 58]]
+    - [[Vectors 59][Vectors 59]]
+    - [[Building Vectors Element by Element 62][Building Vectors Element by Element 62]]
+    - [[Slices 62][Slices 62]]
+  - [[String Types - 64][String Types - 64]]
+    - [[String Literals 64][String Literals 64]]
+    - [[Byte Strings 65][Byte Strings 65]]
+    - [[Strings in Memory 65][Strings in Memory 65]]
+    - [[String 67][String 67]]
+    - [[Using Strings 68][Using Strings 68]]
+    - [[Other String-Like Types 68][Other String-Like Types 68]]
+  - [[Beyond the basics 69][Beyond the basics 69]]
+- [[4. Ownership - 71][4. Ownership - 71]]
+  - [[Ownership - 73][Ownership - 73]]
+  - [[Moves - 77][Moves - 77]]
+    - [[More Operations That Move 82][More Operations That Move 82]]
+    - [[Moves and Control Flow 82][Moves and Control Flow 82]]
+    - [[Moves and Indexed Content 84][Moves and Indexed Content 84]]
+  - [[~Copy~ Types: The Exception to Moves - 86][~Copy~ Types: The Exception to Moves - 86]]
+  - [[~Rc~ and ~Arc~: shared ownership - 90][~Rc~ and ~Arc~: shared ownership - 90]]
+- [[5. References and borrowing - 93][5. References and borrowing - 93]]
+  - [[References as Values - 97][References as Values - 97]]
+    - [[Rust References Versus C++ References - 97][Rust References Versus C++ References - 97]]
+    - [[Assigning References - 98][Assigning References - 98]]
+    - [[References to References - 99][References to References - 99]]
+    - [[Comparing References - 99][Comparing References - 99]]
+    - [[References Are Never Null - 100][References Are Never Null - 100]]
+    - [[Borrowing References to Arbitrary Expressions - 100][Borrowing References to Arbitrary Expressions - 100]]
+    - [[References to Slices and Trait Objects - 101][References to Slices and Trait Objects - 101]]
+  - [[Reference Safety - 101][Reference Safety - 101]]
+    - [[Borrowing a Local Variable - 101][Borrowing a Local Variable - 101]]
+    - [[Receiving References as Parameters - 105][Receiving References as Parameters - 105]]
+    - [[Passing References as Arguments - 107][Passing References as Arguments - 107]]
+    - [[Returning References - 107][Returning References - 107]]
+    - [[Structs Containing References - 109][Structs Containing References - 109]]
+    - [[Distinct Lifetime Parameters - 111][Distinct Lifetime Parameters - 111]]
+    - [[Omitting Lifetime Parameters - 112][Omitting Lifetime Parameters - 112]]
+  - [[Sharing Versus Mutation - 114][Sharing Versus Mutation - 114]]
+  - [[Taking Arms Against a Sea of Objects - 121][Taking Arms Against a Sea of Objects - 121]]
+- [[6. Expressions - 123][6. Expressions - 123]]
+  - [[An Expression Language - 123][An Expression Language - 123]]
+  - [[Blocks and Semicolons - 124][Blocks and Semicolons - 124]]
+  - [[Declarations - 126][Declarations - 126]]
+  - [[~if~ and match - 127][~if~ and match - 127]]
+    - [[~if let~ - 129][~if let~ - 129]]
+  - [[Loops - - 130][Loops - - 130]]
+  - [[~return~ Expressions - 132][~return~ Expressions - 132]]
+  - [[Why Rust Has ~loop~ - 133][Why Rust Has ~loop~ - 133]]
+  - [[Function and Method Calls - 134][Function and Method Calls - 134]]
+  - [[Fields and Elements - 135][Fields and Elements - 135]]
+  - [[Reference Operators - 137][Reference Operators - 137]]
+  - [[Arithmetic, Bitwise, Comparison, and Logical Operators - 137][Arithmetic, Bitwise, Comparison, and Logical Operators - 137]]
+  - [[Assignment 138][Assignment 138]]
+  - [[Type Casts 139][Type Casts 139]]
+  - [[Closures - 140][Closures - 140]]
+  - [[Precedence and Associativity 140][Precedence and Associativity 140]]
+  - [[Onward 142][Onward 142]]
+- [[7. Error Handling - 145][7. Error Handling - 145]]
+  - [[Panic 145][Panic 145]]
+    - [[Unwinding 146][Unwinding 146]]
+    - [[Aborting 147][Aborting 147]]
+  - [[Result 148][Result 148]]
+    - [[Catching Errors 148][Catching Errors 148]]
+    - [[Result Type Aliases 150][Result Type Aliases 150]]
+    - [[Printing Errors 150][Printing Errors 150]]
+    - [[Propagating Errors 152][Propagating Errors 152]]
+    - [[Working with Multiple Error Types 153][Working with Multiple Error Types 153]]
+    - [[Dealing with Errors That “Can’t Happen” 155][Dealing with Errors That “Can’t Happen” 155]]
+    - [[Ignoring Errors 156][Ignoring Errors 156]]
+    - [[Handling Errors in main() 156][Handling Errors in main() 156]]
+    - [[Declaring a Custom Error Type 157][Declaring a Custom Error Type 157]]
+    - [[Why Results? 158][Why Results? 158]]
+- [[8. Crates and Modules - 161][8. Crates and Modules - 161]]
+  - [[Crates - 161][Crates - 161]]
+    - [[Build Profiles 164][Build Profiles 164]]
+  - [[Modules - 165][Modules - 165]]
+    - [[Modules in Separate Files 166][Modules in Separate Files 166]]
+    - [[Paths and Imports 167][Paths and Imports 167]]
+    - [[The Standard Prelude 169][The Standard Prelude 169]]
+    - [[Items, the Building Blocks of Rust 170][Items, the Building Blocks of Rust 170]]
+  - [[Turning a Program into a Library - 172][Turning a Program into a Library - 172]]
+  - [[The src/bin Directory - 174][The src/bin Directory - 174]]
+  - [[Attributes - 175][Attributes - 175]]
+  - [[Tests and Documentation - 178][Tests and Documentation - 178]]
+    - [[Integration Tests 180][Integration Tests 180]]
+    - [[Documentation 181][Documentation 181]]
+    - [[Doc-Tests 182][Doc-Tests 182]]
+  - [[Specifying Dependencies - 185][Specifying Dependencies - 185]]
+    - [[Versions 186][Versions 186]]
+    - [[Cargo.lock 187][Cargo.lock 187]]
+  - [[Publishing Crates to crates.io - 188][Publishing Crates to crates.io - 188]]
+  - [[Workspaces - 190][Workspaces - 190]]
+  - [[More Nice Things - 191][More Nice Things - 191]]
+- [[9. Structs - 193][9. Structs - 193]]
+  - [[Named-Field Structs 193][Named-Field Structs 193]]
+  - [[Tuple-Like Structs 196][Tuple-Like Structs 196]]
+  - [[Unit-Like Structs 197][Unit-Like Structs 197]]
+  - [[Struct Layout 197][Struct Layout 197]]
+  - [[Defining Methods with impl 198][Defining Methods with impl 198]]
+  - [[Generic Structs 202][Generic Structs 202]]
+  - [[Structs with Lifetime Parameters 203][Structs with Lifetime Parameters 203]]
+  - [[Deriving Common Traits for Struct Types 204][Deriving Common Traits for Struct Types 204]]
+  - [[Interior Mutability 205][Interior Mutability 205]]
+- [[10. Enums and patterns - 211][10. Enums and patterns - 211]]
+  - [[Enums 212][Enums 212]]
+    - [[Enums with Data - 214][Enums with Data - 214]]
+    - [[Enums in Memory - 215][Enums in Memory - 215]]
+    - [[Rich Data Structures Using Enums - 216][Rich Data Structures Using Enums - 216]]
+    - [[Generic Enums - 218][Generic Enums - 218]]
+  - [[Patterns 221][Patterns 221]]
+    - [[Literals, Variables, and Wildcards in Patterns - 223][Literals, Variables, and Wildcards in Patterns - 223]]
+    - [[Tuple and Struct Patterns - 225][Tuple and Struct Patterns - 225]]
+    - [[Reference Patterns - 226][Reference Patterns - 226]]
+    - [[Matching Multiple Possibilities - 229][Matching Multiple Possibilities - 229]]
+    - [[Pattern Guards - 229][Pattern Guards - 229]]
+    - [[@ patterns - 230][@ patterns - 230]]
+    - [[Where Patterns Are Allowed - 230][Where Patterns Are Allowed - 230]]
+    - [[Populating a Binary Tree 232][Populating a Binary Tree 232]]
+  - [[The Big Picture 233][The Big Picture 233]]
+- [[11. Traits and Generics - 235][11. Traits and Generics - 235]]
+  - [[Using Traits 237][Using Traits 237]]
+  - [[Trait Objects 238][Trait Objects 238]]
+  - [[Trait Object Layout 239][Trait Object Layout 239]]
+  - [[Generic Functions 240][Generic Functions 240]]
+  - [[Which to Use 243][Which to Use 243]]
+  - [[Defining and Implementing Traits 245][Defining and Implementing Traits 245]]
+  - [[Default Methods 246][Default Methods 246]]
+  - [[Traits and Other People’s Types 247][Traits and Other People’s Types 247]]
+  - [[Self in Traits 249][Self in Traits 249]]
+  - [[Subtraits 250][Subtraits 250]]
+  - [[Static Methods 251][Static Methods 251]]
+  - [[Fully Qualified Method Calls 252][Fully Qualified Method Calls 252]]
+  - [[Traits That Define Relationships Between Types 253][Traits That Define Relationships Between Types 253]]
+  - [[Associated Types (or How Iterators Work) 254][Associated Types (or How Iterators Work) 254]]
+  - [[Generic Traits (or How Operator Overloading Works) 257][Generic Traits (or How Operator Overloading Works) 257]]
+  - [[Buddy Traits (or How rand::random() Works) 258][Buddy Traits (or How rand::random() Works) 258]]
+  - [[Reverse-Engineering Bounds 260][Reverse-Engineering Bounds 260]]
+  - [[Conclusion 263][Conclusion 263]]
+- [[12. Operator Overloading - 265][12. Operator Overloading - 265]]
+  - [[Arithmetic and Bitwise Operators 266][Arithmetic and Bitwise Operators 266]]
+  - [[Unary Operators 268][Unary Operators 268]]
+  - [[Binary Operators 269][Binary Operators 269]]
+  - [[Compound Assignment Operators 270][Compound Assignment Operators 270]]
+  - [[Equality Tests 272][Equality Tests 272]]
+  - [[Ordered Comparisons 275][Ordered Comparisons 275]]
+  - [[Index and IndexMut 277][Index and IndexMut 277]]
+  - [[Other Operators 280][Other Operators 280]]
+- [[13. Utility Traits - 281][13. Utility Traits - 281]]
+  - [[Drop 282][Drop 282]]
+  - [[Sized 285][Sized 285]]
+  - [[Clone 287][Clone 287]]
+  - [[Copy 289][Copy 289]]
+  - [[Deref and DerefMut 289][Deref and DerefMut 289]]
+  - [[Default][Default]]
+  - [[AsRef and AsMut 294][AsRef and AsMut 294]]
+  - [[Borrow and BorrowMut 296][Borrow and BorrowMut 296]]
+  - [[From and Into 297][From and Into 297]]
+  - [[ToOwned 300][ToOwned 300]]
+  - [[Borrow and ToOwned at Work: The Humble Cow 300][Borrow and ToOwned at Work: The Humble Cow 300]]
+- [[14. Closures - 303][14. Closures - 303]]
+  - [[Capturing Variables 305][Capturing Variables 305]]
+  - [[Closures That Borrow 306][Closures That Borrow 306]]
+  - [[Closures That Steal 306][Closures That Steal 306]]
+  - [[Function and Closure Types 308][Function and Closure Types 308]]
+  - [[Closure Performance 310][Closure Performance 310]]
+  - [[Closures and Safety 311][Closures and Safety 311]]
+  - [[Closures That Kill 312][Closures That Kill 312]]
+  - [[FnOnce 312][FnOnce 312]]
+  - [[FnMut 314][FnMut 314]]
+  - [[Callbacks 316][Callbacks 316]]
+  - [[Using Closures Effectively 319][Using Closures Effectively 319]]
+- [[15. Iterators - 321][15. Iterators - 321]]
+  - [[The Iterator and IntoIterator Traits 322][The Iterator and IntoIterator Traits 322]]
+  - [[Creating Iterators 324][Creating Iterators 324]]
+  - [[iter and iter_mut Methods 324][iter and iter_mut Methods 324]]
+  - [[IntoIterator Implementations 325][IntoIterator Implementations 325]]
+  - [[drain Methods 327][drain Methods 327]]
+  - [[Other Iterator Sources 328][Other Iterator Sources 328]]
+  - [[Iterator Adapters 330][Iterator Adapters 330]]
+  - [[map and filter 330][map and filter 330]]
+  - [[filter_map and flat_map 332][filter_map and flat_map 332]]
+  - [[scan 335][scan 335]]
+  - [[take and take_while 335][take and take_while 335]]
+  - [[skip and skip_while 336][skip and skip_while 336]]
+  - [[peekable 337][peekable 337]]
+  - [[fuse 338][fuse 338]]
+  - [[Reversible Iterators and rev 339][Reversible Iterators and rev 339]]
+  - [[inspect 340][inspect 340]]
+  - [[chain 341][chain 341]]
+  - [[enumerate 341][enumerate 341]]
+  - [[zip 342][zip 342]]
+  - [[by_ref 342][by_ref 342]]
+  - [[cloned 344][cloned 344]]
+  - [[cycle 344][cycle 344]]
+  - [[Consuming Iterators 345][Consuming Iterators 345]]
+  - [[Simple Accumulation: count, sum, product 345][Simple Accumulation: count, sum, product 345]]
+  - [[max, min 346][max, min 346]]
+  - [[max_by, min_by 346][max_by, min_by 346]]
+  - [[max_by_key, min_by_key 347][max_by_key, min_by_key 347]]
+  - [[Comparing Item Sequences 347][Comparing Item Sequences 347]]
+  - [[any and all 348][any and all 348]]
+  - [[position, rposition, and ExactSizeIterator 348][position, rposition, and ExactSizeIterator 348]]
+  - [[fold 349][fold 349]]
+  - [[nth 350][nth 350]]
+  - [[last 350][last 350]]
+  - [[find 351][find 351]]
+  - [[Building Collections: collect and FromIterator 351][Building Collections: collect and FromIterator 351]]
+  - [[The Extend Trait 353][The Extend Trait 353]]
+  - [[partition 353][partition 353]]
+  - [[Implementing Your Own Iterators 354][Implementing Your Own Iterators 354]]
+- [[16. Collections - 359][16. Collections - 359]]
+  - [[Overview 360][Overview 360]]
+  - [[Vec<T> 361][Vec<T> 361]]
+    - [[Accessing Elements 362][Accessing Elements 362]]
+    - [[Iteration 364][Iteration 364]]
+    - [[Growing and Shrinking Vectors 364][Growing and Shrinking Vectors 364]]
+    - [[Joining 367][Joining 367]]
+    - [[Splitting 368][Splitting 368]]
+    - [[Swapping 370][Swapping 370]]
+    - [[Sorting and Searching 370][Sorting and Searching 370]]
+    - [[Comparing Slices 372][Comparing Slices 372]]
+    - [[Random Elements 373][Random Elements 373]]
+    - [[Rust Rules Out Invalidation Errors 373][Rust Rules Out Invalidation Errors 373]]
+  - [[VecDeque<T> 374][VecDeque<T> 374]]
+  - [[LinkedList<T> 376][LinkedList<T> 376]]
+  - [[BinaryHeap<T> 377][BinaryHeap<T> 377]]
+  - [[HashMap<K, V> and BTreeMap<K, V> 378][HashMap<K, V> and BTreeMap<K, V> 378]]
+    - [[Entries 381][Entries 381]]
+    - [[Map Iteration 383][Map Iteration 383]]
+  - [[HashSet<T> and BTreeSet<T> 384][HashSet<T> and BTreeSet<T> 384]]
+    - [[Set Iteration 384][Set Iteration 384]]
+    - [[When Equal Values Are Different 385][When Equal Values Are Different 385]]
+    - [[Whole-Set Operations 385][Whole-Set Operations 385]]
+  - [[Hashing 387][Hashing 387]]
+    - [[Using a Custom Hashing Algorithm 388][Using a Custom Hashing Algorithm 388]]
+  - [[Beyond the Standard Collections 389][Beyond the Standard Collections 389]]
+- [[17. Strings and Text - 391][17. Strings and Text - 391]]
+  - [[Some Unicode Background 392][Some Unicode Background 392]]
+    - [[ASCII, Latin-1, and Unicode 392][ASCII, Latin-1, and Unicode 392]]
+    - [[UTF-8 392][UTF-8 392]]
+    - [[Text Directionality 394][Text Directionality 394]]
+  - [[Characters (char) 394][Characters (char) 394]]
+    - [[Classifying Characters 395][Classifying Characters 395]]
+    - [[Handling Digits 395][Handling Digits 395]]
+    - [[Case Conversion for Characters 396][Case Conversion for Characters 396]]
+    - [[Conversions to and from Integers 396][Conversions to and from Integers 396]]
+  - [[String and str 397][String and str 397]]
+    - [[Creating String Values 398][Creating String Values 398]]
+    - [[Simple Inspection 398][Simple Inspection 398]]
+    - [[Appending and Inserting Text 399][Appending and Inserting Text 399]]
+    - [[Removing Text 401][Removing Text 401]]
+    - [[Conventions for Searching and Iterating 401][Conventions for Searching and Iterating 401]]
+    - [[Patterns for Searching Text 402][Patterns for Searching Text 402]]
+    - [[Searching and Replacing 403][Searching and Replacing 403]]
+    - [[Iterating over Text 403][Iterating over Text 403]]
+    - [[Trimming 406][Trimming 406]]
+    - [[Case Conversion for Strings 406][Case Conversion for Strings 406]]
+    - [[Parsing Other Types from Strings 406][Parsing Other Types from Strings 406]]
+    - [[Converting Other Types to Strings 407][Converting Other Types to Strings 407]]
+    - [[Borrowing as Other Text-Like Types 408][Borrowing as Other Text-Like Types 408]]
+    - [[Accessing Text as UTF-8 409][Accessing Text as UTF-8 409]]
+    - [[Producing Text from UTF-8 Data 409][Producing Text from UTF-8 Data 409]]
+    - [[Putting Off Allocation 410][Putting Off Allocation 410]]
+    - [[Strings as Generic Collections 412][Strings as Generic Collections 412]]
+  - [[Formatting Values 413][Formatting Values 413]]
+    - [[Formatting Text Values 414][Formatting Text Values 414]]
+    - [[Formatting Numbers 415][Formatting Numbers 415]]
+    - [[Formatting Other Types 417][Formatting Other Types 417]]
+    - [[Formatting Values for Debugging 418][Formatting Values for Debugging 418]]
+    - [[Formatting Pointers for Debugging 419][Formatting Pointers for Debugging 419]]
+    - [[Referring to Arguments by Index or Name 419][Referring to Arguments by Index or Name 419]]
+    - [[Dynamic Widths and Precisions 420][Dynamic Widths and Precisions 420]]
+    - [[Formatting Your Own Types 421][Formatting Your Own Types 421]]
+    - [[Using the Formatting Language in Your Own Code 423][Using the Formatting Language in Your Own Code 423]]
+  - [[Regular Expressions 424][Regular Expressions 424]]
+    - [[Basic Regex Use 425][Basic Regex Use 425]]
+    - [[Building Regex Values Lazily 426][Building Regex Values Lazily 426]]
+  - [[Normalization 427][Normalization 427]]
+    - [[Normalization Forms 428][Normalization Forms 428]]
+    - [[The unicode-normalization Crate 429][The unicode-normalization Crate 429]]
+- [[18. Input and Output - 431][18. Input and Output - 431]]
+  - [[Readers and Writers 432][Readers and Writers 432]]
+    - [[Readers 433][Readers 433]]
+    - [[Buffered Readers 435][Buffered Readers 435]]
+    - [[Reading Lines 436][Reading Lines 436]]
+    - [[Collecting Lines 439][Collecting Lines 439]]
+    - [[Writers 439][Writers 439]]
+    - [[Files 441][Files 441]]
+    - [[Seeking 441][Seeking 441]]
+    - [[Other Reader and Writer Types 442][Other Reader and Writer Types 442]]
+    - [[Binary Data, Compression, and Serialization 444][Binary Data, Compression, and Serialization 444]]
+  - [[Files and Directories 445][Files and Directories 445]]
+    - [[OsStr and Path 445][OsStr and Path 445]]
+    - [[Path and PathBuf Methods 447][Path and PathBuf Methods 447]]
+    - [[Filesystem Access Functions 449][Filesystem Access Functions 449]]
+    - [[Reading Directories 450][Reading Directories 450]]
+    - [[Platform-Specific Features 451][Platform-Specific Features 451]]
+  - [[Networking 453][Networking 453]]
+- [[19. Concurrency - 457][19. Concurrency - 457]]
+  - [[Fork-Join Parallelism 459][Fork-Join Parallelism 459]]
+    - [[spawn and join 461][spawn and join 461]]
+    - [[Error Handling Across Threads 463][Error Handling Across Threads 463]]
+    - [[Sharing Immutable Data Across Threads 464][Sharing Immutable Data Across Threads 464]]
+    - [[Rayon 466][Rayon 466]]
+    - [[Revisiting the Mandelbrot Set 468][Revisiting the Mandelbrot Set 468]]
+  - [[Channels 470][Channels 470]]
+    - [[Sending Values 472][Sending Values 472]]
+    - [[Receiving Values 475][Receiving Values 475]]
+    - [[Running the Pipeline 476][Running the Pipeline 476]]
+    - [[Channel Features and Performance 478][Channel Features and Performance 478]]
+    - [[Thread Safety: Send and Sync 479][Thread Safety: Send and Sync 479]]
+    - [[Piping Almost Any Iterator to a Channel 482][Piping Almost Any Iterator to a Channel 482]]
+    - [[Beyond Pipelines 483][Beyond Pipelines 483]]
+  - [[Shared Mutable State 484][Shared Mutable State 484]]
+    - [[What Is a Mutex? 484][What Is a Mutex? 484]]
+    - [[Mutex<T> 486][Mutex<T> 486]]
+    - [[mut and Mutex 488][mut and Mutex 488]]
+    - [[Why Mutexes Are Not Always a Good Idea 488][Why Mutexes Are Not Always a Good Idea 488]]
+    - [[Deadlock 489][Deadlock 489]]
+    - [[Poisoned Mutexes 490][Poisoned Mutexes 490]]
+    - [[Multi-producer Channels Using Mutexes 490][Multi-producer Channels Using Mutexes 490]]
+    - [[Read/Write Locks (RwLock<T>) 491][Read/Write Locks (RwLock<T>) 491]]
+    - [[Condition Variables (Condvar) 493][Condition Variables (Condvar) 493]]
+    - [[Atomics 494][Atomics 494]]
+    - [[Global Variables 496][Global Variables 496]]
+  - [[What Hacking Concurrent Code in Rust Is Like 497][What Hacking Concurrent Code in Rust Is Like 497]]
+- [[20. Macros - 499][20. Macros - 499]]
+  - [[Macro Basics 500][Macro Basics 500]]
+    - [[Basics of Macro Expansion 501][Basics of Macro Expansion 501]]
+    - [[Unintended Consequences 503][Unintended Consequences 503]]
+    - [[Repetition 505][Repetition 505]]
+  - [[Built-In Macros 507][Built-In Macros 507]]
+  - [[Debugging Macros 508][Debugging Macros 508]]
+  - [[The json! Macro 509][The json! Macro 509]]
+    - [[Fragment Types 510][Fragment Types 510]]
+    - [[Recursion in Macros 513][Recursion in Macros 513]]
+    - [[Using Traits with Macros 514][Using Traits with Macros 514]]
+    - [[Scoping and Hygiene 516][Scoping and Hygiene 516]]
+    - [[Importing and Exporting Macros 519][Importing and Exporting Macros 519]]
+  - [[Avoiding Syntax Errors During Matching 521][Avoiding Syntax Errors During Matching 521]]
+  - [[Beyond macro_rules! 522][Beyond macro_rules! 522]]
+- [[21. Unsafe Code - 525][21. Unsafe Code - 525]]
+  - [[Unsafe from What? 526][Unsafe from What? 526]]
+  - [[Unsafe Blocks 527][Unsafe Blocks 527]]
+    - [[Example: An Efficient ASCII String Type 529][Example: An Efficient ASCII String Type 529]]
+  - [[Unsafe Functions 531][Unsafe Functions 531]]
+  - [[Unsafe Block or Unsafe Function? 533][Unsafe Block or Unsafe Function? 533]]
+  - [[Undefined Behavior 533][Undefined Behavior 533]]
+  - [[Unsafe Traits 536][Unsafe Traits 536]]
+  - [[Raw Pointers 538][Raw Pointers 538]]
+    - [[Dereferencing Raw Pointers Safely 540][Dereferencing Raw Pointers Safely 540]]
+    - [[Example: RefWithFlag 541][Example: RefWithFlag 541]]
+    - [[Nullable Pointers 544][Nullable Pointers 544]]
+    - [[Type Sizes and Alignments 544][Type Sizes and Alignments 544]]
+    - [[Pointer Arithmetic 545][Pointer Arithmetic 545]]
+    - [[Moving into and out of Memory 546][Moving into and out of Memory 546]]
+    - [[Example: GapBuffer 550][Example: GapBuffer 550]]
+    - [[Panic Safety in Unsafe Code 556][Panic Safety in Unsafe Code 556]]
+  - [[Foreign Functions: Calling C and C++ from Rust 557][Foreign Functions: Calling C and C++ from Rust 557]]
+    - [[Finding Common Data Representations 558][Finding Common Data Representations 558]]
+    - [[Declaring Foreign Functions and Variables 561][Declaring Foreign Functions and Variables 561]]
+    - [[Using Functions from Libraries 562][Using Functions from Libraries 562]]
+    - [[A Raw Interface to libgit2 566][A Raw Interface to libgit2 566]]
+    - [[A Safe Interface to libgit2 572][A Safe Interface to libgit2 572]]
+  - [[Conclusion 583][Conclusion 583]]
+- [[Index - 585][Index - 585]]
 
-* 1. Why Rust? 7
-** Type Safety 8
+* 1. Why Rust? - 1
+** Type Safety 3
 
-* 2. A Tour of Rust 13
-** Downloading and installing Rust 13
-** A simple function 16
-** Writing and running unit tests 17
-** Handling command-line arguments 18
-** A simple web server 21
-** Concurrency 28
-*** Parsing pair command-line arguments 29
-*** Mapping from pixels to complex numbers 31
-*** Mandelbrot membership calculation 32
-*** Writing bitmap files 34
-*** A concurrent Mandelbrot program 35
-*** Running the Mandelbrot plotter 38
-*** Safety is invisible 40
+* 2. A Tour of Rust - 7
+** Downloading and installing Rust - 7
+** A Simple Function - 10
+** Writing and Running Unit Tests - 11
+** Handling Command-Line Arguments - 12
+** A Simple Web Server - 17
+** Concurrency - 23
+*** What the Mandelbrot Set Actually Is - 24
+*** Parsing Pair Command-Line Arguments 28
+*** Mapping from Pixels to Complex Numbers 31
+*** Plotting the Set - 32
+*** Writing Image Files 34
+*** A Concurrent Mandelbrot Program 35
+*** Running the Mandelbrot Plotter 40
+*** Safety Is Invisible 41
 
-* 3. Basic types 41
-** Machine types 44
-*** Integer types 44
-*** Floating-point types 47
-*** The ~bool~ type 48
-*** Characters 49
-** Tuples 50
-** Pointer types 52
-*** References 53
-*** Boxes 53
-*** Raw pointers 53
-** Arrays, Vectors, and Slices 53
-*** Arrays 54
-*** Vectors 55
-*** Slices 58
-** String types 60
-*** String literals 60
-*** Byte strings 61
-*** Strings in memory 61
-*** ~String~ 62
-*** Using strings 63
-*** Other string-like types 63
-** Beyond the basics 64
+* 3. Basic types - 43
+** Machine Types - 46
+*** Integer Types 47
+*** Floating-Point Types 50
+*** The ~bool~ Type 51
+*** Characters 52
 
-* 4. Ownership and moves 65
-** Ownership 66
-** Moves 71
-*** More operations that move 77
-*** Moves and control flow 78
-** ~Copy~ types: the exception to moves 81
-** ~Rc~ and ~Arc~: shared ownership 83
+** Tuples - 54
+** Pointer types - 55
+*** References 56
+*** Boxes 56
+*** Raw Pointers 57
 
-* 5. References and borrowing 87
-** References as values 90
-*** Implicit dereferencing 90
-*** Assigning references 92
-*** References to slices and trait objects 93
-*** References are never null 93
-*** Borrowing references to arbitrary expressions 94
-** Reference safety 94
-*** Borrowing a local variable 94
-*** Receiving references as parameters 98
-*** Passing references as arguments 100
-*** Returning references 101
-*** Structures containing references 102
-*** Distinct lifetime parameters 104
-** Sharing versus mutation 105
-** Reference counting: ~Rc~ and ~Arc~ 113
+** Arrays, Vectors, and Slices - 57
+*** Arrays 58
+*** Vectors 59
+*** Building Vectors Element by Element 62
+*** Slices 62
 
-* 6. Expressions 115
-** An expression language 115
-** Blocks and statements 116
-** Declarations 117
-** ~if~ and match 119
-** Loops 121
-** ~return~ expressions 123
-** Why Rust has ~loop~ 124
-** Names, paths, and ~use~ 125
-** Closures 126
-** Function and method calls 126
-** Fields and elements 127
-** Reference operators 128
-** Arithmetic, bitwise, comparison, and logical operators 129
-** Assignment 130
-** Type casts 130
-** Precedence and associativity 131
-** Onward 133
+** String Types - 64
+*** String Literals 64
+*** Byte Strings 65
+*** Strings in Memory 65
+*** String 67
+*** Using Strings 68
+*** Other String-Like Types 68
 
-* 7. Enums and patterns 135
-** Enums 135
-*** Tuple and struct variants 137
-*** Enums in memory 138
-*** Rich data structures using enums 139
-*** Generic enums 141
+** Beyond the basics 69
 
-** Patterns 143
-*** Tuple and struct patterns 144
-*** Reference patterns 146
-*** Matching multiple possibilities 147
-*** Pattern guards 148
-*** @ patterns 148
-*** Where patterns are allowed 149
-*** Populating a binary tree 150
-** The big picture 151
+* 4. Ownership - 71
+** Ownership - 73
+** Moves - 77
+*** More Operations That Move 82
+*** Moves and Control Flow 82
+*** Moves and Indexed Content 84
+
+** ~Copy~ Types: The Exception to Moves - 86
+** ~Rc~ and ~Arc~: shared ownership - 90
+
+* 5. References and borrowing - 93
+** References as Values - 97
+*** Rust References Versus C++ References - 97
+*** Assigning References - 98
+*** References to References - 99
+*** Comparing References - 99
+*** References Are Never Null - 100
+*** Borrowing References to Arbitrary Expressions - 100
+*** References to Slices and Trait Objects - 101
+
+** Reference Safety - 101
+*** Borrowing a Local Variable - 101
+*** Receiving References as Parameters - 105
+*** Passing References as Arguments - 107
+*** Returning References - 107
+*** Structs Containing References - 109
+*** Distinct Lifetime Parameters - 111
+*** Omitting Lifetime Parameters - 112
+** Sharing Versus Mutation - 114
+** Taking Arms Against a Sea of Objects - 121
+
+* 6. Expressions - 123
+** An Expression Language - 123
+** Blocks and Semicolons - 124
+** Declarations - 126
+** ~if~ and match - 127
+*** ~if let~ - 129
+
+** Loops - - 130
+** ~return~ Expressions - 132
+** Why Rust Has ~loop~ - 133
+** Function and Method Calls - 134
+** Fields and Elements - 135
+** Reference Operators - 137
+** Arithmetic, Bitwise, Comparison, and Logical Operators - 137
+** Assignment 138
+** Type Casts 139
+** Closures - 140
+** Precedence and Associativity 140
+** Onward 142
+   
+* 7. Error Handling - 145
+** Panic 145
+*** Unwinding 146
+*** Aborting 147
+
+** Result 148
+*** Catching Errors 148
+*** Result Type Aliases 150
+*** Printing Errors 150
+*** Propagating Errors 152
+*** Working with Multiple Error Types 153
+*** Dealing with Errors That “Can’t Happen” 155
+*** Ignoring Errors 156
+*** Handling Errors in main() 156
+*** Declaring a Custom Error Type 157
+*** Why Results? 158
+
+* 8. Crates and Modules - 161
+** Crates - 161
+*** Build Profiles 164
+
+** Modules - 165
+*** Modules in Separate Files 166
+*** Paths and Imports 167
+*** The Standard Prelude 169
+*** Items, the Building Blocks of Rust 170
+** Turning a Program into a Library - 172
+** The src/bin Directory - 174
+** Attributes - 175
+** Tests and Documentation - 178
+*** Integration Tests 180
+*** Documentation 181
+*** Doc-Tests 182
+
+** Specifying Dependencies - 185
+*** Versions 186
+*** Cargo.lock 187
+
+** Publishing Crates to crates.io - 188
+** Workspaces - 190
+** More Nice Things - 191
+
+* 9. Structs - 193
+** Named-Field Structs 193
+** Tuple-Like Structs 196
+** Unit-Like Structs 197
+** Struct Layout 197
+** Defining Methods with impl 198
+** Generic Structs 202
+** Structs with Lifetime Parameters 203
+** Deriving Common Traits for Struct Types 204
+** Interior Mutability 205
+
+* 10. Enums and patterns - 211
+** Enums 212
+*** Enums with Data - 214
+*** Enums in Memory - 215
+*** Rich Data Structures Using Enums - 216
+*** Generic Enums - 218
+
+** Patterns 221
+*** Literals, Variables, and Wildcards in Patterns - 223
+*** Tuple and Struct Patterns - 225
+*** Reference Patterns - 226
+*** Matching Multiple Possibilities - 229
+*** Pattern Guards - 229
+*** @ patterns - 230
+*** Where Patterns Are Allowed - 230
+*** Populating a Binary Tree 232
+
+** The Big Picture 233
+* 11. Traits and Generics - 235
+** Using Traits 237
+** Trait Objects 238
+** Trait Object Layout 239
+** Generic Functions 240
+** Which to Use 243
+** Defining and Implementing Traits 245
+** Default Methods 246
+** Traits and Other People’s Types 247
+** Self in Traits 249
+** Subtraits 250
+** Static Methods 251
+** Fully Qualified Method Calls 252
+** Traits That Define Relationships Between Types 253
+** Associated Types (or How Iterators Work) 254
+** Generic Traits (or How Operator Overloading Works) 257
+** Buddy Traits (or How rand::random() Works) 258
+** Reverse-Engineering Bounds 260
+** Conclusion 263
+
+* 12. Operator Overloading - 265
+** Arithmetic and Bitwise Operators 266
+** Unary Operators 268
+** Binary Operators 269
+** Compound Assignment Operators 270
+** Equality Tests 272
+** Ordered Comparisons 275
+** Index and IndexMut 277
+** Other Operators 280
+
+* 13. Utility Traits - 281
+** Drop 282
+** Sized 285
+** Clone 287
+** Copy 289
+** Deref and DerefMut 289
+** Default
+** AsRef and AsMut 294
+** Borrow and BorrowMut 296
+** From and Into 297
+** ToOwned 300
+** Borrow and ToOwned at Work: The Humble Cow 300
+
+* 14. Closures - 303
+** Capturing Variables 305
+** Closures That Borrow 306
+** Closures That Steal 306
+** Function and Closure Types 308
+** Closure Performance 310
+** Closures and Safety 311
+** Closures That Kill 312
+** FnOnce 312
+** FnMut 314
+** Callbacks 316
+** Using Closures Effectively 319
+
+* 15. Iterators - 321
+** The Iterator and IntoIterator Traits 322
+** Creating Iterators 324
+** iter and iter_mut Methods 324
+** IntoIterator Implementations 325
+** drain Methods 327
+** Other Iterator Sources 328
+** Iterator Adapters 330
+** map and filter 330
+** filter_map and flat_map 332
+** scan 335
+** take and take_while 335
+** skip and skip_while 336
+** peekable 337
+** fuse 338
+** Reversible Iterators and rev 339
+** inspect 340
+** chain 341
+** enumerate 341
+** zip 342
+** by_ref 342
+** cloned 344
+** cycle 344
+** Consuming Iterators 345
+** Simple Accumulation: count, sum, product 345
+** max, min 346
+** max_by, min_by 346
+** max_by_key, min_by_key 347
+** Comparing Item Sequences 347
+** any and all 348
+** position, rposition, and ExactSizeIterator 348
+** fold 349
+** nth 350
+** last 350
+** find 351
+** Building Collections: collect and FromIterator 351
+** The Extend Trait 353
+** partition 353
+** Implementing Your Own Iterators 354
+
+* 16. Collections - 359
+** Overview 360
+** Vec<T> 361
+*** Accessing Elements 362
+*** Iteration 364
+*** Growing and Shrinking Vectors 364
+*** Joining 367
+*** Splitting 368
+*** Swapping 370
+*** Sorting and Searching 370
+*** Comparing Slices 372
+*** Random Elements 373
+*** Rust Rules Out Invalidation Errors 373
+
+** VecDeque<T> 374
+** LinkedList<T> 376
+** BinaryHeap<T> 377
+** HashMap<K, V> and BTreeMap<K, V> 378
+*** Entries 381
+*** Map Iteration 383
+
+** HashSet<T> and BTreeSet<T> 384
+*** Set Iteration 384
+*** When Equal Values Are Different 385
+*** Whole-Set Operations 385
+
+** Hashing 387
+*** Using a Custom Hashing Algorithm 388
+
+** Beyond the Standard Collections 389
+
+* 17. Strings and Text - 391
+** Some Unicode Background 392
+*** ASCII, Latin-1, and Unicode 392
+*** UTF-8 392
+*** Text Directionality 394
+
+** Characters (char) 394
+*** Classifying Characters 395
+*** Handling Digits 395
+*** Case Conversion for Characters 396
+*** Conversions to and from Integers 396
+
+** String and str 397
+*** Creating String Values 398
+*** Simple Inspection 398
+*** Appending and Inserting Text 399
+*** Removing Text 401
+*** Conventions for Searching and Iterating 401
+*** Patterns for Searching Text 402
+*** Searching and Replacing 403
+*** Iterating over Text 403
+*** Trimming 406
+*** Case Conversion for Strings 406
+*** Parsing Other Types from Strings 406
+*** Converting Other Types to Strings 407
+*** Borrowing as Other Text-Like Types 408
+*** Accessing Text as UTF-8 409
+*** Producing Text from UTF-8 Data 409
+*** Putting Off Allocation 410
+*** Strings as Generic Collections 412
+
+** Formatting Values 413
+*** Formatting Text Values 414
+*** Formatting Numbers 415
+*** Formatting Other Types 417
+*** Formatting Values for Debugging 418
+*** Formatting Pointers for Debugging 419
+*** Referring to Arguments by Index or Name 419
+*** Dynamic Widths and Precisions 420
+*** Formatting Your Own Types 421
+*** Using the Formatting Language in Your Own Code 423
+
+** Regular Expressions 424
+*** Basic Regex Use 425
+*** Building Regex Values Lazily 426
+
+** Normalization 427
+*** Normalization Forms 428
+*** The unicode-normalization Crate 429
+
+* 18. Input and Output - 431
+** Readers and Writers 432
+*** Readers 433
+*** Buffered Readers 435
+*** Reading Lines 436
+*** Collecting Lines 439
+*** Writers 439
+*** Files 441
+*** Seeking 441
+*** Other Reader and Writer Types 442
+*** Binary Data, Compression, and Serialization 444
+
+** Files and Directories 445
+*** OsStr and Path 445
+*** Path and PathBuf Methods 447
+*** Filesystem Access Functions 449
+*** Reading Directories 450
+*** Platform-Specific Features 451
+
+** Networking 453
+
+* 19. Concurrency - 457
+** Fork-Join Parallelism 459
+*** spawn and join 461
+*** Error Handling Across Threads 463
+*** Sharing Immutable Data Across Threads 464
+*** Rayon 466
+*** Revisiting the Mandelbrot Set 468
+
+** Channels 470
+*** Sending Values 472
+*** Receiving Values 475
+*** Running the Pipeline 476
+*** Channel Features and Performance 478
+*** Thread Safety: Send and Sync 479
+*** Piping Almost Any Iterator to a Channel 482
+*** Beyond Pipelines 483
+
+** Shared Mutable State 484
+*** What Is a Mutex? 484
+*** Mutex<T> 486
+*** mut and Mutex 488
+*** Why Mutexes Are Not Always a Good Idea 488
+*** Deadlock 489
+*** Poisoned Mutexes 490
+*** Multi-producer Channels Using Mutexes 490
+*** Read/Write Locks (RwLock<T>) 491
+*** Condition Variables (Condvar) 493
+*** Atomics 494
+*** Global Variables 496
+
+** What Hacking Concurrent Code in Rust Is Like 497
+
+* 20. Macros - 499
+** Macro Basics 500
+*** Basics of Macro Expansion 501
+*** Unintended Consequences 503
+*** Repetition 505
+
+** Built-In Macros 507
+** Debugging Macros 508
+** The json! Macro 509
+*** Fragment Types 510
+*** Recursion in Macros 513
+*** Using Traits with Macros 514
+*** Scoping and Hygiene 516
+*** Importing and Exporting Macros 519
+
+** Avoiding Syntax Errors During Matching 521
+** Beyond macro_rules! 522
+
+* 21. Unsafe Code - 525
+** Unsafe from What? 526
+** Unsafe Blocks 527
+*** Example: An Efficient ASCII String Type 529
+
+** Unsafe Functions 531
+** Unsafe Block or Unsafe Function? 533
+** Undefined Behavior 533
+** Unsafe Traits 536
+** Raw Pointers 538
+*** Dereferencing Raw Pointers Safely 540
+*** Example: RefWithFlag 541
+*** Nullable Pointers 544
+*** Type Sizes and Alignments 544
+*** Pointer Arithmetic 545
+*** Moving into and out of Memory 546
+*** Example: GapBuffer 550
+*** Panic Safety in Unsafe Code 556
+
+** Foreign Functions: Calling C and C++ from Rust 557
+*** Finding Common Data Representations 558
+*** Declaring Foreign Functions and Variables 561
+*** Using Functions from Libraries 562
+*** A Raw Interface to libgit2 566
+*** A Safe Interface to libgit2 572
+
+** Conclusion 583
+
+* Index - 585

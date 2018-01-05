@@ -1,0 +1,229 @@
+#+TITLE: Maven Essentials
+#+VERSION: 2015
+#+AUTHOR: Prabath Siriwardena
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface - v][Preface - v]]
+- [[Chapter 1: Apache Maven Quick Start - 1][Chapter 1: Apache Maven Quick Start - 1]]
+  - [[Installing Apache Maven 1][Installing Apache Maven 1]]
+    - [[Installing Apache Maven on Ubuntu 2][Installing Apache Maven on Ubuntu 2]]
+    - [[Installing Apache Maven on Mac OS X 3][Installing Apache Maven on Mac OS X 3]]
+    - [[Installing Apache Maven on Microsoft Windows 4][Installing Apache Maven on Microsoft Windows 4]]
+  - [[Configuring the heap size 5][Configuring the heap size 5]]
+  - [[Hello Maven! 6][Hello Maven! 6]]
+  - [[Convention over configuration 7][Convention over configuration 7]]
+  - [[Maven repositories 9][Maven repositories 9]]
+  - [[IDE integration 9][IDE integration 9]]
+    - [[NetBeans integration 9][NetBeans integration 9]]
+    - [[IntelliJ IDEA integration 10][IntelliJ IDEA integration 10]]
+    - [[Eclipse integration 10][Eclipse integration 10]]
+  - [[Troubleshooting 10][Troubleshooting 10]]
+    - [[Enabling Maven debug level logs 10][Enabling Maven debug level logs 10]]
+    - [[Building a dependency tree 10][Building a dependency tree 10]]
+    - [[Viewing all the environment variables and system properties 11][Viewing all the environment variables and system properties 11]]
+    - [[Viewing the effective POM file 12][Viewing the effective POM file 12]]
+    - [[Viewing the dependency classpath 13][Viewing the dependency classpath 13]]
+  - [[Summary 13][Summary 13]]
+- [[Chapter 2: Understanding the Project Object Model (POM) - 15][Chapter 2: Understanding the Project Object Model (POM) - 15]]
+  - [[Project Object Model (POM) 15][Project Object Model (POM) 15]]
+  - [[POM hierarchy 17][POM hierarchy 17]]
+  - [[Super POM 18][Super POM 18]]
+  - [[POM extending and overriding 23][POM extending and overriding 23]]
+  - [[Maven coordinates 25][Maven coordinates 25]]
+  - [[The parent POM 27][The parent POM 27]]
+  - [[Managing POM dependencies 29][Managing POM dependencies 29]]
+    - [[Transitive dependencies 33][Transitive dependencies 33]]
+    - [[Dependency scopes 35][Dependency scopes 35]]
+    - [[Optional dependencies 38][Optional dependencies 38]]
+      - [[Dependency exclusion 39][Dependency exclusion 39]]
+  - [[Summary 42][Summary 42]]
+- [[Chapter 3: Maven Archetypes - 43][Chapter 3: Maven Archetypes - 43]]
+  - [[Archetype quickstart 44][Archetype quickstart 44]]
+  - [[Batch mode 47][Batch mode 47]]
+  - [[Archetype catalogues 47][Archetype catalogues 47]]
+    - [[Building an archetype catalogue 51][Building an archetype catalogue 51]]
+    - [[Public archetype catalogues 51][Public archetype catalogues 51]]
+    - [[The anatomy of archetype – catalog.xml 53][The anatomy of archetype – catalog.xml 53]]
+  - [[The archetype plugin goals 54][The archetype plugin goals 54]]
+  - [[Java EE web applications with the archetype plugin 55][Java EE web applications with the archetype plugin 55]]
+    - [[Deploying web applications to a remote Apache Tomcat server 57][Deploying web applications to a remote Apache Tomcat server 57]]
+  - [[Android mobile applications with the archetype plugin 59][Android mobile applications with the archetype plugin 59]]
+  - [[EJB archives with the archetype plugin 61][EJB archives with the archetype plugin 61]]
+  - [[JIRA plugins with the archetype plugin 64][JIRA plugins with the archetype plugin 64]]
+  - [[Spring MVC applications with the archetype plugin 65][Spring MVC applications with the archetype plugin 65]]
+  - [[Summary 66][Summary 66]]
+- [[Chapter 4: Maven Plugins - 67][Chapter 4: Maven Plugins - 67]]
+  - [[Common Maven plugins 69][Common Maven plugins 69]]
+    - [[The clean plugin 69][The clean plugin 69]]
+    - [[The compiler plugin 70][The compiler plugin 70]]
+    - [[The install plugin 73][The install plugin 73]]
+    - [[The deploy plugin 73][The deploy plugin 73]]
+    - [[The surefire plugin 75][The surefire plugin 75]]
+    - [[The site plugin 77][The site plugin 77]]
+    - [[The jar plugin 80][The jar plugin 80]]
+    - [[The source plugin 81][The source plugin 81]]
+    - [[The resources plugin 82][The resources plugin 82]]
+    - [[The release plugin 83][The release plugin 83]]
+  - [[Plugin discovery and execution 84][Plugin discovery and execution 84]]
+    - [[Plugin management 87][Plugin management 87]]
+    - [[Plugin repositories 87][Plugin repositories 87]]
+    - [[Plugin as an extension 89][Plugin as an extension 89]]
+  - [[Summary 89][Summary 89]]
+- [[Chapter 5: Build Lifecycles - 91][Chapter 5: Build Lifecycles - 91]]
+  - [[Standard lifecycles in Maven 92][Standard lifecycles in Maven 92]]
+    - [[The clean lifecycle 92][The clean lifecycle 92]]
+    - [[The default lifecycle 95][The default lifecycle 95]]
+    - [[The site lifecycle 100][The site lifecycle 100]]
+  - [[Lifecycle bindings 101][Lifecycle bindings 101]]
+  - [[Lifecycle extensions 105][Lifecycle extensions 105]]
+  - [[Summary 108][Summary 108]]
+- [[Chapter 6: Maven Assemblies - 109][Chapter 6: Maven Assemblies - 109]]
+  - [[The assembly plugin 110][The assembly plugin 110]]
+  - [[The assembly descriptor 112][The assembly descriptor 112]]
+  - [[Artifact/resource filtering 125][Artifact/resource filtering 125]]
+  - [[Assembly help 125][Assembly help 125]]
+  - [[A runnable standalone Maven project 126][A runnable standalone Maven project 126]]
+  - [[Summary 131][Summary 131]]
+- [[Chapter 7: Best Practices - 133][Chapter 7: Best Practices - 133]]
+  - [[Dependency management 134][Dependency management 134]]
+  - [[Defining a parent module 136][Defining a parent module 136]]
+  - [[POM properties 137][POM properties 137]]
+  - [[Avoiding repetitive groupIds and versions, and inheriting from][Avoiding repetitive groupIds and versions, and inheriting from]]
+  - [[the parent POM 141][the parent POM 141]]
+  - [[Following naming conventions 141][Following naming conventions 141]]
+  - [[Think twice before you write your own plugin. You may not need it! 143][Think twice before you write your own plugin. You may not need it! 143]]
+  - [[The Maven release plugin 144][The Maven release plugin 144]]
+  - [[The Maven enforcer plugin 145][The Maven enforcer plugin 145]]
+  - [[Avoiding the use of unversioned plugins 147][Avoiding the use of unversioned plugins 147]]
+  - [[Descriptive parent POM files 149][Descriptive parent POM files 149]]
+  - [[Documentation is your friend 150][Documentation is your friend 150]]
+  - [[Avoid overriding the default directory structure 151][Avoid overriding the default directory structure 151]]
+  - [[Using SNAPSHOT versioning during the development 152][Using SNAPSHOT versioning during the development 152]]
+  - [[Get rid of unused dependencies 152][Get rid of unused dependencies 152]]
+  - [[Avoiding keeping credentials in application POM files 153][Avoiding keeping credentials in application POM files 153]]
+  - [[Avoiding using deprecated references 154][Avoiding using deprecated references 154]]
+  - [[Avoiding repetition – use archetypes 155][Avoiding repetition – use archetypes 155]]
+  - [[Avoiding using maven.test.skip 155][Avoiding using maven.test.skip 155]]
+  - [[Summary 157][Summary 157]]
+- [[Index - 159][Index - 159]]
+
+* Preface - v
+* Chapter 1: Apache Maven Quick Start - 1
+** Installing Apache Maven 1
+*** Installing Apache Maven on Ubuntu 2
+*** Installing Apache Maven on Mac OS X 3
+*** Installing Apache Maven on Microsoft Windows 4
+
+** Configuring the heap size 5
+** Hello Maven! 6
+** Convention over configuration 7
+** Maven repositories 9
+** IDE integration 9
+*** NetBeans integration 9
+*** IntelliJ IDEA integration 10
+*** Eclipse integration 10
+
+** Troubleshooting 10
+*** Enabling Maven debug level logs 10
+*** Building a dependency tree 10
+*** Viewing all the environment variables and system properties 11
+*** Viewing the effective POM file 12
+*** Viewing the dependency classpath 13
+
+** Summary 13
+
+* Chapter 2: Understanding the Project Object Model (POM) - 15
+** Project Object Model (POM) 15
+** POM hierarchy 17
+** Super POM 18
+** POM extending and overriding 23
+** Maven coordinates 25
+** The parent POM 27
+** Managing POM dependencies 29
+*** Transitive dependencies 33
+*** Dependency scopes 35
+*** Optional dependencies 38
+**** Dependency exclusion 39
+
+** Summary 42
+
+* Chapter 3: Maven Archetypes - 43
+** Archetype quickstart 44
+** Batch mode 47
+** Archetype catalogues 47
+*** Building an archetype catalogue 51
+*** Public archetype catalogues 51
+*** The anatomy of archetype – catalog.xml 53
+
+** The archetype plugin goals 54
+** Java EE web applications with the archetype plugin 55
+*** Deploying web applications to a remote Apache Tomcat server 57
+
+** Android mobile applications with the archetype plugin 59
+** EJB archives with the archetype plugin 61
+** JIRA plugins with the archetype plugin 64
+** Spring MVC applications with the archetype plugin 65
+** Summary 66
+
+* Chapter 4: Maven Plugins - 67
+** Common Maven plugins 69
+*** The clean plugin 69
+*** The compiler plugin 70
+*** The install plugin 73
+*** The deploy plugin 73
+*** The surefire plugin 75
+*** The site plugin 77
+*** The jar plugin 80
+*** The source plugin 81
+*** The resources plugin 82
+*** The release plugin 83
+
+** Plugin discovery and execution 84
+*** Plugin management 87
+*** Plugin repositories 87
+*** Plugin as an extension 89
+
+** Summary 89
+
+* Chapter 5: Build Lifecycles - 91
+** Standard lifecycles in Maven 92
+*** The clean lifecycle 92
+*** The default lifecycle 95
+*** The site lifecycle 100
+
+** Lifecycle bindings 101
+** Lifecycle extensions 105
+** Summary 108
+
+* Chapter 6: Maven Assemblies - 109
+** The assembly plugin 110
+** The assembly descriptor 112
+** Artifact/resource filtering 125
+** Assembly help 125
+** A runnable standalone Maven project 126
+** Summary 131
+
+* Chapter 7: Best Practices - 133
+** Dependency management 134
+** Defining a parent module 136
+** POM properties 137
+** Avoiding repetitive groupIds and versions, and inheriting from
+** the parent POM 141
+** Following naming conventions 141
+** Think twice before you write your own plugin. You may not need it! 143
+** The Maven release plugin 144
+** The Maven enforcer plugin 145
+** Avoiding the use of unversioned plugins 147
+** Descriptive parent POM files 149
+** Documentation is your friend 150
+** Avoid overriding the default directory structure 151
+** Using SNAPSHOT versioning during the development 152
+** Get rid of unused dependencies 152
+** Avoiding keeping credentials in application POM files 153
+** Avoiding using deprecated references 154
+** Avoiding repetition – use archetypes 155
+** Avoiding using maven.test.skip 155
+** Summary 157
+
+* Index - 159

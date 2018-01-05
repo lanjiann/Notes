@@ -1,0 +1,323 @@
+#+TITLE: Modern Compiler Implementation in ML
+#+VERSION: 1999 (corrected)
+#+AUTHOR: Andrew W. Appel
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface - ix][Preface - ix]]
+- [[Part I Fundamentals of Compilation][Part I Fundamentals of Compilation]]
+- [[1 Introduction - 3][1 Introduction - 3]]
+  - [[1.1 Modules and interfaces - 4][1.1 Modules and interfaces - 4]]
+    - [[Description of The Phases - 5][Description of The Phases - 5]]
+  - [[1.2 Tools and software - 5][1.2 Tools and software - 5]]
+  - [[1.3 Data structures for tree languages - 7][1.3 Data structures for tree languages - 7]]
+    - [[|PROGRAM| STRAIGHT-LINE PROGRAM INTERPRETER][|PROGRAM| STRAIGHT-LINE PROGRAM INTERPRETER]]
+- [[2 Lexical Analysis - 14][2 Lexical Analysis - 14]]
+  - [[2.1 Lexical tokens - 15][2.1 Lexical tokens - 15]]
+  - [[2.2 Regular expressions - 16][2.2 Regular expressions - 16]]
+  - [[2.3 Finite automata - 19][2.3 Finite automata - 19]]
+  - [[2.4 Nondeterministic finite automata - 22][2.4 Nondeterministic finite automata - 22]]
+  - [[2.5 ML-Lex: a lexical analyzer generator - 28][2.5 ML-Lex: a lexical analyzer generator - 28]]
+- [[3 Parsing - 38][3 Parsing - 38]]
+  - [[3.1 Context-free grammers - 40][3.1 Context-free grammers - 40]]
+  - [[3.2 Predictive parsing - 45][3.2 Predictive parsing - 45]]
+  - [[3.3 LR parsing - 55][3.3 LR parsing - 55]]
+  - [[3.4 Using parser generators - 68][3.4 Using parser generators - 68]]
+  - [[3.5 Error recovery - 75][3.5 Error recovery - 75]]
+- [[4 Abstract Syntax - 87][4 Abstract Syntax - 87]]
+  - [[4.1 Semantic actions 87][4.1 Semantic actions 87]]
+  - [[4.2 Abstract parse trees 92][4.2 Abstract parse trees 92]]
+- [[5 Semantic Analysis - 103][5 Semantic Analysis - 103]]
+  - [[5.1 Symbol tables 103][5.1 Symbol tables 103]]
+  - [[5.2 Bindings for the Tiger compiler 111][5.2 Bindings for the Tiger compiler 111]]
+  - [[5.3 Type-checking expressions 114][5.3 Type-checking expressions 114]]
+  - [[5.4 Type-checking declarations 117][5.4 Type-checking declarations 117]]
+- [[6 Activation Records - 124][6 Activation Records - 124]]
+  - [[6.1 Stack frames 126][6.1 Stack frames 126]]
+  - [[6.2 Frames in the Tiger compiler 134][6.2 Frames in the Tiger compiler 134]]
+- [[7 Translation to Intermediate Code - 148][7 Translation to Intermediate Code - 148]]
+  - [[7.1 Intermediate representation trees 149][7.1 Intermediate representation trees 149]]
+  - [[7.2 Translation into trees 152][7.2 Translation into trees 152]]
+  - [[7.3 Declarations 167][7.3 Declarations 167]]
+- [[8 Basic Blocks and Traces - 173][8 Basic Blocks and Traces - 173]]
+  - [[8.1 Canonical trees 174][8.1 Canonical trees 174]]
+  - [[8.2 Taming conditional branches 179][8.2 Taming conditional branches 179]]
+- [[9 Instruction Selection - 186][9 Instruction Selection - 186]]
+  - [[9.1 Algorithms for instruction selection 189][9.1 Algorithms for instruction selection 189]]
+  - [[9.2 CISC machines 197][9.2 CISC machines 197]]
+  - [[9.3 Instruction selection for the Tiger compiler 200][9.3 Instruction selection for the Tiger compiler 200]]
+- [[10 Liveness Analysis - 211][10 Liveness Analysis - 211]]
+  - [[10.1 Solution of dataflow equations 213][10.1 Solution of dataflow equations 213]]
+  - [[10.2 Liveness in the Tiger compiler 222][10.2 Liveness in the Tiger compiler 222]]
+- [[11 Register Allocation - 228][11 Register Allocation - 228]]
+  - [[11.1 Coloring by simplification 229][11.1 Coloring by simplification 229]]
+  - [[11.2 Coalescing 232][11.2 Coalescing 232]]
+  - [[11.3 Precolored nodes 236][11.3 Precolored nodes 236]]
+  - [[11.4 Graph coloring implementation 241][11.4 Graph coloring implementation 241]]
+  - [[11.5 Register allocation for trees 250][11.5 Register allocation for trees 250]]
+- [[12 Putting It All Together - 258][12 Putting It All Together - 258]]
+- [[Part II Advanced Topics][Part II Advanced Topics]]
+- [[13 Garbage Collection - 267][13 Garbage Collection - 267]]
+  - [[13.1 Mark-and-sweep collection - 267][13.1 Mark-and-sweep collection - 267]]
+  - [[13.2 Reference counts - 272][13.2 Reference counts - 272]]
+  - [[13.3 Copying collection 274][13.3 Copying collection 274]]
+  - [[13.4 Generational collection 279][13.4 Generational collection 279]]
+  - [[13.5 Incremental collection 281][13.5 Incremental collection 281]]
+  - [[13.6 Baker's algorithm 284][13.6 Baker's algorithm 284]]
+  - [[13.7 Interface to the compiler 285][13.7 Interface to the compiler 285]]
+- [[14 Object-Oriented Languages - 293][14 Object-Oriented Languages - 293]]
+  - [[14.1 Classes 293][14.1 Classes 293]]
+  - [[14.2 Single inheritance of data fields 296][14.2 Single inheritance of data fields 296]]
+  - [[14.3 Multiple inheritance 298][14.3 Multiple inheritance 298]]
+  - [[14.4 Testing class membership 300][14.4 Testing class membership 300]]
+  - [[14.5 Private fields and methods 304][14.5 Private fields and methods 304]]
+  - [[14.6 Classless languages 304][14.6 Classless languages 304]]
+  - [[14.7 Optimizing object-oriented programs 305][14.7 Optimizing object-oriented programs 305]]
+- [[15 Functional Programming Languages - 309][15 Functional Programming Languages - 309]]
+  - [[15.1 A simple functional language 310][15.1 A simple functional language 310]]
+  - [[15.2 Closures 312][15.2 Closures 312]]
+  - [[15.3 Immutable variables 313][15.3 Immutable variables 313]]
+  - [[15.4 Inline expansion 320][15.4 Inline expansion 320]]
+  - [[15.5 Closure conversion 326][15.5 Closure conversion 326]]
+  - [[15.6 Efficient tail recursion 329][15.6 Efficient tail recursion 329]]
+  - [[15.7 Lazy evaluation 331][15.7 Lazy evaluation 331]]
+- [[16 Polymorphic Types - 344][16 Polymorphic Types - 344]]
+  - [[16.1 Parametric polymorphism 345][16.1 Parametric polymorphism 345]]
+  - [[16.2 Type inference 353][16.2 Type inference 353]]
+  - [[16.3 Representation of polymorphic variables 363][16.3 Representation of polymorphic variables 363]]
+  - [[16.4 Resolution of static overloading 372][16.4 Resolution of static overloading 372]]
+- [[17 Dataflow Analysis - 377][17 Dataflow Analysis - 377]]
+  - [[17.1 Intermediate representation for flow analysis 378][17.1 Intermediate representation for flow analysis 378]]
+  - [[17.2 Various dataflow analyses 381][17.2 Various dataflow analyses 381]]
+  - [[17.3 Transformations using dataflow analysis 386][17.3 Transformations using dataflow analysis 386]]
+  - [[17.4 Speeding up dataflow analysis 387][17.4 Speeding up dataflow analysis 387]]
+  - [[17.5 Alias analysis 396][17.5 Alias analysis 396]]
+- [[18 Loop Optimizations - 404][18 Loop Optimizations - 404]]
+  - [[18.1 Dominators - 407][18.1 Dominators - 407]]
+  - [[18.2 Loop-invariant computations - 412][18.2 Loop-invariant computations - 412]]
+  - [[18.3 Induction variables - 413][18.3 Induction variables - 413]]
+  - [[18.4 Array-bounds checks - 419][18.4 Array-bounds checks - 419]]
+  - [[18.5 Loop unrolling - 423][18.5 Loop unrolling - 423]]
+- [[19 Static Single-Assignment Form - 427][19 Static Single-Assignment Form - 427]]
+  - [[19.1 Converting to SSA form 430][19.1 Converting to SSA form 430]]
+  - [[19.2 Efficient computation of the dominator tree 438][19.2 Efficient computation of the dominator tree 438]]
+  - [[19.3 Optimization algorithms using SSA 445][19.3 Optimization algorithms using SSA 445]]
+  - [[19.4 Arrays, pointers, and memory 451][19.4 Arrays, pointers, and memory 451]]
+  - [[19.5 The control-dependence graph 453][19.5 The control-dependence graph 453]]
+  - [[19.6 Converting back from SSA form 456][19.6 Converting back from SSA form 456]]
+  - [[19.7 A functional intermediate form 458][19.7 A functional intermediate form 458]]
+- [[20 Pipelining and Scheduling - 468][20 Pipelining and Scheduling - 468]]
+  - [[20.1 Loop scheduling without resource bounds 472][20.1 Loop scheduling without resource bounds 472]]
+  - [[20.2 Resource-bounded loop pipelining 476][20.2 Resource-bounded loop pipelining 476]]
+  - [[20.3 Branch prediction 484][20.3 Branch prediction 484]]
+- [[21 The Memory Hierarchy - 492][21 The Memory Hierarchy - 492]]
+  - [[21.1 Cache organization 493][21.1 Cache organization 493]]
+  - [[21.2 Cache-block alignment 496][21.2 Cache-block alignment 496]]
+  - [[21.3 Prefetching 498][21.3 Prefetching 498]]
+  - [[21.4 Loop interchange 504][21.4 Loop interchange 504]]
+  - [[21.5 Blocking 505][21.5 Blocking 505]]
+  - [[21.6 Garbage collection and the memory hierarchy 508][21.6 Garbage collection and the memory hierarchy 508]]
+- [[Appendix: Tiger Language Reference Manual - 512][Appendix: Tiger Language Reference Manual - 512]]
+  - [[A.1 Lexical issues - 512][A.1 Lexical issues - 512]]
+  - [[A.2 Declarations - 512][A.2 Declarations - 512]]
+  - [[A.3 Variables and expressions - 515][A.3 Variables and expressions - 515]]
+  - [[A.4 Standard library - 519][A.4 Standard library - 519]]
+  - [[A.5 Sample Tiger programs - 520][A.5 Sample Tiger programs - 520]]
+- [[Bibliography - 522][Bibliography - 522]]
+- [[Index - 531][Index - 531]]
+
+* Preface - ix 
+* Part I Fundamentals of Compilation
+* 1 Introduction - 3 
+  - FIGURE 1.1.  Phases of a compiler, and interfaces between them.
+
+** DONE 1.1 Modules and interfaces - 4 
+   CLOSED: [2017-12-17 Sun 18:43]
+*** Description of The Phases - 5
+    - Each chapter of Part I of this book describes one compiler phase, as shown
+      in Table 1.2
+
+    - =TODO=
+      =RE-READ LATER=
+      This modularization is typical of many real compilers. But
+      + some compilers combine the below phases in this compiler into one phase
+        1. /Parse/
+        2. /Semantic Analysis/
+        3. /Translate/
+        4. /Canonicalize/
+
+      + others put /Instruction Selection/ _much later_ than I have done, and
+        combine it with /Code Emission/.
+
+      + Simple compilers _omit_ the phases below
+        1. /Control Row Analysis/
+        2. /Data Row Analysis/
+        3. /Register Allocation/
+
+    - The compiler in this book is as simple as possible, but no simpler.
+
+** 1.2 Tools and software - 5 
+   - _TWO_ of the most useful _abstractions_ used in modern compilers are
+     + /context-free grammars/, for parsing
+     + /regular expressions/, for lexical analysis
+
+   - To make best use of these abstractions it is helpful to have special tools,
+     such as
+     + /Yacc/,
+       which converts a grammar into a parsing program
+
+     + /Lex/,
+       which converts a declarative specification into a lexical analysis program
+
+     Fortunately, good versions of these tools are available for ML, and the
+     project described in this book makes use of them: /ML-Yacc/, /ML-Lex/, and
+     /Standard ML of New Jersey Software Library/.
+
+   - The base directory in this book is refered as ~$TIGER/~
+
+** 1.3 Data structures for tree languages - 7 
+   - *Modularity principles for ML programs*
+     1. Each phase or module of the compiler belongs in its own structure.
+
+     2. ~open~ declarations will not be used.
+        + Don't ~open A.F; open A.G; open B; open C;~. With this statements, you
+          cannot know which file contains ~X~.
+
+        + Use structure abbreviations:
+          ~structure W=A.F.W and X=A.G.X and Y=B.Y and Z=C.Z~
+
+*** |PROGRAM| STRAIGHT-LINE PROGRAM INTERPRETER
+
+* 2 Lexical Analysis - 14
+** 2.1 Lexical tokens - 15
+** 2.2 Regular expressions - 16
+** 2.3 Finite automata - 19
+** 2.4 Nondeterministic finite automata - 22
+** 2.5 ML-Lex: a lexical analyzer generator - 28
+
+* 3 Parsing - 38
+** 3.1 Context-free grammers - 40
+** 3.2 Predictive parsing - 45
+** 3.3 LR parsing - 55
+** 3.4 Using parser generators - 68
+** 3.5 Error recovery - 75
+
+* 4 Abstract Syntax - 87 
+** 4.1 Semantic actions 87
+** 4.2 Abstract parse trees 92 
+
+* 5 Semantic Analysis - 103 
+** 5.1 Symbol tables 103 
+** 5.2 Bindings for the Tiger compiler 111 
+** 5.3 Type-checking expressions 114 
+** 5.4 Type-checking declarations 117
+
+* 6 Activation Records - 124 
+** 6.1 Stack frames 126 
+** 6.2 Frames in the Tiger compiler 134 
+
+* 7 Translation to Intermediate Code - 148 
+** 7.1 Intermediate representation trees 149 
+** 7.2 Translation into trees 152 
+** 7.3 Declarations 167 
+
+* 8 Basic Blocks and Traces - 173 
+** 8.1 Canonical trees 174 
+** 8.2 Taming conditional branches 179 
+
+* 9 Instruction Selection - 186 
+** 9.1 Algorithms for instruction selection 189 
+** 9.2 CISC machines 197 
+** 9.3 Instruction selection for the Tiger compiler 200 
+
+* 10 Liveness Analysis - 211 
+** 10.1 Solution of dataflow equations 213 
+** 10.2 Liveness in the Tiger compiler 222 
+
+* 11 Register Allocation - 228 
+** 11.1 Coloring by simplification 229 
+** 11.2 Coalescing 232 
+** 11.3 Precolored nodes 236 
+** 11.4 Graph coloring implementation 241 
+** 11.5 Register allocation for trees 250 
+
+* 12 Putting It All Together - 258 
+* Part II Advanced Topics
+* 13 Garbage Collection - 267
+** 13.1 Mark-and-sweep collection - 267
+** 13.2 Reference counts - 272
+** 13.3 Copying collection 274 
+** 13.4 Generational collection 279
+** 13.5 Incremental collection 281 
+** 13.6 Baker's algorithm 284 
+** 13.7 Interface to the compiler 285 
+
+* 14 Object-Oriented Languages - 293 
+** 14.1 Classes 293 
+** 14.2 Single inheritance of data fields 296 
+** 14.3 Multiple inheritance 298 
+** 14.4 Testing class membership 300 
+** 14.5 Private fields and methods 304 
+** 14.6 Classless languages 304 
+** 14.7 Optimizing object-oriented programs 305 
+
+* 15 Functional Programming Languages - 309 
+** 15.1 A simple functional language 310 
+** 15.2 Closures 312 
+** 15.3 Immutable variables 313 
+** 15.4 Inline expansion 320 
+** 15.5 Closure conversion 326 
+** 15.6 Efficient tail recursion 329 
+** 15.7 Lazy evaluation 331 
+
+* 16 Polymorphic Types - 344 
+** 16.1 Parametric polymorphism 345 
+** 16.2 Type inference 353 
+** 16.3 Representation of polymorphic variables 363 
+** 16.4 Resolution of static overloading 372 
+
+* 17 Dataflow Analysis - 377 
+** 17.1 Intermediate representation for flow analysis 378 
+** 17.2 Various dataflow analyses 381 
+** 17.3 Transformations using dataflow analysis 386 
+** 17.4 Speeding up dataflow analysis 387 
+** 17.5 Alias analysis 396 
+
+* 18 Loop Optimizations - 404   
+** 18.1 Dominators - 407
+** 18.2 Loop-invariant computations - 412
+** 18.3 Induction variables - 413
+** 18.4 Array-bounds checks - 419
+** 18.5 Loop unrolling - 423
+
+* 19 Static Single-Assignment Form - 427 
+** 19.1 Converting to SSA form 430
+** 19.2 Efficient computation of the dominator tree 438 
+** 19.3 Optimization algorithms using SSA 445 
+** 19.4 Arrays, pointers, and memory 451 
+** 19.5 The control-dependence graph 453 
+** 19.6 Converting back from SSA form 456 
+** 19.7 A functional intermediate form 458 
+
+* 20 Pipelining and Scheduling - 468 
+** 20.1 Loop scheduling without resource bounds 472
+** 20.2 Resource-bounded loop pipelining 476 
+** 20.3 Branch prediction 484 
+
+* 21 The Memory Hierarchy - 492 
+** 21.1 Cache organization 493 
+** 21.2 Cache-block alignment 496 
+** 21.3 Prefetching 498 
+** 21.4 Loop interchange 504 
+** 21.5 Blocking 505 
+** 21.6 Garbage collection and the memory hierarchy 508 
+
+* Appendix: Tiger Language Reference Manual - 512
+** A.1 Lexical issues - 512
+** A.2 Declarations - 512
+** A.3 Variables and expressions - 515
+** A.4 Standard library - 519
+** A.5 Sample Tiger programs - 520
+
+* Bibliography - 522
+* Index - 531
