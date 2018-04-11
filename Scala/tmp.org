@@ -1,0 +1,562 @@
+#+TITLE: Programming in Scala (2.12)
+#+SUBTITLE: A comprehensive step-by-step guide
+#+VERSION: 3rd
+#+AUTHOR: Martin Odersky, Lex Spoon, Bill Venners
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[14 Assertions and Tests - 294][14 Assertions and Tests - 294]]
+  - [[14.1 Assertions - 294][14.1 Assertions - 294]]
+  - [[14.2 Testing in Scala - 296][14.2 Testing in Scala - 296]]
+  - [[14.3 Informative failure reports - 297][14.3 Informative failure reports - 297]]
+  - [[14.4 Tests as specifications - 299][14.4 Tests as specifications - 299]]
+  - [[14.5 Property-based testing - 302][14.5 Property-based testing - 302]]
+  - [[14.6 Organizing and running tests - 304][14.6 Organizing and running tests - 304]]
+  - [[14.7 Conclusion - 305][14.7 Conclusion - 305]]
+- [[18 Mutable Objects - 395][18 Mutable Objects - 395]]
+  - [[18.1 What makes an object mutable? - 395][18.1 What makes an object mutable? - 395]]
+  - [[18.2 Reassignable variables and properties - 398][18.2 Reassignable variables and properties - 398]]
+  - [[18.3 Case study: Discrete event simulation - 401][18.3 Case study: Discrete event simulation - 401]]
+  - [[18.4 A language for digital circuits - 402][18.4 A language for digital circuits - 402]]
+  - [[18.5 The ~Simulation~ API - 405][18.5 The ~Simulation~ API - 405]]
+  - [[18.6 Circuit Simulation - 409][18.6 Circuit Simulation - 409]]
+    - [[The ~Wire~ class - 412][The ~Wire~ class - 412]]
+    - [[The ~inverter~ method - 413][The ~inverter~ method - 413]]
+    - [[The ~andGate~ and ~orGate~ methods - 414][The ~andGate~ and ~orGate~ methods - 414]]
+    - [[Simulation output - 414][Simulation output - 414]]
+    - [[Running the simulator - 415][Running the simulator - 415]]
+  - [[18.7 Conclusion - 417][18.7 Conclusion - 417]]
+
+* TODO 14 Assertions and Tests - 294
+** DONE 14.1 Assertions - 294
+   CLOSED: [2017-10-23 Mon 12:52]
+   - The expression ~assert(condition)~ throws an ~AssertionError~
+     if condition does NOT hold.
+
+   - Footnote 1: ~assert~ is defined in ~Predef~
+
+   - There are also a two-argument version of ~assert~:
+     ~assert(condition, explanation)~, where ~explanation~ is of type ~Any~.
+     When use it, the ~assert~ method will call ~toString~ on it to get a string
+     explantion to place inside the ~AssertionError~.
+
+   - Example:
+     #+BEGIN_SRC scala
+       def above(that: Element): Element = {
+         val this1 = this widen that.width
+         val that1 = that widen this.width
+         assert(this1.width == that2.width)
+         elem(this1.contents ++ that1.contents)
+       }
+     #+END_SRC
+
+   - ~ensuring~
+
+   - Example:
+     #+BEGIN_SRC scala
+       private def widen(w: Int): Element =
+         if (w <= width)
+           this
+         else {
+           val left = elem(' ', (w - width) / 2, height)
+           val right = elem(' ', w - width - left.width, height)
+           left beside this beside right
+         } ensuring (w <= _.width)
+     #+END_SRC
+     The ~ensuring~ method is called on a implicitly conversion of the ~Element~
+     value, rather than the ~Element~ value itself.
+
+     If the passed in predicate return ~true~, return the result;
+     otherwise, ensuring will throw an ~AssertionError~.
+
+   - Enable and disable assertions in JVM:
+     use the =-ea= and =-da= flags respectively.
+
+** DONE 14.2 Testing in Scala - 296
+   CLOSED: [2017-10-23 Mon 15:23]
+   - Tools:
+     + in Java:
+       * JUnit
+       * TestNG
+
+     + in Scala:
+       * ScalaTest
+       * specs2
+       * ScalaCheck
+
+   - Start with ScalaTest, which is the most flexible -- teams can use whatever
+     testing style fits their needs best.
+     + for teams familar with JUnit, they can use ~FunSuite~ style.
+       #+BEGIN_SRC scala
+         import org.scalatest.FunSuite
+         import Element.elem
+
+         class ElementSuite extends FunSuite {
+           test("elem result should have passed width") {
+             val ele = elem('x', 2, 3)
+             assert(ele.with == 2)
+           }
+         }
+       #+END_SRC
+
+   - suite :: a collection of tests.
+
+   - test :: anything with a name that can start and either
+     + succeed
+     + fail
+     + be pending
+     + be cancled.
+
+   - Trait ~Suite~ is the central unit of composition in ~ScalaTest~.
+
+     It declares "lifecycle" methods defining a default way to run tests, which
+     can be overridden to customize how tests are written and run.
+
+   - ~ScalaTest~
+     + offers /style traits/ that extend ~Suite~ and override /lifecycle methods/
+       to support different testing styles.
+
+     + provides /mixin traits/ that override /lifecycle methods/ to address
+       particular testing needs.
+
+   - Define test classes by composing ~Suite~ style and mixin traits.
+     Define test suites by composing ~Suite~ instances.
+
+   - ~FunSuite~ :: "Fun" for "function".
+
+   - ~test~ is a method defined in ~FunSuite~, which is invoked by the /primary
+     constructor/ of ~ElementSuite~.
+
+   - =TODO= DETAILS????
+     ~ScalaTest~ is integrated into common build tools (such as /sbt/ and
+     /Maven/) and IDEs (such as /IntelliJ IDEA/ and /Eclipse/).
+
+   - You can run a ~Suite~ directly via ~ScalaTest~'s ~Runner~ application
+     =TODO=
+
+     or
+
+     from the Scala interpreter simply by invoking ~execute~ on it.
+     For example,
+     #+BEGIN_SRC scala
+       scala> (new ElementSuite).execute()
+       // ElementSuite:
+       // - elem result should have passed width
+     #+END_SRC
+
+   - All styles generate specification-like output that can facilitate
+     communication among stakeholders.
+
+     The style you choose dictates only how the declarations of your tests will
+     look. Everything else in ~ScalaTest~ works consistently the same way no
+     matter what style you choose.
+
+** DONE 14.3 Informative failure reports - 297
+   CLOSED: [2017-10-23 Mon 22:36]
+   - Use ~DiagrammedAssertions~, whose error messages display a diagram of the
+     expression passed to ~assert~. See example in page 298.
+
+   - ScalaTest's ~assert~ methods do NOT differentiate between the _actual_ and
+     _expected_ result in error messages.
+
+     The ~assertResult~ method can differentiate between them.
+     #+BEGIN_SRC scala
+       assertResult(2) {
+         ele.width
+       }
+     #+END_SRC
+
+   - Check exceptions:
+     #+BEGIN_SRC scala
+       assertThrows[IllegalArgumentException] {
+         elem('x', -2, 3)
+       }
+     #+END_SRC
+
+   - Intercept exception to use:
+     #+BEGIN_SRC scala
+       val caught =
+         intercept[ArithmeticException] {
+           1 / 0
+         }
+
+       assert(caught.getMessage == "/ by zero")
+     #+END_SRC
+
+** TODO 14.4 Tests as specifications - 299
+** TODO 14.5 Property-based testing - 302
+** TODO 14.6 Organizing and running tests - 304
+** TODO 14.7 Conclusion - 305
+
+* TODO 18 Mutable Objects - 395
+   This chapter
+   - explains what /mutable objects/ are and what Scala provides in terms of
+     syntax to express them.
+
+   - introduces a larger case study on
+     + /discrete event simulation/, which involves /mutable objects/,
+
+     + as well as *building* an /internal DSL/ for defining _digital circuits_ to
+       simulate.
+
+** DONE 18.1 What makes an object mutable? - 395
+   CLOSED: [2018-04-02 Mon 04:08]
+   - You know one object is _mutable_, if it does NOT fulfill the requirement of
+     of /reference transparency/.
+
+   - A good EXAMPLE of /mutable object/ is a _bank account_.
+     #+BEGIN_SRC scala
+       class BankAccount {
+         private var bal: Int = 0
+
+         def balance: Int = bal
+
+         def deposit(amount: Int): Unit = {
+           require(amount > 0)
+           bal += amount
+         }
+
+         def withdraw(amount: Int): Boolean =
+           if (amount > bal) false
+           else {
+             bal -= amount
+             true
+           }
+       }
+     #+END_SRC
+     =From Jian=
+     I think this is a bood idea that the default ~bal~ must be ~0~ first -- NO
+     constructor with ~bal~ value that can be user specified exists, which can
+     avoid unintended errors like initalize an accout with a huge ~bal~ value for
+     anyone.
+
+   - Remember! /mutability/ does NOT always mean ~var~,
+
+     For instance, a /class/ might be /mutable/ _without defining or inheriting
+     any ~var~'s_ because it *forwards* /method/ calls to other objects that
+     have /mutable state/.
+
+     (=From Jian= this is why oop is complicated!!!
+     One simple example is a ~val~ references to /mutable object/, the
+     /reference/ saved in the ~val~ cannot change, but the *forworded* operations
+     change the content of the object it references.)
+
+     The reverse is also possible: *A class might contain ~var~'s and still be
+     purely functional.* For example, a /class/ that _caches the result of an
+     expensive operation in a field for opimization purposes_ .
+     #+BEGIN_SRC scala
+       // NO cache, unoptimized
+       class Keyed {
+         def computeKey: Int = ...  // this will take some time
+
+         // ...
+       }
+
+
+       // Optimized with cache
+       class MemoKeyed extends Keyed {
+
+         private var keyCache: Option[Int] = None
+
+         override def computeKey: Int = {
+           if (!keyCache.isDefined) keyCache = Some(super.computeKey)
+           keyCache.get
+         }
+
+       }
+     #+END_SRC
+     The difference between ~Keyed~ and ~MemoKeyed~ is that ~MemoKeyed~ is more
+     efficient -- no repeated computation, and then no other difference if only
+     inspect them from the outside. Therefore, if ~Keyed~ is puerly functional
+     to the user, why not ~MemoKeyed~.
+
+** DONE 18.2 Reassignable variables and properties - 398
+   CLOSED: [2018-04-02 Mon 20:49]
+   - You can perform _two_ fundamental operations on a reassignable variable:
+     + *get* its value
+     + *set* it to a new value.
+
+   - In Scala, every ~var~ that is a /non-private member/ of some object
+     *implicitly defines a /getter/ and a /setter/ /method/ with it*.
+
+     These /getters/ and /setters/ are _NAMED_ *differently from the Java
+     convention*, however. Of a ~var x~,
+     + Its /getter/ is also named ~x~
+     + Its /setter/ is named ~x_=~.
+
+   - Example:
+     + Original Source code:
+       #+BEGIN_SRC scala
+         class Time {
+           var hour = 12
+           var minute = 0
+         }
+       #+END_SRC
+
+     + Code after auto-transformation:
+       #+BEGIN_SRC scala
+         class Time {
+           private[this] var h = 12
+           private[this] var m = 0
+           def hour: Int = h
+           def hour_=(x: Int) = { h = x }
+           def minute: Int = m
+           def minute_=(x: Int) = { m = x }
+         }
+       #+END_SRC
+       In the transformed code, correspond to one ~var~, for example, ~hour~:
+       * there is always a ~private[this] var~ with _different name_ (~h~).
+
+       * there are always a /getter/ and a /setter/ with the same visibility.
+         The orginal ~val hour~ is /public/, thus the generated ~def hour~ and
+         ~def hour_=~ are /public/.
+
+     + You can manually define /getters/ and /setters/. Here is an example, and
+       we add some constraints to the /getters/ and /setters/, and make a new
+       ~Time~ which, besides some explicit reasonable constraints, works the same
+       as the "Original Souce Code" version:
+       #+BEGIN_SRC scala
+         class Time {
+           private[this] var h = 12
+           private[this] var m = 0
+           def hour: Int = h
+
+           def hour_=(x: Int) = {
+             require(0 <= x && x < 24)
+             h = x
+           }
+
+           def minute: Int = m
+
+           def minute_=(x: Int) = {
+             require(0 <= x && x < 60)
+             m = x
+           }
+         }
+       #+END_SRC
+
+   - It's also possbile, and sometimes useful, to define a /getter/ and a
+     /setter/ without an associated field. For example,
+     #+BEGIN_SRC scala
+       class Thermometer {
+         var celsius: Float = _
+
+         def fahrenheit = celsius * 9 / 5 + 32
+
+         def fahrenheit_= (f: Float) = {
+           celsius = (f 32)
+             ,* 5 / 9
+         }
+
+         override def toString = fahrenheit + "F/" + celsius + "C"
+       }
+     #+END_SRC
+     In this example, ~Thermometer~ doesn't have a field called ~fahrenheit~, but
+     it has the information of /fahrenheit temparature/, which is saved inside
+     ~var celcisus~.
+       The definition of /getter/ ~fahrenheit~ body is the function to translate
+     the information.
+       The definition of /setter/ ~fahrenheit_=~ body translates the input
+     /fahrenheit temparature/ information to /celcisus temparature/ and save it.
+
+** DONE 18.3 Case study: Discrete event simulation - 401
+   CLOSED: [2018-04-02 Mon 21:35]
+   - This task is broken down into several subproblems, each of which is
+     interesting individually:
+
+     1. You'll see a little language for digital circuits -- /embedding DSL/ in a
+        host language like Scala.
+
+     2. Present a simple but general _framework for discrete event simulation_.
+
+          Its main task will be to keep track of actions that are performed in
+        simulated time.
+
+     3. We'll show how *discrete simulation programs* can be _structured_ and
+        _built_.
+
+        The idea of such simulations is to
+        + model physical objects by simulated objects
+
+        + use the simulation framework to model physical time.
+
+     4. xxx
+
+   - This /digital circuits simulation/ example is taken from SICP.
+
+   - The various aspects of the example are structured into *four* software
+     layers:
+     1. simulation framework;
+
+     2. the basic circuit simulation package;
+
+     3. a library of user-defined circuits;
+
+     4. each simulated circuit itself.
+
+     Each layer is expressed as a /class/, some of them have inheritance
+     hierarchy.
+
+** TODO 18.4 A language for digital circuits - 402
+   - A digital circuit is built from /wires/ and /function boxes/.
+
+   - /Wires/ *carry* /signals/, which are *transformed* by /function boxes/.
+
+     /Signals/ are represented by booleans: ~true~ for _signal-on_ and ~false~
+     for _signal-off_.
+
+   - *THREE* basic function boxes (or /gates/):
+     + inverter :: negate its /signal/
+
+     + and-gate :: set its _output_ to the *conjunction* of its _inputs_.
+
+     + or-gate :: set its _output_ to the *disjunction* of its _inputs_.
+
+   - There *THREE* /gates/ is enough to be used to build all other /function
+     boxes/.
+
+   - Define /wire/ like ~class Wire~
+
+   - *THREE* procedures which "make" the /basic gates/ we need:
+     #+BEGIN_SRC scala
+       def inverter(input: Wire, output: Wire)
+
+       def andGate(a1: Wire, a2: Wire, output: Wire)
+
+       def orGate(o1: Wire, o2: Wire, output: Wire)
+     #+END_SRC
+
+   - =TODO=
+
+   - =TODO=
+     #+BEGIN_SRC scala
+       def halfAdder(a: Wire, b: Wire, s: Wire, c: Wire) = {
+         val d, e = new Wire
+         orGate(a, b, d)
+         andGate(a, b, c)
+         inverter(c, e)
+         andGate(d, e, s)
+       }
+     #+END_SRC
+
+   - =TODO=
+
+   - =TODO=
+
+   - =TODO=
+     #+BEGIN_SRC scala
+       def fullAdder(a: Wire, b: Wire, cin: Wire,
+                     sum: Wire, cout: Wire) = {
+         val s, c1, c2 = new Wire
+         halfAdder(a, cin, s, c1)
+         halfAdder(b, s, sum, c2)
+         orGate(c1, c2, cout)
+       }
+     #+END_SRC
+
+** TODO 18.5 The ~Simulation~ API - 405
+   - The simulation API is shown in Listing 18.8.
+     It consists of class ~Simulation~ in /package/ ~org.stairwaybook.simulation~.
+     The elements of the ~Simulation~ /class/ are presented in this section.
+
+   - /Concrete simulation classes/
+     + include the subtypes of this /class/
+
+     + they augment ~Simulation~ with domain-specific functionality.
+
+
+   - Implementation:
+     #+BEGIN_SRC scala
+       abstract class Simulation {
+         type Action = () => Unit
+
+         case class WorkItem(time: Int, action: Action)
+
+         private var curtime = 0
+
+         def currentTime: Int = curtime
+
+         private var agenda: List[WorkItem] = List()
+
+         private def insert(ag: List[WorkItem],
+                            item: WorkItem): List[WorkItem] = {
+           if (ag.isEmpty || item.time < ag.head.time) item :: ag
+           else                                        ag.head :: insert(ag.tail, item)
+         }
+
+         def afterDelay(delay: Int)(block: => Unit) = {
+           val item = WorkItem(currentTime + delay, () => block)
+           agenda = insert(agenda, item)
+         }
+
+         private def next() = {
+           (agenda: @unchecked) match {
+             case item :: rest =>
+               agenda = rest
+               curtime = item.time
+               item.action()
+           }
+         }
+
+         def run() = {
+           afterDelay(0) {
+             println("*** simulation started, time = " +
+                       currentTime + " ***")
+           }
+           while (!agenda.isEmpty) next()
+         }
+
+       }
+     #+END_SRC
+
+     + A /discrete event simulation/ performs _user-defined actions_ at
+       _specified times_. We define the _alias_ of the /action type/ as ~Action~.
+
+       =RE-DO= More about ~type~ in Section 20.6
+
+     + The _time_ at which an /action/ is performed is /simulated time/;
+       _it has nothing to do with the actual "wall clock" time_ -- simulated
+       times are represented simply as integers. The current simulated time is
+       kept in a private variable: ~private var curtime: Int = 0~
+
+       It has a public accessor /method/: ~def currentTime: Int = curtime~
+
+       Combine these two and then the value can be read, but it cannot be
+       modified outside this class.
+
+     + An /action/ that needs to be _executed at a specified time_ is called a
+       /work item/: ~case class WorkItem(time: Int, action: Action)~
+
+     + The ~Simulation~ /class/ keeps an /agenda/ _of all remaining work items
+       that have *NOT YET* been executed_.
+
+       The /work items/ are _sorted by the simulated time_ at which they have to
+       be run: ~private var agenda: List[WorkItem] = List()~
+
+     + ~insert~, ~afterDelay~ =TODO= _NOTE_
+
+     + ~run()~ is used to perform this simulation according to the ~agenda~.
+
+       When the ~agenda~ is not empty, call ~new()~ to run next /work item/ in
+       ~agenda~.
+
+       * Why ~@unchecked~?
+
+         Answer:
+         In ~next()~ we won't match ~Nil~, which is obviously reasonable -- we
+         only call ~next()~ when ~agenda~ is non-empty. However, if you write a
+         /pattern matching/ without doing /exhaustive match/, you'll see an
+         warning message issued by the compiler -- use ~@unchecked~ to tell the
+         compiler to ignore this warning!!!
+
+   - =TODO= _NOTE_
+
+** TODO 18.6 Circuit Simulation - 409
+*** The ~Wire~ class - 412
+*** The ~inverter~ method - 413
+*** The ~andGate~ and ~orGate~ methods - 414
+*** Simulation output - 414
+*** Running the simulator - 415
+
+** TODO 18.7 Conclusion - 417
+   
