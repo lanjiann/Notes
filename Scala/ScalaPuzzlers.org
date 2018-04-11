@@ -85,7 +85,39 @@
 
    - 
 
-* TODO 1. Hi There! 18
+* DONE 1. Hi There! 18
+  CLOSED: [2018-02-08 Thu 23:18]
+  - block expression :: one or multiple statements inside ~{}~, _with the LAST
+       determining the RESULT of the block_.
+
+  - /block expressions/ are *NOT* /anonymous function/.
+
+  - Assume ~val lst = List(1, 2)~,
+    + ~lst.map(i => println("Hi"); i + 1)~ CANNOT compiled.
+
+      The body of an /anonymous function/ can ONLY be ONE experssion. For
+      example, ONLY ~i + 1~ is OK; a /block expression/ that contains multiple
+      expressions is OK. However, not the code above.
+
+    + ~lst.map(i \equal{}> { println("Hi"); i + 1 })~ will print *TWO* =Hi='s, and
+      return ~List(2, 3)~.
+
+      The /block expression/ is the body of this /anonymous function/.
+      The body will be evaluated everytime its /anonymous function/ is called.
+      For this example, it is evaluated two times.
+
+    + Both ~lst.map { println("Hi"); _ + 1 }~ and ~lst.map({ println("Hi"); _ + 1 })~
+      will print *ONE* =Hi=, and return ~List(2, 3)~.
+  
+      The /block expression/ is evaluated first, and then its *LAST* expression is
+      returned as an /anonymous function/ passed to ~map~. Therefore, ONLY *one*
+      =Hi= -- the ~println("Hi");~ as a part of this /block expression/ is
+      evaluated once.
+
+  - The scope of the /placeholder/ ~_~ is the exact expression that includes the
+    /placeholder/. All the other parts are NOT considered as the body of an
+    /anonymous function/ related to the ~_~.
+
 * DONE 2. UPSTAIRS downstairs 23
   CLOSED: [2017-09-28 Thu 23:37]
   Q: What is the result of executing the following code in the REPL?
@@ -118,8 +150,8 @@
      //                           ˆ
    #+END_SRC
 
-   - Uppercase variable names can be used for plain, single-value assignments of
-     ~val~'s and ~var~'s, as in the case of ~MONTH~ and ~DAY~.
+   - /Uppercase variable names/ can be used for plain, single-value assignments
+     of ~val~'s and ~var~'s, as in the case of ~MONTH~ and ~DAY~.
 
    - Some trickiness arises in pattern matching:
      + variables _STARTING WITH an UPPERCASE letter_ are /stable identifiers/.
@@ -145,14 +177,16 @@
 
 ** DONE Discussion
    CLOSED: [2017-09-28 Thu 23:37]
-   - If, by extreme coincidence, the required /stable identifiers/ are in scope
-     the pattern matching part will compile successfully.
+   - If, by extreme *coincidence*, the required /stable identifiers/ are
+     *in scope* the pattern matching part will compile successfully.
+
      At runtime, ~MatchError~ may happen is the given value of the /stable
      identifiers/ can't match the RHS value of pattern matching.
      
      #+BEGIN_SRC scala
        val HOUR = 12; val MINUTE, SECOND = 0;
        var (HOUR, MINUTE, SECOND) = (12, 0, 0)
+       // Even if it compiles successfully, NO assignment happen.
 
 
        val HOUR = 13; val MINUTE, SECOND = 0;
@@ -160,10 +194,12 @@
        // scala.MatchError: (12,0,0) (of class scala.Tuple3)
        //  ...
      #+END_SRC
-     Even if it compiles successfully, NO assignment happen.
 
-   - Lowercase variables can also be _treated as_ /stable identifiers/ by enclos-
-     ing them in backticks.
+   - /Lowercase variables/ can also be _treated as_ /stable identifiers/ by
+     *enclosing them in backticks*.
+
+     _Additional requirement_: ~val~
+
      #+BEGIN_SRC scala
        final val theAnswer = 42
 
@@ -177,7 +213,8 @@
      #+END_SRC
 
      #+BEGIN_SRC scala
-       var theAnswer: Int = 42   // not a val, and not final either
+       // not a `val` (should be), and not `final` either
+       var theAnswer: Int = 42
 
        def checkGuess(guess: Int) = guess match {
          case `theAnswer` => "Your guess is correct"
@@ -189,16 +226,30 @@
        //          case `theAnswer` => "Your guess is correct"
      #+END_SRC
 
-   - =TODO= WHY /stable identifiers/ require ~val~???????
-     =TODO= =???=
+   - We should keep the convention in other languages -- use /lowercase name/
+     for ~var~'s (better still, avoid ~var~'s completely!), and /uppercase names/
+     for /constants/.
 
-   - =TODO= Last paragraph
+     + constants (in Scala) :: variables declared as ~final val~
+
+     =Comment from Jian=
+     A example to distinguish /constant/ and /immutable quantity/:
+       Suppose there are two universe follow the same physics rules (same form
+     formula), and the ONLY difference is some /physics constants/. These
+     /physics constants/ are actully /immutable quantities/ in each universe, not
+     /constant/ in our context of discussion. A /constant/, rather than
+     /immutable quantity/, should be a fixed value defined the template of these
+     two universes -- the universe class. Therefore, for this example, a good
+     choice is the ~static final val~.
+
+     Declared as ~final~ _PREVENTS subclasses from overriding them_, and has an
+     additional performance benefit in that the compiler can /inline/ them.
 
    - _SUMMARY_
-     Use uppercase variable names only for constants.
+     Use *uppercase* variable names ONLY for /constants/.
 
-* 3. Location, Location, Location 27
-* 4. Now You See Me, Now You Don’t 33
+* TODO 3. Location, Location, Location 27
+* TODO 4. Now You See Me, Now You Don’t 33
   Q: What does the following program print?
   #+BEGIN_SRC scala
     trait A {
@@ -289,11 +340,11 @@
         If you do not need to preserve the input type, consider constructing
       your own intermediate types with known characteristics.
 
-* 6. Arg Arrgh! 45
-* 7. Caught Up in Closures 50
-* 8. Map Comprehension 55
-* 9. Init You, Init Me 59
-* 10. A Case of Equality 67
+* TODO 6. Arg Arrgh! 45
+* TODO 7. Caught Up in Closures 50
+* TODO 8. Map Comprehension 55
+* TODO 9. Init You, Init Me 59
+* TODO 10. A Case of Equality 67
 * 11. If at First You Don’t Succeed... 74
 * 12. To Map, or Not to Map 78
 * 13. Self: See Self 83

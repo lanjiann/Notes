@@ -58,7 +58,7 @@
     - [[Spacing][Spacing]]
     - [[Multi-Expression Functions][Multi-Expression Functions]]
 - [[Scaladoc][Scaladoc]]
-  - [[General Style][General Style]]
+  - [[General Style =TODO=][General Style =TODO=]]
   - [[Packages][Packages]]
   - [[Classes, Objects, and Traits][Classes, Objects, and Traits]]
     - [[Classes][Classes]]
@@ -744,27 +744,30 @@
 
 **** DONE Procedure Syntax
      CLOSED: [2017-12-30 Sat 13:16]
+     Prefer
+     #+BEGIN_SRC scala
+       def printBar(bar: Bar): Unit = {
+         println(bar)
+       }
+     #+END_SRC
+
+     to
      #+BEGIN_SRC scala
        // don't do this
        def printBar(bar: Baz) {
-         println(bar)
-       }
-
-       // write this instead
-       def printBar(bar: Bar): Unit = {
          println(bar)
        }
      #+END_SRC
 
 **** DONE Modifiers =RE-READ=
      CLOSED: [2017-12-30 Sat 13:16]
-     Method modifiers should be given in the following order (when each is
+     /Method modifiers/ should be given in the following order (when each is
      applicable):
      1. Annotations, _each on their own line_
      2. Override modifier (~override~)
      3. Access modifier (~protected~, ~private~)
      4. Final modifier (~final~) =TODO=
-     5. ~def~
+     Then ~def~
 
      #+BEGIN_SRC scala
        @Transaction
@@ -888,12 +891,290 @@
     - As noted earlier, /function values/ should leverage /type inference/
       *whenever possible*.
 
-* TODO Scaladoc
-** TODO General Style
-** TODO Packages
-** TODO Classes, Objects, and Traits
-*** TODO Classes
-*** TODO Objects
-*** TODO Traits
+* DONE Scaladoc
+  CLOSED: [2018-02-01 Thu 10:10]
+  - It is important to provide documentation for ALL /packages/, /classes/,
+    /traits/, /methods/, and other /members/.
 
-** TODO Methods and Other Members
+  - /Scaladoc/ generally *FOLLOWS* the conventions of /Javadoc/,
+
+    BUT provides _many additional features_ (=From Jian= Study /Javadoc/ and try
+    to get to know what features are _addtional_ in /Scaladoc/ =TODO=) that
+    simplify writing documentation for Scala code.
+    =TODO=
+
+  - The /Scaladoc/ tool does *NOT mandate* a /documentation comment style/.
+
+  - The following examples demonstrate a single line summary followed by
+    detailed documentation, in the three common styles of indentation.
+
+    + *Javadoc style*:
+      #+BEGIN_SRC java
+        /**
+         * Provides a service as described.
+         *
+         * This is further documentation of what we're documenting.
+         * Here are more details about how it works and what it does.
+         */
+        def member: Unit = ()
+      #+END_SRC
+
+    + *Scaladoc style*:
+      with gutter asterisks aligned in *column two*:
+      #+BEGIN_SRC scala
+        /** Provides a service as described.
+         *
+         *  This is further documentation of what we're documenting.
+         *  Here are more details about how it works and what it does.
+         */
+        def member: Unit = ()
+      #+END_SRC
+
+    + *Scaladoc style*:
+      with gutter asterisks aligned in *column three*:
+      #+BEGIN_SRC scala
+        /** Provides a service as described.
+          *
+          * This is further documentation of what we're documenting.
+          * Here are more details about how it works and what it does.
+          */
+        def member: Unit = ()
+      #+END_SRC
+
+  - When only a simple, short description is needed, a _one-line format_ can be
+    used:
+    #+BEGIN_SRC scala
+      /** Does something very simple */
+      def simple: Unit = ()
+    #+END_SRC
+
+  - Compare to the recommended style of /Javadoc/, the style of /Scaladoc/ above
+    is _MORE compact_.
+
+  - Because the comment markup is *sensitive* to whitespace, the tool *must* be
+    able to _infer the *LEFT* margin_.
+
+    =From Jian=
+    This is also a reason why people design the document style above.
+
+  - The comment text are aligned on *column five*.
+    The comment text indentation width should follow you Scala code indentation
+    width.
+
+  - [[https://docs.scala-lang.org/overviews/scaladoc/for-library-authors.html][Scaladoc for Library Authors]]
+    More details!!! =TODO=
+
+** DONE General Style =TODO=
+   CLOSED: [2018-01-31 Wed 21:24]
+   - Get to the point as quickly as possible.
+     For example, PREFER =returns true if some condition= to =if some condition
+     return true=.
+
+     =Comment from Jian=
+     In the pattern of _<RESULT> if <Condition>_
+
+   - Try to format the first sentence of a method as “Returns XXX”, as in
+     “Returns the first element of the List”, as opposed to “this method
+     returns” or “get the first” etc. Methods typically return things.
+
+     =Comment from Jian=
+     Omit the subjects (_this method_) in the first sentence of a /method/.
+
+   - This same goes for classes; omit “This class does XXX”; just say “Does XXX”
+
+   - Create links to referenced Scala Library classes using the square-bracket
+     syntax, e.g.
+     #+BEGIN_SRC scala
+       /** [[Scala.Option]] ... */
+     #+END_SRC
+
+   - Summarize a method's return value in the ~@return~ annotation, leaving a
+     longer description for the main /Scaladoc/.
+
+   - If the documentation of a method is a _one line description_ of what that
+     method returns,
+     _do NOT repeat it with an @return annotation_.
+
+   - Document what the method does do
+     not what the method should do.
+
+     In other words,
+     say _returns_ the result of applying f to x
+     rather than _return_ the result of applying f to x.
+     Subtle, but important.
+
+   - When referring to the /instance/ of the /class/, use “this XXX”, or “this”
+     and NOT “the XXX”. For objects, say “this object”.
+
+   - Make code examples consistent with this guide.
+
+   - Use the wiki-style syntax instead of HTML wherever possible.
+     =TODO= =???=
+
+   - Examples should use either full code listings or the REPL, depending on
+     what is needed (the simplest way to include REPL code is to develop the
+     examples in the REPL and paste it into the /Scaladoc/).
+
+   - Make liberal use of ~@macro~ to refer to commonly-repeated values that
+     require special formatting. =TODO= =???=
+
+** DONE Packages
+   CLOSED: [2018-02-01 Thu 10:10]
+   - Example (/package object/):
+     + /package object/ is in a file called =package.scala=, under the package
+       directory.
+
+   - How to document a /package/:
+     + A /package/'s documentation should first document what sorts of /classes/
+       are part of the /package/.
+
+     + Secondly, document the general sorts of things the /package object/
+       itself provides
+
+   - While /package documentation/ does *NOT* need to be a full-blown tutorial on
+     using the ~classes~ in the /package/, it should provide an overview of the
+     major classes, with some basic examples of how to use the classes in that
+     package.
+
+   - Example: =TODO= =Re-READ= =Re-READ=
+     #+BEGIN_SRC scala
+       package my.package
+         /** Provides classes for dealing with complex numbers.  Also provides
+           ,*  implicits for converting to and from `Int`.
+           ,*
+           ,*  ==Overview==
+           ,*  The main class to use is [[my.package.complex.Complex]], as so
+           ,*  {{{
+           ,*  scala> val complex = Complex(4,3)
+           ,*  complex: my.package.complex.Complex = 4 + 3i
+           ,*  }}}
+           ,*
+           ,*  If you include [[my.package.complex.ComplexConversions]], you can
+           ,*  convert numbers more directly
+           ,*  {{{
+           ,*  scala> import my.package.complex.ComplexConversions._
+           ,*  scala> val complex = 4 + 3.i
+           ,*  complex: my.package.complex.Complex = 4 + 3i
+           ,*  }}}
+           ,*/
+
+       package complex {}
+     #+END_SRC
+
+** DONE Classes, Objects, and Traits
+   CLOSED: [2018-02-01 Thu 10:10]
+   - Document *ALL* /classes/, /objects/, and /traits/.
+
+   - The first sentence of the /Scaladoc/ should provide a summary of what the
+     /class/ or /trait/ does.
+
+   - Document *ALL* /type parameters/ with ~@tparam~.
+
+*** DONE Classes
+    CLOSED: [2018-02-01 Thu 10:10]
+    - If a class should be created using it's /companion object/, indicate as such
+      after the description of the class (though leave the details of
+      construction to the companion object).
+      =???= =TODO= =A class should be created using it's companion object???=
+                   =From Jian= Create a class????
+
+    - Unfortunately,
+      + there is currently *no way* to create a link to the /companion object/
+        _inline_,
+
+      + however the generated /Scaladoc/ will create a link for you in the
+        /class/ documentation output.
+        =This can be found in the standard library doc=
+
+    - If the class should be created using a /constructor/, document it using the
+      ~@constructor~ syntax:
+      #+BEGIN_SRC scala
+        /** A person who uses our application.
+         *
+         *  @constructor create a new person with a name and age.
+         *  @param name the person's name
+         *  @param age the person's age in years
+         */
+        class Person(name: String, age: Int) {
+        }
+      #+END_SRC
+
+    - Depending on the complexity of your /class/,
+      provide an example of common usage.
+
+*** DONE Objects
+    CLOSED: [2018-02-01 Thu 10:10]
+    - Since /objects/ can be used for a _variety of purposes_,
+      it is important to document *how to use* the /object/.
+
+    - If this ~object~ is a /factory/ for other /objects/, indicate as such here,
+      *deferring* the specifics to the /Scaladoc/ for the ~apply~ method(s).
+
+      If your ~object~ does _NOT_ use ~apply~ as a /factory method/, be sure to
+      indicate the actual /method/ names:
+      #+BEGIN_SRC scala
+        /** Factory for [[mypackage.Person]] instances. */
+        object Person {
+          /** Creates a person with a given name and age.
+           *
+           *  @param name their name
+           *  @param age the age of the person to create
+           */
+          def apply(name: String, age: Int) = { ??? }
+
+          /** Creates a person with a given name and birthdate
+           *
+           *  @param name their name
+           *  @param birthDate the person's birthdate
+           *  @return a new Person instance with the age determined by the
+           *          birthdate and current date.
+           */
+          def apply(name: String, birthDate: java.util.Date) = { ??? }
+        }
+      #+END_SRC
+
+    - If your ~object~ holds /implicit conversions/, provide an *example* in the
+      /Scaladoc/:
+      #+BEGIN_SRC scala
+        /** Implicit conversions and helpers for [[mypackage.Complex]] instances.
+          ,*
+          ,*  {{{
+          ,*  import ComplexImplicits._
+          ,*  val c: Complex = 4 + 3.i
+          ,*  }}}
+          ,*/
+        object ComplexImplicits {}
+      #+END_SRC
+
+*** DONE Traits
+    CLOSED: [2018-02-01 Thu 10:10]
+    =From Jian= =TODO=
+    Example required -- it will be better if there is an example from the standard library.
+    ===========================
+
+    1. An overview of what the /trait/ does;
+
+    2. An overview of the /methods/ and /types/ that must be specified in
+       /classes/ that mix in the /trait/;
+
+    3. If there are known /classes/ using the /trait/, reference them.
+
+** DONE Methods and Other Members
+   CLOSED: [2018-02-01 Thu 10:10]
+   Document ALL /methods/.
+
+   1. The first sentence should be a summary of what the method does.
+
+   2. Subsequent sentences explain in further detail.
+
+   3. Document each /parameter/ as well as each /type parameter/ (with
+      ~@tparam~).
+
+   4. For *curried functions*, =Example=
+      consider providing *more detailed EXAMPLES* regarding the expected or
+      idiomatic usage.
+
+   5. For *implicit parameters*, =Example=
+      take special care to explain where these /parameters/ will come from and
+      if the user needs to do any extra work to make sure the /parameters/ will
+      be available.
