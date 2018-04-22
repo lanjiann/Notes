@@ -1,253 +1,238 @@
-<TeXmacs|1.99.5>
+<TeXmacs|1.99.6>
 
 <style|generic>
 
 <\body>
-  <doc-data|<doc-title|Note to The Book<line-break>The Formal Semantics of
-  Programming Languages>|<doc-author|<author-data|<author-name|Jian Lan>>>>
+  <doc-data|<doc-title|Note to The Book<line-break>Semantics of Programming
+  Languages \U Structures and Techniques [Carl A.
+  Gunter]>|<doc-author|<author-data|<author-name|Jian Lan>>>>
 
-  <section|>
+  <section*|List of Figures - ix>
 
-  <subsection|>
+  <section*|List of Tables - xi>
 
-  <subsection|Sets>
+  <section*|Series Foreword - xiii>
 
-  <subsubsection|Sets and properties>
-
-  <subsubsection|Some important sets>
-
-  <\description>
-    <item*|<em|null> or <em|empty set>><math|\<emptyset\>>
-
-    <item*|<em|natural numbers>><math|\<omega\>> (includes 0)
-  </description>
-
-  <subsubsection|Constructions on sets>
-
-  <\itemize-minus>
-    <item><strong|Comprehension>:
-
-    <math|<around*|{|x\<in\>X\|P <around*|(|x|)>|}>> can be written in the
-    <em|comprehension form> <math|<around*|{|x\|x\<in\>X&P
-    <around*|(|x|)>|}>>
-
-    <with|color|red|TODO>
-
-    <item><strong|Powerset>:
-
-    <\equation*>
-      \<cal-P\>\<frak-o\>\<omega\> <around*|(|X|)>=<around*|{|Y\|Y\<subseteq\>X|}>
-    </equation*>
-
-    <item><strong|Indexed sets>:
-
-    <\equation*>
-      <around*|{|x<rsub|i>\|i\<in\>I|}>
-    </equation*>
-
-    <item><strong|Union>:
-
-    <\equation*>
-      X\<cup\>Y=<around*|{|a\|a\<in\>X or a\<in\>Y|}>
-    </equation*>
-
-    <item><strong|Big union>: Let <math|X> be a set of sets. Their
-    <with|font-shape|italic|union>
-
-    <\equation*>
-      <big|cup>X=<around*|{|a\|\<exists\>x\<in\>X. a\<in\>x|}>
-    </equation*>
-
-    When the <math|X>'s above are some <with|font-shape|italic|indexed sets>,
-    we often write it as <math|<big|cup><rsub|i\<in\>I>x<rsub|i>>.
-
-    <item><strong|Intersection>:
-
-    <\equation*>
-      X\<cap\>Y=<around*|{|a\|a\<in\>X & a\<in\>Y|}>
-    </equation*>
-
-    <item><strong|Big intersection>: Let <math|X> be <underline|nonempty> set
-    of sets. Then
-
-    <\equation*>
-      <big|cap>X=<around*|{|a\|\<forall\>x\<in\>X. a\<in\>x|}>
-    </equation*>
-
-    is a set called its <with|font-shape|italic|intersection>.
-
-    <item><strong|Product>:
-
-    <\itemize-dot>
-      <item><with|font-shape|italic|pairs>:
-    </itemize-dot>
-
-    <\itemize-dot>
-      <item><strong|Exercise 1.1>
-
-      <\proof>
-        \;
-
-        =\<gtr\>
-
-        <\math>
-          <around*|(|a,b|)>=<around*|{|<around*|{|a|}>,<around*|{|a,b|}>|}>
-
-          <around*|(|a<rprime|'>,b<rprime|'>|)>=<around*|{|<around*|{|a<rprime|'>|}>,<around*|{|a<rprime|'>,b<rprime|'>|}>|}>
-        </math>
-
-        If <math|<around*|(|a,b|)>=<around*|(|a<rprime|'>,b<rprime|'>|)>>,
-        <math|<around*|{|<around*|{|a|}>,<around*|{|a,b|}>|}>=<around*|{|<around*|{|a<rprime|'>|}>,<around*|{|a<rprime|'>,b<rprime|'>|}>|}>>.
-        From the property of sets, we know <math|a> must be equal to
-        <math|a<rprime|'>> and <math|<around*|{|a,b|}>=<around*|{|a<rprime|'>,b<rprime|'>|}>>
-        which implies <math|a=a<rprime|'>> and <math|b=b<rprime|'>>.
-
-        \<less\>=
-
-        If <math|a=a<rprime|'>> and <math|b=b<rprime|'>>, from the property
-        of sets, we know <math|<around*|{|<around*|{|a|}>,<around*|{|a,b|}>|}>=<around*|{|<around*|{|a<rprime|'>|}>,<around*|{|a<rprime|'>,b<rprime|'>|}>|}>>.
-        From one of the representation of <with|font-shape|italic|pairs>, we
-        know this is actually <math|<around*|(|a,b|)>=<around*|(|a<rprime|'>,b<rprime|'>|)>>.
-
-        \;
-      </proof>
-
-      <item>For sets <math|X> and <math|Y>, their
-      <with|font-shape|italic|product> is the set
-
-      <\equation*>
-        X\<times\>Y=<around*|{|<around*|(|a,b|)>\|a\<in\>X & b\<in\>Y|}>
-      </equation*>
-    </itemize-dot>
-
-    <item><strong|Disjoint union>:<with|color|red|toDO>
-
-    \;
-
-    <item><strong|Set difference>:
-
-    <\equation*>
-      X<around*|\\||\<nobracket\>>Y=<around*|{|x\|x\<in\>X & x\<nin\>Y|}>
-    </equation*>
-  </itemize-minus>
-
-  <subsubsection|The axiom of foundation>
-
-  <\description>
-    <item*|The axiom of foundation>A set must be constructed from some
-    non-set elements or sets which have themselves been constructed earlier.
-  </description>
-
-  <subsection|Relations and functions>
-
-  <\description>
-    <item*|<with|font-shape|italic|binary relation> (between X and Y)>An
-    element of <math|\<cal-P\>\<omicron\>w <around*|(|X\<times\>Y|)>> \U a
-    subset of pairs in the relation.
-
-    When <math|R> is a relation <math|R\<subseteq\>X\<times\>Y> we shall
-    often write <math|x R y> for <math|<around*|(|x,y|)>\<in\>R>.
-
-    <item*|<with|font-shape|italic|partial function> (from X to Y)>
-
-    <item*|<with|font-shape|italic|(total) function>>
-  </description>
-
-  <\itemize-dot>
-    <item><strong|Exercise 1.2>
-
-    Usually we can find more than one maps to statisfy<math|>
-    <math|<around*|(|X\<rightharpoonup\>Y|)>> or
-    <math|<around*|(|X\<rightarrow\>Y|)>>.
-  </itemize-dot>
-
-  <subsubsection|Lambda notation>
-
-  Suppose <math|f:X\<rightarrow\>Y> is a function which for any element
-  <math|x> in <math|X> gives a value <math|f <around*|(|x|)>> which exactly
-  described by expression <math|e>, probably involving <math|x>. Then we
-  sometime write
-
-  <\equation*>
-    \<lambda\> x\<in\>X.e
-  </equation*>
-
-  for the function <math|f>. Thus
-
-  <\equation*>
-    \<lambda\> x\<in\>X.e=<around*|{|<around*|(|x,e|)>\|x\<in\>X|}>
-  </equation*>
+  <section*|Preface - xv>
 
   \;
 
-  For example, <math|\<lambda\> x\<in\>\<omega\>.<around*|(|x+1|)>> is the
-  successor function.
+  <section|Introduction - 1>
 
-  <\subsubsection>
-    Composing relations and functions
-  </subsubsection>
+  <subsection|Semantics - 1>
 
-  <\description>
-    <item*|<with|font-shape|italic|composition>>
+  <subsection|Semantics of Programming Languages - 9>
 
-    <\equation*>
-      S\<circ\>R=<rsub|def><around*|{|<around*|(|x,z|)>\<in\>X\<times\>Z\|\<exists\>y\<in\>Y.
-      <around*|(|x,y|)>\<in\>R&<around*|(|y,z|)>\<in\>S|}>
-    </equation*>
-  </description>
-
-  <\itemize-dot>
-    <item>Exercise 1.3
-
-    <item>Exercise 1.4
-  </itemize-dot>
+  <subsection|Notes - 29>
 
   \;
 
-  <\description>
-    <item*|<strong|<with|font-shape|italic|Cantor's diagonal argument>>>
-  </description>
+  <section|The Simply-Type <math|\<lambda\>>-Calculus - 31>
 
-  <\itemize-dot>
-    <item>Exercise 1.5
-  </itemize-dot>
+  <subsection|Syntax of <math|\<lambda\>>-Terms - 32>
+
+  <subsection|Rules - 38>
+
+  <subsection|Models - 47>
+
+  <subsection|Notes - 61>
 
   \;
 
-  <subsubsection|Direct and inverse image of a relation>
+  <section|Categorical Models of Simple Types - 63>
 
-  <subsubsection|Equivalence relations>
+  <subsection|Products and Cartesian Closure - 63>
 
-  <\itemize-dot>
-    <item>Exercise 1.6
+  <subsection|<math|\<lambda\>>-Calculus with Constants and Products - 76>
 
-    <item>Exercise 1.7
+  <subsection|The Use of Category Theory - 84>
 
-    <item>Exercise 1.8
-  </itemize-dot>
+  <subsection|Notes - 95>
+
+  \;
+
+  <section|Recursive Definitions of Functions - 97>
+
+  <subsection|A Programming Language for Computable Functions - 100>
+
+  <\subsection>
+    Fixed Points in Complete Partial Orders - 114
+  </subsection>
+
+  <subsection|Fixed-Point Semantics of PCF - 128>
+
+  <subsection|Bounded Recursion - 138>
+
+  <subsection|Notes - 143>
+
+  \;
+
+  <section|Two Theories of Finite Approximation - 145>
+
+  <subsection|Bc-Domains - 147>
+
+  <subsection|Stable Functions and DI-Domains - 155>
+
+  <subsection|Equivalences between Categories - 167>
+
+  <subsection|Notes - 176>
+
+  \;
+
+  <section|Relating Interpretations - 177>
+
+  <subsection|Full Abstraction - 178>
+
+  <subsection|Extensions of Adequacy Results - 190>
+
+  <subsection|Products and Sums - 199>
+
+  <subsection|Notes - 212>
+
+  \;
+
+  <section|Types and Evaluation - 217>
+
+  <subsection|Expressiveness - 218>
+
+  <subsection|Security - 226>
+
+  <subsection|Reference Types - 230>
+
+  <subsection|Recursive Types - 235>
+
+  <subsection|ML Polymorphism and Type Inference - 243>
+
+  <subsection|Notes - 253>
+
+  \;
+
+  <section|Universal Domains - 255>
+
+  <subsection|Untyped <math|\<lambda\>>-Calculus - 255>
+
+  <subsection|Domain Equations - 270>
+
+  <subsection|Notes - 282>
+
+  \;
+
+  <section|Subtype Polymorphism - 285>
+
+  <subsection|Subtypes as Subsets - 287>
+
+  <subsection|Subsumption as Implicit Coercion - 298>
+
+  <subsection|Notes - 312>
+
+  \;
+
+  <section|Domain Theory - 315>
+
+  <subsection|Fixed Points of Functors - 316>
+
+  <subsection|Bifinite Domains - 330>
+
+  <subsection|Adjunctions and Powerdomains - 340>
+
+  <subsection|Notes - 353>
+
+  \;
+
+  <section|Parametric Polymorphism - 357>
+
+  <subsection|Calculi for Expressing Parametric Polymorphism - 357>
+
+  <subsection|Indexed Families of Domains - 374>
+
+  <subsection|Notes - 387>\ 
+
+  \;
+
+  <section*|List of Notations - 391>
+
+  <section*|Bibliography - 395>
+
+  <section*|Subject Index - 407>
+
+  \ 
+
+  \ 
+
+  \;
+
+  \;
+
+  \;
 
   \;
 
   \;
 </body>
 
-<initial|<\collection>
-</collection>>
-
 <\references>
   <\collection>
-    <associate|auto-1|<tuple|1|?>>
-    <associate|auto-10|<tuple|1.3.2|?>>
-    <associate|auto-11|<tuple|1.3.3|?>>
-    <associate|auto-12|<tuple|1.3.4|?>>
-    <associate|auto-2|<tuple|1.1|?>>
-    <associate|auto-3|<tuple|1.2|?>>
-    <associate|auto-4|<tuple|1.2.1|?>>
-    <associate|auto-5|<tuple|1.2.2|?>>
-    <associate|auto-6|<tuple|1.2.3|?>>
-    <associate|auto-7|<tuple|1.2.4|?>>
+    <associate|auto-1|<tuple|?|?>>
+    <associate|auto-10|<tuple|2.1|?>>
+    <associate|auto-11|<tuple|2.2|?>>
+    <associate|auto-12|<tuple|2.3|?>>
+    <associate|auto-13|<tuple|2.4|?>>
+    <associate|auto-14|<tuple|3|?>>
+    <associate|auto-15|<tuple|3.1|?>>
+    <associate|auto-16|<tuple|3.2|?>>
+    <associate|auto-17|<tuple|3.3|?>>
+    <associate|auto-18|<tuple|3.4|?>>
+    <associate|auto-19|<tuple|4|?>>
+    <associate|auto-2|<tuple|?|?>>
+    <associate|auto-20|<tuple|4.1|?>>
+    <associate|auto-21|<tuple|4.2|?>>
+    <associate|auto-22|<tuple|4.3|?>>
+    <associate|auto-23|<tuple|4.4|?>>
+    <associate|auto-24|<tuple|4.5|?>>
+    <associate|auto-25|<tuple|5|?>>
+    <associate|auto-26|<tuple|5.1|?>>
+    <associate|auto-27|<tuple|5.2|?>>
+    <associate|auto-28|<tuple|5.3|?>>
+    <associate|auto-29|<tuple|5.4|?>>
+    <associate|auto-3|<tuple|?|?>>
+    <associate|auto-30|<tuple|6|?>>
+    <associate|auto-31|<tuple|6.1|?>>
+    <associate|auto-32|<tuple|6.2|?>>
+    <associate|auto-33|<tuple|6.3|?>>
+    <associate|auto-34|<tuple|6.4|?>>
+    <associate|auto-35|<tuple|7|?>>
+    <associate|auto-36|<tuple|7.1|?>>
+    <associate|auto-37|<tuple|7.2|?>>
+    <associate|auto-38|<tuple|7.3|?>>
+    <associate|auto-39|<tuple|7.4|?>>
+    <associate|auto-4|<tuple|?|?>>
+    <associate|auto-40|<tuple|7.5|?>>
+    <associate|auto-41|<tuple|7.6|?>>
+    <associate|auto-42|<tuple|8|?>>
+    <associate|auto-43|<tuple|8.1|?>>
+    <associate|auto-44|<tuple|8.2|?>>
+    <associate|auto-45|<tuple|8.3|?>>
+    <associate|auto-46|<tuple|9|?>>
+    <associate|auto-47|<tuple|9.1|?>>
+    <associate|auto-48|<tuple|9.2|?>>
+    <associate|auto-49|<tuple|9.3|?>>
+    <associate|auto-5|<tuple|1|?>>
+    <associate|auto-50|<tuple|10|?>>
+    <associate|auto-51|<tuple|10.1|?>>
+    <associate|auto-52|<tuple|10.2|?>>
+    <associate|auto-53|<tuple|10.3|?>>
+    <associate|auto-54|<tuple|10.4|?>>
+    <associate|auto-55|<tuple|11|?>>
+    <associate|auto-56|<tuple|11.1|?>>
+    <associate|auto-57|<tuple|11.2|?>>
+    <associate|auto-58|<tuple|11.3|?>>
+    <associate|auto-59|<tuple|11.3|?>>
+    <associate|auto-6|<tuple|1.1|?>>
+    <associate|auto-60|<tuple|11.3|?>>
+    <associate|auto-61|<tuple|11.3|?>>
+    <associate|auto-7|<tuple|1.2|?>>
     <associate|auto-8|<tuple|1.3|?>>
-    <associate|auto-9|<tuple|1.3.1|?>>
+    <associate|auto-9|<tuple|2|?>>
   </collection>
 </references>
 
