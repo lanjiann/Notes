@@ -41,14 +41,14 @@
   - [[3.3. Complex Numbers - 61][3.3. Complex Numbers - 61]]
   - [[3.4. Booleans - 63][3.4. Booleans - 63]]
   - [[3.5. Strings - 64][3.5. Strings - 64]]
-    - [[3.5.1. String Literals][3.5.1. String Literals]]
-    - [[3.5.2. String Literals][3.5.2. String Literals]]
-    - [[3.5.3. UTF-8][3.5.3. UTF-8]]
-    - [[3.5.4. Strings and Byte Slices][3.5.4. Strings and Byte Slices]]
-    - [[3.5.5. Conversions between Strings and Numbers][3.5.5. Conversions between Strings and Numbers]]
-  - [[3.6. Constants - 75][3.6. Constants - 75]]
-    - [[3.6.1. The Constant Generator iota][3.6.1. The Constant Generator iota]]
-    - [[3.6.2. Untyped Constants][3.6.2. Untyped Constants]]
+    - [[3.5.1. String Literals - 65][3.5.1. String Literals - 65]]
+    - [[3.5.2. Unicode - 67][3.5.2. Unicode - 67]]
+    - [[3.5.3. UTF-8 - 67][3.5.3. UTF-8 - 67]]
+    - [[3.5.4. Strings and Byte Slices - 71][3.5.4. Strings and Byte Slices - 71]]
+    - [[3.5.5. Conversions between Strings and Numbers - 75][3.5.5. Conversions between Strings and Numbers - 75]]
+  - [[3.6 Constants - 75][3.6 Constants - 75]]
+    - [[3.6.1. The Constant Generator ~iota~ - 77][3.6.1. The Constant Generator ~iota~ - 77]]
+    - [[3.6.2. Untyped Constants - 78 =IMPORTANT= =re-read=][3.6.2. Untyped Constants - 78 =IMPORTANT= =re-read=]]
 - [[4. Composite Types - 81][4. Composite Types - 81]]
   - [[4.1. Arrays - 81][4.1. Arrays - 81]]
   - [[4.2. Slices - 84][4.2. Slices - 84]]
@@ -1375,7 +1375,8 @@
          }
        #+END_SRC
 
-* TODO 3. Basic Data Types - 51
+* DONE 3. Basic Data Types - 51
+  CLOSED: [2018-05-17 Thu 23:08]
 ** DONE 3.1. Integers - 51
    CLOSED: [2018-05-09 Wed 15:09]
    - Each /numeric type/ determines the *size* and *signedness* of its values.
@@ -1721,23 +1722,503 @@
          }
        #+END_SRC
 
-** TODO 3.5. Strings - 64
-*** 3.5.1. String Literals
-*** 3.5.2. String Literals
-*** 3.5.3. UTF-8
-*** 3.5.4. Strings and Byte Slices
-*** 3.5.5. Conversions between Strings and Numbers
+** DONE 3.5. Strings - 64
+   CLOSED: [2018-05-17 Thu 20:49]
+   - Text strings are conventionally interpreted as UTF-8-encoded sequences of
+     Unicode code points (~rune~'s).
 
-** TODO 3.6. Constants - 75
-   - Constants :: expressions whose value is known to the compiler and whose
-                  evaluation is guaranteed to occur at /compile time/, *NOT* at
-                  /run time/.
+   - ~len~ returns the number of bytes (*NOT* ~rune~'s).
 
-                  The underlying type of every constant is a *basic type*:
-                  /boolean/, /string/, or /number/.
+   - Out of boundary access results in a /panic/!
 
-*** 3.6.1. The Constant Generator iota
-*** 3.6.2. Untyped Constants
+   - For text info save in a string, it is NOT convinient to use the indeices.
+     which index byte(s), not characters.
+     =TODO= Discuss access character soon! =TODO=
+
+   - The substring operation ~aString[i:j]~ returns a new string.
+     Either ~i~ or ~j~ can be omitted.
+
+   - String concatenation operation: ~+~
+
+   - The comparison between strings a done byte by byte, and the result is the
+     natural /lexicographic ordering/.
+
+     ~==~ and ~<~ can be use.
+
+   - /string values/ are *immutable*!
+
+*** DONE 3.5.1. String Literals - 65
+    CLOSED: [2018-05-17 Thu 20:49]
+    - Since Go text strings are conventionally interpreted as UTF-8,
+      we can include Unicode code points in /string literals/.
+
+    - Escape sequences:
+      + ~\a~:
+        "alert" or bell
+
+      + ~\b~:
+        backspace
+
+      + ~\f~:
+        form feed
+
+      + ~\n~:
+        newline
+
+      + ~\r~:
+        carriage return
+
+      + ~\t~:
+        tab
+
+      + ~\v~:
+        vertical tab
+
+      + ~\'~:
+        single quote (only in the rune literal '\'' )
+
+      + ~\"~:
+        double quote (only within "..." literals)
+
+      + ~\\~:
+        backslash
+
+    - Use
+      + hexadecimal (~\xhh~ - hh at most can be ~ff~)
+      + octal escapes (\ooo - cannot exceed \377)
+
+    - The /raw string literal/ is written as string but quoted with *backquotes*!
+      Usage: =TODO=
+      + Be convenient way to write /regular expressions/!
+
+      + HTML templates
+
+      + JSON literals
+
+      + Command usage messages, and the like, which often extend over multiple
+        lines.
+        #+BEGIN_SRC go
+          const GoUsage = `Go is a tool for managing Go source code.
+
+          Usage:
+              go command [arguments]
+          ...`
+        #+END_SRC
+
+*** DONE 3.5.2. Unicode - 67
+    CLOSED: [2018-05-17 Thu 20:49]
+    The encoding/decoding system of use ~int32~ to represent Unicode code points
+    is called UTF-32 or UCS-4
+
+*** DONE 3.5.3. UTF-8 - 67
+    CLOSED: [2018-05-16 Wed 13:24]
+    #+BEGIN_SRC text
+      0xxxxxxx                             runes 0−127     (ASCII)
+      110xxxxx 10xxxxxx                    128−2047        (values <128 unused)
+      1110xxxx 10xxxxxx 10xxxxxx           2048−65535      (values <2048 unused)
+      11110xxx 10xxxxxx 10xxxxxx 10xxxxxx  65536−0x10ffff  (other values unused)
+    #+END_SRC
+
+    - UTF-8 was invented by Ken Thompson and Rob Pike.
+
+    - The high-order bits of the first byte of the encoding for a ~rune~ indicate
+      how many bytes follow. The details are listed in the table above.
+
+    - A variable-length encoding precludes direct indexing to access the n-th
+      character of a string, but UTF-8 has many desirable properties to
+      compensate! The encoding is 
+      + compact (compared with UTF-32)
+
+      + compatible with ASCII
+
+      + self-synchronizing:
+        it's possible to find the beginning of a character by backing up _no
+        more than_ three bytes.
+
+      + It's also a /prefix code/, so it can be decoded from left to right
+        without any ambiguity or lookahead.
+
+      + *NO* ~rune~'s encoding is a substring of any other, or even of a
+        sequence of others, so you can search for a ~rune~ by just searching
+        for its bytes, without worrying about the preceding context.
+
+      + The /lexicographic byte order/ _equals_ the /Unicode code point order/,
+        so sorting UTF-8 works naturally.
+
+      + There are no embedded NUL (zero) bytes, which is convenient for
+        programming languages that use NUL to terminate strings -- like C/C++.
+
+    - Go source files are *ALWAYS* encoded in /UTF-8/, and /UTF-8/ is the
+      _preferred_ encoding for text strings manipulated by Go programs.
+
+      + The ~unicode~ /package/ provides functions for working with individual
+        ~rune~'s (such as distinguishing letters from numbers, or converting an
+        upper-case letter to a lower-case one).
+
+      + The ~unicode/utf8~ /package/ provides functions for encoding and decoding
+        ~rune~'s as bytes using UTF-8.
+
+    - Some Unicode characters are hard to type, to distinguish, or even to see.
+      Unicode escapes in Go /string literals/ allow us to specify them by their
+      /numeric code point value/. There are *TWO* forms:
+      + ~\uhhhh~ for a 16-bit value
+
+      + ~\Uhhhhhhhh~ for a 32-bit value, which is used infrequently.
+
+      #+BEGIN_SRC go
+        "世界"
+        "\xe4\xb8\x96\xe7\x95\x8c"
+        "\u4e16\u754c"
+        "\U00004e16\U0000754c"
+      #+END_SRC
+
+    - =IMPORTANT=
+      Thanks to the nice properties of UTF-8, many string operations do NOT
+      require decoding.
+        The functions given below is NOT always true for other encodings.
+      #+BEGIN_SRC go
+        func HasPrefix(s, prefix string) bool {
+          return len(s) >= len(prefix) && s[:len(prefix)] == prefix
+        }
+
+        func HasSuffix(s, suffix string) bool {
+          return len(s) >= len(suffix) && s[len(s)-len(prefix):] == suffix
+        }
+
+        func Contains(s, substr string) bool {
+          for i := 0; i < len(s); i++ {
+            if HasPrefix(s[i:], substr) {
+              return true
+            }
+          }
+        }
+      #+END_SRC
+
+    - If we really care about the individual /Unicode characters/, we have to
+      use other mechanisms.
+      + You can use ~utf8.RuneCountInString~ to count the number of ~rune~'s.
+        With its help, you can iterate over a string.
+        #+BEGIN_SRC go
+          import "unicode/utf8"
+
+          s := "Hello, 世界"
+          fmt.Println(len(s))                     // "13"
+          fmt.Println(utf8.RuneCountInString(s))  // "9"
+
+          for i := 0; i < len(s); {
+            r, size := utf8.DecodeRuneInString(s[i:])
+            fmt.Printf("%d\t%c\n", i, r)
+            i += size
+          }
+        #+END_SRC
+
+      + *If you are sure the string you'll process is encoded with UTF-8*,
+        you can simply use ~range~ to iterate it!
+        #+BEGIN_SRC go
+          for i, r := range "Hello, 世界" {
+            fmt.Printf("%d\t%q\t%d\n", i, r, r)
+          }
+
+          // Count:
+          n := 0
+          for _, _ = range s {
+            n++
+          }
+
+          n := 0
+          for range s {
+            n++
+          }
+        #+END_SRC
+
+    - For unexpected input byte, /UTF-8 decoder in Go/ (you call it _explicitly_
+      when calling functions like ~utf8.DecodeRuneInString~ or _implicitly_)
+      replace them with ='\uFFFD'=, which is printed as �.
+
+    - UTF-8 is exceptionally convenient as an interchange format
+
+      *BUT* within a program ~rune~'s may be more convenient because they are of
+      _uniform size_ and are thus *easily indexed* in /arrays/ and /slices/.
+      For example,
+      #+BEGIN_SRC go
+        // "program" in Japanese katakana
+        s := "プログラム"
+        fmt.Printf("% x\n", s) // "e3 83 97 e3 83 ad e3 82 b0 e3 83 a9 e3 83 a0"
+        r := []rune(s)
+        fmt.Printf("%x\n", r) // "[30d7 30ed 30b0 30e9 30e0]"
+      #+END_SRC
+
+    - The cast ~string(x)~:
+      #+BEGIN_SRC go
+        fmt.Println(string(65))      // "A" not "65"
+        fmt.Println(string(0x4eac))  // "京"
+      #+END_SRC
+
+*** DONE 3.5.4. Strings and Byte Slices - 71
+    CLOSED: [2018-05-17 Thu 20:49]
+    - Four standard packages are particularly important for manipulating strings:
+      + ~strings~:
+        provide many functions for searching, replacing, comparing, trimming,
+        splitting, and joining strings.
+
+      + ~bytes~:
+        Provide similar operations in ~strings~ to manipulating /slices/ of
+        /bytes/ ~[]byte~.
+
+        /Strings/ are immutable. Incrementally build a /string/ can involve a lot
+        of allocation and copying. We use ~bytes.Buffer~ to do build /strings/.
+
+      + ~strconv~:
+        ...
+
+      + ~unicode~:
+        + provide ~IsDigit~, ~IsLetter~, ~IsUpper~, and ~IsLower~ for
+          *classifying* ~rune~'s.
+
+        + provide ~ToUpper~ and ~ToLower~ for one ~rune~.
+
+    - Example:
+      The ~basename(s)~ function, which is like the ~basename~ in Unix shell
+      utility.
+      + =gop1.io/ch3/basename1= - without any libraries
+        #+BEGIN_SRC go
+          // basename removes directory components and a .suffix.
+          // e.g., a => a, a.go => a, a/b/c.go => c, a/b.c.go => b.c
+          func basename(s string) string {
+            // Discard last '/' and everything before.
+            for i := len(s) - 1; i >= 0; i-- {
+              if s[i] == '/' {
+                s = s[i+1:]
+              }
+            }
+            // Preserve everything before last '.'.
+            for i := len(s) - 1; i >= 0; i-- {
+              if s[i] == '.' {
+                s = s[:i]
+                break
+              }
+            }
+
+            return s
+          }
+        #+END_SRC
+
+      + =gop1.io/ch3/basename2= - with the help of ~strings.LastIndex~ library
+        function:
+        #+BEGIN_SRC go
+          func basename(s string) string {
+            slash := strings.LastIndex(s, "/")  // -1 if "/" not found
+            s = s[slash+1:]
+            if dot := strings.LastIndex(s, "."); dot >= 0 {
+              s = s[:dot]
+            }
+
+            return s
+          }
+        #+END_SRC
+
+    - To do the ~basename~ work in real world, use the ~path~ and ~path/filepath~
+      /packages/, which provide a more general set of functions for manipulating
+      hierarchical names.
+
+    - Example: =gop1.io/ch3/comma=
+      Add commas to numbers to group digits for clearity to reads!
+      #+BEGIN_SRC go
+        // comma inserts commas in a non-negative decimal integer string.
+        func commas(s string) string {
+          n := len(s)
+          if n <= 3 {
+            return s
+          }
+          return comma(s[:n-3]) + "," + s[n-3:]
+        }
+      #+END_SRC
+
+    - /Strings/ can be converted to /byte slices/ and back again:
+      #+BEGIN_SRC go
+        s := "abc"
+        b := []byte(s)
+        s2 := []string(b)
+      #+END_SRC
+      + =TODO= note
+      + =TODO= note
+      + =TODO= note
+      + =TODO= note
+
+    - ~bytes.Buffer~'s ~WriteRune~ /method/ can be used.
+      ~WriteByte~ is fine for ASCII.
+
+    - =TODO=
+      The ~bytes.Buffer~ type is extremely versatile, and when we discuss
+      interfaces in Chapter 7.
+
+      =TODO=
+      We'll see how it may be used as a _replacement_ for a file whenever an I/O
+      function requires a sink for bytes ( ~io.Writer~ ) as ~Fprintf~ do es
+      above, or a source of bytes (~io.Reader~).
+
+    - Exercise 3.10
+      DONE
+
+    - Exercise 3.11
+      DONE
+
+    - Exercise 3.12
+      DONE
+
+*** DONE 3.5.5. Conversions between Strings and Numbers - 75
+    CLOSED: [2018-05-16 Wed 10:47]
+    - Use the functions in the ~strconv~ /package/.
+
+    - Convert an integer to a string:
+      + Use ~fmt.Sprintf~
+      + Use ~strconv.Itoa~ (integer to ASCII)
+
+    - ~FormatInt~ and ~FormatUnit~ can be used to format numbers in a different
+      /base/: ~fmt.Println(strconv.FormatInt(int64(x), 2))  // "1111011"~
+
+    - Convert a string to an integer:
+      + Use ~strconv.Atoi~
+      + Use ~strconv.ParseInt~
+      + Use ~strconv.ParseUint~ (for unsigned integers)
+
+    - For example,
+      #+BEGIN_SRC go
+        x, err := strconv.Atoi("123")              // x is an int
+        y, err := strconv.ParseInt("123", 10, 64)  // base 10, up to 64 bits
+      #+END_SRC
+      + The _third argument_ of ~ParseInt~ gives the *size* of the integer type
+        that the result must fit into; for example, 16 implies ~int16~, and the
+        special value of 0 implies ~int~.
+
+    - Sometimes ~fmt.Scanf~ is useful for parsing input that consits of orderly
+      _mixtures_ of strings and numbers all on a single line,
+      =TODO= =???=
+      but it can be inflexible, especially when handling imcomplete or irregular
+      input.
+
+** TODO 3.6 Constants - 75
+   - Constants ::
+     + Boolean, string, or number
+
+     + They are guaranteed to be evaluated at /compile time/, not at /run time/.
+       Their values are known by the compiler.
+
+   - Some errors can be detected at compile time if the related values are
+     /constants/. The errors can be division by zero, string indexing out of
+     bound, and so on.
+
+   - The results of all arithmetic, logical, and comparison operations *applied
+     to constant operands* are themselves constants, as are the results of
+     conversions and calls to certain built-in functions such as ~len~, ~cap~,
+     ~real~, ~imag~ , ~complex~ , and ~unsafe.Sizeof~ (§13.1).
+
+   - Since their values are known to the compiler, /constant expressions/ may
+     appear in /types/, specifically as the length of an array type:
+     #+BEGIN_SRC go
+       const IPv4Len = 4
+
+       // parseIPv4 parses an IPv4 address (d.d.d.d).
+       func parseIPv4(s string) IP {
+         var p [IPv4Len]byte
+         // ...
+       }
+     #+END_SRC
+
+   - =From Jian= 
+     Wh en a sequence of con stants is declare d as a gro up, the rig ht-hand side expression may be
+     omit ted for all but the firs t of the gro up, imp l ying that the pre vious expression and its typ e
+     should be used again. For example:
+
+     #+BEGIN_SRC go
+       const (
+         a = 1
+         b
+         c = 2
+         d
+       )
+       fmt.Println(a, b, c, d) // "1 1 2 2"
+     #+END_SRC
+
+*** TODO 3.6.1. The Constant Generator ~iota~ - 77
+    Generate _a sequence of constants_:
+    - Example 1:
+      #+BEGIN_SRC go
+        type Weekday int
+
+        const {
+          Sunday Weekday = iota
+          Monday
+          Tuesday
+          Wednesday
+          Thursday
+          Friday
+          Saturday
+        }
+      #+END_SRC
+
+    - Example 2:
+      #+BEGIN_SRC go
+        type Flags uint
+
+        const (
+          FlagUp Flags = 1 << iota  // is up
+          FlagBroadcast             // supports broadcast access capability
+          FlagLoopback              // is a loopback interface
+          FlagPointToPoint          // belongs to a point-to-point link
+          FlagMulticast             // supports multicast access capability
+        )
+      #+END_SRC
+
+      They can be used as:
+      #+BEGIN_SRC go
+        // gopl.io/ch3/netflag
+        func IsUp(v Flags) bool     { return v&FlagUp == FlagUp }
+        func TurnDown(v *Flags)     { *v &^= FlagUp }
+        func SetBroadcast(v *Flags) { *v |= FlagBroadcast }
+        func IsCast(v Flags) bool   { return v&(FlagBroadcast|FlagMulticast) != 0 }
+
+        func main() {
+          var v Flags = FlagMulticast | FlagUp
+          fmt.Printf("%b %t\n", v, IsUp(v)) // "10001 true"
+          TurnDown(&v)
+          fmt.Printf("%b %t\n", v, IsUp(v)) // "10000 false"
+          SetBroadcast(&v)
+          fmt.Printf("%b %t\n", v, IsUp(v)) // "10010 false"
+          fmt.Printf("%b %t\n", v, IsCast(v)) // "10010 true"
+        }
+      #+END_SRC
+
+    - Example 3:
+      #+BEGIN_SRC go
+        const (
+          _ = 1 << (10 * iota)
+          KiB // 2^10
+          MiB // 2^100
+          GiB // 2^1000
+          TiB // 2^10000       (exceeds 1 << 32)
+          PiB // 2^100000
+          EiB // 2^1000000
+          ZiB // 2^10000000    (exceeds 1 << 64)
+          YiB // 2^100000000
+        )
+      #+END_SRC
+
+      + The ~iota~ mechanism has its _limits_.
+        For example, it's not possible to generate the more familiar powers of
+        1000 (KB, MB, and so on) because there is no exponentiation operator.
+
+    - Exercise 3.13
+      =From Jian=
+      I don't think this question should be here.
+
+      If someone want to test the results and print them, they will see some
+      overflow errors -- the constants can be defined. However, since the ~ZB~
+      and ~YB~ require more than 64 bits, the ~fmt.Println~ (or other print
+      functions) CANNOT print them directly! To understand this, the knowledge
+      of the next section is IMPORTANT!!!
+
+*** TODO 3.6.2. Untyped Constants - 78 =IMPORTANT= =re-read=
 
 * TODO 4. Composite Types - 81
   - /Arrays/ and /structs/ are /aggregate types/ -- their values are concatena-
@@ -1821,6 +2302,10 @@
      /array/ with this function, you can pass a /pointer/ to this /array/.
 
 ** TODO 4.2. Slices - 84
+  - SYNTAX: ~[]T~
+
+  - 
+
 *** TODO 4.2.1. The append Function - 88
 *** TODO 4.2.2. In-Place Slice Techniques - 91
 
