@@ -1,0 +1,1445 @@
+#+TITLE: Kotlin in Action
+#+VERSION: 2017, 1st
+#+AUTHOR: Dmitry Jemerov, Svetlana Isakova
+#+FOREWORD: Andrey Breslav
+#+STARTUP: entitiespretty
+
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[foreword - xv][foreword - xv]]
+- [[preface - xvii][preface - xvii]]
+- [[acknowledgments - xix][acknowledgments - xix]]
+- [[about this book - xxi][about this book - xxi]]
+- [[about the authors - xxiv][about the authors - xxiv]]
+- [[about the cover illustration - xxv][about the cover illustration - xxv]]
+- [[PART 1 I NTRODUCING KOTLIN - 1][PART 1 I NTRODUCING KOTLIN - 1]]
+- [[1 Kotlin: what and why - 3][1 Kotlin: what and why - 3]]
+  - [[1.1 A taste of Kotlin - 3][1.1 A taste of Kotlin - 3]]
+  - [[1.2 Kotlin's primary traits - 4][1.2 Kotlin's primary traits - 4]]
+    - [[Target platforms: server-side, Android, anywhere Java runs - 4][Target platforms: server-side, Android, anywhere Java runs - 4]]
+    - [[Statically typed - 5][Statically typed - 5]]
+    - [[Functional and object-oriented - 6][Functional and object-oriented - 6]]
+    - [[Free and open source - 7][Free and open source - 7]]
+  - [[1.3 Kotlin applications - 7][1.3 Kotlin applications - 7]]
+    - [[Kotlin on the server side - 8][Kotlin on the server side - 8]]
+    - [[Kotlin on Android - 9][Kotlin on Android - 9]]
+  - [[1.4 The philosophy of Kotlin - 10][1.4 The philosophy of Kotlin - 10]]
+    - [[Pragmatic - 10][Pragmatic - 10]]
+    - [[Concise - 11][Concise - 11]]
+    - [[Safe - 12][Safe - 12]]
+    - [[Interoperable - 12][Interoperable - 12]]
+  - [[1.5 Using the Kotlin tools - 10][1.5 Using the Kotlin tools - 10]]
+    - [[1.5.1 Compiling Kotlin code - 13][1.5.1 Compiling Kotlin code - 13]]
+    - [[1.5.2 Plug-in for IntelliJ IDEA and Android Studio - 14][1.5.2 Plug-in for IntelliJ IDEA and Android Studio - 14]]
+    - [[1.5.3 Interactive shell - 15][1.5.3 Interactive shell - 15]]
+    - [[1.5.4 Eclipse plug-in - 15][1.5.4 Eclipse plug-in - 15]]
+    - [[1.5.5 Online playground 15][1.5.5 Online playground 15]]
+    - [[1.5.6 Java-to-Kotlin converter - 15][1.5.6 Java-to-Kotlin converter - 15]]
+  - [[1.6 Summary - 15][1.6 Summary - 15]]
+- [[2 Kotlin basics - 17][2 Kotlin basics - 17]]
+  - [[2.1 Basic elements: functions and variables - 18][2.1 Basic elements: functions and variables - 18]]
+    - [[2.1.1 Hello, world! - 18][2.1.1 Hello, world! - 18]]
+    - [[2.1.2 Functions - 18][2.1.2 Functions - 18]]
+      - [[EXPRESSION BODIES - 19][EXPRESSION BODIES - 19]]
+    - [[2.1.3 Variables Easier string formatting: string templates - 22][2.1.3 Variables Easier string formatting: string templates - 22]]
+      - [[Mutable and Immutable Variables - 21][Mutable and Immutable Variables - 21]]
+    - [[2.1.4 Easier string formatting: string templates - 22][2.1.4 Easier string formatting: string templates - 22]]
+  - [[2.2 Classes and properties - 23][2.2 Classes and properties - 23]]
+    - [[2.2.1 Properties - 23][2.2.1 Properties - 23]]
+    - [[2.2.2 Custom accessors - 25][2.2.2 Custom accessors - 25]]
+    - [[2.2.3 Kotlin source code layout: directories and packages - 26][2.2.3 Kotlin source code layout: directories and packages - 26]]
+  - [[2.3 Representing and handling choices: enums and ~when~ - 28][2.3 Representing and handling choices: enums and ~when~ - 28]]
+    - [[2.3.1 Declaring ~enum~ classes - 28][2.3.1 Declaring ~enum~ classes - 28]]
+    - [[2.3.2 Using ~when~ to deal with enum classes - 29][2.3.2 Using ~when~ to deal with enum classes - 29]]
+    - [[2.3.3 Using ~when~ with arbitrary objects - 30][2.3.3 Using ~when~ with arbitrary objects - 30]]
+    - [[2.3.4 Using ~when~ without an argument - 31][2.3.4 Using ~when~ without an argument - 31]]
+    - [[2.3.5 Smart casts: combining type checks and casts - 31][2.3.5 Smart casts: combining type checks and casts - 31]]
+    - [[2.3.6 Refactoring: replacing ~if~ with ~when~ - 33][2.3.6 Refactoring: replacing ~if~ with ~when~ - 33]]
+    - [[2.3.7 Blocks as branches of ~if~ and ~when~ - 34][2.3.7 Blocks as branches of ~if~ and ~when~ - 34]]
+  - [[2.4 Iterating over things: ~while~ and ~for~ loops - 35][2.4 Iterating over things: ~while~ and ~for~ loops - 35]]
+    - [[The ~while~ loop - 35][The ~while~ loop - 35]]
+    - [[Iterating over numbers: ranges and progressions - 36][Iterating over numbers: ranges and progressions - 36]]
+    - [[Iterating over maps - 37][Iterating over maps - 37]]
+    - [[Using ~in~ to check collection and range membership - 38][Using ~in~ to check collection and range membership - 38]]
+  - [[2.5 Exceptions in Kotlin - 39][2.5 Exceptions in Kotlin - 39]]
+    - [[~try~, ~catch~, and ~finally~ - 40][~try~, ~catch~, and ~finally~ - 40]]
+    - [[~try~ as an expression - 41][~try~ as an expression - 41]]
+  - [[2.6 Summary - 42][2.6 Summary - 42]]
+- [[3 Defining and calling functions - 44][3 Defining and calling functions - 44]]
+  - [[3.1 Creating collections in Kotlin - 45][3.1 Creating collections in Kotlin - 45]]
+  - [[3.2 Making functions easier to call - 46][3.2 Making functions easier to call - 46]]
+    - [[3.2.1 Named arguments - 47][3.2.1 Named arguments - 47]]
+    - [[3.2.2 Default parameter values - 48 =IMPORTANT=][3.2.2 Default parameter values - 48 =IMPORTANT=]]
+    - [[3.2.3 Getting rid of static utility classes: top-level functions and properties - 49][3.2.3 Getting rid of static utility classes: top-level functions and properties - 49]]
+    - [[Top-Level Properties - 51][Top-Level Properties - 51]]
+  - [[3.3 Adding methods to other people's classes: extension functions and properties - 51][3.3 Adding methods to other people's classes: extension functions and properties - 51]]
+    - [[3.3.1 Imports and extension functions - 53][3.3.1 Imports and extension functions - 53]]
+    - [[3.3.2 Calling extension functions from Java - 53][3.3.2 Calling extension functions from Java - 53]]
+    - [[3.3.3 Utility functions as extensions No overriding for extension functions - 55][3.3.3 Utility functions as extensions No overriding for extension functions - 55]]
+    - [[3.3.4 Extension properties - 56][3.3.4 Extension properties - 56]]
+  - [[3.4 Working with collections: varargs, infix calls, and library support - 57][3.4 Working with collections: varargs, infix calls, and library support - 57]]
+    - [[3.4.1 Extending the Java Collections API - 57][3.4.1 Extending the Java Collections API - 57]]
+    - [[3.4.2 Varargs: functions that accept an arbitrary number of arguments - 58][3.4.2 Varargs: functions that accept an arbitrary number of arguments - 58]]
+    - [[3.4.3 Working with pairs: infix calls and destructuring declarations - 59][3.4.3 Working with pairs: infix calls and destructuring declarations - 59]]
+  - [[3.5 Working with strings and regular expressions - 60][3.5 Working with strings and regular expressions - 60]]
+    - [[3.5.1 Splitting strings - 60][3.5.1 Splitting strings - 60]]
+    - [[3.5.2 Regular expressions and triple-quoted strings - 61][3.5.2 Regular expressions and triple-quoted strings - 61]]
+    - [[3.5.3 Multiline triple-quoted strings - 62][3.5.3 Multiline triple-quoted strings - 62]]
+  - [[3.6 Making your code tidy: local functions and extensions - 64][3.6 Making your code tidy: local functions and extensions - 64]]
+  - [[3.7 Summary - 66][3.7 Summary - 66]]
+- [[4 Classes, objects, and interfaces - 67][4 Classes, objects, and interfaces - 67]]
+  - [[4.1 Defining class hierarchies - 68][4.1 Defining class hierarchies - 68]]
+    - [[Interfaces in Kotlin - 68][Interfaces in Kotlin - 68]]
+    - [[Open, final, and abstract modifiers: final by default - 70][Open, final, and abstract modifiers: final by default - 70]]
+    - [[Visibility modifiers: public by default - 73][Visibility modifiers: public by default - 73]]
+    - [[Inner and nested classes: nested by default - 75][Inner and nested classes: nested by default - 75]]
+    - [[Sealed classes: defining restricted class hierarchies - 77][Sealed classes: defining restricted class hierarchies - 77]]
+  - [[4.2 Declaring a class with nontrivial constructors or properties - 78][4.2 Declaring a class with nontrivial constructors or properties - 78]]
+    - [[Initializing classes: primary constructor and initializer blocks - 79][Initializing classes: primary constructor and initializer blocks - 79]]
+    - [[Secondary constructors: initializing the superclass in different ways - 81][Secondary constructors: initializing the superclass in different ways - 81]]
+    - [[Implementing properties declared in interfaces - 83][Implementing properties declared in interfaces - 83]]
+    - [[Accessing a backing field from a getter or setter - 85][Accessing a backing field from a getter or setter - 85]]
+    - [[Changing accessor visibility - 86][Changing accessor visibility - 86]]
+  - [[4.3 Compiler-generated methods: data classes and class delegation - 87][4.3 Compiler-generated methods: data classes and class delegation - 87]]
+    - [[Universal object methods - 87][Universal object methods - 87]]
+    - [[Data classes: autogenerated implementations of universal methods - 89][Data classes: autogenerated implementations of universal methods - 89]]
+    - [[Class delegation: using the ~by~ keyword - 91][Class delegation: using the ~by~ keyword - 91]]
+  - [[4.4 The ~object~ keyword: declaring a class and creating an instance, combined - 93][4.4 The ~object~ keyword: declaring a class and creating an instance, combined - 93]]
+    - [[Object declarations: singletons made easy - 93][Object declarations: singletons made easy - 93]]
+    - [[Companion objects: a place for factory methods and static members - 96][Companion objects: a place for factory methods and static members - 96]]
+    - [[Companion objects as regular objects - 98][Companion objects as regular objects - 98]]
+    - [[Object expressions: anonymous inner classes rephrased - 100][Object expressions: anonymous inner classes rephrased - 100]]
+  - [[4.5 Summary - 101][4.5 Summary - 101]]
+- [[5 Programming with lambdas - 103][5 Programming with lambdas - 103]]
+  - [[5.1 Lambda expressions and member references - 104][5.1 Lambda expressions and member references - 104]]
+    - [[Introduction to lambdas: blocks of code as function parameters - 104][Introduction to lambdas: blocks of code as function parameters - 104]]
+    - [[Lambdas and collections - 105][Lambdas and collections - 105]]
+    - [[Syntax for lambda expressions - 106][Syntax for lambda expressions - 106]]
+    - [[Accessing variables in scope - 109][Accessing variables in scope - 109]]
+    - [[Member references - 111][Member references - 111]]
+  - [[5.2 Functional APIs for collections - 113][5.2 Functional APIs for collections - 113]]
+    - [[Essentials: ~filter~ and ~map~ - 113][Essentials: ~filter~ and ~map~ - 113]]
+    - [[~all~, ~any~, ~count~, and ~find~: applying a predicate to a collection - 115][~all~, ~any~, ~count~, and ~find~: applying a predicate to a collection - 115]]
+    - [[~groupBy~: converting a list to a map of groups - 117][~groupBy~: converting a list to a map of groups - 117]]
+    - [[~flatMap~ and ~flatten~: processing elements in nested collections - 117][~flatMap~ and ~flatten~: processing elements in nested collections - 117]]
+  - [[5.3 Lazy collection operations: sequences - 118][5.3 Lazy collection operations: sequences - 118]]
+    - [[Executing sequence operations: intermediate and terminal operations - 120][Executing sequence operations: intermediate and terminal operations - 120]]
+    - [[Creating sequences - 122][Creating sequences - 122]]
+  - [[5.4 Using Java functional interfaces - 123][5.4 Using Java functional interfaces - 123]]
+    - [[Passing a lambda as a parameter to a Java method - 124][Passing a lambda as a parameter to a Java method - 124]]
+    - [[SAM constructors: explicit conversion of lambdas to functional interfaces - 126][SAM constructors: explicit conversion of lambdas to functional interfaces - 126]]
+  - [[5.5 Lambdas with receivers: ~with~ and ~apply~ - 128][5.5 Lambdas with receivers: ~with~ and ~apply~ - 128]]
+    - [[The ~with~ function - 128][The ~with~ function - 128]]
+    - [[The ~apply~ function - 130][The ~apply~ function - 130]]
+  - [[5.6 Summary - 131][5.6 Summary - 131]]
+- [[6 The Kotlin type system - 133][6 The Kotlin type system - 133]]
+  - [[6.1 Nullability - 133][6.1 Nullability - 133]]
+    - [[Nullable types - 134][Nullable types - 134]]
+    - [[The meaning of types - 136][The meaning of types - 136]]
+    - [[Safe call operator: ~?.~ - 137][Safe call operator: ~?.~ - 137]]
+    - [[Elvis operator: ~?:~ - 139][Elvis operator: ~?:~ - 139]]
+    - [[Safe casts: ~as?~ - 140][Safe casts: ~as?~ - 140]]
+    - [[Not-null assertions: “!!” - 141][Not-null assertions: “!!” - 141]]
+    - [[The ~let~ function - 143][The ~let~ function - 143]]
+    - [[Late-initialized properties - 145][Late-initialized properties - 145]]
+    - [[Extensions for nullable types - 146][Extensions for nullable types - 146]]
+    - [[Nullability of type parameters - 148][Nullability of type parameters - 148]]
+    - [[Nullability and Java - 149][Nullability and Java - 149]]
+  - [[6.2 Primitive and other basic types - 153][6.2 Primitive and other basic types - 153]]
+    - [[Primitive types: ~Int~, ~Boolean~, and more - 153][Primitive types: ~Int~, ~Boolean~, and more - 153]]
+    - [[Nullable primitive types: ~Int?~, ~Boolean?~, and more - 154][Nullable primitive types: ~Int?~, ~Boolean?~, and more - 154]]
+    - [[Number conversions - 155][Number conversions - 155]]
+    - [[~Any~ and ~Any?~: the root types - 157][~Any~ and ~Any?~: the root types - 157]]
+    - [[The ~Unit~ type: Kotlin's ~void~ - 157][The ~Unit~ type: Kotlin's ~void~ - 157]]
+    - [[The ~Nothing~ type: "This function never returns" - 158][The ~Nothing~ type: "This function never returns" - 158]]
+  - [[6.3 Collections and arrays - 159][6.3 Collections and arrays - 159]]
+    - [[Nullability and collections - 159][Nullability and collections - 159]]
+    - [[Read-only and mutable collections - 161][Read-only and mutable collections - 161]]
+    - [[Kotlin collections and Java - 163][Kotlin collections and Java - 163]]
+    - [[Collections as platform types - 165][Collections as platform types - 165]]
+    - [[Arrays of objects and primitive types - 167][Arrays of objects and primitive types - 167]]
+  - [[6.4 Summary - 170][6.4 Summary - 170]]
+- [[PART 2 EMBRACING KOTLIN - 171][PART 2 EMBRACING KOTLIN - 171]]
+- [[7 Operator overloading and other conventions - 173][7 Operator overloading and other conventions - 173]]
+  - [[7.1 Overloading arithmetic operators - 173][7.1 Overloading arithmetic operators - 173]]
+    - [[Overloading binary arithmetic operations - 174][Overloading binary arithmetic operations - 174]]
+    - [[Overloading compound assignment operators - 177][Overloading compound assignment operators - 177]]
+    - [[Overloading unary operators - 178][Overloading unary operators - 178]]
+  - [[7.2 Overloading comparison operators - - 180][7.2 Overloading comparison operators - - 180]]
+    - [[Equality operators: ~equals~ - 180][Equality operators: ~equals~ - 180]]
+    - [[Ordering operators: ~compareTo~ - 181][Ordering operators: ~compareTo~ - 181]]
+  - [[7.3 Conventions used for collections and ranges - 182][7.3 Conventions used for collections and ranges - 182]]
+    - [[Accessing elements by index: ~get~ and ~set~ - 182][Accessing elements by index: ~get~ and ~set~ - 182]]
+    - [[The ~in~ convention - 184][The ~in~ convention - 184]]
+    - [[The ~rangeTo~ convention - 185][The ~rangeTo~ convention - 185]]
+    - [[The ~iterator~ convention for the ~for~ loop - 186][The ~iterator~ convention for the ~for~ loop - 186]]
+  - [[7.4 Destructuring declarations and component functions - 187][7.4 Destructuring declarations and component functions - 187]]
+    - [[Destructuring declarations and loops - 188][Destructuring declarations and loops - 188]]
+  - [[7.5 Reusing property accessor logic: delegated properties - 189][7.5 Reusing property accessor logic: delegated properties - 189]]
+    - [[Delegated properties: the basics - 189][Delegated properties: the basics - 189]]
+    - [[Using delegated properties: lazy initialization and “by lazy()” - 190][Using delegated properties: lazy initialization and “by lazy()” - 190]]
+    - [[Implementing delegated properties - 192][Implementing delegated properties - 192]]
+    - [[Delegated-property translation rules - 195][Delegated-property translation rules - 195]]
+    - [[Storing property values in a map - 196][Storing property values in a map - 196]]
+    - [[Delegated properties in frameworks - 197][Delegated properties in frameworks - 197]]
+  - [[7.6 Summary - 199][7.6 Summary - 199]]
+- [[8 Higher-order functions: lambdas as parameters and return values - 200][8 Higher-order functions: lambdas as parameters and return values - 200]]
+  - [[8.1 Declaring higher-order functions - 201][8.1 Declaring higher-order functions - 201]]
+    - [[Function types - 201][Function types - 201]]
+    - [[Calling functions passed as arguments - 202][Calling functions passed as arguments - 202]]
+    - [[Using function types from Java - 204][Using function types from Java - 204]]
+    - [[Default and null values for parameters with function types Returning functions from functions - 207][Default and null values for parameters with function types Returning functions from functions - 207]]
+    - [[Removing duplication through lambdas - 209][Removing duplication through lambdas - 209]]
+  - [[8.2 Inline functions: removing the overhead of lambdas - 211][8.2 Inline functions: removing the overhead of lambdas - 211]]
+    - [[How inlining works - 211][How inlining works - 211]]
+    - [[Restrictions on inline functions - 213][Restrictions on inline functions - 213]]
+    - [[Inlining collection operations - 214][Inlining collection operations - 214]]
+    - [[Deciding when to declare functions as inline - 215][Deciding when to declare functions as inline - 215]]
+    - [[Using inlined lambdas for resource management - 216][Using inlined lambdas for resource management - 216]]
+  - [[8.3 Control flow in higher-order functions - 217][8.3 Control flow in higher-order functions - 217]]
+    - [[Return statements in lambdas: return from an enclosing function - 217][Return statements in lambdas: return from an enclosing function - 217]]
+    - [[Returning from lambdas: return with a label - 218][Returning from lambdas: return with a label - 218]]
+    - [[Anonymous functions: local returns by default - 220][Anonymous functions: local returns by default - 220]]
+  - [[8.4 Summary 221][8.4 Summary 221]]
+- [[9 Generics - 223][9 Generics - 223]]
+  - [[9.1 Generic type parameters - 224][9.1 Generic type parameters - 224]]
+    - [[Generic functions and properties - 224][Generic functions and properties - 224]]
+    - [[Declaring generic classes - 226][Declaring generic classes - 226]]
+    - [[Type parameter constraints - 227][Type parameter constraints - 227]]
+    - [[Making type parameters non-null - 229][Making type parameters non-null - 229]]
+  - [[9.2 Generics at runtime: erased and reified type parameters - 230][9.2 Generics at runtime: erased and reified type parameters - 230]]
+    - [[Generics at runtime: type checks and casts - 230][Generics at runtime: type checks and casts - 230]]
+    - [[Declaring functions with reified type parameters - 233][Declaring functions with reified type parameters - 233]]
+    - [[Replacing class references with reified type parameters - 235][Replacing class references with reified type parameters - 235]]
+    - [[Restrictions on reified type parameters - 236][Restrictions on reified type parameters - 236]]
+  - [[9.3 Variance: generics and subtyping - 237][9.3 Variance: generics and subtyping - 237]]
+    - [[Why variance exists: passing an argument to a function - 237][Why variance exists: passing an argument to a function - 237]]
+    - [[Classes, types, and subtypes - 238][Classes, types, and subtypes - 238]]
+    - [[Covariance: preserved subtyping relation - 240][Covariance: preserved subtyping relation - 240]]
+    - [[Contravariance: reversed subtyping relation - 244][Contravariance: reversed subtyping relation - 244]]
+    - [[Use-site variance: specifying variance for type occurrences - 246][Use-site variance: specifying variance for type occurrences - 246]]
+    - [[Star projection: using ~*~ instead of a type argument - 248][Star projection: using ~*~ instead of a type argument - 248]]
+  - [[9.4 Summary 252][9.4 Summary 252]]
+- [[10 Annotations and reflection - 254][10 Annotations and reflection - 254]]
+  - [[10.1 Declaring and applying annotations - 255][10.1 Declaring and applying annotations - 255]]
+    - [[Applying annotations - 255][Applying annotations - 255]]
+    - [[Annotation targets - 256][Annotation targets - 256]]
+    - [[Using annotations to customize JSON serialization - 258][Using annotations to customize JSON serialization - 258]]
+    - [[Declaring annotations - 260][Declaring annotations - 260]]
+    - [[Meta-annotations: controlling how an annotation is processed - 261][Meta-annotations: controlling how an annotation is processed - 261]]
+    - [[Classes as annotation parameters - 262][Classes as annotation parameters - 262]]
+    - [[Generic classes as annotation parameters - 263][Generic classes as annotation parameters - 263]]
+  - [[10.2 Reflection: introspecting Kotlin objects at runtime - 264][10.2 Reflection: introspecting Kotlin objects at runtime - 264]]
+    - [[The Kotlin reflection API: KClass, KCallable, KFunction, and KProperty - 265][The Kotlin reflection API: KClass, KCallable, KFunction, and KProperty - 265]]
+    - [[Implementing object serialization using reflection - 268][Implementing object serialization using reflection - 268]]
+    - [[Customizing serialization with annotations - 270][Customizing serialization with annotations - 270]]
+    - [[JSON parsing and object deserialization - 273][JSON parsing and object deserialization - 273]]
+    - [[Final deserialization step: ~callBy()~ and creating objects using reflection - 277][Final deserialization step: ~callBy()~ and creating objects using reflection - 277]]
+  - [[10.3 Summary - 281][10.3 Summary - 281]]
+- [[11 DSL construction - 282][11 DSL construction - 282]]
+  - [[11.1 From APIs to DSLs - 283][11.1 From APIs to DSLs - 283]]
+    - [[The concept of domain-specific languages - 284][The concept of domain-specific languages - 284]]
+    - [[Internal DSLs - 285][Internal DSLs - 285]]
+    - [[Structure of DSLs - 286][Structure of DSLs - 286]]
+    - [[Building HTML with an internal DSL - 287][Building HTML with an internal DSL - 287]]
+  - [[11.2 Building structured APIs: lambdas with receivers in DSLs - 288][11.2 Building structured APIs: lambdas with receivers in DSLs - 288]]
+    - [[Lambdas with receivers and extension function types - 288][Lambdas with receivers and extension function types - 288]]
+    - [[Using lambdas with receivers in HTML builders - 292][Using lambdas with receivers in HTML builders - 292]]
+    - [[Kotlin builders: enabling abstraction and reuse - 296][Kotlin builders: enabling abstraction and reuse - 296]]
+  - [[11.3 More flexible block nesting with the ~invoke~ convention - 299][11.3 More flexible block nesting with the ~invoke~ convention - 299]]
+    - [[The ~invoke~ convention: objects callable as functions - 299][The ~invoke~ convention: objects callable as functions - 299]]
+    - [[The ~invoke~ convention and functional types - 300][The ~invoke~ convention and functional types - 300]]
+    - [[The ~invoke~ convention in DSLs: declaring dependencies in Gradle - 301][The ~invoke~ convention in DSLs: declaring dependencies in Gradle - 301]]
+  - [[11.4 Kotlin DSLs in practice - 303][11.4 Kotlin DSLs in practice - 303]]
+    - [[Chaining infix calls: ~should~ in test frameworks - 303][Chaining infix calls: ~should~ in test frameworks - 303]]
+    - [[Defining extensions on primitive types: handling dates - 305][Defining extensions on primitive types: handling dates - 305]]
+    - [[Member extension functions: internal DSL for SQL - 306][Member extension functions: internal DSL for SQL - 306]]
+    - [[Anko: creating Android UIs dynamically - 309][Anko: creating Android UIs dynamically - 309]]
+  - [[11.5 Summary - 310][11.5 Summary - 310]]
+- [[appendix A Building Kotlin projects - 313][appendix A Building Kotlin projects - 313]]
+- [[appendix B Documenting Kotlin code - 317][appendix B Documenting Kotlin code - 317]]
+- [[appendix C The Kotlin ecosystem - 320][appendix C The Kotlin ecosystem - 320]]
+- [[index - 323][index - 323]]
+
+* foreword - xv
+* preface - xvii
+* acknowledgments - xix
+* about this book - xxi
+* about the authors - xxiv
+* about the cover illustration - xxv
+* PART 1 I NTRODUCING KOTLIN - 1
+* TODO 1 Kotlin: what and why - 3
+** TODO 1.1 A taste of Kotlin - 3
+** TODO 1.2 Kotlin's primary traits - 4
+*** TODO Target platforms: server-side, Android, anywhere Java runs - 4
+*** TODO Statically typed - 5
+*** TODO Functional and object-oriented - 6
+*** TODO Free and open source - 7
+
+** TODO 1.3 Kotlin applications - 7
+*** TODO Kotlin on the server side - 8
+*** TODO Kotlin on Android - 9
+
+** TODO 1.4 The philosophy of Kotlin - 10
+*** TODO Pragmatic - 10
+*** TODO Concise - 11
+*** TODO Safe - 12
+*** TODO Interoperable - 12
+
+** DONE 1.5 Using the Kotlin tools - 10
+   CLOSED: [2018-05-26 Sat 14:40]
+*** DONE 1.5.1 Compiling Kotlin code - 13
+    CLOSED: [2018-05-26 Sat 14:28]
+    - Conventional extension:
+      =.kt=
+
+    - Compiler:
+      =kotlinc=
+
+    - Run:
+      use =java= to run the jar file generated by =kotlinc= (with its package
+      flag(s)).
+
+    - Figure 1.1 Kotlin build process
+
+    - Kotlin is compatiable with all those common Java build systems such as
+      /Mavan/, /Gradle/, or /Ant/.
+
+*** DONE 1.5.2 Plug-in for IntelliJ IDEA and Android Studio - 14
+    CLOSED: [2018-05-26 Sat 14:29]
+*** DONE 1.5.3 Interactive shell - 15
+    CLOSED: [2018-05-26 Sat 14:36]
+    ~kotlinc~
+
+    =IMPORTANT= =From Jian= =TODO=
+    It seems there is a *BUG* if you use ~kotlinc~ as a REPL (Jian's Ver
+    1.2.40):
+      you cannot use the ~:quit~ command as the first command after getting into
+    the REPL. ~:quit~ only works since the second prompt shows up!
+
+*** DONE 1.5.4 Eclipse plug-in - 15
+    CLOSED: [2018-05-26 Sat 14:36]
+*** DONE 1.5.5 Online playground 15
+    CLOSED: [2018-05-26 Sat 14:36]
+    http://try.kotl.in
+
+*** DONE 1.5.6 Java-to-Kotlin converter - 15
+    CLOSED: [2018-05-26 Sat 14:38]
+    - It is extremely easy if you use IntelliJ IDEA:
+      + paste Java code fragment into a Kotlin file can trigger the conversion
+        action;
+
+      + invokde the "Convert Java File to Kotlin File" action to convert an
+        entire file.
+
+** TODO 1.6 Summary - 15
+
+* DONE 2 Kotlin basics - 17
+  CLOSED: [2018-05-26 Sat 14:23]
+  - This chapter covers
+    + Declaring functions, variables, classes, enums, and properties
+    + Control structures in Kotlin
+    + Smart casts
+    + Throwing and handling exceptions 
+
+** DONE 2.1 Basic elements: functions and variables - 18
+   CLOSED: [2018-05-26 Sat 10:59]
+*** DONE 2.1.1 Hello, world! - 18
+    CLOSED: [2018-05-26 Sat 10:44]
+    #+BEGIN_SRC java
+      fun main(args: Array<String>) {
+          println("Hello, world!")
+      }
+    #+END_SRC
+    - The function can be declared at the top level of a file.
+
+    - The is no special syntax for /arrays/ as in Java like ~[]int~.
+      The ~Array~ itself is just a normal type, with the most general syntax.
+
+    - ~println~ is a wrapper of Java's ~System.out.println~, and you no longer
+      need the prefixed package name in Java.
+
+    - Semicolons can be omitted.
+
+*** DONE 2.1.2 Functions - 18
+    CLOSED: [2018-05-26 Sat 10:47]
+    - Example:
+      #+BEGIN_SRC java
+        fun max(a: Int, b: Int): Int {
+            return if (a > b) a else b
+        }
+      #+END_SRC
+
+    - *Statements and expressions*
+      - In Kotlin, most /control structures/, _EXCEPT_ for the /loops/ (~for~,
+        ~do~, and ~do/ while~) are /expressions/.
+
+      - /assignments/:
+        * Kotlin: statements
+
+        * Java: expressions
+
+**** EXPRESSION BODIES - 19
+     - For single expression body, NO curly braces and the ~return~ are required.
+       ~fun max(a: Int, b: Int): Int = if (a > b) a else b~
+
+       This is called a /expression body/.
+       The one with curly braces is called a /block body/.
+
+     - =IMPORTANT=
+       Omitting the /return type/ is allowed _ONLY_ for functions with an
+       /expression body/ -- that's a conscious design choice, not a theory
+       limitation!!!
+       ~fun max(a: Int, b: Int) = if (a > b) a else b~
+
+*** DONE 2.1.3 Variables Easier string formatting: string templates - 22
+    CLOSED: [2018-05-26 Sat 10:59]
+    - If a variable doesn't have an /initializer/, you need to specify its type
+      _EXPLICITLY_:
+      #+BEGIN_SRC java
+        val answer: Int
+        answer = 42
+      #+END_SRC
+**** Mutable and Immutable Variables - 21
+     ~val~ and ~var~
+
+*** DONE 2.1.4 Easier string formatting: string templates - 22
+    CLOSED: [2018-05-26 Sat 11:03]
+    - /string templates/
+      For instance,
+      + Simple expression: ~println("Hello, $name!")~
+      + Complex expression: ~println("Hello, ${args[0]}!")~
+
+** DONE 2.2 Classes and properties - 23
+   CLOSED: [2018-05-26 Sat 12:38]
+   #+BEGIN_SRC java
+     /* Java */
+     public class Person {
+         private final String name;
+         public Person(String name) {
+             this.name = name;
+         }
+         public String getName() {
+             return name;
+         }
+     }
+   #+END_SRC
+   has corresponding Kotlin code: ~class Person(val name: String)~, this is often
+   called /value objects/ -- only data but no code inside body. The ~public~
+   keyword disappears -- it is the default visibility in Kotlin.
+
+*** DONE 2.2.1 Properties - 23
+    CLOSED: [2018-05-26 Sat 12:26]
+    - In Kotlin, /properties/ are a *first-class language feature*, which entirely
+      replaces /fields/ and /accessor methods/.
+
+      You declare a /property/ in a /class/ _the same way you declare a variable_:
+      with
+      + ~val~: A ~val~ /property/ is *read-only*
+
+      + ~var~: a ~var~ /property/ is *mutable*
+
+    - The relation between Java's getter/setter and Kotlin's.
+      =From Jian= I don't know if there is such a rule in Scala!?
+      + ~getName~ <-> ~name~, and ~setName~ <-> ~name~ (= ...)
+
+      + ~isMarried~ <-> ~married~, and ~setMarried~ <-> ~married~ (=...)
+
+    - TIP
+      You can also use the Kotlin property syntax for classes defined in Java.
+      Getters in a Java class can be accessed as val properties from Kotlin, and
+      get- ter/setter pairs can be accessed as var properties. For example, if a
+      Java class defines methods called getName and setName , you can access it
+      as a property called name . If it defines isMarried and setMarried
+      methods, the name of the corresponding Kotlin property will be isMarried .
+      =TODO=
+
+*** DONE 2.2.2 Custom accessors - 25
+    CLOSED: [2018-05-26 Sat 12:26]
+    #+BEGIN_SRC java
+      class Rectangle(val height: Int, val width: Int) {
+          val isSquare: Boolean
+              get() {
+                  return height == width
+              }
+          // OR, for short,
+          // get() = height == width
+      }
+    #+END_SRC
+    - Then you can use the ~isSquqre~ /property/, both in Kotlin and Java.
+
+*** DONE 2.2.3 Kotlin source code layout: directories and packages - 26
+    CLOSED: [2018-05-26 Sat 12:37]
+    - The /package/ of Kotlin is similar to that of Java.
+
+    - As in Java (UNLIKE Scala), /import statements/ are placed at the *beginning*
+      of the file and use the ~import~ keyword.
+
+    - Example:
+      #+BEGIN_SRC scala
+        package geometry.shapes
+
+        import java.util.Random
+
+        class Rectangle(val height: Int, val width: Int) {
+          val isSquare: Boolean
+              get() = height == width
+        }
+
+
+        fun createRandomRectangle(): Rectangle {
+          val random = Random()
+          return Rectangle(random.nextInt(), random.nextInt())
+        }
+      #+END_SRC
+
+    - Use ~.*~ to import all in a particular /package/.
+      For instance, ~import geometry.shapes.*~
+
+    - In Kotlin, you can put _MULTIPLE_ /classes/ in the same file and choose ANY
+      name (NO need to match the file name to a /class/ like in Java) for that
+      file.
+
+    - Kotlin doesn't impose layout restriction to packages.
+      For instance, under the =geometry= folder, you have two files =example.kt=
+      and =shapes.kt=, they can be the ~geometry.example~ /package/ and the
+      ~geometry.shapes~ /package/, respectively, if you want.
+
+      =Suggestion= Keep follow the Java convention, and you'll work well with Java
+      without find ways to get rid of any meaningless troubles.
+
+** DONE 2.3 Representing and handling choices: enums and ~when~ - 28
+   CLOSED: [2018-05-26 Sat 13:51]
+   ~when~ as a replace of Java ~switch~, but more powerful.
+
+*** DONE 2.3.1 Declaring ~enum~ classes - 28
+    CLOSED: [2018-05-26 Sat 12:46]
+    #+BEGIN_SRC scala
+      enum class Color {
+        RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET
+      }
+    #+END_SRC
+    - In Kotlin, ~enum~ is a so-called /soft keyword/: it has a special meaning
+      when it comes before ~class~, but you can use it as a regular name in other
+      places.
+
+    - Just as in Java,
+      ~enum~'s are *NOT* lists of values: you can declare /properties/ and /methods/
+      on ~enum class~'es. Here's how it works.
+      #+BEGIN_SRC scala
+        enum class Color(
+            val r: Int, val g: Int, val b: Int
+        ) {
+          RED(255, 0, 0), ORANGE(255, 165, 0),
+          YELLOW(255, 255, 0), GREEN(0, 255, 0), BLUE(0, 0, 255),
+          INDIGO(75, 0, 130), VIOLET(238, 130, 238);  // The semicolon here is required.
+
+          fun rgb() = (r * 256 + g) * 256 + b  // Define a method on the enum class
+        }
+
+        // >>>
+        println(Color.BLUE.rgb())
+        // 255
+      #+END_SRC
+
+      + =IMPORTANT=
+        The example shows the ONLY place the semicolon is *MANDATORY*!!!
+        It is use d separate the /enum constant list/ from the /method
+        definition(s)/.
+
+*** DONE 2.3.2 Using ~when~ to deal with enum classes - 29
+    CLOSED: [2018-05-26 Sat 12:51]
+    - Example:
+      #+BEGIN_SRC scala
+        fun getMnemonic(color: Color) =
+          when (color) {
+            Color.RED    -> "Richard"
+            Color.ORANGE -> "Of"
+            Color.YELLOW -> "York"
+            Color.GREEN  -> "Gave"
+            Color.BLUE   -> "Battle"
+            Color.INDIGO -> "In"
+            Color.VIOLET -> "Vain"
+          }
+
+        //  >>>
+        println(getMnemonic(Color.BLUE))
+        // Battle
+      #+END_SRC
+      + NO fallthrough, therefore no need for ~break~'s
+
+    - Example:
+      #+BEGIN_SRC scala
+        fun getWarmth(color: Color) = when(color) {
+          Color.RED, Color.ORANGE, Color.YELLOW  -> "warm"
+          Color.GREEN                            -> "neutral"
+          Color.BLUE, Color.INDIGO, Color.VIOLET -> "cold"
+        }
+
+        //  >>>
+        println(getWarmth(Color.ORANGE))
+        // warm
+      #+END_SRC
+
+      + Simplify the code
+        #+BEGIN_SRC scala
+          import ch02.colors,Color
+          import ch02.colors,Color.*
+
+          fun getWarmth(color: Color) = when(color) {
+            RED, ORANGE, YELLOW  -> "warm"
+            GREEN                -> "neutral"
+            BLUE, INDIGO, VIOLET -> "cold"
+          }
+        #+END_SRC
+
+*** DONE 2.3.3 Using ~when~ with arbitrary objects - 30
+    CLOSED: [2018-05-26 Sat 12:59]
+    ~when~ allows any object, rahter than, like Java, only constants.
+
+    - Example:
+      #+BEGIN_SRC scala
+        fun mix(c1: Color, c2: Color) =
+            when (setOf(c1, c2)) {
+                setOf(RED, YELLOW)  -> ORANGE
+                setOf(YELLOW, BLUE) -> GREEN
+                setOf(BLUE, VIOLET) -> INDIGO
+                else                -> throw Exception("Dirty color")
+        }
+
+        // >>>
+        println(mix(BLUE, YELLOW))
+        // GREEN
+      #+END_SRC
+      + ~setOf~ creates a ~Set~ with given elements.
+
+*** DONE 2.3.4 Using ~when~ without an argument - 31
+    CLOSED: [2018-05-26 Sat 13:10]
+    We want to avoid creating ~Set~ for every branch just for match, which can be
+    costly, though mostly we don't care about it.
+
+    =From Jian= Does Scala have this problem???
+
+    #+BEGIN_SRC scala
+      fun mixOptimized(c1: Color, c2: Color) =
+          when {
+              (c1 == RED && c2 == YELLOW) ||
+              (c1 == YELLOW && c2 == RED) ->
+                  ORANGE
+
+              (c1 == YELLOW && c2 == BLUE) ||
+              (c1 == BLUE && c2 == YELLOW) ->
+                  GREEN
+
+              (c1 == BLUE && c2 == VIOLET) ||
+              (c1 == VIOLET && c2 == BLUE) ->
+                  INDIGO
+
+              else -> throw Exception("Dirty color")
+      }
+
+      // >>>
+      println(mixOptimized(BLUE, YELLOW))
+      // GREEN
+    #+END_SRC
+    + NO argument ~when~ try to match a bool value ~true~.
+
+*** DONE 2.3.5 Smart casts: combining type checks and casts - 31
+    CLOSED: [2018-05-26 Sat 13:20]
+    - /interface/ implemetation doesn't have a keyword, use ~:~.
+
+      =From Jian= This syntax design is good!
+
+    - Example:
+      #+BEGIN_SRC scala
+        interface Expr
+        class Num(val value: Int) : Expr
+        class Sum(val left: Expr, val right: Expr) : Expr
+      #+END_SRC
+
+      + The Kotlin way use ~is~ to *check* (as ~instanceof~ in Java) and /cast/
+        the type (the /cast/ step is done by the compiler if you use ~is~, this
+        is called the /smart cast/).
+        #+BEGIN_SRC scala
+          fun eval(e: Expr): Int {
+            if (e is Num) {
+              return e.value
+
+              //// if there is no smart cast:
+              // val n = e as Num
+              // return n.value
+            }
+
+            if (e is Sum) {
+              return eval(e.left) + eval(e.right)
+            }
+
+            throw IllegalArgumentException("Unknown expression")
+          }
+        #+END_SRC
+
+*** DONE 2.3.6 Refactoring: replacing ~if~ with ~when~ - 33
+    CLOSED: [2018-05-26 Sat 13:51]
+    - Refactor with the ~if/else if/else~ expression
+      #+BEGIN_SRC scala
+        fun eval(e: Expr): Int =
+          if (e is Num) {
+            e.value
+          } else if (e is Sum) {
+            eval(e.left) + eval(e.right)
+          } else {
+            throw IllegalArgumentException("Unknown expression")
+          }
+  
+        // >>>
+        println(eval(Sum(Num(1), Num(2))))
+        // 3
+      #+END_SRC
+
+    - As in Java, the curly braces are _optional_ if there's only ONE expression
+      in an if branch.
+
+    - Refactor with ~when~ -- less boilerplate code
+      #+BEGIN_SRC scala
+        fun eval(e: Expr): Int =
+            when (e) {
+                is Num -> e.value
+                is Sum -> eval(e.left) + eval(e.right)
+                else   -> throw IllegalArgumentException("Unknown expression")
+            }
+      #+END_SRC
+
+*** DONE 2.3.7 Blocks as branches of ~if~ and ~when~ - 34
+    CLOSED: [2018-05-26 Sat 13:51]
+    The branches of ~if~ and ~when~ can be /blocks/.
+    Unlike Scala (if consider Kotlin's ~when~ as Scala's ~match~), curly braces
+    is mandatory for ~when~'s branches if there is more than one statements!
+
+    - Example:
+      #+BEGIN_SRC scala
+        fun evalWithLogging(e: Expr): Int =
+          when (e) {
+            is Num -> {
+              println("num: ${e.value}")
+              e.value
+            }
+
+            is Sum -> {
+              val left = evalWithLogging(e.left)
+              val right = evalWithLogging(e.right)
+              println("sum: $left + $right")
+              left + right
+            }
+
+            else -> throw IllegalArgumentException("Unknown expression")
+        }
+      #+END_SRC
+
+** DONE 2.4 Iterating over things: ~while~ and ~for~ loops - 35
+   CLOSED: [2018-05-26 Sat 14:09]
+   - The ~while~ loop is _identical_ to the one in Java.
+
+   - The ~for~ loop exists in ONLY ONE form, which is equivalent to Java's
+     /for-each loop/.
+
+*** DONE The ~while~ loop - 35
+    CLOSED: [2018-05-26 Sat 13:53]
+    Kotlin has ~while~ and ~do/while~ loops.
+
+*** DONE Iterating over numbers: ranges and progressions - 36
+    CLOSED: [2018-05-26 Sat 14:01]
+    - Use ~..~ to generate /ranges/.
+      For instance, ~val oneToTen = 1..10~
+      *CAUTION* this ~..~ is like Scala's ~to~, rahte than ~until~.
+
+    - progression :: iterate over ALL the values in a /range/.
+
+    - Fizz-Buzz game.
+      #+BEGIN_SRC scala
+        fun fizzBuzz(i: Int) = when {
+            i % 15 == 0 -> "FizzBuzz "
+            i % 3 == 0  -> "Fizz "
+            i % 5 == 0  -> "Buzz "
+            else        -> "$i "
+        }
+
+        // >>>
+        for (i in 1..100) {
+            print(fizzBuzz(i))
+        }
+
+        // 1 2 Fizz 4 Buzz Fizz 7 ..
+      #+END_SRC
+
+    - Countdown and with steps:
+      #+BEGIN_SRC scala
+        for (i in 100 downTo 1 step 2) {
+          print(fizzBuzz(i))
+        }
+        // Buzz 98 Fizz 94 92 FizzBuz 88 ...
+      #+END_SRC
+
+    - Use ~until~ to create a /(end) exlusive range/.
+
+*** DONE Iterating over maps - 37
+    CLOSED: [2018-05-26 Sat 14:02]
+    #+BEGIN_SRC scala
+      val binaryReps = TreeMap<Char, String>()
+
+      for (c in 'A'..'F') {
+        val binary = Integer.toBinaryString(c.toInt())
+        binaryReps[c] = binary
+      }
+
+      for ((letter, binary) in binaryReps) {
+        println("$letter = $binary")
+      }
+    #+END_SRC
+
+    - More /unpack/ syntax in Section 7.4.1
+
+    #+BEGIN_SRC scala
+      val list = arrayListOf("10", "11", "1001")
+
+      for ((index, element) in list.withIndex()) {
+        println("$index: $element")
+      }
+    #+END_SRC
+
+*** DONE Using ~in~ to check collection and range membership - 38
+    CLOSED: [2018-05-26 Sat 14:09]
+    ~in~ or ~!in~
+    - Example:
+      #+BEGIN_SRC scala
+        fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z'
+        fun isNotDigit(c: Char) = c !in '0'..'9'
+      #+END_SRC
+
+    - Example (with ~when~):
+      #+BEGIN_SRC scala
+        fun recognize(c: Char) = when (c) {
+            in '0'..'9'              -> "It's a digit!"
+            in 'a'..'z', in 'A'..'Z' -> "It's a letter!"
+            else                     -> "I don't know..."
+        }
+      #+END_SRC
+
+    - If you have any class that _supports_ /comparing instances/ (by implementing
+      the ~java.lang.Comparable~ /interface/), you can create /ranges/ of objects
+      of that type.
+
+** DONE 2.5 Exceptions in Kotlin - 39
+   CLOSED: [2018-05-26 Sat 14:12]
+   - The basic form for exception-handling statements in Kotlin is _similar_ to
+     Java's. For instance,
+     #+BEGIN_SRC scala
+       if (percentage !in 0..100) {
+         throw IllegalArgumentException(
+           "A percentage value must be between 0 and 100: $percentage")
+       }
+     #+END_SRC
+     + NO ~new~ here
+
+   - Unlike Java, Kotlin's ~throw~ is an /expression/.
+
+     =From Jian= Expression for side-effect??? Similar in Scala??? From the
+     usage, it seems it is!
+
+*** DONE ~try~, ~catch~, and ~finally~ - 40
+    CLOSED: [2018-05-26 Sat 14:16]
+    #+BEGIN_SRC scala
+      fun readNumber(reader: BufferedReader): Int? {
+        try {
+          val line = reader.readLine()
+          return Integer.parseInt(line)
+        }
+        catch (e: NumberFormatException) {
+          return null
+        }
+        finally {
+          reader.close()
+        }
+      }
+    #+END_SRC
+
+*** DONE ~try~ as an expression - 41
+    CLOSED: [2018-05-26 Sat 14:22]
+    #+BEGIN_SRC scala
+      fun readNumber(reader: BufferedReader) {
+          val number = try {
+              Integer.parseInt(reader.readLine())
+          } catch (e: NumberFormatException) {
+              null
+          }
+
+          println(number)
+      }
+
+      // >>>
+      val reader = BufferedReader(StringReader("not a number"))
+
+      // >>>
+      readNumber(reader)
+      // null
+    #+END_SRC
+
+** DONE 2.6 Summary - 42
+   CLOSED: [2018-05-26 Sat 14:23]
+
+* TODO 3 Defining and calling functions - 44
+  - This chapter covers
+    + /Functions/ for working with /collections/, /strings/, and /regular
+      expressions/
+
+    + Using /named arguments/, /default parameter values/, and the /infix call
+      syntax/
+
+    + *Adapting* Java libraries to Kotlin _through_ /extension functions/ and
+      /properties/ =TODO= =???=
+
+    + Structuring code with _top-level and local_ /functions/ and /properties/
+
+** DONE 3.1 Creating collections in Kotlin - 45
+   CLOSED: [2018-05-26 Sat 14:56]
+   #+BEGIN_SRC scala
+     val set = hashSetOf(1, 7, 53)
+     val list = arrayListOf(1, 7, 53)
+     val map = hashMapOf(1 to "one", 7 to "seven", 53 to "fifty-three")
+   #+END_SRC
+
+   - You can use the ~javaClass~ (be equivalent to Java's ~getClass()~ /method/)
+     to get type of you collections:
+     #+BEGIN_SRC scala
+       println(set.javaClass)
+       // class java.util.HashSet
+
+       println(list.javaClass)
+       // class java.util.ArrayList
+
+       println(map.javaClass)
+       // class java.util.HashMap
+     #+END_SRC
+     You see Kotlin does NOT have its own collection classes.
+       This is a *design choice* _based on_ the idea that "interact with Java
+     well is important for Kotlin".
+
+     However, Kotlin _add more_ /methods/ to them (=From Jian= for now, *HOW* is
+     NOT explained)! For instance, ~last()~ for ~List~, and ~max()~ for a
+     collection of comparable values.
+
+   - =TODO=
+     And in section 6.3, you'll learn how the Java collection classes are
+     represented in the Kotlin type system.
+
+** DONE 3.2 Making functions easier to call - 46
+   CLOSED: [2018-05-26 Sat 15:32]
+    #+BEGIN_SRC scala
+      fun <T> joinToString(
+          collection: Collection<T>,
+          separator: String,
+          prefix: String,
+          postfix: String
+      ): String {
+
+          val result = StringBuilder(prefix)
+
+          for ((index, element) in collection.withIndex()) {
+              if (index > 0) result.append(separator)
+              result.append(element)
+          }
+
+          result.append(postfix)
+          return result.toString()
+      }
+    #+END_SRC
+
+*** DONE 3.2.1 Named arguments - 47
+    CLOSED: [2018-05-26 Sat 15:13]
+    - The invocation like ~joinToString(collection, " ", " ", ".")~ will confuse
+      people who read this code.
+
+    - Java does NOT have /named arguments/, while Kotlin has!
+      ~joinToString(collection, separator = " ", prefix = " ", postfix = ".")~
+      + Specify the /unnamed arguments/ first followed by the /named arguments/.
+
+      This is much better than the Java way:
+      #+BEGIN_SRC java
+        joinToString(collection, /* separator */ " ", /* prefix */ " ", /* postfix */ ".");
+      #+END_SRC
+
+    - *WARNING*
+      _UNFORTUNATELY_, you *CANNOT* use /named arguments/ when calling /methods
+      written in Java/, including /methods/ from the JDK and the Android framework.
+
+      _Storing parameter names in =.class= files_ is supported as an *OPTIONAL
+      feature* ONLY starting with Java 8, and
+
+      *Kotlin maintains compatibility with Java 6.*
+
+        As a result, the compiler can't recognize the parameter
+      names used in your call and match them against the method definition.
+
+*** DONE 3.2.2 Default parameter values - 48 =IMPORTANT=
+    CLOSED: [2018-05-26 Sat 15:13]
+    =IMPORTANT=
+    *Default values and Java* 
+    Given that Java does *NOT* have the concept of /default parameter values/,
+    you have to specify all the parameter values explicitly when you call a
+    Kotlin function with default parameter values _from Java_.
+
+    If you frequently need to call a function from Java and want to make it
+    easier to use for Java callers, you can annotate it with ~@JvmOverloads~.
+    This instructs the compiler to generate Java overloaded methods, omitting
+    each of the parameters one by one, starting from the last one.
+
+    For example, if you annotate ~joinToString~ with ~@JvmOverloads~, the
+    following overloads are generated:
+    #+BEGIN_SRC java
+      /* Java */
+      String joinToString(Collection<T> collection, String separator,
+                          String prefix, String postfix);
+
+      String joinToString(Collection<T> collection, String separator,
+                          String prefix);
+
+      String joinToString(Collection<T> collection, String separator);
+
+      String joinToString(Collection<T> collection);
+    #+END_SRC
+    Each overload uses the default values for the parameters that have been omitted
+    from the signature.
+
+*** DONE 3.2.3 Getting rid of static utility classes: top-level functions and properties - 49
+    CLOSED: [2018-05-26 Sat 15:25]
+    #+BEGIN_SRC scala
+      // join.kt
+      package strings
+
+      fun joinToString(...): String { ... }
+    #+END_SRC
+
+    - Q :: How to use this in Java?
+
+    - A :: The Kotlin's code above is equivalent to Java's code
+      #+BEGIN_SRC java
+        package strings;
+
+        public class JoinKt {
+            public static String joinToString(...) { ... }
+        }
+      #+END_SRC
+
+      You can use it in Java in this way:
+      #+BEGIN_SRC java
+        import strings.JoinKt;
+
+        JoinKt.joinToString(list, ", ", "", "");
+      #+END_SRC
+
+    - *Changing the file class name*
+      To *change the name* of the _generated class_ that contains Kotlin
+      /top-level functions/, you add a ~@JvmName~ /annotation/ to the file.
+
+      *Place it _at the beginning of the file_, _BEFORE_ the /package name/:*
+      #+BEGIN_SRC scala
+        @file:JvmName("StringFunctions")
+        package strings
+
+        fun joinToString(...): String { ... }
+      #+END_SRC
+
+      Now the function can be called as follows:
+      #+BEGIN_SRC java
+        import strings.StringFunctions;
+
+        StringFunctions.joinToString(list, ", ", "", "");
+      #+END_SRC
+
+      A detailed discussion of the annotation syntax comes later, in chapter 10.
+
+*** DONE Top-Level Properties - 51
+    CLOSED: [2018-05-26 Sat 15:32]
+    /properties/ can also be top-level in Kotlin, though this feature is NOT
+    used as much as the /top-level functions/.
+    #+BEGIN_SRC scala
+      var opCount = 0
+
+      fun performOperation() {
+        opCount++
+        // ...
+      }
+
+      fun reportOperationCount() {
+        println("Operation performed $opCount times")
+      }
+    #+END_SRC
+
+    - As normal /class-level properties/, the ~val~ /properties/ come with a
+      /getter/, and the ~var~ /properties/ come with a /getter/ and /setter/.
+
+    - If you want a constant like Java's ~public static final~ /field/, you should
+      use the ~const~ modifier, *which
+      is allowed for /properties of /primitive types/, as well as ~String~:*
+      ~const val UNIX_LINE_SEPARATOR = "\n"~
+
+** TODO 3.3 Adding methods to other people's classes: extension functions and properties - 51
+   - extension function :: a function that can be called as a member of a /class/
+        but is defined outside of it.
+
+   - Example:
+     #+BEGIN_SRC scala
+       package Strings
+
+       fun Strings.lastChar(): Char = this.get(this.length - 1)
+       //// Or, for short:
+       // fun Strings.lastChar(): Char = get(length - 1)
+
+       // println("Kotlin".lastChar())
+       //// n
+     #+END_SRC
+
+   - /receiver type/ and /receiver object/
+
+   - The /extension function/ *cannot break* the /encapsulation/!!!!!!
+
+     You *CANNOT* access the /private/ or /protected/ memmbers of the /class/ of
+     a /extension funciton/.
+
+   - On the /call site/, /extension functions/ are *indistinguishable* from
+     /members/, and often _it doesn't matter_ whether the particular /method/ is
+     a /member/ or an /extension/.
+
+*** TODO 3.3.1 Imports and extension functions - 53
+*** TODO 3.3.2 Calling extension functions from Java - 53
+*** TODO 3.3.3 Utility functions as extensions No overriding for extension functions - 55
+*** TODO 3.3.4 Extension properties - 56
+
+** TODO 3.4 Working with collections: varargs, infix calls, and library support - 57
+*** 3.4.1 Extending the Java Collections API - 57
+*** 3.4.2 Varargs: functions that accept an arbitrary number of arguments - 58
+*** 3.4.3 Working with pairs: infix calls and destructuring declarations - 59 
+
+** TODO 3.5 Working with strings and regular expressions - 60
+*** 3.5.1 Splitting strings - 60
+*** 3.5.2 Regular expressions and triple-quoted strings - 61
+*** 3.5.3 Multiline triple-quoted strings - 62
+
+** DONE 3.6 Making your code tidy: local functions and extensions - 64
+   CLOSED: [2018-05-26 Sat 15:52]
+   - The evolution of codes:
+     + Listing 3.11 - A function with repetitive code
+       #+BEGIN_SRC scala
+         class User(val id: Int, val name: String, val address: String)
+
+         fun saveUser(user: User) {
+             if (user.name.isEmpty()) {
+                 throw IllegalArgumentException(
+                     "Can't save user ${user.id}: empty Name")
+             }
+
+             if (user.address.isEmpty()) {
+                 throw IllegalArgumentException(
+                     "Can't save user ${user.id}: empty Address")
+             }
+
+             // Save user to the database
+         }
+
+         saveUser(User(1, "", ""))
+         // java.lang.IllegalArgumentException: Can't save user 1: empty Name
+       #+END_SRC
+
+     + Listing 3.12 - Extracting a local function to avoid repetition
+       #+BEGIN_SRC scala
+         class User(val id: Int, val name: String, val address: String)
+
+         fun saveUser(user: User) {
+             fun validate(user: User,
+                          value: String,
+                          fieldName: String) {
+                 if (value.isEmpty()) {
+                     throw IllegalArgumentException(
+                         "Can't save user ${user.id}: empty $fieldName")
+                 }
+             }
+
+             validate(user, user.name, "Name")
+             validate(user, user.address, "Address")
+             // Save user to the database
+         }
+       #+END_SRC
+
+     + Listing 3.13 - Accessing outer function parameters in a local function
+       #+BEGIN_SRC scala
+         class User(val id: Int, val name: String, val address: String)
+
+         fun saveUser(user: User) {
+             fun validate(value: String,
+                          fieldName: String) {
+                 if (value.isEmpty()) {
+                     throw IllegalArgumentException(
+                         "Can't save user ${user.id}: empty $fieldName")
+                 }
+             }
+
+             validate(user.name, "Name")
+             validate(user.address, "Address")
+             // Save user to the database
+         }
+       #+END_SRC
+
+     + Listing 3.14 - Extracting the logic into an /extension function/
+       #+BEGIN_SRC scala
+         class User(val id: Int, val name: String, val address: String)
+
+         fun User.validateBeforeSave() {
+             fun validate(value: String, fieldName: String) {
+                 if (value.isEmpty()) {
+                     throw IllegalArgumentException(
+                         "Can't save user $id: empty $fieldName")
+                 }
+         }
+
+             validate(name, "Name")
+             validate(address, "Address")
+         }
+
+         fun saveUser(user: User) {
+             user.validateBeforeSave()
+             // Save user to the database
+         }
+       #+END_SRC
+
+       * =TODO= =???= 
+         Extracting a piece of code into an /extension function/ turns out to be
+         surprisingly useful.
+
+         Even though ~User~ is a part of your codebase and not a library class,
+         + you don't want to put this logic into a method of ~User~ , because
+           it's not relevant to any other places where ~User~ is used.
+
+         + If you follow this approach the API of the /class/ contains only the
+           essential /methods/ used everywhere, so the /class/ remains small and
+           easy to wrap your head around.
+             On the other hand, /functions/ that primarily deal with a single
+           =TODO= =???= =???= =???= =???=
+           object and don't need access to its private data can access its
+           members without extra qualification, as in listing 3.14.
+
+   - As a general rule for readability, we don't recommend using more than one
+     level of nesting.
+
+** TODO 3.7 Summary - 66
+
+* TODO 4 Classes, objects, and interfaces - 67
+** 4.1 Defining class hierarchies - 68
+*** Interfaces in Kotlin - 68
+*** Open, final, and abstract modifiers: final by default - 70
+*** Visibility modifiers: public by default - 73
+*** Inner and nested classes: nested by default - 75
+*** Sealed classes: defining restricted class hierarchies - 77
+
+** 4.2 Declaring a class with nontrivial constructors or properties - 78
+*** Initializing classes: primary constructor and initializer blocks - 79
+*** Secondary constructors: initializing the superclass in different ways - 81
+*** Implementing properties declared in interfaces - 83
+*** Accessing a backing field from a getter or setter - 85
+*** Changing accessor visibility - 86
+
+** 4.3 Compiler-generated methods: data classes and class delegation - 87
+*** Universal object methods - 87
+*** Data classes: autogenerated implementations of universal methods - 89
+*** Class delegation: using the ~by~ keyword - 91
+
+** 4.4 The ~object~ keyword: declaring a class and creating an instance, combined - 93
+*** Object declarations: singletons made easy - 93
+*** Companion objects: a place for factory methods and static members - 96
+*** Companion objects as regular objects - 98
+*** Object expressions: anonymous inner classes rephrased - 100
+
+** 4.5 Summary - 101
+
+* TODO 5 Programming with lambdas - 103
+** TODO 5.1 Lambda expressions and member references - 104
+*** Introduction to lambdas: blocks of code as function parameters - 104
+*** Lambdas and collections - 105
+*** Syntax for lambda expressions - 106
+*** Accessing variables in scope - 109
+*** Member references - 111 
+
+** TODO 5.2 Functional APIs for collections - 113
+*** Essentials: ~filter~ and ~map~ - 113
+*** ~all~, ~any~, ~count~, and ~find~: applying a predicate to a collection - 115
+*** ~groupBy~: converting a list to a map of groups - 117
+*** ~flatMap~ and ~flatten~: processing elements in nested collections - 117
+
+** TODO 5.3 Lazy collection operations: sequences - 118
+*** Executing sequence operations: intermediate and terminal operations - 120
+*** Creating sequences - 122
+
+** TODO 5.4 Using Java functional interfaces - 123
+*** Passing a lambda as a parameter to a Java method - 124
+*** SAM constructors: explicit conversion of lambdas to functional interfaces - 126
+
+** TODO 5.5 Lambdas with receivers: ~with~ and ~apply~ - 128
+*** The ~with~ function - 128
+*** The ~apply~ function - 130
+
+** TODO 5.6 Summary - 131
+
+* TODO 6 The Kotlin type system - 133
+** TODO 6.1 Nullability - 133
+*** Nullable types - 134
+*** The meaning of types - 136
+*** Safe call operator: ~?.~ - 137
+*** Elvis operator: ~?:~ - 139
+*** Safe casts: ~as?~ - 140
+*** Not-null assertions: “!!” - 141
+*** The ~let~ function - 143
+*** Late-initialized properties - 145
+*** Extensions for nullable types - 146
+*** Nullability of type parameters - 148
+*** Nullability and Java - 149
+
+** TODO 6.2 Primitive and other basic types - 153
+*** Primitive types: ~Int~, ~Boolean~, and more - 153
+*** Nullable primitive types: ~Int?~, ~Boolean?~, and more - 154
+*** Number conversions - 155
+*** ~Any~ and ~Any?~: the root types - 157
+*** The ~Unit~ type: Kotlin's ~void~ - 157
+*** The ~Nothing~ type: "This function never returns" - 158
+    
+** TODO 6.3 Collections and arrays - 159
+*** Nullability and collections - 159
+*** Read-only and mutable collections - 161
+*** Kotlin collections and Java - 163
+*** Collections as platform types - 165
+*** Arrays of objects and primitive types - 167
+
+** TODO 6.4 Summary - 170
+
+* PART 2 EMBRACING KOTLIN - 171
+* TODO 7 Operator overloading and other conventions - 173
+** TODO 7.1 Overloading arithmetic operators - 173
+*** Overloading binary arithmetic operations - 174
+*** Overloading compound assignment operators - 177
+*** Overloading unary operators - 178
+
+** TODO 7.2 Overloading comparison operators - - 180
+*** Equality operators: ~equals~ - 180
+*** Ordering operators: ~compareTo~ - 181
+
+** TODO 7.3 Conventions used for collections and ranges - 182
+*** Accessing elements by index: ~get~ and ~set~ - 182
+*** The ~in~ convention - 184
+*** The ~rangeTo~ convention - 185
+*** The ~iterator~ convention for the ~for~ loop - 186
+
+** TODO 7.4 Destructuring declarations and component functions - 187
+*** Destructuring declarations and loops - 188
+
+** TODO 7.5 Reusing property accessor logic: delegated properties - 189
+*** Delegated properties: the basics - 189
+*** Using delegated properties: lazy initialization and “by lazy()” - 190
+*** Implementing delegated properties - 192
+*** Delegated-property translation rules - 195
+*** Storing property values in a map - 196
+*** Delegated properties in frameworks - 197
+
+** TODO 7.6 Summary - 199
+
+* TODO 8 Higher-order functions: lambdas as parameters and return values - 200
+** TODO 8.1 Declaring higher-order functions - 201
+*** Function types - 201
+*** Calling functions passed as arguments - 202
+*** Using function types from Java - 204
+*** Default and null values for parameters with function types Returning functions from functions - 207
+*** Removing duplication through lambdas - 209
+
+** TODO 8.2 Inline functions: removing the overhead of lambdas - 211
+*** How inlining works - 211
+*** Restrictions on inline functions - 213
+*** Inlining collection operations - 214
+*** Deciding when to declare functions as inline - 215
+*** Using inlined lambdas for resource management - 216  
+
+** TODO 8.3 Control flow in higher-order functions - 217
+*** Return statements in lambdas: return from an enclosing function - 217
+*** Returning from lambdas: return with a label - 218
+*** Anonymous functions: local returns by default - 220
+
+** TODO 8.4 Summary 221
+
+* TODO 9 Generics - 223
+** TODO 9.1 Generic type parameters - 224
+*** Generic functions and properties - 224
+*** Declaring generic classes - 226
+*** Type parameter constraints - 227
+*** Making type parameters non-null - 229
+
+** TODO 9.2 Generics at runtime: erased and reified type parameters - 230
+*** Generics at runtime: type checks and casts - 230
+*** Declaring functions with reified type parameters - 233
+*** Replacing class references with reified type parameters - 235
+*** Restrictions on reified type parameters - 236
+
+** TODO 9.3 Variance: generics and subtyping - 237
+*** Why variance exists: passing an argument to a function - 237
+*** Classes, types, and subtypes - 238
+*** Covariance: preserved subtyping relation - 240
+*** Contravariance: reversed subtyping relation - 244
+*** Use-site variance: specifying variance for type occurrences - 246
+*** Star projection: using ~*~ instead of a type argument - 248
+
+** TODO 9.4 Summary 252
+
+* TODO 10 Annotations and reflection - 254
+** TODO 10.1 Declaring and applying annotations - 255
+*** Applying annotations - 255
+*** Annotation targets - 256
+*** Using annotations to customize JSON serialization - 258
+*** Declaring annotations - 260
+*** Meta-annotations: controlling how an annotation is processed - 261
+*** Classes as annotation parameters - 262
+*** Generic classes as annotation parameters - 263
+
+** TODO 10.2 Reflection: introspecting Kotlin objects at runtime - 264
+*** The Kotlin reflection API: KClass, KCallable, KFunction, and KProperty - 265
+*** Implementing object serialization using reflection - 268
+*** Customizing serialization with annotations - 270
+*** JSON parsing and object deserialization - 273
+*** Final deserialization step: ~callBy()~ and creating objects using reflection - 277
+
+** TODO 10.3 Summary - 281 
+
+* TODO 11 DSL construction - 282
+** TODO 11.1 From APIs to DSLs - 283
+*** The concept of domain-specific languages - 284
+*** Internal DSLs - 285
+*** Structure of DSLs - 286
+*** Building HTML with an internal DSL - 287
+
+** TODO 11.2 Building structured APIs: lambdas with receivers in DSLs - 288
+*** Lambdas with receivers and extension function types - 288
+*** Using lambdas with receivers in HTML builders - 292
+*** Kotlin builders: enabling abstraction and reuse - 296
+
+** TODO 11.3 More flexible block nesting with the ~invoke~ convention - 299
+*** The ~invoke~ convention: objects callable as functions - 299
+*** The ~invoke~ convention and functional types - 300
+*** The ~invoke~ convention in DSLs: declaring dependencies in Gradle - 301
+
+** TODO 11.4 Kotlin DSLs in practice - 303
+*** Chaining infix calls: ~should~ in test frameworks - 303
+*** Defining extensions on primitive types: handling dates - 305
+*** Member extension functions: internal DSL for SQL - 306
+*** Anko: creating Android UIs dynamically - 309
+
+** TODO 11.5 Summary - 310
+
+* TODO appendix A Building Kotlin projects - 313
+* TODO appendix B Documenting Kotlin code - 317
+* TODO appendix C The Kotlin ecosystem - 320
+* index - 323
+
+
