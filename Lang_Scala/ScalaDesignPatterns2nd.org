@@ -1,0 +1,1048 @@
+#+TITLE: Scala Design Patterns
+#+VERSION: 2018, 2nd
+#+AUTHOR: Ivan Nikolov
+#+STARTUP: entitiespretty
+
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface][Preface]]
+  - [[Who this book is for][Who this book is for]]
+  - [[What this book covers][What this book covers]]
+  - [[To get the most out of this book][To get the most out of this book]]
+    - [[Download the example code files][Download the example code files]]
+    - [[Conventions used][Conventions used]]
+  - [[Get in touch][Get in touch]]
+    - [[Reviews][Reviews]]
+- [[1. The Design Patterns Out There and Setting Up Your Environment][1. The Design Patterns Out There and Setting Up Your Environment]]
+  - [[Design patterns][Design patterns]]
+    - [[Scala and design patterns][Scala and design patterns]]
+    - [[The need for design patterns and their benefits][The need for design patterns and their benefits]]
+  - [[Design pattern categories][Design pattern categories]]
+    - [[Creational design patterns][Creational design patterns]]
+      - [[The abstract factory design pattern][The abstract factory design pattern]]
+      - [[The factory method design pattern][The factory method design pattern]]
+      - [[The lazy initialization design pattern][The lazy initialization design pattern]]
+      - [[The singleton design pattern][The singleton design pattern]]
+      - [[The object pool design pattern][The object pool design pattern]]
+      - [[The builder design pattern][The builder design pattern]]
+      - [[The prototype design pattern][The prototype design pattern]]
+    - [[Structural design patterns][Structural design patterns]]
+      - [[The adapter design pattern][The adapter design pattern]]
+      - [[The decorator design pattern][The decorator design pattern]]
+      - [[The bridge design pattern][The bridge design pattern]]
+      - [[The composite design pattern][The composite design pattern]]
+      - [[The facade design pattern][The facade design pattern]]
+      - [[The flyweight design pattern][The flyweight design pattern]]
+      - [[The proxy design pattern][The proxy design pattern]]
+    - [[Behavioral design patterns][Behavioral design patterns]]
+      - [[The value object design pattern][The value object design pattern]]
+      - [[The null object design pattern][The null object design pattern]]
+      - [[The strategy design pattern][The strategy design pattern]]
+      - [[The command design pattern][The command design pattern]]
+      - [[The chain of responsibility design pattern][The chain of responsibility design pattern]]
+      - [[The interpreter design pattern][The interpreter design pattern]]
+      - [[The iterator design pattern][The iterator design pattern]]
+      - [[The mediator design pattern][The mediator design pattern]]
+      - [[The memento design pattern][The memento design pattern]]
+      - [[The observer design pattern][The observer design pattern]]
+      - [[The state design pattern][The state design pattern]]
+      - [[The template method design pattern][The template method design pattern]]
+      - [[The visitor design pattern][The visitor design pattern]]
+    - [[Functional design patterns][Functional design patterns]]
+      - [[Monoids][Monoids]]
+      - [[Monads][Monads]]
+      - [[Functors][Functors]]
+    - [[Scala-specific design patterns][Scala-specific design patterns]]
+      - [[The lens design pattern][The lens design pattern]]
+      - [[The cake design pattern][The cake design pattern]]
+      - [[Pimp my library][Pimp my library]]
+      - [[Stackable traits][Stackable traits]]
+      - [[The type class design pattern][The type class design pattern]]
+      - [[Lazy evaluation][Lazy evaluation]]
+      - [[Partial functions][Partial functions]]
+      - [[Implicit injection][Implicit injection]]
+      - [[Duck typing][Duck typing]]
+      - [[Memoization][Memoization]]
+  - [[Choosing a design pattern][Choosing a design pattern]]
+  - [[Setting up the development environment][Setting up the development environment]]
+    - [[Installing Scala][Installing Scala]]
+      - [[Tips for installing Scala manually][Tips for installing Scala manually]]
+      - [[Tips for installing Scala using SBT][Tips for installing Scala using SBT]]
+    - [[Scala IDEs][Scala IDEs]]
+    - [[Dependency management][Dependency management]]
+      - [[SBT][SBT]]
+      - [[Maven][Maven]]
+      - [[SBT versus Maven][SBT versus Maven]]
+  - [[Summary][Summary]]
+- [[2. Traits and Mixin Compositions][2. Traits and Mixin Compositions]]
+  - [[Traits][Traits]]
+    - [[Traits as interfaces][Traits as interfaces]]
+      - [[Mixing in traits with variables][Mixing in traits with variables]]
+    - [[Traits as classes][Traits as classes]]
+    - [[Extending classes][Extending classes]]
+    - [[Extending traits][Extending traits]]
+  - [[Mixin compositions][Mixin compositions]]
+    - [[Mixing traits in][Mixing traits in]]
+    - [[Composing][Composing]]
+      - [[Composing simple traits][Composing simple traits]]
+      - [[Composing complex traits][Composing complex traits]]
+      - [[Composing with self-types][Composing with self-types]]
+    - [[Clashing traits][Clashing traits]]
+      - [[Same signatures and return types][Same signatures and return types]]
+      - [[Same signatures and different return types traits][Same signatures and different return types traits]]
+      - [[Same signatures and return types mixins][Same signatures and return types mixins]]
+      - [[Same signatures and different return types mixins][Same signatures and different return types mixins]]
+  - [[Multiple inheritance][Multiple inheritance]]
+    - [[The diamond problem][The diamond problem]]
+    - [[The limitations][The limitations]]
+  - [[Linearization][Linearization]]
+    - [[Rules of inheritance hierarchies][Rules of inheritance hierarchies]]
+    - [[Linearization rules][Linearization rules]]
+    - [[How linearization works][How linearization works]]
+    - [[Initialization][Initialization]]
+    - [[Method overriding][Method overriding]]
+  - [[Testing traits][Testing traits]]
+    - [[Using a class][Using a class]]
+    - [[Mixing the trait in][Mixing the trait in]]
+      - [[Mixing into the test class][Mixing into the test class]]
+      - [[Mixing into the test cases][Mixing into the test cases]]
+    - [[Running the tests][Running the tests]]
+  - [[Traits versus classes][Traits versus classes]]
+    - [[Summary][Summary]]
+- [[3. Unification][3. Unification]]
+  - [[Functions and classes][Functions and classes]]
+    - [[Functions as classes][Functions as classes]]
+      - [[Function literals][Function literals]]
+      - [[Functions without syntactic sugar][Functions without syntactic sugar]]
+    - [[Increased expressivity][Increased expressivity]]
+  - [[Algebraic data types and class hierarchies][Algebraic data types and class hierarchies]]
+    - [[ADTs][ADTs]]
+      - [[Sum ADTs][Sum ADTs]]
+      - [[Product ADTs][Product ADTs]]
+      - [[Hybrid ADTs][Hybrid ADTs]]
+      - [[The unification][The unification]]
+    - [[Pattern matching][Pattern matching]]
+      - [[Pattern matching with values][Pattern matching with values]]
+      - [[Pattern matching for product ADTs][Pattern matching for product ADTs]]
+  - [[Modules and objects][Modules and objects]]
+      - [[Using modules][Using modules]]
+  - [[Summary][Summary]]
+- [[4. Abstract and Self Types][4. Abstract and Self Types]]
+  - [[Abstract types][Abstract types]]
+    - [[Generics][Generics]]
+    - [[Abstract types][Abstract types]]
+    - [[Generics versus abstract types][Generics versus abstract types]]
+      - [[Usage advice][Usage advice]]
+  - [[Polymorphism][Polymorphism]]
+    - [[Subtype polymorphism][Subtype polymorphism]]
+    - [[Parametric polymorphism][Parametric polymorphism]]
+    - [[Ad hoc polymorphism][Ad hoc polymorphism]]
+      - [[Adding functions for multiple types][Adding functions for multiple types]]
+  - [[Self types][Self types]]
+    - [[Using self types][Using self types]]
+      - [[Requiring multiple components][Requiring multiple components]]
+      - [[Conflicting components][Conflicting components]]
+      - [[Self types and the cake design pattern][Self types and the cake design pattern]]
+    - [[Self types versus inheritance][Self types versus inheritance]]
+      - [[Inheritance leaking functionality][Inheritance leaking functionality]]
+  - [[Summary][Summary]]
+- [[5. Aspect-Oriented Programming and Components][5. Aspect-Oriented Programming and Components]]
+  - [[Aspect-oriented programming][Aspect-oriented programming]]
+    - [[Understanding application efficiency][Understanding application efficiency]]
+      - [[Timing our application without AOP][Timing our application without AOP]]
+      - [[Timing our application with AOP][Timing our application with AOP]]
+  - [[Components in Scala][Components in Scala]]
+    - [[Using Scala's expressive power to build components][Using Scala's expressive power to build components]]
+      - [[Implementing components][Implementing components]]
+      - [[Self types for components][Self types for components]]
+  - [[Summary][Summary]]
+- [[6. Creational Design Patterns][6. Creational Design Patterns]]
+  - [[What are creational design patterns?][What are creational design patterns?]]
+  - [[The factory method design pattern][The factory method design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+      - [[Scala alternatives][Scala alternatives]]
+    - [[What it is good for?][What it is good for?]]
+    - [[What it is not so good for?][What it is not so good for?]]
+  - [[The abstract factory][The abstract factory]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+      - [[Scala alternatives][Scala alternatives]]
+    - [[What it is good for?][What it is good for?]]
+    - [[What it is not so good for?][What it is not so good for?]]
+  - [[Other factory design patterns][Other factory design patterns]]
+    - [[The static factory][The static factory]]
+    - [[The simple factory][The simple factory]]
+    - [[Factory combinations][Factory combinations]]
+  - [[Lazy initialization][Lazy initialization]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+    - [[What it is good for?][What it is good for?]]
+    - [[What it is not so good for?][What it is not so good for?]]
+  - [[The singleton design pattern][The singleton design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+    - [[What it is good for?][What it is good for?]]
+    - [[What it is not so good for?][What it is not so good for?]]
+  - [[The builder design pattern][The builder design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+      - [[A Java-like implementation][A Java-like implementation]]
+      - [[Implementation with a case class][Implementation with a case class]]
+      - [[Using generalized type constraints][Using generalized type constraints]]
+    - [[What it is good for?][What it is good for?]]
+    - [[What it is not so good for?][What it is not so good for?]]
+  - [[The prototype design pattern][The prototype design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+    - [[What it is good for?][What it is good for?]]
+    - [[What it is not so good for?][What it is not so good for?]]
+  - [[Summary][Summary]]
+- [[7. Structural Design Patterns][7. Structural Design Patterns]]
+  - [[Defining structural design patterns][Defining structural design patterns]]
+  - [[The adapter design pattern][The adapter design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+      - [[The adapter design pattern with final classes][The adapter design pattern with final classes]]
+      - [[The adapter design pattern the Scala way][The adapter design pattern the Scala way]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The decorator design pattern][The decorator design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+      - [[The decorator design pattern the Scala way][The decorator design pattern the Scala way]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The bridge design pattern][The bridge design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+      - [[The bridge design pattern the Scala way][The bridge design pattern the Scala way]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The composite design pattern][The composite design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The facade design pattern][The facade design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The flyweight design pattern][The flyweight design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The proxy design pattern][The proxy design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[Summary][Summary]]
+- [[8. Behavioral Design Patterns - Part One][8. Behavioral Design Patterns - Part One]]
+  - [[Defining behavioral design patterns][Defining behavioral design patterns]]
+  - [[The value object design pattern][The value object design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+    - [[Alternative implementation][Alternative implementation]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The null object design pattern][The null object design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The strategy design pattern][The strategy design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+      - [[The strategy design pattern the Scala way][The strategy design pattern the Scala way]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The command design pattern][The command design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+      - [[The command design pattern the Scala way][The command design pattern the Scala way]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The chain of responsibility design pattern][The chain of responsibility design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+      - [[The chain of responsibility design pattern the][The chain of responsibility design pattern the]]
+      - [[Scala way][Scala way]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The interpreter design pattern][The interpreter design pattern]]
+    - [[An example class diagram][An example class diagram]]
+    - [[A code example][A code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[Summary][Summary]]
+- [[9. Behavioral Design Patterns - Part Two][9. Behavioral Design Patterns - Part Two]]
+  - [[The iterator design pattern][The iterator design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The mediator design pattern][The mediator design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The memento design pattern][The memento design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The observer design pattern][The observer design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The state design pattern][The state design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The template method design pattern][The template method design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code exampleWhat it is good for][Code exampleWhat it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[The visitor design pattern][The visitor design pattern]]
+    - [[Example class diagram][Example class diagram]]
+    - [[Code example][Code example]]
+      - [[The visitor design pattern the Scala way][The visitor design pattern the Scala way]]
+    - [[What it is good for][What it is good for]]
+    - [[What it is not so good for][What it is not so good for]]
+  - [[Summary][Summary]]
+- [[10. Functional Design Patterns - the Deep Theory][10. Functional Design Patterns - the Deep Theory]]
+  - [[Abstraction and vocabulary][Abstraction and vocabulary]]
+  - [[Monoids][Monoids]]
+    - [[What are monoids?][What are monoids?]]
+    - [[Monoids in real life][Monoids in real life]]
+    - [[Using monoids][Using monoids]]
+      - [[Monoids and foldable collections][Monoids and foldable collections]]
+      - [[Monoids and parallel computations][Monoids and parallel computations]]
+      - [[Monoids and composition][Monoids and composition]]
+    - [[When to use monoids][When to use monoids]]
+  - [[Functors][Functors]]
+    - [[Functors in real life][Functors in real life]]
+      - [[Using our functors][Using our functors]]
+  - [[Monads][Monads]]
+    - [[What is a monad?][What is a monad?]]
+      - [[The flatMap method][The flatMap method]]
+      - [[The unit method][The unit method]]
+      - [[The connection between map, flatMap, and unit][The connection between map, flatMap, and unit]]
+      - [[The monad laws][The monad laws]]
+    - [[Monads in real life][Monads in real life]]
+    - [[Using monads][Using monads]]
+      - [[The Option monad][The Option monad]]
+      - [[A more advanced monad example][A more advanced monad example]]
+    - [[Monad intuition][Monad intuition]]
+  - [[Summary][Summary]]
+- [[11. Applying What We Have Learned][11. Applying What We Have Learned]]
+  - [[The lens design pattern][The lens design pattern]]
+    - [[Lens example][Lens example]]
+      - [[Without the lens design pattern][Without the lens design pattern]]
+      - [[With the lens design pattern][With the lens design pattern]]
+    - [[Minimizing the boilerplate][Minimizing the boilerplate]]
+  - [[The cake design pattern][The cake design pattern]]
+    - [[Dependency injection][Dependency injection]]
+      - [[Dependency injection libraries and Scala][Dependency injection libraries and Scala]]
+    - [[Dependency injection in Scala][Dependency injection in Scala]]
+      - [[Writing our code][Writing our code]]
+      - [[Wiring it all up][Wiring it all up]]
+      - [[Unit testing our application][Unit testing our application]]
+    - [[Other dependency injection alternatives][Other dependency injection alternatives]]
+      - [[Implicits for dependency injection][Implicits for dependency injection]]
+      - [[Reader monad for dependency injection][Reader monad for dependency injection]]
+  - [[The pimp my library design pattern][The pimp my library design pattern]]
+    - [[Using pimp my library][Using pimp my library]]
+    - [[Pimp my library in real life][Pimp my library in real life]]
+  - [[The stackable traits design pattern][The stackable traits design pattern]]
+    - [[Using stackable traits][Using stackable traits]]
+  - [[The type class design pattern][The type class design pattern]]
+    - [[Type class example][Type class example]]
+    - [[Type class design pattern alternatives][Type class design pattern alternatives]]
+  - [[Lazy evaluation][Lazy evaluation]]
+    - [[Evaluating by-name parameters only once][Evaluating by-name parameters only once]]
+    - [[Alternative lazy evaluation][Alternative lazy evaluation]]
+  - [[Partial functions][Partial functions]]
+    - [[Partial functions are not partially applied functions][Partial functions are not partially applied functions]]
+    - [[Partially defined functions][Partially defined functions]]
+  - [[Implicit injection][Implicit injection]]
+    - [[Implicit conversions][Implicit conversions]]
+    - [[Dependency injection using implicits][Dependency injection using implicits]]
+      - [[Testing with implicit dependency injection][Testing with implicit dependency injection]]
+  - [[Duck typing][Duck typing]]
+    - [[Duck typing example][Duck typing example]]
+    - [[Duck typing alternatives][Duck typing alternatives]]
+    - [[When to use duck typing][When to use duck typing]]
+  - [[Memoization][Memoization]]
+    - [[Memoization example][Memoization example]]
+    - [[Memoization alternatives][Memoization alternatives]]
+  - [[Summary][Summary]]
+- [[12. Real-Life Applications][12. Real-Life Applications]]
+  - [[Reasons to use libraries][Reasons to use libraries]]
+  - [[The Scalaz library][The Scalaz library]]
+    - [[Monoids in Scalaz][Monoids in Scalaz]]
+      - [[Using monoids][Using monoids]]
+      - [[Testing monoids][Testing monoids]]
+    - [[Monads in Scalaz][Monads in Scalaz]]
+      - [[Using monads][Using monads]]
+      - [[Testing monads][Testing monads]]
+    - [[The possibilities of Scalaz][The possibilities of Scalaz]]
+  - [[Writing a complete application][Writing a complete application]]
+    - [[Application specifications][Application specifications]]
+    - [[Implementation][Implementation]]
+      - [[The libraries to use][The libraries to use]]
+    - [[Writing some code][Writing some code]]
+    - [[Wiring it all up][Wiring it all up]]
+    - [[The end result][The end result]]
+  - [[Testing our application][Testing our application]]
+    - [[Unit testing][Unit testing]]
+    - [[Application testing][Application testing]]
+  - [[The future of our application][The future of our application]]
+  - [[Summary][Summary]]
+
+* Preface
+** Who this book is for
+** What this book covers
+** To get the most out of this book
+*** Download the example code files
+*** Conventions used
+
+** Get in touch
+*** Reviews
+
+* 1. The Design Patterns Out There and Setting Up Your Environment
+** DONE Design patterns
+   CLOSED: [2018-05-29 Tue 11:54]
+   - Design Patterns (The formal definition) ::
+        A design pattern is a reusable solution to a recurring problem in
+        software design. It is not a finished piece of code but a template that
+        helps to solve a particular problem or family of problems.
+
+   - Feature-rich languages might not even need a /design pattern/, while others
+     still do.
+
+   - The lack or existence of a certain functionality within aprogramming language
+     also makes it able to implement additional /design patterns/ that others
+     cannot. The opposite is also valid -- it might not be able to implement
+     things that others can.
+
+*** DONE Scala and design patterns
+    CLOSED: [2018-05-29 Tue 11:54]
+    - The hybrid nature of the Scala makes some of the /traditional object-oriented
+      design patterns/ _obsolete_, or possible, using _other cleaner techniques_.
+
+*** DONE The need for design patterns and their benefits
+    CLOSED: [2018-05-29 Tue 11:54]
+
+** DONE Design pattern categories
+   CLOSED: [2018-05-29 Tue 12:45]
+   - Even if there are many different /design patterns/, they can all be grouped
+     in the following:
+     + Creational
+
+     + Structural
+
+     + Behavioral
+
+     + Functional
+
+     + Scala-specific design patterns
+       * Some of these /design patterns/ can be assigned to the previous groups.
+         - They can either be _additions_ or _replacements_ of the already
+           existing ones.
+
+         - They are typical to Scala and take advantage of some advanced language
+           features or simply features not available in other languages.)
+
+   - The _first three groups_ contain the famous /Gang of Four design patterns/.
+
+     The rest, even if they can be assigned to one of the first three groups, will
+     be specific to Scala and functional programming languages.
+
+     =TODO=
+     In the next few subsections, we will explain the main characteristics of
+     the listed groups and briefly present the actual design patterns that fall
+     under them.
+
+*** TODO Creational design patterns
+    - The /creational design patterns/ deal with /object creation mechanisms/.
+
+      + *PURPOSE*: create objects in a way that is suitable to the current situation,
+        which could lead to unnecessary complexity and the need for extra
+        knowledge if they were not there.
+
+      + The main ideas behind the /creational design patterns/ are as follows:
+        * *Knowledge encapsulation* about the concrete classes
+
+        * *Hiding details* about the actual creation and how objects are combined
+
+**** TODO The abstract factory design pattern
+**** TODO The factory method design pattern
+**** TODO The lazy initialization design pattern
+**** TODO The singleton design pattern
+**** TODO The object pool design pattern
+**** TODO The builder design pattern
+**** TODO The prototype design pattern
+
+*** TODO Structural design patterns
+    - /Structural design patterns/ exist in order to help establish the
+      relationships between different entities in order to _form larger
+      structures_.
+
+        They define how each component should be structured so that it has very
+      flexible interconnecting modules that can work together in a larger
+      system.
+
+    - The main features of /structural design patterns/ include the following:
+      + The use of composition to combine the implementations of multiple objects
+
+      + Help build a large system made of various components by maintaining a high
+        level of flexibility
+
+**** TODO The adapter design pattern
+**** TODO The decorator design pattern
+**** TODO The bridge design pattern
+**** TODO The composite design pattern
+**** TODO The facade design pattern
+**** TODO The flyweight design pattern
+**** TODO The proxy design pattern
+
+*** TODO Behavioral design patterns
+    - /Behavioral design patterns/ increase *communication flexibility* between
+      objects based on the specific ways they interact with each other.
+
+      Here,
+      + /creational patterns/ mostly describe a moment in time during creation,
+      + /structural patterns/ describe a more or less static structure,
+      + /behavioral patterns/ describe a process or flow.
+
+      They simplify this flow and make it more understandable.
+
+    - The main features of /behavioral design patterns/ are as follows:
+      + What is being described is a process or flow
+
+      + The flows are simplified and made understandable
+
+      + They accomplish tasks that would be difficult or impossible to achieve
+        with objects
+
+**** The value object design pattern
+**** The null object design pattern
+**** The strategy design pattern
+**** The command design pattern
+**** The chain of responsibility design pattern
+**** The interpreter design pattern
+**** The iterator design pattern
+**** The mediator design pattern
+**** The memento design pattern
+**** The observer design pattern
+**** The state design pattern
+**** The template method design pattern
+**** The visitor design pattern
+
+*** DONE Functional design patterns
+    CLOSED: [2018-05-29 Tue 12:37]
+**** DONE Monoids
+     CLOSED: [2018-05-29 Tue 12:29]
+     - Concept
+
+     - What is important about /monoids/ is that
+       + they give us the possibility to work with many different types of values
+         in a common way.
+
+       + They allow us to convert pairwise operations to *work with sequences*;
+       + the /associativity/ gives us the possibility for *parallelization*
+       + the /identity element/ allows us to know what to do with empty lists.
+
+       /Monoids/ are *GREAT to EASILY* _describe and implement *aggregations*._
+
+**** DONE Monads
+     CLOSED: [2018-05-29 Tue 12:37]
+     - /Monads/ are algebraic structures that REPRESENT _computations as sequences
+       of steps_.
+
+     - /Monads/ are useful for
+       + building pipelines
+
+       + adding operations with side effects cleanly to a language where everything
+         is immutable
+
+       + implementing compositions.
+         =From Jian= Especially for data structures with embedded sub-structures
+
+**** DONE Functors
+     CLOSED: [2018-05-29 Tue 12:34]
+     - This concept comes from /category theory/.
+
+     - For now, you could remember that /functors/ are things that can allow us
+       to *lift* a function of the /type/ ~A => B~ to a function of the /type/
+       ~F[A] => F[B]~.
+
+*** DONE Scala-specific design patterns
+    CLOSED: [2018-05-29 Tue 12:45]
+**** The lens design pattern
+**** The cake design pattern
+**** Pimp my library
+**** Stackable traits
+**** The type class design pattern
+**** Lazy evaluation
+**** Partial functions
+**** Implicit injection
+**** Duck typing
+**** Memoization
+
+** TODO Choosing a design pattern
+** TODO Setting up the development environment
+*** DONE Installing Scala
+    CLOSED: [2018-05-29 Tue 13:12]
+**** DONE Tips for installing Scala manually
+     CLOSED: [2018-05-29 Tue 13:12]
+**** DONE Tips for installing Scala using SBT
+     CLOSED: [2018-05-29 Tue 13:12]
+
+*** DONE Scala IDEs
+    CLOSED: [2018-05-29 Tue 13:13]
+*** TODO Dependency management
+**** SBT
+**** Maven
+**** SBT versus Maven
+
+** TODO Summary
+
+* 2. Traits and Mixin Compositions
+** Traits
+*** Traits as interfaces
+**** Mixing in traits with variables
+
+*** Traits as classes
+*** Extending classes
+*** Extending traits
+
+** Mixin compositions
+*** Mixing traits in
+*** Composing
+**** Composing simple traits
+**** Composing complex traits
+**** Composing with self-types
+
+*** Clashing traits
+**** Same signatures and return types
+**** Same signatures and different return types traits
+**** Same signatures and return types mixins
+**** Same signatures and different return types mixins
+
+** Multiple inheritance
+*** The diamond problem
+*** The limitations
+
+** Linearization
+*** Rules of inheritance hierarchies
+*** Linearization rules
+*** How linearization works
+*** Initialization
+*** Method overriding
+
+** Testing traits
+*** Using a class
+*** Mixing the trait in
+**** Mixing into the test class
+**** Mixing into the test cases
+
+*** Running the tests
+
+** Traits versus classes
+*** Summary
+
+* 3. Unification
+** Functions and classes
+*** Functions as classes
+**** Function literals
+**** Functions without syntactic sugar
+
+*** Increased expressivity
+
+** Algebraic data types and class hierarchies
+*** ADTs
+**** Sum ADTs
+**** Product ADTs
+**** Hybrid ADTs
+**** The unification
+
+*** Pattern matching
+**** Pattern matching with values
+**** Pattern matching for product ADTs
+
+** Modules and objects
+**** Using modules
+
+** Summary
+
+* 4. Abstract and Self Types
+** Abstract types
+*** Generics
+*** Abstract types
+*** Generics versus abstract types
+**** Usage advice
+
+** Polymorphism
+*** Subtype polymorphism
+*** Parametric polymorphism
+*** Ad hoc polymorphism
+**** Adding functions for multiple types
+
+** Self types
+*** Using self types
+**** Requiring multiple components
+**** Conflicting components
+**** Self types and the cake design pattern
+
+*** Self types versus inheritance
+**** Inheritance leaking functionality
+
+** Summary
+
+* 5. Aspect-Oriented Programming and Components
+** Aspect-oriented programming
+*** Understanding application efficiency
+**** Timing our application without AOP
+**** Timing our application with AOP
+
+** Components in Scala
+*** Using Scala's expressive power to build components
+**** Implementing components
+**** Self types for components
+
+** Summary
+
+* 6. Creational Design Patterns
+** What are creational design patterns?
+** The factory method design pattern
+*** An example class diagram
+*** A code example
+**** Scala alternatives
+
+*** What it is good for?
+*** What it is not so good for?
+
+** The abstract factory
+*** An example class diagram
+*** A code example
+**** Scala alternatives
+
+*** What it is good for?
+*** What it is not so good for?
+
+** Other factory design patterns
+*** The static factory
+*** The simple factory
+*** Factory combinations
+
+** Lazy initialization
+*** An example class diagram
+*** A code example
+*** What it is good for?
+*** What it is not so good for?
+
+** The singleton design pattern
+*** An example class diagram
+*** A code example
+*** What it is good for?
+*** What it is not so good for?
+
+** The builder design pattern
+*** An example class diagram
+*** A code example
+**** A Java-like implementation
+**** Implementation with a case class
+**** Using generalized type constraints
+***** Changing the Person class
+***** Adding generalized type constraints to the required methods
+***** Using the type-safe builder
+
+*** What it is good for?
+*** What it is not so good for?
+
+** The prototype design pattern
+*** An example class diagram
+*** A code example
+*** What it is good for?
+*** What it is not so good for?
+
+** Summary
+
+* 7. Structural Design Patterns
+** Defining structural design patterns
+** The adapter design pattern
+*** Example class diagram
+*** Code example
+**** The adapter design pattern with final classes
+**** The adapter design pattern the Scala way
+
+*** What it is good for
+*** What it is not so good for
+
+** The decorator design pattern
+*** Example class diagram
+*** Code example
+**** The decorator design pattern the Scala way
+
+*** What it is good for
+*** What it is not so good for
+
+** The bridge design pattern
+*** Example class diagram
+*** Code example
+**** The bridge design pattern the Scala way
+
+*** What it is good for
+*** What it is not so good for
+
+** The composite design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** The facade design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** The flyweight design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** The proxy design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** Summary
+
+* 8. Behavioral Design Patterns - Part One
+** Defining behavioral design patterns
+** The value object design pattern
+*** An example class diagram
+*** A code example
+*** Alternative implementation
+*** What it is good for
+*** What it is not so good for
+
+** The null object design pattern
+*** An example class diagram
+*** A code example
+*** What it is good for
+*** What it is not so good for
+
+** The strategy design pattern
+*** An example class diagram
+*** A code example
+**** The strategy design pattern the Scala way
+
+*** What it is good for
+*** What it is not so good for
+
+** The command design pattern
+*** An example class diagram
+*** A code example
+**** The command design pattern the Scala way
+
+*** What it is good for
+*** What it is not so good for
+
+** The chain of responsibility design pattern
+*** An example class diagram
+*** A code example
+**** The chain of responsibility design pattern the
+**** Scala way
+*** What it is good for
+*** What it is not so good for
+
+** The interpreter design pattern
+*** An example class diagram
+*** A code example
+*** What it is good for
+*** What it is not so good for
+
+** Summary
+
+* 9. Behavioral Design Patterns - Part Two
+** The iterator design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** The mediator design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** The memento design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** The observer design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** The state design pattern
+*** Example class diagram
+*** Code example
+*** What it is good for
+*** What it is not so good for
+
+** The template method design pattern
+*** Example class diagram
+*** Code exampleWhat it is good for
+*** What it is not so good for
+
+** The visitor design pattern
+*** Example class diagram
+*** Code example
+**** The visitor design pattern the Scala way
+
+*** What it is good for
+*** What it is not so good for
+
+** Summary
+
+* 10. Functional Design Patterns - the Deep Theory
+** Abstraction and vocabulary
+** Monoids
+*** What are monoids?
+*** Monoids in real life
+*** Using monoids
+**** Monoids and foldable collections
+**** Monoids and parallel computations
+**** Monoids and composition
+
+*** When to use monoids
+
+** Functors
+*** Functors in real life
+**** Using our functors
+
+** Monads
+*** What is a monad?
+**** The flatMap method
+**** The unit method
+**** The connection between map, flatMap, and unit
+***** The names of the methods
+**** The monad laws
+
+*** Monads in real life
+*** Using monads
+**** The Option monad
+**** A more advanced monad example
+
+*** Monad intuition
+
+** Summary
+
+* 11. Applying What We Have Learned
+** The lens design pattern
+*** Lens example
+**** Without the lens design pattern
+***** Immutable and verbose
+***** Using mutable properties
+
+**** With the lens design pattern
+
+*** Minimizing the boilerplate
+
+** The cake design pattern
+*** Dependency injection
+**** Dependency injection libraries and Scala
+
+*** Dependency injection in Scala
+**** Writing our code
+**** Wiring it all up
+**** Unit testing our application
+
+*** Other dependency injection alternatives
+**** Implicits for dependency injection
+**** Reader monad for dependency injection
+
+** The pimp my library design pattern
+*** Using pimp my library
+*** Pimp my library in real life
+
+** The stackable traits design pattern
+*** Using stackable traits
+
+** The type class design pattern
+*** Type class example
+*** Type class design pattern alternatives
+
+** Lazy evaluation
+*** Evaluating by-name parameters only once
+*** Alternative lazy evaluation
+
+** Partial functions
+*** Partial functions are not partially applied functions
+*** Partially defined functions
+
+** Implicit injection
+*** Implicit conversions
+*** Dependency injection using implicits
+**** Testing with implicit dependency injection
+
+** Duck typing
+*** Duck typing example
+*** Duck typing alternatives
+*** When to use duck typing
+
+** Memoization
+*** Memoization example
+*** Memoization alternatives
+
+** Summary
+
+* 12. Real-Life Applications
+** Reasons to use libraries
+** The Scalaz library
+*** Monoids in Scalaz
+**** Using monoids
+**** Testing monoids
+
+*** Monads in Scalaz
+**** Using monads
+**** Testing monads
+
+*** The possibilities of Scalaz
+
+** Writing a complete application
+*** Application specifications
+*** Implementation
+**** The libraries to use
+***** Reading the application configuration
+***** Reading the scheduler configuration
+***** Scheduling tasks
+***** Accessing a database
+***** Executing console commands
+
+*** Writing some code
+*** Wiring it all up
+*** The end result
+
+** Testing our application
+*** Unit testing
+*** Application testing
+
+** The future of our application
+** Summary
