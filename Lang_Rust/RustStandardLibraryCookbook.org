@@ -1,0 +1,1454 @@
+#+TITLE: Rust Standard Library Cookbook
+#+SUBTITLE: Over 75 recipes to leverage the power of Rust
+#+VERSION: 2018
+#+AUTHOR: Jan Nils Ferner && Daniel Durante
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface][Preface]]
+  - [[Who this book is for][Who this book is for]]
+  - [[What this book covers][What this book covers]]
+  - [[To get the most out of this book][To get the most out of this book]]
+    - [[Download the example code files][Download the example code files]]
+    - [[Conventions used][Conventions used]]
+  - [[Sections][Sections]]
+    - [[Getting ready][Getting ready]]
+    - [[How to do it&#x2026;][How to do it&#x2026;]]
+    - [[How it works&#x2026;][How it works&#x2026;]]
+    - [[There's more&#x2026;][There's more&#x2026;]]
+    - [[See also][See also]]
+  - [[Get in touch][Get in touch]]
+    - [[Reviews][Reviews]]
+  - [[Disclaimer][Disclaimer]]
+- [[1. Learning The Basics][1. Learning The Basics]]
+  - [[Introduction][Introduction]]
+  - [[Concatenating Strings][Concatenating Strings]]
+    - [[Getting Ready][Getting Ready]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+  - [[Using the ~format!~ Macro][Using the ~format!~ Macro]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+  - [[Providing A Default Implementation][Providing A Default Implementation]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+  - [[Using The Constructor Pattern][Using The Constructor Pattern]]
+    - [[Getting Ready][Getting Ready]]
+    - [[How to Do It][How to Do It]]
+    - [[How It Works][How It Works]]
+    - [[There's More][There's More]]
+    - [[See Also][See Also]]
+  - [[Using The Builder Pattern][Using The Builder Pattern]]
+    - [[How to Do It][How to Do It]]
+    - [[How It Works][How It Works]]
+    - [[There's More][There's More]]
+  - [[Parallelism Through Simple Threads][Parallelism Through Simple Threads]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Generating Random Numbers][Generating Random Numbers]]
+    - [[How to Do It][How to Do It]]
+    - [[How It Works][How It Works]]
+    - [[There's More][There's More]]
+  - [[Querying with Regexes][Querying with Regexes]]
+    - [[Getting Ready][Getting Ready]]
+    - [[How to Do It][How to Do It]]
+    - [[How It Works][How It Works]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Accessing The Command Line][Accessing The Command Line]]
+    - [[How to Do It][How to Do It]]
+    - [[How It Works][How It Works]]
+    - [[There's More][There's More]]
+  - [[Interacting with Environment Variables][Interacting with Environment Variables]]
+    - [[How to Do It][How to Do It]]
+    - [[How It Works][How It Works]]
+    - [[There's More][There's More]]
+  - [[Reading from Stdin][Reading from Stdin]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Accepting A Variable Number of Arguments][Accepting A Variable Number of Arguments]]
+    - [[Getting Started][Getting Started]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+- [[2. Working with Collections][2. Working with Collections]]
+  - [[Introduction][Introduction]]
+  - [[Using A Vector][Using A Vector]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Using A String][Using A String]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Accessing Collections As Iterators][Accessing Collections As Iterators]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Using A ~VecDeque~][Using A ~VecDeque~]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Using A ~HashMap~][Using A ~HashMap~]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Using A ~HashSet~][Using A ~HashSet~]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Creating An Own ~iterator~][Creating An Own ~iterator~]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Using A slab][Using A slab]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+- [[3. Handling Files and The Filesystem][3. Handling Files and The Filesystem]]
+  - [[Introduction][Introduction]]
+  - [[Working with Text Files][Working with Text Files]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Handling Bytes][Handling Bytes]]
+    - [[Getting Ready][Getting Ready]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+  - [[Working with Binary Files][Working with Binary Files]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Compressing and Decompressing Data][Compressing and Decompressing Data]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+  - [[Traversing The Filesystem][Traversing The Filesystem]]
+    - [[Getting Ready][Getting Ready]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Finding Files with Glob Patterns][Finding Files with Glob Patterns]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[See Also][See Also]]
+- [[4. Serialization][4. Serialization]]
+  - [[Introduction][Introduction]]
+  - [[Working with CSV][Working with CSV]]
+    - [[Getting started][Getting started]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Serialization basics with Serde][Serialization basics with Serde]]
+    -  [[How to do it..][How to do it..]]
+    -  [[How it works..][How it works..]]
+    -  [[There's more..][There's more..]]
+    -  [[See also][See also]]
+  -  [[Working with TOML][Working with TOML]]
+      -  [[Getting started][Getting started]]
+      -  [[How to do it..][How to do it..]]
+      -  [[How it works..][How it works..]]
+      -  [[There's more..][There's more..]]
+      -  [[See also][See also]]
+  -  [[Working with JSON][Working with JSON]]
+    - [[Getting ready][Getting ready]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Building JSON dynamically][Building JSON dynamically]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[See also][See also]]
+- [[5. Advanced Data Structures][5. Advanced Data Structures]]
+  - [[Introduction][Introduction]]
+  - [[Creating lazy static objects][Creating lazy static objects]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Working with bit fields][Working with bit fields]]
+    - [[Getting started][Getting started]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[See also][See also]]
+  - [[Providing custom derives][Providing custom derives]]
+    - [[Getting started][Getting started]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Converting types into each other][Converting types into each other]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+  - [[Boxing data][Boxing data]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Sharing ownership with smart pointers][Sharing ownership with smart pointers]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Working with interior mutability][Working with interior mutability]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+- [[6. Handling Errors][6. Handling Errors]]
+  - [[Introduction][Introduction]]
+  - [[Providing user-defined error types][Providing user-defined error types]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Providing logging][Providing logging]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+  - [[Creating a custom logger][Creating a custom logger]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Implementing the Drop trait][Implementing the Drop trait]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Understanding RAII][Understanding RAII]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+- [[7. Parallelism and Rayon][7. Parallelism and Rayon]]
+  - [[Introduction][Introduction]]
+  - [[Parallelizing iterators][Parallelizing iterators]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[See also][See also]]
+  - [[Running two operations together][Running two operations together]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Sharing resources in multithreaded closures][Sharing resources in multithreaded closures]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[See also][See also]]
+  - [[Sending data across threads][Sending data across threads]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Accessing resources in parallel with RwLocks][Accessing resources in parallel with RwLocks]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Atomically accessing primitives][Atomically accessing primitives]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+    - [[See also][See also]]
+  - [[Putting it all together in a connection handler][Putting it all together in a connection handler]]
+    - [[How to do it..][How to do it..]]
+    - [[How it works..][How it works..]]
+    - [[There's more..][There's more..]]
+- [[8. Working with Futures][8. Working with Futures]]
+  - [[Introduction][Introduction]]
+  - [[Providing Futures with A CPU Pool and Waiting for Them][Providing Futures with A CPU Pool and Waiting for Them]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+  - [[Handling Errors in Futures][Handling Errors in Futures]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[See Also][See Also]]
+  - [[Combining Futures][Combining Futures]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[See Also][See Also]]
+  - [[Using Streams][Using Streams]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+  - [[Using Sinks][Using Sinks]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+  - [[Using The Oneshot Channel][Using The Oneshot Channel]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+  - [[Returning Futures][Returning Futures]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Locking Resources with ~BiLocks~][Locking Resources with ~BiLocks~]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+- [[9. Networking][9. Networking]]
+  - [[Introduction][Introduction]]
+  - [[Setting Up A Basic HTTP Server][Setting Up A Basic HTTP Server]]
+    - [[Getting Ready][Getting Ready]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[See Also][See Also]]
+  - [[Configuring An HTTP Server to Perform Echoing and Routing][Configuring An HTTP Server to Perform Echoing and Routing]]
+    - [[Getting Ready][Getting Ready]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+  - [[Configuring An HTTP Server to Perform File Serving][Configuring An HTTP Server to Perform File Serving]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Making Requests to APIs][Making Requests to APIs]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+- [[10. Using Experimental Nightly Features][10. Using Experimental Nightly Features]]
+  - [[Introduction][Introduction]]
+  - [[Iterating Over An Inclusive Range][Iterating Over An Inclusive Range]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[See Also][See Also]]
+  - [[Returning Abstract Types][Returning Abstract Types]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Composing Functions][Composing Functions]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[See Also][See Also]]
+  - [[Filtering Strings Efficiently][Filtering Strings Efficiently]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[See Also][See Also]]
+  - [[Stepping Through An Iterator In Regular Intervals][Stepping Through An Iterator In Regular Intervals]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[See Also][See Also]]
+  - [[Benchmarking Your Code][Benchmarking Your Code]]
+    - [[How to Do It..][How to Do It..]]
+    - [[How It Works..][How It Works..]]
+    - [[There's More..][There's More..]]
+    - [[See Also][See Also]]
+  - [[Using Generators][Using Generators]]
+    - [[How to Do It...][How to Do It...]]
+    - [[How It Works...][How It Works...]]
+    - [[See Also][See Also]]
+- [[Other Books You May Enjoy][Other Books You May Enjoy]]
+  - [[Leave a review - let other readers know what you think][Leave a review - let other readers know what you think]]
+
+* Preface
+** Who this book is for
+** What this book covers
+** To get the most out of this book
+*** Download the example code files
+*** Conventions used
+
+** Sections
+*** Getting ready
+*** How to do it&#x2026;
+*** How it works&#x2026;
+*** There's more&#x2026;
+*** See also
+
+** Get in touch
+*** Reviews
+
+** Disclaimer
+
+* 1. Learning The Basics
+** Introduction
+   - =EN=
+     quintessential - 精髓
+
+** Concatenating Strings
+*** Getting Ready
+*** How to Do It..
+*** How It Works..
+
+** Using the ~format!~ Macro
+*** How to Do It..
+*** How It Works..
+*** There's More..
+
+** Providing A Default Implementation
+*** How to Do It..
+*** How It Works..
+
+** DONE Using The Constructor Pattern
+   CLOSED: [2018-06-03 Sun 18:58]
+   - Q :: How to idiomatically initialize complex /structs/ in Rust?
+
+   - A :: Though Rust doesn't support some specific SYNTAX for a /constructor/,
+          it have a convention of "constructor". The std uses this pattern very
+          often, so we need to understand it if we want to use the std
+          effectively.
+
+*** DONE Getting Ready
+    CLOSED: [2018-06-03 Sun 18:57]
+*** DONE How to Do It
+    CLOSED: [2018-06-03 Sun 18:58]
+    =cargo run --bin constructor=
+
+    #+BEGIN_SRC rust
+      fn main() {
+          // We don't need to care about
+          // the internal structure of NameLength
+          // Instead, we can just call it's constructor
+          let name_length = NameLength::new("John");
+
+          // Prints "The name 'John' is '4' characters long"
+          name_length.print();
+      }
+
+      struct NameLength {
+          name: String,
+          length: usize,
+      }
+
+      impl NameLength {
+          // The user doesn't need to setup length
+          // We do it for him!
+          fn new(name: &str) -> Self {
+              NameLength {
+                  name: name.to_string(),
+                  length: name.len(),
+              }
+          }
+
+          fn print(&self) {
+              println!(
+                  "The name '{}' is '{}' characters long",
+                  self.name,
+                  self.length,
+              );
+          }
+      }
+    #+END_SRC
+*** DONE How It Works
+    CLOSED: [2018-06-03 Sun 18:18]
+    =From Jian= *I don't understand the 1st paragraph!!!*
+
+*** DONE There's More
+    CLOSED: [2018-06-03 Sun 18:57]
+    - By convention, we create the ~new~ /method/ as the /main constructor/, and
+      name the other options according to how they differ from the DEFAULT.
+      For instance, ~Vec~ provide the /methods/ ~new~ and ~with_capacity~.
+
+    - When accepting a kind of string (either ~&str~, that is, a /borrowed
+      string slice/, or ~String~, that is, an /owned string/) with plans to store
+      it in your ~struct~, like we do in our example, also considering a ~Cow~.
+      + Cow :: Clone On Write, a /wrappter/ arround a /type/, which means that
+               it will try to borrow a type for as long as possible and only
+               make an owned clone of the data when absolutely necessary, which
+               happens at the first mutation.
+
+      + With the help of ~Cow~, the code below would NOT care whether the called
+        passed a ~&str~ or a ~String~ to it, and would instead try to work in
+        the most efficient way possible: =Re-Read Code=
+        #+BEGIN_SRC rust
+          use std::borrow::Cow;
+
+          struct NameLength<'a> {
+              name: Cow<'a, str>,
+              length: usize,
+          }
+
+          impl<'a> NameLength<'a> {
+              // The user doesn't need to setup length
+              // We do it for him!
+
+              fn new<S>(name: S) -> Self
+              where
+                  S: Into<Cow<'a, str>>,
+              {
+                  let name: Cow<'a, str> = name.into();
+
+                  NameLength {
+                      length: name.len(),
+                      name,
+                  }
+              }
+
+              fn print(&self) {
+                  println!(
+                      "The name '{}' is '{}' characters long",
+                      self.name, self.length
+                  );
+              }
+          }
+        #+END_SRC
+        * =IMPORTANT= =!!!=
+          Here the *order* of the lines ~length: name.len(),~ and ~name,~ matters,
+          actually, it is very _IMPORTANT_!!!
+            Only the given order is compilable -- use the borrowed one to call
+          ~len()~, and then make an owned clone to the ~struct~. If NOT in this
+          order -- the owned ~name~ first -- the owned ~name~ will be consumed
+          by the ~name.len()~ call!
+
+        * The ~Into~ trait and the ~Cow~ will be explained in the Chapter 5!
+
+    - About the ~Cow~:
+      Read this blog post by Joe Wilm: https://jwilm.io/blog/from-str-to-cow/.
+
+*** TODO See Also
+
+** DONE Using The Builder Pattern
+   CLOSED: [2018-06-03 Sun 19:43]
+   =From Jian= The /builder pattern/ is useless if there are features of /name
+   parameters/ and /default value parameters/. Hope Rust can have it in the
+   future!!!
+
+*** DONE How to Do It
+    CLOSED: [2018-06-03 Sun 19:43]
+    Try with =cargo run --bin builder=
+
+    #+BEGIN_SRC rust
+      fn main() {
+          // We can easily create different configurations
+          let normal_burger = BurgerBuilder::new().build();
+          let cheese_burger = BurgerBuilder::new()
+              .cheese(true)
+              .salad(false)
+              .build();
+
+          let veggie_bigmac = BurgerBuilder::new()
+              .vegetarian(true)
+              .patty_count(2)
+              .build();
+
+          if let Ok(normal_burger) = normal_burger {
+              normal_burger.print();
+          }
+
+          if let Ok(cheese_burger) = cheese_burger {
+              cheese_burger.print();
+          }
+
+          if let Ok(veggie_bigmac) = veggie_bigmac {
+              veggie_bigmac.print();
+          }
+
+          // Our builder can perform a check for
+          // invalid configurations
+          let invalid_burger = BurgerBuilder::new()
+              .vegetarian(true)
+              .bacon(true)
+              .build();
+
+          if let Err(error) = invalid_burger {
+              println!("Failed to print burger: {}", error);
+          }
+
+          // If we omit the last step, we can reuse our builder
+          let cheese_burger_builder = BurgerBuilder::new().cheese(true);
+
+          for i in 1..10 {
+              let cheese_burger = cheese_burger_builder.build();
+
+              if let Ok(cheese_burger) = cheese_burger {
+                  println!("cheese burger number {} is ready!", i);
+                  cheese_burger.print();
+              }
+          }
+      }
+
+
+      struct Burger {
+          patty_count: i32,
+          vegetarian: bool,
+          cheese: bool,
+          bacon: bool,
+          salad: bool,
+      }
+
+      impl Burger {
+          // This method is just here for illustrative purposes
+          fn print(&self) {
+              let pretty_patties =
+                  if self.patty_count == 1 {
+                      "patty"
+                  } else {
+                      "patties"
+                  };
+
+              let pretty_bool = |val| if val { "" } else { "no " };
+              let pretty_vegetarian = if self.vegetarian { "vegetarian " } else { "" };
+
+              println!(
+                  "This is a {}burger with {} {}, {}cheese, {}bacon and {}salad",
+                  pretty_vegetarian,
+                  self.patty_count,
+                  pretty_patties,
+                  pretty_bool(self.cheese),
+                  pretty_bool(self.bacon),
+                  pretty_bool(self.salad)
+              )
+          }
+      }
+
+      struct BurgerBuilder {
+          patty_count: i32,
+          vegetarian: bool,
+          cheese: bool,
+          bacon: bool,
+          salad: bool,
+      }
+
+      impl BurgerBuilder {
+          // in the constructor, we can specify
+          // the standard values
+          fn new() -> Self {
+              BurgerBuilder {
+                  patty_count: 1,
+                  vegetarian: false,
+                  cheese: false,
+                  bacon: false,
+                  salad: true,
+              }
+          }
+
+          // Now we have to define a method for every
+          // configurable value
+          fn patty_count(mut self, val: i32) -> Self {
+              self.patty_count = val;
+              self
+          }
+
+          fn vegetarian(mut self, val: bool) -> Self {
+              self.vegetarian = val;
+              self
+          }
+          fn cheese(mut self, val: bool) -> Self {
+              self.cheese = val;
+              self
+          }
+          fn bacon(mut self, val: bool) -> Self {
+              self.bacon = val;
+              self
+          }
+          fn salad(mut self, val: bool) -> Self {
+              self.salad = val;
+              self
+          }
+
+          // The final method actually constructs our object
+          fn build(&self) -> Result<Burger, String> {
+              let burger = Burger {
+                  patty_count: self.patty_count,
+                  vegetarian: self.vegetarian,
+                  cheese: self.cheese,
+                  bacon: self.bacon,
+                  salad: self.salad,
+              };
+              // Check for invalid configuration
+              if burger.vegetarian && burger.bacon {
+                  Err("Sorry, but we don't server vegetarian bacon yet".to_string())
+              } else {
+                  Ok(burger)
+              }
+          }
+      }
+    #+END_SRC
+
+*** DONE How It Works
+    CLOSED: [2018-06-03 Sun 19:43]
+*** DONE There's More
+    CLOSED: [2018-06-03 Sun 19:42]
+    - If you want your object to be constructable *without* a /builder/,
+      you could also provide ~Burger~ with _a ~Default~ implementation_.
+      ~BurgerBuilder::new()~ could then just return ~Default::default()~.
+
+    - In ~build()~,
+      if your configuration can *inherently _NOT_ be invalid*, you can, of course,
+      return the object directly *without* wrapping it in a ~Result~.
+
+** TODO Parallelism Through Simple Threads
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+** DONE Generating Random Numbers
+   CLOSED: [2018-06-03 Sun 21:41]
+   - As described in the preface, the Rust core team LEFT some functionality
+     intentionally OUT OF the standard and put it into its own /external crate/.
+
+     *Generating pseudo-random numbers is one such functionality.*
+
+*** DONE How to Do It
+    CLOSED: [2018-06-03 Sun 21:03]
+    - Add the ~rand ~ "0.5"= (=From Jian= Jun 3) line to the =Cargo.toml= file
+      ~[dependencies]~ section..
+
+    - Try with =cargo run --bin rand=
+      #+BEGIN_SRC rust
+        extern crate rand;
+
+        fn main() {
+            // random number between std::i32::MIN and std::i32::MAX
+            let random_num1 = rand::random::<i32>();
+            println!("random_num1: {}", random_num1);
+
+            // Every primitive data type can be randomized
+            let random_char = rand::random::<char>();
+            // Although random_char will probably not be
+            // representable on most operating systems
+            println!("random_char: {}", random_char);
+
+
+            use rand::Rng;
+            // We can use a reusable generator
+            let mut rng = rand::thread_rng();
+            // This is equivalent to rand::random()
+            if rng.gen() {
+                println!("This message has a 50-50 chance of being printed");
+            }
+            // A generator enables us to use ranges
+            // random_num3 will be between 0 and 9
+            let random_num3 = rng.gen_range(0, 10);
+            println!("random_num3: {}", random_num3);
+
+            // random_float will be between 0.0 and 0.999999999999...
+            let random_float = rng.gen_range(0.0, 1.0);
+            println!("random_float: {}", random_float);
+
+            // Per default, the generator uses a uniform distribution,
+            // which should be good enough for nearly all of your
+            // use cases. If you require a particular distribution,
+            // you specify it when creating the generator:
+
+            // TODO: Replace this deprecated method invoke!!!
+            let mut chacha_rng = rand::ChaChaRng::new_unseeded();
+            let random_chacha_num = chacha_rng.gen::<i32>();
+            println!("random_chacha_num: {}", random_chacha_num);
+        }
+      #+END_SRC
+
+*** DONE How It Works
+    CLOSED: [2018-06-03 Sun 21:41]
+    - ~extern crate rand;~
+
+    - Uniform distribution:
+      + Get a random number directly (within the range of a type):
+        ~rand::random();~
+
+      + Get a random number /generator/:
+        * ~let rng = rand::random::<type_you_want>();~
+          or
+          ~let rng: type_you_want = rand::random();~
+
+        * Get a random number generator with ~let mut rng = rand::thread_rng();~,
+          and call ~rng.gen()~, which calls ~rand::random()~ implicitly.
+
+      + Use can use the random number generator above to get random number within
+        a range: ~rng.gen_range(0, 10)~, whose range is [0, 10) in math.
+
+    - You can also get a random number generator with other distribution!
+      =From Jian= For ~rand~ version 0.5, this ~new_unseeded~ method is deprecated!
+      #+BEGIN_SRC rust
+        let mut chacha_rng = rand::ChaChaRng::new_unseeded();
+        let random_chacha_num = chacha_rng.gen::<i32>();
+      #+END_SRC
+
+*** DONE There's More
+    CLOSED: [2018-06-03 Sun 21:41]
+    =IMPORTANT= =IMPORTANT= =IMPORTANT= _Useful for Test_
+    If you want to randomly populate an entire ~struct~, you use the
+    ~rand_derive~ helper /crate/ in order to derive it from ~Rand~.
+
+    You can then generate your own ~struct~, just as you would generate any other
+    type.
+
+** DONE Querying with Regexes
+   CLOSED: [2018-06-03 Sun 23:08]
+   The ~regex~ crate
+
+*** DONE Getting Ready
+    CLOSED: [2018-06-03 Sun 23:05]
+*** DONE How to Do It
+    CLOSED: [2018-06-03 Sun 23:08]
+    Try it with ~cargo run --bin regex~
+
+    #+BEGIN_SRC rust
+      extern crate regex;
+
+      fn main() {
+          use regex::Regex;
+          // Beginning a string with 'r' makes it a raw string,
+          // in which you don't need to escape any symbols
+          let date_regex =
+              Regex::new(r"^\d{2}.\d{2}.\d{4}$").expect("Failed to create regex");
+          let date = "15.10.2017";
+          // Check for a match
+          let is_date = date_regex.is_match(date);
+          println!("Is '{}' a date? {}", date, is_date);
+
+          // Let's use capture groups now
+          let date_regex = Regex::new(r"(\d{2}).(\d{2}).(\d{4})")
+              .expect("Failed to create regex");
+          let text_with_dates = "Alan Turing was born on 23.06.1912 and died on 07.06.1954. \
+          A movie about his life called 'The Imitation Game' came out on 14.11.2017";
+
+          // Iterate over the matches
+          for cap in date_regex.captures_iter(text_with_dates) {
+              println!("Found date {}", &cap[0]);
+              println!("Year: {} Month: {} Day: {}", &cap[3], &cap[2], &cap[1]);
+          }
+
+          // Replace the date format
+          println!("Original text:\t\t{}", text_with_dates);
+          let text_with_indian_dates =
+              date_regex.replace_all(text_with_dates, "$1-$2-$3");
+          println!("In indian format:\t{}", text_with_indian_dates);
+
+          // Replacing groups is easier when we name them
+          // ?P<somename> gives a capture group a name
+          let date_regex = Regex::new(r"(?P<day>\d{2}).(?P<month>\d{2}).(?P<year>\d{4})")
+              .expect("Failed to create regex");
+          let text_with_american_dates =
+              date_regex.replace_all(text_with_dates,
+                                     "$month/$day/$year");
+          println!("In american format:\t{}", text_with_american_dates);
+          let rust_regex = Regex::new(r"(?i)rust")
+              .expect("Failed to create regex");
+          println!("Do we match RuSt? {}", rust_regex.is_match("RuSt"));
+
+          // ------------------------------------------------------------------------ //
+          use regex::RegexBuilder;
+          let rust_regex = RegexBuilder::new(r"rust")
+              .case_insensitive(true)
+              .build()
+              .expect("Failed to create regex");
+          println!("Do we still match RuSt? {}", rust_regex.is_match("RuSt"));
+      }
+    #+END_SRC
+    + Add ~regex = "1.0.0"~ (=From Jian= Jun 3) to the ~[dependencies]~ section
+      of the =Cargo.toml= file.
+
+*** DONE How It Works
+    CLOSED: [2018-06-03 Sun 23:05]
+    - Construct a /regex/ object by calling ~Regex::new(pattern_string)~.
+      Most of the time, you will want to pass a /raw string/ in the form of
+      ~r"..."~.
+
+    - We can iterate over the results of our /regex/.
+      The object we get on every match is a collection of our /capture groups/.
+      Keep in mind that the 0 index is always the /ENTIRE capture/.
+      #+BEGIN_SRC rust
+        for cap in date_regex.captures_iter(text_with_dates) {
+            println!("Found date {}", &cap[0]);
+            println!("Year: {} Month: {} Day: {}", &cap[3], &cap[2], &cap[1]);
+        }
+      #+END_SRC
+      + Unfortunately, the indeces are not checked at /compile-time/, and if we
+        access with out of bound indeces, there will be a /runtime error/.
+
+    - match groups (~$0~ is the entire match):
+      #+BEGIN_SRC rust
+        let text_with_indian_dates = date_regex.replace_all(text_with_dates, "$1-$2-$3")
+      #+END_SRC
+
+    - Named match groups: ~?P<somename>~
+      #+BEGIN_SRC rust
+        let date_regex = Regex::new(r"(?P<day>\d{2}).(?P<month>\d{2}).(?P<year>\d{4})")
+            .expect("Failed to create regex");
+        let text_with_american_dates = date_regex.replace_all(text_with_dates, "$month/$day/$year");
+      #+END_SRC
+
+    - Flags:
+      + Syntax: ~(?flag_name)~
+
+      + For instance:
+        * ~(?i)~: case insensitive.
+        * ~(?x)~: ignore whitespace in the regex string.
+
+    - ~RegexBuilder~ can be more clear, but verbose:
+      #+BEGIN_SRC rust
+        let rust_regex = RegexBuilder::new(r"rust")
+            .case_insensitive(true)
+            .build()
+            .expect("Failed to create regex");
+
+        // rust_regex.is_match("RuSt")
+      #+END_SRC
+
+*** DONE There's More..
+    CLOSED: [2018-06-03 Sun 22:51]
+    - The regexes work by compiling their strings into the equivalent Rust code
+      on creation.
+        For *performance reasons*, you are advised to *reuse* your /regexes/
+      instead of creating them anew every time you use them.
+
+      =TODO=
+      A good way of doing this is by using the ~lazy_static~ /crate/, which we
+      will look at later in the book, in the _Creating lazy static objects_
+      SECTION in _Chapter 5, Advanced Data Structures._
+
+    - One thing that is the MOST IMPORTANT for /regex/:
+      *DON'T over use it!*
+
+*** DONE See Also
+    CLOSED: [2018-06-03 Sun 22:51]
+    - =TODO=
+      Creating lazy static objects recipe in Chapter 5, Advanced Data Structures.
+
+** DONE Accessing The Command Line
+   CLOSED: [2018-06-03 Sun 23:29]
+*** DONE How to Do It
+    CLOSED: [2018-06-03 Sun 23:23]
+    Try with =cargo run --bin cli_params some_option some_other_option=
+
+    #+BEGIN_SRC rust
+      use std::env;
+
+      fn main() {
+          // env::args returns an iterator over the parameters
+          println!("Got following parameters: ");
+          for arg in env::args() {
+              println!("- {}", arg);
+          }
+
+          // We can access specific parameters using the iterator API
+          let mut args = env::args();
+          if let Some(arg) = args.nth(0) {
+              println!("The path to this program is: {}", arg);
+          }
+          if let Some(arg) = args.nth(1) {
+              println!("The first parameter is: {}", arg);
+          }
+          if let Some(arg) = args.nth(2) {
+              println!("The second parameter is: {}", arg);
+          }
+
+          // Or as a vector
+          let args: Vec<_> = env::args().collect();
+          println!("The path to this program is: {}", args[0]);
+          if args.len() > 1 {
+
+              println!("The first parameter is: {}", args[1]);
+          }
+          if args.len() > 2 {
+              println!("The second parameter is: {}", args[2]);
+          }
+      }
+    #+END_SRC
+
+*** DONE How It Works
+    CLOSED: [2018-06-03 Sun 23:29]
+    - ~std::env::args()~ returns an /iterator/ over the provided command-line
+      parameters.
+      + By convention, the first command-line parameter on most OS is the path to
+        the executable itself.
+
+    - Access specific parameters in TWO ways:
+      + Keep them in an /iterator/.
+        Accessing an /iterator/ _FORCES_ you to _check at compile time_ whether
+        the element exists, for example, an ~if let~ binding.
+
+      + ~collect~ them into a collection such as ~Vec~
+        Accessing a /vector/ _checks the validity at runtime_
+
+*** DONE There's More
+    CLOSED: [2018-06-03 Sun 23:29]
+    If you ware building a serious command-line utility in the style of *nix
+    tools, you will have to parse a lot of different parameters. Try to take a
+    look at third-party libraries, such as ~clap~.
+
+** DONE Interacting with Environment Variables
+   CLOSED: [2018-06-03 Sun 23:44]
+   Read, set, and remove /environment variables/.
+*** DONE How to Do It
+    CLOSED: [2018-06-03 Sun 23:37]
+    Try it with the command =cargo run --bin env_vars=
+
+    #+BEGIN_SRC rust
+      use std::env;
+
+      fn main() {
+          // We can iterate over all the env vars for the current process
+          println!("Listing all env vars:");
+          for (key, val) in env::vars() {
+              println!("{}: {}", key, val);
+          }
+
+          let key = "PORT";
+          println!("Setting env var {}", key);
+          // Setting an env var for the current process
+          env::set_var(key, "8080");
+
+          print_env_var(key);
+
+          // Removing an env var for the current process
+          println!("Removing env var {}", key);
+          env::remove_var(key);
+
+          print_env_var(key);
+      }
+
+      fn print_env_var(key: &str) {
+          // Accessing an env var
+          match env::var(key) {
+              Ok(val) => println!("{}: {}", key, val),
+              Err(e) => println!("Couldn't print env var {}: {}", key, e),
+          }
+      }
+    #+END_SRC
+
+*** DONE How It Works
+    CLOSED: [2018-06-03 Sun 23:44]
+    - ~std::env::vars()~ returns an /iterator/ over all the /environment variables/
+      that were set _for the current process_ at the time of execution.
+
+    - Use ~std::env::var(key)~ to access a specific /environment variable/ with
+      its ~key~.
+
+      It returns an ~Err~ if the requested /environment variable/ is
+      + either not present
+      + or doesn't contain valid Unicode.
+
+    - Because your ~env::var~ returns a ~Result~,
+      you can easily _set up default values_ for them by using ~unwrap_or_default~.
+      For instance,
+      #+BEGIN_SRC rust
+        redis_addr = env::var("REDIS_ADDR")
+            .unwrap_or_default("localhost:6379".to_string());
+      #+END_SRC
+
+    - Use ~std::env::set_var(key)~ to create an /environment variable/.
+      Use ~std::env::remove_var(key)~ to delete an /environment variable/.
+
+      Both only change for our _current process_.
+
+*** DONE There's More
+    CLOSED: [2018-06-03 Sun 23:35]
+    - The industry standard way to do this is by creating a file called =.env=
+      that contains said config in the form of key-value-pairs, and loading it
+      into the process at some point during the build.
+
+      =TODO=
+      One easy way to do this in Rust is by using the dotenv
+      (https://crates.io/crates/dotenv) third-party crate.
+
+** TODO Reading from Stdin
+*** How to Do It..
+    #+BEGIN_SRC rust
+      use std::io;
+      use std::io::prelude::*;
+
+      fn main() {
+          print_single_line("Please enter your forename: ");
+          let forename = read_line_iter();
+
+          print_single_line("Please enter your surname: ");
+          let surname = read_line_buffer();
+
+          print_single_line("Please enter your age: ");
+          let age = read_number();
+
+          println!(
+              "Hello, {} year old human named {} {}!",
+              age, forename, surname
+          );
+      }
+
+      fn print_single_line(text: &str) {
+          // We can print lines without adding a newline
+          print!("{}", text);
+          // However, we need to flush stdout afterwards
+          // in order to guarantee that the data actually displays
+          io::stdout().flush().expect("Failed to flush stdout");
+      }
+
+      fn read_line_iter() -> String {
+          let stdin = io::stdin();
+          // Read one line of input iterator-style
+          let input = stdin.lock().lines().next();
+          input
+              .expect("No lines in buffer")
+              .expect("Failed to read line")
+              .trim()
+              .to_string()
+      }
+
+      fn read_line_buffer() -> String {
+          // Read one line of input buffer-style
+          let mut input = String::new();
+          io::stdin()
+              .read_line(&mut input)
+              .expect("Failed to read line");
+          input.trim().to_string()
+      }
+
+      fn read_number() -> i32 {
+          let stdin = io::stdin();
+          loop {
+              // Iterate over all lines that will be inputted
+              for line in stdin.lock().lines() {
+                  let input = line.expect("Failed to read line");
+                  // Try to convert a string into a number
+                  match input.trim().parse::<i32>() {
+                      Ok(num) => return num,
+                      Err(e) => println!("Failed to read number: {}", e),
+                  }
+              }
+          }
+      }
+    #+END_SRC
+*** How It Works..
+*** There's More..
+*** See Also
+
+** TODO Accepting A Variable Number of Arguments
+*** Getting Started
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+* 2. Working with Collections
+** Introduction
+** Using A Vector
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Using A String
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Accessing Collections As Iterators
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Using A ~VecDeque~
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Using A ~HashMap~
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Using A ~HashSet~
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Creating An Own ~iterator~
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Using A slab
+*** How to do it..
+*** How it works..
+*** There's more..
+
+* 3. Handling Files and The Filesystem
+** Introduction
+** Working with Text Files
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+** Handling Bytes
+*** Getting Ready
+*** How to Do It..
+*** How It Works..
+*** There's More..
+
+** Working with Binary Files
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+** Compressing and Decompressing Data
+*** How to Do It..
+*** How It Works..
+*** There's More..
+
+** Traversing The Filesystem
+*** Getting Ready
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+** Finding Files with Glob Patterns
+*** How to Do It..
+*** How It Works..
+*** See Also
+
+* 4. Serialization
+** Introduction
+** Working with CSV
+*** Getting started
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Serialization basics with Serde
+***  How to do it..
+***  How it works..
+***  There's more..
+***  See also
+
+**  Working with TOML
+****  Getting started
+****  How to do it..
+****  How it works..
+****  There's more..
+****  See also
+
+**  Working with JSON
+*** Getting ready
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Building JSON dynamically
+*** How to do it..
+*** How it works..
+*** See also
+
+* 5. Advanced Data Structures
+** Introduction
+** Creating lazy static objects
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Working with bit fields
+*** Getting started
+*** How to do it..
+*** How it works..
+*** See also
+
+** Providing custom derives
+*** Getting started
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Converting types into each other
+*** How to do it..
+*** How it works..
+
+** Boxing data
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Sharing ownership with smart pointers
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Working with interior mutability
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+* 6. Handling Errors
+** Introduction
+** Providing user-defined error types
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Providing logging
+*** How to do it..
+*** How it works..
+*** There's more..
+
+** Creating a custom logger
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Implementing the Drop trait
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Understanding RAII
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+* 7. Parallelism and Rayon
+** Introduction
+** Parallelizing iterators
+*** How to do it..
+*** How it works..
+*** See also
+
+** Running two operations together
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Sharing resources in multithreaded closures
+*** How to do it..
+*** How it works..
+*** See also
+
+** Sending data across threads
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Accessing resources in parallel with RwLocks
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Atomically accessing primitives
+*** How to do it..
+*** How it works..
+*** There's more..
+*** See also
+
+** Putting it all together in a connection handler
+*** How to do it..
+*** How it works..
+*** There's more..
+
+* 8. Working with Futures
+** Introduction
+** Providing Futures with A CPU Pool and Waiting for Them
+*** How to Do It..
+*** How It Works..
+
+** Handling Errors in Futures
+*** How to Do It..
+*** How It Works..
+*** See Also
+
+** Combining Futures
+*** How to Do It..
+*** How It Works..
+*** See Also
+
+** Using Streams
+*** How to Do It..
+*** How It Works..
+
+** Using Sinks
+*** How to Do It..
+*** How It Works..
+
+** Using The Oneshot Channel
+*** How to Do It..
+*** How It Works..
+
+** Returning Futures
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+** Locking Resources with ~BiLocks~
+*** How to Do It..
+*** How It Works..
+
+* 9. Networking
+** Introduction
+** Setting Up A Basic HTTP Server
+*** Getting Ready
+*** How to Do It..
+*** How It Works..
+*** See Also
+
+** Configuring An HTTP Server to Perform Echoing and Routing
+*** Getting Ready
+*** How to Do It..
+*** How It Works..
+
+** Configuring An HTTP Server to Perform File Serving
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+** Making Requests to APIs
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+* 10. Using Experimental Nightly Features
+** Introduction
+** Iterating Over An Inclusive Range
+*** How to Do It..
+*** How It Works..
+*** See Also
+
+** Returning Abstract Types
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+** Composing Functions
+*** How to Do It..
+*** How It Works..
+*** See Also
+
+** Filtering Strings Efficiently
+*** How to Do It..
+*** How It Works..
+*** See Also
+
+** Stepping Through An Iterator In Regular Intervals
+*** How to Do It..
+*** How It Works..
+*** See Also
+
+** Benchmarking Your Code
+*** How to Do It..
+*** How It Works..
+*** There's More..
+*** See Also
+
+** Using Generators
+*** How to Do It...
+*** How It Works...
+*** See Also
+
+* Other Books You May Enjoy
+** Leave a review - let other readers know what you think
