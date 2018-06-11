@@ -37,11 +37,11 @@
     - [[Vectors - 59][Vectors - 59]]
     - [[Building Vectors Element by Element - 62][Building Vectors Element by Element - 62]]
     - [[Slices - 62][Slices - 62]]
-  - [[String Types - 64 =RE=READ=][String Types - 64 =RE=READ=]]
+  - [[String Types - 64][String Types - 64]]
     - [[String Literals - 64][String Literals - 64]]
     - [[Byte Strings - 65][Byte Strings - 65]]
     - [[Strings in Memory - 65][Strings in Memory - 65]]
-    - [[String - 67 =RE-READ=][String - 67 =RE-READ=]]
+    - [[String - 67][String - 67]]
     - [[Using Strings - 68][Using Strings - 68]]
     - [[Other String-Like Types - 68][Other String-Like Types - 68]]
   - [[Beyond the basics - 69][Beyond the basics - 69]]
@@ -138,7 +138,7 @@
   - [[Interior Mutability - 205][Interior Mutability - 205]]
 - [[10. Enums and patterns - 211][10. Enums and patterns - 211]]
   - [[Enums - 212][Enums - 212]]
-    - [[Enums with Data - 214][Enums with Data - 214]]
+    - [[Enums with Data - 214 - =Re-Write Notes=][Enums with Data - 214 - =Re-Write Notes=]]
     - [[Enums in Memory - 215][Enums in Memory - 215]]
     - [[Rich Data Structures Using Enums - 216][Rich Data Structures Using Enums - 216]]
     - [[Generic Enums - 218][Generic Enums - 218]]
@@ -151,7 +151,7 @@
     - [[~@~ patterns - 230][~@~ patterns - 230]]
     - [[Where Patterns Are Allowed - 230][Where Patterns Are Allowed - 230]]
     - [[Populating a Binary Tree 232][Populating a Binary Tree 232]]
-  - [[The Big Picture - 233][The Big Picture - 233]]
+  - [[The Big Picture - 233 =Re-Read=][The Big Picture - 233 =Re-Read=]]
 - [[11. Traits and Generics - 235][11. Traits and Generics - 235]]
   - [[Using Traits - 237][Using Traits - 237]]
     - [[Trait Objects - 238][Trait Objects - 238]]
@@ -161,7 +161,7 @@
   - [[Defining and Implementing Traits - 245][Defining and Implementing Traits - 245]]
     - [[Default Methods - 246][Default Methods - 246]]
     - [[Traits and Other People's Types - 247][Traits and Other People's Types - 247]]
-    - [[Self in Traits - 249][Self in Traits - 249]]
+    - [[~Self~ in Traits - 249][~Self~ in Traits - 249]]
     - [[Subtraits - 250][Subtraits - 250]]
     - [[Static Methods - 251][Static Methods - 251]]
   - [[Fully Qualified Method Calls - 252][Fully Qualified Method Calls - 252]]
@@ -171,7 +171,7 @@
     - [[Buddy Traits (or How ~rand::random()~ Works) - 258][Buddy Traits (or How ~rand::random()~ Works) - 258]]
   - [[Reverse-Engineering Bounds - 260][Reverse-Engineering Bounds - 260]]
   - [[Conclusion - 263][Conclusion - 263]]
-- [[12. Operator Overloading - 265][12. Operator Overloading - 265]]
+- [[12. Operator Overloading - 265 - =Reading=][12. Operator Overloading - 265 - =Reading=]]
   - [[Arithmetic and Bitwise Operators - 266][Arithmetic and Bitwise Operators - 266]]
     - [[Unary Operators - 268][Unary Operators - 268]]
     - [[Binary Operators - 269][Binary Operators - 269]]
@@ -329,7 +329,7 @@
     - [[~Path~ and ~PathBuf~ Methods - 447][~Path~ and ~PathBuf~ Methods - 447]]
     - [[Filesystem Access Functions - 449][Filesystem Access Functions - 449]]
     - [[Reading Directories - 450][Reading Directories - 450]]
-    - [[Platform-Specific Features - 451][Platform-Specific Features - 451]]
+    - [[Platform-Specific Features - 451 =RE-READ= =TAKE NOTES=][Platform-Specific Features - 451 =RE-READ= =TAKE NOTES=]]
   - [[Networking - 453][Networking - 453]]
 - [[19. Concurrency - 457][19. Concurrency - 457]]
   - [[Fork-Join Parallelism - 459][Fork-Join Parallelism - 459]]
@@ -737,14 +737,14 @@
    - =TODO= NOTES =TODO=
 
 ** TODO Concurrency - 23
-*** What the Mandelbrot Set Actually Is - 24
-*** Parsing Pair Command-Line Arguments - 28
-*** Mapping from Pixels to Complex Numbers - 31
-*** Plotting the Set - 32
-*** Writing Image Files - 34
-*** A Concurrent Mandelbrot Program - 35
-*** Running the Mandelbrot Plotter - 40
-*** Safety Is Invisible - 41
+*** TODO What the Mandelbrot Set Actually Is - 24
+*** TODO Parsing Pair Command-Line Arguments - 28
+*** TODO Mapping from Pixels to Complex Numbers - 31
+*** TODO Plotting the Set - 32
+*** TODO Writing Image Files - 34
+*** TODO A Concurrent Mandelbrot Program - 35
+*** TODO Running the Mandelbrot Plotter - 40
+*** TODO Safety Is Invisible - 41
 
 * DONE 3. Basic types - 43
   CLOSED: [2018-05-22 Tue 09:03]
@@ -1264,14 +1264,14 @@
       =TODO= Chapter 21 covers how to implement such types
 
 *** TODO Building Vectors Element by Element - 62
-    This is a bad idea!!!
-    
-    - It will involve a lot of re-allocating and copy.
-      Whenever a vector outgrows its buffer’s capacity, it chooses a new buffer
-      *twice* as large as the old one.
+    - =TODO= NOTE
+      Reasoning and Justify!
+      =TODO=
 
-    - =TODO= =???= =TODO=
-      =IMPORTANT= but I don't quite understand! =RE-READ=
+    - If you can estimate the size of your /vector/, use the /method/
+      ~Vec::with_capacity~ instead of ~Vec::new~.
+
+      Of course, if you know the content of your /vector/, use ~vec!~.
 
 *** DONE Slices - 62
     CLOSED: [2018-05-20 Sun 21:05]
@@ -1312,10 +1312,13 @@
         print(&sv[1..3]); // print v[1] and v[2]
       #+END_SRC
 
-** DONE String Types - 64 =RE=READ=
+** DONE String Types - 64
    CLOSED: [2018-05-22 Tue 09:03]
-   Rust has a similar design as C++: two string types (in C++, they are ~char *~
-   and ~std::string~).
+   - Rust has a similar design as C++: two string types
+     + in C++, they are ~const char *~ and ~std::string~.
+
+   - =TODO=
+     More details in Chapter 17.
 
 *** DONE String Literals - 64
     CLOSED: [2018-05-21 Mon 18:44]
@@ -1325,29 +1328,36 @@
       #+BEGIN_SRC rust
         println!("In the room the women come and go,
             Singing of Mount Abora");
+
+        // In the room the women come and go,
+        //     Singing of Mount Abora
       #+END_SRC
-      The newline character, as well as the spaces at the begining of the second
-      line are included in this /string literal/.
+      The /newline character/, as well as the /spaces/ _at the begining of the
+      second line_ are included in this /string literal/.
 
-      + If one line of a string ends with a backslash,
-        then the newline character and the leading whitespace on the next line
-        are dropped:
-        #+BEGIN_SRC rust
-          println!("It was a bright, cold day in April, and \
-                    there were four of us-\
-                    more or less.");
-        #+END_SRC
+    - If one line of a string ends with a _backslash_,
+      then the /newline character/ and the _leading whitespace_ on the next line
+      are dropped:
+      #+BEGIN_SRC rust
+        println!("It was a bright, cold day in April, and \
+                  there were four of us-\
+                  more or less.");
 
-    - /Raw string/ can reduce the double backslashes in somre strings (e.g.
-      regular expressions):
+        // It was a bright, cold day in April, and there were four of us-more or less.
+      #+END_SRC
+
+    - /Raw string/ can reduce the double backslashes in some strings (e.g. Windows
+      pathes and regular expressions):
+
+      All backslashes and whitespace characters inside a /raw string/ are included
+      _verbatim_ in the string. *No escape sequences are reconized.*
       #+BEGIN_SRC rust
         let default_win_install_path = r"C:\Program Files\Gorillas";
         let pattern = Regex::new(r"\d+(\.\d+)*");
       #+END_SRC
 
       + You *CANNOT* include a double-quote character in a /raw string/ SIMPLY BY
-        putting a backslash in front of it -- remember, we said *NO escape
-        sequences are recognized*.
+        putting a backslash in front of it.
 
         * Solution: Use pound signs with /raw string/:
           #+BEGIN_SRC rust
@@ -1357,12 +1367,27 @@
                 followed immediately by three pound signs ('###'):
             "###)
           #+END_SRC
-          You can add as many pound signs as needed to make it clear where the /raw string/ ends.
+          You can add as many pound signs as needed to make it clear where the
+          /raw string/ ends.
 
 *** DONE Byte Strings - 65
     CLOSED: [2018-05-21 Mon 21:45]
     - byte string :: a /string literal/ with the ~b~ prefix.
-                     Such a /string/ is a /slice of ~u8~ values/.
+
+    - Such a /byte string/ is a /slice of ~u8~ (byte) values/ --
+      rather than Unicode text.
+
+    - It does NOT have any of the string methods we'll discuss in a minute.
+
+      The most string-like thing about /byte strings/ is the syntax we used to
+      write it.
+
+    - Example,
+      #+BEGIN_SRC rust
+        let method = b"GET";
+        assert_eq(method, &[b'G', b'E', b'T']);
+      #+END_SRC
+      + Here ~method~ is if type ~&[u8; 3]~
 
     - This combines with all the other string syntax we've shown:
       + span multiple lines
@@ -1373,7 +1398,7 @@
 
     - /raw byte string/ starts with ~br"~
 
-    - /byte strings/ can only contains ASCII and \xHH escape sequences.
+    - /byte strings/ can only contains ASCII and =\xHH= escape sequences.
 
       You *CANNOT* save other Unicode characters in bytes to form /byte
       strings/.
@@ -1394,43 +1419,64 @@
 *** DONE Strings in Memory - 65
     CLOSED: [2018-05-21 Mon 23:10]
     - Rust /strings/ are sequences of Unicode characters,
-      but they are NOT stored in memory as array of chars.
+      but they are NOT stored in memory as array of ~char~'s (UTF-16 in Rust).
 
-      Instead, they are stored using UTF-8, a variable-width encoding.
+      Instead, they are *stored using UTF-8*, a variable-width encoding.
 
     - Figure 3-3 shows the ~String~ and ~&str~ values created by the code:
       #+BEGIN_SRC rust
-        let noodles = "noodles".to_string();
-        let oodles = &noodles[1..];
-        let poodles = "ಠ_ಠ";
+        let noodles: String = "noodles".to_string();
+        let oodles: &str = &noodles[1..];
+        let poodles: &str = "ಠ_ಠ";
       #+END_SRC
       + A ~String~ has a /resizable buffer/ holding UTF-8 text.
         The buffer is allocated on the /heap/.
 
+        The implementation of ~String~:
+        It uses a ~Vec<u8>~ to hold the data. This ~Vec<u8>~ is guaranteed to hold
+        well-formed UTF-8.
+
+      + A ~&str~, like other slice references, is a /fat pointer/, containing both
+        * the address of the actual data
+
+        * the length of this /slice/.
+
+      + You can think of a ~&str~ as being nothing more than a ~&[u8]~ that is
+        guaranteed to hold well-formed UTF-8.
+
+      + A /string literal/ is a ~&str~ that refers to preallocated text, typically
+        stored in read-only memory along with the program's machine code (=???=).
+          In the preceding example, ~poodles~ is a /string literal/, pointing to
+        seven bytes that are created when the program begins execution, and that
+        last until it exits
+
+    - A ~&str~ (pronounced "stir" or "string slice").
+
     - ~&str~'s ~len()~ /method/ returns its length in byte.
       ~&str~'s ~chars().count()~ returns the number of characters.
 
-    - It is *impossible* to modify a ~&str~:
-      #+BEGIN_SRC rust
+    - It is *IMPOSSIBLE* to modify a ~&str~.
+
         let mut s = "hello";
         s[0] = 'c';    // error: the type `str` cannot be mutably indexed
         s.push('\n');  // error: no method named `push` found for the `&str`
       #+END_SRC
 
-    - Create new /strings/ at run time, use ~String~.
+    - Create new /strings/ at /run time/, use ~String~.
 
     - The type ~&mut str~ does exist, but it is *not very useful*, since almost
-      any operation on UTF-8 can *change its overall byte length*, and a /slice/
-      *cannot reallocate* its referent.
+      any operation on UTF-8 can _CHANGE its *overall byte length*,_ and a /slice/
+      *CANNOT reallocate* its referent.
 
-      =From Jian= This means if you think you need ~&mut str~, it most be
-      localized, and you must justify your reasoning!!!
+      =From Jian= This means if you think you need ~&mut str~, you operation mustn't
+      change it overall byte lenght, and you must justify your reasoning!!! In general,
+      this is impossible.
 
-        In fact, the only operations available on &mut str are ~make_ascii_uppercase~
-      and ~make_ascii_lowercase~ , which modify the text in place and affect
-      only single-byte characters, by definition.
+        In fact, the only operations available on ~&mut str~ are ~make_ascii_uppercase~
+      and ~make_ascii_lowercase~ , which modify the text in place and affect only
+      /single-byte character/'s, by definition.
 
-*** DONE String - 67 =RE-READ=
+*** DONE String - 67
     CLOSED: [2018-05-21 Mon 23:23]
     - ~&str~ is very much like ~&[T]~: a /fat pointer/ to some data.
 
@@ -1444,19 +1490,20 @@
       | ~.push()~ and ~.pop()~ methods                   | Yes                 | Yes                 |
       | Range syntax ~v[start..stop]~                    | Yes, returns ~&[T]~ | Yes, returns ~&str~ |
       | Automatic conversion                             | ~&Vec<T>~ to ~&[T]~ | ~&String~ to ~&str~ |
-      | Inherits methods                                 | From ~&[T]~         | From &str           |
+      | Inherits methods                                 | From ~&[T]~         | From ~&str~         |
 
     - Like a ~Vec~,
-      each ~String~ has its own heap-allocated buffer that is _NOT shared_ with
+      each ~String~ has its own /heap-allocated buffer/ that is _NOT shared_ with
       any other ~String~. When a ~String~ variable goes out of scope, the buffer
-      is automatically freed, unless the ~String~ was /moved/.
+      is _automatically freed_, unless the ~String~ was /moved/.
 
-    - There are several ways to create ~Strings~:
+    - There are several ways to create ~String~'s:
       + The ~.to_string()~ /method/ converts a ~&str~ to a ~String~.
-        This *copies* the string: ~let error_message = "too many pets".to_string();~
+        This *copies* the string:
+        ~let error_message = "too many pets".to_string();~
 
-      + The ~format!()~ macro works just like println!(), except that
-        * it returns a new ~String~ instead of writing text to stdout
+      + The ~format!()~ macro works just like ~println!()~, except that
+        * it returns a new ~String~ instead of writing text to /stdout/
         * it doesn't automatically add a new line at the end.
         #+BEGIN_SRC rust
           assert_eq!(format!("{}°{:02}′{:02}′′N", 24, 5, 23),
@@ -1475,21 +1522,23 @@
       =TODO=
       Chapter 5 addresses this question in detail.
 
-      For now it will suffice to point out that a ~&str~ can refer to any /slice/ of
-      any /string/, whether it is a /string literal/ (stored in the executable) or a
-      ~String~ (allocated and freed at run time).
-        This means that ~&str~ is more appropriate for function arguments when
+      For now it will suffice to point out that a ~&str~ can refer to any /slice/
+      of any /string/, whether it is a /string literal/ (stored in the executable)
+      or a ~String~ (allocated and freed at run time).
+
+      =IMPORTANT=
+        This means that ~&str~ is more appropriate for /function arguments/ when
       the caller should be allowed to pass either kind of string.
 
 *** DONE Using Strings - 68
     CLOSED: [2018-05-22 Tue 09:03]
     - /Strings/ support the ~==~ and ~!=~ operators.
-      They are used to _compare their values_, rather than address as in Java.
+      They are used to _compare their values_, rather than /address/ as in Java.
       ~assert!("ONE".to_lowercase() == "one");~
 
     - /Strings/ also support the comparison operators ~<~, ~<=~, ~>~, and ~>=~,
-      as well as many useful methods and functions -- search "str (primitive
-      type)" or the "~std::str~" module (or just flip to Chapter 17).
+      as well as many useful methods and functions -- search "~str~ (primitive
+      type)" or the "~std::str~" module (or just flip to Chapter 17). =TODO=
       Here are a few examples:
       #+BEGIN_SRC rust
         assert!("peanut".contains("nut"));
@@ -1501,26 +1550,21 @@
         }
       #+END_SRC
 
-    - =TODO= =NOTE=
-      Keep in mind that, given the nature of Unicode, simple char-by-char
-      comparison does not always give the expected answers. For example,
-      + the Rust strings ~"th\u{e9}"~ and ~"the\u{301}"~ are both valid Unicode
-        representations for *thé*, the French word for tea. Unicode says they
-        should both be displayed and processed in the same way, but Rust treats
-        them as two completely distinct strings.
+    - Keep in mind that, you shouldn't belive in your eyes and the common sense in
+      your language and culture!
+      + Given the nature of Unicode, simple char-by-char comparison does not always
+        give the expected answers -- differnt binary forms can have the same display!
 
-        =From Jian=
-        Unicode has this trap for people work on it: 
-        For one kind of view, there is no unique Unicode representation!
-        You cannot belive in your eyes!
+        For example, the Rust strings ~"th\u{e9}"~ and ~"the\u{301}"~ are both
+        valid Unicode representations for *thé*, the French word for tea.
 
-      + Similarly, Rust's ordering operators like ~<~ use a simple lexicographical
-        order based on character code point values.
+      + Similarly, Rust's ordering operators like ~<~ use a simple /lexicographical
+        order/ based on /character code point values/.
           This ordering only sometimes resembles the ordering used for text in the
-        user’s language and culture.
+        user's language and culture.
 
-        =TODO=
-        We discuss these issues in more detail in Chapter 17.
+      =TODO=
+      We discuss these issues in more detail in Chapter 17.
 
 *** DONE Other String-Like Types - 68
     CLOSED: [2018-05-22 Tue 08:59]
@@ -1536,8 +1580,7 @@
         that isn't valid Unicode. What should happen when a Rust program comes
         across this sort of filename?
 
-      + Solution: =TODO= =Learn More=
-        Rust’s solution is to offer a few string-like types for these situations:
+      + Rust's Solution is to offer a few string-like types for these situations:
         * Stick to ~String~ and ~&str~ for Unicode text.
 
         * When working with filenames, use ~std::path::PathBuf~ and ~&Path~ instead.
@@ -1550,7 +1593,7 @@
           ~&OsStr~.
 
         * When interoperating with C libraries that use null-terminated strings,
-          use ~std::ffi::CString~ and ~&CStr~.
+          use ~std::ffi::CString~ and ~&CStr~. =IMPORTANT=
 
 ** DONE Beyond the basics - 69
    CLOSED: [2018-05-20 Sun 21:30]
@@ -2798,16 +2841,146 @@
 *** TODO Aborting - 147
 
 ** TODO Result - 148
-*** TODO Catching Errors - 148
-*** TODO Result Type Aliases - 150
-*** TODO Printing Errors - 150
+   - Rust does NOT have /exception/!
+     Instead, /functions/ that can fail have a /return type/ that says so.
+     For instance,
+     ~fn get_weather(location: LatLng) -> Result<WeatherReport, io::Error>~
+
+*** DONE Catching Errors - 148
+    CLOSED: [2018-06-10 Sun 13:42]
+    - Pattern matching is the most thorough way of dealing with a ~Result~.
+      It is the equivalent of ~try/catch~ in other languages.
+
+    - ~match~ is a bit verbose, so ~Result<T, E>~ offers a variety of /methods/
+      that are useful in particular common cases. Each of these /methods/ has a
+      ~match~ expression in its implementation.
+
+      + ~result.is_ok()~ and ~result.is_err()~
+
+      + ~result.ok()~ returns the success value, if any, as an ~Option<T>~.
+
+      + ~result.err()~ returns the error value, if any, as an ~Option<E>~.
+
+      + ~result.unwrap_or(fallback)~ returns the success value, if ~result~ is a
+        success result. Otherwise, it returns ~fallback~, discarding the error
+        value.
+
+        If you have a appropriate fallback value, this is a good alternative to
+        ~.ok()~ because the /return type/ is ~T~, not ~Option<T>~.
+
+      + ~result.unwrap_or_else(fallback_fn)~ returns the success value, ...
+        This is good for the case that the computation of the ~fallback~ value is
+        costly.
+
+      + ~result.unwrap()~ returns the success value, or panic if the ~result~ is
+        an error.
+
+      + ~result.expect(message)~ is similar to the ~unwrap~ method, but with an
+        error message in case of panic.
+
+      + Two /methods/ for /borrowing references/ to the value in a ~Result~:
+        * ~result.as_ref()~ converts a ~Result<T, E>~ to a ~Result<&T, &E>~,
+          borrowing a reference to the success or error value in the existing
+          ~result~.
+
+        * ~result.as_mut()~
+          ~Result<&mut T, &mut E>~
+
+        These two /methods/ are very useful -- all the other /methods/ introduced
+        here, except the ~result.is_ok()~ and the ~result.is_err()~ consumes the
+        ~self~, this may not be what you want.
+
+*** DONE Result Type Aliases - 150
+    CLOSED: [2018-06-10 Sun 13:46]
+    Sometimes you may see a type like ~Result<()>~, which means this ~Result~ /type
+    alias/ is being used.
+
+    ~pub type Result<T> = result::Result<T, Error>;~. This example is in the /module/
+    of ~std::io~, and the ~Error~ is the ~std::io::Error~.
+
+*** DONE Printing Errors - 150
+    CLOSED: [2018-06-10 Sun 14:08]
+    Sometimes the only way to handle an error is by dumping it to the terminal and
+    moving on.
+
+    - All the errors, such as ~std::io::Error~, ~std::fmt::Error~, and
+      ~std::str::Utf8Error~, implement the ~std::error:Error~ /trait/, which means
+      they share the following features:
+      + Use ~{}~ format specifier to display a brief error message.
+        Use ~{:?}~ format specifier to display a ~Debug~ view of the error.
+
+      + ~err.description()~ returns an error message as a ~&str~.
+
+      + ~err.cause()~ returns an ~Option<&Error>~: the underlying error, if any,
+        that triggered ~err~.
+
+        =RE-READ= More details!!!
+
+    - Printing an error value does NOT also print out its cause.
+
+      If you want to be sure to print all the available information, use this function:
+      #+BEGIN_SRC rust
+        use std::error::Error;
+        use std::io::{Write, stderr};
+
+        /// Dump an error message to `stderr`.
+        ///
+        /// If another error happens while building the error message or
+        /// writing to `stderr`, it is ignored.
+        fn print_error(mut err: &Error) {
+            let _ = writeln!(stderr(), "error: {}", err);
+            while let Some(cause) = err.cause() {
+                let _ = writeln!(stderr(), "caused by: {}", cause);
+                err = cause;
+            }
+        }
+      #+END_SRC
+
+    - The standard library's error types do NOT include a /stack trace/,
+
+      but the ~error-chain~ *crate* makes it easy to define your own custom
+      error type that supports grabbing a /stack trace/ when it's created.
+
+      It uses the ~backtrace~ /crate/ to capture the stack.
+
 *** TODO Propagating Errors - 152
 *** TODO Working with Multiple Error Types - 153
 *** TODO Dealing with Errors That "Can't Happen" - 155
 *** TODO Ignoring Errors - 156
 *** TODO Handling Errors in ~main()~ - 156
 *** TODO Declaring a Custom Error Type - 157
-*** TODO Why Results? - 158
+*** DONE Why Results? - 158
+    CLOSED: [2018-06-10 Sun 14:19]
+    Here are the key points of the design:
+    + Rust requires the programmer to make some sort of decision, and record it in the
+      code, at every point where an error could occur. This is good because otherwise,
+      it's easy to get error handling wrong through neglect.
+      =SIMPIFY THIS NOTE=
+
+      =From Jian= You cannot neglect it, but much better than Java's /checked
+      exception/.
+
+    + Use ~?~ to do error propagation.
+      Thus error plumbing does not clutter up your code the way it does in C and Go.
+      Yet it's still visible.
+
+    + Since the possibility of errors is part of every function's /return type/,
+      it's clear which functions can fail and which can't.
+      =From Jian= It is visible, but much better than Java's /checked exception/.
+
+      If you change a function to be fallible, you're _changing_ its /return type/,
+      so the compiler will make you update that function's downstream users.
+
+    + Rust checks that ~Result~ values are used, so you can't accidentally let an
+      error pass silently (a common mistake in C).
+
+    + Since ~Result~ is a data type like any other, it's easy to store success and
+      error results in the same collection. _This makes it easy to model PARTIAL
+      success._
+        For example, if you’re writing a program that loads millions of records
+      from a text file, and you need a way to cope with the likely outcome that
+      most will succeed, but some will fail, you can represent that situation in
+      memory using a vector of ~Result~'s.
 
 * TODO 8. Crates and Modules - 161
   - This chapter covers the features of Rust that help keep your program organized:
@@ -3741,7 +3914,8 @@
 
    We could go on.
 
-* TODO 9. Structs - 193
+* DONE 9. Structs - 193
+  CLOSED: [2018-06-06 Wed 22:19]
   - Rust has *three* kinds of /struct types/:
     + named-field,
     + tuple-like,
@@ -4124,41 +4298,720 @@
    - /Mutability/ is like anything else:
      in excess, it causes problems, but you often want just a little bit of it.
 
-* TODO 10. Enums and patterns - 211
+* DONE 10. Enums and patterns - 211
+  CLOSED: [2018-06-06 Wed 22:19]
   - Rust /enumerations/ (simply /enums/) are the analog of /algebraic data types/
     (or known as /sum types/ or /discriminated unions/) in ML and Haskell.
 
-** TODO Enums - 212
-*** TODO Enums with Data - 214
-    - =TODO= NOTES
+** DONE Enums - 212
+   CLOSED: [2018-06-06 Wed 19:59]
+   - Simple, C-style enums are straightforward:
+     #+BEGIN_SRC rust
+       enum Ordering {
+           Less,
+           Equal,
+           Greater
+       }
+     #+END_SRC
+     + The ~Less~, ~Equal~, and ~Greater~ are called /constructors/.
+
+     + /Function/ that use this /enum/:
+       #+BEGIN_SRC rust
+         use std::cmp::Ordering;
+
+         fn compare(n: i32, m: i32) -> Ordering {
+             if n < m {
+                 Ordering::Less
+             } else if n > m {
+                 Ordering::Greater
+             } else {
+                 Ordering::Equal
+             }
+         }
+       #+END_SRC
+       * If you don't want the ~Ordering::~ part, you can ~use std::cmp::Ordering::*;~.
+         However, this is NOT recommended.
+
+       * If a /enums/ is in the current module, you can ~use self::EnumName::*;~
+
+   - In memory, values of C-style enums are stored as integers.
+     Occasionally it's useful to tell Rust which integers to use:
+     #+BEGIN_SRC rust
+       enum HttpStatus {
+           Ok = 200,
+           NotModified = 304,
+           NotFound = 404,
+           // ...
+       }
+     #+END_SRC
+     Otherwise Rust will assign the numbers for you, starting at 0.
+
+   - By default, Rust stores C-style enums using the smallest built-in integer type
+     that can accomodate them.
+     #+BEGIN_SRC rust
+       use std::mem::size_of;
+
+       assert_eq!(size_of::<Ordering>(), 1);
+       assert_eq!(size_of::<HttpStatus>(), 2);  // The number `404` doesn't fit in a `u8`
+     #+END_SRC
+
+   - You can override Rust's choice of in-memory representation by adding a ~#[repr]~
+     /attribute/ to the /enum/.
+     =TODO=
+     For details, see Chapter 21.
+
+   - Casting a C-style /enum/ to an integer is allowed:
+     ~assert_eq!(HttpStatus::Ok as i32, 200);~
+
+     You cannot cast an integer to a /enum/ with ~as~.
+     If you still want this, try
+     #+BEGIN_SRC rust
+       fn http_status_from_u32(n: u32) -> Option<HttpStatus> {
+           match n {
+               200 => Some(HttpStatus::Ok),
+               200 => Some(HttpStatus::NotModified),
+               200 => Some(HttpStatus::NotFound),
+               // ...
+               _   => None
+           }
+       }
+     #+END_SRC
+     or use the ~enum_primitive~ /crate/. =TODO=
+     It contains a /macro/ that _autogenerates_ this kind of conversion code for
+     you.
+
+   - As with /structs/, the compiler will implement features like the ~==~ operator
+     for you, but you have to ask.
+     #+BEGIN_SRC rust
+       #[derive(Copy, Clone, Debug, PartialEq)]
+       enum TimeUnit {
+           Seconds, Minutes, Hours, Days, Months, Years
+       }
+     #+END_SRC
+
+   - /Enums/ can have /methods/, just like /structs/:
+     #+BEGIN_SRC rust
+       impl TimeUnit {
+           /// Return the plural noun for this time unit.
+           fn plural(self) -> &'static str {
+               match self {
+                   TimeUnit::Seconds => "seconds",
+                   TimeUnit::Minutes => "minutes",
+                   TimeUnit::Hours   => "hours",
+                   TimeUnit::Days    => "days",
+                   TimeUnit::Months  => "months",
+                   TimeUnit::Years   => "years"
+               }
+           }
+
+           // Return the singular noun for this time unit.
+           fn singular(self) -> &'static str {
+               self.plural().trim_right_matches('s')
+           }
+       }
+     #+END_SRC
+
+*** DONE Enums with Data - 214 - =Re-Write Notes=
+    CLOSED: [2018-06-06 Wed 17:59]
+    - Example:
+      #+BEGIN_SRC rust
+        /// A timestamp that has been deliberately rounded off, so our program
+        /// says "6 months ago" instead of "February 9, 2016, at 9:49 AM".
+        #[derive(Copy, Clone, Debug, PartialEq)]
+        enum RoughTime {
+            InThePast(TimeUnit, u32),
+            JustNow,
+            InTheFuture(TimeUnit, u32)
+        }
+      #+END_SRC
+      The /enum variants/ that takes argument(s) are called /tuple variants/.
+
+    - /Enums/ can also have /struct variants/, which contain /named fields/, just
+      like ordinary structs:
+      #+BEGIN_SRC rust
+        enum Shape {
+            Sphere { center: Point3d, radius: f32 },
+            Cuboid { corner1: Point3d, corner2: Point3d }
+        }
+
+        let unit_sphere = Shape::Sphere { center: ORIGIN, radius: 1.0 };
+      #+END_SRC
+
+    - In all, Rust has *three* kinds of /enum variant/,
+      echoing the *three* kinds of /struct/ we showed in the previous chapter.
+      + /Variants with no data/ correspond to /unit-like structs/.
+
+      + /Tuple variants/ look and function just like /tuple structs/.
+
+      + /Struct variants/ have curly braces and /named fields/.
+
+      *A single /enum/ can have /variants/ of _ALL three_ kinds.*
+      #+BEGIN_SRC rust
+        enum RelationshipStatus {
+            Single,
+            InARelationship,
+            ItsComplicated(Option<String>),
+            ItsExtremelyComplicated {
+                car: DifferentialEquation,
+                cdr: EarlyModernistPoem
+            }
+        }
+      #+END_SRC
+
     - All constructors and fields of a public enum are automatically public.
-*** TODO Enums in Memory - 215
-*** TODO Rich Data Structures Using Enums - 216
-*** TODO Generic Enums - 218
 
-** TODO Patterns - 221
-*** TODO Literals, Variables, and Wildcards in Patterns - 223
-*** TODO Tuple and Struct Patterns - 225
-*** TODO Reference Patterns - 226
-*** TODO Matching Multiple Possibilities - 229
-*** TODO Pattern Guards - 229
-*** TODO ~@~ patterns - 230
-*** TODO Where Patterns Are Allowed - 230
-*** TODO Populating a Binary Tree 232
+*** DONE Enums in Memory - 215
+    CLOSED: [2018-06-06 Wed 19:18]
+    - In memory, /enums with data/ are stored as
+      + a SMALL /integer tag/
+      + enough memory to hold all the /fields/ of the /largest variant/.
 
-** TODO The Big Picture - 233
+    - The /tag field/ is for _Rust's INTERNAL USE_.
+      It tells
+      1. which /constructor/ created the value
+      2. (therefore) which /fields/ it has.
+
+    - As of Rust 1.17, ~RoughTime~ fits in _8 bytes_, as shown in Figure 10-1
+
+      *Rust makes NO PROMISES about enum LAYOUT,* however, in order to leave the
+      door open for future optimizations.
+        In some cases, it would be possible to pack an /enum/ more efficiently
+      than the figure suggests. We'll show later in this chapter how Rust can
+      already *OPTIMIZE AWAY the /tag field/ for some enums*.
+      =TODO= See the /Generic Enums with ~Box~ types/ in "Generic Enums" section.
+
+*** DONE Rich Data Structures Using Enums - 216
+    CLOSED: [2018-06-06 Wed 19:59]
+    - Enums are also useful for quickly implementing tree-like data structures.
+
+    - For example, suppose a Rust program needs to work with arbitrary JSON data.
+      In memory, any JSON document can be represented as a value of this Rust
+      type:
+      #+BEGIN_SRC rust
+        enum Json {
+            Null,
+            Boolean(bool),
+            Number(f64),
+            String(String),
+            Array(Vec<Json>),
+            Object(Box<HashMap<String, Json>>)
+        }
+      #+END_SRC
+
+    - The JSON standard specifies the various data types that can appear in a JSON
+      document:
+      + ~null~
+      + Boolean values
+      + numbers
+      + strings
+      + arrays of JSON values
+      + objects with string keys and JSON values.
+
+      The ~Json~ /enum/ simply spells out these types.
+
+    - This is not a hypothetical example.
+      A very similar /enum/ can be found in ~serde_json~, _a serialization
+      library for Rust structs_ that is one of the most-downloaded crates on
+      _crates.io_.
+
+    - The ~Box~ around the ~HashMap~ that represents an ~Object~ serves only to
+      make all ~Json~ values more compact. =From Jian= eliminate /tag fields/???
+
+      In memory, values of type ~Json~ take up *FOUR machine words*:
+
+      + ~String~ and ~Vec~ values are THREE words, and Rust adds A /tag/ byte.
+
+      + ~Null~ and ~Boolean~ values don't have enough data in them to use up all
+        that space, but all values of one /enum/, here the ~Json~, must be the
+        same size. The extra space goes unused.
+
+        Figure 10-2 shows some examples of how ~Json~ values actually look in
+        memory.
+
+    - A ~HashMap~ is larger still.
+      If we had to leave room for it in every ~Json~ value, they would be quite
+      large, eight words or so.
+
+      *But a ~Box<HashMap>~ is a single word*: it's just a pointer to
+      heap-allocated data.
+
+      We could make ~Json~ even _more compact_ *by boxing more fields*.
+
+    - C++ Version of ~Json~:
+      =TODO= =NOTE=
+
+*** DONE Generic Enums - 218
+    CLOSED: [2018-06-06 Wed 18:48]
+    - Examples:
+      #+BEGIN_SRC rust
+        enum Option<T> {
+            None,
+            Some(T)
+        }
+
+        enum Result<T, E> {
+            Ok(T),
+            Err(E)
+        }
+      #+END_SRC
+
+    - These types are familiar enough by now, and the syntax for /generic enums/
+      is the _same as_ for /generic structs/.
+
+    - =TODO= =???= =???=
+      One unobvious detail is
+      that Rust can eliminate the /tag field/ (See the Enums in Memory section)
+      of ~Option<T>~ when the type ~T~ is a ~Box~ or some other /smart pointer
+      type/. An ~Option<Box<i32>>~ is stored in memory as a single machine word,
+      + 0 for ~None~
+      + nonzero for ~Some~ boxed value.
+
+    - Generic data structures can be built with just a few lines of code:
+      #+BEGIN_SRC rust
+        // An ordered collection of `T`s.
+        enum BinaryTree<T> {
+            Empty,
+            NonEmpty(Box<TreeNode<T>>)
+        }
+
+        // A part of a `BinaryTree`.
+        struct TreeNode<T> {
+            element: T,
+            left: BinaryTree<T>,
+            right: BinaryTree<T>,
+        }
+      #+END_SRC
+      These few lines of code define a ~BinaryTree~ type that can store any number
+      of values of type ~T~.
+
+      + Use it:
+        #+BEGIN_SRC rust
+          use self::BinaryTree::*;
+
+          let jupiter_tree = NonEmpty(Box::new(TreeNode {
+              element: "Jupiter",
+              left: Empty,
+              right: Empty
+          }));
+
+          let mercury_tree = Empty;
+
+          let mars_tree = NonEmpty(Box::new(TreeNode {
+              element: "Mars",
+              left:     jupiter_tree,
+              right:    mercury_tree,
+          }));
+        #+END_SRC
+
+    - =TODO=
+      Later in this chapter, we'll show how to implement an ~add~ /method/ on the
+      ~BinaryTree~ type, so that we can instead write:
+      #+BEGIN_SRC rust
+        let mut tree = BinaryTree::Empty;
+
+        for planet in planets {
+            tree.add(planet);
+        }
+      #+END_SRC
+
+    - =Re-Read= =TODO=
+      No matter what language you’re coming from, creating data structures like
+      BinaryTree in Rust will likely take some practice. It won’t be obvious at first where to
+      put the Box es. One way to find a design that will work is to draw a picture like
+      Figure 10-3 that shows how you want things laid out in memory. Then work back‐
+      ward from the picture to the code. Each collection of rectangles is a struct or tuple;
+      each arrow is a Box or other smart pointer. Figuring out the type of each field is a bit
+      of a puzzle, but a manageable one. The reward for solving the puzzle is control over
+      your program’s memory usage.
+
+    - The price (real costs, costs at the first glance but actually investment)
+      of using Rust's /enums/:
+      + The memory cost of the /tag field/ in memory.
+        Up to 8 bytes in the worst case, but that is usually negligible.
+
+      + You cannot access fields of a /enum/ regardless of whether they are acutally
+        present in the value -- even you know, you must also let the compiler know.
+
+        =TODO= Use /patterns/ to solve this problem, and you will like this solution.
+
+        =From Jian= This is NOT a cost. It's a cost at the first glance, and it
+        is actually a good investment!
+
+** DONE Patterns - 221
+   CLOSED: [2018-06-06 Wed 22:19]
+   - Example:
+     #+BEGIN_SRC rust
+       enum RoughTime {
+           InThePast(TimeUnit, u32),
+           JustNow,
+           InTheFuture(TimeUnit, u32)
+       }
+
+       fn rough_time_to_english(rt: RoughTime) -> String {
+           match rt {
+               RoughTime::InThePast(units, count)   => format!("{} {} ago", count, units.plural()),
+               RoughTime::JustNow                   => format!("just now"),
+               RoughTime::InTheFuture(units, count) => format!("{} {} from now", count, units.plural())
+           }
+       }
+     #+END_SRC
+
+   - /Expressions/ *produce* values; /patterns/ *consume* values.
+     The two use a lot of the same syntax.
+
+   - Rust /patterns/ are their own little language, _summarized in Table 10-1_.
+     | Pattern type            | Example                             | Notes                                         |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Literal                 | ~100~                               | Matches an exact value; the name of a ~const~ |
+     |                         | ~"name"~                            | is also allowed                               |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Range                   | ~0 ... 100~                         | Matches any value in range, including the end |
+     |                         | ~'a' ... 'k'~                       | value                                         |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Wildcard                | ~_~                                 | Matches any value and ignores it              |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Variable                | ~name~                              | Like ~_~ but moves or copies the value into a |
+     |                         | ~mut count~                         | new local variable                            |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | ref variable            | ~ref field~                         | Borrows a reference to the matched value      |
+     |                         | ~ref mut field~                     | instead of moving or copying it               |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Binding with subpattern | ~val @ 0 ... 99~                    | Matches the pattern to the right of ~@~,      |
+     |                         | ~ref circle @ Shape::Circle { .. }~ | using the variable name to the left           |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Enum pattern            | ~Some(value)~                       |                                               |
+     |                         | ~None~                              |                                               |
+     |                         | ~Pet::Orca~                         |                                               |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Tuple pattern           | ~(key, value)~                      |                                               |
+     |                         | ~(r, g, b)~                         |                                               |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Struct pattern          | ~Color(r, g, b)~                    |                                               |
+     |                         | ~Point { x, y }~                    |                                               |
+     |                         | ~Card { suit: Clubs, rank: n }~     |                                               |
+     |                         | ~Account { id, name, .. }~          |                                               |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Reference               | ~&value~                            | Matches only reference values                 |
+     |                         | ~&(k, v)~                           |                                               |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Multiple patterns       | ~'a' \vert{} 'A'~                         | In ~match~ only (not valid in ~let~ , etc.)   |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+     | Guard expression        | ~x if x * x <= r2~                  | In ~match~ only (not valid in ~let~ , etc.)   |
+     |-------------------------+-------------------------------------+-----------------------------------------------|
+
+*** DONE Literals, Variables, and Wildcards in Patterns - 223
+    CLOSED: [2018-06-06 Wed 20:38]
+*** DONE Tuple and Struct Patterns - 225
+    CLOSED: [2018-06-06 Wed 20:43]
+    - /Patterns/ like ~Point { x: x, y: y }~ are common when MATCHING /structs/,
+      and the redundant names are visual clutter, so Rust has a _shorthand_ for
+      this: ~Point {x, y}~.
+
+    - Even with the shorthand, it is cumbersome to match a large struct when we
+      only care about a few fields:
+      #+BEGIN_SRC rust
+        match get_account(id) {
+            // ...
+            Some(Account {
+                    name, language, // <--- the 2 things we care about
+                    id: _, status: _, address: _, birthday: _, eye_color: _,
+                    pet: _, security_question: _, hashed_innermost_secret: _,
+                    is_adamantium_preferred_customer: _ }) =>
+                language.show_custom_greeting(name)
+        }
+      #+END_SRC
+
+      =IMPORTANT=
+      To avoid this, use ~..~ to tell Rust you don't care about any of the other fields:
+      #+BEGIN_SRC rust
+        Some(Account { name, language, .. }) =>
+            language.show_custom_greeting(name)
+      #+END_SRC
+
+*** DONE Reference Patterns - 226
+    CLOSED: [2018-06-06 Wed 22:00]
+    - Example:
+      + With compiler error
+        #+BEGIN_SRC rust
+          match account {
+              Account { name, language, .. } => {
+                  ui.greet(&name, &language);
+                  ui.show_settings(&account);  // error: use of moved value `account`
+              }
+          }
+        #+END_SRC
+        * This code works if ~name~ and ~language~ are copiable.
+
+        * If ~name~ and ~language~ are NOT copiable, we bind ~name~ and ~language~
+          with *moving* them, we cannot use ~account~ in the
+          ~ui.show_settings(&account);~ line.
+          
+      + Fix it:
+        #+BEGIN_SRC rust
+          match account {
+              Account { ref name, ref language, .. } => {
+                  ui.greet(&name, &language);
+                  ui.show_settings(&account);
+              }
+          }
+        #+END_SRC
+
+    - Use ~ref mut~ to /borrow/ /mutable reference/.
+
+    - Match /reference/:
+      #+BEGIN_SRC rust
+        match sphere.center() {
+            &Point3d { x, y, z } => ......
+        }
+      #+END_SRC
+
+    - =NOTE= =TODO=
+      This is a bit tricky because Rust is following a pointer here, an action
+      we usually associate with the ~*~ operator, not the ~&~ operator.
+
+      + Rationale:
+        The thing to remember is that *patterns and expressions are natural
+        opposites*. For instance,
+        * The expression ~(x, y)~ makes two values into a new /tuple/,
+          but the pattern ~(x, y)~ does the opposite: it matches a /tuple/ and
+          _breaks_ out the two values.
+
+        * It's the same with ~&~.
+          - In an /expression/, ~&~ *creates* a /reference/.
+          - In a /pattern/, ~&~ *matches* a /reference/.
+
+    - Matching a reference follows all the rules we’ve come to expect.
+
+      + Lifetimes are enforced.
+
+      + You CANNOT get ~mut~ access via a /shared reference/.
+
+      + You CANNOT /move/ a value out of a /reference/, even a ~mut~ /reference/.
+
+        (When we match ~&Point3d { x, y, z }~, the variables ~x~, ~y~, and ~z~
+        receive copies of the coordinates, leaving the original ~Point3d~ value
+        intact. It works because those fields are /copyable/.)
+
+        If we try the same thing on a ~struct~ with *noncopyable* /fields/,
+        we'll get an error:
+
+        #+BEGIN_SRC rust
+          match friend.borrow_car() {
+              Some(&Car { engine, .. }) => // error: can't move out of borrow
+                  //     ...
+              None => {}
+          }
+
+        #+END_SRC
+
+        Scrapping a borrowed car for parts is not nice, and Rust won't stand for
+        it. You can use a ~ref~ pattern to /borrow/ a /reference/ to a part. You
+        just don't own it.
+        ~Some(&Car { ref engine, .. }) => // ok, engine is a reference~
+
+*** DONE Matching Multiple Possibilities - 229
+    CLOSED: [2018-06-06 Wed 20:44]
+    - Use ~|~ to match several /patterns/.
+
+    - Use ~...~ to match a whole /range/ (=IMPORTANT= INCLUSIVE) of values.
+      #+BEGIN_SRC rust
+        match next_char {
+            '0' ... '9' =>
+                self.read_number(),
+            'a' ... 'z' | 'A' ... 'Z' =>
+                self.read_word(),
+            ' ' | '\t' | '\n' =>
+                self.skip_whitespace(),
+            _ =>
+                self.handle_punctuation()
+        }
+      #+END_SRC
+
+*** DONE Pattern Guards - 229
+    CLOSED: [2018-06-06 Wed 20:49]
+    #+BEGIN_SRC rust
+      match robot.last_known_location() {
+          Some(point) if self.distance_to(point) < 10 =>
+              short_distance_strategy(point),
+          Some(point) =>
+              long_distance_strategy(point),
+          None =>
+              searching_strategy()
+      }
+    #+END_SRC
+    + Use ~Some(ref point)~
+      if the ~point~ above is NOT copyable.
+
+*** DONE ~@~ patterns - 230
+    CLOSED: [2018-06-06 Wed 20:57]
+    - On success, instead of creating variables for parts of the matched value,
+      it creates a single variable ~x~ and *moves* or *copies* the whole value
+      into it. =Re-Read=
+
+    - For example, say you have this code:
+      #+BEGIN_SRC rust
+        match self.get_selection() {
+            rect @ Shape::Rect(..) =>
+                optimized_paint(&rect),
+            // Shape::Rect(top_left, bottom_right) =>
+            //     optimized_paint(&Shape::Rect(top_left, bottom_right)),
+
+            other_shape =>
+                paint_outline(other_shape.get_outline()),
+        }
+      #+END_SRC
+
+    - ~@~ patterns are also useful with ranges:
+      #+BEGIN_SRC rust
+        match chars.next() {
+            Some(digit @ '0' ... '9') => read_number(digit, chars),
+            // ...
+        }
+      #+END_SRC
+
+*** DONE Where Patterns Are Allowed - 230
+    CLOSED: [2018-06-06 Wed 22:14]
+    - Although patterns are most prominent in match expressions, they are also
+      allowed in several other places, _typically in place of an identifier._
+
+    - For example:
+      #+BEGIN_SRC rust
+        // ...unpack a struct into three new local variables
+        let Track { album, track_number, title, .. } = song;
+
+        // ...unpack a function argument that's a tuple
+        fn distance_to((x, y): (f64, f64)) -> f64 { ... }
+
+        // ...iterate over keys and values of a HashMap
+        for (id, document) in &cache_map {
+            println!("Document #{}: {}", id, document.title);
+        }
+
+        // ...automatically dereference an argument to a closure
+        // (handy because sometimes other code passes you a reference
+        // when you'd rather have a copy)
+        let sum = numbers.fold(0, |a, &num| a + num);
+      #+END_SRC
+
+      + =From Jian= I don't quite understand the last line? I mean what's special???
+
+    - irrefutable patterns :: patterns that always match.
+
+    - /Irrefutable patterns/ are special in Rust.
+      They're the only /patterns/ allowed in the four places shown here (after
+      ~let~ , in /function/ arguments, after ~for~ , and in /closure/ arguments).
+
+    - /Refutable patterns/ are allowed in ~match~, ~if let~, and ~while let~.
+
+*** DONE Populating a Binary Tree 232
+    CLOSED: [2018-06-06 Wed 22:19]
+    #+BEGIN_SRC rust
+      impl<T: Ord> BinaryTree<T> {
+
+          fn add(&mut self, value: T) {
+              match *self {
+                  BinaryTree::Empty =>
+                      ,*self = BinaryTree::NonEmpty(Box::new(TreeNode {
+                          element: value,
+                          left: BinaryTree::Empty,
+                          right: BinaryTree::Empty
+                      })),
+                  BinaryTree::NonEmpty(ref mut node) =>
+                      if value <= node.element { node.left.add(value); }
+                      else                     { node.right.add(value); }
+              }
+          }
+
+      }
+
+      let mut tree = BinaryTree::Empty;
+      tree.add("Mercury");
+      tree.add("Venus");
+    #+END_SRC
+
+** DONE The Big Picture - 233 =Re-Read=
+   CLOSED: [2018-06-06 Wed 20:03]
+   TODO: NOTES
 
 * TODO 11. Traits and Generics - 235
+  - Rust supports /polymorphism/ with two related features: /traits/ and /generics/.
+
+    These concepts will be familiar to many programmers,
+    =???=
+    *but Rust takes a fresh approach inspired by Haskell's /typeclasses/.*
+
+  - About /traits/:
+    + We'll also use /traits/ to add /extension methods/ to EXISTING types, even
+      built-in types like ~str~ and ~bool~.
+
+    + We'll explain why adding a trait to a type costs no extra memory and how to
+      use traits without virtual method call overhead.
+
+    + We'll see that built-in /traits/ are the hook into the language that Rust
+      provides for /operator overloading/ and other features.
+
+    + =TODO=
+      We'll cover /the ~Self~ type/, /associated methods/, and /associated types/,
+      *three features Rust lifted from Haskell* that elegantly solve problems that
+      other languages address with workarounds and hacks.
+
+  - About /generics/.
+
+  - /Generics/ and /traits/ are closely related.
+
+    Rust makes us declare the ~T: Ord~ requirement (called a /bound/) up front,
+    before using the ~<=~ operator to compare two values of type ~T~.
+
+    + So we'll also talk about
+      * how ~&mut Write~ and ~<T: Write>~ are *similar*,
+      * how they're *different*, and
+      * how to *choose between* these two ways of using /traits/.
+
 ** TODO Using Traits - 237
+   - There is one UNUSUAL RULE about /trait methods/:
+     *the /trait/ itself must be in scope. Otherwise, all its /methods/ are HIDDEN.*
+
 *** TODO Trait Objects - 238
 *** TODO Trait Object Layout - 239
+    - Rust AUTOMATICALLY *converts* /ordinary references/ into /trait objects/
+      when needed. This is why we're able to pass ~&mut local_file to say_hello~
+      in this example:
+      #+BEGIN_SRC rust
+        let mut local_file = File::create("hello.txt")?;
+        say_hello(&mut local_file)?;
+      #+END_SRC
+
+      + Likewise, Rust will happily convert a ~Box<File>~ to a ~Box<Write>~, a
+        value that owns a writer in the /heap/:
+        ~let w: Box<Write> = Box::new(local_file);~
+
+    - This kind of conversion is the *ONLY WAY* to create a /trait object/.
+
+      What the computer is actually doing here is very simple. At the point
+      where the conversion happens, Rust knows the referent's true type (in this
+      case, ~File~), so it just adds the address of the appropriate /vtable/,
+      turning the regular pointer into a fat pointer.
+
 *** TODO Generic Functions - 240
+    - TODO
+
+    - It's also possible for a /type parameter/ to have _no bounds_ at all,
+      but you cannot do much with a value if you haven't specified any bounds for
+      it. You can
+      + move it
+      + put it into a box or vector
+
+      That's about it.
+
 *** TODO Which to Use - 243
 
 ** TODO Defining and Implementing Traits - 245
 *** TODO Default Methods - 246
 *** TODO Traits and Other People's Types - 247
-*** TODO Self in Traits - 249
+*** TODO ~Self~ in Traits - 249
 *** TODO Subtraits - 250
 *** TODO Static Methods - 251
 
@@ -4171,15 +5024,283 @@
 ** TODO Reverse-Engineering Bounds - 260
 ** TODO Conclusion - 263
 
-* TODO 12. Operator Overloading - 265
-** TODO Arithmetic and Bitwise Operators - 266
-*** TODO Unary Operators - 268
-*** TODO Binary Operators - 269
-*** TODO Compound Assignment Operators - 270
+* TODO 12. Operator Overloading - 265 - =Reading=
+  - Table 12-1. Summary of /traits/ for /operator overloading/
+    =From Jian= Categories:
+    + Unary operators
+    + Arithmetic operators
+    + Bitwise operators
+    + Compound assignment arithmetic operators
+    + Compound assignment bitwise operators
+    + Comparison
+    + Indexing
+
+** DONE Arithmetic and Bitwise Operators - 266
+   CLOSED: [2018-06-07 Thu 18:33]
+   - Examples:
+     + ~a + b~ is a shorthand for ~a.add(b)~,
+       this operator comes from ~std::ops::Add~.
+
+     + ~a * b~ is a shorthand for ~a.mul(b)~,
+       this operator comes from ~std::ops::Mul~.
+
+     + ~-a~ is a shorthand for ~a.neg()~,
+       this operator comes from ~std::ops::Neg~.
+
+     You can use these methods calls ONLY WHEN you import the corresponding
+     /traits/.
+
+   - The definition of ~std::ops::Add~:
+     #+BEGIN_SRC rust
+       trait Add<RHS=Self> {
+           type Output;
+           fn add(self, rhs: RHS) -> Self::Output;
+       }
+     #+END_SRC
+
+     + Implement the ~Add~ for a fixed type, for example, ~i32~:
+       #+BEGIN_SRC rust
+         use std::ops::Add;
+
+         impl Add for Complex<i32> {
+             type Output = Complex<i32>;
+
+             fn add(self, rhs: Self) -> Self {
+                 Complex { re: self.re + rhs.re, im: self.im + rhs.im }
+             }
+         }
+       #+END_SRC
+
+     + Implement the ~Add~ for with generics, and keep the lhs and rhs have the
+       same types. This is the most preferred one in Rust:
+       #+BEGIN_SRC rust
+         use std::ops::Add;
+
+         impl<T> Add for Complex<T>
+             where T: Add<Output=T>
+         {
+             type Output = Self;
+
+             fn add(self, rhs: Self) -> Self {
+                 Complex { re: self.re + rhs.re, im: self.im + rhs.im }
+             }
+         }
+       #+END_SRC
+
+     + The most general solution, which is NOT preferred in Rust -- in practice,
+       Rust tends to avoid supporting mixed-type operations:
+       #+BEGIN_SRC rust
+         use std::ops::Add;
+
+         impl<L, R, O> Add<Complex<R>> for Complex<L>
+             where L: Add<R, Output=O>
+         {
+             type Output = Complex<O>;
+
+             fn add(self, rhs: Complex<R>) -> Self::Output {
+                 Complex { re: self.re + rhs.re, im: self.im + rhs.im }
+             }
+         }
+       #+END_SRC
+
+   - Rust's /built-in traits/ for /arithmetic/ and /bitwise/ operators come in
+       *three* groups:
+     + unary operators
+
+     + binary operators
+
+     + compound assignment operators
+
+*** DONE Unary Operators - 268
+    CLOSED: [2018-06-07 Thu 17:48]
+    =TODO=
+    Aside from the /dereferencing operator/ ~*~, which we'll cover separately in
+    "Deref and DerefMut" on page 289, Rust has *two* /unary operators/:
+
+    - Table 12-2. Built-in traits for unary operators
+      | Trait name      | Expression | Equivalent expression |
+      |-----------------+------------+-----------------------|
+      | ~std::ops::Neg~ | ~-x~       | ~x.neg()~             |
+      | ~std::ops::Not~ | ~!x~       | ~x.not()~             |
+
+    - ~std::ops::Neg~ corresponds to /unary negation operator/ ~-~:
+      + ALL of Rust's /numeric types/ implement
+
+    - ~std::ops::Not~ corresponds to /unary complement operator/ ~!~,
+      it behaves as the two functionalities ~!~ and ~~~ in C/C++.
+      + For /integer types/, it is /bitwise complement/ (flips the bits);
+
+      + For /bool/, it is /bool complement/.
+
+    - There are also ~std::ops::Neg~ and ~std::ops::Not~ implementations for
+      /references/ to those types.
+
+    - These /traits/' definitions:
+      #+BEGIN_SRC rust
+        trait Neg {
+            type Output;
+            fn neg(self) -> Self::Output;
+        }
+
+        trait Not {
+            type Output;
+            fn not(self) -> Self::Output;
+        }
+      #+END_SRC
+
+    - Example (the generics implementation of negating complex numbers):
+      #+BEGIN_SRC rust
+        use std::ops::Neg;
+
+        impl<T, O> Neg for Complex<T>
+            where T: Neg<Output=O>
+        {
+            type Output = Complex<O>;
+
+            fn neg(self) -> Complex<O> {
+                Complex { re: -self.re, im: -self.im }
+            }
+        }
+      #+END_SRC
+
+*** DONE Binary Operators - 269
+    CLOSED: [2018-06-07 Thu 18:08]
+    Table 12-3. Built-in traits for binary operators
+    |----------------------+--------------------+------------+-----------------------|
+    | Category             | Trait name         | Expression | Equivalent expression |
+    |----------------------+--------------------+------------+-----------------------|
+    | Arithmetic operators | ~std::ops::Add~    | ~x + y~    | ~x.add(y)~            |
+    |                      | ~std::ops::Sub~    | ~x - y~    | ~x.sub(y)~            |
+    |                      | ~std::ops::Mul~    | ~x * y~    | ~x.mul(y)~            |
+    |                      | ~std::ops::Div~    | ~x / y~    | ~x.div(y)~            |
+    |                      | ~std::ops::Rem~    | ~x % y~    | ~x.rem(y)~            |
+    |----------------------+--------------------+------------+-----------------------|
+    | Bitwise operators    | ~std::ops::BitAnd~ | ~x & y~    | ~x.bitand(y)~         |
+    |                      | ~std::ops::BitOr~  | ~x \vert{} y~    | ~x.bitor(y)~          |
+    |                      | ~std::ops::BitXor~ | ~x ^ y~    | ~x.bitxor(y)~         |
+    |                      | ~std::ops::Shl~    | ~x << y~   | ~x.shl(y)~            |
+    |                      | ~std::ops::Shr~    | ~x >> y~   | ~x.shr(y)~            |
+    |----------------------+--------------------+------------+-----------------------|
+
+    - ALL of Rust's /numeric types/ implement the /arithmetic operators/.
+
+    - All of these /traits/ here have the same general form.
+      For example:
+      #+BEGIN_SRC rust
+        trait BitXor<RHS=Self> {
+            type Output;
+            fn bitxor(self, rhs: RHS) -> Self::Output;
+        }
+      #+END_SRC
+      + The ~Shl~ and ~Shr~ /traits/ *DEVIATE slightly from this pattern*:
+        they do not default their ~RHS~ type parameter to ~Self~,
+        so you *must always supply the righthand operand type explicitly*.
+
+    - You can use the ~+~ operator to *concatenate* a ~String~ with a ~&str~ /slice/
+      or another ~String~.
+
+      However, Rust does not permit the left operand of ~+~ to be a ~&str~, to
+      discourage building up LONG strings by repeatedly concatenating small
+      pieces on the left. (This performs poorly, requiring time QUADRATIC in the
+      final length of the string.)
+
+      + Generally, the ~write!~ /macro/ is better for building up strings _piece
+        by piece_;
+        =TODO=
+        we show how to do this in “Appending and Inserting Text” on page 399.
+
+*** DONE Compound Assignment Operators - 270
+    CLOSED: [2018-06-07 Thu 18:33]
+    Table 12-4. Built-in /traits/ for /compound assignment operators/
+    |----------------------+-----------------------+------------+-----------------------|
+    | Category             | Trait name            | Expression | Equivalent expression |
+    |----------------------+-----------------------+------------+-----------------------|
+    | Arithmetic operators | ~std::ops::AddAssign~ | ~x += y~   | ~x.add_assign(y)~     |
+    |                      | ~std::ops::SubAssign~ | ~x -= y~   | ~x.sub_assign(y)~     |
+    |                      | ~std::ops::MulAssign~ | ~x *= y~   | ~x.mul_assign(y)~     |
+    |                      | ~std::ops::DivAssign~ | ~x /= y~   | ~x.div_assign(y)~     |
+    |                      | ~std::ops::RemAssign~ | ~x %= y~   | ~x.rem_assign(y)~     |
+    |----------------------+-----------------------+------------+-----------------------|
+    | Bitwise operators    | ~std::ops::BitAnd~    | ~x &= y~   | ~x.bitand_assign(y)~  |
+    |                      | ~std::ops::BitOr~     | ~x \vert{}= y~   | ~x.bitor_assign(y)~   |
+    |                      | ~std::ops::BitXor~    | ~x ^= y~   | ~x.bitxor_assign(y)~  |
+    |                      | ~std::ops::Shl~       | ~x <<= y~  | ~x.shl_assign(y)~     |
+    |                      | ~std::ops::Shr~       | ~x >>= y~  | ~x.shr_assign(y)~     |
+    |----------------------+-----------------------+------------+-----------------------|
+
+    - ALL of Rust's /numeric types/ implement the /arithmetic compound assignment
+      operators/.
+
+      Rust's /integer types/ and /bool/ implement the /bitwise compound assignment
+      operators/.
+
+    - /Compound assignment operators/ always return ~()~ -- they are all used for
+      side-effect.
+
+    - The way how Rust's /compound assignment operators/ are defined are different
+      from /compound assignment operators/ in other languages:
+      + In other languages,
+        ~x += y~ is considered as a shorthand of ~x = x + y~, which means it is
+        a composition of two operations.
+
+      + In Rust,
+        The /built-in trait/ for a /compound assignment operator/ is *completely
+        independent* of the /built-in trait/ for the CORRESPONDING /binary operator/.
+
+        ~x += y~ corresponds to the ~x.add_assign(y)~, which is the ONLY /method/
+        of /trait/ ~std::ops::AddAssign~ /trait/:
+        #+BEGIN_SRC rust
+          trait AddAssign<RHS=Self> {
+              fn add_assign(&mut self, RHS);
+          }
+        #+END_SRC
+
+    - A _generic implementation_ of ~AddAssign~ for our ~Complex~ type is straightforward:
+      #+BEGIN_SRC rust
+        use std::ops::AddAssign;
+
+        impl<T> AddAssign for Complex<T>
+            where T: AddAssign<T>
+        {
+            fn add_assign(&mut self, rhs: Complex<T>) {
+                self.re += rhs.re;
+                self.im += rhs.im;
+            }
+        }
+      #+END_SRC
+
+    - As with the /binary traits/ ~Shl~ and ~Shr~, the ~ShlAssign~ and ~ShrAssign~
+      /traits/ _deviate slightly_ from the pattern followed by the other
+      /compound assignment traits/:
+      they do NOT default their ~RHS~ /type parameter/ to ~Self~ , so you MUST
+      ALWAYS supply the righthand operand type EXPLICITLY.
+
 ** TODO Equality Tests - 272
 ** TODO Ordered Comparisons - 275
 ** TODO ~Index~ and ~IndexMut~ - 277
-** TODO Other Operators - 280
+** DONE Other Operators - 280
+   CLOSED: [2018-06-07 Thu 18:18]
+   - *NOT ALL* /operators/ can be /overloaded/ in Rust.
+
+     For example, as of Rust 1.17,
+     + the /error-checking operator/ ~?~ works _ONLY_ with ~Result~ values;
+     + the /logical operators/ ~&&~ and ~||~ are limited to ~Boolean~ values _ONLY_;
+     + The ~..~ operator _ALWAYS_ creates ~Range~ values;
+     + the ~&~ operator _ALWAYS_ /borrows references/;
+     + the ~=~ operator _ALWAYS_ /moves/ or /copies/ values.
+
+     None of them can be overloaded.
+
+   - ~Deref~ and ~DerefMut~ are explained in the next Chapter.
+     They do more than just overload a few operators.
+
+   - Rust does NOT support /overloading/ the /function call operator/, ~f(x)~.
+
+     Instead, when you need a /callable value/, you'll typically just write a
+     /closure/.
+
+     =TODO= We'll explain how this works and cover the ~Fn~, ~FnMut~, and
+     ~FnOnce~ special /traits/ in Chapter 14.
 
 * TODO 13. Utility Traits - 281
 ** ~Drop~ - 282
@@ -4375,25 +5496,463 @@
 *** TODO The unicode-normalization Crate - 429
 
 * TODO 18. Input and Output - 431
+  - Rust's /standard library/ features for /input/ and /output/ are organized
+    around *three* /traits/:
+    + ~Read~
+    + ~BufRead~
+    + ~Write~
+
+    and the various types that implement them:
+
+    + Values that implement ~Read~ have /methods/ for *byte-oriented input*.
+      They're called /readers/.
+
+    + Values that implement ~BufRead~ have
+      * all the /methods/ of ~Read~
+      * (plus) /methods/ for _reading lines of text_ and so forth.
+
+      They're called /buffered readers/.
+
+    + Values that implement ~Write~ support _BOTH_
+      * *byte-oriented output*
+      * *UTF-8 text output*.
+
+      They're called /writers/.
+
+  - Figure 18-1. Selected /reader (bufferd or non-buffered)/ and /writer/ types
+    from the Rust standard library.
+
 ** TODO Readers and Writers - 432
+   - /Readers/ are values that your program can _read bytes from_.
+     Examples include:
+     + _Files opened_ using ~std::fs::File::open(filename)~;
+
+     + ~std::net::TcpStream~'s, for *receiving* data over the _network_;
+
+     + ~std::io::stdin()~, for *reading* from the /process's standard input stream/;
+
+     + ~std::io::Cursor<&[u8]>~ values, which are /readers/ that "read" from a
+       /byte array/ that's _ALREADY in memory_.
+
+   - /Writers/ are values that your program can _write bytes to_.
+     Examples include:
+     + _Files opened_ using ~std::fs::File::create(filename)~;
+
+     + ~std::net::TcpStream~'s, for *sending* data over the _network_;
+
+     + ~std::io::stdout()~ and ~std::io:stderr()~, for *writing* to the terminal;
+
+     + ~std::io::Cursor<&mut [u8]>~ values, which let you treat any /mutable slice
+       of bytes/ *as a file* for *writing*;
+
+     + ~Vec<u8>~, a /writer/ whose ~write~ /methods/ *append* to the vector =TODO= =???=
+
+   - For example, here's a function that *copies all bytes* _from_ ANY /reader/
+     _to_ ANY /writer/:
+     #+BEGIN_SRC rust
+       use std::io::{self, Read, Write, ErrorKind};
+
+       const DEFAULT_BUF_SIZE: usize = 8 * 1024;
+
+       pub fn copy<R: ?Size, W: ?Sized>(reader: &mut R, writer: &mut W) -> io::Result<u64>
+           where R: Read, W: Write
+       {
+           let mut buf = [0; DEFAULT_BUF_SIZE];
+           let mut written = 0;
+           loop {
+               let len = match reader.read(&mut buf) {
+                   Ok(0)                                            => return Ok(written),
+                   Ok(len)                                          => len,
+                   Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,
+                   Err(e)                                           => return Err(e),
+               };
+               writer.write_all(&buf[..len])?;
+               written += len as u64;
+           }
+       }
+     #+END_SRC
+     + This is the implementation of ~std::io::copy()~ from /Rust's standard
+       library/.
+
+       Since it's /generic/, you can use it to copy data from a ~File~ to a
+       ~TcpStream~, from ~Stdin~ to an in-memory ~Vec<u8>~, etc.
+
+   - The *four* ~std::io~ /traits/ ~Read~, ~BufRead~, ~Write~, and ~Seek~ are so
+     commonly used that there's a /prelude module/ containing _ONLY_ those /traits/:
+     ~use std::io::prelude::*;~
+
+   - The ~self~ in the statement ~use std::io::{self, Read, Write, ErrorKind};~ is
+     an alias to the ~std::io~. This means you can, for example, write ~io::Result~,
+     rather than ~std::io::Result~.
+
 *** TODO Readers - 433
+    ~std::io::Read~ has several /methods/ for _reading data_.
+    All of them take the /reader/ itself by ~mut~ /reference/.
+
+    - The main /methods/ of the ~Read~ /trait/.
+      + ~reader.read(&mut buffer)~
+        TODO
+        TODO
+        TODO
+        TODO
+        TODO
+        TODO
+        TODO
+
+      + ~reader.read_to_end(&mut byte_vec)~
+        Read all _remaining input_ from this ~reader~, appending it to ~byte_vec~,
+        which is a ~Vec<u8>~.
+
+        * Return ~io::Result<()>~.
+
+        * *CAUTION*
+          There is _no limit_ on the amount of data this method will pile into
+          the /vector/, so *don't use it on an UNTRUSTED SOURCE.* (You can impose
+          a limit using the ~.take()~ method, described below.)
+
+      + ~reader.read_to_string(&mut string)~
+        It is similar to ~reader.read_to_end(&mut byte_vec)~,
+        BUT append the data to the given ~String~.
+
+        If the stream isn't valid UTF-8, this returns an ~ErrorKind::InvalidData~ error.
+
+        =RE-READ= =???=
+        In some languages, byte input and character input are handled by
+        different types. These days, UTF-8 is so dominant that Rust acknowledges
+        this de facto standard and supports UTF-8 everywhere. Other character
+        sets are supported with the open source encoding crate.
+
+      + ~reader.read_exact(&mut buf)~
+        Read exactly enough data to fill the given buffer ~buf~.
+
+        * The /argument type/ is ~&[u8]~.
+
+        * IF the /reader/ runs out of data before reading ~buf.len()~ bytes,
+          this returns an ~ErrorKind::UnexpectedEof~ error.
+
+
+    - Four adapter /methods/ that take the /reader/ by value, transforming it into
+      an /iterator/ or a DIFFERENT /reader/:
+      + ~reader.bytes()~
+        Return an /iterator/ over the bytes of the input stream.
+
+        The item type is ~io::Result<u8>~, so _an error check is required for
+        every byte_.
+
+        Furthermore, this calls ~reader.read()~ once per byte, which will be
+        very *INEFFICIENT* IF the /reader/ is *NOT buffered*.
+
+      + ~reader.chars()~
+        Similar to ~reader.bytes()~ but the item contains ~char~.
+        Treat the input as UTF-8. Invalid UTF-8 causes an ~InvalidData~ error.
+
+      + ~reader.chain(reader2)~
+        Return a new /reader/ that produces all the input from /reader/,
+        followed by all the input from ~reader2~.
+
+      + ~reader.take(n)~
+        Return a new /reader/ that reads from the same source as ~reader~,
+        BUT is limited to ~n~ /bytes/ of input.
+
+    - There is *NO* /method/ for _closing_ a /reader/.
+
+      /Readers/ and /writers/ typically implement ~Drop~ so that they are
+      _closed AUTOMATICALLY_.
+
 *** TODO Buffered Readers - 435
+    - 
+
 *** TODO Reading Lines - 436
+    - 
+
 *** TODO Collecting Lines - 439
+    - 
+
 *** TODO Writers - 439
+    - 
+
 *** TODO Files - 441
+    - 
+
 *** TODO Seeking - 441
+    - 
+
 *** TODO Other Reader and Writer Types - 442
+    - 
+
 *** TODO Binary Data, Compression, and Serialization - 444
+    - 
 
-** TODO Files and Directories - 445
-*** ~OsStr~ and ~Path~ - 445
-*** ~Path~ and ~PathBuf~ Methods - 447
-*** Filesystem Access Functions - 449
-*** Reading Directories - 450
-*** Platform-Specific Features - 451
+** DONE Files and Directories - 445
+   CLOSED: [2018-06-08 Fri 22:22]
+   The next few sections cover Rust's features for working with _files_ and
+   _directories_, which live in the ~std::path~ and ~std::fs~ /modules/. All of
+   these features involve _working with filenames_, so we'll start with the
+   /filename types/.
 
-** TODO Networking - 453
+*** DONE ~OsStr~ and ~Path~ - 445
+    CLOSED: [2018-06-08 Fri 20:30]
+    - Inconveniently, your operating system _does *NOT force VALID* Unicode_
+      filenames.
+
+      + Linux: 
+        Any string of bytes (excluding null bytes and slashes) is an acceptable
+        filename.
+
+      + Windows: 
+        ALMOST ANY (=???=) string of 16-bit "wide characters" is an acceptable
+        filename, even strings the operating system handles, like /command-line
+        arguments/ and /environment variables/.
+
+    - Rust strings (~str~ and ~String~) are always *valid* Unicode.
+      Rust has to cope with the rare case where the filenames are NOT Unicode.
+      Rust has ~std::ffi::OsStr~ and ~OsString~.
+
+    - =NOTE= TODO
+
+    - ~std::path::Path~ and its /owning type/ ~PathBuf~.
+      ~Path~ is purely a convenience -- it is exactly like ~OsStr~, but it _adds
+      many handy /filename-related methods/._ ~Path~ is be used for both /absolute
+      and relative paths/. For individual component of a /path/, use ~OsStr~.
+
+    - Lastly, for each string type, there's a corresponding owning type:
+      a ~String~ _owns_ a *heap-allocated* ~str~, a ~std::ffi::OsString~ _owns_ a
+      *heap-allocated* ~OsStr~ , and a ~std::path::PathBuf~ _owns_ a *heap-allocated*
+      ~Path~.
+      |                                            | ~str~          | ~OsStr~           | ~Path~           |
+      |--------------------------------------------+----------------+-------------------+------------------|
+      | Unsized type, always passed by reference   | Yes            | Yes               | Yes              |
+      | Can contain any Unicode text               | Yes            | Yes               | Yes              |
+      | Looks just like UTF-8, normally            | Yes            | Yes               | Yes              |
+      | Can contain non-Unicode data               | No             | Yes               | Yes              |
+      | Text processing methods                    | Yes            | No                | No               |
+      | Filename-related methods                   | No             | No                | Yes              |
+      | Owned, growable, heap-allocated equivalent | ~String~       | ~OsString~        | ~PathBuf~        |
+      | Convert to owned type                      | ~.to_string()~ | ~.to_os_string()~ | ~.to_path_buf()~ |
+
+      =TODO= =???=
+      All three of these types implement a common /trait/, ~AsRef<Path>~, so we
+      can easily declare a /generic function/ that accepts "any filename type" as
+      an argument. This uses a technique we showed in "AsRef and AsMut" on page 294. =TODO=
+      #+BEGIN_SRC rust
+        use std::path::Path;
+        use std::io;
+
+        fn swizzle_file<P>(path_arg: P) -> io::Result<()>
+            where P: AsRef<Path>
+        {
+            let path = path_arg.as_ref();
+            // ...
+        }
+      #+END_SRC
+      =???= =TODO=
+      All the standard functions and methods that take path arguments use this
+      technique, so you can freely pass string literals to any of them.
+
+*** DONE ~Path~ and ~PathBuf~ Methods - 447
+    CLOSED: [2018-06-08 Fri 20:30]
+    ~Path~ offers the following methods, among others:
+    + ~Path::new(str)~
+      Convert a ~&str~ or ~&OsStr~ to a ~&Path~.
+
+      This does *NOT copy* the string:
+      the new ~&Path~ *points to* the same bytes as the ORIGINAL ~&str~ or ~&OsStr~.
+
+    + ~path.parent()~
+      The /return type/ is ~Option<&Path>~.
+      *NO string copy*, the result path just *point to* the substring of the ~path~.
+
+      For instance, 
+      ~Path::new("/home/fwolfe/program.txt").parent()~
+      returns ~Path::new("/home/fwolfe")~
+
+    + ~path.file_name()~
+      Return the last component of ~path~, if any.
+      The /return type/ is ~Option<&OsStr>~.
+
+      For instance,
+      * ~Path::new("/home/fwolfe/program.txt").file_name()~
+        returns ~Some(OsStr::new("program.txt"))~.
+
+      * ~Path::new("/home/fwolfe/").file_name()~
+        returns ~Some(OsStr::new("fwolfe"))~.
+
+    + ~path.is_absolute()~ and ~path.is_relative()~
+
+    + ~path1.join(path2)~
+      #+BEGIN_SRC rust
+        let path1 = Path::new("/usr/share/dict");
+        assert_eq!(path1.join("words"),
+                   Path::new("/usr/share/dict/words"));
+      #+END_SRC
+      IF ~path2~ is an /absolute path/, this just returns a _copy_ of ~path2~,
+      so _this /method/ can be used to *convert* ANY /path/ to an /absolute
+      path/:_ ~let abs_path = std::env::current_dir()?.join(any_path);~
+
+    + ~path1.components()~
+      Returns an /iterator/ over the components of the given path, from left to
+      right.
+
+      The item type of this /iterator/ is ~std::path::Component~, and /enum/ that
+      can represent all the different pieces that can appear in filenames:
+      #+BEGIN_SRC rust
+        pub enum Component<'a> {
+            Prefix(PrefixComponent<'a>),  // Windows-only: a drive letter or share
+            RootDir,                      // the root directory, `/` or `\`
+            CurDir,                       // the `.` special directory
+            ParentDir,                    // the `..` special directory
+            Normal(&'a OsStr),            // plain file and directory names
+        }
+      #+END_SRC
+      * For instance,
+        A Windows path =\\venice\Music\A Love Supreme\04-Psalm.mp3= consists of
+        1. a ~Prefix~ representing =\\venice\Music=
+        2. a ~RootDir~
+        3. two ~Normal~ components representing =A Love supreme= and =04-Psalm.mp3=.
+
+    + /methods/ that query the filesystem:
+      * ~.exists()~
+      * ~.is_file()~
+      * ~.is_dir()~
+      * ~.read_dir()~
+      * ~.canonicalize()~, and so on.
+
+    + /methods/ that convert ~Path~'s to strings.
+      Each one allows for the posibility of invalid UTF-8 in the ~Path~.
+      * ~path.to_str()~
+        Convert ~Path~ to an ~Option<&str>~.
+        If the ~Path~ content isn't valid UTF-8, this returns ~None~.
+
+      * ~path.to_string_lossy()~
+        If path is _NOT valid UTF-8_, this /method/ _make a copy_, *replacing*
+        each _invalid byte sequence_ with the /Unicode replacement character/,
+        =U+FFFD (‘�’)=.
+
+        The /return type/ is ~std::borrow::Cow<str>~.
+        =TOOD= See "Borrow and ToOwned at Work: The Humble Cow"
+
+      * ~path.display()~
+        The value this returns is _NOT a string_, but it implements ~std::fmt::Display~,
+        so it can be used with ~format!()~, ~println!()~, and friends.
+
+        If the path is *NOT valid* UTF-8, the output may contain the ~�~ character.
+
+*** DONE Filesystem Access Functions - 449
+    CLOSED: [2018-06-08 Fri 21:38]
+    - Table 18-1. Summary of filesystem access functions
+
+    - For creating /symbolic links/, see "Platform-Specific Features" on page 451.
+      =TODO=
+
+    - NOTE ......
+
+    - As a convenience,
+      the ~Path~ type has a few of these built in as /methods/:
+      ~path.metadata()~, for example, is the same thing as ~std::fs::metadata(path)~.
+
+*** DONE Reading Directories - 450
+    CLOSED: [2018-06-08 Fri 22:16]
+    Use ~std::fs::read_dir(path)~ and the ~.read_dir()~ /method/ of a ~Path~:
+
+    - Example:
+      #+BEGIN_SRC rust
+        for entry_result in path.read_dir()? {
+            let entry = entry_result?;
+            println!("{}", entry.file_name().to_string_lossy());
+        }
+      #+END_SRC
+
+    - Note the *two* uses of ~?~ in this code.
+      + The first line checks for errors *opening the directory*.
+      + The second line checks for errors *reading the next entry*.
+
+    - The type of ~entry~ is ~std::fs::DirEntry~, and it's a /struct/ with just a
+      few /methods/:
+      + ~entry.file_name()~ is the name of the file or directory, as an ~OsString~.
+
+      + ~entry.path()~ is the same, but with the original path joined to it, producing
+        a new ~PathBuf~. If the directory we're listing is =/home/jimb=, and
+        ~entry.file_name()~ is =.emacs=, then ~entry.path()~ would return
+        ~PathBuf::from("\slash{}home\slash{}jimb\slash{}.emacs")~.
+
+      + ~entry.file_type()~ returns an ~io::Result<FileType>~.
+        ~FileType~ has ~.is_file()~, ~.is_dir()~, and ~.is_symlink()~ /methods/.
+
+      + ~entry.metadata()~ gets the rest of the metadata about this /entry/.
+
+    - The special directories ~.~ and ~..~ are not listed when reading a directory.
+      =TIPs=
+
+    - Example, recursively copies a directory tree from one place to another on
+      disk:
+      #+BEGIN_SRC rust
+        use std::fs;
+        use std::io;
+        use std::path::Path;
+
+        /// Copy the existing directory `src` to the target path `dst`.
+        fn copy_dir_to(src: &Path, dst: &Path) -> io::Result<()> {
+            if !dst.is_dir() {
+                fs::create_dir(dst)?;
+            }
+
+            for entry_result in src.read_dir()? {
+                let entry = entry_result?;
+                let file_type = entry.file_type()?;
+                copy_to(&entry.path(), &file_type, &dst.join(entry.file_name()))?;
+            }
+
+            Ok(())
+        }
+      #+END_SRC
+
+      A separate function, ~copy_to~, copies individual directory entries:
+
+      #+BEGIN_SRC rust
+        /// Copy whatever is at `src` to the target path `dst`.
+        fn copy_to(src: &Path, src_type: &fs::FileType, dst: &Path) -> io::Result<()> {
+            if src_type.is_file() {
+                fs::copy(src, dst)?;
+            } else if src_type.is_dir() {
+                copy_dir_to(src, dst)?;
+            } else {
+                return Err(io::Error::new(io::ErrorKind::Other,
+                                          format!("don't know how to copy: {}", src.display())));
+            }
+
+            Ok(())
+        }
+      #+END_SRC
+
+*** TODO Platform-Specific Features - 451 =RE-READ= =TAKE NOTES=
+
+** DONE Networking - 453
+   CLOSED: [2018-06-08 Fri 23:00]
+   =From Jian= I only take nots, I don't understand /network programing/.
+   Re-read later when I understand.
+
+   - For _low-level networking code_, start with the ~std::net module~, which
+     provides _cross-platform_ SUPPORT _for TCP and UDP networking_.
+
+   - Use the ~native_tls~ /crate/ for _SSL/TLS_ SUPPORT.
+
+   - For high-performance servers, you'll need to use /ASYNCHRONOUS input and
+     output/. The ~mio~ /crate/ provides the needed support.
+
+   - There's also the EXPERIMENTAL ~tokio~ /crate/, which wraps the ~mio~ event
+     loop in a futures-based API, reminiscent of JavaScript promises.
+
+   - Higher-level protocols are supported by third-party crates.
+     For example, the ~reqwest~ /crate/ offers a beautiful API for HTTP clients.
+
+   - The ~iron~ framework for HTTP servers offers high-level touches such as the
+     ~BeforeMiddleware~ and ~AfterMiddleware~ traits, which help you compose an
+     app from pluggable parts.
+
+   - The ~websocket~ /crate/ implements the _WebSocket protocol_.
+
+   - And so on. Rust is a young language with a busy open source ecosystem. Support
+     for networking is rapidly expanding.
 
 * TODO 19. Concurrency - 457
 ** TODO Fork-Join Parallelism - 459
@@ -4428,10 +5987,132 @@
 ** TODO What Hacking Concurrent Code in Rust Is Like - 497
 
 * TODO 20. Macros - 499
+  - Rust supports /macros/,
+    a way to extend the language in ways that go *beyond* what you can do with
+    /functions/ ALONE.
+
+  - Example:
+    ~assert_eq!(gcd(6, 10), 2);~
+
+    + This could have been written as a /generic function/,
+
+      _BUT_ the ~assert_eq!~ /macro/ does several things _that /functions/ *CANNOT*
+      do_.
+
+      One is that when an assertion fails, ~assert_eq!~
+      _generates an error message containing the FILENAME and LINE NUMBER of the
+      assertion._
+
+      *Functions have no way of getting that information*.
+      *Macros can*, because the way they work is completely different.
+
+  - /Macros/ are a kind of shorthand.
+    During compilation,
+    + _BEFORE_ types are checked
+      and
+    + _LONG BEFORE_ any machine code is generated, each /macro/ call is /expanded/
+      -- that is, it's replaced with some Rust code.
+
+  - The preceding /macro/ call /expands/ to this:
+    #+BEGIN_SRC rust
+      match (&gcd(6, 10), &2) {
+          (left_val, right_val) => {
+              if !(*left_val == *right_val) {
+                  panic!("assertion failed: `(left == right)`, \
+                          (left: `{:?}`, right: `{:?}`)", left_val, right_val);
+              }
+          }
+      }
+    #+END_SRC
+    + ~panic!~ is also a /macro/, so it then expands to some more Rust code.
+      That code uses TWO other /macros/, ~file!()~ and ~line!()~.
+
+      Once every /macro/ call in the /crate/ is *FULLY* /expanded/, Rust moves on
+      to the next phase of compilation.
+
+    + At run time, an assertion failure would look like this (and would indicate
+      a bug in the ~gcd()~ function, since ~2~ is the correct answer):
+      #+BEGIN_SRC text
+        thread 'main' panicked at 'assertion failed: `(left == right)`, (left: `17`,
+        right: `2`)', gcd.rs:7
+      #+END_SRC
+
+    + Rust /macros/ NEVER insert _unmatched brackets or parentheses._
+
 ** TODO Macro Basics - 500
+   - Figure 20-1 shows part of the source code for the ~assert_eq!~ /macro/.
+     + /pattern/ and /template/
+
+     + Code:
+       #+BEGIN_SRC rust
+         macro_rules! assert_eq {
+             ($left:expr, $right:expr) => ({
+                 match (&$left, &$right) {
+                     if !(*left_val = *right_val) {
+                         panic!("assertion failed: `(left == right)` (left: `{:?}`, right: `{:?}`)",
+                                left_val, right_val)
+                     }
+                 }
+             });
+         }
+       #+END_SRC
+
+
+   - ~macro_rules!~ is the *MAIN* way to define /macros/ in Rust.
+
+     Note that there is *NO* ~!~ after ~assert_eq~ in this /macro/ definition:
+     the ~!~ is
+     + _ONLY_ included when *calling* a /macro/,
+     + NOT when *defining* it.
+
+   - =TODO=
+     We'll talk about another approach, called /procedural macros/, at the end of
+     this chapter.
+
+     But for the most part, we'll focus on ~macro_rules!~.
+
+   - A macro defined with ~macro_rules!~ works *entirely* by /pattern matching/.
+     The _body_ of a /macro/ is just *a series of RULES*:
+     #+BEGIN_SRC rust
+       ( pattern1 ) => ( template1 );
+       ( pattern2 ) => ( template2 );
+       ...
+     #+END_SRC
+
+   - Incidentally, you _can use square brackets or curly braces_ instead of parentheses
+     around the pattern or the template; it makes no difference to Rust. Likewise, when
+     you call a /macro/, these are all equivalent:
+     #+BEGIN_SRC rust
+       assert_eq!(gcd(6, 10), 2);
+       assert_eq![gcd(6, 10), 2];
+       assert_eq!{gcd(6, 10), 2}
+     #+END_SRC
+
+     + The only difference is that _semicolons_ are usually _optional_ after curly
+       braces.
+
+       _By convention_, we use
+       * parentheses when calling ~assert_eq!~,
+       * square brackets for ~vec!~,
+         and
+       * curly braces for ~macro_rules!~;
+
+       but it's just a convention.
+
 *** TODO Basics of Macro Expansion - 501
+    - x
+
 *** TODO Unintended Consequences - 503
+    - x
+
 *** TODO Repetition - 505
+    | Pattern      | Meaning                                        |
+    | ~$( ... )*~  | Match _0_ or more times with no separator        |
+    | ~$( ... ),*~ | Match _0_ or more times, separated by commas     |
+    | ~$( ... );*~ | Match _0_ or more times, separated by semicolons |
+    | ~$( ... )+~  | Match _1_ or more times with no separator        |
+    | ~$( ... ),+~ | Match _1_ or more times, separated by commas     |
+    | ~$( ... );+~ | Match _1_ or more times, separated by semicolons |
 
 ** DONE Built-In Macros - 507
    CLOSED: [2018-06-05 Tue 22:12]
@@ -4509,7 +6190,80 @@
      + ~include_bytes!("file.dat")~ is the same except the file is treated as _binary
        data_, NOT UTF-8 text. The result is a ~&'static [u8]~.
 
-** TODO Debugging Macros - 508
+** DONE Debugging Macros - 508
+   CLOSED: [2018-06-10 Sun 20:58]
+   - Debugging a wayward /macro/ can be challenging.
+
+     + The biggest problem is
+       the lack of visibility into the process of macro expansion.
+
+   - Rust will often *expand* all /macros/, find some kind of error, and then print
+     an error message that does _NOT show the fully expanded code_ that contains
+     the error!
+
+   - Here are _THREE_ tools to help *troubleshoot* /macros/.
+     (These features are ALL *unstable*,
+     but since they're really designed to be used during development, not in
+     code that you’d check in, that isn’t a big problem in practice.)
+
+     + The simplest, you can ask ~rustc~ to show what your code looks like _after
+       expanding_ ALL /macros/.
+
+       Use ~cargo build --verbose~ to see how Cargo is invoking ~rustc~.
+       1. Copy the ~rustc~ command line
+          and
+       2. add ~-Z unstable-options --pretty expanded~ as options.
+
+       Then the _fully expanded code_ is dumped to your terminal.
+
+       _Unfortunately, this ONLY WORKS if your code is free of syntax errors._
+
+     + Rust provides a ~log_syntax!()~ /macro/ that simply prints its
+       arguments to the terminal at /compile time/. You can use this for
+       ~println!~-style debugging. This macro requires the ~#![feature(log_syntax)]~
+       feature flag.
+       =From Jian= Not clear! Try this!
+
+     + You can ask the Rust compiler to _log ALL /macro/ calls_ to the terminal.
+       Insert ~trace_macros!(true);~ somewhere in your code.
+         From that point on, each time Rust *expands* a /macro/, it will print the
+       /macro/ _name_ and _arguments_. For example, this program:
+       For example:
+       #+BEGIN_SRC rust
+         #![feature(trace_macros)]
+
+         fn main() {
+             trace_macros!(true);
+             let numbers = vec![1, 2, 3];
+             trace_macros!(false);
+             println!("total: {}", numbers,iter().sum::<u64>());
+         }
+
+
+       #+END_SRC
+
+       Compile it
+
+       #+BEGIN_SRC bash
+         # $
+         rustup override set nightly
+         ## ...
+
+         # $
+         rustc trace_example.rs
+         ## note: trace_macro
+         ##  --> trace_example.rs:5:19
+         ##   |
+         ## 5 |     let numbers = vec![1, 2, 3];
+         ##   |                   ^^^^^^^^^^^^^
+         ##   |
+         ##   = note: expanding `vec! { 1 , 2 , 3 }`
+         ##   = note: to `< [ _ ] > :: into_vec ( box [ 1 , 2 , 3 ] )`
+       #+END_SRC
+       * The compiler shows the code of EACH /macro/ call, both *before* and
+         *after* _expansion_. The line ~trace_macros!(false);~ turns tracing off
+         again, so the call to ~println!()~ is not traced.
+
 ** TODO The ~json!~ Macro - 509
 *** TODO Fragment Types - 510
 *** TODO Recursion in Macros - 513
