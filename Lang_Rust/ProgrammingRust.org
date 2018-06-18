@@ -61,7 +61,7 @@
     - [[Comparing References - 99][Comparing References - 99]]
     - [[References Are Never Null - 100][References Are Never Null - 100]]
     - [[Borrowing References to Arbitrary Expressions - 100][Borrowing References to Arbitrary Expressions - 100]]
-    - [[References to Slices and Trait Objects - 101 =TODO=][References to Slices and Trait Objects - 101 =TODO=]]
+    - [[References to Slices and Trait Objects - 101][References to Slices and Trait Objects - 101]]
   - [[Reference Safety - 101][Reference Safety - 101]]
     - [[Borrowing a Local Variable - 101][Borrowing a Local Variable - 101]]
     - [[Receiving References as Parameters - 105][Receiving References as Parameters - 105]]
@@ -192,7 +192,7 @@
   - [[~From~ and ~Into~ - 297][~From~ and ~Into~ - 297]]
   - [[~ToOwned~ - 300][~ToOwned~ - 300]]
   - [[~Borrow~ and ~ToOwned~ at Work: The Humble ~Cow~ - 300][~Borrow~ and ~ToOwned~ at Work: The Humble ~Cow~ - 300]]
-- [[14. Closures - 303][14. Closures - 303]]
+- [[14. Closures - 303 - =Re-READ=][14. Closures - 303 - =Re-READ=]]
   - [[Capturing Variables - 305][Capturing Variables - 305]]
     - [[Closures That Borrow - 306][Closures That Borrow - 306]]
     - [[Closures That Steal - 306][Closures That Steal - 306]]
@@ -204,12 +204,12 @@
     - [[~FnMut~ - 314][~FnMut~ - 314]]
   - [[Callbacks - 316][Callbacks - 316]]
   - [[Using Closures Effectively - 319][Using Closures Effectively - 319]]
-- [[15. Iterators - 321][15. Iterators - 321]]
+- [[15. Iterators - 321 - =Reading=][15. Iterators - 321 - =Reading=]]
   - [[The ~Iterator~ and ~IntoIterator~ Traits - 322][The ~Iterator~ and ~IntoIterator~ Traits - 322]]
-  - [[Creating ~Iterator~'s - 324][Creating ~Iterator~'s - 324]]
+  - [[Creating ~Iterator~'s - 324 =NOTE=][Creating ~Iterator~'s - 324 =NOTE=]]
     - [[~iter~ and ~iter_mut~ Methods - 324][~iter~ and ~iter_mut~ Methods - 324]]
     - [[~IntoIterator~ Implementations - 325][~IntoIterator~ Implementations - 325]]
-    - [[~drain~ Methods - 327][~drain~ Methods - 327]]
+    - [[~drain~ Methods - 327 =???=][~drain~ Methods - 327 =???=]]
     - [[Other ~Iterator~ Sources - 328][Other ~Iterator~ Sources - 328]]
   - [[~Iterator~ Adapters - 330][~Iterator~ Adapters - 330]]
     - [[~map~ and ~filter~ - 330][~map~ and ~filter~ - 330]]
@@ -218,7 +218,7 @@
     - [[~take~ and ~take_while~ - 335][~take~ and ~take_while~ - 335]]
     - [[~skip~ and ~skip_while~ - 336][~skip~ and ~skip_while~ - 336]]
     - [[~peekable~ - 337][~peekable~ - 337]]
-    - [[fuse - 338][fuse - 338]]
+    - [[~fuse~ - 338][~fuse~ - 338]]
     - [[Reversible ~Iterator~'s and ~rev~ - 339][Reversible ~Iterator~'s and ~rev~ - 339]]
     - [[~inspect~ - 340][~inspect~ - 340]]
     - [[~chain~ - 341][~chain~ - 341]]
@@ -232,7 +232,7 @@
     - [[~max~, ~min~ - 346][~max~, ~min~ - 346]]
     - [[~max_by~, ~min_by~ - 346][~max_by~, ~min_by~ - 346]]
     - [[~max_by_key~, ~min_by_key~ - 347][~max_by_key~, ~min_by_key~ - 347]]
-    - [[Comparing Item Sequences - 347][Comparing Item Sequences - 347]]
+    - [[Comparing ~Item~ Sequences - 347][Comparing ~Item~ Sequences - 347]]
     - [[~any~ and ~all~ - 348][~any~ and ~all~ - 348]]
     - [[~position~, ~rposition~, and ~ExactSizeIterator~ - 348][~position~, ~rposition~, and ~ExactSizeIterator~ - 348]]
     - [[~fold~ - 349][~fold~ - 349]]
@@ -2042,7 +2042,8 @@
      will have climbed the steepest part of Rust's learning curve, and you'll be
      ready to take advantage of Rust's unique strengths.
 
-* TODO 5. References and borrowing - 93
+* DONE 5. References and borrowing - 93
+  CLOSED: [2018-06-14 Thu 21:17]
   - ALL the /pointer types/ we've seen SO FAR are /owning pointer types/:
     + the simple ~Box<T>~ heap pointer,
     + the pointers internal to ~String~ and ~Vec~ values
@@ -2113,7 +2114,8 @@
   - Pass it /by value/, you use the /move/ semantics, and give out the /ownership/.
     Pass it /by reference/, you keep the /ownership/.
 
-** TODO References as Values - 97
+** DONE References as Values - 97
+   CLOSED: [2018-06-14 Thu 02:41]
 *** DONE Rust References Versus C++ References - 97
     CLOSED: [2018-05-24 Thu 12:07]
     - In a nutshell, whereas
@@ -2138,7 +2140,7 @@
         #+BEGIN_SRC rust
           let mut y = 32;
           let m = &mut y;     // &mut y is a mutable reference to y
-          ,*m += 32;          // explicitly dereference m to set y's value
+          *m += 32;           // explicitly dereference m to set y's value
           assert!(*m == 64);  // add to see y's new value
         #+END_SRC
 
@@ -2160,7 +2162,8 @@
           /implicit deference/ as well.
 
         * The ~.~ operator can also /implicitly borrow/ a /reference/ to its
-          _left operand_, if needed for a /method/ call. For example,
+          _left operand_, if needed for a /method/ call.
+          For example,
           ~Vec~'s ~sort~ /method/ takes a /mutable reference/ to the vector, so
           the two calls shown here are equivalent:
           #+BEGIN_SRC rust
@@ -2237,19 +2240,22 @@
         assert!(rx == ry);              // their referents are equal
         assert!(!std::ptr::eq(rx, ry)); // but occupy different addresses
       #+END_SRC
+      =IMPORTANT=
 
 *** DONE References Are Never Null - 100
     CLOSED: [2018-05-24 Thu 12:32]
-    /References/ are NEVER /null/, except in the ~unsafe~ block.
+    /References/ are NEVER /null/.
     Outside ~unsafe~ block, you CAN'T convert zero into a /reference/ -- the way
     you can used to create /null/ in C/C++.
 
 *** DONE Borrowing References to Arbitrary Expressions - 100
     CLOSED: [2018-05-24 Thu 12:46]
-    - Whereas C and C++ ONLY let you apply the ~&~ operator to _certain kinds of
+    - Whereas
+      C and C++ ONLY let you apply the ~&~ operator to _CERTAIN kinds of
       expressions_,
-      Rust lets you /borrow/ a /reference/ to the value of any sort of
-      expression at all:
+
+      Rust lets you /borrow/ a /reference/ to the value of *ANY* sort of expression
+      at all:
       #+BEGIN_SRC rust
         fn factorial(n: usize) -> usize {
             (1..n+1).fold(1, |a, b| a * b)
@@ -2277,15 +2283,51 @@
         /dangling reference/. The pointer to /anonymous variables/ will be
         /dropped/ when beyond their /lifetime/.
 
-        If the /reference/ could ever be used *beyond* the /anonymous variable/'s
-        /lifetime/, Rust will always report the problem to you at compile time.
-          You can then fix your code to keep the referent in a /named variable/
-        with an _appropriate_ (=???=) /lifetime/.
+    - If the /reference/ could ever be used *beyond* the /anonymous variable/'s
+      /lifetime/, Rust will always report the problem to you at /compile time/.
+        You can then fix your code to keep the referent in a /named variable/
+      with an _appropriate_ (=???=) /lifetime/.
+      =TODO= =TODO= =TODO=
       
-*** TODO References to Slices and Trait Objects - 101 =TODO=
-    /fat pointers/
-    /references/ to a /slice/
-    /trait object/
+*** DONE References to Slices and Trait Objects - 101
+    CLOSED: [2018-06-14 Thu 02:39]
+    - The /references/ we've shown _so far_ are all _SIMPLE_ /addresses/.
+
+    - HOWEVER, Rust also includes *TWO* kinds of /fat pointers/.
+
+    - fat pointers :: two-word values carrying the address of some value, along
+                      with some further information necessary to put the value
+                      to use.
+
+    - A /reference to a slice/ is a /fat pointer/,
+      carrying the _starting address_ of the /slice/ and its _length_.
+
+      =TODO= =REVIEW=
+      We described slices in detail in Chapter 3.
+
+    - Rust's other kind of /fat pointer/ is a /trait object/,
+
+      =From Jian= =???= =TODO= Should be a /trait object/ or a /reference trait object/ ???????
+
+      a /reference/ to a value that implements a certain /trait/.
+
+      A /trait object/ carries
+      + a /value/'s /address/
+
+      + a /pointer/ to the /trait/'s implementation appropriate to that value,
+        for invoking the /trait/'s /methods/.
+
+      =TODO=
+      We'll cover /trait objects/ in detail in "Trait Objects" on page 238.
+
+    - ASIDE FROM carrying this extra data,
+      /slice references/ and /trait object references/ behave just like the other
+      sorts of /references/ we've shown so far in this chapter:
+      + they don't own their referents;
+
+      + they are NOT allowed to _outlive_ their referents;
+
+      + they may be /mutable/ or /shared/; and so on.
 
 ** TODO Reference Safety - 101
 *** DONE Borrowing a Local Variable - 101
@@ -2338,19 +2380,193 @@
       if you have a variable ~x~, then a /reference/ to ~x~ *must not* _outlive_
       ~x~ itself, as shown in Figure 5-3.
 
-    - The rules Rust compiler used to do the lifetime check is not so different
+    - The rules Rust compiler used to do the lifetime check is NOT so different
       from the process C and C++ programmers impose on themselves; the
       difference is that _Rust knows the rules, and *enforces* them_.
 
 *** TODO Receiving References as Parameters - 105
-*** TODO Passing References as Arguments - 107
-*** TODO Returning References - 107
+*** DONE Passing References as Arguments - 107
+    CLOSED: [2018-06-14 Thu 17:38]
+    Now that we've shown how a function's signature relates to its body, let's
+    examine how it relates to the function's callers.
+
+    - Example:
+      #+BEGIN_SRC rust
+        // This could be written more briefly: fn g(p: &i32),
+        // but let's write out the lifetimes for now.
+        fn g<'a>(p: &'a i32) { ... }
+
+        let x = 10;
+        g(&x);
+      #+END_SRC
+      + From ~g~'s signature alone, Rust knows it will _NOT_ save ~p~ anywhere
+        that might outlive the call:
+        any /lifetime/ that encloses the call must work for ~'a~.
+
+    - When defining /functions/ and /types/, you need to figure out /lifetime
+      parameters/.
+
+      When using them, Rust infers the /lifetimes/ for you.
+
+    - With a definition of wrong /lifetime parameters/ settings,
+      the code won't compile:
+      #+BEGIN_SRC rust
+        fn f(p: &'static i32) { ... }
+
+        let x = 10;
+        f(&x);
+      #+END_SRC
+    
+*** DONE Returning References - 107
+    CLOSED: [2018-06-14 Thu 17:50]
+    #+BEGIN_SRC rust
+      // v should have at least one element
+      fn smallest(v: &[i32]) -> &i32 {
+          let mut s = &v[0];
+
+          for r in &v[1..] {
+              if *r < *s { s = r; }
+          }
+
+          s
+      }
+    #+END_SRC
+    - We've omitted lifetimes from that function's signature in the usual way.
+
+      + When a function
+        takes a SINGLE /reference/ as an argument, and
+        returns a SINGLE /reference/,
+
+        Rust assumes that the two must have the SAME /lifetime/.
+
+      + Write it explicitly:
+        ~fn smallest<'a>(v: &'a [i32]) -> &'a i32 { ... }~
+
+    - You cannot use it in this way:
+      #+BEGIN_SRC rust
+        let s;
+        {
+            let parabola = [9, 4, 1, 0, 1, 4, 9];
+            s = smallest(&parabola);
+        }
+        assert_eq!(*s, 0);  // bad: points to element of dropped array
+      #+END_SRC
+      The first line of the error message is:
+      ~error: `parabola` does not live long enough~
+    
 *** TODO Structs Containing References - 109
+    - x
+
+    - =???= =TODO=
+      In fact, ... ???
+
+    - x
+
 *** TODO Distinct Lifetime Parameters - 111
-*** TODO Omitting Lifetime Parameters - 112
+*** DONE Omitting Lifetime Parameters - 112
+    CLOSED: [2018-06-14 Thu 21:17]
+    - In the simplest case, if your function _doesn't return_ any /references/ (or
+      other types that require /lifetime parameters/), then you never need to
+      write out /lifetimes/ for your parameters -- *Rust just assigns a DISTINCT
+      /lifetime/ to each spot that needs one.* For example:
+      #+BEGIN_SRC rust
+        struct S<'a, 'b> {
+            x: &'a i32,
+            y: &'b i32
+        }
+
+        fn sum_r_xy(r: &i32, s: S) -> i32 {
+            r + s.x + s.y
+        }
+      #+END_SRC
+
+      This function's signature is shorthand for:
+      ~fn sum_r_xy<'a, 'b, 'c>(r: &'a i32, s: S<'b, 'c>) -> i32~
+
+    - If there's only a _SINGLE_ /lifetime/ that appears among your function's
+      parameters, then Rust _assumes_ ANY /lifetimes/ in your return value must
+      be that one:
+      #+BEGIN_SRC rust
+        fn first_third(point: &[i32; 3]) -> (&i32, &i32) {
+            (&point[0], &point[2])
+        }
+      #+END_SRC
+      With all the lifetimes written out, the equivalent would be:
+      ~fn first_third<'a>(point: &'a [i32; 3]) -> (&'a i32, &'a i32)~
+
+    - If there are _MULTIPLE_ /lifetimes/ among your parameters,
+      then there's NO natural reason to prefer one over the other for the return
+      value, and
+      *Rust makes you spell out what's going on*.
+
+    - But as one final shorthand,
+      if your function is a /method/ on some /type/ and takes its ~self~
+      parameter /by reference/, then that breaks the tie:
+        Rust assumes that ~self~'s /lifetime/ is the one to give EVERYTHING in
+      your /return value/.
+
+      + Example:
+        #+BEGIN_SRC rust
+          struct StringTable {
+              elements: Vec<String>,
+          }
+
+          impl StringTable {
+              fn find_by_prefix(&self, prefix: &str) -> Option<&String> {
+                  for i in 0 .. self.elements.len() {
+                      if self.elements[i].starts_with(prefix) {
+                          return Some(&self.elements[i]);
+                      }
+                  }
+                  None
+              }
+          }
+        #+END_SRC
+        The ~find_by_prefix~ /method/'s signature is shorthand for:
+        ~fn find_by_prefix<'a, 'b>(&'a self, prefix: &'b str) -> Option<&'a String>~
+
+    - *SUMMARY*:
+      All these abbreviations meant to be helpful without introducing surprises.
+      _When they're NOT what you want, you can always write the /lifetimes/ out
+      explicitly._
 
 ** TODO Sharing Versus Mutation - 114
-** TODO Taking Arms Against a Sea of Objects - 121
+** DONE Taking Arms Against a Sea of Objects - 121
+   CLOSED: [2018-06-14 Thu 03:06]
+   - The disadvantages of languages with GC:
+     Since it is easy to get not-in-use memeory back, you may create many objects
+     you think you need without a fully consideration of your design and memory
+     use, and build connections between them -- finally, When everything depends
+     on everything else like this Figure 5-10,
+
+     (=From Jian= two reasons:
+     you create two many objects you actually don't need if you have a better
+     design, and with this bad design you often have to build unecessary
+     dependencies between these objects).
+
+     it's hard to test, evolve, or even think about any component in isolation.
+
+   - One fascinating thing about Rust is that the /ownership model/ puts a speed
+     bump on the highway to hell.
+     =From Jian= *Make dangerous things verbose*
+       It takes a bit of effort to make a cycle in Rust -- two values such that
+     each one contains a reference pointing to the other. You have to use a /smart
+     pointer type/, such as ~Rc~, and /interior mutability/ -- a topic we haven't
+     even covered yet. =TODO=
+
+   - Rust prefers for /pointers/, /ownership/, and /data flow/ to pass through
+     the system *in one direction*, as shown in Figure 5-11.
+
+     Rust's /ownership model/ will give you some trouble when you want to do
+     some bad design.
+       The cure is to do some up-front design and build a better program.
+
+   - Rust is all about *transferring* the pain of understanding your program _from
+     the future to the present_.
+
+     + It works unreasonably well:
+       * not only can Rust force you to understand why your program is thread-safe,
+       * it can even require some amount of high-level architectural design.
 
 * DONE 6. Expressions - 123 =NOTE=
   CLOSED: [2018-05-23 Wed 22:43]
@@ -5303,6 +5519,46 @@
      ~FnOnce~ special /traits/ in Chapter 14.
 
 * TODO 13. Utility Traits - 281
+  - Several other /built-in traits/ let you hook into parts of the Rust language
+    and standard library:
+    + You can use the ~Drop~ /trait/ to _clean up_ values when they _go out of scope_,
+      like /destructors/ in C++.
+
+    + /Smart pointer types/, like ~Box<T>~ and ~Rc<T>~, can implement the ~Deref~ /trait/
+      to make the pointer reflect the /methods/ of the wrapped value.
+
+    + By implementing the ~From<T>~ and ~Into<T>~ /traits/, you can tell Rust how
+      to convert a value from one type to another.
+
+  - We'll cover each of the /traits/ shown in Table 13-1:
+    | Trait                    | Description                                                          |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~Drop~                   | Destructors. Cleanup code that Rust runs automatically               |
+    |                          | whenever a value is dropped.                                         |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~Sized~                  | Marker /trait/ for types with a _fixed size_ known at                |
+    |                          | /compile time/, as opposed to types (such as slices)                 |
+    |                          | that are dynamically sized.                                          |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~Clone~                  | Types that support cloning values.                                   |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~Copy~                   | Marker /trait/ for types that can be cloned simply by                |
+    |                          | making a byte-for-byte copy of the memory containing the value.      |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~Deref~ and ~DerefMut~   | /Traits/ for /smart pointer types/.                                  |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~Default~                | Types that have a sensible "default value."                          |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~AsRef~ and ~AsMut~      | Conversion /traits/ for borrowing one type of reference              |
+    |                          | from another.                                                        |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~Borrow~ and ~BorrowMut~ | Conversion /traits/, like ~AsRef~ / ~AsMut~ , but additionally       |
+    |                          | guaranteeing consistent hashing, ordering, and equality.             |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~From~ and ~Into~        | Conversion /traits/ for transforming one type of value into another. |
+    |--------------------------+----------------------------------------------------------------------|
+    | ~ToOwned~                | Conversion /trait/ for converting a reference to an owned value.     |
+
 ** ~Drop~ - 282
 ** ~Sized~ - 285
 ** ~Clone~ - 287
@@ -5315,7 +5571,8 @@
 ** ~ToOwned~ - 300
 ** ~Borrow~ and ~ToOwned~ at Work: The Humble ~Cow~ - 300
 
-* TODO 14. Closures - 303
+* DONE 14. Closures - 303 - =Re-READ=
+  CLOSED: [2018-06-12 Tue 19:33]
   - Example:
     #+BEGIN_SRC rust
       struct City {
@@ -5355,59 +5612,801 @@
       * how /Rust closures/ work
       * why they're *faster* than you might expect.
 
-** TODO Capturing Variables - 305
+** DONE Capturing Variables - 305
+   CLOSED: [2018-06-12 Tue 19:33]
    - A /closure/ can USE DATA that belongs to an /enclosing function/.
 
-*** TODO Closures That Borrow - 306
-*** TODO Closures That Steal - 306
+*** DONE Closures That Borrow - 306
+    CLOSED: [2018-06-11 Mon 17:37]
+    Example code:
+    #+BEGIN_SRC rust
+      fn sort_by_statistic(cities: &mut Vec<City>, stat: Statistic) {
+          cities.sort_by_key(|city| -city.get_statistic(stat));
+      }
+    #+END_SRC
+    + When Rust creates the /closure/, it /automatically borrows/ a /reference/
+      to ~stat~.
+
+    + Since this /closure/ contains a /reference/ to ~stat~, Rust WON'T let it
+      outlive ~stat~.
+
+*** DONE Closures That Steal - 306
+    CLOSED: [2018-06-11 Mon 17:49]
+    #+BEGIN_SRC rust
+      fn start_sorting_thread(mut cities: Vec<City>, stat: Statistic)
+                              -> thread::JoinHandle<Vec<City>>
+      {
+          let key_fn = move |city: &City| -> i64 { -city.get_statistic(stat) };
+
+          thread::spawn(move || {
+              cities.sort_by_key(key_fn);
+              cities
+          })
+      }
+    #+END_SRC
+    - The FIRST /closure/, ~key_fn~, takes /ownership/ of ~stat~.
+      Then the SECOND /closure/ takes /ownership/ of both ~cities~ and ~key_fn~.
+
+    - We get something important by accepting Rust's strict rules: /thread safety/.
+
+      Values are moved rather than being shared across /threads/.
 
 ** TODO Function and Closure Types - 308
+   - For example,
+     ~fn city_population_descending(city: &City) -> i64 { -city.population }~ has
+     type ~fn(&City) -> i64~.
+
+   - /Structs/ may have /function-typed fields/.
+
+   - /Generic types/ like ~Vec~ can store scads of functions, as long as they all
+     share the same ~fn~ type.
+
+   - /Function values/ are *tiny*:
+     a ~fn~ value is the memory address of the function's machine code, just LIKE
+     a /function pointer/ in C++.
+
 ** TODO Closure Performance - 310
 ** TODO Closures and Safety - 311
 *** TODO Closures That Kill - 312
 *** TODO ~FnOnce~ - 312
 *** TODO ~FnMut~ - 314
+    - =EN=
+      swath - 大片
 
 ** TODO Callbacks - 316
 ** TODO Using Closures Effectively - 319
+   - Some code patterns that are commonplace in languages with GC like Java, C#,
+     and JavaScript will *NOT* work in Rust WITHOUT CHANGES.
 
-* TODO 15. Iterators - 321
-** TODO The ~Iterator~ and ~IntoIterator~ Traits - 322
-** TODO Creating ~Iterator~'s - 324
+   - =EN=
+     divvy up - 分紅
+
+* TODO 15. Iterators - 321 - =Reading=
+  The rest of this chapter falls into *five* parts:
+  1. We'll explain the ~Iterator~ and ~IntoIterator~ /traits/, which are the
+     foundation of Rust's /iterators/.
+
+  2. Then we'll go over the *three* stages of a typical /iterator/ pipeline:
+     1. *creating* an /iterator/ from some sort of _value source_;
+
+     2. *adapting* one sort of /iterator/ into another by *selecting* or *processing*
+        values as they go by;
+
+     3. *consuming* the values the /iterator/ produces.
+
+  3. We'll show how to *implement* /iterators/ for your own types.
+
+** DONE The ~Iterator~ and ~IntoIterator~ Traits - 322
+   CLOSED: [2018-06-12 Tue 22:08]
+   - iterator :: Any value that implements the ~std::iter::Iterator~ /trait/.
+
+   - The ~Iterator~ trait:
+     #+BEGIN_SRC rust
+       trait Iterator {
+           type Item;
+
+           fn next(&mut self) -> Option<Self::Item>;
+           // ... // many default methods
+       }
+     #+END_SRC
+
+   - If there's a natural way to iterate over certain type, this type can implement
+     ~std::iter::IntoIterator~, whose ~into_iter~ /method/ takes a value and
+     returns an /iterator/ over it:
+     #+BEGIN_SRC rust
+       trait IntoIterator where Self::IntoIter::Item == Self::Item {
+           type Item;
+           type IntoIter: Iterator;
+           fn into_iter(self) -> Self::IntoIter;
+       }
+     #+END_SRC
+
+   - ~IntoIter~ is the type of the /iterator/ value ITSELF, and ~Item~ is the type
+     of value it produces.
+
+     The /vector reference/ ~&v~ is the /iterable/ in this case.
+
+   - iterable :: Any type that implements ~IntoIterator~ (because it's something
+                 you could iterate over if you asked)
+
+   - Under the hood, every ~for~ loop is just shorthand for calls to IntoIterator
+     and Iterator methods:
+     #+BEGIN_SRC rust
+       let mut iterator = (&v).into_iter();
+
+       while let Some(element) = iterator.next() {
+           println!("{}", element);
+       }
+     #+END_SRC
+     Although a ~for~ loop always calls ~into_iter~ on its operand, you can also
+     pass /iterators/ to ~for~ loops directly; this occurs when you loop over a
+     ~Range~.
+
+     + Rationale:
+       ALL /iterators/ AUTOMATICALLY implement ~IntoIterator~, with an ~into_iter~
+       /method/ that simply returns the /iterator/.
+
+   - After a /iterator/'s ~next~ /method/ returns ~None~, in most cases, it will
+     keep returning ~None~, but NOT all /iterators/ have this behavior.
+
+     See page 338 -- use the ~fuse~ /adapter method/ to force the ~None~ values
+     after the first ~None~ value.
+
+   - Here's some terminology for /iterators/:
+     + An /iterator/ produces /values/.
+
+     + The /values/ an /iterator/ produces are /items/.
+
+     + The code that receives the /items/ an /iterator/ produces is the /consumer/.
+       In this example, the ~for~ loop *consumes* the /iterator/'s /items/.
+
+** TODO Creating ~Iterator~'s - 324 =NOTE=
 *** TODO ~iter~ and ~iter_mut~ Methods - 324
 *** TODO ~IntoIterator~ Implementations - 325
-*** TODO ~drain~ Methods - 327
-*** TODO Other ~Iterator~ Sources - 328
+    - MOST /collections/ actually provide _several_ implementations of ~IntoIterator~,
+      for /shared references/, /mutable references/, and /moves/:
+      + Given a /shared reference/ to the /collection/, ~into_iter~ returns an
+        /iterator/ that produces /shared references/ to its items.
+
+        For example,
+        ~favorites~ is a ~Vec<String>~, and the call ~(&favorites).into_iter()~
+        would return an /iterator/ whose ~Item~ type is ~&String~.
+
+        ~for element in &collection { ... }~
+
+      + Given a /mutable reference/ to the /collection/, ~into_iter~ returns an
+        /iterator/ that produces /mutable references/ to the items.
+
+        For example,
+        ~vector~ is some ~Vec<String>~, and the call ~(&mut vector).into_iter()~
+        returns an /iterator/ whose ~Item~ type is ~&mut String~.
+
+        ~for element in &mut collection { ... }~
+
+      + When passed the /collection/ by value, ~into_iter~ returns an /iterator/
+        that takes /ownership/ of the /collection/ and returns /items/ by /value/;
+
+        the items' /ownership/ moves from the /collection/ to the /consumer/, and
+        the _ORIGINAL_ /collection/ is *consumed* in the process.
+
+        For example, the call ~favorites.into_iter()~ in the preceding code
+        returns an /iterator/ that produces each string by value; the consumer
+        receives /ownership/ of each string. When the /iterator/ is /dropped/,
+        any elements remaining in the ~BTreeSet~ are /dropped/ too, and the set's
+        now-empty husk is disposed of.
+
+        ~for element in collection { ... }~
+
+    - =EN=
+      husk - 壳
+
+    - *NOT every type provides all THREE implementations.*
+      =page= 326 start
+
+*** DONE ~drain~ Methods - 327 =???=
+    CLOSED: [2018-06-13 Wed 08:59]
+    - Many collection types provide a ~drain~ method.
+
+    - ~drain~ :: a kind of /method/ that takes a /mutable reference/ to the /collection/
+                 and returns an /iterator/ that passes /ownership/ of each element to
+                 the consumer.
+
+      + However,
+        _UNLIKE_ the ~into_iter()~ /method/, which takes the /collection/
+        _by value_ and _consumes_ it,
+
+        ~drain~ merely _borrows_ a /mutable reference/ to the /collection/,
+        =TODO= =???= =???=
+        and when the /iterator/ is _dropped_, it _removes_ any remaining elements
+        from the /collection/, and leaves it empty.
+
+    - On types that can be indexed by a range, like ~String~'s, /vectors/, and
+      ~VecDeque~'s, the ~drain~ /method/
+      + takes a range of elements to remove,
+      + _rather than_ draining the entire sequence:
+
+      #+BEGIN_SRC rust
+        use std::iter::FromIterator;
+
+        let mut outer = "Earth".to_string();
+        let inner = String::from_iter(outer.drain(1..4));
+
+        assert_eq!(outer, "Eh");
+        assert_eq!(inner, "art");
+      #+END_SRC
+      + If you do need to ~drain~ the ENTIRE sequence, use the full range, ~..~,
+        as the argument.
+    
+*** DONE Other ~Iterator~ Sources - 328
+    CLOSED: [2018-06-13 Wed 09:07]
+    =IMPORTANT= =!!!!!!=
+    Table 15-1. Other /iterators/ in the standard library
 
 ** TODO ~Iterator~ Adapters - 330
-*** TODO ~map~ and ~filter~ - 330
-*** TODO ~filter_map~ and ~flat_map~ - 332
-*** TODO ~scan~ - 335
-*** TODO ~take~ and ~take_while~ - 335
-*** TODO ~skip~ and ~skip_while~ - 336
-*** TODO ~peekable~ - 337
-*** TODO fuse - 338
-*** TODO Reversible ~Iterator~'s and ~rev~ - 339
-*** TODO ~inspect~ - 340
-*** TODO ~chain~ - 341
-*** TODO ~enumerate~ - 341
-*** TODO ~zip~ - 342
-*** TODO ~by_ref~ - 342
-*** TODO ~cloned~ - 344
-*** TODO ~cycle~ - 344
-** TODO Consuming Iterators - 345
-*** TODO Simple Accumulation: ~count~, ~sum~, ~product~ - 345
-*** TODO ~max~, ~min~ - 346
-*** TODO ~max_by~, ~min_by~ - 346
-*** TODO ~max_by_key~, ~min_by_key~ - 347
+*** DONE ~map~ and ~filter~ - 330
+    CLOSED: [2018-06-13 Wed 09:24]
+    - Example:
+      #+BEGIN_SRC rust
+        let text = " ponies   \n   giraffes\niguanas  \nsquid".to_string();
+        let v: Vec<&str> = text.lines()
+            .map(str::trim)
+            .filter(|s| *s != "iguanas")
+            .collect();
+        assert_eq!(v, ["ponies", "giraffes", "iguanas", "squid"]);
+      #+END_SRC
 
-*** TODO Comparing Item Sequences - 347
-*** TODO ~any~ and ~all~ - 348
+    - A chain of /iterator adapters/ is like a pipeline in the Unix shell.
+
+    - These adapters' signatures:
+      #+BEGIN_SRC rust
+        fn map<B, F>(self, f: F) -> some Iterator<Item=B>
+            where Self: Sized, F: FnMut(Self::Item) -> B;
+
+        fn filter<P>(self, predicate: P) -> some Iterator<Item=Self::Item>
+            where Self: Sized, P: FnMut(&Self::Item) -> bool;
+      #+END_SRC
+      + The ~some~ part is NOT Valid Rust.
+        * footnote: =TODO=
+          Rust RFC 1522 will add syntax to the language very much like our some
+          Iterator notation. As of Rust 1.17, it is not yet included in the
+          language by default.
+
+        The real /return types/ are opaque ~struct~ types, which aren't
+        informative (therefore not be presented here).
+
+    - Since most /adapters/ take ~self~ _by value_, they require ~Self~ to be ~Sized~
+      (which all COMMON /iterators/ are).
+
+    - There are two important points to notice about iterator adapters.
+      =TODO= =NOTE=
+      + Laziness =TODO=
+
+      + Efficiency =TODO=
+
+*** DONE ~filter_map~ and ~flat_map~ - 332
+    CLOSED: [2018-06-13 Wed 09:49]
+    - The signature of the ~filter_map~ /method/:
+      #+BEGIN_SRC rust
+        fn filter_map<B, F>(self, f: F) -> some Iterator<Item=B>
+            where Self: Sized, F: FnMut(Self::Item) -> Option<B>;
+      #+END_SRC
+      This signature is similar to ~map~, but the /return type/ of ~F~ is
+      different. The one for ~map~ is ~B~, and the one for ~filter_map~ is
+      ~Option<B>~.
+
+      Here ~Option~ type is used to do something similar to the ~predicate~ for
+      the ~filter~ /method/ -- this time we use ~Option~, instead of ~bool~, to
+      filter out the values we don't want (when the value is ~None~).
+
+    - Example:
+      #+BEGIN_SRC rust
+        use std::str::FromStr;
+
+        let text = "1\nfrond .25 289\n3.1415 estuary\n";
+        for number in text.split_whitespace()
+            .filter_map(|w| f64::from_str(w).ok()) {
+                println!("{:4.2}", number.sqrt());
+        }
+
+        // 1.00
+        // 0.50
+        // 17.00
+        // 1.77
+      #+END_SRC
+
+      The equivalent but more verbose version of only using ~map~ and ~filter~:
+      #+BEGIN_SRC rust
+        text.split_whitespace()
+            .map(|w| f64::from_str(w))
+            .filter(|r| r.is_ok())
+            .map(|r| r.unwrap())
+      #+END_SRC
+
+    - The signature of the ~flat_map~ /method/:
+      #+BEGIN_SRC rust
+        fn flat_map<U, F>(self, f: F) -> some Iterator<Item=U::Item>
+            where F: FnMut(Self::Item) -> U, U: IntoIterator;
+      #+END_SRC
+      + The /closure/ passed to ~flat_map~ must return an /iterable/, but any sort
+        of /iterable/ will do.
+
+        footnote 2:
+        Since ~Option~ is an /iterable/, for the /closures/ that returns ~Option~
+        types, ~flat_map~ is equivalent to the ~filter_map~.
+
+    - Example:
+      Map countries to their major cities:
+      #+BEGIN_SRC rust
+        use std::collections::HashMap;
+
+        let mut major_cities = HashMap::new();
+        major_cities.insert("Japan", vec!["Tokyo", "Kyoto"]);
+        major_cities.insert("The United States", vec!["Portland", "Nashville"]);
+        major_cities.insert("Brazil", vec!["São Paulo", "Brasília"]);
+        major_cities.insert("Kenya", vec!["Nairobi", "Mombasa"]);
+        major_cities.insert("The Netherlands", vec!["Amsterdam", "Utrecht"]);
+
+        let countries = ["Japan", "Brazil", "Kenya"];
+
+        for &city in countries.iter().flat_map(|country| &major_cities[country]) {
+            println!("{}", city);
+        }
+      #+END_SRC
+      Because of the /laziness/,
+      *use ~next~ to retrive every element will NOT trigger concatenation operations.*
+
+*** DONE ~scan~ - 335
+    CLOSED: [2018-06-13 Wed 10:04]
+    =From Jian=
+    LIKE a ~reduce~ /method/ in other languages, but this one can stop in the
+    middle by some condition -- last returning value is ~None~.
+
+    This ~scan~ is totally different in semantics from the one in Scala.
+
+    - Example:
+      #+BEGIN_SRC rust
+        let iter = (0..10)
+            .scan(0, |sum, item| {
+                *sum += item;
+                if *sum > 10 {
+                    None
+                } else {
+                    Some(item * item)
+                }
+            });
+
+        assert_eq!(iter.collect::<Vec<i32>>(), vec![0, 1, 4, 9, 16]);
+      #+END_SRC
+
+    - =From Jian=
+      Try to find or create a function of:
+      #+BEGIN_SRC rust
+        fn to_option<T>(b: bool, v: T) -> Option<T> {
+            match b {
+                true => Some(v),
+                _ => None
+            }
+        }
+      #+END_SRC
+      Then the code in the last example can be re-written as:
+      ~(0..10).scan(0, |sum, item| {*sum += item; to_option(*sum > 10, item * item)});~
+
+      =TODO= How to make the second parameter ~v~ /laziness/!!!!!!!!!
+
+*** DONE ~take~ and ~take_while~ - 335
+    CLOSED: [2018-06-13 Wed 14:59]
+    - The ~take~ /method/:
+      #+BEGIN_SRC rust
+        fn take(self, n: usize) -> some Iterator<Item=Self::Item>
+            where Self: Sized;
+
+        fn take_when<P>(self, predicate: P) -> some Iterator<Item=Self::Item>
+            where Self: Sized, P: FnMut(&Self::Item) -> bool;
+      #+END_SRC
+
+*** DONE ~skip~ and ~skip_while~ - 336
+    CLOSED: [2018-06-13 Wed 15:02]
+    These two /methods/ are like the ~drop~ and ~dropWhile~ /methods/ in Scala.
+
+    Not use the word "drop" to avoid miss-leading name -- "drop" has a special
+    meaning in the context of Rust.
+
+    #+BEGIN_SRC rust
+      fn skip(self, n: usize) -> some Iterator<Item=Self::Item>
+          where Self: Sized;
+
+      fn skip_while<P>(self, predicate: P) -> some Iterator<Item=Self::Item>
+          where Self: Sized, P: FnMut(&Self::Item) -> bool;
+    #+END_SRC
+    - xxx
+
+*** DONE ~peekable~ - 337
+    CLOSED: [2018-06-13 Wed 16:09]
+    - peekable iterator :: You can peek at the next item that will be produced
+         _WITHOUT_ actually consuming it.
+
+    - You can turn almost *ANY* /iterator/ into a /peekable iterator/ by calling
+      the ~Iterator~ /trait/'s ~peekable~ /method/:
+      #+BEGIN_SRC rust
+        fn peekable(self) -> std::iter::Peekable<Self>
+            where Self: Sized;
+      #+END_SRC
+      + ~Peekable<Self>~ is a /struct/ that implements ~Iterator<Item=Self::Item>~;
+
+      + ~Self~ is the type of the underlying /iterator/.
+
+    - A ~Peekable~ /iterator/ has an additional /method/ ~peek~ that returns an
+      ~Option<&Item>~:
+      + ~None~ if the underlying /iterator/ is done
+
+      + ~Some(r)~, where ~r~ is a /shared reference/ to the _NEXT_ /item/.
+
+      (Note that, if the /iterator/'s /item/ type is already a /reference/ to
+      something, this ends up being a /reference to a reference/.)
+
+    - Calling ~peek~, and the result will be cached.
+      All the other ~Iterator~ methods on ~Peekable~ know about this cache.
+
+    - /Peekable iterators/ are essential when you can't decide how many /items/
+      to consume from an /iterator/ until you've gone too far.
+
+    - For example, if you're parsing numbers from a stream of characters, you can't
+      decide where the number ends until you've seen the first non-number
+      character following it:
+      #+BEGIN_SRC rust
+        use std::iter::Peekable;
+
+        fn parse_number<I>(tokens: &mut Peekable<I>) -> u32
+            where I: Iterator<Item=char>
+        {
+            let mut n = 0;
+
+            loop {
+                match tokens.peek() {
+                    Some(r) if r.is_digit(10) => {
+                        n = n * 10 + r.to_digit(10).unwrap();
+                    }
+
+                    _ => return n
+                }
+                tokens.next();
+            }
+        }
+
+        let mut chars = "226153980,1766319049".chars().peekable();
+        assert_eq!(parse_number(&mut chars), 226153980);
+        // Look, `parse_number` didn't consume the comma! So we will.
+        assert_eq!(chars.next(), Some(','));
+        assert_eq!(parse_number(&mut chars), 1766319049);
+        assert_eq!(chars.next(), None);
+      #+END_SRC
+
+*** DONE ~fuse~ - 338
+    CLOSED: [2018-06-13 Wed 09:34]
+    The subsequent behavior of a ~Iterator~ that has returned ~None~ if NOT forced.
+
+    Most /iterators/ just return ~None~ again, but NOT ALL.
+    You cannot make a general assumption!
+
+    The ~fuse~ adapter takes any /iterator/ and turns into one that will definitely
+    continue to return ~None~ once it has done so the first time:
+    #+BEGIN_SRC rust
+      struct Flaky(bool);
+
+      impl Iterator for Flaky {
+          type Item = &'static str;
+          fn next(&mut self) -> Option<Self::Item> {
+              if self.0 {
+                  self.0 = false;
+                  Some("totally the last item")
+              } else {
+                  self.0 = true; // D'oh!
+                  None
+              }
+          }
+      }
+      let mut flaky = Flaky(true);
+      assert_eq!(flaky.next(), Some("totally the last item"));
+      assert_eq!(flaky.next(), None);
+      assert_eq!(flaky.next(), Some("totally the last item"));
+
+      let mut not_flaky = Flaky(true).fuse();
+      assert_eq!(not_flaky.next(), Some("totally the last item"));
+      assert_eq!(not_flaky.next(), None);
+      assert_eq!(not_flaky.next(), None);
+    #+END_SRC
+    Here we first introduce /struct/ that has a wierd-behaved /interator/ that
+    can return other values after returning ~None~, and then we use ~fuse~ to
+    convert the original /iterator/ to a well-behaved /iterator/ -- always return
+    ~None~ after returning the first ~None~.
+
+    *The fuse adapter is probably most useful in generic code that needs to work
+    with iterators of uncertain origin.*
+      Rather than hoping that every /iterator/ you'll have to deal with will be
+    well-behaved, you can use ~fuse~ to make sure.
+
+*** DONE Reversible ~Iterator~'s and ~rev~ - 339
+    CLOSED: [2018-06-13 Wed 16:22]
+    Some /iterators/ are able to draw /items/ from both ends of the sequence.
+    - Reversible iterators implement ~DoubleEndedIterator~:
+      #+BEGIN_SRC rust
+        trait DoubleEndedIterator: Iterator {
+            fn next_back(&mut self) -> Option<Self::Item>;
+        }
+      #+END_SRC
+
+    - Example:
+      #+BEGIN_SRC rust
+        use std::iter::DoubleEndedIterator;
+        let bee_parts = ["head", "thorax", "abdomen"];
+        let mut iter = bee_parts.iter();
+
+        assert_eq!(iter.next(), Some(&"head"));
+        assert_eq!(iter.next_back(), Some(&"abdomen"));
+        assert_eq!(iter.next(), Some(&"thorax"));
+        assert_eq!(iter.next_back(), None);
+        assert_eq!(iter.next(), None);
+      #+END_SRC
+
+    - In general, the standard library provides double-ended iteration *whenever
+      it's practical*. For instance, ~Vec~, ~BTreeSet~, and ~BTreeMap~.
+
+    - NOT all /iterators/ can do this so easily:
+      an /iterator/ producing values from other /threads/ arriving at a /channel/'s
+      ~Receiver~ has _NO WAY to anticipate_ what the last value received might be.
+
+    - If an /iterator/ is double-ended, you can reverse it with the ~rev~ /adapter/:
+      #+BEGIN_SRC rust
+        fn rev(self) -> some Iterator<Item=Self>
+            where Self: Sized + DoubleEndedIterator;
+      #+END_SRC
+
+    - Most /iterator/ adapters, when possible, preserve the input /iterator/'s
+      reversibility in the result /iterator/.
+
+*** DONE ~inspect~ - 340
+    CLOSED: [2018-06-13 Wed 16:46]
+    - The ~inspect~ adapter is handy for *debugging* pipelines of /iterator/ adapters,
+      BUT *it isn't used much in production code*.
+
+    - It simply applies a /closure/ to a /shared reference/ to each /item/, and
+      then passes the /item/ through.
+
+      The closure CANNOT affect the /items/,
+      but it can do things like _print_ them or _make assertions_ about them.
+
+    - Example:
+      #+BEGIN_SRC rust
+        let upper_case: String = "große".chars()
+            .inspect(|c| println!("before: {:?}", c))
+            .flat_map(|c| c.to_uppercase())
+            .inspect(|c| println!(" after:     {:?}", c))
+            .collect();
+
+        assert_eq!(upper_case, "GROSSE");
+
+        // before: 'g'
+        //  after:     'G'
+        // before: 'r'
+        //  after:     'R'
+        // before: 'o'
+        //  after:     'O'
+        // before: 'ß'
+        //  after:     'S'
+        //  after:     'S'
+        // before: 'e'
+        //  after:     'E'
+      #+END_SRC
+      + The uppercase equivalent of the lowercase German letter ~ß~ is ~SS~, which
+        is why ~char::to_uppercase~ returns an /iterator/ over characters, _NOT_
+        a single replacement character.
+
+*** DONE ~chain~ - 341
+    CLOSED: [2018-06-13 Wed 16:35]
+    - The ~chain~ adapter's signature is as follows:
+      #+BEGIN_SRC rust
+        fn chain<U>(self, other: U) -> some Iterator<Item=Self::Item>
+            where Self: Sized, U: IntoIterator<Item=Self::Item>;
+      #+END_SRC
+      In other words, you can *chain* an /iterator/ together with any /iterable/
+      that produces the _SAME_ /item type/.
+
+    - Example,
+      ~let v: Vec<i32> = (1..4).chain(vec![20, 30, 40]).collect();~
+      Here, the ~v~ is [1, 2, 3, 20, 30, 40]).
+
+    - A /chain iterator/ is _reversible_, if *BOTH* of its underlying /iterators/
+      are.
+
+*** DONE ~enumerate~ - 341
+    CLOSED: [2018-06-13 Wed 16:31]
+    This /method/ returns an /iterator/ with elements of ~(0, A), (1, B), (2,
+    C), ......~.
+
+*** DONE ~zip~ - 342
+    CLOSED: [2018-06-13 Wed 16:26]
+    - The /zipped iterator/
+      ends when either of the two underlying /iterators/ ends.
+
+      The length of a /zipped iterator/ depends on the shorter one.
+
+    - Example (~enumerate~-like):
+      ~let v: Vec<_> = (0..).zip("ABCD".chars()).collect();~
+      The ~v~ here is of value ~vec![(0, 'A'), (1, 'B'), (2, 'C'), (3, 'D')]~.
+
+*** DONE ~by_ref~ - 342
+    CLOSED: [2018-06-14 Thu 01:54]
+    All the /adapters/ we mentioned take ownership of the underlying /iterator/,
+    and provide _NO_ /method/ to give it back.
+
+    You can Use the ~by_ref~ /method/ to /borrow/ a /mutable reference/ to the
+    /iterator/, and then apply /adapters/ to the reference. When you are done,
+    you drop it, and you can re-gain access to your ORIGINAL /iterator/.
+
+    - Example:
+      #+BEGIN_SRC rust
+        let message = "To: jimb\r\n\
+                       From: id\r\n\
+                       \r\n\
+                       Oooooh, donuts!!\r\n";
+
+        let mut lines = message.lines();
+
+        println!("Headers:");
+        for header in lines.by_ref().take_while(|l| !l.is_empty()) {
+            println!("{}" , header);
+        }
+
+        println!("\nBody:");
+        for body in lines {
+            println!("{}" , body);
+        }
+
+        // Headers:
+        // To: jimb
+        // From: id
+        //
+        // Body:
+        // Oooooh, donuts!!
+      #+END_SRC
+
+    - The implementation of the ~by_ref~:
+      #+BEGIN_SRC rust
+        impl<'a, I: Iterator + ?Sized> Iterator for &'a mut I {
+            type Item = I::Item;
+
+            fn next(&mut self) -> Option<I::Item> {
+                (**self).next()
+            }
+
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                (**self).size_hint()
+            }
+        }
+      #+END_SRC
+      + In other words, if ~I~ is some /iterator type/, then ~&mut I~ is an
+        /iterator/ too, whose ~next~ and ~size_hint~ /methods/ defer to its referent.
+
+        When you call an /adapter/ on a /mutable reference/ to an /iterator/, the
+        /adapter/ takes /ownership/ of the /reference/, _NOT_ the /iterator/ ITSELF.
+
+        That's just a /borrow/ that ends when the /adapter/ goes out of scope.
+
+*** DONE ~cloned~ - 344
+    CLOSED: [2018-06-14 Thu 01:58]
+    The ~cloned~ /adapter/ takes an /iterator/ _that produces /references/,_ and
+    returns an /iterator/ _that produces /values/ cloned from those /references/._
+
+    Naturally, the referent type *MUST* implement ~Clone~. For example:
+    #+BEGIN_SRC rust
+      let a = ['1', '2', '3', '∞'];
+      assert_eq!(a.iter().next(),          Some(&'1'));
+      assert_eq!(a.iter().cloned().next(), Some('1')); 
+    #+END_SRC
+
+*** TODO ~cycle~ - 344
+
+** TODO Consuming Iterators - 345
+*** DONE Simple Accumulation: ~count~, ~sum~, ~product~ - 345
+    CLOSED: [2018-06-13 Wed 16:49]
+    You can extend ~sum~ and ~product~ to work with other types by implementing
+    the ~std::iter::Sum~ and ~std::iter::Product~ /traits/, which we won't
+    describe in this book.
+
+*** DONE ~max~, ~min~ - 346
+    CLOSED: [2018-06-13 Wed 16:54]
+    The /iterator/'s /item type/ must implement ~std::cmp::Ord~ to use the ~max~
+    and ~min~ /methods/.
+
+    - ~f32~ and ~f64~ implement ONLY ~std::cmp::PartialOrd~, not ~std::cmp::Ord~,
+      so you *CANNOT* use the ~min~ and ~max~ /methods/ to compute the least or
+      greatest of a sequence of floating-point numbers.
+
+      This is NOT a popular design, but it is deliberate:
+      it's NOT clear what such functions should do with IEEE ~NaN~ values.
+
+    - If you know how you would like to handle ~NaN~ values, you can use ~min_by~
+      and ~max_by~ /iterator methods/ instead.
+
+*** DONE ~max_by~, ~min_by~ - 346
+    CLOSED: [2018-06-13 Wed 16:57]
+    Example:
+    #+BEGIN_SRC rust
+      use std::cmp::{PartialOrd, Ordering};
+
+      // Compare two f64 values. Panic if given a NaN.
+      fn cmp(lhs: &&f64, rhs: &&f64) -> Ordering {
+          lhs.partial_cmp(rhs).unwrap()
+      }
+
+      let numbers = [1.0, 4.0, 2.0];
+      assert_eq!(numbers.iter().max_by(cmp), Some(&4.0));
+      assert_eq!(numbers.iter().min_by(cmp), Some(&1.0));
+
+      let numbers = [1.0, 4.0, std::f64::NAN, 2.0];
+
+      assert_eq!(numbers.iter().max_by(cmp), Some(&4.0)); // panics
+    #+END_SRC
+    - The _DOUBLE_ /references/ in ~cmp~'s parameters arise because ~numbers.iter()~
+      produces /references/ to the elements, and then ~max_by~ and ~min_by~ pass
+      the /closure references/ to the /iterator/'s /items/.
+
+*** TODO ~max_by_key~, ~min_by_key~ - 347
+*** TODO Comparing ~Item~ Sequences - 347
+*** DONE ~any~ and ~all~ - 348
+    CLOSED: [2018-06-13 Wed 16:58]
 *** TODO ~position~, ~rposition~, and ~ExactSizeIterator~ - 348
 *** TODO ~fold~ - 349
-*** TODO ~nth~ - 350
-*** TODO ~last~ - 350
-*** TODO ~find~ - 351
+*** DONE ~nth~ - 350
+    CLOSED: [2018-06-13 Wed 17:02]
+    Skip ~n~ /items/ from the /iterator/, and returns the _NEXT_ /item/, or
+    ~None~ if the sequence ends before the point.
+
+    - ~.nth(0)~ is equivalent to ~.next()~.
+
+    - Example:
+      #+BEGIN_SRC rust
+        let mut squares = (0..10).map(|i| i*i);
+
+        assert_eq!(squares.nth(4), Some(16));
+        assert_eq!(squares.nth(0), Some(25));
+        assert_eq!(squares.nth(6), None);
+      #+END_SRC
+
+    - Its signature is shown here:
+      #+BEGIN_SRC rust
+        fn nth(&mut self, n: usize) -> Option<Self::Item>
+            where Self: Sized;
+      #+END_SRC
+
+*** DONE ~last~ - 350
+    CLOSED: [2018-06-13 Wed 17:06]
+    The ~last~ /method/ *consumes* /items/ until the /iterator/ returns ~None~,
+    and then returns the _last_ /item/.
+
+    - Return ~None~ if no /items/ in this /iterator/.
+
+    - Signature:
+      ~fn last(self) -> Option<Self::Item>;~
+
+    - Tips:
+      If you have a /reversible iterator/, you may prefer ~iter.rev().next()~,
+      rather than using the ~last()~ /method/.
+
+*** DONE ~find~ - 351
+    CLOSED: [2018-06-13 Wed 17:10]
+    - Signature:
+      #+BEGIN_SRC rust
+        fn find<P>(&mut self, predicate: P) -> Option<Self::Item>
+            where Self: Sized,
+                  P: FnMut(&Self::Item) -> bool;
+      #+END_SRC
+
+      + It returns ~Some~ with the found element when the first time the passed
+        in /closure/ returns ~true~.
+
+      + It returns ~None~ if nothing found.
+
 *** TODO Building Collections: ~collect~ and ~FromIterator~ - 351
 *** TODO The ~Extend~ Trait - 353
 *** TODO ~partition~ - 353
@@ -5416,15 +6415,74 @@
 
 * TODO 16. Collections - 359
 ** TODO Overview - 360
+   - Table 16-1. Summary of the standard collections
+     =IMPORTANT=
+
 ** TODO ~Vec<T>~ - 361
 *** TODO Accessing Elements - 362
 *** TODO Iteration - 364
 *** TODO Growing and Shrinking Vectors - 364
-*** TODO Joining - 367
+*** DONE Joining - 367
+    CLOSED: [2018-06-13 Wed 17:25]
+    TWO /methods/ work on _arrays of arrays_, by which we mean ANY /array/, /slice/,
+    or /vector/ whose elements are themselves /arrays/, /slices/, or /vectors/.
+
+    - ~slices.concat()~
+      Example:
+      #+BEGIN_SRC rust
+        assert_eq!([[1, 2], [3, 4], [5, 6]].concat(),
+                   vec![1, 2, 3, 4, 5, 6]);
+      #+END_SRC
+
+    - ~slices.join(&separator)~
+      Example:
+      #+BEGIN_SRC rust
+        assert_eq!([[1, 2], [3, 4], [5, 6]].join(&0),
+                   vec![1, 2, 0, 3, 4, 0, 5, 6]);
+      #+END_SRC
+
+    - 
+
 *** TODO Splitting - 368
-*** TODO Swapping - 370
+*** DONE Swapping - 370
+    CLOSED: [2018-06-13 Wed 17:29]
+    There's a convenience /method/ for swapping two elements:
+    ~slice.swap(i, j)~ swaps the two elements ~slice[i]~ and ~slice[j]~.
+
+    Vectors have a related method for efficiently removing any element:
+
+    - ~vec.swap_remove(i)~ removes and returns ~vec[i]~. But no sliding.
+        This is like ~vec.remove(i)~ except that instead of sliding the rest of
+      the vector's elements over to close the gap, *it simply moves ~vec~'s last
+      element into the gap.*
+
+      *It's useful when you don't care about the order of the items left in the
+      vector.*
+
 *** TODO Sorting and Searching - 370
-*** TODO Comparing Slices - 372
+*** DONE Comparing Slices - 372
+    CLOSED: [2018-06-13 Wed 18:15]
+    - If a type ~T~ implements ~PartialEq~ /trait/ (~==~ and ~!=~) or
+      ~PartialOrd~ /trait/ (~<~, ~<=~, ~>~, and ~>=~), then the corresponding
+      /arrays/ ~[T; N]~, /slices/ ~[T]~, and /vectors/ ~Vec<T>~ support them
+      too.
+
+    - If ~T~ supports the operators ~<~, ~<=~, ~>~, and ~>=~ (the ~PartialOrd~
+      /trait/, described in "Ordered Comparisons" on page 275), then /arrays/,
+      /slices/, and /vectors/ of ~T~ do too.
+
+      /Slice comparisons/ are lexicographical.
+
+    - TWO convenience /methods/ perform common /slice comparisons/:
+      + ~slice.starts_with(other)~
+        Example:
+        ~assert_eq!([1, 2, 3, 4].starts_with(&[1, 2]), true);~
+        ~assert_eq!([1, 2, 3, 4].starts_with(&[2, 3]), false);~
+
+      + ~slice.ends_with(other)~
+        Example:
+        ~assert_eq!([1, 2, 3, 4].ends_with(&[3, 4]), true);~
+
 *** TODO Random Elements - 373
 *** TODO Rust Rules Out Invalidation Errors - 373
 
@@ -5443,7 +6501,10 @@
 ** TODO Hashing - 387
 *** TODO Using a Custom Hashing Algorithm - 388
 
-** TODO Beyond the Standard Collections 389
+** DONE Beyond the Standard Collections 389
+   CLOSED: [2018-06-13 Wed 18:28]
+   - Rust collection, as much of Rust standard library, they're designed to ensure
+     that the need to write ~unsafe~ is as rare as possible.
 
 * TODO 17. Strings and Text - 391
 ** TODO Some Unicode Background - 392
@@ -5477,15 +6538,180 @@
 *** TODO Strings as Generic Collections - 412
 
 ** TODO Formatting Values - 413
+   - The /template string/ must be a _constant_, so that _Rust can check it against
+     the types of the arguments at compile time_.
+
+   - Each argument *must be used*; Rust reports a compile-time error otherwise.
+
+   - Several standard library features _SHARE_ this little language for formatting strings:
+     + ~format!~ uses it to *build* ~String~'s.
+     + ~println!~ and ~print!~ *write* formatted text to the /standard output stream/.
+     + ~writeln!~ and ~write!~ *write* it to a /designated output stream/.
+     + ~panic!~ uses it to *build* a (hopefully informative) expression of terminal dismay.
+
+   - =EN=
+     dismay - 驚
+
+   - Rust's formatting facilities are designed to be open-ended -- you can extend
+     these /macros/ to support your own types by *implementing* _the ~std::fmt~
+     module's /formatting traits/._
+       And you can use ~format_args!~ and the ~std::fmt::Arguments~ type to make your
+     own /functions/ and /macros/ support the /formatting language/.
+
+   - /Formatting macros/ *ALWAYS borrow shared references* to their arguments;
+     they *NEVER take ownership* of them or mutate them.
+
+   - The template's ~{...}~ forms are called /format parameters/, and have the form
+     ~{which:how}~. *Both parts are optional; ~{}~ is frequently used.*
+
+     + The =which= value selects which argument following the template should take
+       the parameter's place -- you can select arguments _by index or by name_.
+
+       Parameters with no =which= value are simply paired with arguments from left
+       to right.
+
+     + The =how= value says how the argument should be formatted:
+       * how much padding,
+       * to which precision,
+       * in which numeric radix,
+       * and so on.
+
+       If =how= is present, the colon before it is _required_.
+
+   - Examples table - page 414
+
+   - In a /template string/, use _DOUBLE_ '{' or '}' to show the literal '{' and
+     '}'. For example,
+     #+BEGIN_SRC rust
+       assert_eq!(
+           format!("{{a, c}} ⊂ {{a, b, c}}"),
+           "{a, c} ⊂ {a, b, c}"
+       );
+     #+END_SRC
+
 *** TODO Formatting Text Values - 414
+    - When formatting a textual type like &str or String ( char is treated like a single-
+      character string), the how value of a parameter has several parts, all optional.
+      =TODO= =RE-NOTE= =START=
+
 *** TODO Formatting Numbers - 415
+    - xxx
+
 *** TODO Formatting Other Types - 417
-*** TODO Formatting Values for Debugging - 418
-*** TODO Formatting Pointers for Debugging - 419
-*** TODO Referring to Arguments by Index or Name - 419
-*** TODO Dynamic Widths and Precisions - 420
+    - xxx
+
+*** DONE Formatting Values for Debugging - 418
+    CLOSED: [2018-06-17 Sun 20:42]
+    ~{:?}~
+    - You can use ~{:?}~ to inspect /vectors/, /slices/, /tuples/, /hash tables/,
+      /threads/, and hundreds of other types.
+      #+BEGIN_SRC rust
+        use std::collections::HashMap;
+        let mut map = HashMap::new();
+        map.insert("Portland", (45.5237606,-122.6819273));
+        map.insert("Taipei",   (25.0375167, 121.5637));
+        println!("{:?}", map);
+
+        // {"Taipei": (25.0375167, 121.5637), "Portland": (45.5237606, -122.6819273)}
+      #+END_SRC
+
+    - If you include the ~#~ character in the /format parameter/, Rust will
+      _pretty-print_ the value.
+      #+BEGIN_SRC text
+        {
+            "Taipei": (
+                25.0375167,
+                121.5637
+            ),
+            "Portland": (
+                45.5237606,
+                -122.6819273
+            )
+        }
+      #+END_SRC
+      *These exact forms are _NOT guaranteed_, and do sometimes _CHANGE_ from one Rust
+      release to the next.*
+
+    - You can use the ~#[derive(Debug)]~ syntax to make your own types work with ~{:?}~:
+      #+BEGIN_SRC rust
+        #[derive(Copy, Clone, Debug)]
+        struct Complex { r: f64, i: f64 }
+        let third = Complex { r: -0.5, i: f64::sqrt(0.75) };
+        println!("{:?}", third);
+        // Complex { r: -0.5, i: 0.8660254037844386 }
+      #+END_SRC
+
+      + This is fine for debugging,
+        BUT it might be nice if ~{}~ could print them in a more traditional form,
+        like =-0.5 + 0.8660254037844386i=.
+        =TODO=
+        In "Formatting Your Own Types" on page 421, we'll show how to do exactly
+        that.
+
+*** DONE Formatting Pointers for Debugging - 419
+    CLOSED: [2018-06-17 Sun 19:03]
+    Example:
+    #+BEGIN_SRC rust
+      use std::rc::Rc;
+
+      let original = Rc::new("mazurka".to_string());
+      let cloned = original.clone();
+      let impostor = Rc::new("mazurka".to_string());
+      println!("text:     {}, {}, {}",       original, cloned, imposter);
+      println!("pointers: {:p}, {:p}, {:p}", original, cloned, imposter);
+    #+END_SRC
+
+    - If you pass ANY sort of /pointer/ to a /formatting macro/ -- a /reference/,
+      a ~Box~, an ~Rc~ -- the /macro/ simply follows the /pointer/ and formats its
+      referent; the pointer itself is not of interest.
+
+      However, _when you're debugging_, you usually want an address served as a
+      rough "name" for an individual value, which can _be illuminating when examining
+      structures with cycles or sharing_.
+
+    - You may want to find more refined visualizations rather than a hexadecimal
+      soup, BUT ~{:p}~ still the simplest and the most foundamental way, though
+      it is a quick-and-dirty solution.
+
+*** DONE Referring to Arguments by Index or Name - 419
+    CLOSED: [2018-06-17 Sun 20:44]
+    - You can *mix* /indexed/, /named/, and /positional/ (that is, no index or name)
+      parameters together in a single /formatting macro/ use.
+
+*** DONE Dynamic Widths and Precisions - 420
+    CLOSED: [2018-06-17 Sun 21:28]
+    - A parameter's
+      + minimum field width,
+      + text length limit,
+      + numeric precision
+
+      _need NOT_ always be fixed values; you can choose them AT /runtime/.
+
+    - Explain by examples:
+      + ~format!("{:>1$}", content, get_width())~
+        Use the 1st arguments (count from 0th), here is the ~get_width()~, as the
+        width.
+
+      + ~format!("{:>width$}", content, width=get_width())~
+        Same as above, but refer to the argument _by name_.
+
+      + The same approach works for the _text length limit_ as well:
+        ~format!("{:>width$.limit$}", content, width=get_width(), limit=get_limit())~
+
+      + =???=
+        In place of the _text length limit_ or _floating-point precision_, you can
+        also write ~*~, which says to take the _NEXT positional argument_ as the
+        precision. The following clips ~content~ to at most ~get_limit()~ characters:
+        ~format!("{:.*}", get_limit(), content)~
+
+    - The argument taken as the precision *must be* a ~usize~.
+      There is _NO_ corresponding syntax for the _field width_.
+
 *** TODO Formatting Your Own Types - 421
+    - xxx
+
 *** TODO Using the Formatting Language in Your Own Code - 423
+    - xxx
 
 ** TODO Regular Expressions - 424
 *** TODO Basic Regex Use - 425
@@ -5528,6 +6754,7 @@
      + _Files opened_ using ~std::fs::File::open(filename)~;
 
      + ~std::net::TcpStream~'s, for *receiving* data over the _network_;
+
 
      + ~std::io::stdin()~, for *reading* from the /process's standard input stream/;
 
@@ -5587,17 +6814,50 @@
 
 *** TODO Readers - 433
     ~std::io::Read~ has several /methods/ for _reading data_.
-    All of them take the /reader/ itself by ~mut~ /reference/.
+    All of them take the /reader/ itself _by ~mut~ /reference/._
 
     - The main /methods/ of the ~Read~ /trait/.
       + ~reader.read(&mut buffer)~
-        TODO
-        TODO
-        TODO
-        TODO
-        TODO
-        TODO
-        TODO
+        * Read some bytes from the data source
+          and
+          store them in the given ~buffer~.
+
+        * The type of the ~buffer~ argument is ~&mut [u8]~.
+
+        * This reads up to ~buffer.len()~ bytes.
+
+        * The /return type/ is ~io::Result<u64>~ (an alias for ~Result<u64, io::Error>~).
+          - One success, the ~u64~ value is the number of bytes read.
+            ~Ok(0)~ means there is no more input to read.
+
+        * One error, this /method/ returns ~Err(err)~, here the ~err~ is an
+          ~io::Error~ value.
+          - An ~io::Error~ is printable, for the benefit of humans;
+
+          - ~io::Error~ has a ~kind()~ method that returns an error code of type
+            ~io::ErrorKind~, of course, as you can guess, it is a /enum/.
+
+          - ~io::ErrorKind~ has members like ~PermissionDenied~ and ~ConnectionReset~.
+
+            Most of them indicate serious errors that you can't ignore,
+            _BUT_ one /kind/ of error, ~io::ErrorKind::Interrupted~, should be
+            handled specially -- it corresponds to the Unix error code ~EINTER~,
+            which means the read happened to be interrupted by a /signal/.
+
+            _UNLESS_ the program is designed to do something clever with /signals/,
+            it SHOULD JUST RETRY the ~read~.
+              The code for ~copy()~, in the preceding section, shows an example
+            of this.
+
+        * As you can see, the ~read~ /method/ is very low-level, even inheriting
+          quirks of the underlying operating system
+          - if you're implementing the ~Read~ /trait/ for a new type of data source,
+            this gives you a lot of leeway.
+
+          - to relif the pain of using this ~read~ /method/,
+            Rust provides several *higher-level CONVENIENCE* methods. All of them
+            have default implementations in terms of ~.read()~. They all handle
+            ~ErrorKind::Interrupted~, so you don't have to.
 
       + ~reader.read_to_end(&mut byte_vec)~
         Read all _remaining input_ from this ~reader~, appending it to ~byte_vec~,
@@ -5659,16 +6919,96 @@
       /Readers/ and /writers/ typically implement ~Drop~ so that they are
       _closed AUTOMATICALLY_.
 
-*** TODO Buffered Readers - 435
-    - 
+*** DONE Buffered Readers - 435
+    CLOSED: [2018-06-16 Sat 22:42]
+    - For efficiency, /readers/ and /writers/ can be *buffered*,
+      which simply means they have a chunk of memory (a /buffer/) that holds some
+      input or output data in memory.
+
+    - Figure 18-2   =Re-Read=
+
+    - ~BufReader~ get a large chunk of input from the OS to its /buffer/.
+      When the user use a ~BufReader~ implementation to read, it reads from the
+      /buffer/.
+
+    - The actual default size of a ~BufReader~'s /buffer/ is _several kilobytes_.
+
+    - /Buffered readers/ implement both ~Read~ and a SECOND /trait/, ~BufRead~,
+      which adds the following /methods/:
+      + ~buf_reader.read_line(&mut line)~
+        * Read a line of text and appends it to line, which is a ~String~.
+          The /newline character/ at the end of the line is included in line.
+
+        * The /return value/ is an ~io::Result<usize>~, _the number of bytes read,
+          including the line ending, if any._
+
+        * If the /buffered reader/ is at the end of the input, this
+          1. leaves line unchanged;
+          2. returns ~Ok(0)~.
+
+      + ~buf_reader.lines()~
+        Return an /iterator/ over the lines of the input.
+
+        The /item type/ is ~io::Result<String>~.
+        /Newline characters/ are _NOT included_ in the strings.
+
+        *This /method/ is _ALMOST ALWAYS what you want for text input_.*
+        =TODO= The next two sections show some examples of its use.
+        
+      + ~buf_reader.read_until(stop_byte, &mut byte_vec)~ and
+        ~reader.split(stop_byte)~
+
+        They are just like ~.read_line()~ and ~.lines()~, but byte-oriented, producing
+        ~Vec<u8>~'s instead of ~String~'s. You choose the delimiter ~stop_byte~ .
+
+    - ~BufRead~ also provides a pair of LOW-LEVEL /methods/, ~.fill_buf()~ and
+      ~.consume(n)~, for _direct access_ to the /reader's internal buffer/.
+      For more about these methods, see the online documentation. =TODO= =TODO=
+
+    - =TODO= The next two sections cover buffered readers in more detail.
 
 *** TODO Reading Lines - 436
-    - 
+*** DONE Collecting Lines - 439
+    CLOSED: [2018-06-17 Sun 14:58]
+    For several _reader methods_ that returns /iterators/, including ~.lines()~,
+    produce ~Result~ /item values/.
+      You may want to collect all the lines in to a vector. If you call the ~.collect()~
+    /method/ directly, the result is NOT what you usually want -- we usually want
+    a vector of string, and this vector can be wrapped by something; but what we
+    get is of type ~Vec<io::Result<String>>~. Mostly, we want types like ~Vec<String>~
+    or ~<io::Result<Vec<String>>>~.
 
-*** TODO Collecting Lines - 439
-    - 
+    - Solution: =IMPORTANT=
+      ~let lines = reader.lines().collect::<io::Result<Vec<String>>>()?;~
+      The ~lines~ has type ~Vec<String>~.
+      If you drop the ~?~, the type is ~<io::Result<Vec<String>>>~.
+
+      + Q :: How does this work?
+
+      + A :: The standard library contains an implementation of ~FromIterator~ for
+             ~Result~ -- easy to overlook in the online documentation -- that makes
+             this possbile:
+             #+BEGIN_SRC rust
+               impl<T, E C> FromIterator<Result<T, E>> for Result<C, E>
+                   where C: FromIterator<T>
+               {
+                   // ...
+               }
+             #+END_SRC
+
+        - This says:
+          if you can collect items of type ~T~ into a collection of type ~C~
+          (~where C: FromIterator<T>~)
+          then you can collect items of type ~Result<T, E>~ into a result of type
+          ~Result<C, E>~ (~FromIterator<Result<T, E>> for Result<C, E>~).
+
+          In other words, io::Result<Vec<String>> is a collection type, so the
+          ~.collect()~ /method/ can create and populate values of that type. 
 
 *** TODO Writers - 439
+    - As we've seen, input is mostly done using /methods/.
+      Output is a bit _different_.
+
     - 
 
 *** TODO Files - 441
