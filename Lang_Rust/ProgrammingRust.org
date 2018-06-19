@@ -297,7 +297,7 @@
     - [[Producing Text from UTF-8 Data - 409][Producing Text from UTF-8 Data - 409]]
     - [[Putting Off Allocation - 410][Putting Off Allocation - 410]]
     - [[Strings as Generic Collections - 412][Strings as Generic Collections - 412]]
-  - [[Formatting Values - 413][Formatting Values - 413]]
+  - [[Formatting Values - 413 - =Reading=][Formatting Values - 413 - =Reading=]]
     - [[Formatting Text Values - 414][Formatting Text Values - 414]]
     - [[Formatting Numbers - 415][Formatting Numbers - 415]]
     - [[Formatting Other Types - 417][Formatting Other Types - 417]]
@@ -6537,7 +6537,7 @@
 *** TODO Putting Off Allocation - 410
 *** TODO Strings as Generic Collections - 412
 
-** TODO Formatting Values - 413
+** TODO Formatting Values - 413 - =Reading=
    - The /template string/ must be a _constant_, so that _Rust can check it against
      the types of the arguments at compile time_.
 
@@ -6589,16 +6589,107 @@
        );
      #+END_SRC
 
-*** TODO Formatting Text Values - 414
-    - When formatting a textual type like &str or String ( char is treated like a single-
-      character string), the how value of a parameter has several parts, all optional.
-      =TODO= =RE-NOTE= =START=
+*** DONE Formatting Text Values - 414
+    CLOSED: [2018-06-18 Mon 17:49]
+    - When formatting a textual type like ~&str~ or ~String~ (in the formatting
+      context, ~char~ is treated like a single-character string), the ~how~ value
+      of a parameter _has several parts_, ALL _optional_:
+      + A /text length limit/.
+        * Rust *truncates* your argument if it is longer than this.
 
-*** TODO Formatting Numbers - 415
-    - xxx
+        * If you specify no limit, Rust uses the full text.
 
-*** TODO Formatting Other Types - 417
-    - xxx
+      + A /minimum field width/.
+        * After any truncation, if your argument is shorter than this, Rust *pads*
+          it _on the right (by default) with spaces (by default)_ to make a field
+          of this width.
+
+        * If omitted, Rust doesn't pad your argument.
+
+      + An alignment.
+        If your argument needs to be padded to meet the minimum field width,
+        this says where your text should be placed within the field.
+          Put your text at the ~<~ (start), ~^~ (middle) , or ~>~ (end).
+
+      + A padding character to use in this padding process.
+        * If omitted, Rust uses spaces.
+
+        * If you specify the /padding character/, you MUST also specify the
+          /alignment/.
+
+    - Since without ~{:p}~ like /format parameters/ the pointer referents will be
+      printed rather than the address, along with ~&str~ and ~String~, you can also
+      pass formatting macros /smart pointer types/ with /textual referents/, like
+      ~Rc<String>~ or ~Cow<'a, str>~, without manually dereference the value out.
+
+    - Since in general ~std::path::Path~ is NOT quite a well-formed UTF-8 textual
+      type, you _CANNOT_ pass it directly to the /formatting macro/.
+        However, you can call its ~.display()~ /method/ and pass the result to the
+      /formatting macro/.
+        For example, ~println!("processing file: {}", path.display());~
+
+*** DONE Formatting Numbers - 415
+    CLOSED: [2018-06-18 Mon 20:10]
+    - When the formatting argument has a numeric type like usize or f64 , the
+      parameter's how value has the following parts, all optional:
+      + A /padding and alignment/,
+        which work as they do with textual types.
+
+      + A ~+~ character, requesting that the number's sign always be shown, even
+        when the argument is positive.
+
+      + A ~#~ character, requesting an explicit radix prefix like ~0x~ or ~0b~.
+        See the "notation" bullet point that concludes this list.
+
+      + A ~0~ character, requesting that the minimum field width be satisfied by
+        _including leading zeros_ in the number, instead of the usual padding
+        approach.
+
+        * When you request leading zeros, /alignment and padding characters/ are
+          simply *ignored*, since the zeros expand the number to fill the entire
+          field.
+
+      + A /minimum field width/.
+        If the formatted number is not at least this wide, Rust *pads* it _on the
+        left (by default) with spaces (by default)_ to make a field of the given
+        width.
+
+        * This is applied to the entire number, sign, radix prefix, and all if exist.
+
+      + A /precision/ for floating-point arguments, indicating how many digits
+        Rust should include after the decimal point.
+
+        Rust rounds or zero-extends as necessary to produce exactly this many
+        fractional digits. If the precision is omitted, Rust tries to accurately
+        represent the value using as few digits as possible. For arguments of
+        integer type, the precision is ignored.
+
+      + A /notation/.
+        For /integer types/, this can be ~b~ for /binary/, ~o~ for /octal/, or
+        ~x~ or ~X~ for hexadecimal with lower- or uppercase letters.
+
+        If you included the ~#~ character, these include an explicit /Rust-style
+        radix prefix/, ~0b~, ~0o~, ~0x~, or ~0X~. For floating-point types, a radix
+        of ~e~ or ~E~ requests scientific notation, with a normalized coefficient,
+        using ~e~ or ~E~ for the exponent. If you don't specify any notation, Rust
+        formats numbers in decimal.
+
+*** DONE Formatting Other Types - 417
+    CLOSED: [2018-06-18 Mon 20:14]
+    - Beyond /strings/ and /numbers/, you can format several other /standard library
+      types/:
+      + /Error types/ can all be formatted directly, making it easy to include them
+        in error messages.
+          Every error type should implement the ~std::error::Error~ /trait/, which
+        extends the /default formatting trait/ ~std::fmt::Display~ . As a consequence,
+        any type that implements ~Error~ is ready to format.
+
+      + /Internet protocol address types/ like ~std::net::IpAddr~ and
+        ~std::net::SocketAddr~, can be formatted.
+
+      + The Boolean ~true~ and ~false~ values can be formatted,
+        Although these are usually not the best strings to present directly to
+        end users.
 
 *** DONE Formatting Values for Debugging - 418
     CLOSED: [2018-06-17 Sun 20:42]
@@ -6713,9 +6804,137 @@
 *** TODO Using the Formatting Language in Your Own Code - 423
     - xxx
 
-** TODO Regular Expressions - 424
-*** TODO Basic Regex Use - 425
-*** TODO Building Regex Values Lazily - 426
+** DONE Regular Expressions - 424
+   CLOSED: [2018-06-18 Mon 19:20]
+   - The _external_ ~regex~ crate is _Rust's official regular expression library_.
+     + Usage:
+       1. Add a line to the =[dependencies]= section of your crate's =Cargo.toml=
+          file:
+          ~regex = "0.2.2"~ for example.
+       2. Pace an ~extern crate regex;~ statement in your crate's root.
+
+   - ~regex~ provides the usual searching and matching functions.
+     + It has good support for /Unicode/;
+
+     + It support search /byte strings/ as well;
+
+     + It doesn't support some features you'll often find in other regular
+       expression packages, like /backreferences/ and /look-around patterns/,
+       * Rationale:
+         Those simplifications allow ~regex~ to
+         + *ensure that searches take time linear in the size of the expression
+           and in the length of the text being searched*.
+             These guarantees, among others, make regex safe to use even with
+           untrusted expressions searching untrusted text.
+
+*** DONE Basic Regex Use - 425
+    CLOSED: [2018-06-18 Mon 18:20]
+    - Example:
+      #+BEGIN_SRC rust
+        use regex::Regex;
+
+        // A semver version number, like 0.2.1.
+        // May contain a pre-release version suffix, like 0.2.1-alpha.
+        // (No build metadata suffix, for brevity.)
+        let semver = Regex::new(r"(\d+)\.(\d+)\.(\d+)(-[-.[:alnum:]]*)?")?;
+
+        // Simple search, with a Boolean result.
+        let haystack = r#"regex = "0.2.5""#;
+        assert!(semver.is_match(haystack));
+      #+END_SRC
+
+    - The ~Regex::captures~ /method/ searches a string _for the first match_, and
+      returns a ~regex::Captures~ value holding match information for each group
+      in the expression:
+      #+BEGIN_SRC rust
+        // You can retrieve capture groups:
+        let captures = semver.captures(haystack)
+            .ok_or("semver regex should have matched")?;
+        assert_eq!(&captures[0], "0.2.5");
+        assert_eq!(&captures[1], "0");
+        assert_eq!(&captures[2], "2");
+        assert_eq!(&captures[3], "5");
+      #+END_SRC
+      + Out of bound indexing will cause to a /panic/.
+
+      + Use the ~.get(index)~ /method/ of a ~Captures~, you can get a
+        ~Option<regex::Match>~. For example,
+        #+BEGIN_SRC rust
+          assert_eq!(captures.get(4), None);
+          assert_eq!(captures.get(3).unwrap().start(), 13);
+          assert_eq!(captures.get(3).unwrap().end(), 14);
+          assert_eq!(captures.get(3).unwrap().as_str(), "5");
+        #+END_SRC
+
+    - Iterate over all the matches in a string:
+      #+BEGIN_SRC rust
+        let haystack = "In the beginning, there was 1.0.0. \
+                        For a while, we used 1.0.1-beta, \
+                        but in the end, we settled on 1.2.4.";
+
+        let matches: Vec<&str> = semver.find_iter(haystack)
+            .map(|mtch| mtch.as_str())
+            .collect();
+        assert_eq!(matches, vec!["1.0.0", "1.0.1-beta", "1.2.4"]);
+      #+END_SRC
+      + The ~find_iter~ /iterator/ produces a ~Match~ value for EACH _nonoverlapping_
+        match of the expression, working from the start of the string to the end.
+
+        The ~captures_iter~ method is similar, but produces ~Captures~ values
+        recording all capture groups.
+
+      + Searching is *SLOWER* _when /capture groups/ MUST be reported_,
+        so if you don't need them, it's best to use one of the methods that
+        doesn't return them.
+
+*** DONE Building Regex Values Lazily - 426
+    CLOSED: [2018-06-18 Mon 19:20]
+    - The ~Regex::new~ construction operation *can be expensive*:
+      + Extreme cases (usually machine generated regex):
+        constructing a ~Regex~ for a _1200-character_ regular expression can take
+        almost a *millisecond* on a fast developer machine,
+
+      + Trivial expression takes *microseconds*.
+
+    - It's best to keep Regex construction out of heavy computational loops;
+      instead, you should *construct your Regex once, and then reuse the same
+      one*.
+
+    - The ~lazy_static~ /crate/ provides a nice way to
+      construct /static values/ LAZILY the first time they are used.
+      1. Configuration:
+         Add a line like ~lazy_static = "0.2.8"~ to the ~[dependencies]~ section
+         of the =Cargo.toml= file.
+
+      2. Usage:
+         #+BEGIN_SRC rust
+           #[macro_use]
+           extern crate lazy_static;
+
+           lazy_static! {
+               static ref SEMVER: Regex
+                   = Regex::new(r"(\d+)\.(\d+)\.(\d+)(-[-.[:alnum:]]*)?")
+                         .expect("error parsing regex");
+           }
+         #+END_SRC
+         + =TODO= =???= What is ~static ref~???
+
+    - The macro expands to a declaration of a /static variable/ named ~SEMVER~,
+      _BUT_ its type is a /macro-generated type/ that implements ~Deref<Target=Regex>~
+      and therefore _exposes ALL the SAME methods as a ~Regex~, rather than ~Regex~._
+
+      + The first time ~SEMVER~ is *dereferenced*, the initializer is evaluated,
+        and the value saved for later use.
+
+      + Since ~SEMVER~ is a /static variable/, NOT just a /local variable/, the
+        initializer runs _at most once_ per program execution.
+
+    - You can
+      + put the ~lazy_static!~ declaration in a /module/,
+        or
+      + even put it inside the /function/ that uses the ~Regex~, if that's the
+        most appropriate scope. The regular expression is still always compiled
+        ONLY ONCE per program execution.
 
 ** TODO Normalization - 427
 *** TODO Normalization Forms - 428
@@ -6967,7 +7186,117 @@
 
     - =TODO= The next two sections cover buffered readers in more detail.
 
-*** TODO Reading Lines - 436
+*** DONE Reading Lines - 436
+    CLOSED: [2018-06-18 Mon 22:00]
+    Implement a basic version of the Unix ~greap~ utility.
+    - The first version, accept input from the /stdin/:
+      #+BEGIN_SRC rust
+        use std::io;
+        use std::io::prelude::*;
+  
+        fn grep(target: &str) -> io::Result<()> {
+            let stdin = io::stdin();
+  
+            for line_result in stdin.lock().lines() {
+                let line = line_result?;
+                if line.contains(target) {
+                    println!("{}", line);
+                }
+            }
+            Ok(())
+        }
+      #+END_SRC
+
+    - The second version, also accept input from files on disk:
+      #+BEGIN_SRC rust
+        fn grep<R>(target: &str, reader: R) -> io::Result<()>
+            where R: BufRead
+        {
+            for line_result in reader.lines() {
+                let line = line_result?;
+                if line.contains(target) {
+                    println!("{}", line);
+                }
+            }
+            Ok(())
+        }
+
+        // Now we can pass it either a `StdinLock` or a buffered `File`:
+        let stdin = io::stdin();
+        grep(&target, stdin.lock())?;  // ok
+
+        let f = File::open(file)?;
+        grep(&target, BufReader::new(f))?;  // also ok
+      #+END_SRC
+      + Caution:
+        ~File~ is NOT automatically buffered (it only implements ~Read~), but it
+        is easy to create a /buffered reader/ for a /reader/,the ~File~ (in our
+        code, ~BufReader::new(reader)~ does this), or any other /unbuffered
+        reader/.
+
+        * To set the size of the /buffer/, use
+          ~BufReader::with_capacity(size, reader)~.
+
+      + In most languages, *files are buffered by default*, and you need to find
+        a way to unbuffer them if you want.
+
+        In Rust, ~File~ and ~BufReader~ are two separate library features,
+        _BECAUSE_ sometimes you want files without buffering, and sometimes you
+        want buffering without files (for example, you may want to buffer input
+        from the network).
+
+    - The FULL program, including error handling and some crude argument parsing:
+      #+BEGIN_SRC rust
+        // grep - Search stdin or some files for lines matching a given string.
+        use std::error::Error;
+        use std::io::{self, BufReader};
+        use std::io::prelude::*;
+        use std::fs::File;
+        use std::path::PathBuf;
+
+        fn grep<R>(target: &str, reader: R) -> io::Result<()>
+            where R: BufRead
+        {
+            for line_result in reader.lines() {
+                let line = line_result?;
+                if line.contains(target) {
+                    println!("{}", line);
+                }
+            }
+            Ok(())
+        }
+
+        fn grep_main() -> Result<(), Box<Error>> {
+            // Get the command-line arguments. The first argument is the
+            // string to search for; the rest are filenames.
+            let mut args = std::env::args().skip(1);
+            let target = match args.next() {
+                Some(s) => s,
+                None => Err("usage: grep PATTERN FILE...")?
+            };
+
+            let files: Vec<PathBuf> = args.map(PathBuf::from).collect();
+
+            if files.is_empty() {
+                let stdin = io::stdin();
+                grep(&target, stdin.lock())?;
+            } else {
+                for file in files {
+                    let f = File::open(file)?;
+                    grep(&target, BufReader::new(f))?;
+                }
+            }
+            Ok(())
+        }
+
+        fn main() {
+            let result = grep_main();
+            if let Err(err) = result {
+                let _ = writeln!(io::stderr(), "{}", err);
+            }
+        }
+      #+END_SRC
+
 *** DONE Collecting Lines - 439
     CLOSED: [2018-06-17 Sun 14:58]
     For several _reader methods_ that returns /iterators/, including ~.lines()~,
