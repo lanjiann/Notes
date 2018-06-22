@@ -323,7 +323,7 @@
     - [[Files - 441][Files - 441]]
     - [[Seeking - 441][Seeking - 441]]
     - [[Other Reader and Writer Types - 442][Other Reader and Writer Types - 442]]
-    - [[Binary Data, Compression, and Serialization - 444][Binary Data, Compression, and Serialization - 444]]
+    - [[Binary Data, Compression, and Serialization - 444 =Re-read=][Binary Data, Compression, and Serialization - 444 =Re-read=]]
   - [[Files and Directories - 445][Files and Directories - 445]]
     - [[~OsStr~ and ~Path~ - 445][~OsStr~ and ~Path~ - 445]]
     - [[~Path~ and ~PathBuf~ Methods - 447][~Path~ and ~PathBuf~ Methods - 447]]
@@ -5186,33 +5186,187 @@
       * how they're *different*, and
       * how to *choose between* these two ways of using /traits/.
 
-** TODO Using Traits - 237
-   - There is one UNUSUAL RULE about /trait methods/:
-     *the /trait/ itself must be in scope. Otherwise, all its /methods/ are HIDDEN.*
+** DONE Using Traits - 237
+   CLOSED: [2018-06-21 Thu 19:19]
+   - In Rust, there is one UNUSUAL RULE about /trait methods/:
+     *the /trait/ itself must be in scope. Otherwise, all its /methods/ are
+     HIDDEN.*
+     For example,
+     #+BEGIN_SRC rust
+       use std::io::Write;
 
-*** TODO Trait Objects - 238
-*** TODO Trait Object Layout - 239
+       let mut buf: Vec<u8> = vec![];
+       buf.write_all(b"hello")?;  // This is ok only when we have the `use` line above.
+     #+END_SRC
+
+   - If a /trait/ is inside /the standard prelude/, you don't need a ~use~ statement.
+     =TODO= We'l cover many of them in Chapter 13.
+
+   - Rust's /traits/' /methods/ are like /virtual methods/ in C++ and C#, while
+     there is NO runtime overhead in Rust.
+
+     Rust can even /inline/ the /method/ (C++ and C# will _often_ do the same,
+     _although the posibility of subclassing sometimes precludes this_.)
+
+*** DONE Trait Objects - 238
+    CLOSED: [2018-06-20 Wed 02:00]
+    - There are *two* ways of using /traits/ to write /polymorphic/ code in Rust:
+      + /trait objects/, which is presented in this section
+      + /generics/
+
+    - Rust does *NOT* permit variables of type ~Write~:
+      #+BEGIN_SRC rust
+        use std::io::Write;
+
+        let mut buf: Vec<u8> = vec![];
+        let writer: Write = buf;  // error: `Write` does NOT have a constant size
+      #+END_SRC
+      + *The _SIZE_ of a variable has to be known at compile time*, and types that
+        implement ~Write~ can be any size.
+
+      + You may be surprising if you're coming from C# or Java, but the reason is
+        simple. In both of them, you actually save a /reference/, which has a
+        known size -- this is NOT the case in Rust, Rust doesn't save a reference
+        by default.
+
+      + The right one -- write out the /reference/ EXPLICITLY:
+        #+BEGIN_SRC rust
+          let writer: &mut Write = &mut buf;
+        #+END_SRC
+
+      + trait object :: a /reference/ to a /trait/ type, like the ~writer~ above.
+        * Like any other /references/, a /trait object/ points to some value, it
+          has a /lifetime/, and it can be either ~mut~ or /shared/.
+
+      + What makes a /trait object/ different is that
+        Rust usually does *NOT* know the type of the referent at /compile time/.
+          So a /trait object/ includes a little *EXTRA INFORMATION about the
+        referent's type*. This is strictly for Rust's own use behind the scenes:
+        when you call ~writer.write(data)~, Rust needs the type information to
+        _dynamically call_ the right ~write~ /method/ depending on the type of
+        ~*writer~.
+
+        * You can't query the type information directly,
+          =From Jian= Reflection???
+
+        * Rust does _NOT support_ /downcasting/ from the /trait object/ ~&mut Write~
+          back to a concrete type like ~Vec<u8>~.
+
+*** DONE Trait Object Layout - 239
+    CLOSED: [2018-06-20 Wed 02:30]
+    - In memory, a /trait object/ takes up two machine words, and it is a /fat
+      pointer/ consisting of
+      + a /pointer/ to the /value/
+      + a /pointer/ to the table representing the /value's type/.
+
+    - Figure 11-1. /Trait objects/ in memory
+      =IMPORTANT=
+
+    - Page 239 - last paragraph - =From Jian= No Note with my first glance
+      =Re-Read= later!
+
+    - Seasoned C++ programmers will notice the Rust and C++ use memory a bit differently:
+      + In C++
+        The /vtable (virtual table) pointer/, or /vptr/, is stored as part of
+        the /struct/.
+
+      + In Rust
+        Rust uses /fat pointers/ instead. Why does Rust design like this?
+        * The /struct/ itself contains nothing but its fields.
+            This way, one /struct/ can implement dozens of /traits/ *without
+          containing dozens of /vptrs/.*
+
+        * Even types like ~i32~, which aren't big enough to accommodate a /vptr/,
+          can implement /traits/.
+          =From Jian= This successfully solve the *dilemma* in most other OOP
+          languages:
+          - If basic types are object, they can be two heavy (this is true in most
+            OOP language, but not true in Rust).
+            =From Jian= for example, Java's ~Integer~.
+
+          - If basic types are NOT object, they can't have /methods/ (this is true
+            in most OOP language, for example, Java's ~int~ but not true in Rust).
+            =From Jian= for example, Java's ~int~.
+
     - Rust AUTOMATICALLY *converts* /ordinary references/ into /trait objects/
-      when needed. This is why we're able to pass ~&mut local_file to say_hello~
+      when needed. This is why we're able to pass ~&mut local_file~ to ~say_hello~
       in this example:
       #+BEGIN_SRC rust
         let mut local_file = File::create("hello.txt")?;
         say_hello(&mut local_file)?;
       #+END_SRC
+      + Here ~&mut local_file~ is of type ~&mut File~, which is a _CONCRETE type_,
+        NOT a /trait object/.
+          The ~sey_hello~ /method/ accepts a parameter of type ~&mut Write~, which
+        is a /trait object/.
 
       + Likewise, Rust will happily convert a ~Box<File>~ to a ~Box<Write>~, a
-        value that owns a writer in the /heap/:
+        value that _OWNS_ a /writer/ in the /heap/:
         ~let w: Box<Write> = Box::new(local_file);~
 
-    - This kind of conversion is the *ONLY WAY* to create a /trait object/.
+    - This kind of conversion is the *ONLY WAY* to *create* a /trait object/.
 
-      What the computer is actually doing here is very simple. At the point
-      where the conversion happens, Rust knows the referent's true type (in this
-      case, ~File~), so it just adds the address of the appropriate /vtable/,
-      turning the regular pointer into a fat pointer.
+      What the computer is actually doing here is very simple:
+      At the point where the conversion happens, Rust knows the referent's true
+      type (in this case, ~File~), so it just adds the address of the
+      appropriate /vtable/, turning the /regular pointer/ into a /fat pointer/.
 
-*** TODO Generic Functions - 240
-    - TODO
+*** DONE Generic Functions - 240
+    CLOSED: [2018-06-20 Wed 22:17]
+    - Let's re-write the ~say_hello()~ that tokk a /trait object/ as a /generic function/:
+      #+BEGIN_SRC rust
+        fn say_hello<W: Write>(out: &mut W) -> std::io::Result<()> {
+            out.write_all(b"hello world\n")?;
+            out.flush()
+        }
+      #+END_SRC
+      + Only the signature has changed:
+        * ~fn say_hello(out: &mut Write)~ is a /plain function/.
+
+        * ~fn say_hello<W: Write>(out: &mut W)~ is a /generic function/.
+
+      + Which type ~W~ stands for depends on how the /generic function/ is used:
+        * ~say_hello(&mut local_file)?;~ calls ~say_hello::<File>~
+
+        * ~say_hello(&mut bytes)?;~ calls ~say_hello::<Vec<u8>>~
+
+        Rust generates separate machine code for this version of the function,
+        calling the corresponding ~Vec<u8>~ /methods/.
+
+      + It's seldom necessary to write the concrete /type parameter(s)/ type(s)
+        explicitly.
+
+        Only when there is not any arguments that provide useful clues, you may
+        have to spell it out:
+        #+BEGIN_SRC rust
+          // calling a generic method collect<C>() that takes no arguments
+          let v1 = (0 .. 1000).collect();  // error: can't infer type
+          let v1 = (0 .. 1000).collect::<Vec<i32>>();  //ok
+        #+END_SRC
+
+    - *CONVENTION*
+      /Type parameters/ are usually *single uppercase letters*.
+
+    - Sometimes we need *MULTIPLE* abilities from a /type parameter/,
+      Here we are planning to determine which values are the most common? The
+      usual way is to use the values as key in a /hash table/. That means the
+      values need to support the ~Hash~ and ~Eq~ operations. Then the /bound/ of
+      ~T~ CANNOT be ~<T: Debug>~. It should be:
+      #+BEGIN_SRC rust
+        fn top_ten<T: Debug + Hash + Eq>(values: &Vec<T>) { ... }
+      #+END_SRC
+      + Some types implement ~Debug~ , some implement ~Hash~ , some support ~Eq~;
+        and a few, like ~u32~ and ~String~ , implement ALL three, as shown in
+        *Figure 11-2*.
+
+    - It's also possible for a /type parameter/ to have *NO* /bounds/ at all, but
+      you can't do much with a value if you haven't specified any /bounds/ for it.
+      You can /move/ it. You can put it into a /box/ or /vector/. That's about it.
+
+      =From Jian= The operations available to a /type/ depends on the natural of
+      this type.
+
+      =From Jian= I learned this point in Haskell!
 
     - It's also possible for a /type parameter/ to have _no bounds_ at all,
       but you cannot do much with a value if you haven't specified any bounds for
@@ -5222,10 +5376,159 @@
 
       That's about it.
 
-*** TODO Which to Use - 243
+    - In SYNTAX, we have two ways to write down the /bounds/:
+      + cluttered
+        #+BEGIN_SRC rust
+          /// Run a query on a large, partitioned data set.
+          /// See <http://research.google.com/archive/mapreduce.html>.
+          fn run_query<M: Mapper + Serialize, R: Reducer + Serialize>(
+              data: &DataSet, map: M, reduce: R) -> Results
+          { ... }
+        #+END_SRC
+
+      + non-cluttered
+        #+BEGIN_SRC rust
+          fn run_query<M, R>(data: &DataSet, map: M, reduce: R) -> Results
+              where M: Mapper + Serialize,
+                    R: Reducer + Serialize
+          { ... }
+        #+END_SRC
+        * This kind of ~where~ clause is also allowed on /generic structs/,
+          / generic enums/, /type aliases/, and /methods/ -- *ANYWHERE /bounds/
+          are permitted*.
+
+    - A /generic function/ can have both
+      + /lifetime parameters/
+      + /type parameters/.
+
+    - /Lifetime parameters/ COME FIRST:
+      #+BEGIN_SRC rust
+        /// Return a reference to the point in `candidates` that's
+        /// closest to the `target` point.
+        fn nearest<'t, 'c, P>(target: &'t P, candidates: &'c [P]) -> &'c P
+            where P: MeasureDistance
+        {
+          // ...
+        }
+      #+END_SRC
+
+    - /Lifetimes/ *NEVER* have any impact on /machine code/.
+      Two calls to ~nearest()~ using the SAME /type/ ~P~, but DIFFERENT /lifetimes/,
+      will _call the SAME_ /compiled function/.
+        Only *differing* /types/ cause Rust to compile _MULTIPLE_ copies of a
+      /generic function/.
+
+    - Of course, /functions are _NOT the ONLY_ kind of /generic/ code in Rust.
+      + We've already covered /generic types/ in "Generic Structs" on page 202
+        and "Generic Enums" on page 18.
+
+      + An individual /method/ can be /generic/, *even if the /type/ it's defined
+        on is NOT generic*. For example,
+        #+BEGIN_SRC rust
+          impl PancakeStack {
+              fn push<T: Topping>(&mut self, good: T) -> RancakeResult<()> {
+                  // ...
+              }
+          }
+        #+END_SRC
+
+      + Type aliases can be generics, too:
+        ~type PancakeResult<T> = Result<T, PancakeError>;~
+
+      + =TODO=
+        We'll cover generic traits later in this chapter.
+
+      
+
+*** DONE Which to Use - 243
+    CLOSED: [2018-06-21 Thu 19:19]
+    The *CHOICE* of whether to use /trait objects/ or /generic/ code is _SUBTLE_.
+    Since both features are based on /traits/, _they have a lot IN COMMON_.
+
+    - /Trait objects/
+      + *WHENEVER* you need a /collection/ of values of MIXED /types/. =EVERYDAY USE=
+        * It is technically possible to make /generic/ salad:
+          #+BEGIN_SRC rust
+            trait Vegetable {
+                // ...
+            }
+  
+            struct Salad<V: Vegetable> {
+                veggies: Vec<V>
+            }
+          #+END_SRC
+          _BUT_ you won't like this -- since the element of each /vector/ must
+          have constant size, you can only put one kind of vegetable in one salad,
+          for example, ~Salad<IcebergLettuce>~, which is usually not what you
+          want.
+
+          Here is the /trait object/ solution:
+          #+BEGIN_SRC rust
+            struct Salad {
+                // Here you must use `Box<Vegetable>`, which has a constant size.
+                // Actually, `Vegetable` itself is NOT a trait object!
+                veggies: Vec<Box<Vegetable>>
+            }
+          #+END_SRC
+
+      + *Reduce* the total amount of compiled code. =Rarely USE=
+        Rust may have to compile a /generic function/ MANY times, *once for each type*
+        it's used with.
+          This could _make the binary large_, a phenomenon called /code bloat/
+        in C++ circles.
+          Constrained environments do exist, though most of time we don't need
+        to consider this.
+
+    - /Generics/
+      *ALL the other* situations except those above.
+      + Advantage 1: *speed*.
+        NO /dynamic dispatch/.
+        For a /generic function/, each available type has its own copy/version of
+        compiled code. A GENERIC ~min()~ can be as fast as ~min_u8()~, ~min_u64()~,
+        and so on, even if they have similar implementation.
+
+        * A call with constant arguments, like ~min(5, 3)~, will be even faster:
+          Rust can evaluate it at compile time, no runtime cost at all.
+
+        * Or consider this /generic function/ call:
+          #+BEGIN_SRC rust
+            let mut sink = std::io::sink();
+            say_hello(&mut sink)?;
+          #+END_SRC
+          Because of the nature of ~sink~, Rust can use the know information (from
+          /generics/). In short, Rust has all the information it needs to
+          optimize away this function entirely.
+          =Re-Read= More details in the book =page 245=
+
+          * Compare to the behavior with /trait object/:
+            Rust _NEVER_ knows that type of value a /trait object/ points to _UNTIL_
+            /runtime/. So, in this example, even if you pass a ~Sink~, the *OVERHEAD*
+            of _calling virtual methods_ and _checking for errors_ still applies.
+
+      + Advantage 2: NOT EVERY /trait/ can support /trait objects/.
+        /Traits/ support several features, such as /static methods/, that work
+        only with /generics/ -- if you don't know the concrete type, you don't
+        know if it has specific /static methods/, but for /trait object/ the
+        concrete type is known at runtime. Therefore, you can't use /static
+        methods/ with /trait objects/ in your source code -- it cannot be compiled:
+        they RULE OUT /trait objects/ entirely.
 
 ** TODO Defining and Implementing Traits - 245
 *** TODO Default Methods - 246
+    =From Jian= Like Scala, Rust support /trait default methods/.
+    The design idea is the same as Scala:
+    The /methods/ of /trait/ can be categoried as /core method(s)/ and /common
+    method(s)/. The /core method(s)/ are the most specific for each type, and they
+    should be implemented by the user who define this type. The /common method(s)/
+    are the /methods/ that use the /core method(s)/ to do something, and they are
+    NOT very specific 
+
+
+
+    When you ~impl~ a /trait/, you only need to implement its /methods/ that are
+    VERY SPECIFIC for your type (structs, enums, ...), most of other /methods/
+    have default implementations -- they are /default methods/.
+
 *** TODO Traits and Other People's Types - 247
 *** TODO ~Self~ in Traits - 249
 *** TODO Subtraits - 250
@@ -6940,7 +7243,8 @@
 *** TODO Normalization Forms - 428
 *** TODO The unicode-normalization Crate - 429
 
-* TODO 18. Input and Output - 431
+* DONE 18. Input and Output - 431
+  CLOSED: [2018-06-19 Tue 22:29]
   - Rust's /standard library/ features for /input/ and /output/ are organized
     around *three* /traits/:
     + ~Read~
@@ -6967,7 +7271,8 @@
   - Figure 18-1. Selected /reader (bufferd or non-buffered)/ and /writer/ types
     from the Rust standard library.
 
-** TODO Readers and Writers - 432
+** DONE Readers and Writers - 432
+   CLOSED: [2018-06-19 Tue 22:29]
    - /Readers/ are values that your program can _read bytes from_.
      Examples include:
      + _Files opened_ using ~std::fs::File::open(filename)~;
@@ -7031,7 +7336,8 @@
      an alias to the ~std::io~. This means you can, for example, write ~io::Result~,
      rather than ~std::io::Result~.
 
-*** TODO Readers - 433
+*** DONE Readers - 433
+    CLOSED: [2018-06-19 Tue 22:29]
     ~std::io::Read~ has several /methods/ for _reading data_.
     All of them take the /reader/ itself _by ~mut~ /reference/._
 
@@ -7334,23 +7640,310 @@
           In other words, io::Result<Vec<String>> is a collection type, so the
           ~.collect()~ /method/ can create and populate values of that type. 
 
-*** TODO Writers - 439
-    - As we've seen, input is mostly done using /methods/.
-      Output is a bit _different_.
+*** DONE Writers - 439
+    CLOSED: [2018-06-19 Tue 02:32]
+    - As we've seen,
+      + input is mostly done using /methods/.
+      + *Output is a bit _different_.*
 
-    - 
+    - We've used ~println!()~ and ~print!()~
 
-*** TODO Files - 441
-    - 
+    - To send /output/ to a /writer/, use the ~write!()~ and ~writeln!()~ /macros/.
+      Example:
+      #+BEGIN_SRC rust
+        writeln!(io::stderr(), "error: world not helloable")?;
+        writeln!(&mut byte_vec, "The greatest common divisor of {:?} is {}", numbers, d)?;
+      #+END_SRC
 
-*** TODO Seeking - 441
-    - 
+    - They are similar to the ~print!()~ and ~println!()~, except for two differences:
+      + they take an extra first argument, a /writer/.
 
-*** TODO Other Reader and Writer Types - 442
-    - 
+      + they return a ~Result~, so errors must be handled.
+        (~print!()~ and ~println!()~ does NOT return ~Result~, they just panic
+        if the write fails -- since they write to the terminal, this is rare.)
 
-*** TODO Binary Data, Compression, and Serialization - 444
-    - 
+    - The ~Write~ /trait/ has these /methods/:
+      + ~writer.write(&buf)~ *writes* some of the /bytes/ in the /slice/ ~buf~ to
+        the underlying stream.
+        It returns an ~io::Result<usize>~.
+        On success, this gives the _number of bytes written_, which may be _less
+        than_ ~buf.len()~ , at the whim of the stream.
+
+        * *CAUTION*:
+          Like ~Reader::read()~, this is a low-level /method/ that you should
+          avoid using directly.
+
+      + ~writer.write_all(&buf)~ *writes all* the /bytes/ in the /slice/ ~buf~.
+        _Returns_ ~Result<()>~.
+
+      + ~writer.flush()~ *flushes* any buffered data to the underlying stream.
+        _Returns_ ~Result<()>~.
+
+    - Just as ~BufReader::new(reader)~ adds a /buffer/ to any /reader/,
+      ~BufWriter::new(writer)~ adds a /buffer/ to any /writer/.
+      #+BEGIN_SRC rust
+        let file = File::create("tmp.txt")?;
+        let writer = BufWriter::new(file);
+      #+END_SRC
+      + To *set* the _size_ of the /buffer/, use ~BufWriter::with_capacity(size, writer)~.
+
+    - To make sure your application notices all output errors,
+      manually ~.flush()~ /buffered writers/ before dropping them.
+
+      =From Jian= =IMPORTANT= =!!!=
+      Can this ~.flush()~ be inserted to the source code by the compiler
+      automatically??? Can we just create an /attribute/ to control this
+      feature?
+
+      + Rationale:
+        When a ~BufWriter~ is /dropped/, all _REMAINING_ /buffered data/ is written
+        to the underlying /writer/.
+          However, if an error occurs during this write, the error is *ignored*.
+        (Since this happens inside ~BufWriter~'s ~.drop()~ /method/, there is _NO_
+        useful place to report the error.)
+
+*** DONE Files - 441
+    CLOSED: [2018-06-19 Tue 01:25]
+    - We've already seen two ways to *open* a file:
+      + ~File::open(filename)~ *opens* an existing file for reading.
+        It returns an ~io::Result<File>~, and it's an error if the file doesn't exist.
+
+      + ~File::create(filename)~ *creates* a new file for writing.
+        If a file exists with the given filename, it is truncated.
+
+    - The ~File~ type is in the filesystem module, ~std::fs~, not ~std::io~.
+
+    - When the ~open~ and ~create~ method doesn't fit the bill,
+      you can use ~OpenOptions~ to specify the exact desired behavior:
+      #+BEGIN_SRC rust
+        use std::fs::OpenOptions;
+
+        let log = OpenOptions::new()
+            .append(true)  // if file exists, add to the end
+            .open("server.log")?;
+
+        let file = OpenOptions::new()
+            .write(true)
+            .create_new(true)  // fail if file exists
+            .open("new_file.txt")?;
+      #+END_SRC
+
+    - The /methods/ ~.append()~, ~.write()~, ~.create_new()~, and so on are _designed
+      to be chained like this_: each one returns ~self~.
+
+        This method-chaining design pattern is common enough to have a name in
+      Rust: it's called a /builder/. ~std::process::Command~ is another example. =TODO=
+      For more details on ~OpenOptions~, see the online documentation. =TODO=
+
+    - Once a ~File~ has been opened, it behaves like any other /reader/ or /writer/.
+      You can *add* a /buffer/ if needed. The ~File~ will be closed
+      automatically when you drop it.
+
+*** DONE Seeking - 441
+    CLOSED: [2018-06-19 Tue 02:11]
+    ~File~ also implements the ~Seek~ /trait/.
+    ~Seek~ is defined like this:
+    #+BEGIN_SRC rust
+      pub trait Seek {
+          fn seek(&mut self, pos: SeekFrom) -> io::Result<u64>;
+      }
+
+      pub enum SeekFrom {
+          Start(u64),
+          End(i64),
+          Current(i64),
+      }
+    #+END_SRC
+    - Usage (examples):
+      + Rewind to the beginning:
+        ~file.seek(SeekFrom::Start(0))~
+
+      + Go back a few bytes:
+        ~file.seek(SeekFrom::Current(-8))~
+
+    - *Seeking within a file is _SLOW_.*
+      Whether you're using a hard disk or a SSD, a /seek/ takes as long as
+      reading several megabytes of data.
+      =TODO= =WHY= =???=
+
+*** DONE Other Reader and Writer Types - 442
+    CLOSED: [2018-06-19 Tue 18:11]
+    - ~io::stdin()~
+
+    - ~io::stdin()~ and ~io::stderr()~
+      also have /mutexes/ and ~.lock()~ /methods/.
+
+    - ~Vec<u8>~
+      implements ~Write~.
+      Writing to a ~Vec<u8>~ *extends* the vector with the new data.
+
+      (~String~ does NOT implement ~Write~.
+      To build a string using ~Write~, first write to a ~Vec<u8>~, then use
+      ~String::from_utf8(vec)~ to convert the vector to a string.)
+
+    - ~Cursor::new(buf)~
+      creates a ~Cursor~, a /buffered reader/ that reads from ~buf~.
+
+      *This is how you create a /reader/ that reads from a ~String~.*
+
+      + The argument ~buf~ can be any type that implements ~AsRef<[u8]>~, so you
+        can also pass a ~&[u8]~, ~&str~, or ~Vec<u8>~.
+
+      + ~Cursor~'s implement ~Read~, ~BufRead~, and ~Seek~.
+        If the type of ~buf~ is ~&mut [u8]~ or ~Vec<u8>~, then the ~Cursor~ also
+        implements ~Write~.
+
+      + Writing to a /cursor/ *overwrites* bytes in ~buf~ starting at the current
+        position.
+        * If you try to write past the end of a ~&mut [u8]~, you'll get a *partial
+          write* or an ~io::Error~.
+          =TODO= More details! Which one???
+
+        * Using a /cursor/ to write past the end of a ~Vec<u8>~ is *fine*, though:
+          it grows the vector.
+
+      + ~Cursor<&mut [u8]>~ and ~Cursor<Vec<u8>>~ thus *implement* _ALL_ FOUR of
+        the ~std::io::prelude~ /traits/.
+
+    - ~std::net::TcpStream~ represeents a TCP network connection.
+      Since TCP enables two-way communication, it's BOTH a /reader/ and a /writer/.
+
+      The /static method/ ~TcpStream::connect(("hostname", PORT))~ tries to connect
+      to a server and returns an ~io::Result<TcpStream>~.
+
+    - ~std::process::Command~ =TODO= =TODO= =TODO= =???=
+      supports spawning a child process and piping data to its standard input.
+      For example,
+      #+BEGIN_SRC rust
+        use std::process::{Command, Stdio};
+
+        let mut child =
+            Command::new("grep")
+            .arg("-e")
+            .arg("a.*e.*i.*o.*u")
+            .stdin(Stdio::piped())
+            .spawn()?;
+
+        let mut to_child = child.stdin.take().unwrap();
+        for word in my_words {
+            writeln!(to_child, "{}", word)?;
+        }
+        drop(to_child);
+        child.wait()?;
+      #+END_SRC
+      + The type of ~child.stdin~ is ~Option<std::process::ChildStdin>~; here we've
+        used ~.stdin(Stdio::piped())~ when setting up the child process, so
+        ~child.stdin~ is _definitely populated when_ ~.spawn()~ succeeds.
+        If we hadn't, ~child.stdin~ would be ~None~.
+
+      + ~Command~ also has similar /methods/ ~.stdout()~ and ~.stderr()~, which can be
+        used to request /readers/ in ~child.stdout~ and ~child.stderr~.
+
+    - The ~std::io~ module also offers a handful of /functions/ that return /trivial
+      readers and writers/:
+      + ~io::sink()~
+        Returns a /writer/. All the write /methods/ return ~Ok~, butthe data is
+        just discarded.
+
+      + ~io::empty()~
+        Returns a /reader/, with which reading _always succeeds_, but returns
+        /end-of-input/.
+
+      + ~io::repeat(byte)~
+        returns a /reader/ that *repeats* the given ~byte~ _endlessly_.
+
+*** DONE Binary Data, Compression, and Serialization - 444 =Re-read=
+    CLOSED: [2018-06-19 Tue 22:28]
+    Many _open source_ /crates/ _build on_ the ~std::io~ framework to offer
+    EXTRA features:
+    - The ~byteorder~ /crate/
+      offers ~ReadBytesExt~ and ~WriteBytesExt~ /traits/ that ADD /methods/ to
+      _ALL_ /readers/ and /writers/ *for /binary input and output/:*
+      #+BEGIN_SRC rust
+        use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
+
+        let n = reader.read_u32::<LittleEndian>()?;
+        writer.write_i64::<LittleEndian>(n as i64)?;
+      #+END_SRC
+
+    - The ~flate2~ /crate/
+      provides /adapter methods/ for reading the writing ~gzipped~ data:
+      #+BEGIN_SRC rust
+        use flate2::FlateReadExt;
+
+        let file = File::open("access.log.gz")?;
+        let mut gzip_reader = file.gz_decode()?;
+      #+END_SRC
+
+    - The ~serde~ /crate/
+      is for /serialization/ and /deserialization/: it converts back and forth
+      _BETWEEN_ Rust /structs/ and /bytes/.
+
+      We mentioned this once before, in "Traits and Other People's Types" on page 247.
+
+      Now take a closer look.
+      + Suppose we have some data -- the map for a text adventure game -- stored
+        in a ~HashMap~:
+        #+BEGIN_SRC rust
+          type RoomId = String;                      // each room has a unique name
+          type RoomExits = Vec<(char, RoomId)>;      // ...and a list of exits
+          type RoomMap = HashMap<RoomId, RoomExits>; // room names and exits, simple
+
+          // Create a simple map.
+          let mut map = RoomMap::new();
+          map.insert("Cobble Crawl".to_string(),
+                     vec![('W', "Debris Room".to_string())]);
+          map.insert("Debris Room".to_string(),
+                     vec![('E', "Cobble Crawl".to_string()),
+                          ('W', "Sloping Canyon".to_string())]);
+          // ...
+        #+END_SRC
+
+      + Turning this data INTO JSON for output is just a few lines of code:
+        #+BEGIN_SRC rust
+          extern crate serde;
+          use std::io;
+          use serde::Serialize;
+          use serde_json::Serializer;
+
+          let mut serializer = Serializer::new(io::stdout());
+          map.serialize(&mut serializer)?;
+        #+END_SRC
+        * This code uses the ~serialize~ /method/ of the ~serde::Serialize~ /trait/.
+          *The library attaches this /trait/ to all types that it knows how to
+          serialize*, and that includes all of the types that appear in our
+          data: /strings/, /characters/, /tuples/, /vectors/, and ~HashMaps~.
+
+        * ~serde~ is flexible.
+          In this program, the output is JSON data, because we chose the ~serde_json~
+          /serializer/. Other formats, like /MessagePack/, are also available.
+            Likewise, you could send this output to a /file/, a ~Vec<u8>~, or any
+          other /writer/. The code above prints the data on ~stdout~ . Here it is:
+          #+BEGIN_SRC json
+            {"Debris Room":[["E","Cobble Crawl"],["W","Sloping Canyon"]],"Cobble Crawl":
+            [["W","Debris Room"]]}
+          #+END_SRC
+
+        * ~serde~ also includes support for *deriving* the two key ~serde~ /traits/:
+          #+BEGIN_SRC rust
+            #[derive(Serialize, Deserialize)]
+            struct Player {
+                location: String,
+                items: Vec<String>,
+                health: u32
+            }
+          #+END_SRC
+          - As of Rust 1.17, this ~#[derive]~ /attribute/ requires a few extra steps
+            when setting up your project.
+
+            *We won't cover that here;* see the ~serde~ documentation for details.
+
+            In short, the /build system/ *autogenerates implementations* of
+            ~serde::Serialize~ and ~serde::Deserialize~ for ~Player~ , so that
+            serializing a ~Player~ value is simple: ~player.serialize(&mut serializer)?;~
+
+            The output looks like this:
+            ~{"location":"Cobble Crawl", "items":["a wand"],"health":3}~
 
 ** DONE Files and Directories - 445
    CLOSED: [2018-06-08 Fri 22:22]
