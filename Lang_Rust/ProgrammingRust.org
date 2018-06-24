@@ -152,7 +152,7 @@
     - [[Where Patterns Are Allowed - 230][Where Patterns Are Allowed - 230]]
     - [[Populating a Binary Tree 232][Populating a Binary Tree 232]]
   - [[The Big Picture - 233 =Re-Read=][The Big Picture - 233 =Re-Read=]]
-- [[11. Traits and Generics - 235][11. Traits and Generics - 235]]
+- [[11. Traits and Generics - 235 - =Reading=][11. Traits and Generics - 235 - =Reading=]]
   - [[Using Traits - 237][Using Traits - 237]]
     - [[Trait Objects - 238][Trait Objects - 238]]
     - [[Trait Object Layout - 239][Trait Object Layout - 239]]
@@ -5152,7 +5152,7 @@
    CLOSED: [2018-06-06 Wed 20:03]
    TODO: NOTES
 
-* TODO 11. Traits and Generics - 235
+* TODO 11. Traits and Generics - 235 - =Reading=
   - Rust supports /polymorphism/ with two related features: /traits/ and /generics/.
 
     These concepts will be familiar to many programmers,
@@ -5513,35 +5513,473 @@
         methods/ with /trait objects/ in your source code -- it cannot be compiled:
         they RULE OUT /trait objects/ entirely.
 
-** TODO Defining and Implementing Traits - 245
-*** TODO Default Methods - 246
+** DONE Defining and Implementing Traits - 245
+   CLOSED: [2018-06-22 Fri 03:14]
+*** DONE Default Methods - 246
+    CLOSED: [2018-06-21 Thu 22:47]
     =From Jian= Like Scala, Rust support /trait default methods/.
     The design idea is the same as Scala:
     The /methods/ of /trait/ can be categoried as /core method(s)/ and /common
-    method(s)/. The /core method(s)/ are the most specific for each type, and they
-    should be implemented by the user who define this type. The /common method(s)/
-    are the /methods/ that use the /core method(s)/ to do something, and they are
-    NOT very specific 
+    method(s)/. The /common method(s)/ depend on the /core methods/ -- which are
+    the most specific for different types, and they should be implemented by the
+    user who define this type. The /common method(s)/ are the /methods/ that
+    mostly are not very specific for different types, and the DEFAULT
+    implementation can fulfill most expectations.
 
+    For example, the ~std::io::Write~ /trait/ has two abstract /core methods/ that
+    need to be implemented, one /default method/ as /common method(s)/ that depends
+    on the /core methods/.
+    #+BEGIN_SRC rust
+      trait Write {
+          fn write(&mut self, buf: &[u8]) -> Result<usize>;
 
+          fn flush(&mut self) -> Result<()>;
 
-    When you ~impl~ a /trait/, you only need to implement its /methods/ that are
-    VERY SPECIFIC for your type (structs, enums, ...), most of other /methods/
-    have default implementations -- they are /default methods/.
+          fn write_all(&mut self, buf: &[u8]) -> Result<()> {
+              let mut bytes_written = 0;
+              while bytes_written < buf.len() {
+                  bytes_written += self.write(&buf[bytes_written..])?;
+              }
+              Ok(())
+          }
+          // ...
+      }
+    #+END_SRC
 
-*** TODO Traits and Other People's Types - 247
-*** TODO ~Self~ in Traits - 249
-*** TODO Subtraits - 250
-*** TODO Static Methods - 251
+    Usage (implementation):
+    #+BEGIN_SRC rust
+      use std::io::{Write, Result};
 
-** TODO Fully Qualified Method Calls - 252
+      impl Write for Sink {
+          fn write(&mut self, buf: &[u8]) -> Result<usize> {
+              // Claim to have successfully written the whole buffer.
+              Ok(buf.len())
+          }
+
+          fn flush(&mut self) -> Result<()> {
+              Ok(())
+          }
+      }
+    #+END_SRC
+
+*** DONE Traits and Other People's Types - 247
+    CLOSED: [2018-06-21 Thu 22:58]
+    - Rust lets you implement ANY /trait/ on ANY /type/,
+      AS LONG AS *either* the /trait/ *or* the /type/ is introduced in the
+      *CURRENT* /crate/.
+
+      This is the /coherence rule/, which helps Rust ensure that /trait/
+      implementations are *unique*.
+
+    - C++ has a similar uniqueness restriction:
+      the /One Definition Rule/. In typical C++ fashion, it isn't enforced by the
+      compiler, except in the simplest cases, and you get /undefined behavior/ if
+      you break it.
+
+    - /Generic implementation/:
+      #+BEGIN_SRC rust
+        use std::io::{self, Write};
+
+        /// Trait for values to which you can send HTML.
+        trait WriteHtml {
+            fn write_html(&mut self, &HtmlDocument) -> io::Result<()>;
+        }
+
+        /// You can write HTML to any std::io writer.
+        impl<W:Write> WriteHtml for W {
+            fn write_html(&mut self, html: &HtmlDocument) -> io::Result<()> {
+                // ...
+            }
+        }
+      #+END_SRC
+
+*** DONE ~Self~ in Traits - 249
+    CLOSED: [2018-06-21 Thu 23:01]
+    Some /methods/ in a /trait/ contains parameters or return values of
+    *corresponding* /type/ in the implementation for a specific /type/. Since
+    you don't have the names of types who will implement this /trait/, we use
+    the name ~Self~, which means this /type/ always matches ~this~.
+
+    =From Jian= As in Scala.
+
+    - Example:
+      #+BEGIN_SRC rust
+        pub trait Clone {
+            fn clone(&self) -> Self;
+
+            // ...
+        }
+      #+END_SRC
+
+    - Example of mis-use ~Self~
+      #+BEGIN_SRC rust
+        pub trait Spliceable {
+            fn splice(&self, other: &Self) -> Self;
+        }
+
+        impl Spliceable for CherryTree {
+            fn splice(&self, other: &Self) -> Self {
+                // ...
+            }
+        }
+
+        impl Spliceable for Mammoth {
+            fn splice(&self, other: &Self) -> Self {
+                // ...
+            }
+        }
+
+        // ERROR: the trait `Spliceable` cannot be made into an object
+        fn splice_anything(left: &Spliceable, right: &Spliceable) {
+            let combo = left.splice(right);
+            // ...
+        }
+      #+END_SRC
+      + The ~splice_anything~ /method/ uses /trait object/, but this is wrong.
+
+        At /compile time/, the compiler cannot know the exact types of ~left~ and
+        ~right~, and it can't check the compatibility of the two ~Self~'s of
+        each parameter (their types can be one of ~CherryTree~ or ~Mammoth~).
+
+        * =IMPORTANT=
+          /Trait objects/ are _really intended for_ the SIMPLEST kinds of /traits/,
+          the kinds that could be implemented using /interfaces/ in Java or
+          abstract base classes in C++.
+            The more ADVANCED FEATURES of /traits/ are useful, but they _can't
+          coexist with_ /trait objects/ because with /trait objects/, you *lose
+          the type information* Rust needs to type-check your program.
+
+      + Now, had we wanted genetically improbable splicing, we could have designed
+        a /trait object/-friendly /trait/:
+        #+BEGIN_SRC rust
+          pub trait MegaSpliceable {
+              fn splice(&self, other: &MegaSpliceable) -> Box<MegaSpliceable>;
+          }
+        #+END_SRC
+        This /trait/ is *COMPATIBLE* with /trait objects/.
+        There's no problem type-checking calls to this ~.splice()~ /method/
+        because the type of the argument other is not required to match the type
+        of ~self~, as long as both types are ~MegaSpliceable~.
+        =Re-Read=
+
+*** DONE Subtraits - 250
+    CLOSED: [2018-06-21 Thu 23:32]
+    You can declare that _a /trait/ is an extension of another /trait/._
+
+    - For example,
+      #+BEGIN_SRC rust
+        /// Someone in the game world, either the player or some other
+        /// pixie, gargoyle, squirrel, ogre, etc.
+        trait Creature: Visible {
+            fn position(&self) -> (i32, i32);
+
+            fn facing(&self) -> Direction;
+
+            // ...
+        }
+      #+END_SRC
+
+      Then every /type/ implements ~Creature~ MUST also implement the ~Visible~:
+      #+BEGIN_SRC rust
+        impl Visible for Broom {
+            // ...
+        }
+
+        impl Creature for Broom {
+            // ...
+        }
+      #+END_SRC
+      + Not only *decouple* /type/ and /traits/, also *decouple* the implementations
+        of /traitS/.
+
+*** DONE Static Methods - 251
+    CLOSED: [2018-06-22 Fri 03:14]
+    NOT like most OOP languages, Rust /trait/ CAN INCLUDE /static methods/ --
+    /methods/ that don't have ~self~ related first parameters.
+
+    - For example:
+      #+BEGIN_SRC rust
+        trait StringSet {
+            /// Return a new empty set.
+            fn new() -> Self;
+
+            /// Return a set that contains all the strings in `strings`.
+            fn from_slice(strings: &[&str]) -> Self;
+
+            /// Find out if this set contains a particular `value`.
+            fn contains(&self, string: &str) -> bool;
+
+            /// Add a string to this set.
+            fn add(&mut self, string: &str);
+        }
+      #+END_SRC
+
+    - As we mentioned before, also like Java and C# interfaces, /trait objects/
+      do _NOT support_ /static methods/.
+
+    - =TODO= =???= =???= =???=
+      If you want to call /static methods/ from a /trait objects/, the ~Self~ in
+      the /trait/ definition must be bound by ~Sized~.
+        This /bound/ tells Rust that /trait objects/ are excused from supporting
+      this /method/. ~StringSet~ /trait objects/ are then allowed; they _still
+      do NOT support_ the TWO /static methods/, but you can *create* them and
+      *use* them to call ~.contains()~ and ~.add()~.
+      =TODO= =???= =???= =???=
+        The same trick works for ANY OTHER /method/ that is _INCOMPATIBLE_ with
+      /trait objects/.
+      =TODO= =???= =???= =???=
+      (We will forgo the rather tedious technical explanation
+      of why this works, but the Sized trait is covered in Chapter 13.)
+      #+BEGIN_SRC rust
+        trait StringSet {
+            fn new() -> Self
+                where Self: Sized;
+
+            fn from_slice(strings: &[&str]) -> Self
+                where Self: Sized;
+
+            fn contains(&self, string: &str) -> bool;
+
+            fn add(&mut self, string: &str);
+        }
+      #+END_SRC
+
+** DONE Fully Qualified Method Calls - 252
+   CLOSED: [2018-06-22 Fri 03:39]
+   - _FOUR_ equivalent calls:
+     #+BEGIN_SRC rust
+       "hello".to_string();
+
+       str::to_string("hello");
+
+       ToString::to_string("hello");
+
+       <str as ToString>::to_string("hello");
+     #+END_SRC
+     + The second form looks exactly _LIKE_ (not "IS") a /static method/ call.
+       Just pass the ~self~ (here it is "hello") as the first argument.
+
+     + Since ~to_string~ is a /method/ of the standard ~ToString~ /trait/,
+       we have the third and the forth.
+
+     + Except the most often used ~"hello".to_string();~,
+       the other forms are called /qualified method calls/.
+
+       * /qualified method calls/ specify the /type/ or /trait/ that a /method/
+         is associated with.
+
+         The forth one, with the angle brackets, specifies both:
+         a /fully qualified method call/.
+
+   - When you write calls like ~"hello".to_string()~, using the ~.~ operator,
+     you do _NOT say exactly which_ ~to_string~ /method/ you're calling.
+       Rust has a _method lookup algorithm_ that figures this out, depending on
+     the types, deref coercions, and so on.
+       With /fully qualified calls/, you can say *EXACTLY* which method you mean,
+     and *that can help in a few odd cases*.
+     + When more than one /methods/ have the *SAME NAME*.
+       For example, ~Outlaw~ has two ~.draw()~ /methods/ from _TWO_ different
+       /traits/, one for drawing it on the screen and one for interacting with
+       the law:
+       #+BEGIN_SRC rust
+         outlaw.draw();  // error: draw on screen or draw pistol?
+
+         Visible::draw(&outlaw);  // ok: draw on screen
+         HasPistol::draw(&outlaw);  // ok: corral
+       #+END_SRC
+
+     + When the type of the ~self~ argument *CANNOT be inferred*:
+       #+BEGIN_SRC rust
+         let zero = 0;  // type unspecified; could be `i8`, `u8`, ...
+
+         zero.abs();  // error: method `abs` not found
+         i64::abs(zero);  // ok
+       #+END_SRC
+       =From Jian= this is just a example for illustration, in the real world, you
+       may prefer write the declaration as ~let zero = 0_i64;~
+
+     + When using the function itself as a function value:
+       =From Jian= I think this is often used!!!
+       =IMPORTANT=
+       #+BEGIN_SRC rust
+         let words: Vec<String> =
+             line.split_whitespace()  // iterator produces `&str` values
+                 .map(<str as ToString>::to_string)  // ok
+                 .collect();
+       #+END_SRC
+
+     + When calling /trait methods/ in /macros/.
+       =TODO= We'll explain in Chapter 20.
+
+   - /Fully qualified syntax/ also works for /static methods/.
+     In the previous section, we wrote ~S::new()~ to create a new set in a
+     /generic function/.
+       We could also have written ~StringSet::new()~ or ~<S as StringSet>::new()~.
+
 ** TODO Traits That Define Relationships Between Types - 253
-*** TODO Associated Types (or How Iterators Work) - 254
-*** TODO Generic Traits (or How Operator Overloading Works) - 257
+*** DONE Associated Types (or How Iterators Work) - 254
+    CLOSED: [2018-06-23 Sat 01:50]
+    Example:
+    #+BEGIN_SRC rust
+      pub trait Iterator {
+          type Item;
+
+          fn next(&mut self) -> Option<Self::Item>;
+
+          // ...
+      }
+    #+END_SRC
+    - The ~Item~ is called /associated type/.
+
+    - We write ~Self::Item~, not just plain ~Item~,
+      BECAUSE ~Item~ is a feature of _EACH_ type of /iterator/, *NOT a
+      standalone type*.
+
+    - Implement ~Iterator~ for a type:
+      #+BEGIN_SRC rust
+        // (code from the std::env standard library module)
+        impl Iterator for Args {
+            type Item = String;
+
+            fn next(&mut self) -> Option<String> {
+                // ...
+            }
+            // ...
+        }
+      #+END_SRC
+
+    - Generic code can use associated types:
+      #+BEGIN_SRC rust
+        /// Loop over an iterator, storing the values in a new vector.
+        fn collect_into_vector<I: Iterator>(iter: I) -> Vec<I::Item> {
+            let mut results = Vec::new();
+
+            for value in iter {
+                results.push(value);
+            }
+            results
+        }
+      #+END_SRC
+      + this is actually the ~.collect()~ /method/ in the standard library.
+        =From Jian= I don't know if the details are same.
+
+    - Another example:
+      #+BEGIN_SRC rust
+        /// Print out all the values produced by an iterator
+        fn dump<I>(iter: I)
+            where I: Iterator
+        {
+            for (index, value) in iter.enumerate() {
+                println!("{}: {:?}", index, value);  // error
+            }
+        }
+
+        // error[E0277]: the trait bound `<I as std::iter::Iterator>::Item:
+        //               std::fmt::Debug` is not satisfied
+        //     --> traits_dump.rs:10:37
+        //     |
+        //  10
+        //     |                             ^^^^^ the trait `std::fmt::Debug`
+        //     |                             is not implemented for
+        //     |                             `<I as std::iter::Iterator>::Item`
+        //     |
+        //     = help: consider adding a
+        //             `where <I as std::iter::Iterator>::Item: std::fmt::Debug` bound
+        //     = note: required by `std::fmt::Debug::fmt`
+      #+END_SRC
+      What you need to do to eliminate this error:
+      + ~use std::fmt::Debug;~
+        and
+      + re-write the ~where~ line to ~where I: Iterator, I::Item: Debug~
+        OR
+        specify the ~I::Item~ exact type with ~where I: Iterator<Item=String>~
+
+        * This ~where I: Iterator<Item=String>~ syntax can be used *ANYWHERE* the
+          name of a /trait/ can be used, including trait object types:
+          #+BEGIN_SRC rust
+            fn dump(iter: &mut Iterator<Item=String>) {
+                for (index, s) in iter.enumerate() {
+                    println!("{}: {:?}", index, s);
+                }
+            }
+          #+END_SRC
+
+          This syntax can be used anywhere the name of a /trait/ can be used,
+          including /trait object/ types:
+          #+BEGIN_SRC rust
+            fn dump(iter: &mut Iterator<Item=String>) {
+                for (index, s) in iter.enumerate() {
+                    println!("{}: {:?}", index, s);
+                }
+            }
+          #+END_SRC
+
+    - /Associated types/ are generally useful WHENEVER a /trait/ needs to cover
+      _more than just /methods/._
+      + In a /thread pool library/, a ~Task~ /trait/,
+        _REPRESENTING_ a unit of work, could have an /associated ~Output~ type/.
+        =TODO= =???=
+
+      + A ~Pattern~ trait, representing a way of searching a string, could have
+        an /associated ~Match~ type/,
+        _REPRESENTING_ all the information gathered by matching the pattern to
+        the string.
+        #+BEGIN_SRC rust
+          trait Pattern {
+              type Match;
+
+              fn search(&self, string: &str) -> Option<Self::Match>;
+          }
+
+          /// You can search a string for a particular character.
+          impl Pattern for char {
+              /// A "match" is just the location where the
+              /// character was found.
+              type Match = usize;
+
+              fn search(&self, string: &str) -> Option<usize> {
+                  // ...
+              }
+          }
+        #+END_SRC
+
+      + A library for working with relational databases might have a /Database
+        Connection trait/ with /associated types/ _REPRESENTING_ transactions,
+        cursors, prepared statements, and so on.
+
+    - /Associated types/ are perfect for cases where each implementation has one
+      specific related type:
+      each type of ~Task~ produces a particular type of ~Output~;
+      each type of ~Pattern~ looks for a particular type of ~Match~.
+
+      =TODO= =???=
+      However, as we'll see, some relationships among types are not like this.
+
+*** DONE Generic Traits (or How Operator Overloading Works) - 257
+    CLOSED: [2018-06-23 Sat 02:00]
+    #+BEGIN_SRC rust
+      /// std::ops::Mul, the trait for types that support `*`.
+      pub trait Mul<RHS> {
+          /// The resulting type after applying the `*` operator
+          type Output;
+
+          /// The method for the `*` operator
+          fn mul(self, rhs: RHS) -> Self::Output;
+      }
+    #+END_SRC
+    This is just a illustration of /generic traits/, the real ~Mul~ /trait/ looks
+    like this:
+    #+BEGIN_SRC rust
+      pub trait Mul<RHS=Self> {
+          // ...
+      }
+    #+END_SRC
+
 *** TODO Buddy Traits (or How ~rand::random()~ Works) - 258
 
 ** TODO Reverse-Engineering Bounds - 260
-** TODO Conclusion - 263
+** DONE Conclusion - 263
+   CLOSED: [2018-06-22 Fri 03:41]
 
 * TODO 12. Operator Overloading - 265 - =Reading=
   - Table 12-1. Summary of /traits/ for /operator overloading/
@@ -6722,8 +7160,84 @@
      =IMPORTANT=
 
 ** TODO ~Vec<T>~ - 361
-*** TODO Accessing Elements - 362
-*** TODO Iteration - 364
+   - Three ways to create vectors with the ~vec!~ macro:
+     + ~let mut numbers: Vec<i32> = vec![];~
+
+     + ~let words = vec!["step", "on", "no", "pets"];~
+
+     + ~let mut buffer = vec![0u8; 1024];~
+
+   - A vector has *three* fields: =See Figure 16-1=
+     + the /length/
+     + the /capacity/
+     + a /pointer/ to a /heap/ allocation where the elements are stored.
+
+   - The /empty vector/, initially has a capacity of 0. *NO* /heap/ memory is
+     allocated for it _UNTIL_ the first element is added.
+
+   - Like all /collections/, ~Vec~ implements ~std::iter::FromIterator~, so you
+     can create a /vector/ from any /iterator/ using the /iterator/'s ~.collect()~
+     /method/.
+
+*** DONE Accessing Elements - 362
+    CLOSED: [2018-06-22 Fri 04:19]
+    - Getting elements of an /array/, /slice/, or /vector/ by index is straight-
+      forward:
+      #+BEGIN_SRC rust
+        // Get a reference to an element
+        let first_line = &lines[0];
+
+        // Get a copy of an element
+        let fifth_number = numbers[4];       // requires Copy
+        let second_line = lines[1].clone();  // requires Clone
+
+        // Get a reference to a slice
+        let my_ref = &buffer[4..12];
+
+        // Get a copy of a slice
+        let my_copy = buffer[4..12].to_vec();  // requires Clone
+      #+END_SRC
+      + /Panic/ if an index is out of bounds.
+
+    - Methods:
+      + ~slice.first()~, ~slice.last()~, and ~slice.get(index)~
+        If the item type is ~T~, the return type of this /method/ is ~Option<&T>~.
+
+      + ~slice.first_mut()~, ~slice.last_mut()~, and ~slice.get_mut(index)~
+        The variations of these that /borrow/ ~mut~ /references/.
+        If the item type is ~T~, the return type of this /method/ is ~Option<&mut T>~.
+
+      + The /mothods/ above return /references/ of value include /references/.
+        The /method/ below make copies.
+
+      + ~slice.to_vec()~
+        *Clone* a whole /slice/, returning a new /vector/.
+        Only available if the ellements are clonable -- ~where T: Clone~.
+
+*** DONE Iteration - 364
+    CLOSED: [2018-06-22 Fri 04:09]
+    - /Vectors/ and /slices/ are /iterable/, either /BY value/ or /BY reference/,
+      following the pattern described in "IntoIterator Implementations" on page 325.
+      + Iterating over a ~Vec<T>~ produces items of type ~T~.
+        The elements are *moved out* of the /vector/ one by one, consuming it.
+
+      + Iterating over a value of type ~&[T; N]~ , ~&[T]~ , or ~&Vec<T>~ -- that
+        is, a /reference/ to an /array/, /slice/, or /vector/ -- produces items
+        of type ~&T~, /references/ to the individual elements, which are *NOT moved*.
+
+      + Iterating over a value of type ~&mut [T; N]~, ~&mut [T]~, or ~&mut Vec<T>~
+        produces items of type ~&mut T~.
+
+      =From Jian=
+      the way you use the whole /collection/ decide the way you use their /items/.
+
+    - /Arrays/, /slices/, and /vectors/ also have ~.iter()~ and ~.iter_mut()~
+      /methods/ (described in "~iter~ and ~iter_mut~ Methods" on page 324) for
+      creating /iterators/ that produce /references/ to their elements.
+
+    - =TODO=
+      We'll cover some fancier ways to iterate over a slice in "Splitting" on page 368.
+
 *** TODO Growing and Shrinking Vectors - 364
 *** DONE Joining - 367
     CLOSED: [2018-06-13 Wed 17:25]
@@ -6763,6 +7277,33 @@
       vector.*
 
 *** TODO Sorting and Searching - 370
+    - /Slices/ offer *three* /methods/ for sorting:
+      + ~slice.sort()~
+        NOTE
+
+      + ~slice.sort_by(cmp)~
+        NOTE
+
+      + ~slice.sort_by_key(key)~
+        NOTE
+
+      All *three* /methods/ perform a /stable sort/.
+
+    - ~slice.reverse()~
+
+    - Once a /slice/ is sorted, it can be efficiently searched:
+      + ~slice.binary_search(&value)~, ~slice.binary_search_by(&value, cmp)~, and
+        ~slice.binary_search_by_key(&value, key)~
+        NOTE
+
+    - One /method/ for searching a /vector/ that is _NOT sorted_:
+      + ~slice.contains(&value)~
+        NOTE
+
+    - To _find the location_ of a value in a /slice/, like ~array.indexOf(value)~
+      in JavaScript, use an /iterator/: ~slice.iter().position(|x| *x == value)~
+      This returns an ~Option<usize>~.
+
 *** DONE Comparing Slices - 372
     CLOSED: [2018-06-13 Wed 18:15]
     - If a type ~T~ implements ~PartialEq~ /trait/ (~==~ and ~!=~) or
@@ -6786,7 +7327,29 @@
         Example:
         ~assert_eq!([1, 2, 3, 4].ends_with(&[3, 4]), true);~
 
-*** TODO Random Elements - 373
+*** DONE Random Elements - 373
+    CLOSED: [2018-06-22 Fri 04:36]
+    Use ~rand~ /crate/, which is external, but it is maintained by the official
+    Rust team.
+    - The ~rand~ /crate/ offers two /methods/ for getting random output from an
+      /array/, /slice/, or /vector/:
+
+      + ~rng.choose(slice)~ returns a /reference/ to a _random element_ of a /slice/.
+        Like ~slice.first()~ and ~slice.last()~, this returns an ~Option<&T>~ that
+        is ~None~ only if the /slice/ is empty.
+
+      + ~rng.shuffle(slice)~ _randomly reorders_ the elements of a /slice/ _IN PLACE_.
+        The /slice/ _MUST_ be passed by ~mut~ /reference/.
+
+    You can use ~rand::thread_rng()~ to get a random number generator that
+    implements the ~rand::Rng~ /trait/. To call the /methods/ of this generator,
+    you need to _import_ ~rand::Rng~. For example, shuffle the vector ~my_vec~:
+    #+BEGIN_SRC rust
+      use rand::{Rng, thread_rng};
+
+      thread_rng().shuffle(&mut my_vec);
+    #+END_SRC
+
 *** TODO Rust Rules Out Invalidation Errors - 373
 
 ** TODO ~VecDeque<T>~ - 374
@@ -6808,6 +7371,10 @@
    CLOSED: [2018-06-13 Wed 18:28]
    - Rust collection, as much of Rust standard library, they're designed to ensure
      that the need to write ~unsafe~ is as rare as possible.
+
+     =From Jian=
+     This also means in the Rust standard library collection implementations source
+     code, there are a lot ~unsafe~ code, usually for efficiency.
 
 * TODO 17. Strings and Text - 391
 ** TODO Some Unicode Background - 392
