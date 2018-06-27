@@ -105,7 +105,7 @@
     - [[Handling Errors in ~main()~ - 156][Handling Errors in ~main()~ - 156]]
     - [[Declaring a Custom Error Type - 157][Declaring a Custom Error Type - 157]]
     - [[Why Results? - 158][Why Results? - 158]]
-- [[8. Crates and Modules - 161][8. Crates and Modules - 161]]
+- [[8. Crates and Modules - 161 - =Reading=][8. Crates and Modules - 161 - =Reading=]]
   - [[Crates - 161][Crates - 161]]
     - [[Build Profiles - 164][Build Profiles - 164]]
   - [[Modules - 165][Modules - 165]]
@@ -171,7 +171,7 @@
     - [[Buddy Traits (or How ~rand::random()~ Works) - 258][Buddy Traits (or How ~rand::random()~ Works) - 258]]
   - [[Reverse-Engineering Bounds - 260][Reverse-Engineering Bounds - 260]]
   - [[Conclusion - 263][Conclusion - 263]]
-- [[12. Operator Overloading - 265 - =Reading=][12. Operator Overloading - 265 - =Reading=]]
+- [[12. Operator Overloading - 265][12. Operator Overloading - 265]]
   - [[Arithmetic and Bitwise Operators - 266][Arithmetic and Bitwise Operators - 266]]
     - [[Unary Operators - 268][Unary Operators - 268]]
     - [[Binary Operators - 269][Binary Operators - 269]]
@@ -2972,7 +2972,8 @@
 ** DONE Onward - 142
    CLOSED: [2018-05-23 Wed 22:43]
    
-* TODO 7. Error Handling - 145
+* DONE 7. Error Handling - 145
+  CLOSED: [2018-06-25 Mon 02:48]
   - There are two kinds of errors-handling in Rust:
     + /panic/
 
@@ -3056,7 +3057,8 @@
 
 *** TODO Aborting - 147
 
-** TODO Result - 148
+** DONE Result - 148
+   CLOSED: [2018-06-25 Mon 02:48]
    - Rust does NOT have /exception/!
      Instead, /functions/ that can fail have a /return type/ that says so.
      For instance,
@@ -3159,12 +3161,246 @@
 
       It uses the ~backtrace~ /crate/ to capture the stack.
 
-*** TODO Propagating Errors - 152
-*** TODO Working with Multiple Error Types - 153
-*** TODO Dealing with Errors That "Can't Happen" - 155
-*** TODO Ignoring Errors - 156
-*** TODO Handling Errors in ~main()~ - 156
-*** TODO Declaring a Custom Error Type - 157
+*** DONE Propagating Errors - 152
+    CLOSED: [2018-06-25 Mon 00:52]
+    - The behavior of ~?~ depends on whether this function returns a _success
+      result_ or an _error result_ (*To ensure that this works, ~?~ can only be
+      used in functions that have a ~Result~ return type*):
+      + On success
+        it /unwraps/ the ~Result~ to get the /success value/ inside.
+        The type of weather here is not ~Result<WeatherReport, io::Error>~ but
+        simply ~WeatherReport~.
+
+      + On error
+        it immediately returns from the enclosing function, passing the error
+        result up the call chain.
+
+    - The behavior of ~?~ is like
+      #+BEGIN_SRC rust
+        let weather = match get_weather(hometown) {
+            Ok(success_value) => success_value,
+            Err(err) => return Err(err)
+        }
+      #+END_SRC
+      + The _ONLY differences_ between this and the ~?~ operator are some fine points
+        involving types and conversions.
+        =TODO=
+        We'll cover those details in the next section.
+
+    - Legacy code:
+      ~try!()~ was introduced in Rust 1.13.
+      ~let weather = try!(get_weather(hometown));~
+      This /macro/ expands to the pattern matching above.
+
+    - Error handling is sometimes pervasive in your program:
+      #+BEGIN_SRC rust
+        use std::fs;
+        use std::io;
+        use std::path::Path;
+
+        for move_all(src: &Path, dst: &Path) -> io::Result<()> {
+            for entry_result in src.read_dir()? {  // opening dir could fail
+                let entry = entry_result?;         // reading dir could fail
+                let dst_file = dst.join(entry.file_name());
+                fs::rename(entry.path(), dst_file)?;  // renaming could fail
+            }
+            Ok(())  // phew!
+        }
+      #+END_SRC
+
+*** DONE Working with Multiple Error Types - 153
+    CLOSED: [2018-06-25 Mon 01:53]
+    Example code:
+    #+BEGIN_SRC rust
+      use std::io::{self, BufRead};
+
+      /// Read integers from a text file.
+      /// The file should have one number on each line.
+      fn read_numbers(file: &mut BufRead) -> Result<Vec<i64>, io::Error> {
+          let mut numbers = vec![];
+          for line_result in file.lines() {
+              let line = line_result?;      // reading lines can fail
+              numbers.push(line.parse()?);  // parsing integers can fail
+          }
+          Ok(numbers)
+      }
+
+      /// numbers.push(line.parse()?);     // parsing integers can fail
+      ///              ^^^^^^^^^^^^^ the trait `std::convert::From<std::num::ParseIntError>`
+      ///                            is not implemented for `std::io::Error`
+    #+END_SRC
+    - In Chapter 2, the Mandelbrot set example, we define a ~ImageError~, and
+      implements conversions from ~io::Error~ and several other error types to
+      ~ImageError~.
+
+      If you prefer this way, you can use the ~errorchain~ /crate/, which is
+      designed to help you define good error types with just a few lines of
+      code.
+
+    - You can use a /trait object/ and /generics/ to save the used errors to
+      an error type you defined.
+      #+BEGIN_SRC rust
+        type GenError = Box<std::error::Error>;
+        type GenResult<T> = Result<T, GenError>;
+      #+END_SRC
+      Then change the return type of ~read_numbers()~ to ~GenResult<Vec<i64>>~.
+
+      + Incidentally, the ~?~ operator does this /automatic conversion/ using a
+        standard method that you can use yourself. To convert any error to the
+        GenError type, call
+        #+BEGIN_SRC rust
+          GenError::from() :
+          let io_error = io::Error::new(          // make our own io::Error
+              io::ErrorKind::Other, "timed out");
+          return Err(GenError::from(io_error));   // manually convert to GenError
+        #+END_SRC
+        =TODO= We'll cover the ~From~ /trait/ and its ~from()~ /method/ fully in
+        Chapter 13.
+
+      + The *Downside* of this method is:
+        the /return type/ NO LONGER *communicates* precisely what kinds of errors
+        the caller can expect. _The caller must be ready for anything._
+
+      + If you're calling a function that returns a ~GenResult~, and you want to
+        *handle _one_ particular kind of error, but let _all others_ propagate out*,
+
+        use the generic method ~error.downcast_ref::<ErrorType>()~. It borrows a
+        reference to the error, if it happens to be the particular type of error
+        you're looking for:
+        #+BEGIN_SRC rust
+          loop {
+              match compile_project() {
+                  Ok(()) => return Ok(()),
+                  Err(err) => {
+                      if let Some(mse) = err.downcast_ref::<MissingSemicolonError>() {
+                          insert_semicolon_in_source_code(mse.file(), mse.line())?;
+                          continue; // try again!
+                      }
+                      return Err(err);
+                  }
+              }
+          }
+        #+END_SRC
+        Many languages have built-in syntax to do this, but it turns out to be
+        rarely needed. Rust has a method for it instead.
+        =TODO= =RE-READ= !!!
+
+*** DONE Dealing with Errors That "Can't Happen" - 155
+    CLOSED: [2018-06-25 Mon 02:12]
+    Use the ~.unwrap()~ /mehtod/. If we are wrong, and the error CAN happend,
+    then we would /panic/.
+
+    For example, the ~Write~ /trait/ defines a common set of /methods/ (~.write()~
+    and others) for text and binary output. All of those /methods/ return ~io::Result~'s,
+    but if you happend to be writing to a ~Vec<u8>~, they can't fail. In such cases,
+    it's acceptable to use ~.unwrap()~ or ~.expect(message)~ to dispensse with the
+    ~Result~'s.
+
+*** DONE Ignoring Errors - 156
+    CLOSED: [2018-06-25 Mon 00:55]
+    For example, the call to ~writeln!~ can have error. If you want to ignore it
+    without getting any warnings, try:
+    ~let _ = writeln!(stderr(), "error: {}", err);  // ok, ignore result~
+
+*** DONE Handling Errors in ~main()~ - 156
+    CLOSED: [2018-06-25 Mon 02:24]
+    - In _most places_ where a ~Result~ is produced,
+      letting the error bubble up to the /caller/ is the *right behavior*.
+        This is why ~?~ is a single character in Rust. As we've seen, in some
+      programs it's used on many lines of code in a row.
+
+    - Before Rust 1.26, you can't use ~?~ in the ~main()~ function, whose /return
+      type/ cannot be ~Result~.
+
+      =From Jian= This book is published before Rust 1.26.
+      Since Rust 1.26, the ~main()~ function can be of ~Result~ /return type/,
+      and you can use ~?~ in it.
+
+    - For the cases of prior to Rust 1.26, you can use ~.expect()~ /method/.
+      If this call returns an error result, the ~.expect()~ /method/ /panics/.
+
+      Panicking in the main thread prints an error message, then exists with a
+      *nonzero exit code*, which is roughly the desired behavior.
+
+    - For example,
+      #+BEGIN_SRC rust
+        fn main() {
+            calculate_tides().expect("error");  // the buck stops here
+        }
+      #+END_SRC
+      The error message is lost in the noise.
+      #+BEGIN_SRC bash
+        # $ tidecalc --planet mercury
+
+        ##   thread 'main' panicked at 'error: "moon not found"', /buildslave/rust-buildbot/s
+        ##   lave/nightly-dist-rustc-linux/build/src/libcore/result.rs:837
+        ##   note: Run with `RUST_BACKTRACE=1` for a backtrace.
+      #+END_SRC
+
+      The ~RUST_BACKTRACE=1~ here is bad advice in this particular case.
+      You should print it out by yourself, and get a nice and tidy output:
+      #+BEGIN_SRC rust
+        fn main() {
+            if let Err(err) = calculate_tides() {
+                print_error(&err);
+                std::process::exit(1);
+            }
+        }
+        // $
+        // tidecalc --planet mercury
+        //
+        /// error: moon not found
+      #+END_SRC
+
+*** DONE Declaring a Custom Error Type - 157
+    CLOSED: [2018-06-25 Mon 02:48]
+    - Define a basic version, and use ~Err~ to convert it to an ~std::error::Error~:
+      #+BEGIN_SRC rust
+        // json/src/error.rs
+        #[derive(Debug, Clone)]
+        pub struct JsonError {
+            pub message: String,
+            pub line: usize,
+            pub column: usize,
+        }
+
+        // inside a function
+        // ...
+           return Err(JsonError {
+               message: "expected ']' at end of array".to_string(),
+               line: current_line,
+               column: current_column
+           });
+        // ...
+      #+END_SRC
+
+    - Define a standard error types:
+      #+BEGIN_SRC rust
+        use std;
+        use std::fmt;
+
+        #[derive(Debug, Clone)]
+        pub struct JsonError {
+            pub message: String,
+            pub line: usize,
+            pub column: usize,
+        }
+
+        // Errors should be printable.
+        impl fmt::Display for JsonError {
+            fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+                write!(f, "{} ({}:{})", self.message, self.line, self.column)
+            }
+        }
+
+        // Errors should implement the std::error::Error trait.
+        impl std::error::Error for JsonError {
+            fn description(&self) -> &str {
+                &self.message
+            }
+        }
+      #+END_SRC
+
 *** DONE Why Results? - 158
     CLOSED: [2018-06-10 Sun 14:19]
     Here are the key points of the design:
@@ -3198,7 +3434,7 @@
       most will succeed, but some will fail, you can represent that situation in
       memory using a vector of ~Result~'s.
 
-* TODO 8. Crates and Modules - 161
+* TODO 8. Crates and Modules - 161 - =Reading=
   - This chapter covers the features of Rust that help keep your program organized:
     /crates/ and /modules/.
 
@@ -3892,6 +4128,8 @@
      it.
 
 ** TODO Tests and Documentation - 178
+   - A SIMPLE /unit testing framework/ is *built into* Rust.
+
    - tests :: /ordinary functions/ marked with the ~#[test]~ /attribute/.
 
    - For example,
@@ -3916,19 +4154,20 @@
        #
        # test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured
      #+END_SRC
-     =TODO= You'll also see some output about “doc-tests,” which we’ll get to in
-     a minute.
+     You'll also see some output about /doc-tests/, which we'll get to in this
+     section in a minute.
 
-   - This works the same whether your /crate/ is an /executable/ or a /library/.
+   - This *works the _same_ WHETHER* your /crate/ is an /executable/ or a /library/.
 
-   - Use command like =cargo test math= to run tests that contains the word "math".
+   - Use command like =cargo test math= to run tests that contains the word ="math"=.
 
    - ~assert!(expr)~
 
    - ~assert_eq!(v1, v2)~ is just like ~assert!(v1 == v2)~,
-     except that if the /assertion/ fails, the error message shows both values.
+     _EXCEPT_ that if the /assertion/ fails, the error message shows both values.
 
-   - ~assert!~ and ~assert_eq!~ are even used in /release builds/.
+   - You can use these /macros/ in ordinary code, to *check /invariants/,*
+     but note that ~assert!~ and ~assert_eq!~ are even used in /release builds/.
 
      Use ~debug_assert!~ and ~debug_assert_eq!~ if you only want them in /debug
      builds/.
@@ -3946,14 +4185,13 @@
        }
      #+END_SRC
 
-   - =cargo build --release= skip the testing code.
+   - =cargo build --release= *skip* the testing code.
 
    - By convention, when your tests get substantial enough to require support
      code, is to put them in a ~tests~ /module/ and declare the WHOLE /module/
      to be testing-only using the ~#[cfg(test)]~ /attribute/:
      #+BEGIN_SRC rust
-       #[cfg(test)]
-       // include this module only when testing
+       #[cfg(test)]   // include this module only when testing
        mod tests {
            fn roughly_equal(a: f64, b: f64) -> bool {
                (a - b).abs() < 1e-6
@@ -3966,6 +4204,9 @@
            }
        }
      #+END_SRC
+     If you don't do this, in a /nontesting build/, ~roughly_equal~ is unused,
+     and you will receive a warning like:
+     ~warning: function is never used: `roughly_equal`~
 
    - /Rust's test/ harness uses _multiple threads_ to run several tests at a time,
      a nice side benefit of your Rust code being *thread-safe by default*.
@@ -3973,11 +4214,45 @@
      To disable this,
      + either run a single test, =cargo test testname=;
        or
-     + set the /environment variable/ ~RUST_TEST_THREADS~ to ~1.~
+     + set the /environment variable/ ~RUST_TEST_THREADS~ to ~1~.
 
+*** DONE Integration Tests - 180
+    CLOSED: [2018-06-25 Mon 23:20]
+    - Integration tests :: =.rs= files that live in a =tests= directory _alongside_
+         your project's =src= directory.
 
+    - When you run =cargo test=, Cargo compiles each /integration test/ as a *SEPARATE,
+      STANDALONE /crate/,* linked with your library and the Rust test harness. 
 
-*** TODO Integration Tests - 180
+      Example:
+      #+BEGIN_SRC rust
+        // tests/unfurl.rs - Fiddleheads unfurl in sunlight
+
+        extern crate fern_sim;
+        use fern_sim::Terrarium;
+        use std::time::Duration;
+
+        #[test]
+        fn test_fiddlehead_unfurling() {
+            let mut world = Terrarium::load("tests/unfurl_files/fiddlehead.tm");
+            assert!(world.fern(0).is_furled());
+            let one_hour = Duration::from_secs(60 * 60);
+            world.apply_sunlight(one_hour);
+            assert!(world.fern(0).is_fully_unfurled());
+        }
+      #+END_SRC
+
+      + The point of /integration tests/ is that they see your /crate/ *from the
+        outside*, just as a user would. *They test the /crate/'s /public API/.*
+
+        This is why we did _NOT_ put the /integration tests/ in to the ~fern_sim~
+        project, and use the ~extern crate fern_sim;~.
+
+    - ~cargo test~ runs *BOTH* /unit tests/ and /integration tests/.
+
+      Use ~cargo test --test unfurl~ to run the /integration tests/ in the
+      particular file =tests/unfurl.rs=.
+
 *** TODO Documentation - 181
 *** TODO Doc-Tests - 182
 
@@ -5977,11 +6252,109 @@
 
 *** TODO Buddy Traits (or How ~rand::random()~ Works) - 258
 
-** TODO Reverse-Engineering Bounds - 260
+** DONE Reverse-Engineering Bounds - 260
+   CLOSED: [2018-06-24 Sun 23:00]
+   Sometimes you don't what /traits/ you need to implements some generics, and
+   you can use the compiler error messages as a guide to complete your code.
+
+   Suppose we have:
+   #+BEGIN_SRC rust
+     fn dot(v1: &[i64], v2: &[i64]) -> i64 {
+         let mut total = 0;
+         for i in 0 .. v1.len() {
+             total = total + v1[i] * v2[i];
+         }
+         total
+     }
+   #+END_SRC
+   You want a generics version to support some other numeric types.
+   - Step 1: Replace the type with type parameters (non-compilable)
+     #+BEGIN_SRC rust
+       fn dot<N>(v1: &[N], v2: &[N]) -> N {
+           let mut total = 0;
+           for i in 0 .. v1.len() {
+               total = total + v1[i] * v2[i];
+           }
+           total
+       }
+     #+END_SRC
+     Try to compile, and Rust complains about the use of ~+~ and ~*~ and the
+     type of ~0~. These problem can be solve by using ~Add~, ~Mul~, and
+     ~Default~ as bounds of ~N~.
+
+   - Step 2: Add bounds
+     #+BEGIN_SRC rust
+       use std::ops::{Add, Mul};
+
+       fn dot<N: Add + Mul + Default>(v1: &[N], v2: &[N]) -> N {
+           let mut total = N::default();
+           for i in 0 .. v1.len() {
+               total = total + v1[i] * v2[i];
+           }
+           total
+       }
+     #+END_SRC
+     ~Add~ and ~Mul~ has no promise about the output type.
+
+   - Step 3: Add constraint to the output types.
+     #+BEGIN_SRC rust
+       use std::ops::{Add, Mul};
+
+       fn dot<N>(v1: &[N], v2: &[N]) -> N
+           where N: Add<Output=N> + Mul<Output=N> + Default
+       {
+           let mut total = N::default();
+           for i in 0 .. v1.len() {
+               total = total + v1[i] * v2[i];
+           }
+           total
+       }
+     #+END_SRC
+     Try to compile, and the error message is =cannot move out of there=
+
+   - Step 4: Add ~Copy~ as a bound
+     #+BEGIN_SRC rust
+       use std::ops::{Add, Mul};
+
+       fn dot<N>(v1: &[N], v2: &[N]) -> N
+           where N: Add<Output=N> + Mul<Output=N> + Default + Copy
+       {
+           let mut total = N::default();
+           for i in 0 .. v1.len() {
+               total = total + v1[i] * v2[i];
+           }
+           total
+       }
+     #+END_SRC
+
+   - Discussion:
+     Rust has no single ~Number~ /trait/ in the standard library that included
+     all the operators and methods we wanted to use.
+       There's a popular open source crate called ~num~ that defines such a
+     /trait/! Add it to the =Cargo.toml= and written:
+     #+BEGIN_SRC rust
+       extern crate num;
+       use num::Num;
+
+       fn dot<N: Num + Copy>(v1: &[N], v2: &[N]) -> N {
+           let mut total = N::zero();
+           for i in 0 .. v1.len() {
+               total = total + v1[i] * v2[i];
+           }
+           total
+       }
+     #+END_SRC
+
+     + Still, why go to all this trouble?
+       Why didn’t Rust’s designers make the generics more like C++ templates,
+       where the constraints are left implicit in the code, à la “duck typing?”
+       =Re-Read= =Page 263=
+
 ** DONE Conclusion - 263
    CLOSED: [2018-06-22 Fri 03:41]
 
-* TODO 12. Operator Overloading - 265 - =Reading=
+* DONE 12. Operator Overloading - 265
+  CLOSED: [2018-06-25 Mon 18:06]
   - Table 12-1. Summary of /traits/ for /operator overloading/
     =From Jian= Categories:
     + Unary operators
@@ -6232,9 +6605,202 @@
       they do NOT default their ~RHS~ /type parameter/ to ~Self~ , so you MUST
       ALWAYS supply the righthand operand type EXPLICITLY.
 
-** TODO Equality Tests - 272
-** TODO Ordered Comparisons - 275
-** TODO ~Index~ and ~IndexMut~ - 277
+** DONE Equality Tests - 272
+   CLOSED: [2018-06-25 Mon 03:28]
+   Rust's equality operators, ~==~ and ~!=~, are shorthand for calls to the
+   ~std::cmp::PartialEq~ /trait/'s ~eq~ and ~ne~ /methods/:
+   ~assert_eq!(x \equal{}\equal{} y, x.eq(&y));~
+   ~assert_eq!(x != y, x.ne(&y));~
+
+   - Definition of ~std::cmp::PartialEq~:
+     #+BEGIN_SRC rust
+       trait PartialEq<Rhs: ?Sized = Self> {
+           fn eq(&self, other: &Rhs) -> bool;
+           fn ne(&self, other: &Rhs) -> bool { !self.eq(other)}
+       }
+     #+END_SRC
+
+   - A complete implementation of ~PartialEq~ for ~Complext~
+     #+BEGIN_SRC rust
+       impl<T: PartialEq> PartialEq for Complex<T> {
+           fn eq(&self, other: &Complex<T>) -> bool {
+               self.re == other.re && self.im == other.im
+           }
+       }
+     #+END_SRC
+
+   - Rust does NOT have inheritance, and the equality definition is simple.
+     You can ask Rust to generate an implementation of ~PartialEq~ for you
+     automatically with the ~#[derive]~ /attribute/.
+
+     The ONLY requirement is that each of the new type field should have
+     implemented ~PartialEq~.
+
+   - UNLIKE the /arithmetic and bitwise traits/, which take their operands /by value/,
+     ~PartialEq~ takes its operands /by reference/ -- even non-~Copy~ values won't
+     be moved.
+
+   - ~where Rhs: ?Sized~ *relaxes* Rust's _usual requirement_ that /type parameters/
+     must be /sized types/, letting us write /traits/ like ~PartialEq<str>~ or
+     ~PartialEq<[T]>~.
+
+   - WHY do we name this /trait/ ~PartialEq~ rather than ~Eq~ or ~Equal~???
+     + The definition in mathematics of *the equivalence relation* imposes three
+       requirements: for ANY values x and y
+       * x \equal{}\equal{} y         <===>         y \equal{}\equal{} x
+
+       * x \equal{}\equal{} y and y \equal{}\equal{} z         <===>         x \equal{}\equal{} z
+
+       * x \equal{}\equal{} x
+
+     + Because of the IEEE standard, floating-point values have ~NaN~'s, which
+       _does NOT satisfy_ the third requirement!
+       * NaN != NaN
+
+       * NaN < NaN \equal{}\equal{} false
+         NaN > NaN \equal{}\equal{} false
+         NaN <= NaN \equal{}\equal{} false
+         NaN >= NaN \equal{}\equal{} false
+
+   - There is a /trait/ ~std::cmp::Eq~, and it is the /subtrait/ of ~PartialEq~.
+     It does NOT have additional /methods/. Even though, NO new /methods/, you
+     should guarantee x == x if you want to implement ~Eq~.
+
+     + ~trait Eq: PartialEq<Self> { }~
+
+   - In practice, every implementation of ~PartialEq~ can be ~Eq~, except ~f32~
+     and ~f64~.
+
+   - The implmenetation is simple:
+     ~impl<T: Eq> Eq for Complex<T> { }~
+     However, mostly we prefer use the ~#[derive]~ /attribute/ for generating ~Eq~.
+
+   - If you use ~#[derive]~, Rust will check the two (~PartialEq~) or three (~Eq~)
+     requirements are imposed.
+
+** DONE Ordered Comparisons - 275
+   CLOSED: [2018-06-25 Mon 17:39]
+   Rust specifies the behavior of the ordered comparison operators ~<~, ~>~, ~<=~,
+   and ~>=~ all in terms of a SINGLE /trait/, ~std::cmp::PartialOrd~:
+   #+BEGIN_SRC rust
+     trait PartialOrd<Rhs = Self>: PartialEq<Rhs> where Rhs: ?Sized {
+         fn partial_cmp(&self, other: &Rhs) -> Option<Ordering>;
+
+         fn lt(&self, other: &Rhs) -> bool { ... }
+         fn le(&self, other: &Rhs) -> bool { ... }
+         fn gt(&self, other: &Rhs) -> bool { ... }
+         fn ge(&self, other: &Rhs) -> bool { ... }
+     }
+   #+END_SRC
+   - The ONLY method of ~PartialOrd~ you must implement yourself is ~partial_cmp~,
+     which returns ~Some(o)~. Then ~o~ indicates ~self~'s relationship to other:
+     #+BEGIN_SRC rust
+       enum Ordering {
+           Less,       // self < other
+           Equal,      // self == other
+           Greater,    // self > other
+       }
+     #+END_SRC
+
+   - If, for some reason, you want to call the /method/ and use pattern matching
+     to match ~Ordering~ values, you need ~std::cmp::PartialOrd~ and
+     ~std::cmp::Ordering~ in scope.
+
+   - If you know that values of *TWO* /types/ are *ALWAYS* _ordered_ with respect
+     to each other, then you can implement the stricter ~std::cmp::Ord trait~:
+     #+BEGIN_SRC rust
+       trait Ord: Eq + PartialOrd<Self> {
+           fn cmp(&self, other: &Self) -> Ordering;
+       }
+     #+END_SRC
+     Almost all types the implmenet ~PartialOrd~ should also implement ~Ord~.
+     In the standard library, ~f32~ and ~f64~ are the only exceptions.
+
+** DONE ~Index~ and ~IndexMut~ - 277
+   CLOSED: [2018-06-25 Mon 18:06]
+   You can specify how an /indexing expression/ like ~a[i]~ works on your type by
+   implementing the ~std::ops::Index~ and ~std::ops::IndexMut~ /traits/.
+
+   - Arrays support the ~[]~ operator directly,
+
+     On any other type,
+     + the expression ~a[i]~ is normally shorthand for ~*a.index(i)~, where index
+       is a /method/ of the ~std::ops::Index~ /trait/.
+       #+BEGIN_SRC rust
+         trait Index<Idx> {
+             type Output: ?Sized;
+             fn index(&self, index: Idx) -> &Self::Output;
+         }
+       #+END_SRC
+
+     + If the expression is being *assigned to* or *borrowed mutably*, it's instead
+       shorthand for ~*a.index_mut(i)~, a call to the /method/ of the ~std::ops::IndexMut~
+       /trait/.
+       #+BEGIN_SRC rust
+         trait IndexMut<Idx>: Index<Idx> {
+             fn index_mut(&mut self, index: Idx) -> &mut Self::Output;
+         }
+       #+END_SRC
+
+   - /Slices/ implement ~Index<usize>~ and ~Index<Range<usize>>~.
+     ~a[i..j]~ is a shorthand of ~*a.index(std::ops::Range { start: i, end: j })~
+
+   - ONE *limitation* of ~IndexMut~:
+     by design, it must return a /mutable reference/ to some value.
+
+     This is why you CANNOT use an expression like ~m["十"] = 10;~ to insert a
+     value into the ~HashMap~ ~m~: 
+     the table would need to create an entry for ~"十"~ first, with some /default value/,
+     and _return_ a /mutable reference/ to that.
+       But *not all types have CHEAP default values,* and some may be EXPENSIVE to /drop/;
+     it would be a waste to create such a value only to be immediately /dropped/ by the
+     assignment.
+
+     =IMPORTANT= =Watch ON this=
+     (There are plans to improve this in later versions of the language.)
+
+   - In chapter 2, in the Mandelbrot set ploter, we have an indexing:
+     ~pixels[row * bounds.0 + column] = ...;~.
+     It would be nicer to have an ~Image<u8>~ type that acts like a two-dimensional
+     array, allowing us to access pixels without having to write out all the arithmetic:
+     ~image[row][column] = ...;~
+
+     + Code:
+       #+BEGIN_SRC rust
+         struct Image<P> {
+             width: usize,
+             pixels: Vec<P>
+         }
+
+         impl<P: Default + Copy> Image<P> {
+             /// Create a new image of the given size.
+             fn new(width: usize, height: usize) -> Image<P> {
+                 Image {
+                     width,
+                     pixels: vec![P::default(); width * height]
+                 }
+             }
+         }
+
+         // And here are implementations of Index and IndexMut that would fit the bill:
+         impl<P> std::ops::Index<usize> for Image<P> {
+             type Output = [P];
+             fn index(&self, row: usize) -> &[P] {
+                 let start = row * self.width;
+                 &self.pixels[start .. start + self.width]
+             }
+         }
+
+         impl<P> std::ops::IndexMut<usize> for Image<P> {
+             fn index_mut(&mut self, row: usize) -> &mut [P] {
+                 let start = row * self.width;
+                 &mut self.pixels[start .. start + self.width]
+             }
+         }
+       #+END_SRC
+       This implementation also guarantees the supposed behavior: out-of-bounds
+       access is _detected_ and causes a /panic/.
+   
 ** DONE Other Operators - 280
    CLOSED: [2018-06-07 Thu 18:18]
    - *NOT ALL* /operators/ can be /overloaded/ in Rust.
@@ -6300,17 +6866,48 @@
     |--------------------------+----------------------------------------------------------------------|
     | ~ToOwned~                | Conversion /trait/ for converting a reference to an owned value.     |
 
-** ~Drop~ - 282
-** ~Sized~ - 285
-** ~Clone~ - 287
-** ~Copy~ - 289
-** ~Deref~ and ~DerefMut~ - 289
-** ~Default~
-** ~AsRef~ and ~AsMut~ - 294
-** ~Borrow~ and ~BorrowMut~ - 296
-** ~From~ and ~Into~ - 297
-** ~ToOwned~ - 300
-** ~Borrow~ and ~ToOwned~ at Work: The Humble ~Cow~ - 300
+** TODO ~Drop~ - 282
+** TODO ~Sized~ - 285
+   - sized type :: one whose values ALL have the same size in memory.
+
+   - *Almost all* /types/ in Rust are /sized/.
+
+   - Unsized types:
+     For example,
+     * ~str~ (note, without an ~&~).
+
+     * /Array slices types/ like ~[T]~ (again, without an ~&~) are unsized, too.
+
+     * The /referent/ of a /trait object/.
+
+** TODO ~Clone~ - 287
+** TODO ~Copy~ - 289
+   The ~std::clone::Clone~ /trait/ is for types that can make copies of themselves.
+   #+BEGIN_SRC rust
+     trait Clone: Sized {
+         fn clone(&self) -> Self;
+
+         fn clone_from(&mut self, source: &Self) {
+             ,*self = source.clone()
+         }
+     }
+   #+END_SRC
+   - The ~clone~ method should construct an _independent copy_ of ~self~ and return
+     it.
+
+   - Since this /method's return type/ is ~Self~, and /functions/ may NOT return
+     /unsized values/, the ~Clone~ /trait/ itself extends the ~Sized~ /trait/:
+     this has the effect of _bounding_ implementations' ~Self~ type to be ~Sized~.
+
+   - 
+   
+** TODO ~Deref~ and ~DerefMut~ - 289
+** TODO ~Default~
+** TODO ~AsRef~ and ~AsMut~ - 294
+** TODO ~Borrow~ and ~BorrowMut~ - 296
+** TODO ~From~ and ~Into~ - 297
+** TODO ~ToOwned~ - 300
+** TODO ~Borrow~ and ~ToOwned~ at Work: The Humble ~Cow~ - 300
 
 * DONE 14. Closures - 303 - =Re-READ=
   CLOSED: [2018-06-12 Tue 19:33]
@@ -9104,6 +9701,17 @@
 ** TODO Beyond ~macro_rules!~ - 522
 
 * TODO 21. Unsafe Code - 525
+  - Unsafe code lets you tell Rust, "In this case, just trust me."
+    By marking off a block or function as /unsafe/, you acquire the ability to
+    + call /unsafe functions/ in the standard library
+    + dereference /unsafe pointers/,
+    + call /functions written in other languages/ like C and C++,
+    + among other powers.
+
+    All of Rust's usual safety checks _STILL APPLY_: type checks, lifetime checks,
+    and bounds checks on indices all occur normally.
+      *Unsafe code just enables a small set of additional features.*
+
 ** TODO Unsafe from What? - 526
 ** TODO Unsafe Blocks - 527
 *** TODO Example: An Efficient ASCII String Type - 529
