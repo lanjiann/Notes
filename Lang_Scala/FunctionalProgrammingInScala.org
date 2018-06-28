@@ -735,7 +735,8 @@ Coalesce
 *** DONE 3.6 Summary - 47
     CLOSED: [2017-03-18 Sat 22:02]
 
-** TODO 4 Handling errors without exceptions - 48 =ing...=
+** DONE 4 Handling errors without exceptions - 48 =ing...=
+   CLOSED: [2018-06-28 Thu 01:16]
    - The functional solution, of returning errors as values, is
      + safer and
      + retains referential transparency,
@@ -768,13 +769,16 @@ Coalesce
       }
       #+END_SRC
 
-    - There are two main problems with exceptions:
-      1. /exceptions/ break /RT/ and
+    - There are _two_ main problems with /exceptions/:
+      1. /Exceptions/ break /referential transparency/ and
          introduce /context dependence/,
-      2. Exceptions are not type-safe.
+
+      2. /Exceptions/ are *NOT* /type-safe/.
          For example: There is a function ~failingFn: Int => Int~.
-         * It tells us nothing about the facct that  exceptions may occur.
+         * It tells us nothing about the fact that  /exceptions/ may occur.
+
          * It doesn't force us to handle those exceptions.
+
          * If we forget to check for an exception in ~failingFn~, this won't be
            detected until runtime.
 
@@ -797,45 +801,59 @@ Coalesce
       They allow us to /consolidate/ and /centralize error-handling/ _logic_,
 
     - The technique we use is based on an old idea:
-      _instead of throwing_ an exception,
-      _we return a value_ indicating that an exceptional condition has occurred.
-      This is like the return codes in the C language.
+      _instead of_ *throwing* an /exception/,
+      we *return* a /value/ indicating that an exceptional condition has occurred.
+      This is like the /return codes/ in the C language.
 
     - However, unlike C-style error codes,
       + the error-handling strategy we use is /completely type-safe/, and
-      + we get full assistance from the type-checker in forcing us to deal with
+
+      + we get full assistance from the type-checker in *forcing* us to deal with
         errors,
+
       + with a minimum of syntactic noise.
+
+        =From Jian=
+        Avoid error-handling blocks before you really want to deal with it.
+
+        In Java, you must re-throw the /exception/ if you don't want to deal with
+        it in some places.
 
 *** DONE 4.2 Possible alternatives to exceptions - 50
     CLOSED: [2017-03-19 Sun 23:05]
     - /partial function/: it's not defined for some inputs.
 
-    - A function is _typically partial_
-      because it _makes some assumptions_ about its inputs that aren't implied by
-      the input types.
+    - A function is typically /partial/
+      BECAUSE it _makes some assumptions_ about its inputs that are *NOT implied
+      by the /input types/.*
 
-    - One "solution" is to return some sort of bogus value of its type, this is
-      how error handling is often doen in languages without exceptions.
-      We _REJECT_ this solution for a few reasons:
+    - One "solution" is to return some sort of _bogus value_ of its type, this is
+      how error handling is often doen in languages WITHOUT /exceptions/.
+      We *REJECT* this solution for a few reasons:
       1. It allows errors to silently propagate
          * Callers should check this condition manually, but they may forget
            (error-prone).
+
          * If a caller forgets to check this, compiler won't alert because the
            returned value is legal.
+
          * Often the error won't be detected until much later in the code.
 
       2. It a caller do the right thing to check the error codes, he/she at same
          time introduces a fair amout of boilerplate code at each errorcode-check
          required call site.
 
-      3. It's not applicable to polymorphic code. You can't find a proper value
+      3. It's not applicable to polymorphic code. You CANNOT find a proper value
          for all possible types of the type variable ~A~.
-         _NOTE_: ~null~ doesn't work for primitive types.
+         _NOTE_: ~null~ doesn't work for /primitive types/.
 
-      4. It demands a special policy or calling convention of callers --
+         =From Jian= Even if Scala's /primitive types/ can have /methods/, which
+         is different from Java, they still CANNOT be assigned with ~null~.
+         =???= A wierd design?!
+
+      4. It demands a _special policy_ or _calling convention of callers_ --
          proper use of this kind of functions would require that callers do
-         something other than call mean and make use of the result.
+         something other than call ~mean~ and make use of the result.
            Giving functions special policies like this makes it difficult to
          pass them to higher-order functions, which must treat all arguments
          uniformly.
@@ -848,34 +866,46 @@ Coalesce
         if (xs.isEmpty) onEmpty
         else xs.sum / xs.length
       #+END_SRC
-      It has drawbacks: it requires that
-      1. immediate callers have direct knowledge of how to handle the undefined
+      It has DRAWBACKS -- it requires
+      1. _immediate callers_ have direct knowledge of how to handle the undefined
          case
          and
       2. limits them to returning a ~Double~ (the type of the addtional argument).
            What if ~mean_1~ is called as part of a larger computation and we'd
-         like to abort that computation if mean is undefined?
+         like to abort that computation if /mean/ is undefined?
          Or
            perhaps we'd like to take some completely different branch in the
          larger computation in this case?
 
          Simply passing an ~onEmpty~ parameter doesn't give us this freedom.
 
-*** TODO 4.3 The ~Option~ data type - 52
-    - The solution is to represent explicitly in the return type that a function
-      may not always have an answer.
+*** DONE 4.3 The ~Option~ data type - 52
+    CLOSED: [2018-06-27 Wed 20:42]
+    - The solution is to represent EXPLICITLY in the /return type/ that
+      a function _may not always_ have an answer.
         We can think of this as _DEFERRING_ to the caller for the error-handling
       strategy.
-**** 4.3.1 Usage patterns for ~Option~ - 53
-***** BASIC FUNCTIONS ON OPTION
-      - /non-strictness/ =TODO=
 
-      - WHY ~B :> A~ is required: =TODO: I don't understand=
-        It’s needed to convince Scala that it’s still safe to declare Option[+A]
-        as covariant in A. See the chapter notes for more detail—it’s
-        unfortunately somewhat complicated, but a necessary complication in
-        Scala. Fortunately, fully understanding subtyping and variance isn’t
-        essential for our purposes here.
+    - Re-creating the ~Option~ type in the Scala standard library:
+      #+BEGIN_SRC scala
+        sealed trait Option[+A]
+        case class Some[+A](get: A) extends Optioin[A]
+        case object None extends Option[Nothing]
+      #+END_SRC
+
+**** DONE 4.3.1 Usage patterns for ~Option~ - 53
+     CLOSED: [2018-06-27 Wed 18:44]
+***** BASIC FUNCTIONS ON OPTION
+      - Listing 4.2 The ~Option~ data type
+        #+BEGIN_SRC scala
+          trait Option[+A] {
+            def map[B](f: A => B): Option[B]
+            def flatMap[B](f: A => Option[B]): Option[B]
+            def getOrElse[B >: A](default: => B): B
+            def orElse[B >: A](ob: => Option[B]): Option[B]
+            def filter(f: A => Boolean): Option[A]
+          }
+        #+END_SRC
 
 ***** USAGE SCENARIOS FOR THE BASIC OPTION FUNCTIONS
       - ~Option[A].map(f)~:
@@ -886,12 +916,21 @@ Coalesce
       - ~Option[A].flatMap(f)~ is similar, except that the function we provide
         to transform the result can itself fail.
 
-      - =TODO= EXERCISE 4.2: I don't like the anonymous function passed
-        ~flatMap~ in this exercise -- it's too long to understand with
-        only one glance.
+      - EXERCISE 4.2:
+        I don't like the /anonymous function/ passed ~flatMap~ in this exercise --
+        it's too long to understand with only one glance.
 
-      - We can use ~filter~ to convert successes into failures if the successful
-        values don't match the given predicate
+        My solution:
+        #+BEGIN_SRC scala
+          def variance(xs: Seq[Double]): Option[Double] =
+            for {
+              m <- mean(xs)
+              r <- mean(xs.map(x => math.pow(x - m, 2)))
+            } yield r
+        #+END_SRC
+
+      - We can use ~filter~ to *CONVERT successes INTO failures* _if the successful
+        values DO NOT MATCH the given predicate_.
 
       - _A common pattern_:
         transform an ~Option~ via calls to ~map~, ~flatMap~, and/or ~filter~,
@@ -910,83 +949,156 @@ Coalesce
 
       - A common idiom is to do ~o.getOrElse(throw new Exception("FAIL"))~ to convert
         the ~None~ case of an ~Option~ back to an exception.
+
         _The general rule of thumb_:
-        We use exceptions _ONLY if NO REASONABLE program would ever catch the
+        We use /exceptions/ *ONLY* _if NO REASONABLE program would ever catch the
         exception_.
 
       - _Note_:
         1. We don't have to check for ~None~ at each stage of the computation --
            we can apply several transformations and then check for and handle
-           ~None~ when we're ready.
+           ~None~ when we're ready -- the computation will _stop immediately_
+           when it notice nothing need to be done, for example, ~map~, ~flatMap~,
+           and ~filter~ has no cost if the ~this~ is ~None~.
 
         2. But we _also get additional safety_:
-           since ~Option[A]~ is a different type than ~A~, and
-           the compiler won't let us forget to explicitly defer or handle the
-           possibility of ~None~.
+           since ~Option[A]~ is a DIFFERENT type than ~A~, the compiler will *NOT*
+           let us forget to explicitly defer or handle the possibility of ~None~.
 
-**** 4.3.2 ~Option~ composition, lifting, and wrapping exception-oriented APIs - 56
-     - /lift/:
+**** DONE 4.3.2 ~Option~ composition, lifting, and wrapping exception-oriented APIs - 56
+     CLOSED: [2018-06-27 Wed 20:42]
+     - Q :: How to apply a ~Option~ _unrelated_ functions to an ~Option~ value
+            *WITHOUT* rewrite a whole function?
+
+     - A :: We can use /lift/:
        #+BEGIN_SRC scala
-       def lift[A, B](f: A => B): Option[A] => Option[B] = _ map f
+         def lift[A, B](f: A => B): Option[A] => Option[B] = _ map f
        #+END_SRC
 
-     - With ~lift~, any function that we already have lying around can be
-       /lifted/ to operate within the context of a single ~Option~ value.
-       For example,
+     - One example of applying ~lift~:
+       ~val absO: Option[Double] => Option[Double] = lift(math.abs)~
+
+     - The ~Try~ function is a general-purpose function we can use to *convert _FROM_
+       an exception-based API _TO_ an ~Option~-oriented API*.
+         This uses a non-strict or lazy argument, as indicated by the ~=> A~ as the
+       /type/ of ~a~.
        #+BEGIN_SRC scala
-       val absO: Option[Double] => Option[Double] = lift(math.abs)
+         def parseInsuranceRateQuote(
+             age: String,
+             numberOfSpeedingTickets: String): Option[Double] = {
+           val optAge: Option[Int] = Try(age.toInt)
+           val optTickets: Option[Int] = Try(numberOfSpeedingTickets.toInt)
+           insuranceRateQuote(optAge, optTickts)
+         }
+
+         def Try[A](a: => A): Option[A] =
+           try Some(a)
+           catch { case e: Exception => None }
        #+END_SRC
 
-     - =TODO= note
+     - =Exercise 4.3
+       Implement ~def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C]~
 
-     - =TODO= Exercise 4.3  re-read the given answer
+     - With ~map2~, we can do:
+       #+BEGIN_SRC scala
+         def parseInsuranceRateQuote(
+             age: String,
+             numberOfSpeedingTickets: String): Option[Double] = {
+           val optAge: Option[Int] = Try { age.toInt }
+           val optTickets: Option[Int] = Try { numberOfSpeedingTickets.toInt }
+           map2(optAge, optTickes)(insuranceRateQuote)
+         }
+       #+END_SRC
 
-     - =TODO= Exercise 4.4
+     - Exercise 4.4
+       ~def sequence[A](a: List[Option[A]]): Option[List[A]]~
 
-     - =TODO= Exercise 4.5
+     - Exercise 4.5
+       ~def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]]~
 
-     - _For-comprehensions_
+     - *For-comprehensions*
+
+       =From Jian= I prefer ~for~-comprehensions in some senarios -- they
+       sometimes can be less clutter then using the /methods/ of ~Option~
+       directly.
+         I give my solution to solve Exercise 4.2 above with ~for~-comprehension.
 
      - =IMPORTANT=
        Between ~map~, ~lift~, ~sequence~, ~traverse~, ~map2~, ~map3~, and so on,
-       you should _NEVER_ have to modify any existing functions to work with
+       you should _NEVER have to modify any existing functions_ to work with
        optional values.
 
-*** TODO 4.4 The ~Either~ data type - 60
-    - The big idea in this chapter:
-      we can represent failures and exceptions with ordinary values, and write
-      functions that abstract out common patterns of error handling and recovery.
+*** DONE 4.4 The ~Either~ data type - 60
+    CLOSED: [2018-06-28 Thu 01:16]
+    The _big idea_ in this chapter:
+    Represent _failures_ and /exceptions/ with _ordinary values_, and write
+    functions that abstract out common patterns of error handling and recovery.
 
-    - ~Option~ never tells you what when wrong, and it only tells there is no
+    - ~Option~ never tells you what went wrong, and it only tells there is no
       available value. Sometimes, we may need more information.
 
     - ~Either~ basic Definition:
       #+BEGIN_SRC scala
-      sealed trait Either[+E, +A]
-      case class Left[+E](value: E) extends Either[E, Nothing]
-      case class Right[+A](value: A) extends Either[Nothing, A]
+        sealed trait Either[+E, +A]
+        case class Left[+E](value: E) extends Either[E, Nothing]
+        case class Right[+A](value: A) extends Either[Nothing, A]
       #+END_SRC
+      It is a /disjoint union/ of _two_ types.
 
     - ~Either~ is also often used more generally to encode one of two
       possibilities in cases where it isn't worth defining a fresh data type.
-      =TODO= We'll see some examples of this throughout the book.
 
     - ~Option~ and ~Either~ in the standard library
       + Read both API's in the Scala standard library.
+
       + ~Either~ doesn't define a right-biased ~flatMap~ directly like we do here
         (in this chapter).
 
-    - =TODO= EXERCISE 4.6
-    - =TODO= EXERCISE 4.7
-    - =TODO= EXERCISE 4.8
+    - Examples:
+      + ~mean~
+        #+BEGIN_SRC scala
+          def mean(xs: IndexedSeq[Double]): Either[String, Double] =
+            if (xs.isEmpty)
+              Left("mean of empty list!")
+            else
+              Right(xs.sum / xs.length)
+        #+END_SRC
 
-*** TODO 4.5 Summary - 63
+      + Sometimes we might want to include more information about the error, for
+        example a stack trace showing the location of the error in the source
+        code. In such cases we can simply return the exception in the ~Left~
+        side of an ~Either~:
+        #+BEGIN_SRC scala
+          def safeDiv(x: Int, y: Int): Either[Exception, Int] =
+              try Right(x / y)
+              catch { case e: Exception => Left(e) }
+        #+END_SRC
+
+    - As we did with ~Option~ , we can write a function, ~Try~, which _factors
+      out_ this common pattern of converting /thrown exceptions/ to values:
+      #+BEGIN_SRC scala
+        def Try[A](a: => A): Either[Exception, A] =
+          try Right(a)
+          catch { case e: Exception => Left(e) }
+      #+END_SRC
+
+    - EXERCISE 4.6
+
+    - EXERCISE 4.7
+
+    - EXERCISE 4.8
+
+*** DONE 4.5 Summary - 63
+    CLOSED: [2018-06-28 Thu 01:16]
     - The bigger idea:
-      + represent exceptions _as ordinary values_ and
+      + represent exceptions _as ordinary values_
+
       + use higher-order functions to encapsulate common patterns of
         _handling_
         and
         _propagating_ errors.
+
+        =From Jian= Rather than *explicit* /pattern matching/.
 
     - =TODO= In the next chapter, we'll look more closely at why /non-strictness/
       is important and how it can buy us greater modularity and efficiency in our
@@ -1181,8 +1293,8 @@ Coalesce
 *** 5.5 Summary - 77
 
 ** TODO 6  Purely functional state - 78
-*** 6.1 Generating random numbers using side effects - 78
-*** 6.2 Purely functional random number generation - 80
+*** TODO 6.1 Generating random numbers using side effects - 78
+*** TODO 6.2 Purely functional random number generation - 80
     - Return the random number object as well as the new state together.
       #+BEGIN_SRC scala
       trait RNG {
@@ -1199,7 +1311,7 @@ Coalesce
       }
       #+END_SRC
 
-*** 6.3 Making stateful APIs pure - 81
+*** TODO 6.3 Making stateful APIs pure - 81
     - _footnote 4_:
       1. Efficiency loss and reason.
       2. Efficient purely functional data structures may help.
