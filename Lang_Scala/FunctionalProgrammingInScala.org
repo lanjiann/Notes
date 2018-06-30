@@ -1295,12 +1295,19 @@ Coalesce
 ** TODO 6  Purely functional state - 78
 *** TODO 6.1 Generating random numbers using side effects - 78
 *** TODO 6.2 Purely functional random number generation - 80
+    - The key to *recovering* /referential transparency/ is to make the /state/
+      updates _EXPLICIT_.
+
+    - Here is one possible interface to a random number generator with explicit
+      state updates.
+      #+BEGIN_SRC scala
+        trait RNG {
+          def nextInt: (Int, RNG)
+        }
+      #+END_SRC
+
     - Return the random number object as well as the new state together.
       #+BEGIN_SRC scala
-      trait RNG {
-        def nextInt: (Int, RNG)
-      }
-      
       case class SimpleRNG(seed: Long) extends RNG {
         def nextInt: (Int, RNG) = {
           val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
@@ -1321,11 +1328,42 @@ Coalesce
        Awkwardness like this is almost always a sign of some missing abstraction
       waiting to be discovered.
 *** TODO 6.4 A better API for state actions - 84
-    - /state action (or state transitions)/: for example ~RNG => (A, RNG)~
+    - /state action (or state transitions)/
+      for example ~RNG => (A, RNG)~.
+      They transform ~RNG~ states from one to the next.
 
-    - /combinators/ =TODO= in this section
-      Combinators will pass the state from one action to the next automatically.
-      With combinators, we no longer need to pass the state along ourselves.
+      These state actions can be *combined* using /combinators/, which are higher
+      -order functions that we'll define in this section =TODO=.
+
+    - We want our /combinators/ to pass the /state/ from one action to the next
+      _AUTOMATICALLY_.
+      1. ~type Rand[+A] = RNG => (A, RNG)~
+
+      2. Pass the ~RNG~ /state/ through without using it, always returning a constant
+         value rather than a random value:
+         #+BEGIN_SRC scala
+           def unit[A](a: A): Rand[A] =
+             rng => (a, rng)
+         #+END_SRC
+
+      3. Transform the output of a /state action/ _WITHOUT modifying_ the /state/
+         itself.
+           Remember, ~Rand[A]~ is just a /type alias/ for a /function type/ ~RNG
+         => (A, RNG)~, so this is just a kind of /function composition/:
+         #+BEGIN_SRC scala
+           def map[A, B](s: Rand[A])(f: A => B): Rand[B] =
+             rng => {
+               val (a, rng2) = s(rng)
+               (f(a), rng2)
+             }
+         #+END_SRC
+         + Usage:
+           #+BEGIN_SRC scala
+             def nonNegativeEven: Rand[Int] =
+               map(nonNegativeInt)(i => i - i % 2)
+           #+END_SRC
+
+      4. 
 
 **** TODO 6.4.1 Combining state actions - 85
      - ???
