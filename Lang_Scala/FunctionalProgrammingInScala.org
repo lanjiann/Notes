@@ -1293,10 +1293,72 @@ Coalesce
 *** 5.5 Summary - 77
 
 ** TODO 6  Purely functional state - 78
-*** TODO 6.1 Generating random numbers using side effects - 78
-*** TODO 6.2 Purely functional random number generation - 80
-    - The key to *recovering* /referential transparency/ is to make the /state/
-      updates _EXPLICIT_.
+   We'll see how to write purely functional programs that manipulate /state/.
+
+   - Using the simple domain of /random number generation/ as the example.
+       This is NOT the most compelling use case, but a good first example that is
+     simple enough.
+
+   - =TODO= More compelling use cases in _parts 3 and 4_ of the book,
+     ESPECIALLY part 4, where we'll say a lot more about dealing with /state/
+     and /effects/.
+
+   - The goal:
+     give you a basic pattern for how to *make _ANY_ /stateful API/ purely functional*.
+
+*** DONE 6.1 Generating random numbers using side effects - 78
+    CLOSED: [2018-06-30 Sat 09:31]
+    - Scala has ~scala.util.Random~ with a pretty typical imperative API that relies
+      on /side effects/.
+      #+BEGIN_SRC scala
+        val rng = new scala.util.Random
+
+        rng.nextDouble
+        // res1: Double = 0.9867076608154569
+
+        rng.nextDouble
+        // res2: Double = 0.8455696498024141
+
+        rng.nextInt
+        // res3: Int = -623297295
+
+        rng.nextInt(10)
+        // res4: Int = 4
+      #+END_SRC
+      + The object ~rng~ has some /INTERNAL state/ that gets updated after each
+        invocation, since we'd otherwise get the same value each time we called
+        ~nextInt~ or ~nextDouble~.
+
+        The _state updates/ are performed as a /side effect/, these /methods/ are
+        *NOT* /referentially transparent/ -- this implies that they are *NOT* as
+        /testable/, /composable/, /modular/, and /easily parallelized/ as they
+        could be.
+
+    - You cannot contral the exact value of a random number.
+      You cannot get a value a second time as you wish, or else it is NOT random.
+
+    - Q :: If we can't control the random number values, how about pass in a
+           generator?
+
+    - A :: Even the "SAME" /generator/ has to
+      + be both created with the *same* /seed/, and
+      + also be in the *same* /state/.
+
+        =???= =Is this a workable way, but only hard to handle???=
+      This means its /methods/ have been called a certain number of times since it
+      was created -- this will be really difficult to guarantee, because every time
+      we call ~nextInt~, for example, the PREVIOUS /state/ of the random number
+      generator is *destroyed*.
+        Do we now need a separate mechanism to keep track of how many times
+      we've called the /methods/ on ~Random~?
+
+    - The answer to all of this is that *we should eschew /side effects/ on principle*!
+
+*** DONE 6.2 Purely functional random number generation - 80
+    CLOSED: [2018-06-30 Sat 09:45]
+    The key to *recovering* /referential transparency/ is to make the /state/
+    updates _EXPLICIT_ -- do NOT update /state/ as a /side effect/, but simply
+    return the new /state/ along with the value that we're generating.
 
     - Here is one possible interface to a random number generator with explicit
       state updates.
@@ -1305,18 +1367,44 @@ Coalesce
           def nextInt: (Int, RNG)
         }
       #+END_SRC
+      Rather than work as ~scala.util.Random~, we return the random number *and*
+      the new /state/, leaving the OLD /state/ unmodified.
 
-    - Return the random number object as well as the new state together.
+      In effect, *SEPARATE* the concern of _computing_ what the NEXT /state/ is
+      from the concern of _communicating_ the NEW /state/ to the rest of the
+      program.
+
+    - *No GLOBAL mutable memory is being used* -- we simply return the NEXT /state/
+      back to the caller.
+        This leaves the caller of ~nextInt~ in COMPLETE control of what to do
+      with the NEW /state/.
+
+    - We need an implementation to illustrate the principles.
+      Here is a simple one, use the /linear congruential generator/ algorithm, which
+      is the same as the algorithm of the ~scala.util.Random~.
       #+BEGIN_SRC scala
-      case class SimpleRNG(seed: Long) extends RNG {
-        def nextInt: (Int, RNG) = {
-          val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
-          val nextRNG = SimpleRNG(newSeed)
-          val n = (newSeed >>> 16).toInt
-          (n, nextRNG)
+        case class SimpleRNG(seed: Long) extends RNG {
+          def nextInt: (Int, RNG) = {
+            val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
+            val nextRNG = SimpleRNG(newSeed)
+            val n = (newSeed >>> 16).toInt
+            (n, nextRNG)
+          }
         }
-      }
       #+END_SRC
+      + Usage examples:
+        #+BEGIN_SRC scala
+          val rng = SimpleRNG(42)
+          val (n1, rng2) = rng.nextInt
+          // n1: Int = 16159453
+          // rng2: RNG = SimpleRNG(1059025964525)
+
+          val (n2, rng3) = rng2.nextInt
+          // n2: Int = -1281479697
+          // rng3: RNG = SimpleRNG(197491923327988)
+        #+END_SRC
+        If you call ~rng.nextInt~ or ~rng2.nextInt~ again, you'll get back the
+        same random numbers again, respectively.
 
 *** TODO 6.3 Making stateful APIs pure - 81
     - _footnote 4_:
@@ -1375,7 +1463,66 @@ Coalesce
 *** TODO 6.7 Summary - 91
 
 * TODO PART 2 FUNCTIONAL DESIGN AND COMBINATOR LIBRARIES - 93
+  - In part 1, we covered the fundamentals of FP and saw how the commitment to
+    using only pure functions affects the basic building blocks of programs:
+    /loops/, /data structures/, /exceptions/, and so on.
+
+  - In this part, we'll see how the assumptions of functional programming _affect_
+    *library design*.
+
+  - We'll create _THREE_ useful libraries in this part
+    1. parallel and asynchronous computation
+
+    2. testing programs
+
+    3. parsing text
+
+  - The primary goal *is NOT* to teach you about parallelism, testing, and parsing.
+
+    The primary goal *IS* to _help you *develop skill in designing functional
+    libraries*,_ even for domains that look nothing like the ones here.
+
+  - One final note:
+    as you work through part 2, you may notice *repeated patterns* of similar-looking
+    code. Keep this in the back of your mind. _When we get to part 3_, we'll discuss
+    + how to remove this duplication, and
+
+    + we'll discover an entire world of fundamental abstractions that are common
+      to all libraries.
+
 ** TODO 7 Purely functional parallelism - 95
+   In this chapter, we'll build a _purely functional library_ for creating /parallel/
+   and /asynchronous/ computations.
+
+   - We'll rein in the complexity inherent in parallel programs by describing them
+     using ONLY pure functions.
+       This will let us use the /substitution model/ to simplify our reasoning
+     and hopefully make working with concurrent computations both easy and enjoyable.
+
+   - =EN= 
+     rein in - 控制住
+
+   - *MAIN CONCERN*:
+     make our library _HIGHLY_ /composable/ and /modular/.
+     To this end, we'll keep with our theme of
+     *separating* the concern of describing a computation *from* actually running it.
+
+     + Goal:
+       We want to allow users of our library to write programs at a very high level,
+       *insulating* them *from* the nitty-gritty of how their programs will be executed.
+
+       For example, towards the end of the chapter we'll develop a combinator,
+       ~parMap~, that will let us easily apply a function ~f~ to every element in
+       a collection simultaneously: ~val outputList = parMap(inputList)(f)~
+
+   - =EN= 
+     nitty-gritty - 事實真相
+
+   - NOTE =TODO=
+
+   - We'll emphasize /algebraic reasoning/ and introduce the idea that an API can
+     *be DESCRIBED BY /an algebra/ that obeys specific /laws/.*
+
 *** TODO 7.1 Choosing data types and functions - 96
 **** 7.1.1 A data type for parallel computations - 97
 **** 7.1.2 Combining parallel computations - 100
@@ -1411,7 +1558,57 @@ Coalesce
 *** TODO 8.7 Summary - 144
 
 ** TODO 9 Parser combinators - 146
+   We'll work through the design of a /combinator library/ for creating /parsers/.
+   We'll use JSON parsing as a motivating use case.
+   (Like chapters 7 and 8,
+   this chapter is _NOT so much about parsing_
+   as it is about _providing further insight into the process of functional design_.)
+
+   - This chapter will introduce a _design approach_ that we'll call /algebraic
+     design/.
+
+   - *Parser combinators versus parser generators*
+
 *** TODO 9.1 Designing an algebra, first - 147
+    - There are MANY different kinds of _parsing libraries_.
+
+      Ours will be designed for /expressiveness/ (we’d like to be able to parse
+      ARBITRARY grammars), /speed/, and /GOOD error reporting/.
+
+    - For simplicity and for speed,
+      our library will create parsers that _operate on strings_ as input.
+
+    - We need to pick some parsing tasks to help us discover a good algebra for our parsers.
+
+      + As the first parsing task JSON or HTML are NOT simple enough!
+
+        A good and simple domain to start with is parsing various combinations of
+        _repeated letters_ and _gibberish words_ like "abracadabra" and "abba".
+
+        We’ll see how simple examples like this help us ignore extraneous details
+        and focus on the essence of the problem.
+
+    - Let's start with the simplest of parsers.
+      + ~def char(c: Char): Parser[Char]~
+
+      + ~def run[A](p: Parser[A])(input: String): Either[ParseError, A]~
+
+      + --
+        #+BEGIN_SRC scala
+          trait Parsers[ParseError, Parser[+_]] {
+            def run[A](p: Parser[A])(input: String): Either[ParseError, A]
+            def char(c: Char): Parser[Char]
+          }
+        #+END_SRC
+
+      + ~run(char(c))(c.toString) == Right(c)~
+
+      + ~def string(s: String): Parser[String]~
+
+    - xxxx
+
+    - *The advantages of algebraic design*
+
 *** TODO 9.2 A possible algebra - 152
 **** 9.2.1 Slicing and nonempty repetition - 154
 

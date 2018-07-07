@@ -105,7 +105,7 @@
     - [[Handling Errors in ~main()~ - 156][Handling Errors in ~main()~ - 156]]
     - [[Declaring a Custom Error Type - 157][Declaring a Custom Error Type - 157]]
     - [[Why Results? - 158][Why Results? - 158]]
-- [[8. Crates and Modules - 161 - =Reading=][8. Crates and Modules - 161 - =Reading=]]
+- [[8. Crates and Modules - 161][8. Crates and Modules - 161]]
   - [[Crates - 161][Crates - 161]]
     - [[Build Profiles - 164][Build Profiles - 164]]
   - [[Modules - 165][Modules - 165]]
@@ -186,7 +186,7 @@
   - [[~Clone~ - 287][~Clone~ - 287]]
   - [[~Copy~ - 289][~Copy~ - 289]]
   - [[~Deref~ and ~DerefMut~ - 289][~Deref~ and ~DerefMut~ - 289]]
-  - [[~Default~][~Default~]]
+  - [[~Default~ - 292][~Default~ - 292]]
   - [[~AsRef~ and ~AsMut~ - 294][~AsRef~ and ~AsMut~ - 294]]
   - [[~Borrow~ and ~BorrowMut~ - 296][~Borrow~ and ~BorrowMut~ - 296]]
   - [[~From~ and ~Into~ - 297][~From~ and ~Into~ - 297]]
@@ -206,7 +206,7 @@
   - [[Using Closures Effectively - 319][Using Closures Effectively - 319]]
 - [[15. Iterators - 321 - =Reading=][15. Iterators - 321 - =Reading=]]
   - [[The ~Iterator~ and ~IntoIterator~ Traits - 322][The ~Iterator~ and ~IntoIterator~ Traits - 322]]
-  - [[Creating ~Iterator~'s - 324 =NOTE=][Creating ~Iterator~'s - 324 =NOTE=]]
+  - [[Creating ~Iterator~'s - 324][Creating ~Iterator~'s - 324]]
     - [[~iter~ and ~iter_mut~ Methods - 324][~iter~ and ~iter_mut~ Methods - 324]]
     - [[~IntoIterator~ Implementations - 325][~IntoIterator~ Implementations - 325]]
     - [[~drain~ Methods - 327 =???=][~drain~ Methods - 327 =???=]]
@@ -3434,7 +3434,8 @@
       most will succeed, but some will fail, you can represent that situation in
       memory using a vector of ~Result~'s.
 
-* TODO 8. Crates and Modules - 161 - =Reading=
+* DONE 8. Crates and Modules - 161
+  CLOSED: [2018-07-01 Sun 20:24]
   - This chapter covers the features of Rust that help keep your program organized:
     /crates/ and /modules/.
 
@@ -4127,7 +4128,8 @@
      then becomes superfluous, and Rust generates a warning advising you to remove
      it.
 
-** TODO Tests and Documentation - 178
+** DONE Tests and Documentation - 178
+   CLOSED: [2018-07-01 Sun 20:24]
    - A SIMPLE /unit testing framework/ is *built into* Rust.
 
    - tests :: /ordinary functions/ marked with the ~#[test]~ /attribute/.
@@ -4142,7 +4144,7 @@
        }
      #+END_SRC
 
-     Use ~cargo test~ to run all the tests.
+   - Use ~cargo test~ to run all the tests.
      #+BEGIN_SRC bash
        #$
        cargo test
@@ -4159,7 +4161,7 @@
 
    - This *works the _same_ WHETHER* your /crate/ is an /executable/ or a /library/.
 
-   - Use command like =cargo test math= to run tests that contains the word ="math"=.
+   - Use command like =cargo test math= to run tests that _contains_ the word ="math"=.
 
    - ~assert!(expr)~
 
@@ -4172,7 +4174,7 @@
      Use ~debug_assert!~ and ~debug_assert_eq!~ if you only want them in /debug
      builds/.
 
-   - To TEST error cases, add the ~#[should_panic]~ /attribute/ to your test to
+   - To *TEST error cases*, add the ~#[should_panic]~ /attribute/ to your test to
      specify the error that should happen:
      #+BEGIN_SRC rust
        /// This test passes only if division by zero causes a panic
@@ -4185,7 +4187,7 @@
        }
      #+END_SRC
 
-   - =cargo build --release= *skip* the testing code.
+   - Use =cargo build= or =cargo build --release= *skip* the testing code.
 
    - By convention, when your tests get substantial enough to require support
      code, is to put them in a ~tests~ /module/ and declare the WHOLE /module/
@@ -4253,8 +4255,196 @@
       Use ~cargo test --test unfurl~ to run the /integration tests/ in the
       particular file =tests/unfurl.rs=.
 
-*** TODO Documentation - 181
-*** TODO Doc-Tests - 182
+*** DONE Documentation - 181
+    CLOSED: [2018-07-01 Sun 19:50]
+    The command ~cargo doc~ creates HTML documentation for your library.
+
+    - ~cargo doc --no-deps --open~
+      + ~--no-deps~:
+        generate documentation only for your /crate/ itself, and NOT for all the
+        /crates/ it depends on.
+
+      + ~--open~:
+        Open the documentation in your browser afterward.
+
+    - Cargo saves the new documentation files in =target/doc=.
+      The starting page is =target/doc/fern_sim/index.html=.
+
+    - The documentation is generated from the ~pub~ features of your library, plus
+      any ~doc~ comments you've attached to them.
+
+    - Rust treats comments start with ~///~ as a ~#[doc]~ /attribute/:
+      #+BEGIN_SRC rust
+        /// Simulate the production of a spore by meiosis.
+        pub fn produce_spore(factory: &mut Sporangium) -> Spore {
+            // ...
+        }
+      #+END_SRC
+
+      is exactly the same as:
+
+      #+BEGIN_SRC rust
+        #[doc = "Simulate the production of a spore by meiosis."]
+        pub fn produce_spore(factory: &mut Sporangium) -> Spore {
+            // ...
+        }
+      #+END_SRC
+
+      + When you *compile* or *test* a library, these /attributes/ are IGNORED.
+        When you *generate* documentation, ~doc~ comments on public features are
+        included in the output.
+
+      + Likewise, comments starting with ~//!~ are treated as ~#![doc]~ /attributes/,
+        and are attached to the enclosing feature, typically a module or crate.
+
+        For example, your =fern_sim/src/lib.rs= file might begin like this:
+        #+BEGIN_SRC rust
+          //! Simulate the growth of ferns, from the level of
+          //! individual cells on up.
+        #+END_SRC
+
+    - The content of a ~doc~ comment is treated as /Markdown/.
+      You can also fall back on HTML.
+
+    - Code samples:
+      + You can use ~`backticks`~ to set off bits of code in the middle of running
+        text. In the output, these snippets will be formatted in a fixed-width font.
+
+      + Larger code samples
+        * can be added by indenting _FOUR_ spaces.
+          #+BEGIN_SRC rust
+            /// A block of code in a doc comment:
+            ///
+            ///     if everything().works() {
+            ///         println!("ok");
+            ///     }
+          #+END_SRC
+
+        * Or use Markdown fenced code blocks. This has exactly the same effect.
+          #+BEGIN_SRC rust
+            /// Another snippet, the same code, but written differently:
+            ///
+            /// ```
+            /// if everything().works() {
+            ///     println!("ok");
+            /// }
+            /// ```
+          #+END_SRC
+
+*** DONE Doc-Tests - 182
+    CLOSED: [2018-07-01 Sun 20:24]
+    When you run tests in a Rust library crate,
+    Rust *checks* that all the code that _appears in your documentation_
+    actually _runs and works_.
+
+    - Each block of code that appears in a doc comment is compiled as a *SEPARATE*
+      executable crate.
+
+      Then, they are linked with your library.
+
+      run it.
+
+    - Here is a standalone example of a doc-test.
+      Create a new project by running ~cargo new ranges~ and put this code in
+      =ranges/src/lib.rs=:
+      #+BEGIN_SRC rust
+        use std::ops::Range;
+        /// Return true if two ranges overlap.
+        ///
+        ///     assert_eq!(ranges::overlap(0..7, 3..10), true);
+        ///     assert_eq!(ranges::overlap(1..5, 101..105), false);
+        ///
+        /// If either range is empty, they don't count as overlapping.
+        ///
+        ///     assert_eq!(ranges::overlap(0..0, 0..10), false);
+        ///
+        pub fn overlap(r1: Range<usize>, r2: Range<usize>) -> bool {
+            r1.start < r1.end && r2.start < r2.end &&
+                r1.start < r2.end && r2.start < r1.end
+        }
+      #+END_SRC
+      + The two small blocks of code in the doc comment appear in the documentation
+        generated by cargo doc , as shown in *Figure 8-3*.
+
+      + Run it:
+        #+BEGIN_SRC bash
+          ## $ cargo test
+          ##    Compiling ranges v0.1.0 (file:///.../ranges)
+          ## ...
+          ##    Doc-tests ranges
+          ##
+          ## running 2 tests
+          ## test overlap_0 ... ok
+          ## test overlap_1 ... ok
+          ##
+          ## test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured
+        #+END_SRC
+
+        If you pass the ~--verbose~ flag to Cargo, you'll see that it's using
+        ~rustdoc --test~ to run these two tests.
+          Rustdoc stores each code sample in a separate file, adding a few lines
+        of boilerplate code, to produce two programs.
+
+        * Here's the first:
+          #+BEGIN_SRC rust
+            extern crate ranges;
+            fn main() {
+                assert_eq!(ranges::overlap(0..7, 3..10), true);
+                assert_eq!(ranges::overlap(1..5, 101..105), false);
+            }
+          #+END_SRC
+
+        * And here’s the second:
+          #+BEGIN_SRC rust
+            extern crate ranges;
+            fn main() {
+                assert_eq!(ranges::overlap(0..0, 0..10), false);
+            }
+          #+END_SRC
+
+    - *The idea behind doc-test*
+      + It is _NOT_ to put all the tests into comments.
+
+      + Rather, you write the best possible documentation, and Rust makes sure the
+        code samples in your documentation actually compile and run.
+
+    - For the code that is necessary to make the code compile, but not for the
+      documentation, you can put a ~#~ followed by a space at the beginning of
+      that line.
+      #+BEGIN_SRC rust
+        /// Let the sun shine in and run the simulation for a given
+        /// amount of time.
+        ///
+        ///     # use fern_sim::Terrarium;
+        ///     # use std::time::Duration;
+        ///     # let mut tm = Terrarium::new();
+        ///     tm.apply_sunlight(Duration::from_secs(60));
+        ///
+        pub fn apply_sunlight(&mut self, time: Duration) {
+            // ...
+        }
+      #+END_SRC
+
+    - Sometimes it’s helpful to show a complete sample program in documentation,
+      including a main function and an extern crate declaration. Obviously, if
+      those pieces of code appear in your code sample, you do not also want
+      Rustdoc to add them automatically. The result wouldn’t compile. Rustdoc
+      therefore treats any code block containing the exact string fn main as a
+      complete program, and doesn’t add anything to it.
+
+    - Testing can be disabled for specific blocks of code.
+      You need to use a fenced code block.
+      + Compile, but not run:
+        ~```no_run~
+
+      + Don't compile
+        ~```ignore~
+
+    - For non-Rust code:
+      + For example, use ~```c++~, ~```sh~, and ~```text~.
+
+      + If ~rustdoc~ doesn't know the names, it will still recognize that the code
+        block is NOT Rust, and it disables code highlighting as well as doc-testing.
 
 ** DONE Specifying Dependencies - 185
    CLOSED: [2018-06-04 Mon 20:14]
@@ -4323,7 +4513,76 @@
 
       The HISTORY of your =Cargo.lock= file will record your dependency updates.
 
-** TODO Publishing Crates to crates.io - 188
+** DONE Publishing Crates to crates.io - 188
+   CLOSED: [2018-07-01 Sun 05:49]
+   1. Run ~cargo package~ in your project.
+      =From Jian= must be top-level?
+
+      - This command creates a file (in this case, =target/package/fern_sim-0.1.0.crate=)
+        containing all your library's source files, including =Cargo.toml=.
+          _This is the file that you'll upload to crates.io to share with the
+        world._
+          Cargo then _double-checks_ its work by building your library from the
+        =.crate= file, just as your eventual users will.
+
+      (You can use =cargo package --list= to see which files are included)
+
+   2. You may see a warning message like:
+      #+BEGIN_SRC text
+        warning: manifest has no description, license, license-file, documentation,
+        homepage or repository. See http://doc.crates.io/manifest.html#package-metadata
+        for more info.
+      #+END_SRC
+      + This message tells you that the ~[package]~ section of =Cargo.toml= is
+        missing some information that will be important to /downstream users/.
+
+        *The URL in the warning is an excellent resource*
+        =TODO= READ IT!!!
+
+      + You can fix the warning by adding a few lines to =Cargo.toml=:
+        #+BEGIN_SRC toml
+          [package]
+          name = "fern_sim"
+          version = "0.1.0"
+          authors = ["You <you@example.com>"]
+          license = "MIT"
+          homepage = "https://fernsim.example.com/"
+          repository = "https://gitlair.com/sporeador/fern_sim"
+          documentation = "http://fernsim.example.com/docs"
+          description = """
+          Fern simulation, from the cellular level up.
+          """
+        #+END_SRC
+        Remember the downstream users can see all the information in this file,
+        and before publishment, double-check to make sure that there is no private
+        information that you don't want to others know.
+
+   3. About the /dependencies/ of your /crate/.
+      You may indicate dependencies in the way like ~image = {path = "vendor/image" }~.
+      This ~path~ is a local path, which is NOT available for the other users. Therefore,
+      Cargo *ignores* the ~path~ key in automatically downloaded libraries, and *this can
+      cause build errors*.
+
+      + How to fix it?
+        Mostly your dependencies should be on crates.io too, and you should specify
+        a version number instead of a =path=: ~image = "0.6.1"~
+
+        * If you prefer, you can specify both:
+          ~image = { path = "vendor/image", version = "0.6.1" }~
+          *In this case, it is YOUR RESPONSIBILITY to make sure that the two
+          stay in sync.*
+
+   4. Get an account on crates.io.
+      Your "Account Settings" page will show a =cargo login= command, like this
+      one: =$ cargo login 5j0dV54BjlXBpUUbfIj7G9DvNl1vsWW1=
+
+      Cargo saves the key in a configuration file, and the API key should be
+      kept secret, like a password.
+
+      *So run this command ONLY on a computer you control.*
+
+   5. Run ~cargo publish~
+
 ** DONE Workspaces - 190
    CLOSED: [2018-06-04 Mon 19:48]
    Suppose you have written many /crates/. They live side by side in a SINGLE
@@ -6826,48 +7085,97 @@
      ~FnOnce~ special /traits/ in Chapter 14.
 
 * TODO 13. Utility Traits - 281
-  - Several other /built-in traits/ let you hook into parts of the Rust language
-    and standard library:
-    + You can use the ~Drop~ /trait/ to _clean up_ values when they _go out of scope_,
-      like /destructors/ in C++.
+  - Several /built-in traits/ let you hook into parts of the Rust language and
+    standard library:
+    + Use the ~Drop~ /trait/ to _clean up_ values when they _go out of scope_,
+      LIKE /destructors/ in C++.
 
-    + /Smart pointer types/, like ~Box<T>~ and ~Rc<T>~, can implement the ~Deref~ /trait/
-      to make the pointer reflect the /methods/ of the wrapped value.
+    + /Smart pointer types/, like ~Box<T>~ and ~Rc<T>~, can implement the ~Deref~
+      /trait/ to make the pointer reflect the /methods/ of the wrapped value.
 
     + By implementing the ~From<T>~ and ~Into<T>~ /traits/, you can tell Rust how
       to convert a value from one type to another.
 
   - We'll cover each of the /traits/ shown in Table 13-1:
-    | Trait                    | Description                                                          |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~Drop~                   | Destructors. Cleanup code that Rust runs automatically               |
-    |                          | whenever a value is dropped.                                         |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~Sized~                  | Marker /trait/ for types with a _fixed size_ known at                |
-    |                          | /compile time/, as opposed to types (such as slices)                 |
-    |                          | that are dynamically sized.                                          |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~Clone~                  | Types that support cloning values.                                   |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~Copy~                   | Marker /trait/ for types that can be cloned simply by                |
-    |                          | making a byte-for-byte copy of the memory containing the value.      |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~Deref~ and ~DerefMut~   | /Traits/ for /smart pointer types/.                                  |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~Default~                | Types that have a sensible "default value."                          |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~AsRef~ and ~AsMut~      | Conversion /traits/ for borrowing one type of reference              |
-    |                          | from another.                                                        |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~Borrow~ and ~BorrowMut~ | Conversion /traits/, like ~AsRef~ / ~AsMut~ , but additionally       |
-    |                          | guaranteeing consistent hashing, ordering, and equality.             |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~From~ and ~Into~        | Conversion /traits/ for transforming one type of value into another. |
-    |--------------------------+----------------------------------------------------------------------|
-    | ~ToOwned~                | Conversion /trait/ for converting a reference to an owned value.     |
+    + ~Drop~
+      /Destructors/.
+      Cleanup code that Rust runs automatically whenever a value is dropped.
+
+    + ~Sized~
+      Marker /trait/ for types with a *fixed size* known at /compile time/,
+      as _opposed to_ types (such as /slices/) that are *dynamically sized*.
+
+    + ~Clone~
+      Types that support *cloning* values.
+
+    + ~Copy~
+      Marker /trait/ for types that can be cloned simply by making a
+      byte-for-byte copy of the memory containing the value.
+
+    + ~Deref~ and ~DerefMut~
+      /Traits/ for /smart pointer types/.
+
+    + ~Default~
+      Types that have a sensible "default value."
+
+    + ~AsRef~ and ~AsMut~
+      /Conversion traits/ for *borrowing* one type of /reference/ from another.
+
+    + ~Borrow~ and ~BorrowMut~
+      /Conversion traits/, like ~AsRef~ / ~AsMut~,
+      BUT additionally GUARANTEEING consistent hashing, ordering, and equality.
+      =???= =TODO=
+
+    + ~From~ and ~Into~
+      /Conversion traits/ for *transforming* one type of value into another.
+
+    + ~ToOwned~
+      /Conversion trait/ for converting a /reference/ to an /owned value/.
+
+  - There are OTHER IMPORTANT /standard library traits/ as well. =TODO= =TODO=
+    + Cover ~Iterator~ and ~IntoIterator~ in Chapter 15.
+    + Cover ~Hash~, for computing hash codes, in Chapter 16.
+    + Cover ~Send~ and ~Sync~, which mark thread-safe types, in Chapter 19.
 
 ** TODO ~Drop~ - 282
+   #+BEGIN_SRC rust
+     trait Drop {
+         fn drop(&mut self);
+     }
+   #+END_SRC
+
+   - When a value's /owner/ GOES AWAY, we say that Rust *drops* the /value/.
+
+   - *Dropping* a /value/ entails freeing whatever _other values_, /heap storage/,
+     and /system resources/ the value owns.
+
+   - *Drops* occur under a variety of circumstances:
+     + when a variable goes *out of scope*;
+
+     + when an expression's value is *discarded by* the ~;~ /operator/;
+
+     + when you *truncate* a /vector/, *removing* elements from its end;
+
+     + and so on. =TODO=
+
+   - For types that implement ~std::ops::Drop~, *Rust calls* (NOT you) its ~drop~
+     /method/, *before* proceeding to *drop* whatever values its fields or
+     elements own, as it normally would.
+
+   - Implicit invocation of ~drop~ is the *only way* to call that /method/;
+
+     if you try to invoke it EXPLICITLY yourself, _Rust flags that as an error_.
+
+   - TODO
+     NOTE
+
+   - TODO
+     NOTE
+
 ** TODO ~Sized~ - 285
+   ~Sized~ is a /marker trait/ -- it doesn't have any /method/, and _ONLY Rust,
+   NOT you_, can implement it.
+
    - sized type :: one whose values ALL have the same size in memory.
 
    - *Almost all* /types/ in Rust are /sized/.
@@ -6881,6 +7189,15 @@
      * The /referent/ of a /trait object/.
 
 ** TODO ~Clone~ - 287
+   #+BEGIN_SRC rust
+     trait Clone: Sized {
+         fn clone(&self) -> Self;
+         fn clone_from(&mut self, source: &Self) {
+             ,*self = source.clone()
+         }
+     }
+   #+END_SRC
+
 ** TODO ~Copy~ - 289
    The ~std::clone::Clone~ /trait/ is for types that can make copies of themselves.
    #+BEGIN_SRC rust
@@ -6892,6 +7209,7 @@
          }
      }
    #+END_SRC
+
    - The ~clone~ method should construct an _independent copy_ of ~self~ and return
      it.
 
@@ -6902,12 +7220,161 @@
    - 
    
 ** TODO ~Deref~ and ~DerefMut~ - 289
-** TODO ~Default~
+   #+BEGIN_SRC rust
+     trait Deref {
+         type Target: ?Sized;
+         fn deref(&self) -> &Self::Target;
+     }
+
+     trait DerefMut: Deref {
+         fn deref_mut(&mut self) -> &mut Self::Target;
+     }
+   #+END_SRC
+
+** DONE ~Default~ - 292
+   CLOSED: [2018-07-06 Fri 14:13]
+   #+BEGIN_SRC rust
+     trait Default {
+         fn default() -> Self;
+     }
+   #+END_SRC
+   Some types have a REASONABLY OBVIOUS /default value/, and you can specify it by
+   implementing the ~std::default::Default~ /trait/.
+   
+   - For example,
+     #+BEGIN_SRC rust
+       impl Default for String {
+           fn default() -> String {
+               String::new()
+           }
+       }
+     #+END_SRC
+
+   - _ALL_ of Rust's /collection types/ implement ~Default~, with /default values/
+     of *EMPTY collection*.
+
+     + This design is helpful WHEN you need to build a collection of values, BUT
+       want to let your caller decide exactly what sort of collection to build.
+
+       =From Jian= Then,
+       You can specify the ~Default~ /trait/, RATHER THAN the /concrete type/.
+
+       For example,
+       the ~Iterator~ /trait/'s ~partition~ /method/ splits the values the /iterator/
+       produces into two collections, using a /closure/ to decide where each value
+       goes:
+       #+BEGIN_SRC rust
+         use std::collections::HashSet;
+         let squares = [4, 9, 16, 25, 36, 49, 64];
+         let (powers_of_two, impure): (HashSet<i32>, HashSet<i32>) =
+             squares.iter().partition(|&n| n & (n-1) == 0);
+         assert_eq!(powers_of_two.len(), 3);
+         assert_eq!(impure.len(), 4);
+       #+END_SRC
+       * The /closure/ ~|&n| n & (n-1) == 0~ uses some /bit-fiddling/ to recognize
+         numbers that are powers of two, and ~partition~ uses that to produce two
+         ~HashSet~'s.
+
+       * ~partition~ is *NOT SPECIFIC to* ~HashSet~'s; you can use it to produce
+         ANY sort of collection you like, as long as the collection type implements
+         - ~Default~, to produce an empty col‐ lection to start with,
+           and
+         - ~Extend<T>~, to add values of ~T~ to the collection.
+
+       * ~String~ implements ~Default~ and ~Extend<char>~, so you can write:
+         #+BEGIN_SRC rust
+           let (upper, lower): (String, String)
+               = "Great Teacher Onizuka".chars().partition(|&c| c.is_uppercase());
+           assert_eq!(upper, "GTO");
+           assert_eq!(lower, "reat eacher nizuka");
+         #+END_SRC
+
+   - Another common use of ~Default~ is to produce default values for structs that
+     represent a large collection of parameters, most of which you won't usually
+     need ot change.
+
+     For example, the ~glium~ /crate/ provides Rust bindings for the powerful and
+     complex OpenGL graphics library. The ~glium::DrawParameters~ /struct/ includes
+     22 fields, each controlling a different detail of how OpenGL should render some
+     bit of graphics.
+       The ~glium~ draw function expects a ~DrawParameters~ struct as an argument.
+     Since ~DrawParameters~ implements ~Default~, you can create one to pass to
+     ~draw~, _mentioning *ONLY* those fields you want to change_:
+     #+BEGIN_SRC rust
+       let params = glium::DrawParameters {
+           line_width: Some(0.02),
+           point_size: Some(0.02),
+           .. Default::default()  // The syntax of this usage
+       };
+
+       target.draw(..., &params).unwrap();
+     #+END_SRC
+
+   - *IF* a type ~T~ implements ~Default~,
+     then the standard library implements ~Default~ *AUTOMATICALLY* for ~Rc<T>~,
+     ~Arc<T>~, ~Box<T>~, ~Cell<T>~, ~RefCell<T>~, ~Cow<T>~, ~Mutex<T>~, and ~RwLock<T>~.
+       The /default value/ for the type ~Rc<T>~, for example, is an ~Rc~
+     pointing to the /default value/ for type ~T~.
+
+   - *IF* _ALL_ the element types of a /tuple type/ implement ~Default~,
+     then the /tuple type/ does too.
+
+   - Rust does *NOT IMPLICITLY implement* ~Default~ for /struct types/,
+     BUT *IF* _ALL_ of a /struct/'s fields implement ~Default~ , you can implement
+     ~Default~ for the struct automatically using ~#[derive(Default)]~.
+
+   - The /default value/ of any ~Option<T>~ is ~None~.
+
 ** TODO ~AsRef~ and ~AsMut~ - 294
+   #+BEGIN_SRC rust
+     trait AsRef<T: ?Sized> {
+         fn as_ref(&self) -> &T;
+     }
+
+     trait AsMut<T: ?Sized> {
+         fn as_mut(&mut self) -> &mut T;
+     }
+   #+END_SRC
+
 ** TODO ~Borrow~ and ~BorrowMut~ - 296
+   #+BEGIN_SRC rust
+     trait Borrow<Borrowed: ?Sized> {
+         fn borrow(&self) -> &Borrowed;
+     }
+
+     trait BorrowMut<Borrowed: ?Sized>: Borrow<Borrowed> {
+         fn borrow_mut(&mut self) -> &mut Borrowed;
+     }
+   #+END_SRC
+
 ** TODO ~From~ and ~Into~ - 297
+   #+BEGIN_SRC rust
+     trait Into<T>: Sized {
+         fn into(self) -> T;
+     }
+
+     trait From<T>: Sized {
+         fn from(T) -> Self;
+     }
+   #+END_SRC
+
 ** TODO ~ToOwned~ - 300
+   #+BEGIN_SRC rust
+     trait ToOwned {
+         type Owned: Borrow<Self>;
+         fn to_owned(&self) -> Self::Owned;
+     }
+   #+END_SRC
+
 ** TODO ~Borrow~ and ~ToOwned~ at Work: The Humble ~Cow~ - 300
+   #+BEGIN_SRC rust
+     enum Cow<'a, B: ?Sized + 'a>
+         where B: ToOwned
+     {
+         Borrowed(&'a B),
+         Owned(<B as ToOwned>::Owned),
+     }
+   #+END_SRC
 
 * DONE 14. Closures - 303 - =Re-READ=
   CLOSED: [2018-06-12 Tue 19:33]
@@ -7067,8 +7534,8 @@
    - iterable :: Any type that implements ~IntoIterator~ (because it's something
                  you could iterate over if you asked)
 
-   - Under the hood, every ~for~ loop is just shorthand for calls to IntoIterator
-     and Iterator methods:
+   - Under the hood, every ~for~ loop is just shorthand for calls to ~IntoIterator~
+     and ~Iterator~ methods:
      #+BEGIN_SRC rust
        let mut iterator = (&v).into_iter();
 
@@ -7098,9 +7565,22 @@
      + The code that receives the /items/ an /iterator/ produces is the /consumer/.
        In this example, the ~for~ loop *consumes* the /iterator/'s /items/.
 
-** TODO Creating ~Iterator~'s - 324 =NOTE=
-*** TODO ~iter~ and ~iter_mut~ Methods - 324
-*** TODO ~IntoIterator~ Implementations - 325
+** DONE Creating ~Iterator~'s - 324
+   CLOSED: [2018-07-03 Tue 12:22]
+   The Rust standard library documentation explains in detail what sort of /iterators/
+   each type provides, but the library _follows some general conventions_ to help you
+   get oriented and find what you need.
+
+*** DONE ~iter~ and ~iter_mut~ Methods - 324
+    CLOSED: [2018-07-03 Tue 11:54]
+    - ~iter~ produces a /shared reference/ to each /item/.
+
+    - ~iter_mut~ produces a /mutable reference/ to each /item/.
+
+    - /Slices/ like ~&[T]~ and ~&str~ have ~iter~ and ~iter_mut~ methods too.
+
+*** DONE ~IntoIterator~ Implementations - 325
+    CLOSED: [2018-07-03 Tue 12:22]
     - MOST /collections/ actually provide _several_ implementations of ~IntoIterator~,
       for /shared references/, /mutable references/, and /moves/:
       + Given a /shared reference/ to the /collection/, ~into_iter~ returns an
@@ -7131,7 +7611,7 @@
         returns an /iterator/ that produces each string by value; the consumer
         receives /ownership/ of each string. When the /iterator/ is /dropped/,
         any elements remaining in the ~BTreeSet~ are /dropped/ too, and the set's
-        now-empty husk is disposed of.
+        non-empty husk is disposed of.
 
         ~for element in collection { ... }~
 
@@ -7140,6 +7620,68 @@
 
     - *NOT every type provides all THREE implementations.*
       =page= 326 start
+
+      For example,
+      + ~HashSet~, ~BTreeSet~ and ~BinaryHeap~ do _NOT_ implement ~IntoIterator~
+        on /mutable references/,
+        SINCE modifying their elements *would probably VIOLATE* the type's /invariants/:
+        the modified value might have a different hash value, or be ordered
+        differently with respect to its neighbors, so modifying it would leave
+        it incorrectly placed.
+
+      + Other types do support _mutation_, but only PARTIALLY.
+        For example, ~HashMap~ and ~BTreeMap~ produce
+        * /mutable reference/ to their /entries' values/,
+
+        * but ONLY /shared references/ to their keys, for similar reasons to those
+          given earlier.
+
+      + /Slices/ implement *two* of the three ~IntoIterator~ variants;
+        SINCE they _do NOT own_ their elements, there is NO "by value" case.
+        INSTEAD, ~into_iter~ for ~&[T]~ and ~&mut [T]~ returns an /iterator/
+        that produces /shared and mutable references/ to the elements.
+
+        If you imagine the underlying /slice/ type ~[T]~ as a collection of some
+        sort, this fits neatly into the overall pattern.
+
+    - You may have noticed that the first two ~IntoIterator~ variants, for /shared
+      and mutable references/, are *equivalent to* calling ~iter~ or ~iter_mut~
+      on the referent.
+
+      + Q :: Why does Rust provide both?
+
+      + A :: 
+        1. ~IntoIterator~ is what makes ~for~ loops work, so that's obviously necessary.
+           But when you're not using a ~for~ loop, ~favorites.iter()~ is clearer than
+           ~(&favorites).into_iter()~.
+
+           Iteration by /shared reference/ is something you'll need frequently,
+           so ~iter~ and ~iter_mut~ are still valuable for their _ergonomics_.
+
+        2. IntoIterator can also be useful in generic code: you can use a bound
+           like ~T~:
+           ~IntoIterator~ to restrict the type variable ~T~ to types that can be
+           iterated over. Or, you can write ~T: IntoIterator<Item=U>~ to further
+           require the iteration to produce a particular type ~U~. For example,
+           this function dumps values from any iterable whose items are
+           printable with the ~"{:?}"~ format:
+           #+BEGIN_SRC rust
+             use std::fmt::Debug;
+
+             fn dump<T, U>(t: T)
+                 where T: IntoIterator<Item=U>,
+                       U: Debug
+             {
+                 for u in t {
+                     println!("{:?}", u);
+                 }
+             }
+           #+END_SRC
+
+           =IMPORTANT=
+           You *CANNOT* write this /generic function/ using ~iter~ and ~iter_mut~,
+           SINCE *they're NOT /methods/ of any /trait/:*
+           most /iterable/ types just happen to have /methods/ by those names.
 
 *** DONE ~drain~ Methods - 327 =???=
     CLOSED: [2018-06-13 Wed 08:59]
@@ -7180,7 +7722,8 @@
     =IMPORTANT= =!!!!!!=
     Table 15-1. Other /iterators/ in the standard library
 
-** TODO ~Iterator~ Adapters - 330
+** DONE ~Iterator~ Adapters - 330
+   CLOSED: [2018-07-01 Sun 20:35]
 *** DONE ~map~ and ~filter~ - 330
     CLOSED: [2018-06-13 Wed 09:24]
     - Example:
@@ -7642,7 +8185,44 @@
       assert_eq!(a.iter().cloned().next(), Some('1')); 
     #+END_SRC
 
-*** TODO ~cycle~ - 344
+*** DONE ~cycle~ - 344
+    CLOSED: [2018-07-01 Sun 20:35]
+    The ~cycle~ adapter returns an /iterator/ that *endlessly repeats* the sequence
+    produced by the _UNDERLYING_ /iterator/. The _UNDERLYING_ /iterator/ *must
+    implement* ~std::clone::Clone~, so that ~cycle~ can _save_ its initial state
+    and _reuse_ it each time the cycle starts again.
+
+    - For example:
+      #+BEGIN_SRC rust
+        let dirs = ["North", "East", "South", "West"];
+        let mut spin = dirs.iter().cycle();
+        assert_eq!(spin.next(), Some(&"North"));
+        assert_eq!(spin.next(), Some(&"East"));
+        assert_eq!(spin.next(), Some(&"South"));
+        assert_eq!(spin.next(), Some(&"West"));
+        assert_eq!(spin.next(), Some(&"North"));
+        assert_eq!(spin.next(), Some(&"East"));
+      #+END_SRC
+
+    - The fizz-buzz game implementation that needs NO arithmetic calculation:
+      #+BEGIN_SRC rust
+        use std::iter::{once, repeat};
+
+        let fizzes = repeat("").take(2).chain(once("fizz")).cycle();
+        let buzzes = repeat("").take(4).chain(once("buzz")).cycle();
+        let fizzes_buzzes = fizzes.zip(buzzes);
+
+        let fizz_buzz = (1..100).zip(fizzes_buzzes)
+            .map(|tuple|
+                 match tuple {
+                     (i, ("", "")) => i.to_string(),
+                     (_, (fizz, buzz)) => format!("{}{}", fizz, buzz)
+                 });
+
+        for line in fizz_buzz {
+            println!("{}", line);
+        }
+      #+END_SRC
 
 ** TODO Consuming Iterators - 345
 *** DONE Simple Accumulation: ~count~, ~sum~, ~product~ - 345
@@ -7689,12 +8269,133 @@
       produces /references/ to the elements, and then ~max_by~ and ~min_by~ pass
       the /closure references/ to the /iterator/'s /items/.
 
-*** TODO ~max_by_key~, ~min_by_key~ - 347
-*** TODO Comparing ~Item~ Sequences - 347
+*** DONE ~max_by_key~, ~min_by_key~ - 347
+    CLOSED: [2018-07-01 Sun 22:45]
+    - Signatures:
+      #+BEGIN_SRC rust
+        fn min_by_key<B: Ord, F>(self, f: F) -> Option<Self::Item>
+            where Self: Sized, F: FnMut(&Self::Item) -> B;
+
+        fn max_by_key<B: Ord, F>(self, f: F) -> Option<Self::Item>
+            where Self: Sized, F: FnMut(&Self::Item) -> B;
+      #+END_SRC
+
+    - Example:
+      #+BEGIN_SRC rust
+        use std::collections::HashMap;
+
+        let mut populations = HashMap::new();
+        populations.insert("Portland",  583_776);
+        populations.insert("Fossil",        449);
+        populations.insert("Greenhorn",       2);
+        populations.insert("Boring",      7_762);
+        populations.insert("The Dalles", 15_340);
+
+        assert_eq!(populations.iter().max_by_key(|&(_name, pop)| pop),
+                   Some((&"Portland", &583_776)));
+
+        assert_eq!(populations.iter().min_by_key(|&(_name, pop)| pop),
+                   Some((&"Greenhorn", &2)));
+      #+END_SRC
+
+*** DONE Comparing ~Item~ Sequences - 347
+    CLOSED: [2018-07-01 Sun 22:50]
+    - You can use ~<~ and ~==~ operators to compare strings, vectors, and slices,
+      assuming their individual elements can be compared.
+
+    - /Iterators/ doesn't support Rust's comparison operators, but they do provide
+      /methods/ like ~eq~ and ~lt~ that do the same job.
+
+    - Example:
+      #+BEGIN_SRC rust
+        let packed = "Helen of Troy";
+        let spaced = "Helen   of    Troy";
+        let obscure = "Helen of Sandusky"; // nice person, just not famous
+
+        assert!(packed != spaced);
+        assert!(packed.split_whitespace().eq(spaced.split_whitespace()));
+
+        // This is true because ' ' < 'o'.
+        assert!(spaced < obscure);
+
+        // This is true because 'Troy' > 'Sandusky'.
+        assert!(spaced.split_whitespace().gt(obscure.split_whitespace()));
+      #+END_SRC
+
+    - Using the ~eq~ and ~gt~ /methods/ on these /iterators/ performs a *word-by-word
+      comparison*, _INSTEAD OF_ a character-by-character comparison.
+        These are all possible because ~&str~ implements ~PartialOrd~ and ~PartialEq~.
+
 *** DONE ~any~ and ~all~ - 348
     CLOSED: [2018-06-13 Wed 16:58]
-*** TODO ~position~, ~rposition~, and ~ExactSizeIterator~ - 348
-*** TODO ~fold~ - 349
+*** DONE ~position~, ~rposition~, and ~ExactSizeIterator~ - 348
+    CLOSED: [2018-07-01 Sun 23:01]
+    - Example:
+      #+BEGIN_SRC rust
+        let text = "Xerxes";
+        assert_eq!(text.chars().position(|c| c == 'e'), Some(1));
+        assert_eq!(text.chars().position(|c| c == 'z'), None);
+      #+END_SRC
+
+    - Example:
+      Why cannot we use ~&str~ here? _Explained later in this section._
+      #+BEGIN_SRC rust
+        let bytes = b"Xerxes";
+        assert_eq!(bytes.iter().rposition(|&c| c == b'e'), Some(4));
+        assert_eq!(bytes.iter().rposition(|&c| c == b'X'), Some(0));
+      #+END_SRC
+
+    - An /exact-size iterator/ is one that implements the ~std::iter::ExactSizeIterator~
+      /trait/:
+      #+BEGIN_SRC rust
+        pub trait ExactSizeIterator: Iterator {
+            fn len(&self) -> usize { ... }
+            fn is_empty(&self) -> bool { ... }
+        }
+      #+END_SRC
+
+    - Naturally, *NOT every* /iterator/ knows how many items it will produce in
+      advance; in the preceding examples, the ~char~'s /iterator/ on ~&str~ does
+      *NOT* (UTF-8 is a variable-width encoding), so _you *CANNOT* use ~rposition~
+      on strings_. But an /iterator/ over an /array/ of bytes certainly knows
+      the array's length, so it can implement ~ExactSizeIterator~.
+
+*** DONE ~fold~ - 349
+    CLOSED: [2018-07-01 Sun 23:07]
+    - Signature:
+      #+BEGIN_SRC rust
+        fn fold<A, F>(self, init: A, f: F) -> A
+            where Self: Sized, F: FnMut(A, Self::Item) -> A;
+      #+END_SRC
+
+    - Example:
+      #+BEGIN_SRC rust
+        let a = [5, 6, 7, 8, 9, 10];
+
+        assert_eq!(a.iter().fold(0, |n, _| n+1), 6);      // count
+        assert_eq!(a.iter().fold(0, |n, i| n+i), 45);     // sum
+        assert_eq!(a.iter().fold(1, |n, i| n*i), 151200); // product
+
+        // max
+        assert_eq!(a.iter().fold(i32::min_value(), |m, &i| std::cmp::max(m, i)),
+                   10);
+      #+END_SRC
+
+    - =From Jian=
+      =TODO= =???=
+      There is NOT ~reduce~ in Rust as a method of /iterator/'s??????????
+
+    - Note that the /accumulator values/ are *moved into and out* of the /closure/,
+      so you can use ~fold~ with non-~Copy~ /accumulator/ types:
+      =TODO= =???= =???=
+      #+BEGIN_SRC rust
+        let a = ["Pack ", "my ", "box ", "with ",
+                 "five ", "dozen ", "liquor ", "jugs"];
+        let pangram = a.iter().fold(String::new(),
+                                    |mut s, &w| { s.push_str(w); s });
+        assert_eq!(pangram, "Pack my box with five dozen liquor jugs");
+      #+END_SRC
+
 *** DONE ~nth~ - 350
     CLOSED: [2018-06-13 Wed 17:02]
     Skip ~n~ /items/ from the /iterator/, and returns the _NEXT_ /item/, or
@@ -7746,10 +8447,227 @@
       + It returns ~None~ if nothing found.
 
 *** TODO Building Collections: ~collect~ and ~FromIterator~ - 351
-*** TODO The ~Extend~ Trait - 353
-*** TODO ~partition~ - 353
+    - Naturally, ~collect~ itself doesn't know how to construct all these types.
+
+      Rather, when some collection type like ~Vec~ or ~HashMap~ knows how to
+      construct itself from an /iterator/, it implements the ~std::iter::FromIterator~
+      /trait/, for which ~collect~ is just a convenient veneer:
+      #+BEGIN_SRC rust
+      trait FromIterator<A>: Sized {
+            fn from_iter<T: IntoIterator<Item=A>>(iter: T) -> Self;
+        }
+      #+END_SRC
+
+    - TODO
+
+    - TODO
+
+*** DONE The ~Extend~ Trait - 353
+    CLOSED: [2018-07-02 Mon 02:01]
+    - A type that implements the ~std::iter::Extend~ /trait/ has the ~extend~
+      /method/ that can add /iterable/'s /items/
+
+    - Example:
+      #+BEGIN_SRC rust
+        let mut v: Vec<i32> = (0 .. 5).map(|i| 1 << i).collect();
+        v.extend(&[32, 57, 99, 163]);
+        assert_eq!(v, &[1, 2, 4, 8, 16, 31, 57, 99, 163]);
+      #+END_SRC
+
+    - *All* of the /standard collections/ implement ~Extend~, so they *ALL* have
+      this /method/; so does ~String~.
+
+      Arrays and slices, which have a fixed length, do _NOT_.
+
+    - Definition:
+      #+BEGIN_SRC rust
+        trait Extend<A> {
+            fn extend<T>(&mut self, iter: T)
+                where T: IntoIterator<Item=A>;
+        }
+      #+END_SRC
+
+      + Obviously, this is _very SIMILAR to_ ~std::iter::FromIterator~: that *creates*
+        a _new_ collection, whereas ~Extend~ *extends* an _existing_ collection.
+
+          In fact, several implementations of ~FromIterator~ in the standard library
+        simply create a new empty collection, and then call extend to populate it.
+
+        For example, the implementation of ~FromIterator~ for
+        ~std::collections::LinkedList~ works this way:
+        #+BEGIN_SRC rust
+          impl<T> FromIterator<T> for LinkedList<T> {
+              fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+                  let mut list = Self::new();
+                  list.extend(iter);
+                  list
+              }
+          }
+        #+END_SRC
+
+*** DONE ~partition~ - 353
+    CLOSED: [2018-07-02 Mon 02:21]
+    - The ~partition~ /method/ divides an /iterator/'s items among TWO collections,
+      using a closure to decide where each item belongs.
+
+      For example,
+      #+BEGIN_SRC rust
+        let things = ["doorknob", "mushroom", "noodle", "giraffe", "grapefruit"];
+        // Amazing fact: the name of a living thing always starts with an
+        // odd-numbered letter.
+
+        let (living, nonliving): (Vec<&str>, _)
+            = things.iter().partition(|name| name.as_bytes()[0] & 1 != 0);
+
+        assert_eq!(living, vec!["mushroom", "giraffe", "grapefruit"]);
+        assert_eq!(nonliving, vec!["doorknob", "noodle"]);
+      #+END_SRC
+
+    - The signature:
+      #+BEGIN_SRC rust
+        fn partition<B, F>(self, f: F) -> (B, B)
+            where Self: Sized,
+                  B: Default + Extend<Self.Item>,
+                  F: FnMaul(&Self::Item -> book;
+
+      #+END_SRC
+
+    - Whereas ~collect~ requires its /result type/ to implement ~FromIterator~,
+      /partition/ instead requires ~std::default::Default~, which all Rust
+      collections implement by returning an empty collection, and ~std::default::Extend~.
+
+    - Q :: Why does NOT ~partition~ just split the /iterator/ into _two_ /iterators/,
+           instead of building _two_ /collections/?
+      + Reason 1:
+        /Items/ drawn from the UNDERLYING /iterator/ but NOT yet drawn from the
+        appropriate partitioned /iterator/ would need to be buffered somewhere
+        -- you would end up building a collection of some sort *internally*,
+        anywhay.
+
+      + Fundamental Reason:
+        *safety*
+        /Partitioning/ one /iterator/ into _two_ would require the two partitions
+        to share the _SAME_ UNDERLYING /iterator/. /Iterators/ must be _mutable_
+        to be used; so the UNDERLYING /iterator/ would necessarily be shared,
+        /mutable state/, which Rust's safety depends on avoiding.
 
 ** TODO Implementing Your Own Iterators - 354
+   You can implement the ~IntoIterator~ and ~Iterator~ /traits/ for your own
+   types, making all the _adapters_ and _consumers_ shown in this chapter
+   available for use, along with lots of other library and /crate/ code written
+   to work with the standard iterator interface.
+
+   In this section, we'll show a simple iterator over a _range_ type, and then a
+   more complex iterator over a _binary tree_ type.
+
+   - *Range*
+     #+BEGIN_SRC rust
+       struct I32Range {
+           start: i32,
+           end: i32
+       }
+
+       impl Iterator for I32Range {
+           type Item = i32;
+
+           fn next(&mut self) -> Option<i32> {
+               if self.start >= self.end {
+                   return None;
+               }
+               let result = Some(self.start);
+               self.start += 1;
+               result
+           }
+       }
+     #+END_SRC
+     + Of course, a for loop uses ~IntoIterator::into_iter~ to convert its operand
+       into an /iterator/.
+
+       But the standard library provides a _BLANKET implementation_ of ~IntoIterator~
+       for every type that implements ~Iterator~, so ~I32Range~ is ready for use:
+       #+BEGIN_SRC rust
+         let mut pi = 0.0;
+         let mut numerator = 1.0;
+
+         for k in (I32Range { start: 0, end: 14 }) {
+             pi += numerator / (2*k + 1) as f64;
+             numerator /= -3.0;
+         }
+
+         pi *= f64::sqrt(12.0);
+
+         // IEEE 754 specifies this result exactly.
+         assert_eq!(pi as f32, std:;f32::consts::PI);
+       #+END_SRC
+
+   - The ~I32Range~ case is special, in that the /iterable/ and /iterator/ are the
+     SAME type.
+
+     Many cases are NOT so simple.
+
+   - *Binary Tree*
+     #+BEGIN_SRC rust
+       enum BinaryTree<T> {
+           Empty,
+           NonEmpty(Box<TreeNode<T>>)
+       }
+
+       struct TreeNode<T> {
+           element: T,
+           left: BinaryTree<T>,
+           right: BinaryTree<T>
+       }
+     #+END_SRC
+
+     + The classic way to walk a binary tree is to recurse, using the stack of
+       function calls to keep track of your place in the tree and the nodes yet
+       to be visited.
+         _BUT_ when implementing ~Iterator~ for ~BinaryTree<T>~, each call to
+       next must produce exactly one value and return.
+
+       *To keep track of the tree nodes it has yet to produce, the iterator must
+       maintain its own stack.* Here's one possible /iterator/ type for ~BinaryTree~:
+       #+BEGIN_SRC rust
+         use self::BinaryTree::*;
+
+         // The state of an in-order traversal of a `BinaryTree`.
+         struct TreeIter<'a, T: 'a> {
+             // A stack of references to tree nodes. Since we use `Vec`'s
+             // `push` and `pop` methods, the top of the stack is the end of the
+             // vector.
+             //
+             // The node the iterator will visit next is at the top of the stack,
+             // with those ancestors still unvisited below it. If the stack is empty,
+             // the iteration is over.
+             unvisited: Vec<&'a TreeNode<T>>
+         }
+
+         impl<'a, T: 'a> TreeIter<'a, T> {
+             fn push_left_edge(&mut self, mut tree: &'a BinaryTree<T>) {
+                 while let NonEmpty(ref node) = *tree {
+                     self.unvisited.push(node);
+                     tree = &node.left;
+                 }
+             }
+         }
+
+         impl<T> BinaryTree<T> {
+             fn iter(&self) -> TreeIter<T> {
+                 let mut iter = TreeIter { unvisited: Vec::new() };
+                 iter.push_left_edge(self);
+                 iter
+             }
+         }
+
+         impl<'a, T: 'a> IntoIterator for &'a BinaryTree<T> {
+             type Item = &'a T;
+             type IntoIter = TreeIter<'a, T>;
+
+             fn into_iter(self) -> Self::IntoIter {
+                 self.iter()
+             }
+         }
+       #+END_SRC
 
 * TODO 16. Collections - 359
 ** TODO Overview - 360
@@ -7949,9 +8867,129 @@
 
 *** TODO Rust Rules Out Invalidation Errors - 373
 
-** TODO ~VecDeque<T>~ - 374
-** TODO ~LinkedList<T>~ - 376
-** TODO ~BinaryHeap<T>~ - 377
+** DONE ~VecDeque<T>~ - 374
+   CLOSED: [2018-07-02 Mon 02:46]
+   - Methods:
+     + ~deque.push_front(value)~
+
+     + ~deque.push_back(value)~ adds a value at the end. (This method is used much
+       more than ~.push_front()~, because the usual convention for queues is that
+       values are added at the back and removed at the front, like people waiting
+       in a line.)
+
+     + ~deque.pop_front()~
+       Returns ~Option<T>~
+
+     + ~deque.pop_back()~
+       Returns ~Option<T>~
+
+     + ~deque.front()~ and ~deque.back()~ work like ~vec.first()~ and ~vec.last()~.
+       They return a /reference/ to the front or back element of the queue.
+
+       The return value is an ~Option<&T>~.
+
+     + ~deque.front_mut()~ and ~deque.back_mut()~ work like ~vec.first_mut()~ and
+       ~vec.last_mut()~ , returning ~Option<&mut T>~.
+
+   - The implementation of ~VecDeque~ is a /ring buffer/, as shown in Figure 16-3.
+
+     Page 375 - implementation details.
+
+   - HOWEVER, because /deques/ _do *NOT* store their elements CONTIGUOUSLY in memory_,
+     they do _NOT_ inherit all the /methods/ of /slices/.
+     =IMPORTANT=
+
+     One way to perform /vector/ and /slice/ operations on /deque/ data is to
+     *convert the ~VecDeque~ to a ~Vec~, do the operation, and then change it back*:
+     + ~Vec<T>~ implements ~From<VecDeque<T>>~ , so ~Vec::from(deque)~ turns a /deque/
+       into a /vector/.
+
+       This costs ~O(n)~ time, since it may require rearranging the elements.
+
+     + ~VecDeque<T>~ implements ~From<Vec<T>>~, so ~VecDeque::from(vec)~ turns a
+       /vector/ into a /deque/.
+
+       This is also ~O(n)~, but it's *usually fast*, even if the /vector/ is large,
+       because the /vector/'s /heap allocation/ can *simply be moved to* the new
+       /deque/.
+
+       This method makes it easy to *create a /deque/ with specified elements*, even
+       though there is no standard ~vec_deque![]~ /macro/:
+       #+BEGIN_SRC rust
+         use std::collections::VecDeque;
+         let v = VecDeque::from(vec![1, 2, 3, 4]);
+       #+END_SRC
+
+** DONE ~LinkedList<T>~ - 376
+   CLOSED: [2018-07-02 Mon 02:54]
+   - Each value of a /linked list/ is stored in a *separate* /heap allocation/.
+
+   - ~std::collections::LinkedList<T>~ is a doubly linked list for Rust.
+     It supports a SUBSET of ~VecDeque~'s /methods/.
+
+     + The /methods/ that operate on the _front_ and _back_ of the sequence are
+       all there; so are /iterator methods/, ~LinkedList::new()~, and A FEW OTHERS.
+
+     + Because of the INEFFICIENCY, /methods/ that access elements by index are
+       generally *omitted*,
+
+     + As of Rust 1.17, Rust's ~LinkedList~ type has *NO* /methods/ for *removing
+       a range* of elements from a list or *inserting* elements at specific locations
+       in a list.
+
+       *The API seems incomplete.*
+       =From Jian= How about now??????? =TODO=
+
+   - For now, the _main advantage_ of ~LinkedList~ over ~VecDeque~ is that
+     combining two lists is very fast. ~list.append(&mut list2)~. It takes ~O(1)~
+     time.
+
+** DONE ~BinaryHeap<T>~ - 377
+   CLOSED: [2018-07-02 Mon 03:06]
+   For ~BinaryHeap~ the _greatest value_ always bubbles up to the front of the
+   queue.
+
+   - Most commonly used /methods/:
+     + ~heap.push(value)~
+       ~adds~ a value to the /heap/.
+
+     + ~heap.pop()~
+       *removes* and *returns* the _greatest value_ from the /heap/.
+       It returns an ~Option<T>~.
+
+     + ~heap.peek()~
+       returns a /reference/ to the _greatest value_ in the /heap/.
+       The return type is ~Option<&T>~.
+
+   - ~BinaryHeap~ also supports a subset of the /methods/ on ~Vec~, including
+     ~BinaryHeap::new()~, ~.len()~, ~.is_empty()~, ~.capacity()~, ~.clear()~, and
+     ~.append(&mut heap2)~.
+
+   - Example:
+     #+BEGIN_SRC rust
+       use std::collections::BinaryHeap;
+
+       let mut heap = BinaryHeap::from(vec![2, 3, 8, 6, 9, 5, 4]);
+
+       assert_eq!(heap.peek(), Some(&9));
+       assert_eq!(heap.pop(), Some(9));
+
+       assert_eq!(heap.pop(), Some(8));
+       assert_eq!(heap.pop(), Some(6));
+       assert_eq!(heap.pop(), Some(5));
+       // ...
+     #+END_SRC
+
+   - ~BinaryHeap~ works for any types that implements the ~Ord~ build-in trait.
+
+   - ~BinaryHeap~'s ~.iter()~ /method/ does *NOT* produce elements in order!!!
+     You need to iterate in order elements like:
+     #+BEGIN_SRC rust
+       while let Some(task) = heap.pop() {
+           handle(task);
+       }
+     #+END_SRC
+
 ** TODO ~HashMap<K, V>~ and ~BTreeMap<K, V>~ - 378
 *** TODO Entries - 381
 *** TODO Map Iteration - 383
@@ -7971,19 +9009,192 @@
 
      =From Jian=
      This also means in the Rust standard library collection implementations source
-     code, there are a lot ~unsafe~ code, usually for efficiency.
+     code, there are a lot ~unsafe~ code, which are mostly used for efficiency.
 
 * TODO 17. Strings and Text - 391
-** TODO Some Unicode Background - 392
-*** TODO ASCII, Latin-1, and Unicode - 392
-*** TODO UTF-8 - 392
-*** TODO Text Directionality - 394
+** DONE Some Unicode Background - 392
+   CLOSED: [2018-07-01 Sun 22:05]
+*** DONE ASCII, Latin-1, and Unicode - 392
+    CLOSED: [2018-07-01 Sun 20:44]
+    - /ASCII/: _0 ~ 0x7f_
 
-** TODO Characters (~char~) - 394
-*** TODO Classifying Characters - 395
-*** TODO Handling Digits - 395
-*** TODO Case Conversion for Characters - 396
-*** TODO Conversions to and from Integers - 396
+    - /Unicode/:
+      + assigns _0 ~ 0xff_ to the same characters as the ISO/IEC 8859-1 character
+        set, an 8-bit superset of ASCII for use with Western European languages.
+
+        Unicode calls this range of code points *the Latin-1 code block*.
+
+        * Since /Unicode/ is a superset of /Latin-1/, converting Latin-1 to Unicode
+          doesn't even require a table:
+          #+BEGIN_SRC rust
+            fn latin1_to_char(latin1: u8) -> char {
+                latin1 as char
+            }
+          #+END_SRC
+
+        * The reverse conversion:
+          #+BEGIN_SRC rust
+            fn char_to_latin1(c: char) -> Option<u8> {
+                if c as u32 <= 0xff {
+                    Some(c as u8)
+                } else {
+                    None
+                }
+            }
+          #+END_SRC
+
+*** DONE UTF-8 - 392
+    CLOSED: [2018-07-01 Sun 22:05]
+    The Rust ~String~ and ~str~ types represent text using the UTF-8 encoding form.
+    UTF-8 encodes a character as a sequence of *one to four bytes* (Figure 17-1).
+
+    - Two restrictions on well-formed UTF-8 sequences:
+      + Only the *shortest* encoding is the well-formed one.
+
+        This rule ensures that there is EXACTLY one UTF-8 encoding for a given
+        /code point/.
+
+      + Well-formed UTF-8 *MUST NOT* encode numbers from ~0xd800~ through ~0xdfff~,
+        of beyond ~0x10ffff~: those are
+        * either reserved for noncharacter purposes
+          OR
+        * outside Unicode's range entirely.
+
+    - Example:
+      #+BEGIN_SRC rust
+        assert_eq!("うどん: udon".as_bytes(),
+                   &[0xe3, 0x81, 0x86, // う
+                     0xe3, 0x81, 0xa9, // ど
+                     0xe3, 0x82, 0x93, // ん
+                     0x3a, 0x20, 0x75, 0x64, 0x6f, 0x6e // : udon
+                   ]);
+      #+END_SRC
+
+    - The diagram shows some very helpful properties of UTF-8:
+      Page 393 ~ 394
+
+*** DONE Text Directionality - 394
+    CLOSED: [2018-07-01 Sun 22:05]
+    - Unicode stores characters in the order in which they would normally be written
+      or read, so the initial bytes of a string holding, say, Hebrew text encode
+      the character that would be written at the right: Example-Code-Page 394!
+
+      =From Jian= I CANNOT copy the example code here -- the behavior
+      of Hebrew text is weird.
+
+    - A few method names in the standard library use the terms left and right to
+      mean the start and end of the text.
+
+** DONE Characters (~char~) - 394
+   CLOSED: [2018-07-01 Sun 22:38]
+   A Rust ~char~ is a 32-bit value holding a /Unicode code point/.
+
+   - A ~char~ is guaranteed to fall in the range _from 0 to 0xd7ff_, or _in the
+     range 0xe000 to 0x10ffff_; all the /methods/ for creating and manipulating
+     ~char~ values *ensure* that this is true.
+
+   - The ~char~ type implements ~Copy~ and ~Clone~, along with all the usual /traits/
+     for _comparison_, _hashing_, and _formatting_.
+
+   - Notations:
+     In the descriptions that follow, the variable ~ch~ is always of type ~char~.
+
+*** DONE Classifying Characters - 395
+    CLOSED: [2018-07-01 Sun 22:15]
+    - ~ch.is_numeric()~
+      A numeric character. This includes the Unicode general categories
+      _"Number; digit" and "Number; letter"_, but *NOT* _"Number; other"_
+
+    - ~ch.is_alphabetic()~
+      An alphabetic character: Unicode’s "Alphabetic" derived property.
+
+    - ~ch.is_alphanumeric()~
+      Either numeric or alphabetic, as defined above.
+
+    - ~ch.is_whitespace()~
+      A whitespace character: Unicode character property"WSpace=Y".
+
+    - ~ch.is_control()~
+      A control character: Unicode's "Other, control" general category.
+
+*** DONE Handling Digits - 395
+    CLOSED: [2018-07-01 Sun 22:38]
+    - ~ch.to_digit(radix)~
+      Return ~Option(u32)~
+
+      + This recognizes ONLY ASCII digits, NOT the broader class of characters covered
+        by ~char::is_numeric~.
+
+      + The ~radix~ parameter can range from 2 to 36.
+        For /radixes/ larger than 10, /ASCII letters/ of either case are
+        considered digits with values from 10 through 35.
+
+    - ~std::char::from_digit(num, radix)~
+      Return ~Option(u32)~
+
+    - ~ch.is_digit(radix)~
+
+    - For example:
+      #+BEGIN_SRC rust
+        assert_eq!('F'.to_digit(16), Some(15));
+        assert_eq!(std::char::from_digit(15, 16), Some('f'));
+        assert!(char::is_digit('f', 16));
+      #+END_SRC
+
+*** DONE Case Conversion for Characters - 396
+    CLOSED: [2018-07-01 Sun 22:32]
+    - ~ch.is_lowercase()~ and ~ch.is_uppercase()~
+
+    - ~ch.to_lowercase()~ and ~ch.to_uppercase()~
+      Return /iterators/ that produce the characters of the lower- and uppercase
+      equivalents of ~ch~, according to the *Unicode Default Case Conversion
+      algorithms*:
+      #+BEGIN_SRC rust
+        let mut upper = 's'.to_uppercase();
+        assert_eq!(upper.next(), Some('S'));
+        assert_eq!(upper.next(), None);
+      #+END_SRC
+
+      + These /methods/ return an /iterator/ _INSTEAD of a single character_
+        because case conversion in Unicode is *NOT* always a one-to-one process:
+        #+BEGIN_SRC rust
+          // The uppercase form of the German letter "sharp S" is "SS":
+          let mut upper = 'ß'.to_uppercase();
+          assert_eq!(upper.next(), Some('S'));
+          assert_eq!(upper.next(), Some('S'));
+          assert_eq!(upper.next(), None);
+
+          // Unicode says to lowercase Turkish dotted capital 'İ' to 'i'
+          // followed by `'\u{307}'`, COMBINING DOT ABOVE, so that a
+          // subsequent conversion back to uppercase preserves the dot.
+          let ch = 'İ'; // `'\u{130}'`
+          let mut lower = ch.to_lowercase();
+          assert_eq!(lower.next(), Some('i'));
+          assert_eq!(lower.next(), Some('\u{307}'));
+          assert_eq!(lower.next(), None);
+        #+END_SRC
+
+        + As a convenience, these iterators implement the ~std::fmt::Display~ /trait/,
+          so you can pass them directly to a ~println!~ or ~write!~ /macro/.
+
+*** DONE Conversions to and from Integers - 396
+    CLOSED: [2018-07-01 Sun 22:26]
+    - ~char~'s to Integers
+      Rust's as operator will convert a ~char~ to _ANY_ integer type,
+      *silently masking off any upper bits*:
+      #+BEGIN_SRC rust
+        assert_eq!('B' as u32, 66);
+        assert_eq!('饂' as u8, 66);   // upper bits of 1001100101000010 is truncated, and only keep 1000010
+        assert_eq!('二' as i8, -116); // same
+      #+END_SRC
+
+    - Integers to ~char~'s
+      There are _invalid_ code points. If you use ~as~, you'll get some /panic/.
+      #+BEGIN_SRC rust
+        assert_eq!(char::from(66), 'B');
+        assert_eq!(std::char::from_u32(0x9942), Some('饂'));
+        assert_eq!(std::char::from_u32(0xd800), None); // reserved for UTF-16
+      #+END_SRC
 
 ** TODO ~String~ and ~str~ - 397
 *** TODO Creating String Values - 398
@@ -8403,9 +9614,92 @@
         most appropriate scope. The regular expression is still always compiled
         ONLY ONCE per program execution.
 
-** TODO Normalization - 427
+** DONE Normalization - 427
+   CLOSED: [2018-07-06 Fri 14:50]
+   - _Failure to normalize_ can even have *security consequences*.
+
+     For example,
+     if your website normalizes usernames in some cases but not others, you
+     could end up with two distinct users named bananasflambé, which some parts
+     of your code treat as the same user, but others distinguish, resulting in
+     one’s privileges being extended incorrectly to the other.
+     =TODO=
+       Of course, there are many ways to avoid this sort of problem, but history
+     shows there are also many ways not to.
+
 *** TODO Normalization Forms - 428
-*** TODO The unicode-normalization Crate - 429
+    - Unicode defines *four* /normalized forms/, each of which is appropriate for
+      different uses.
+
+      There are two questions to answer:
+      1. Q & A - 1
+         + Q :: do you prefer characters to be _as COMPOSED as possible_ or
+                _as DECOMPOSED as possible_?
+
+         + A :: =Re-Do= Read book
+
+      2. Q & A - 2
+         + Q :: if two character sequences represent the same fundamental text,
+                but differ in the way that text should be formatted, do you want
+                to _treat them as EQUIVALENT_, or _keep them DISTINCT_?
+
+         + A ::  =Re-Do= Read book
+
+    - The Unicode /Normalization Form C (NFC)/ and /Normalization Form D (NFD)/ use
+      the /maximally composed/ and /maximally decomposed/ forms of each character,
+      but *DO NOT* try to unify compatibility equivalent sequences.
+
+      =TODO=
+      The /NFKC/ and /NFKD/ /normalization forms/ are _LIKE_ /NFC/ and /NFD/, but
+      normalize all compatibility equivalent sequences to some simple representative
+      of their class.
+
+    - *The World Wide Web Consortium's “Character Model For the World Wide Web” rec-
+      ommends using /NFC/ for all content.*
+
+    - *The /Unicode Identifier and Pattern Syntax/ annex suggests using /NFKC/ for
+      identifiers in programming languages*, and offers principles for adapting
+      the form when necessary.
+
+*** DONE The unicode-normalization Crate - 429
+    CLOSED: [2018-07-06 Fri 14:26]
+    - Add ~unicode-normalization = "0.1.7"~ o the ~[dependencies]~ section of your
+      =Cargo.toml= file, and add ~extern crate unicode_normalizatoin;~ to your source
+      code file.
+
+      With these declarations in palce, a ~&str~ has *FOUR* NEW /methods/ that
+      return /iterators/ over a particular /normalized form/ of the string:
+      #+BEGIN_SRC rust
+        use unicode_normalization::UnicodeNormalization;
+
+        // No matter what representation the lefthand string uses
+        // (you shouldn't be able to tell just by looking),
+        // these assertions will hold.
+        assert_eq!("Phở".nfd().collect::<String>(), "Pho\u{31b}\u{309}");
+        assert_eq!("Phở".nfc().collect::<String>(), "Ph\u{1edf}");
+
+        // The lefthand side here uses the "ffi" ligature character.
+        assert_eq!("① Di\u{fb03}culty".nfkc().collect::<String>(), "1 Difficulty");
+      #+END_SRC
+
+      + Taking a /normalized string/ and *normalizing* it again in the same form
+        is _guaranteed_ to return *IDENTICAL* text.
+
+    - *ANY* /substring/ of a /normalized string/ is ITSELF /normalized/.
+
+    - The concatenation of two /normalized strings/ is *NOT necessarily* /normalized/.
+
+      For example, the second string might start with combining characters that should
+      be placed before combining characters at the end of the first string.
+
+    - Since 
+      + /Normalized forms/ does *NOT uses* _no unassigne_ /code points/.
+
+      + /Unicode/ *promises* that its /normalized form/ will *NOT change* in future
+        versions of the standard.
+
+      , /normalized forms/ are GENERALLY SAFE to use in /persistent storage/, EVEN
+      as the Unicode standard _evolves_.
 
 * DONE 18. Input and Output - 431
   CLOSED: [2018-06-19 Tue 22:29]
@@ -9740,3 +11034,4 @@
 ** TODO Conclusion - 583
 
 * Index - 585
+  
