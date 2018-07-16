@@ -37,7 +37,7 @@
     - [[Vectors - 59][Vectors - 59]]
     - [[Building Vectors Element by Element - 62][Building Vectors Element by Element - 62]]
     - [[Slices - 62][Slices - 62]]
-  - [[String Types - 64][String Types - 64]]
+  - [[String Types - 64 - =TODO= =Re-Read=][String Types - 64 - =TODO= =Re-Read=]]
     - [[String Literals - 64][String Literals - 64]]
     - [[Byte Strings - 65][Byte Strings - 65]]
     - [[Strings in Memory - 65][Strings in Memory - 65]]
@@ -285,19 +285,19 @@
     - [[Appending and Inserting Text - 399][Appending and Inserting Text - 399]]
     - [[Removing Text - 401][Removing Text - 401]]
     - [[Conventions for Searching and Iterating - 401][Conventions for Searching and Iterating - 401]]
-    - [[Patterns for Searching Text - 402][Patterns for Searching Text - 402]]
+    - [[Patterns for Searching Text - 402 - =Re-READ=][Patterns for Searching Text - 402 - =Re-READ=]]
     - [[Searching and Replacing - 403][Searching and Replacing - 403]]
-    - [[Iterating over Text - 403][Iterating over Text - 403]]
+    - [[Iterating over Text - 403 - *Re-READ*][Iterating over Text - 403 - *Re-READ*]]
     - [[Trimming - 406][Trimming - 406]]
     - [[Case Conversion for Strings - 406][Case Conversion for Strings - 406]]
     - [[Parsing Other Types from Strings - 406][Parsing Other Types from Strings - 406]]
     - [[Converting Other Types to Strings - 407][Converting Other Types to Strings - 407]]
-    - [[Borrowing as Other Text-Like Types - 408][Borrowing as Other Text-Like Types - 408]]
+    - [[Borrowing as Other Text-Like Types - 408 - =TODO= =re-do=][Borrowing as Other Text-Like Types - 408 - =TODO= =re-do=]]
     - [[Accessing Text as UTF-8 - 409][Accessing Text as UTF-8 - 409]]
     - [[Producing Text from UTF-8 Data - 409][Producing Text from UTF-8 Data - 409]]
     - [[Putting Off Allocation - 410][Putting Off Allocation - 410]]
     - [[Strings as Generic Collections - 412][Strings as Generic Collections - 412]]
-  - [[Formatting Values - 413 - =Reading=][Formatting Values - 413 - =Reading=]]
+  - [[Formatting Values - 413][Formatting Values - 413]]
     - [[Formatting Text Values - 414][Formatting Text Values - 414]]
     - [[Formatting Numbers - 415][Formatting Numbers - 415]]
     - [[Formatting Other Types - 417][Formatting Other Types - 417]]
@@ -1312,13 +1312,12 @@
         print(&sv[1..3]); // print v[1] and v[2]
       #+END_SRC
 
-** DONE String Types - 64
+** DONE String Types - 64 - =TODO= =Re-Read=
    CLOSED: [2018-05-22 Tue 09:03]
-   - Rust has a similar design as C++: two string types
-     + in C++, they are ~const char *~ and ~std::string~.
+   - C++ has *two* string types ~const char *~ and ~std::string~.
+     Rust has a similar design as C++.
 
-   - =TODO=
-     More details in Chapter 17.
+   - More details in Chapter 17.
 
 *** DONE String Literals - 64
     CLOSED: [2018-05-21 Mon 18:44]
@@ -9011,7 +9010,8 @@
      This also means in the Rust standard library collection implementations source
      code, there are a lot ~unsafe~ code, which are mostly used for efficiency.
 
-* TODO 17. Strings and Text - 391
+* DONE 17. Strings and Text - 391
+  CLOSED: [2018-07-11 Wed 16:01]
 ** DONE Some Unicode Background - 392
    CLOSED: [2018-07-01 Sun 22:05]
 *** DONE ASCII, Latin-1, and Unicode - 392
@@ -9196,26 +9196,871 @@
         assert_eq!(std::char::from_u32(0xd800), None); // reserved for UTF-16
       #+END_SRC
 
-** TODO ~String~ and ~str~ - 397
-*** TODO Creating String Values - 398
-*** TODO Simple Inspection - 398
-*** TODO Appending and Inserting Text - 399
-*** TODO Removing Text - 401
-*** TODO Conventions for Searching and Iterating - 401
-*** TODO Patterns for Searching Text - 402
-*** TODO Searching and Replacing - 403
-*** TODO Iterating over Text - 403
-*** TODO Trimming - 406
-*** TODO Case Conversion for Strings - 406
-*** TODO Parsing Other Types from Strings - 406
-*** TODO Converting Other Types to Strings - 407
-*** TODO Borrowing as Other Text-Like Types - 408
-*** TODO Accessing Text as UTF-8 - 409
-*** TODO Producing Text from UTF-8 Data - 409
-*** TODO Putting Off Allocation - 410
-*** TODO Strings as Generic Collections - 412
+** DONE ~String~ and ~str~ - 397
+   CLOSED: [2018-07-11 Wed 16:01]
+   - Rust's ~String~ and ~str~ types are *guaranteed* to hold only _well-formed
+     UTF-8_.
+     + The library ensures this _by restricting_
+       * the ways you can create String and str values
+       * the operations you can perform on them,
 
-** TODO Formatting Values - 413 - =Reading=
+       such that the values are well-formed when introduced, and remain so as
+       you work with them.
+
+       *ALL* their /methods/ protect this guarantee:
+       no safe operation on them can introduce ill-formed UTF-8.
+
+       This simplifies code that works with the text.
+
+   - Rust places /text-handling methods/ on either ~str~ and ~String~ *depending
+     on* whether the /method/ needs a *resizable buffer*, or is happy just using
+     the text in place.
+
+     =TODO=
+     Since ~String~ _dereferences to_ ~&str~, *EVERY* /method/ defined on ~str~
+     is directly available on ~String~ as well.
+
+     =TODO=
+     This section presents methods from both types, grouped by rough function.
+
+   - These /methods/ index text _by byte_ offsets, and measure its length _in bytes_,
+     _rather than characters_.
+
+     In practice,
+     _given the nature of Unicode_, *indexing by character is _NOT_ as useful as
+     it may seem, and byte offsets are faster and simpler.*
+       If you try to use a byte offset that lands in the midst of some character's
+     UTF-8 encoding, the method panics, so you can't introduce ill-formed UTF-8
+     this way.
+
+   - A String is implemented as
+     a wrapper around a ~Vec<u8>~ that *ensures* the /vector/'s contents are
+     always well-formed UTF-8.
+
+       Rust *WILL NEVER* change ~String~ to use a more complicated representation,
+     so you can assume *that ~String~ shares ~Vec~'s performance characteristics.*
+
+   - Notations in this section
+     |---------------+-------------------------------------------------------------|
+     | Variable Name | Presumed type                                               |
+     |---------------+-------------------------------------------------------------|
+     | string        | ~String~                                                    |
+     |---------------+-------------------------------------------------------------|
+     | slice         | ~&str~ or something that dereferences to one, like ~String~ |
+     |               | or ~Rc<String>~                                             |
+     |---------------+-------------------------------------------------------------|
+     | ch            | ~char~                                                      |
+     |---------------+-------------------------------------------------------------|
+     | n             | ~usize~, a length                                           |
+     |---------------+-------------------------------------------------------------|
+     | i , j         | ~usize~, a byte offset                                      |
+     |---------------+-------------------------------------------------------------|
+     | range         | A range of ~usize~ byte offsets, either fully bounded like  |
+     |               | ~i..j~, or partly bounded like ~i..~, ~..j~, or ~..~        |
+     |---------------+-------------------------------------------------------------|
+     | pattern       | Any pattern type: ~char~, ~String~, ~&str~, ~&[char]~, or   |
+     |               | ~FnMut(char) -> bool~                                       |
+     |---------------+-------------------------------------------------------------|
+
+     =TODO= We describe pattern types in “Patterns for Searching Text” on page 402.
+
+*** DONE Creating String Values - 398
+    CLOSED: [2018-07-08 Sun 00:47]
+    There are a few common ways to create ~String~ values:
+    - ~String::new()~ returns a fresh, empty string.
+      This has no heap-allocated buffer, but will allocate one as needed.
+
+    - ~String::with_capacity(n)~ returns a fresh, empty string with a buffer *pre-
+      allocated* to hold at least ~n~ bytes.
+        Use this way to build a string when you know the length of the string in
+      advance. This is more efficient than resizing the buffer as you build the
+      string.
+        The string will _still grow its buffer as needed_ if its length _exceeds_
+      ~n~ bytes. Like vectors, strings have ~capacity~, ~reserve~, and ~shrink_to_fit~
+      /methods/, but usually the default allocation logic is fine.
+
+    - ~slice.to_string()~ allocates a fresh ~String~ whose contents are a copy of
+      /slice/.
+
+    - ~iter.collect()~ constructs a string by concatenating an iterator's items,
+      which _can be_ ~char~, ~&str~, or ~String~ values.
+
+      + For example, to remove all spaces from a string, you can write:
+        #+BEGIN_SRC rust
+          let spacey = "man hat tan";
+          let spaceless: String =
+              spacey.chars().filter(|c| !c.is_whitespace()).collect();
+          assert_eq!(spaceless, "manhattan");
+        #+END_SRC
+
+      Using ~collect~ this way takes advantage of ~String~'s implementation of
+      the ~std::iter::FromIterator~ /trait/.
+
+    - The ~&str~ type *CANNOT* implement ~Clone~:
+      the /trait/ requires clone on a ~&T~ to return a ~T~ value, but ~str~ is
+      *unsized*.
+
+      However, ~&str~ does implement ~ToOwned~, which lets the implementer specify
+      its owned equivalent, so ~slice.to_owned()~ returns a copy of slice as a
+      freshly allocated ~String~.
+
+*** DONE Simple Inspection - 398
+    CLOSED: [2018-07-08 Sun 00:56]
+    These /methods/ get basic information from /string slices/:
+    - ~slice.len()~ is the length of /slice/, *in bytes*.
+
+    - ~slice.is_empty()~ is ~true~ if ~slice.len() == 0~.
+
+    - ~slice[range]~ returns a /slice/ *borrowing* the given portion of ~slice~.
+      Partially bounded and unbounded ranges are OK. For example:
+      #+BEGIN_SRC rust
+        let full = "bookkeeping";
+        assert_eq!(&full[..4], "book");
+        assert_eq!(&full[5..], "eeping");
+        assert_eq!(&full[2..4], "ok");
+        assert_eq!(full[..].len(), 11);
+        assert_eq!(full[5..].contains("boo"), false);
+      #+END_SRC
+
+    - You *CANNOT* index a /string slice/ with a _SINGLE position_, like ~slice[i]~.
+
+      Fetching a _SINGLE character_ at a given byte offset is a bit clumsy:
+      you *MUST* produce a ~chars~ /iterator/ over the /slice/, and ask it to
+      parse one character's UTF-8:
+      #+BEGIN_SRC rust
+        let parenthesized = "Rust (饂)";
+        assert_eq!(parenthesized[6..].chars().next(), Some('饂'));
+      #+END_SRC
+
+      =TODO=
+      However, you should *RARELY need* to do this.
+      Rust has *much NICER ways* to iterate over /slices/, which we describe in
+      “Iterating over Text” on page 403.
+
+    - ~slice.split_at(i)~ returns a tuple of *TWO* shared /slices/ *borrowed* from
+      /slice/:
+      the portion up to byte offset ~i~, and the portion after it. In other words, this
+      returns ~(slice[..i], slice[i..])~ .
+
+    - ~slice.is_char_boundary(i)~ is ~true~ if the byte offset ~i~ falls between
+      /character boundaries/, and is thus suitable as an offset into /slice/.
+
+    Naturally, /slices/ can *be compared for* /equality/, /ordered/, and /hashed/.
+
+    Ordered comparison simply _treats the string as_ a sequence of /Unicode code
+    points/ and compares them in /lexicographic order/.
+
+*** DONE Appending and Inserting Text - 399
+    CLOSED: [2018-07-08 Sun 01:36]
+    - The following /methods/ add text to a ~String~:
+      + ~string.push(ch)~ appends the character ~ch~ to the *end* string.
+
+      + ~string.push_str(slice)~ appends the full contents of slice .
+
+      + ~string.extend(iter)~ appends the items produced by the /iterator/ ~iter~
+        to the string.
+          The /iterator/ _can produce_ ~char~, ~str~, or ~String~ values. These
+        are ~String~'s implementations of ~std::iter::Extend~:
+        #+BEGIN_SRC rust
+          let mut also_spaceless = "con".to_string();
+          also_spaceless.extend("tri but ion".split_whitespace());
+          assert_eq!(also_spaceless, "contribution");
+        #+END_SRC
+
+      + ~string.insert(i, ch)~ inserts the single character ~ch~ _AT byte offset_
+        ~i~ in string.
+          This entails *shifting* over any characters after ~i~ to make room for
+        ~ch~, so building up a string this way can require time *quadratic in the
+        length of the string*. =????= =TODO= =TODO=
+
+      + ~string.insert_str(i, slice)~ does the same for /slice/, with the same per-
+        formance caveat.
+
+    - Since ~String~ implements ~std::fmt::Write~, the ~write!~ and ~writeln!~ /macros/
+      can *append* /formatted text/ to ~String~'s:
+      #+BEGIN_SRC rust
+        use std::fmt::Write;
+
+        let mut letter = String::new();
+        writeln!(letter, "Whose {} these are I think I know", "rutabagas")?;
+        writeln!(letter, "His house is in the village though;")?;
+        assert_eq!(letter, "Whose rutabagas these are I think I know\n\
+                            His house is in the village though;\n");
+      #+END_SRC
+      + Since ~write!~ and ~writeln!~ are designed for writing to /output streams/,
+        they return a ~Result~, which Rust complains if you ignore. This code uses
+        the ~?~ operator to handle it, but writing to a ~String~ is actually
+        infallible, so in this case calling ~.unwrap()~ would be OK too.
+
+    - Since ~String~ implements ~Add<&str>~ and ~AddAssign<&str>~, you can write
+      code like this:
+      #+BEGIN_SRC rust
+        let left = "partners".to_string();
+        let mut right = "crime".to_string();
+        assert_eq!(left + " in " + &right, "partners in crime");
+        right += " doesn't pay";
+        assert_eq!(right, "crime doesn't pay");
+      #+END_SRC
+      + When applied to strings, the ~+~ operator takes its /LEFT operand/ _by value_,
+        so it can actually *reuse* that ~String~ as the result of the addition.
+          As a consequence, _IF_ the /left operand/'s buffer is *large enough* to
+        hold the result, _NO_ allocation is needed.
+
+      + In an unfortunate lack of symmetry, the /LEFT operand/ of ~+~ *CANNOT* be
+        a ~&str~, so you CANNOT write: ~let parenthetical = "(" + string + ")";~
+        The right way is: ~let parenthetical = "(".to_string() + string + ")";~
+
+        HOWEVER, this restriction does *discourage* building up strings from the
+        end backward. This approach performs *poorly* because the text must be
+        repeatedly shifted toward the end of the buffer.
+        =TODO= =TODO= =TODO=
+
+    - Building strings from beginning to end by appending small pieces, however,
+      is *efficient*.
+        A String behaves the way a /vector/ does, always _AT LEAST_ *doubling* its
+      buffer's size when it needs more /capacity/.
+      =Read "Building Vectors Element by Element" on page 62=
+
+      Use ~String::with_capacity~ to crate strings if you know the right buffer
+      size, and it can be more efficient by avoding calling to the /heap allocator/.
+
+*** DONE Removing Text - 401
+    CLOSED: [2018-07-08 Sun 01:02]
+    ~String~ has a few methods for *removing text* (these do *not affect* the
+    string's /capacity/; use ~shrink_to_fit~ if you need to free memory):
+    - ~string.clear()~ resets string to the *empty* string.
+
+    - ~string.truncate(n)~ discards all characters *after* the _byte offset_ ~n~,
+      leaving string with a length of at most ~n~.
+
+      If string is _shorter than_ ~n~ bytes, this has _NO effect_.
+
+    - ~string.pop()~ removes the *last* character from string, if any, and returns
+      it as an ~Option<char>~.
+
+    - ~string.remove(i)~ removes the /character/ _at byte offset_ ~i~ from string
+      and returns it, *shifting* any following characters toward the front.
+
+      This takes time _linear in the number of following characters_.
+
+    - ~string.drain(range)~ returns an /iterator/ over the given range of _byte
+      indices_, and *removes* the characters *once* the /iterator/ is /dropped/.
+      Characters after the range are shifted toward the front:
+      #+BEGIN_SRC rust
+        let mut choco = "chocolate".to_string();
+        assert_eq!(choco.drain(3..6).collect::<String>(), "col");
+        assert_eq!(choco, "choate");
+      #+END_SRC
+      If you just want to remove the range, you can just drop the iterator
+      immediately, without drawing any items from it:
+      #+BEGIN_SRC rust
+        let mut winston = "Churchill".to_string();
+        winston.drain(2..6);  // drop the generated iterator.
+        assert_eq!(winston, "Chill");
+      #+END_SRC
+
+*** DONE Conventions for Searching and Iterating - 401
+    CLOSED: [2018-07-08 Sun 16:55]
+    Rust's standard library functions for searching text and iterating over text
+    follow some naming conventions to make them easier to remember:
+
+    - Most operations process text from start to end,
+      BUT operations with names starting with ~r~ work _from end to start_.
+      For example, ~rsplit~ is the end-to-start version of ~split~.
+
+      In some cases changing direction can affect not only the order in which
+      values are produced but also the values themselves.
+
+      =TODO=
+      See the diagram in Figure 17-3 for an example of this.
+
+    - Iterators with names ending in ~n~ limit themselves to a given number of
+      matches.
+
+    - Iterators with names ending in ~_indices~ produce, together with their usual
+      iteration values, the byte offsets in the /slice/ at which they appear.
+
+    The standard library does _NOT_ provide all combinations for every operation.
+    For example, many operations do _NOT_ need an ~n~ variant, as it's easy enough
+    to simply end the iteration early.
+
+*** DONE Patterns for Searching Text - 402 - =Re-READ=
+    CLOSED: [2018-07-08 Sun 17:09]
+    - When a standard library function needs to _search_, _match_, _split_, or
+      _trim_ text, it accepts several different types to represent what to look
+      for:
+      #+BEGIN_SRC rust
+        let haystack = "One fine day, in the middle of the night";
+        assert_eq!(haystack.find(','), Some(12));
+        assert_eq!(haystack.find("night"), Some(35));
+        assert_eq!(haystack.find(char::is_whitespace), Some(3));
+      #+END_SRC
+
+      These types are called /patterns/, and most operations support them:
+
+      #+BEGIN_SRC rust
+        assert_eq!("## Elephants"
+                   .trim_left_matches(|ch: char| ch == '#' || ch.is_whitespace()),
+                   "Elephants");
+      #+END_SRC
+
+    - The standard library supports *FOUR* main kinds of /patterns/:
+      + A ~char~ as a /pattern/ matches that character.
+
+      + A ~String~ or ~&str~ or ~&&str~ as a /pattern/ matches a substring equal
+        to the /pattern/.
+
+      + A ~FnMut(char) -> bool~ /closure/ as a /pattern/ matches a SINGLE character
+        for which the /closure/ returns ~true~.
+
+      + A ~&[char]~ as a /pattern/ (not a ~&str~, but a /slice/ of ~char~ values)
+        matches any SINGLE character that appears in the list. Note that if you
+        write out the list as an array literal, you may need to use an ~as~
+        expression to get the type right:
+        #+BEGIN_SRC rust
+          let code = "\t    function noodle() { ";
+          assert_eq!(code.trim_left_matches(&[' ', '\t'] as &[char]),
+                     "function noodle() { ");
+          // Shorter equivalent: &[' ', '\t'][..]
+        #+END_SRC
+        Otherwise, Rust will be confused by the fixed-size array type ~&[char; 2]~,
+        which is unfortunately not a pattern type.
+
+    - In the library's own code, a /pattern/ is any type that implements the
+      ~std::str::Pattern~ /trait/.
+
+      The details of ~Pattern~ are *NOT yet stable*, so you *CANNOT implement* it
+      for your own types in stable Rust, but the door is open to permit regular
+      expressions and other sophisticated patterns in the future. Rust does
+      guarantee that the pattern types supported now will continue to work in
+      the future.
+
+*** DONE Searching and Replacing - 403
+    CLOSED: [2018-07-09 Mon 18:18]
+    Rust has a few /methods/ for *searchings* for /patterns/ in /slices/ and possibly
+    *replacing* them with new text:
+    - ~slice.contains(pattern)~ returns ~true~ if ~slice~ contains a match for
+      /pattern/.
+
+    - ~slice.starts_with(pattern)~ and ~slice.ends_with(pattern)~ return ~true~ if
+      /slice/'s initial or final text matches /pattern/ :
+      ~assert!("2017".starts_with(char::is_numeric));~
+
+    - ~slice.find(pattern)~ and ~slice.rfind(pattern)~ return ~Some(i)~ if /slice/
+      contains a match for /pattern/, where ~i~ is the _byte offset_ at which the
+      pattern appears. The ~find~ method returns the _first_ match, ~rfind~ the _last_:
+      #+BEGIN_SRC rust
+        let quip = "We also know there are known unknowns";
+        assert_eq!(quip.find("know"), Some(8));
+        assert_eq!(quip.rfind("know"), Some(31));
+        assert_eq!(quip.find("ya know"), None);
+        assert_eq!(quip.rfind(char::is_uppercase), Some(0));
+      #+END_SRC
+
+    - ~slice.replace(pattern, replacement)~ returns a new ~String~ formed by
+      replacing all matches for pattern with replacement :
+      #+BEGIN_SRC rust
+        assert_eq!("The only thing we have to fear is fear itself"
+                   .replace("fear", "spin"),
+                   "The only thing we have to spin is spin itself");
+        assert_eq!("`Borrow` and `BorrowMut`"
+                   .replace(|ch:char| !ch.is_alphanumeric(), ""),
+                   "BorrowandBorrowMut");
+      #+END_SRC
+
+    - ~slice.replacen(pattern, replacement, n)~ does the same, but replaces at most
+      the _first n_ matches.
+
+*** DONE Iterating over Text - 403 - *Re-READ*
+    CLOSED: [2018-07-09 Mon 18:33]
+    The standard library provides several ways to *ITERATE over a /slice/'s text*.
+    Figure 17-3 shows examples of some.
+
+    - =From Jian=
+      If Figure 17-3 has table boundaries in the figure, the appearence will be
+      better.
+
+    - =TODO= NOTE
+
+    - Methods:
+      + ~slice.chars()~ returns an iterator over slice ’s characters.
+
+      + ~slice.char_indices()~ returns an iterator over slice ’s characters and their byte
+        offsets:
+        #+BEGIN_SRC rust
+          assert_eq!("élan".char_indices().collect::<Vec<_>>(),
+                     vec![(0, 'é'), // has a two-byte UTF-8 encoding
+                          (2, 'l'),
+                          (3, 'a'),
+                          (4, 'n')]);
+        #+END_SRC
+        Note that this is not equivalent to .chars().enumerate() , since it supplies each
+        character’s byte offset within the slice, instead of just numbering the characters.
+
+      + ~slice.bytes()~ returns an iterator over the individual bytes of slice , exposing
+        the UTF-8 encoding:
+        #+BEGIN_SRC rust
+          assert_eq!("élan".bytes().collect::<Vec<_>>(),
+                     vec![195, 169, b'l', b'a', b'n']);
+        #+END_SRC
+
+      + ~slice.lines()~ returns an /iterator/ over the lines of /slice/.
+        Lines are terminated by ~"\n"~ or ~"\r\n"~.
+        Each item produced is a ~&str~ borrowing from /slice/.
+        The items do *NOT* include the lines' terminating characters.
+
+      + ~slice.split(pattern)~ returns an /iterator/ over the portions of /slice/
+        separated by matches of pattern.
+
+        This *produces empty strings* between immediately adjacent matches, as
+        well as for matches at the beginning and end of /slice/.
+
+      + The ~slice.rsplit(pattern)~ method is the same, but scans /slice/ from end
+        to start, producing matches in that order.
+
+      + ~slice.split_terminator(pattern)~ and ~slice.rsplit_terminator(pattern)~
+        are similar, except that the pattern is treated as a terminator, not a separator: if
+        pattern matches at the right end of slice , the iterators do not produce an empty
+        slice representing the empty string between that match and the end of the slice, as
+        split and rsplit do. For example:
+        #+BEGIN_SRC rust
+          // The ':' characters are separators here. Note the final "".
+          assert_eq!("jimb:1000:Jim Blandy:".split(':').collect::<Vec<_>>(),
+          vec!["jimb", "1000", "Jim Blandy", ""]);
+          // The '\n' characters are terminators here.
+          assert_eq!("127.0.0.1 localhost\n\
+          127.0.0.1 www.reddit.com\n"
+          .split_terminator('\n').collect::<Vec<_>>(),
+          vec!["127.0.0.1 localhost",
+          "127.0.0.1 www.reddit.com"]);
+          // Note, no final ""!
+        #+END_SRC
+
+      + The ~slice.splitn(n, pattern)~ and ~slice.rsplitn(n, pattern)~ are like
+        ~split~ and ~rsplit~, except that they split the string into *AT MOST ~n~
+        /slices/,* at the first or last n-1 matches for pattern .
+
+      + ~slice.split_whitespace()~ returns an /iterator/ over the whitespace-separated
+        portions of /slice/.
+          A run of multiple whitespace characters is considered a single separator.
+          Trailing whitespace is ignored. This uses the *same definition of whitespace*
+        as ~char::is_whitespace~:
+        #+BEGIN_SRC rust
+          let poem = "This is just to say\n\
+                      I have eaten\n\
+                      the plums\n\
+                      again\n";
+
+          assert_eq!(poem.split_whitespace().collect::<Vec<_>>(),
+                     vec!["This", "is", "just", "to", "say",
+                          "I", "have", "eaten", "the", "plums",
+                          "again"]);
+        #+END_SRC
+
+      + ~slice.matches(pattern)~ returns an /iterator/ over the matches for pattern
+        in /slice/.
+
+        ~slice.rmatches(pattern)~ is the same, but /iterates/ from end to start.
+
+      + ~slice.match_indices(pattern)~ and ~slice.rmatch_indices(pattern)~ are
+        similar, except that the items produced are ~(offset, match)~ pairs,
+        where offset is the *byte offset* at which the match _begins_, and match
+        is the matching /slice/.
+
+*** DONE Trimming - 406
+    CLOSED: [2018-07-08 Sun 01:09]
+    To /trim/ a string is to remove text, usually whitespace, from the beginning
+    or end of the string.
+      It's often useful in cleaning up input read from a file where the user might
+    have indented text for legibility, or accidentally left trailing whitespace on
+    a line.
+    - ~slice.trim()~ returns a /subslice/ of /slice/ that *omits* _ANY leading
+      and trailing whitespace_. ~slice.trim_left()~ omits only leading whitespace,
+      ~slice.trim_right()~ only trailing whitespace:
+      #+BEGIN_SRC rust
+        assert_eq!("\t*.rs ".trim(), "*.rs");
+        assert_eq!("\t*.rs ".trim_left(), "*.rs ");
+        assert_eq!("\t*.rs ".trim_right(), "\t*.rs");
+      #+END_SRC
+
+    - ~slice.trim_matches(pattern)~ returns a /subslice/ of /slice/ that *omits*
+      ALL matches of ~pattern~ *from the _beginning_ and _end_.*
+        The ~trim_left_matches~ and ~trim_right_matches~ methods do the same for
+      only leading or trailing matches:
+      ~assert_eq!("001990".trim_left_matches('0'), "1990");~
+
+    Note that the terms ~left~ and ~right~ in these methods' names always refer
+    to the *START* and *END* of the slice, respectively, *regardless of the
+    directionality of the text they hold.*
+
+*** DONE Case Conversion for Strings - 406
+    CLOSED: [2018-07-08 Sun 01:12]
+    The /methods/ ~slice.to_uppercase()~ and ~slice.to_lowercase()~ return a freshly
+    allocated string holding the text of /slice/ converted to uppercase or lowercase.
+      *The result may not be the same length as /slice/;* (=From Jian= You may
+    remember the relation between ß and SS in German) see “Case Conversion for
+    Characters” on page 396 for details.
+
+*** DONE Parsing Other Types from Strings - 406
+    CLOSED: [2018-07-08 Sun 01:44]
+    - Rust provides /standard traits/ for both
+      + parsing values from strings
+      + producing textual representations of values.
+
+    - If a type implements the ~std::str::FromStr~ /trait/, then it provides a
+      standard way to parse a value _from_ a /string slice/:
+      #+BEGIN_SRC rust
+        pub trait FromStr: Sized {
+            type Err;
+            fn from_str(s: &str) -> Result<Self, Self::Err>;
+        }
+      #+END_SRC
+
+    - *ALL* the USUAL /machine types/ implement ~FromStr~:
+      #+BEGIN_SRC rust
+        use std::str::FromStr;
+
+        assert_eq!(usize::from_str("3628800"), Ok(3628800));
+        assert_eq!(f64::from_str("128.5625"), Ok(128.5625));
+        assert_eq!(bool::from_str("true"), Ok(true));
+        assert!(f64::from_str("not a float at all").is_err());
+        assert!(bool::from_str("TRUE").is_err());
+      #+END_SRC
+
+    - The ~std::net::IpAddr~ type, an ~enum~ holding either an IPv4 or an IPv6
+      internet address, implements ~FromStr~ too:
+      #+BEGIN_SRC rust
+        use std::net::IpAddr;
+
+        let address = IpAddr::from_str("fe80::0000:3ea9:f4ff:fe34:7a50")?;
+        assert_eq!(address,
+                   IpAddr::from([0xfe80, 0, 0, 0, 0x3ea9, 0xf4ff, 0xfe34, 0x7a50]));
+      #+END_SRC
+
+    - /String slices/ have a ~parse~ /method/ that parses the /slice/ into whatever
+      type you like, *assuming it implements ~FromStr~.* As with ~Iterator::collect~,
+      you will sometimes need to spell out which type you want, so ~parse~ is
+      _not always much more legible_ than calling ~from_str~ directly:
+      ~let address = "fe80::0000:3ea9:f4ff:fe34:7a50".parse::<IpAddr>()?;~
+
+      You can compare this with the ~IpAddr::from_str~ version above.
+
+*** DONE Converting Other Types to Strings - 407
+    CLOSED: [2018-07-09 Mon 18:55]
+    There are *three* MAIN ways to *convert* _nontextual values_ *to* _strings_:
+
+    - Types that have a natural human-readable printed form can implement the
+      ~std::fmt::Display~ /trait/, which lets you use the ~{}~ /format
+      specifier/ in the ~format!~ /macro/:
+      #+BEGIN_SRC rust
+        assert_eq!(format!("{}, wow", "doge"), "doge, wow");
+        assert_eq!(format!("{}", true), "true");
+        assert_eq!(format!("({:.3}, {:.3})", 0.5, f64::sqrt(3.0)/2.0),
+                   "(0.500, 0.866)");
+        // Using `address` from above.
+        let formatted_addr: String = format!("{}", address);
+        assert_eq!(formatted_addr, "fe80::3ea9:f4ff:fe34:7a50");
+      #+END_SRC
+
+      ALL Rust's /machine numeric types/ implement ~Display~, as do /characters/,
+      /strings/, and /slices/.
+
+      The /smart pointer/ types ~Box<T>~ , ~Rc<T>~ , and ~Arc<T>~ implement ~Display~
+      if ~T~ itself does: their displayed form is simply that of their /referent/.
+      =From Jian= NOT Addresses!!!!!!
+
+      Containers like ~Vec~ and ~HashMap~ do *NOT* implement ~Display~, as there's
+      _NO SINGLE natural human-readable form_ for those types.
+
+    - If a type implements ~Display~, the standard library *automatically implements*
+      the ~std::str::ToString~ /trait/ for it, whose sole method ~to_string~ can
+      be more convenient when you don't need the flexibility of ~format!~:
+      #+BEGIN_SRC rust
+        // Continued from above.
+        assert_eq!(address.to_string(), "fe80::3ea9:f4ff:fe34:7a50");
+      #+END_SRC
+
+      The ~ToString~ /trait/ *predates* the introduction of ~Display~ and is
+      _LESS flexible_.
+
+      *For your own types, you should generally implement ~Display~ instead of ~ToString~.*
+
+    - _EVERY /public type/ in the /standard library implements/ ~std::fmt::Debug~,_
+      which takes a value and formats it as a string in a way helpful to programmers.
+      The easiest way to use ~Debug~ to produce a string is via the ~format!~ /macro/'s
+      ~{:?}~ /format specifier/:
+      #+BEGIN_SRC rust
+        // Continued from above.
+        let addresses = vec![address,
+                             IpAddr::from_str("192.168.0.1")?];
+        assert_eq!(format!("{:?}", addresses),
+                   "[V6(fe80::3ea9:f4ff:fe34:7a50), V4(192.168.0.1)]");
+      #+END_SRC
+      + This takes advantage of a /blanket implementation/ of ~Debug~ for ~Vec<T>~,
+        for *ANY* ~T~ that _itself implements_ ~Debug~. All of Rust's collection
+        types have such implementations.
+
+      + You should implement ~Debug~ for your own types, too.
+        *USUALLY it's BEST to let Rust _derive_ an implementation* with the
+        /attribute/ ~#[derive(Copy, Clone, Debug)]~
+
+    The ~Display~ and ~Debug~ /formatting traits/ are just two among several that
+    the ~format!~ /macro/ and its relatives use to format values as text.
+
+    We'll cover the others, and explain how to implement them all, in
+    “Formatting Values” on page 413.
+
+*** DONE Borrowing as Other Text-Like Types - 408 - =TODO= =re-do=
+    CLOSED: [2018-07-09 Mon 18:38]
+    You can borrow a slice’s contents in several different ways:
+    - /Slices/ and ~String~'s implement ~AsRef<str>~, ~AsRef<[u8]>~, ~AsRef<Path>~,
+      and ~AsRef<OsStr>~.
+        Many /standard library functions/ use these /traits/ *as bounds* on their
+      /parameter types/, so you can pass /slices/ and /strings/ to them
+      directly, even when what they really want is some other type.
+
+      =TODO= OR =RE-DO= =!!!=
+      See "~AsRef~ and ~AsMut~" on page 294 for a more detailed explanation.
+
+    - /Slices/ and /strings/ also implement the ~std::borrow::Borrow<str>~ trait.
+
+      ~HashMap~ and ~BTreeMap~ use ~Borrow~ to make ~String~'s work nicely as keys
+      in a table, as do functions like ~[T]::binary_search~.
+
+      =TODO= OR =RE-DO= =!!!=
+      See "~Borrow~ and ~BorrowMut~" on page 296 for details.
+
+*** DONE Accessing Text as UTF-8 - 409
+    CLOSED: [2018-07-09 Mon 18:58]
+    There are *two* MAIN ways to get at the /bytes representing text/, depending
+    on whether you want to take /ownership/ of the bytes or just /borrow/ them:
+
+    - ~slice.as_bytes()~ *borrows* /slice/'s bytes as a ~&[u8]~.
+
+      Since this is *not* a /mutable reference/, /slice/ can *assume its bytes will
+      remain well-formed UTF-8*.
+
+    - ~string.into_bytes()~ takes /ownership/ of string and returns a ~Vec<u8>~ of
+      the /string/'s bytes by value. This is a *cheap conversion*, as it simply
+      hands over the ~Vec<u8>~ that _the string had been using as its buffer_.
+
+        Since ~string~ _no longer exists_, there's *NO need* for the bytes to
+      continue to be well-formed UTF-8, and the caller is *free to modify* the
+      ~Vec<u8>~ as it pleases.
+
+*** DONE Producing Text from UTF-8 Data - 409
+    CLOSED: [2018-07-11 Wed 14:44]
+    If you have a _block of bytes_ that you BELIEVE _contains UTF-8 data_,
+    you have a few options for converting them into ~String~'s or /slices/,
+    *depending on how you want to handle errors*:
+    - ~str::from_utf8(byte_slice)~
+      TAKES _a ~&[u8]~ /slice/ of bytes_ and
+      RETURNS a ~Result~: ~Ok(&str)~ that contains well-formed UTF-8 if no error.
+
+    - ~String::from_utf8(vec)~ tries to construct a ~String~ from a ~Vec<u8>~
+      _passed by value_. Its /return type/ is ~Result<String, FromUtf8Error>~.
+      #+BEGIN_SRC rust
+        let good_utf8: Vec<u8> = vec![0xe9, 0x8c, 0x86];
+        assert_eq!(String::from_utf8(good_utf8).ok(), Some("錆".to_string()));
+        let bad_utf8: Vec<u8> = vec![0x9f, 0xf0, 0xa6, 0x80];
+        let result = String::from_utf8(bad_utf8);
+        assert!(result.is_err());
+        // Since String::from_utf8 failed, it didn't consume the original
+        // vector, and the error value hands it back to us unharmed.
+
+        assert_eq!(result.unwrap_err().into_bytes(),
+                   vec![0x9f, 0xf0, 0xa6, 0x80]);
+      #+END_SRC
+
+      + If ~vec~ holds well-formed UTF-8,
+        this RETURNS ~Ok(string)~,
+        where *string has _taken /ownership/ of_ ~vec~ for use as its buffer*.
+        *NO* /heap allocation/ or /copying/ of the text takes place.
+
+      + If the bytes are not valid UTF-8,
+        this RETURNS ~Err(e)~, where ~e~ is a ~FromUtf8Error~ error value.
+
+        The call ~e.into_bytes()~ gives you back the original vector ~vec~, so
+        it is *NOT lost* when the conversion fails:
+
+
+    - ~String::from_utf8_lossy(byte_slice)~ tries to construct a ~String~ or ~&str~
+      from a ~&[u8]~ shared /slice of bytes/.
+
+      *This conversion always succeeds, replacing any ill-formed UTF-8 with
+      Unicode replacement characters.*
+
+      The /return value/ is a ~Cow<str>~
+      + if it contains well-formed UTF-8,
+        the result borrows a ~&str~ directly from ~byte_slice~
+
+      + if it contains ill-formed bytes,
+        the result owns a freshly _allocated_ ~String~ with replacement
+        characters substituted for the ill-formed bytes.
+
+      Hence, when ~byte_slice~ is well-formed, *NO* /heap allocation/ or /copying/
+      takes place.
+
+      =TODO=
+      We discuss ~Cow<str>~ in more detail in “Putting Off Allocation” on
+      page 410.
+
+    - *unsafe function* ~String::from_utf8_unchecked~
+      takes ~Vec<u8>~ that MUST contains well-formed UTF-8.
+
+      This simply wraps the ~Vec<u8>~ up as a ~String~ and returns it,
+      *without examining the bytes at all*.
+
+      When you want to you this function, it is your responsibility for making
+      sure you haven't introduced ill-formed UTF-8 into the system.
+
+    - Similarly, *unsafe function* ~str::from_utf8_unchecked~
+      takes a ~&[u8]~ and returns it as a ~&str~, *without checking to see if it
+      holds well-formed UTF-8*.
+
+      As with ~String::from _utf8_unchecked~, you are responsible for making
+      sure this is safe.
+
+*** DONE Putting Off Allocation - 410
+    CLOSED: [2018-07-11 Wed 16:01]
+    Suppose you want your program to greet the user. _On Unix_, you could write:
+    #+BEGIN_SRC rust
+      fn get_name() -> String {
+          std::env::var("USER") // Windows uses "USERNAME"
+              .unwrap_or("whoever you are".to_string())
+      }
+
+      println!("Greetings, {}!", get_name());
+    #+END_SRC
+    For Unix users, this greets them by username. For Windows users and the tragically
+    unnamed, it provides alternative stock text.
+
+    - The ~std::env::var~ function returns a ~String~ -- and has good reasons to
+      do so that we won't go into here. =TODO= =???=
+
+        But that means the alternative stock text must also be returned as a ~String~.
+      _This is disappointing_: when ~get_name~ returns a /static string/, NO allocation
+      should be necessary at all.
+
+    - The /return value/ of ~name~ should be an owned ~String~, sometimes it should
+      be a ~&'static str~, and we CAN'T know which one it will be until we run the
+      program.
+
+      *This dynamic character is the hint to consider using ~std::borrow::Cow~,*
+      the clone-on-write type that can hold _either_ /owned/ _or_ /borrowed/ data.
+
+    - As explained in “Borrow and ToOwned at Work: The Humble Cow” on page 300,
+      ~Cow<'a, T>~ is an /enum/ with *two* variants: ~Owned~ and ~Borrowed~.
+
+      + ~Borrowed~ holds a reference ~&'a T~
+
+      + ~Owned~ holds the _owning version_ of ~&T~:
+        ~String~ for ~&str~, ~Vec<i32>~ for ~&[i32]~, and so on.
+
+      Whether ~Owned~ or ~Borrowed~, a ~Cow<'a, T>~ can always produce a ~&T~ for
+      you to use. In fact, ~Cow<'a, T>~ _dereferences to_ ~&T~, BEHAVING AS a
+      kind of /smart pointer/.
+
+    - Changing ~get_name~ to return a ~Cow~ results in the following:
+      #+BEGIN_SRC rust
+        use std::borrow::Cow;
+
+        fn get_name() -> Cow<'static, str> {
+            std::env::var("USER")
+                .map(|v| Cow::Owned(v))
+                .unwrap_or(Cow::Borrowed("whoever you are"))
+        }
+      #+END_SRC
+      If this SUCCEEDS in reading the "USER" environment variable, the map
+      RETURNS the resulting ~String~ as a ~Cow::Owned~.
+
+      If it FAILS, the ~unwrap_or~ returns its ~static &str~ as a ~Cow::Borrowed~.
+      The caller can remain unchanged: ~println!("Greetings, {}!", get_name());~
+
+      *As long as ~T~ implements the ~std::fmt::Display~ /trait/, displaying a
+      ~Cow<'a, T>~ produces the SAME results as DISPLAYING a ~T~.*
+
+    - ~Cow~ is also useful when you may or _may not need to MODIFY some text_ you
+      have /borrowed/.
+
+      When no changes are necessary, you can continue to /borrow/ it. But ~Cow~'s
+      namesake *clone-on-write* behavior can give you an /owned, mutable copy/ of
+      the value on demand.
+
+      ~Cow~'s ~to_mut~ /method/ makes sure the ~Cow~ is ~Cow::Owned~, applying
+      the value's ~ToOwned~ implementation if necessary, and then returns a
+      /mutable reference/ to the value.
+
+      + Example:
+        #+BEGIN_SRC rust
+          fn get_title() -> Option<&'static str> { ... }
+
+          let mut name = get_name();
+
+          if let Some(title) = get_title() {
+              name.to_mut().push_str(", ");
+              name.to_mut().push_str(title);
+          }
+
+          println!("Greetings, {}!", name);
+        #+END_SRC
+        If ~get_title~ returns ~None~, the ~Cow~ simply carries the /static string/
+        all the way through to the ~println!~.
+
+        *You’ve managed to _put off allocation_ UNLESS it's really necessary,
+        while still writing straightforward code.*
+
+    - Since ~Cow~ is frequently used for strings, the standard library has some
+      *special support* for ~Cow<'a, str>~. It provides ~From~ and ~Into~
+      conversions from both ~String~ and ~&str~, so you can write ~get_name~
+      more tersely:
+      #+BEGIN_SRC rust
+        fn get_name() -> Cow<'static, str> {
+            std::env::var("USER")
+                .map(|v| v.into())
+                .unwrap_or("whoever you are".into())
+        }
+      #+END_SRC
+
+    - ~Cow<'a, str>~ also implements ~std::ops::Add~ and ~std::ops::AddAssign~,
+      so to add the ~title~ to the ~name~, you could write:
+      #+BEGIN_SRC rust
+        if let Some(title) = get_title() {
+            name += ", ";
+            name += title;
+        }
+      #+END_SRC
+
+    - Or, since a ~String~ can be a ~write!~ /macro/'s destination:
+      #+BEGIN_SRC rust
+        use std::fmt::Write;
+
+        if let Some(title) = get_title() {
+            write!(name.to_mut(), ", {}", title).unwrap();
+        }
+      #+END_SRC
+      + As before, _no allocation occurs UNTIL_ you try to _modify_ the ~Cow~.
+
+    - Keep in mind that
+      NOT every ~Cow<..., str>~ must be ~'static~: you can use ~Cow~ to /borrow/
+      previously computed text _UNTIL_ the moment a /copy/ becomes NECESSARY.
+
+*** DONE Strings as Generic Collections - 412
+    CLOSED: [2018-07-09 Mon 18:42]
+    - ~String~ implements both ~std::default::Default~ and ~std::iter::Extend~:
+      ~default~ returns an *empty string*, and ~extend~ can *append* /characters/,
+      /string slices/, or /strings/ to the end of a string.
+
+      This is the *SAME combination of /traits/ implemented by Rust's other
+      collection types* like ~Vec~ and ~HashMap~ for /generic construction
+      patterns/ such as ~collect~ and ~partition~ .
+
+    - The &~str~ type also implements ~Default~, returning an *empty /slice/.*
+        This is handy in some corner cases; for example, it lets you derive
+      ~Default~ for structures containing /string slices/.
+
+** DONE Formatting Values - 413
+   CLOSED: [2018-07-07 Sat 23:32]
    - The /template string/ must be a _constant_, so that _Rust can check it against
      the types of the arguments at compile time_.
 
@@ -9476,11 +10321,182 @@
     - The argument taken as the precision *must be* a ~usize~.
       There is _NO_ corresponding syntax for the _field width_.
 
-*** TODO Formatting Your Own Types - 421
-    - xxx
+*** DONE Formatting Your Own Types - 421
+    CLOSED: [2018-07-07 Sat 23:32]
+    The /formatting macros/ use a set of /traits/ defined in the ~std::fmt~ /module/
+    _to *convert* values *to* text_.
+      You can make Rust's /formatting macros/ format your own types by *implementing*
+    one or more of these /traits/ yourself.
 
-*** TODO Using the Formatting Language in Your Own Code - 423
-    - xxx
+    - format parameter notations and their corresponding /traits/:
+
+      | Notations | Example     | Trait                | purpose                                       |
+      |-----------+-------------+----------------------+-----------------------------------------------|
+      | none      | ~{}~        | ~std::fmt::Display~  | Text, numbers, errors: the catch-all trait    |
+      | ~b~       | ~{bits:#b}~ | ~std::fmt::Binary~   | Numbers in binary                             |
+      | ~o~       | ~{:#5o}~    | ~std::fmt::Octal~    | Numbers in octal                              |
+      | ~x~       | ~{:4x}~     | ~std::fmt::LowerHex~ | Numbers in hexadecimal, lower-case digits     |
+      | ~X~       | ~{:016X}~   | ~std::fmt::UpperHex~ | Numbers in hexadecimal, upper-case digits     |
+      | ~e~       | ~{:.3e}~    | ~std::fmt::LowerExp~ | Floating-point numbers in scientific notation |
+      | ~E~       | ~{:.3E}~    | ~std::fmt::UpperExp~ | Same, upper-case E                            |
+      | ~?~       | ~{:#?}~     | ~std::fmt::Debug~    | Debugging view, for developers                |
+      | ~p~       | ~{:p}~      | ~std::fmt::Pointer~  | Pointer as address, for developers            |
+
+    - You can ask Rust to implement ~std::fmt::Debug~ for you by using the /attribute/
+      ~#[derive(Debug)]~.
+
+    - The /formatting traits/ _ALL_ have the *SAME STRUCTURE*,
+
+            *differing* _ONLY_ in their names.
+
+      Use ~std::fmt::Display~ as a representative:
+      #+BEGIN_SRC rust
+        trait Display {
+            fn fmt(&self, dest: &mut std::fmt::Formatter) -> std::fmt::Result;
+        }
+      #+END_SRC
+
+      + The ~fmt~ /method/'s job is to produce a _properly formatted representation_
+        of ~self~ and write its characters to ~dest~.
+          In addition to serving as an /output stream/, the ~dest~ argument also
+        carries details parsed from the /format parameter/, like the _alignment_
+        and _minimum field width_.
+
+        * Here is a example with ~Complex~ -- print it as the ~a \pm{} bi~ form:
+          #+BEGIN_SRC rust
+            use std::fmt;
+
+            impl fmt::Display for Complex {
+                fn fmt(&self, dest: &mut fmt::Formatter) -> fmt::Result {
+                    let i_sign = if self.i < 0.0 { '-' } else { '+' };
+                    write!(dest, "{} {} {}i", self.r, i_sign, f64::abs(self.i))
+                }
+            }
+
+            // Examples:
+            let one_twenty = Complex { r: -0.5, i: 0.866 };
+            assert_eq!(format!("{}", one_twenty),
+                       "-0.5 + 0.866i");
+
+            let two_forty = Complex { r: -0.5, i: -0.866 };
+            assert_eq!(format!("{}", two_forty),
+                       "-0.5 - 0.866i");
+          #+END_SRC
+          This takes advantage of the fact that ~Formatter~ itself an /output stream/,
+          so the ~write!~ /macro/ can do most of the work for us.
+
+      + The ~#~ character in a format parameter typically selects some *alternative
+        display form*. Here we use /polar coordinate representation/:
+        #+BEGIN_SRC rust
+          impl fmt::Display for Complex {
+              fn fmt(&self, dest: &mut fmt::Formatter) -> fmt::Result {
+                  let (r, i) = (self.r, self.i);
+                  if dest.alternate() {
+                      let abs = f64::sqrt(r * r + i * i);
+                      let angle = f64::atan2(i, r) / std::f64::consts::PI * 180.0;
+                      write!(dest, "{} ∠ {}°", abs, angle)
+                  } else {
+                      let i_sign = if i < 0.0 { '-' } else { '+' };
+                      write!(dest, "{} {} {}i", r, i_sign, f64::abs(i))
+                  }
+              }
+          }
+
+          // 
+          let ninety = Complex { r: 0.0, i: 2.0};
+          assert_eq!(format!("{}", ninety),
+                     "0 + 2i");
+          assert_eq!(format!("{:#}", ninety),
+                     "2 ∠ 90°");
+        #+END_SRC
+
+    - Although the /formatting traits'/ ~fmt~ /methods/ return a ~fmt::Result~
+      value (a typical _module-specific_ ~Result~ type), you should *propagate*
+      _failures_ *ONLY* from operations on the ~Formatter~, as the ~fmt::Display~
+      implementation does with its calls to ~write!~;
+
+      *your formatting functions _MUST NEVER originate_ errors themselves*.
+      + This allows /macros/ like ~format!~ to simply return a ~String~ instead of
+        a ~Result<String, ...>~, since appending the formatted text to a String
+        never fails.
+
+      + It also ensures that ANY /errors/ you do get from ~write!~ or ~writeln!~
+        reflect REAL PROBLEMS from the underlying I/O stream, not formatting issues.
+
+    - ~Formatter~ has plenty of other helpful /methods/, including some for handling
+      structured data like /maps/, /lists/, and so on, which we *won't* cover here;
+      consult the online documentation for the full details.
+      =TODO= =TODO= =TODO=
+
+*** DONE Using the Formatting Language in Your Own Code - 423
+    CLOSED: [2018-07-07 Sat 23:23]
+    You can write your own /functions/ and /macros/ that accept /format templates/
+    and /arguments/ by using Rust's ~format_args!~ /macro/ and the ~std::fmt::Arguments~
+    type.
+
+    - For example, suppose your program needs to log status messages as it runs,
+      and you'd like to use Rust's text formatting language to produce them.
+      The following would be a start:
+      #+BEGIN_SRC rust
+        fn logging_enabled() -> bool {
+            // ...
+        }
+
+        use std::fs::OpenOptions;
+        use std::io::Write;
+
+        fn write_log_entry(entry: std::fmt::Arguments) {
+            if logging_enabled() {
+                // Keep things simple for now, and just
+                // open the file every time.
+                let mut log_file = OpenOptions::new()
+                    .append(true)
+                    .create(true)
+                    .open("log-file-name")
+                    .expect("failed to open log file");
+                log_file.write_fmt(entry)
+                    .expect("failed to write to log");
+            }
+        }
+      #+END_SRC
+      + You can use it like:
+        #+BEGIN_SRC rust
+          write_log_entry(format_args!("Hark! {:?}\n", mysterious_value));
+        #+END_SRC
+
+      + Constructing an ~Arguments~ value is cheap (=From Jian= Details in the book
+        page 424). This is important, since in this ~write_log_entry~ function, even
+        if the value of ~logging_enabled()~ is ~false~, the ~entry~ will be created.
+
+        It is obvious that if we can lazily evaluate ~entry~, we can get a BETTER
+        solution.
+
+      + The ~File~ type implements the ~std::io::Write~ /trait/, whose ~write_fmt~
+        /method/ takes an ~Argument~ and does the formatting. It writes the results
+        to the underlying stream.
+
+      + The call to ~write_log_entry~ (see above) is *NOT* pretty -- you don't want
+        to create an ~Arguments~ value every time you call the ~write_log_entry~
+        function.
+
+        This is where a /macro/ can help: =TODO= Chapter 20
+        #+BEGIN_SRC rust
+          macro_rules! log {  // no! needed after name in macro definitions
+              ($format:tt, $($arg:expr),*) => (
+                  write_log_entry(format_args!($format, $($arg),*))
+              )
+          }
+        #+END_SRC
+
+        Then you can use it like:
+        #+BEGIN_SRC rust
+          log!("O day and night, but this is wondrous strange! {:?}\n",
+               mysterious_value);
+        #+END_SRC
+
+        * =From Jian= =TODO= =TODO= =TODO=
+          I think if we embed the code of the body of the ~write_log_entry~ to the
+          /macro/ directly, we can get ~entry~ _lazily evaluated_.
 
 ** DONE Regular Expressions - 424
    CLOSED: [2018-06-18 Mon 19:20]
