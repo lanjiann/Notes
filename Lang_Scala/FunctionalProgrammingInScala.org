@@ -253,7 +253,43 @@ mourn
 Coalesce
 
 * TODO Part 1 Introduction to functional programming - 1
-  - Outlines for the Chapter 1 ~ 6
+  - We BEGIN this book with a _radical premise_:
+    that we will *restrict* ourselves to constructing programs *using only pure
+    functions* with no side effects such as reading from files or mutating memory.
+
+    This idea, of /functional programming/, leads to a very different way of
+    writing programs than you may be used to.
+      We therefore start from the very beginning, *relearning* how to write the
+    simplest of programs *in a functional way*.
+
+  - Outlines for the Chapter 1 ~ 6:
+    + Chapter 1 explains exactly
+      * *WHAT* functional programming means
+        AND
+      * give you some idea of its *benefits*.
+
+    + The rest of the chapters in part 1 introduce the _basic techniques_ for
+      /functional programming/ in Scala.
+      * Chapter 2 introduces Scala the language and covers fundamentals LIKE
+        - how to write loops functionally
+
+        - manipulate functions as ordinary values.
+
+      * Chapter 3 deals with /in-memory data structures/ that may change over time.
+
+      * Chapter 4 talks about _handling errors in pure functions_, and
+
+      * Chapter 5 introduces the *notion* of /non-strictness/, which can be used
+        to improve the /efficiency/ and /modularity/ of functional code.
+
+      * Chapter 6 introduces _modeling STATEFUL programs using pure functions_.
+
+  - The intent of this first part of the book is
+    * to get you thinking about programs purely in terms of functions from inputs
+      to outputs,
+      and
+    * to teach you the techniques you'll need in part 2, when we start writing
+      some practical code.
 
 ** DONE 1 What is functional programming? - 3
    CLOSED: [2017-03-15 Wed 21:01]
@@ -1524,9 +1560,110 @@ Coalesce
      *be DESCRIBED BY /an algebra/ that obeys specific /laws/.*
 
 *** TODO 7.1 Choosing data types and functions - 96
-**** 7.1.1 A data type for parallel computations - 97
-**** 7.1.2 Combining parallel computations - 100
-**** 7.1.3 Explicit forking - 102
+    - Example for Illustration:
+      #+BEGIN_SRC scala
+        def sum(ints: Seq[Int]): Int =
+          ints.foldLeft(0)((a, b) => a + b)
+      #+END_SRC
+
+    - INSTEAD of _folding sequentially_,
+      we could use a /divide-and-conquer algorithm/; see the following code:
+      #+BEGIN_SRC scala
+        def sum(ints: IndexedSeq[Int]): Int =
+          if (ints.size <= 1)
+            ints.headOption getOrElse 0
+          else {
+            val (l,r) = ints.splitAt(ints.length/2)
+            sum(l) + sum(r)
+          }
+      #+END_SRC
+
+      + _UNLIKE_ the ~foldLeft~-based implementation, this implementation *can be
+        parallelized* — the two halves can be summed _in parallel_.
+
+    - Instead learning how to work with the implementation APIs directly (likely
+      related to ~java.lang.Thread~ and ~java.util.concurrent~), we'll design our
+      own ideal API as illuminated by our examples and work backward from there
+      to an implementation.
+
+**** TODO 7.1.1 A data type for parallel computations - 97
+     - xxx
+       + ~def unit[A](a: => A): Par[A]~
+         for taking an unevaluated ~A~ and returning a computation that might
+         evaluate it in a separate thread.
+
+         We call it ~unit~ because in a sense it creates a unit of parallelism
+         that just wraps a single value.
+
+       + ~def get[A](a: Par[A]): A~
+         for extracting the resulting value from a parallel computation.
+
+     - Listing 7.2  Updating ~sum~ with our custom data type
+       #+BEGIN_SRC scala
+         def sum(ints: IndexedSeq[Int]): Int =
+           if (ints.size <= 1)
+             ints headOption getOrElse 0
+           else {
+             val (l, r) = ints.splitAt(ints.length/2)
+             val sumL: Par[Int] = Par.unit(sum(l))
+             val sumR: Par[Int] = Par.unit(sum(r))
+             Par.get(sumL) + Par.get(sumR)
+           }
+       #+END_SRC
+
+     - *The problem with using concurrency primitives directly*
+       + Transcribed partial excerpt of ~java.lang.Thread~ and ~Runnable~ into Scala:
+         #+BEGIN_SRC scala
+           trait Runnable { def run: Unit }
+
+           class Thread(r: Runnable) {
+             def start: Unit  // Begins running `r` in a separate thread.
+             def join: Unit   // Blocks the calling thread until `r` finishes running.
+           }
+         #+END_SRC
+
+       + A problem of both of the types ~Runnable~ and ~Thread~ is their core
+         functions do NOT have meaningful type -- they are used for /side effect/.
+         This is BAD for /compositionality/.
+
+       + ~Thread~ also has the _DISADVANTAGE_ that it maps directly onto /operating
+         system threads/, which are a scarce resource.
+           It would be preferable to create as many /logical threads/ as is natural
+         for our problem, and LATER deal with mapping these onto actual /OS threads/.
+
+       + This kind of thing can be handled by something like
+         ~java.util.concurrent.Future~, ~ExecutorService~, and friends.
+
+         *Why don't we use them directly?*
+
+         Here's a portion of their API:
+         #+BEGIN_SRC scala
+           class ExecutorService {
+             def submit[A](a: Callable[A]): Future[A]
+           }
+
+           trait Future[A] {
+             def get: A
+           }
+         #+END_SRC
+         Though these are a tremendous help in abstracting over physical threads,
+         these primitives are still at a much lower level of abstraction than
+         the library we want to create in this chapter.
+         * A call to ~Future.get~, for example, *blocks* the calling thread *until*
+           the ~ExecutorService~ has finished executing it, and its API provides
+           _no means of composing futures_.
+
+           Of course, we can build the implementation of our library on top of
+           these tools (and this is in fact what we end up doing later in the
+           chapter), but they don't present a modular and compositional API that
+           we'd want to use directly from functional programs.
+
+       + =TODO=
+
+       + =TODO=
+
+**** TODO 7.1.2 Combining parallel computations - 100
+**** TODO 7.1.3 Explicit forking - 102
 
 *** TODO 7.2 Picking a representation - 104
 *** TODO 7.3 Refining the API - 105

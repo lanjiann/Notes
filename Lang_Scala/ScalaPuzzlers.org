@@ -120,16 +120,13 @@
 
 * DONE 2. UPSTAIRS downstairs 23
   CLOSED: [2017-09-28 Thu 23:37]
-  Q: What is the result of executing the following code in the REPL?
-  #+BEGIN_SRC scala
-    var MONTH = 12; var DAY = 24
-    var (HOUR, MINUTE, SECOND) = (12, 0, 0)
-  #+END_SRC
+  - Q :: What is the result of executing the following code in the REPL?
+    #+BEGIN_SRC scala
+      var MONTH = 12; var DAY = 24
+      var (HOUR, MINUTE, SECOND) = (12, 0, 0)
+    #+END_SRC
 
-  A: The first statement prints:
-     =MONTH: Int = 12=
-     =DAY: Int = 24=
-     and the second fails to compile.
+  - A :: The first line compiles, and the second fails to compile.
 
 ** DONE Explanation
    CLOSED: [2017-09-28 Thu 23:05]
@@ -153,9 +150,13 @@
    - /Uppercase variable names/ can be used for plain, single-value assignments
      of ~val~'s and ~var~'s, as in the case of ~MONTH~ and ~DAY~.
 
-   - Some trickiness arises in pattern matching:
-     + variables _STARTING WITH an UPPERCASE letter_ are /stable identifiers/.
-       They are intended for matching against constants.
+   - Some *trickiness* arises in /pattern matching/ -- multiple-variable assignments,
+     NOT LIKE single-variable assignment, are /paatern matching/.
+
+     In /pattern matching/,
+
+     + Variables _STARTING WITH an UPPERCASE letter_ are /stable identifiers/.
+       They are intended for matching against _constants_.
        #+BEGIN_SRC scala
          final val TheAnswer = 42
 
@@ -171,8 +172,8 @@
          // res1: String = Your guess is correct
        #+END_SRC
 
-     + variables _STARTING WITH an LOWERCASE letter_, by contrast, define
-       /variable patterns/, which cause values to be assigned:
+     + Variables _STARTING WITH an LOWERCASE letter_, by contrast, define
+       /variable patterns/, which cause values to be *assigned*:
        ~var (hour, minute, second) = (12, 0, 0)~
 
 ** DONE Discussion
@@ -195,10 +196,8 @@
        //  ...
      #+END_SRC
 
-   - /Lowercase variables/ can also be _treated as_ /stable identifiers/ by
-     *enclosing them in backticks*.
-
-     _Additional requirement_: ~val~
+   - *Enclosing lowercase variables in backticks*, and then you get /stable
+     identifiers/
 
      #+BEGIN_SRC scala
        final val theAnswer = 42
@@ -225,6 +224,10 @@
        //   theAnswer found.
        //          case `theAnswer` => "Your guess is correct"
      #+END_SRC
+
+   - You can also use the *enclosing with backticks* way to convert keywords to
+     variable names. For example, you can use ~`val`~ as a variable name.
+
 
    - We should keep the convention in other languages -- use /lowercase name/
      for ~var~'s (better still, avoid ~var~'s completely!), and /uppercase names/

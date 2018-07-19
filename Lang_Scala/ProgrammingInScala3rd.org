@@ -12898,24 +12898,40 @@ Conclusion - 76]]
 ** TODO 29.6 Tracking module instances - 671
 ** TODO 29.7 Conclusion - 673
 * TODO 30 Object Equality - 674 =Re-READ=
-  Define object equality is more tricky than it looks at first glance.
+  Define *object equality* is more tricky than it looks at first glance.
+
+  =From Jian=
+  This complexity comes from /subtyping/.
+  This is NOT a problem of OOP, but a problem of OOP with /inheritance/.
 
 ** DONE 30.1 Equality in Scala - 674
    CLOSED: [2017-11-25 Sat 00:39]
    - As mentioned in Section 11.2, the definition of equality is _DIFFERENT_ in
-     Scala and Java.
+     Scala and Java. Both of them has *TWO* equality comparison operators, but
+     with _DIFFERENT design choice_.
 
-   - Java has _TWO_ equality comparisons:
-     + ~==~ operator :: natural equality check for /value types/ and /object
-                        identity for reference types/
+     + Java
+       * ~==~ operator :: 
+         - /natural equality check/ for /value types/
+           AND 
+         - /object identity/ for /reference types/
 
-     + ~equals~ method :: (user-defined) canonical equality for reference types.
+       * ~equals~ method :: (user-defined) canonical equality for /reference types/.
 
-   - Java's _TWO_ equality comparisons are problematic -- the more natural
-     symbol, ~==~, does NOT always correspond to the natural notion of equality.
+     + Scala
+       * ~==~ operator :: Be reserved for the "natural" equality of each type.
+         - For /value types/, ~==~ is value comparison, just like in Java.
 
-   - Scala also has an equality method signifying /object identity/, but it is
-     not used much -- ~eq~.
+         - For /reference types/, ~==~ is the same as ~equals~ in Scala, and you
+           can redefine the behavior of ~==~ for new types by overriding the
+           ~equals~ /method/.
+
+       * ~eq~ method :: /object identity/, which is NOT used much.
+
+   - Q: Why does Java's design is BAD!?
+
+     A: The more natural symbol, ~==~, *does NOT* always correspond to the natural
+        notion of equality.
 
    - In Scala ~==~ is value comparison, just like in Java.
 
