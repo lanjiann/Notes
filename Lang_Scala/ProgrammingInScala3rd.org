@@ -166,7 +166,7 @@
   - [[12.6 Why not multiple inheritance? - 270][12.6 Why not multiple inheritance? - 270]]
   - [[12.7 To trait or not to trait? - 274 =IMPORTANT=][12.7 To trait or not to trait? - 274 =IMPORTANT=]]
   - [[12.8 Conclusion - 275][12.8 Conclusion - 275]]
-- [[13 Packages and Imports - 276 _Re-READ_][13 Packages and Imports - 276 _Re-READ_]]
+- [[13 Packages and Imports - 276 - _Re-READ_][13 Packages and Imports - 276 - _Re-READ_]]
   - [[13.1 Putting code in packages - 277][13.1 Putting code in packages - 277]]
   - [[13.2 Concise access to related code - 281 =RE-READ=][13.2 Concise access to related code - 281 =RE-READ=]]
   - [[13.3 Imports - 285][13.3 Imports - 285]]
@@ -179,7 +179,7 @@
     - [[Visibility and companion objects][Visibility and companion objects]]
   - [[13.6 Package objects - 291][13.6 Package objects - 291]]
   - [[13.7 Conclusion - 293][13.7 Conclusion - 293]]
-- [[14 Assertions and Tests - 294 _No details in this book!!!_][14 Assertions and Tests - 294 _No details in this book!!!_]]
+- [[14 Assertions and Tests - 294 - _No details in this book!!!_][14 Assertions and Tests - 294 - _No details in this book!!!_]]
   - [[14.1 Assertions - 294][14.1 Assertions - 294]]
   - [[14.2 Testing in Scala - 296][14.2 Testing in Scala - 296]]
   - [[14.3 Informative failure reports - 297][14.3 Informative failure reports - 297]]
@@ -443,17 +443,17 @@
   - [[29.5 Runtime linking - 670][29.5 Runtime linking - 670]]
   - [[29.6 Tracking module instances - 671][29.6 Tracking module instances - 671]]
   - [[29.7 Conclusion - 673][29.7 Conclusion - 673]]
-- [[30 Object Equality - 674 =Re-READ=][30 Object Equality - 674 =Re-READ=]]
+- [[30 Object Equality - 674][30 Object Equality - 674]]
   - [[30.1 Equality in Scala - 674][30.1 Equality in Scala - 674]]
   - [[30.2 Writing an equality method - 675][30.2 Writing an equality method - 675]]
-    - [[Pitfall #1: Defining ~equals~ with the wrong signature][Pitfall #1: Defining ~equals~ with the wrong signature]]
-    - [[Pitfall #2: Changing ~equals~ without also changing ~hashCode~][Pitfall #2: Changing ~equals~ without also changing ~hashCode~]]
-    - [[Pitfall #3: Defining ~equals~ in terms of mutable fields][Pitfall #3: Defining ~equals~ in terms of mutable fields]]
+    - [[Pitfall #1: Defining ~equals~ with the wrong signature - 676][Pitfall #1: Defining ~equals~ with the wrong signature - 676]]
+    - [[Pitfall #2: Changing ~equals~ without also changing ~hashCode~ - 678][Pitfall #2: Changing ~equals~ without also changing ~hashCode~ - 678]]
+    - [[Pitfall #3: Defining ~equals~ in terms of mutable fields - 680][Pitfall #3: Defining ~equals~ in terms of mutable fields - 680]]
     - [[Pitfall #4: Failing to define ~equals~ as an equivalence relation][Pitfall #4: Failing to define ~equals~ as an equivalence relation]]
   - [[30.3 Defining equality for parameterized types - 688][30.3 Defining equality for parameterized types - 688]]
   - [[30.4 Recipes for ~equals~ and ~hashCode~ - 692][30.4 Recipes for ~equals~ and ~hashCode~ - 692]]
-    - [[Recipe for ~equals~][Recipe for ~equals~]]
-    - [[Recipe for ~hashCode~][Recipe for ~hashCode~]]
+    - [[Recipe for ~equals~ - 693][Recipe for ~equals~ - 693]]
+    - [[Recipe for ~hashCode~ - 695][Recipe for ~hashCode~ - 695]]
   - [[30.5 Conclusion - 697][30.5 Conclusion - 697]]
 - [[31 Combining Scala and Java - 698][31 Combining Scala and Java - 698]]
   - [[31.1 Using Scala from Java - 698][31.1 Using Scala from Java - 698]]
@@ -5442,7 +5442,7 @@ Conclusion - 76]]
      and
    + _ALLOW_ you to stack behaviors.
 
-* DONE 13 Packages and Imports - 276 _Re-READ_
+* DONE 13 Packages and Imports - 276 - _Re-READ_
   CLOSED: [2017-10-21 Sat 17:53]
   This chapter shows several constructs that help you program in a /modular
   style/.
@@ -5812,7 +5812,7 @@ Conclusion - 76]]
 ** DONE 13.7 Conclusion - 293
    CLOSED: [2017-10-21 Sat 17:53]
 
-* DONE 14 Assertions and Tests - 294 _No details in this book!!!_
+* DONE 14 Assertions and Tests - 294 - _No details in this book!!!_
   CLOSED: [2018-04-10 Tue 22:20]
   /Assertions/ and /tests/ are *two* important ways you can check that the software
   you write behaves as you expect.
@@ -12897,7 +12897,8 @@ Conclusion - 76]]
 ** TODO 29.5 Runtime linking - 670
 ** TODO 29.6 Tracking module instances - 671
 ** TODO 29.7 Conclusion - 673
-* TODO 30 Object Equality - 674 =Re-READ=
+* DONE 30 Object Equality - 674
+  CLOSED: [2018-07-19 Thu 18:27]
   Define *object equality* is more tricky than it looks at first glance.
 
   =From Jian=
@@ -12952,51 +12953,101 @@ Conclusion - 76]]
          if (null eq this) {null eq that} else {this equals that}
      #+END_SRC
 
-** TODO 30.2 Writing an equality method - 675
+** DONE 30.2 Writing an equality method - 675
+   CLOSED: [2018-07-19 Thu 01:19]
    - footnote:
      All but the _third_ pitfall are described in the context of Java in the
      book, Effective Java Second Edition, by Joshua Bloch.
 
-   - ~class Point(val x: Int, val y: Int)~
+   - Here are four common pitfalls2 that can cause inconsistent behavior when
+     overriding equals:
+     1. Defining equals with the wrong signature.
 
-*** DONE Pitfall #1: Defining ~equals~ with the wrong signature
+     2. Changing equals without also changing hashCode.
+
+     3. Defining equals in terms of mutable fields.
+
+     4. Failing to define equals as an equivalence relation. 
+
+*** DONE Pitfall #1: Defining ~equals~ with the wrong signature - 676
     CLOSED: [2017-11-25 Sat 00:54]
-    #+BEGIN_SRC scala
-      // An utterly WRONG definition of equals
-      def equals(other: Point): Boolean =
-        this.x = other.x && this.y == other.y
+    Consider adding an /equality method/ to the following class of simple points:
+    ~class Point(val x: Int, val y: Int)~
 
-      val p1, p2 = new Point(1, 2)
-      // p1: Point = Point@37d7d90f
-      // p2: Point = Point@3beb846d
+    - At the first glance, you may want to /override/ the ~equals~ /method/ with
+      the /signature/ ~equals(other: Point): Boolean~.
 
-      val coll = mutable.HashSet(p1)
-      // coll: scala.collection.mutable.HashSet[Point] =
-      // Set(Point@37d7d90f)
+      *This is utterly WRONG!*
 
-      coll contains p2
-      // res2: Boolean = false
+    - The *right* /signature/ is ~equals(other: Any): Boolean~, which is the
+      signature of the one defined in the ROOT /class/ ~Any~.
 
-      val p2a: Any = p2
-      // p2a: Any = Point@3beb846d
+    - If you use the wrong one, ~equals(other: Point): Boolean~, you just write
+      an /overloaded/ alternative, *which should NOT exists, and it can make
+      people confused*.
 
-      p1 equals p2a
-      // res3: Boolean = false
-    #+END_SRC
+      Let's say some examples:
 
-    The given ~equals~ above is NOT /overridden/ -- it is /overload/, which is
-    wrong.
-      The *RIGHT* input type should be ~Any~, as in the ~Any~ class, and then the
-    definition is:
-    #+BEGIN_SRC scala
-      // A better definition, but still not perfect
-      override def equals(other: Any) = other match {
-        case that: Point => this.x == that.x && this.y == that.y
-        case _ => false
-      }
-    #+END_SRC
+      + If we use the *wrong* /signature/ ~equals(other: Point): Boolean~:
+        #+BEGIN_SRC scala
+          // An utterly WRONG definition of equals
+          def equals(other: Point): Boolean =
+            this.x = other.x && this.y == other.y
+  
+          val p1, p2 = new Point(1, 2)
+          // p1: Point = Point@37d7d90f
+          // p2: Point = Point@3beb846d
+  
+          val coll = mutable.HashSet(p1)
+          // coll: scala.collection.mutable.HashSet[Point] =
+          // Set(Point@37d7d90f)
+  
+          // Use the `equals` defined above, NOT the one from `Any`, which is
+          // WRONG. This is also the reason why this result is not consistent
+          // with the `contains` expression below -- the implementation of the
+          // `contains` uses `equals` from `Any`.
+          p1 equals p2
+          // res1: Boolean = true
 
-*** DONE Pitfall #2: Changing ~equals~ without also changing ~hashCode~
+          coll contains p2
+          // res2: Boolean = false
+        #+END_SRC
+        The result of the last expression is *NOT* what we expect!!!
+
+        The reason is that the ~mutable.HashSet~ is a generics, and it use the
+        ~equals~ inherited from ~Any~ to test ~equality~, and ~contains~ exploits
+        this ~equals~!
+
+        We can prove that with the ~equals~ from ~Any~, with _not exact_ /static
+        type/, the answer is ~false~ -- the same as the ~contains~ reported above!
+
+        #+BEGIN_SRC scala
+          val p2a: Any = p2
+          // p2a: Any = Point@3beb846d
+
+          // This result of this expression is consistent with the `contains`
+          // expression above!
+          p1 equals p2a
+          // res3: Boolean = false
+        #+END_SRC
+
+    - A BETTER definition, but still *NOT perfect*:
+      #+BEGIN_SRC scala
+        override def equals(other: Any) = other match {
+          case that: Point => this.x == that.x && this.y == that.y
+          case _ => false
+        }
+      #+END_SRC
+
+    - A related *pitfall* is to define ~==~ with a *wrong* /signature/.
+
+      As we mentioned the ~==~ in ~Any~ is a /final method/, and you _CANNOT_
+      redefine ~def ==(other: Any): Boolean~.
+
+      HOWEVER, if you use a *wrong* /signature/, you just /overload/ ~==~,
+      _rather than_ /override/ it, which is allowed.
+
+*** DONE Pitfall #2: Changing ~equals~ without also changing ~hashCode~ - 678
     CLOSED: [2017-11-25 Sat 01:25]
     #+BEGIN_SRC scala
       val p1, p2 = new Point(1, 2)
@@ -13007,10 +13058,11 @@ Conclusion - 76]]
       //// The output is NOT certain: can be `true` or `false`
     #+END_SRC
     - The ~contains~ method of a ~HashSet~ instance will search ~p2~ in the same
-      "hash bucket" of ~p1~. The result is true when ~p1~ and ~p2~ can be put in
-      the same "hash bucket" . However, since ~hashCode~ is NOT overridden for
-      ~Point~, ~p1~ and ~p2~ have different hash code, and they can be in the
-      same or different "hash bucket". Then the result can be ~true~ or ~false~.
+      "hash bucket" of ~p1~. The result is ~true~ when ~p1~ and ~p2~ can be put in
+      the same "hash bucket".
+        However, since ~hashCode~ is *NOT* /overridden/ for ~Point~, ~p1~ and
+      ~p2~ have different hash code, and they can be in the _same or different_
+      "hash bucket". Then the result can be ~true~ or ~false~.
 
     - The problem is that the last implementation of ~Point~ _violated the
       contract_ on ~hashCode~ as defined for class ~Any~:
@@ -13024,7 +13076,7 @@ Conclusion - 76]]
       The text of ~Any~'s ~hashCode~ contract is inspired by the Javadoc
       documentation of class ~java.lang.Object~.
 
-    - The new implementation (Better but not all right):
+    - The new implementation (Better but *not* all right):
       #+BEGIN_SRC scala
         class Point(val x: Int, val y: Int) {
           override def hashCode = (x, y).##
@@ -13044,7 +13096,7 @@ Conclusion - 76]]
         When invoked on a collection or a tuple, it computes a mixed hash that
         is _sensitive to the hash codes of all the elements_ in the collection.
 
-*** DONE Pitfall #3: Defining ~equals~ in terms of mutable fields
+*** DONE Pitfall #3: Defining ~equals~ in terms of mutable fields - 680
     CLOSED: [2017-11-25 Sat 01:35]
     You put an object into a ~HashSet~, this object is then put in a specific
     "hash bucket" according to its hash code. After modifing its mutable fields,
@@ -13052,24 +13104,170 @@ Conclusion - 76]]
     will be equality checked in this "hash bucket", a similar to the new hash
     code object will mostly be equality checked in other "hash bucket".
 
-    - Solution:
-      1. Hash codes shouldn't depend on mutable fields.
+    - Example (bad definition):
+      #+BEGIN_SRC scala
+        class Point(var x: Int, var y: Int) {  // Problematic
+          override def hashCode = (x, y).##
 
-      2. If hash codes depend on mutable fields, try NOT modify them.
+          override def equals(other: Any) = other match {
+            case that: Point => this.x == that.x && this.y == that.y
+            case _           => false
+          }
+        }
+      #+END_SRC
+
+    - Solution:
+      1. /Hash codes/ *shouldn't depend* on /mutable fields/.
+
+      2. _IF_ /hash codes/ depend on /mutable fields/, *try NOT modify them*.
 
       3. If all the above can be satisfied, try to define your own method to
-         check equality without hash code, for example, use a name like
+         check equality *without* /hash code/, for example, use a name like
          ~equalContents~.
 
-*** TODO Pitfall #4: Failing to define ~equals~ as an equivalence relation
+*** DONE Pitfall #4: Failing to define ~equals~ as an equivalence relation
+    CLOSED: [2018-07-19 Thu 01:19]
+    - The /contract/ of the ~equals~ /method/ in ~scala.Any~ specifies that
+      ~equals~ *must implement* _an equivalence relation on non-null objects_:
+      + It is /reflexive/:
+        For _ANY non-null value_ ~x~, the expression ~x.equals(x)~ should return
+        ~true~.
 
+      + It is /symmetric/:
+        For _ANY non-null values_ ~x~ and ~y~, ~x.equals(y)~ should return ~true~
+        iff ~y.equals(x)~ returns ~true~.
+
+      + It is /transitive/:
+        For _ANY non-null values_ ~x~, ~y~, and ~z~, if ~x.equals(y)~ returns ~true~
+        and ~y.equals(z)~ returns ~true~, then ~x.equals(z)~ should return ~true~.
+
+      + It is /consistent/:
+        For _ANY non-null values_ ~x~ and ~y~, multiple invocations of ~x.equals(y)~
+        should _consistently_ return ~true~ or _consistently_ return ~false~,
+        provided no information used in ~equals~ comparisons on the objects is
+        modified.
+
+      + For _ANY non-null value_ ~x~, ~x.equals(null)~ should return ~false~.
+
+    - The definition of ~equals~ developed for /class/ ~Point~ _up to now_ satisfies
+      the contract for ~equals~.
+
+      However, *things become more complicated once /subclasses/ are considered.*
+
+    - Say there is a /subclass/ ~ColoredPoint~ of ~Point~ that adds a field ~color~
+      of type ~Color~. Assume ~Color~ is defined as an /enumeration/:
+      #+BEGIN_SRC scala
+        object Color extends Enumeration {
+          val Red, Orange, Yellow, Green, Blue, Indigo, Violet = Value
+        }
+
+        class ColoredPoint(x: Int, y: Int, val color: Color.Value)
+            extends Point(x, y) { // Problem: equals not symmetric
+          override def equals(other: Any) = other match {
+            case that: ColoredPoint =>
+              this.color == that.color && super.equals(that)
+            case _ => false
+          }
+        }
+      #+END_SRC
+      + The above ~equals~ /method/ is *WRONG*.
+
+        If you use ~equals~ to compare ~Point~ and ~ColoredPoint~, the /symmetric/
+        contract will be violated!
+        #+BEGIN_SRC scala
+          val p = new Point(1, 2)
+          // p: Point = Point@5428bd62
+
+          val cp = new ColoredPoint(1, 2, Color.Red)
+          // cp: ColoredPoint = ColoredPoint@5428bd62
+
+          p equals cp
+          // res9: Boolean = true
+
+          cp equals p
+          // res10: Boolean = false
+        #+END_SRC
+
+      + Now you need to make a decision:
+        Modify the ~equals~ /method/ to make it *more general* OR *stricter*.
+
+        - Try the *more general* way --
+          if the corresponding parts are equal, not matter what exact class they
+          are, they are equal.
+
+          This way _violate_ the /transitive/ contract. It's a dead end!!!
+
+        - Try the *stricter* way --
+          Different /run time classes/ values should always be inequal!!!
+
+          *This way _satisfies_ all the rules.*
+
+    - For our current version of ~equals~, ~new Point(1, 2)~ does NOT equal 
+      to ~new Point(1, 1) { override val y = 2 }~. This is NOT reasonable!
+
+      We know the reason, the second one is an /anonymous type/ which is a
+      /subclass/ of the ~Point~ type.
+
+      *There should be an _EXCEPTION_ that, in this case, two value of different
+      classes should be equal* -- the /anonymous type/, which is a subtype of a
+      /class/.
+
+      + We introduce the ~def canEqual(other: Any): Boolean~ /method/.
+
+        If in a subtype /override/ this /method/, it and its supertypes cannot
+        be equal (you can /override/ it in a way violate this, but in the real
+        world, I can guess a reason that we should do this!).
+
+        Now the ~equals~'s of ~Point~ and ~ColoredPoint~: 
+        #+BEGIN_SRC scala
+          class Point(val x: Int, val y: Int) {
+            override def hashCode = (x, y).##
+            override def equals(other: Any) = other match {
+              case that: Point =>
+                (that canEqual this) &&
+                  (this.x == that.x) && (this.y == that.y)
+              case _ =>
+                false
+            }
+            def canEqual(other: Any) = other.isInstanceOf[Point]
+          }
+
+
+          class ColoredPoint(x: Int, y: Int, val color: Color.Value)
+              extends Point(x, y) {
+            override def hashCode = (super.hashCode, color).##
+            override def equals(other: Any) = other match {
+              case that: ColoredPoint =>
+                (that canEqual this) &&
+                  super.equals(that) && this.color == that.color
+              case _ =>
+                false
+            }
+            override def canEqual(other: Any) =
+              other.isInstanceOf[ColoredPoint]
+          }
+        #+END_SRC
+
+        In this way, since the ~new Point(1, 1) { override val y = 2 }~ does NOT
+        /override/ the ~canEqual~ /method/, it is equal to ~Point(1, 2)~.
+
+    - People may think this ~canEqual~ /method/ _violate_ the /Liskov Substitution
+      Principle/, but this _wrong_. *There is NO violation*.
+      - /Liskov Substitution Principle/ requires that a /subclass value/ can be used
+        to replace a /superclass value/, but it doesn't require they have the
+        same behavior!
+      - =TODO= =DETAILS=
+    
 ** DONE 30.3 Defining equality for parameterized types - 688
    CLOSED: [2017-11-25 Sat 01:50]
-   This is special due to /type erasure/.
+   When /classes/ are parameterized, this scheme needs to be adapted a little
+   bit. *This is special due to /type erasure/.*
 
    - Example code with parameterized types:
      #+BEGIN_SRC scala
-       trait Tree[+T] {
+
+
+            trait Tree[+T] {
          def elem: T
          def left: Tree[T]
          def right: Tree[T]
@@ -13091,8 +13289,15 @@ Conclusion - 76]]
        ) extends Tree[T]
      #+END_SRC
 
-   - No overridden ~equals~, ~hashCode~, and ~canEqual~ is required for ~EmptyTree~.
-     =Explained in Page 689=
+   - No need to implement ~equals~ for ~Tree~ -- we assume ~equals~'s will be
+     implemented separately for _EACH implementation_ of the /abstract class/.
+
+     + For ~EmptyTree~:
+       No overridden ~equals~, ~hashCode~, and ~canEqual~ is required.
+
+       The default ~equals~ and ~hashCode~ inherited from ~AnyRef~ work just fine.
+         After all, an ~EmptyTree~ is ONLY equal to itself, so equality should be
+       /reference equality/, which is what's inherited from ~AnyRef~.
 
    - Define ~equals~
      #+BEGIN_SRC scala
@@ -13109,52 +13314,207 @@ Conclusion - 76]]
          }
        }
      #+END_SRC
-     This code will issue an unchecked warnings.
-     Use ~fsc -unchecked Tree.scala~ to check:
+
+     This code will issue an *unchecked warnings*.
+     Use ~fsc -unchecked Tree.scala~ to check, and you'll get a warning message:
      #+BEGIN_QUOTE
-     $ fsc unchecked
      Tree.scala
      Tree.scala:14: warning: non variable typeargument T in type
      pattern is unchecked since it is eliminated by erasure
          case that: Branch[T] => this.elem == that.elem && 
      #+END_QUOTE
+
      This is due to /type erasure/.
 
+   - How to deal with this *unchecked warning*?
      + Fix it
-       ~case that: Branch[T]~ to
+
+         ~case that: Branch[T]~ to
        * ~case that: Branch[t]~ =TODO= details
          OR
        * ~case that: Branch[_]~
 
-   - Define ~hashCode~ for ~Branch~ as usual
+     + Rationale:
+       You need NOT necessarily check that two ~Branch~'es have the same element
+       types when comparing them -- it's quite possible that two ~Branch~'es with
+       _different element types_ are equal, as long as their fields are the same.
+       #+BEGIN_SRC scala
+         val b1 = new Branch[List[String]](Nil, EmptyTree, EmptyTree)
+         // b1: Branch[List[String]] = Branch@9d5fa4f
+
+         val b2 = new Branch[List[Int]](Nil, EmptyTree, EmptyTree)
+         // b2: Branch[List[Int]] = Branch@56cdfc29
+
+         b1 == b2
+         // res19: Boolean = true
+       #+END_SRC
+
+       * *CONTROVERSY*: Should ~b1 == b2~ _true_ or _false_?
+         - In the /type erasure model/ (JVM - Scala):
+           /type parameters/ are present ONLY at compile-time, and it's natural to
+           consider the two ~Branch~ values ~b1~ and ~b2~ to be equal at run
+           time if all fields are equal.
+
+         - If in a model that the /type parameters/ are considered form part of
+           an object's value, it's equally natural to consider them different.
+
+   - Override ~hashCode~ for ~Branch~ as usual
      ~override def hashCode: Int = (elem, left, right).##~
 
-   - Define ~canEqual~ for ~Branch~:
+   - Override ~canEqual~ for ~Branch~:
      #+BEGIN_SRC scala
        def canEqual(other: Any) = other match {
          case that: Branch[_] => true
-         case _ => false
+         case _               => false
        }
 
        // OR
 
        def canEqual(other: Any) = otherisInstanceOf[Branch[_]]
      #+END_SRC
-     =TODO=
-     The type parameter, rather than type pattern, ~_~ is explained in the next
-     chapter.
-     
-** TODO 30.4 Recipes for ~equals~ and ~hashCode~ - 692
-*** Recipe for ~equals~
-    1. x
-    2. 
-    3. 
-    4. 
-    5. 
-    6. 
-    7. 
+     How is it possible to leave some parts of it (the ~_~ in the second form
+     above) undefined? =TODO= =TODO= =TODO= The /type parameter/, rather than
+     /type pattern/, ~_~ is explained in the next chapter.
 
-*** Recipe for ~hashCode~
+   - The final version: 
+     #+BEGIN_SRC scala
+       class Branch[T](
+         val elem: T,
+         val left: Tree[T],
+         val right: Tree[T]
+       ) extends Tree[T] {
+         override def equals(other: Any) = other match {
+           case that: Branch[_] => (that canEqual this) &&
+                                 this.elem == that.elem &&
+                                 this.left == that.left &&
+                                 this.right == that.right
+           case _ => false
+         }
+
+         def canEqual(other: Any) = other.isInstanceOf[Branch[_]]
+
+         override def hashCode: Int = (elem, left, right).##
+       }
+     #+END_SRC
+
+** DONE 30.4 Recipes for ~equals~ and ~hashCode~ - 692
+   CLOSED: [2018-07-19 Thu 18:27]
+   In this section, we'll provide *step-by-step recipes for creating ~equals~ and
+   ~hashCode~ /methods/ that should suffice for _most situations_.*
+
+   As an illustration, we'll use the /methods/ of /class/ ~Rational~, shown in
+   Listing 30.5. This is a *modified version* of Listing 6.5 on page 151:
+   - Remove mathematical operators methods that are not related to this _equality
+     check_ topic.
+
+   - Enhance the ~toString~ /method/.
+
+   - Code:
+     #+BEGIN_SRC scala
+       class Rational(n: Int, d: Int) {
+         require(d != 0)
+
+         private val g = gcd(n.abs, d.abs)
+         val numer = (if (d < 0) -n else n) / g
+         val denom = d.abs / g
+
+         private def gcd(a: Int, b: Int): Int =
+           if (b == 0) a else gcd(b, a % b)
+
+         override def equals(other: Any): Boolean =
+           other match {
+             case that: Rational =>
+               (that canEqual this) &&
+                 numer == that.numer &&
+                 denom == that.denom
+             case _ => false
+           }
+
+         def canEqual(other: Any): Boolean =
+           other.isInstanceOf[Rational]
+
+         override def hashCode: Int = (numer, denom).##
+
+         override def toString =
+           if (denom == 1) numer.toString else numer + "/" + denom
+       }
+     #+END_SRC
+
+*** DONE Recipe for ~equals~ - 693
+    CLOSED: [2018-07-19 Thu 13:50]
+    1. To override equals in a non-final class, create a canEqual method.
+
+       + If the inherited definition of equals is from ~AnyRef~ (that is, ~equals~
+         was not redefined higher up in the class hierarchy), the definition of
+         ~canEqual~ should be *new*;
+
+       + otherwise, it will /override/ a previous definition of a method with the
+         same name.
+
+       + ONLY Exception:
+         for /final classes/ that redefine the ~equals~ method inherited from
+         ~AnyRef~.
+
+         For them the /subclass/ anomalies described in Section 30.2 _cannot arise_;
+         consequently they _need not_ define ~canEqual~.
+
+         The type of object passed to ~canEqual~ should be ~Any~:
+         ~def canEqual(other: Any): Boolean =~
+
+    2. The ~canEqual~ method should yield ~true~ if the argument object is an instance
+       of the *CURRENT class* (i.e., the /class/ in which ~canEqual~ is defined), and
+       ~false~ otherwise:
+       ~other.isInstanceOf[Rational]~
+
+    3. In the ~equals~ method, make sure you declare the type of the object
+       passed as an ~Any~:
+       ~override def equals(other: Any): Boolean =~
+
+    4. Write the body of the ~equals~ method _as a single ~match~ expression_.
+       The selector of the ~match~ should be _the object passed to ~equals~:_
+       #+BEGIN_SRC scala
+         other match {
+           // ...
+         }
+       #+END_SRC
+
+    5. The ~match~ expression should have *two* ~case~'s.
+
+       The first ~case~ should declare a typed pattern for the type of the
+       /class/ on which you're defining the ~equals~ method:
+       ~case that: Rational =>~
+
+    6. In the body of this ~case~, write *an expression that logical-ands* together
+       the *individual expressions that must be ~true~ for the objects to be equal*.
+
+       + If the ~equals~ /method/ you are /overriding/ is *NOT* that of ~AnyRef~,
+         you will most likely want to include an invocation of the /superclass/'s
+         ~equals~ /method/: ~super.equals(that) &&~
+
+       + If you are defining ~equals~ for a /class/ that first introduced ~canEqual~,
+         you should invoke ~canEqual~ on the argument to the _equality method_,
+         passing ~this~ as the argument: ~(that canEqual this) &&~
+
+       + Overriding redefinitions of ~equals~ *should also include* the ~canEqual~
+         invocation, *unless they contain a call to ~super.equals~.* In the latter
+         case, the ~canEqual~ test will already be done by the _superclass call_.
+
+       + Lastly, _for *EACH* /field/ relevant to equality_, verify that the field
+         in this object is equal to the corresponding field in the passed object:
+         #+BEGIN_SRC scala
+           numer == that.numer &&
+           denom == that.denom
+         #+END_SRC
+
+    7. For the *second* ~case~, use a /wildcard pattern/ that yields ~false~:
+       ~case _ => false~
+
+*** DONE Recipe for ~hashCode~ - 695
+    CLOSED: [2018-07-19 Thu 18:27]
+    - If the ~equals~ method does _NOT_ invokes ~super.equals(that)~ as part of
+      its calculation, you should create a tuple that include all the fields of
+      this class, and then use the ~##~ /method/ to get the hash code.
+
     - If the ~equals~ method invokes ~super.equals(that)~ as part of its calcula-
       tion, you should start your ~hashCode~ calculation with an invocation of
       ~super.hashCode~. For example,
@@ -13162,7 +13522,55 @@ Conclusion - 76]]
         override def hashCode: Int = (super.hashCode, numer, denom).##
       #+END_SRC
 
-** TODO 30.5 Conclusion - 697
+    - Keep in mind as you write ~hashCode~ /methods/ using this approach is that
+      your hash code will only be as good as the hash codes you build out of it
+      (call the ~hashCode~ on the relevant fields)
+
+    - Sometime you may need to do something extra besides just calling ~hashCode~
+      on the field to get a useful hash code for that field.
+
+      For example, if one of your fields is a collection,
+      + you probably want a hash code for that field that is based on all the
+        elements contained in the collection.
+
+      + If the fields is a ~Vector~, ~List~, ~Set~, ~Map~, or /tuple/, you can
+        simply include it in the list of items you are hashing over, because
+        ~equals~ and ~hashCode~ are /overridden/ in those /classes/ to take into
+        account the contained elements.
+
+      + ~Array~'s are special, which do not take elements into account when
+        calculating a /hash code/.
+          Thus for an array, you should treat each element of the array like an
+        individual field of your object, calling ~##~ on each element explicitly
+        or passing the array to one of the ~hashCode~ /methods/ in singleton
+        object ~java.util.Arrays~.
+
+    - If you find that a particular /hash code/ calculation is harming the performance
+      of your program, you can consider *caching* the /hash code/.
+        This is especially useful for /immutable/ objects, their /hash code/ can
+      be calculated once when the object is created, and save it.
+
+      In this way, you will /override/ ~hashCode~ with a ~val~ instead of a ~def~.
+
+** DONE 30.5 Conclusion - 697
+   CLOSED: [2018-07-19 Thu 00:54]
+   - In retrospect, defining a correct implementation of ~equals~ has been
+     *surprisingly subtle*.
+     + You must be careful about the /type signature/;
+
+     + you must /override/ ~hashCode~;
+
+     + you should *avoid dependencies* on /mutable state/;
+
+     + you should implement and use a ~canEqual~ /method/
+       _if your /class/ is non-~final~._
+
+   - Given how difficult it is to implement a correct equality method,
+     you might prefer to define your classes of comparable objects as /case
+     classes/.
+
+     That way, the Scala compiler will add ~equals~ and ~hashCode~ /methods/
+     with the right properties *automatically*.
 
 * TODO 31 Combining Scala and Java - 698
   This chapter describes two aspects of combining Java and Scala:

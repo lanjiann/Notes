@@ -63,7 +63,42 @@
 - [[Index - 957][Index - 957]]
 
 * TODO Chapter 14: Concurrency - 839
+  - process :: xxx
+
+  - thread :: yyy
+
 ** TODO 14.1 What Are Threads? - 840
+   - A bouncing ball animation.
+     Figure 14.1
+
+   - We first show the single thread version.
+
+   - Launches a ball from the upper left corner of the screen and the ball begins
+     bouncing.
+     + The handler of the Start button calls the ~addBall~ method.
+       This /method/ contains a loop running through 1000 moves, and each call to
+       ~move~ moves the ball by a small amount, adjusts the direction if it bounces
+       against a wall, and redraws the panel.
+
+   - code
+     #+BEGIN_SRC java
+       Ball ball = new Ball();
+       panel.add(ball);
+
+       for (int i = 1; i <= STEPS; i++)
+       {
+           ball.move(panel.getBounds());
+           panel.paint(panel.getGraphics());
+           Thread.sleep(DELAY);
+       }
+     #+END_SRC
+     + The the ~Thread.sleep~ make the _current_ /thread/ pause.
+
+     + The ~sleep~ /method/ can *throw* an ~InterruptedException~.
+       We discuss this /exception/ and its proper handling _LATER_.
+
+       For now, we simply terminate the bouncing if this /exception/ occurs.
+
 *** 14.1.1 Using Threads to Give Other Tasks a Chance - 846
 
 ** TODO 14.2 Interrupting Threads - 851

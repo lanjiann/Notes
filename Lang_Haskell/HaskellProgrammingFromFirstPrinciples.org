@@ -253,7 +253,7 @@
   - [[10.1 Folds - 349][10.1 Folds - 349]]
   - [[10.2 Bringing you into the fold - 349][10.2 Bringing you into the fold - 349]]
   - [[10.3 Recursive patterns - 351][10.3 Recursive patterns - 351]]
-  - [[10.4 [ =RE-READ= ] Fold right - 352][10.4 [ =RE-READ= ] Fold right - 352]]
+  - [[10.4 Fold right - 352][10.4 Fold right - 352]]
     - [[How ~foldr~ evaluates - 352][How ~foldr~ evaluates - 352]]
   - [[10.5 Fold left - 360][10.5 Fold left - 360]]
     - [[Associativity and folding][Associativity and folding]]
@@ -5331,7 +5331,7 @@
        The /head/ of the list gets evaluated, set aside, and then the function
        moves to the right, evaluates the next /head/, and so on.
 
-** DONE 10.4 [ =RE-READ= ] Fold right - 352
+** DONE 10.4 Fold right - 352
    CLOSED: [2017-06-01 Thu 22:02]
    ~foldr~ is called _fold right_ because THIS /fold/ is _right associative_.
 
@@ -5447,17 +5447,17 @@
 
     - ALL folds *recurse* over the /spine/ _in the same direction_; =IMPORTANT=
 
-      the _DIFFERENCE_ between /left folds/ and /right folds/ is in the
-      association of the folding function and, thus, which direction the folding
-      or reduction proceeds.
+      the _DIFFERENCE_ between /left folds/ and /right folds/ is
+      in _the association of the folding function_ and, thus, which direction the
+      folding or reduction proceeds.
 
     - Look at part of the definition of ~foldr~:
       ~foldr f z (x:xs) = f x (foldr f z xs)~
       If ~f~ doesn't evaluate its second argument (rest of the /fold/),
-      no more of the /spine/ will be forced.
+      *no more of the /spine/ will be forced*.
 
-      _Since Haskell is lazy by default, non-immediate evaluation can happen
-      often._ One of the CONSEQUENCES of this is that ~foldr~ can _avoid_
+      _Since Haskell is /lazy/ by default, non-immediate evaluation can happen
+      often._ One of the CONSEQUENCES of this is that ~foldr~ can *avoid*
       evaluating
       + NOT ONLY some or all of the /values/ in the list,
 
@@ -5491,7 +5491,7 @@
           -- 10
 
           -- #3
-          -- Here, the undefined is part of the spine
+          -- Here, the `undefined` is part of the spine
           foldr (+) 0 ([1, 2, 3, 4] ++ u)
           -- -- *** Exception: Prelude.undefined
 
@@ -5499,19 +5499,19 @@
           foldr (+) 0 (take 4 ([1, 2, 3, 4] ++ u))
           -- 10
         #+END_SRC
-        + For #1, this expression _requires_ the evaluation of ~u~, which is
+        * For #1, this expression _requires_ the evaluation of ~u~, which is
           ~undefined~.
-          This run into /bottom/.
+        * This run into /bottom/.
 
-        + For #2, this expression _DOESN'T require_ the evaluation of ~u~.
+        * For #2, this expression _DOESN'T require_ the evaluation of ~u~.
 
-        + For #3, here ~u~ is a part of the spine.
+        * For #3, here ~u~ is a part of the spine.
 
           Here the evaluation of ~u~ is required. _However_, even if the inside
           values evaluation DOESN'T required, since ~u~ is part of the /spine/,
           the _Exception_ will be thrown out.
 
-        + For #4, even if ~u~ is a part of the /spine/, with ~take~, this part of
+        * For #4, even if ~u~ is a part of the /spine/, with ~take~, this part of
           /spine/ won't be visited, and no _Exception_.
 
     - Sometimes, the /spines/ will be evaluated _unconditionally_, but not the
@@ -5524,7 +5524,7 @@
         -- *** Exception: Prelude.undefined
       #+END_SRC
 
-      However, we can still drop this part of spine (as in #4 the last example):
+      However, we can still drop this part of /spine/ (as in #4 the last example):
       #+BEGIN_SRC haskell
         length (take 4 ([1, 2, 3, 4] ++ undefined))
         -- 4
@@ -5539,28 +5539,17 @@
       It doesn't matter that if there only ~take 4~ it could've hit the /bottom/!
       Nothing forced it to because of the ~take 2~ between it and length.
 
-      + =TODO=   page 357 - _START HERE_
-
-      =From Jian=
-      Speak this in another way: ~take 2~ doesn't happen after when
-      ~take 4 ([1, 2]++undefined)~ is done ----
-      the left ~take~ takes the first element when the right ~take~ takes the
-      first element, and the left ~take~ takes the second element when the right
-      ~take~ takes the the second element. Now the left ~take~ has finished its
-      work, then the right ~take~ would also stop doing it planed to do but no
-      longer need to do due to /laziness/.
-
-    - Focus on one part of the definition
+    - Focus on one part of the definition of ~foldr~
       ~foldr f z (x:xs) = f x (foldr f z xs)~,
-      and you can see the pattern matching of ~x~. We know
+      and you can see the /pattern matching/ of ~x~. We know
       /pattern matching/ is _strict by default_.
 
-      This means ~foldr~ must force the initial cons cell in order to
+      This means ~foldr~ must force the initial /cons cell/ in order to
       discriminate between the ~[]~ (the base case) and the ~(x : xs)~,
-      _so the first cons cell CANNOT be_ ~undefined~.
+      _so the *first* /cons cell/ *CANNOT* be ~undefined~._
 
       For example,
-      Here, ~foldr~ will never force evaluation of any of its arguments, so we
+      Here, ~foldr~ will *never force* evaluation of any of its arguments, so we
       can have a /bottom/
       + as a value
         or
@@ -5592,10 +5581,10 @@
         -- 9001
       #+END_SRC
       #2 and #3 work well because the cons cells contain /bottom/ values
-      but are not themselves bottom.
+      but are _not themselves /bottom/._
       =IMPORTANT=
 
-      #1 throws _Exception_ because ~undefined~ of it is the cons cell itself.
+      #1 throws _Exception_ because ~undefined~ of it is the /cons cell/ itself.
 
     - =TODO= We will experiment later with /nonstrictness/ and /strictness/ to
       see how it affects the way our programs evaluate.
@@ -5604,7 +5593,7 @@
       unless the function asks for the results of having folded the rest of the
       list.
 
-      In the following examples, we don't force traversal of the /spine/ because
+      In the following examples, we do _NOT force traversal_ of the /spine/ because
       ~const~ just throws away its second argument,
       _which is the rest of the fold_:
       #+BEGIN_SRC haskell
@@ -5645,30 +5634,33 @@
      ((0 + 1) + 2) + 3
    #+END_SRC
 
-   - _Left folds_ traverse the /spine/ _in the same direction_ as right folds.
+   - As we mentioned, /left folds/ traverse the /spine/ _in the same direction_
+     as /right folds/.
 
-     BUT their folding process is left associative and proceeds in the opposite
-     direction as that of ~foldr~.
+     BUT their folding process is
+     + *left associative*
+       and
+     + proceeds in the opposite direction as that of ~foldr~.
 
-   - Check the associativity of ~foldl~:
+   - Check the /associativity/ of ~foldl~ with the trick we metioned in the last
+     section:
      #+BEGIN_SRC haskell
-       -- Prelude> let f = (\x y -> concat ["(", x, "+", y, ")"])
-
-       -- Prelude> foldl f "0" (map show [1..5])
-       "(((((0+1)+2)+3)+4)+5)"
+       let f = (\x y -> concat ["(", x, "+", y, ")"])
+       foldl f "0" (map show [1..5])
+       -- "(((((0+1)+2)+3)+4)+5)"
      #+END_SRC
 
-   - =From Jian= Due to the associativity, if a right associative operator is
-     used, ~flip~ is required.
+   - =From Jian= =TODO= =RE-READ=
+     Due to the /associativity/, if a /right associative operator/ is used, ~flip~
+     is required.
      For example,
      #+BEGIN_SRC haskell
        myReverse :: [a] -> [a]
        myReverse = foldl (flip (:)) []
      #+END_SRC
 
-
-   - _scans_ are similar to _folds_ but return a list of all the itermediate
-     stages of the fold.
+   - /scan/'s are similar to /fold/'s
+     but return a list of *all the itermediate stages* of the /fold/.
      #+BEGIN_SRC haskell
      -- Prelude> scanr (+) 0 [1..5]
      -- [15, 14, 12, 9, 5, 0]
@@ -5677,9 +5669,11 @@
      -- [0, 1, 3, 6, 10, 15]
      #+END_SRC
 
-   - The relationship between the _scans_ and _folds_ are as follows:
+   - The relationship between the /scan/'s and /fold/'s are as follows:
      + ~head (scanr f z xs)~ = ~foldr f z xs~
      + ~last (scanl f z xs)~ = ~foldl f z xs~
+
+     =TODO= =Re-Read=
 
 *** DONE Associativity and folding
     CLOSED: [2017-06-03 Sat 22:47]
@@ -5691,7 +5685,7 @@
         * the empty list constructor with our start value ~z~:
 
       + _left fold_ on a list with the function ~f~ and start value ~z~
-        =FROM JIAN=
+        =FROM JIAN= =TODO= =NOT FINISHED=
         * replacing the cons constructors with our folding function
           and
         * the first list constructor with our start value ~z~:
@@ -5722,6 +5716,10 @@
         -- [3,2,1]
       #+END_SRC
 
+    - Even when we've satisfied the types by flipping things around,
+      the *left-associating nature* of ~foldl~ leads to a different result from
+      that of ~foldr~.
+
     - Compare the types of ~foldr~ and ~foldl~:
       + ~foldr \colon\colon Foldable t => (a -> b -> b) -> b -> t a -> b~
       + ~foldl \colon\colon Foldable t => (b -> a -> b) -> b -> t a -> b~
@@ -5742,7 +5740,7 @@
 
     2. =(3 * (2 * (1 * 1))=
 
-    3. b) c) =TODO=  See next section
+    3. b) c) =TODO=  See next section =TODO=
 
     4. a)
 
@@ -5752,7 +5750,7 @@
          foldr (++) "" ["woot", "WOOT", "woot"]
 
          -- b)
-         foldr max [] "fear is the little death"
+         foldr max 'f' "fear is the little death"
 
          -- c)
          foldr (&&) True [False, True]
@@ -5762,6 +5760,14 @@
 
          -- e)
          foldl (\x y -> x ++ show y) "" [1..5]
+
+         -- for `foldr const`, the return type should be the element of the
+         -- foldable structre.
+         --
+         -- f) the second parameter should be of type class `Num` and `Enum`
+         -- g) the second parameter should be `Char`
+         -- h) the second parameter should be `Char`
+         -- h) the second parameter should be of type class `Num` and `Enum`
 
          -- f)
          foldr const 0 [1..5]
