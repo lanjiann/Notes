@@ -1,0 +1,129 @@
+#+TITLE: Seven Concurrency Models in Seven Weeks
+#+SUBTITLE: When Threads Unravel
+#+VERSION: 2014
+#+AUTHOR: Paul Butcher
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Foreword - vii][Foreword - vii]]
+- [[Acknowledgments - ix][Acknowledgments - ix]]
+- [[Preface - xi][Preface - xi]]
+- [[1. Introduction - 1][1. Introduction - 1]]
+  - [[Concurrent or Parallel? - 1][Concurrent or Parallel? - 1]]
+  - [[Parallel Architecture - 3][Parallel Architecture - 3]]
+  - [[Concurrency: Beyond Multiple Cores - 4][Concurrency: Beyond Multiple Cores - 4]]
+  - [[The Seven Models - 7][The Seven Models - 7]]
+- [[2. Threads and Locks - 9][2. Threads and Locks - 9]]
+  - [[The Simplest Thing That Could Possibly Work - 9][The Simplest Thing That Could Possibly Work - 9]]
+  - [[Day 1: Mutual Exclusion and Memory Models - 10][Day 1: Mutual Exclusion and Memory Models - 10]]
+  - [[Day 2: Beyond Intrinsic Locks - 21][Day 2: Beyond Intrinsic Locks - 21]]
+  - [[Day 3: On the Shoulders of Giants - 32][Day 3: On the Shoulders of Giants - 32]]
+  - [[Wrap-Up - 44][Wrap-Up - 44]]
+- [[3. Functional Programming - 49][3. Functional Programming - 49]]
+  - [[If It Hurts, Stop Doing It - 49][If It Hurts, Stop Doing It - 49]]
+  - [[Day 1: Programming Without Mutable State - 50][Day 1: Programming Without Mutable State - 50]]
+  - [[Day 2: Functional Parallelism - 61][Day 2: Functional Parallelism - 61]]
+  - [[Day 3: Functional Concurrency - 71][Day 3: Functional Concurrency - 71]]
+  - [[Wrap-Up - 82][Wrap-Up - 82]]
+- [[4. The Clojure Way—Separating Identity from State - 85][4. The Clojure Way—Separating Identity from State - 85]]
+  - [[The Best of Both Worlds - 85][The Best of Both Worlds - 85]]
+  - [[Day 1: Atoms and Persistent Data Structures - 85][Day 1: Atoms and Persistent Data Structures - 85]]
+  - [[Day 2: Agents and Software Transactional Memory - 97][Day 2: Agents and Software Transactional Memory - 97]]
+  - [[Day 3: In Depth - 106][Day 3: In Depth - 106]]
+  - [[Wrap-Up - 113][Wrap-Up - 113]]
+- [[5. Actors - 115][5. Actors - 115]]
+  - [[More Object-Oriented than Objects - 115][More Object-Oriented than Objects - 115]]
+  - [[Day 1: Messages and Mailboxes - 116][Day 1: Messages and Mailboxes - 116]]
+  - [[Day 2: Error Handling and Resilience - 127][Day 2: Error Handling and Resilience - 127]]
+  - [[Day 3: Distribution - 137][Day 3: Distribution - 137]]
+  - [[Wrap-Up - 150][Wrap-Up - 150]]
+- [[6. Communicating Sequential Processes - 153][6. Communicating Sequential Processes - 153]]
+  - [[Communication Is Everything - 153][Communication Is Everything - 153]]
+  - [[Day 1: Channels and Go Blocks - 154][Day 1: Channels and Go Blocks - 154]]
+  - [[Day 2: Multiple Channels and IO - 166][Day 2: Multiple Channels and IO - 166]]
+  - [[Day 3: Client-Side CSP - 177][Day 3: Client-Side CSP - 177]]
+  - [[Wrap-Up - 185][Wrap-Up - 185]]
+- [[7. Data Parallelism - 189][7. Data Parallelism - 189]]
+  - [[The Supercomputer Hidden in Your Laptop - 189][The Supercomputer Hidden in Your Laptop - 189]]
+  - [[Day 1: GPGPU Programming - 190][Day 1: GPGPU Programming - 190]]
+  - [[Day 2: Multiple Dimensions and Work-Groups - 201][Day 2: Multiple Dimensions and Work-Groups - 201]]
+  - [[Day 3: OpenCL and OpenGL—Keeping It on the GPU - 212][Day 3: OpenCL and OpenGL—Keeping It on the GPU - 212]]
+  - [[Wrap-Up - 220][Wrap-Up - 220]]
+- [[8. The Lambda Architecture - 223][8. The Lambda Architecture - 223]]
+  - [[Parallelism Enables Big Data - 223][Parallelism Enables Big Data - 223]]
+  - [[Day 1: MapReduce - 224][Day 1: MapReduce - 224]]
+  - [[Day 2: The Batch Layer - 237][Day 2: The Batch Layer - 237]]
+  - [[Day 3: The Speed Layer - 249][Day 3: The Speed Layer - 249]]
+  - [[Wrap-Up - 261][Wrap-Up - 261]]
+- [[9. Wrapping Up - 263][9. Wrapping Up - 263]]
+  - [[Where Are We Going? - 263][Where Are We Going? - 263]]
+  - [[Roads Not Taken - 265][Roads Not Taken - 265]]
+  - [[Over to You - 267][Over to You - 267]]
+- [[Bibliography - 269][Bibliography - 269]]
+- [[Index - 271][Index - 271]]
+
+* Foreword - vii
+* Acknowledgments - ix
+* Preface - xi
+* 1. Introduction - 1
+** Concurrent or Parallel? - 1
+** Parallel Architecture - 3
+** Concurrency: Beyond Multiple Cores - 4
+** The Seven Models - 7
+
+* 2. Threads and Locks - 9
+** The Simplest Thing That Could Possibly Work - 9
+** Day 1: Mutual Exclusion and Memory Models - 10
+** Day 2: Beyond Intrinsic Locks - 21
+** Day 3: On the Shoulders of Giants - 32
+** Wrap-Up - 44
+
+* 3. Functional Programming - 49
+** If It Hurts, Stop Doing It - 49
+** Day 1: Programming Without Mutable State - 50
+** Day 2: Functional Parallelism - 61
+** Day 3: Functional Concurrency - 71
+** Wrap-Up - 82
+
+* 4. The Clojure Way—Separating Identity from State - 85
+** The Best of Both Worlds - 85
+** Day 1: Atoms and Persistent Data Structures - 85
+** Day 2: Agents and Software Transactional Memory - 97
+** Day 3: In Depth - 106
+** Wrap-Up - 113
+
+* 5. Actors - 115
+** More Object-Oriented than Objects - 115
+** Day 1: Messages and Mailboxes - 116
+** Day 2: Error Handling and Resilience - 127
+** Day 3: Distribution - 137
+** Wrap-Up - 150
+
+* 6. Communicating Sequential Processes - 153
+** Communication Is Everything - 153
+** Day 1: Channels and Go Blocks - 154
+** Day 2: Multiple Channels and IO - 166
+** Day 3: Client-Side CSP - 177
+** Wrap-Up - 185
+
+* 7. Data Parallelism - 189
+** The Supercomputer Hidden in Your Laptop - 189
+** Day 1: GPGPU Programming - 190
+** Day 2: Multiple Dimensions and Work-Groups - 201
+** Day 3: OpenCL and OpenGL—Keeping It on the GPU - 212
+** Wrap-Up - 220
+
+* 8. The Lambda Architecture - 223
+** Parallelism Enables Big Data - 223
+** Day 1: MapReduce - 224
+** Day 2: The Batch Layer - 237
+** Day 3: The Speed Layer - 249
+** Wrap-Up - 261
+
+* 9. Wrapping Up - 263
+** Where Are We Going? - 263
+** Roads Not Taken - 265
+** Over to You - 267
+
+* Bibliography - 269
+* Index - 271

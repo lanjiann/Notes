@@ -17,7 +17,7 @@
   - [[Design patterns][Design patterns]]
     - [[Scala and design patterns][Scala and design patterns]]
     - [[The need for design patterns and their benefits][The need for design patterns and their benefits]]
-  - [[Design pattern categories][Design pattern categories]]
+  - [[Design pattern categories - =RE-READ= =IMPORTANT=][Design pattern categories - =RE-READ= =IMPORTANT=]]
     - [[Creational design patterns][Creational design patterns]]
       - [[The abstract factory design pattern][The abstract factory design pattern]]
       - [[The factory method design pattern][The factory method design pattern]]
@@ -63,7 +63,7 @@
       - [[Implicit injection][Implicit injection]]
       - [[Duck typing][Duck typing]]
       - [[Memoization][Memoization]]
-  - [[Choosing a design pattern][Choosing a design pattern]]
+  - [[Choosing a design pattern - =Re-REAd= =IMPORTANT=][Choosing a design pattern - =Re-REAd= =IMPORTANT=]]
   - [[Setting up the development environment][Setting up the development environment]]
     - [[Installing Scala][Installing Scala]]
       - [[Tips for installing Scala manually][Tips for installing Scala manually]]
@@ -415,7 +415,8 @@
 ** Get in touch
 *** Reviews
 
-* 1. The Design Patterns Out There and Setting Up Your Environment
+* DONE 1. The Design Patterns Out There and Setting Up Your Environment
+  CLOSED: [2018-08-14 Tue 01:27]
 ** DONE Design patterns
    CLOSED: [2018-05-29 Tue 11:54]
    - Design Patterns (The formal definition) ::
@@ -439,7 +440,7 @@
 *** DONE The need for design patterns and their benefits
     CLOSED: [2018-05-29 Tue 11:54]
 
-** DONE Design pattern categories
+** DONE Design pattern categories - =RE-READ= =IMPORTANT=
    CLOSED: [2018-05-29 Tue 12:45]
    - Even if there are many different /design patterns/, they can all be grouped
      in the following:
@@ -596,8 +597,32 @@
 **** Duck typing
 **** Memoization
 
-** TODO Choosing a design pattern
-** TODO Setting up the development environment
+** DONE Choosing a design pattern - =Re-REAd= =IMPORTANT=
+   CLOSED: [2018-08-14 Tue 01:19]
+   - About how to *use* /a design pattern/ or *combine* /design patterns/, you
+     should consider (this is BY NO MEANS an exhaustive list of questions):
+     + Is this piece of code
+       going to be _fairly static_ OR will it _change in the future_?
+
+     + Do we have to _dynamically decide_ what /algorithms/ to use?
+
+     + Is our code going to be _used by others_?
+
+     + Do we have an agreed /interface/?
+
+     + _What libraries_ are we planning to use, if any?
+
+     + Are there any _special performance requirements or limitations_?
+
+   - In the rest of the chapters, we will try to give specific recommendations
+     about _when a /design pattern/ should and should NOT be used._ =TODO=
+
+     =IMPORTANT=
+     They should help you ask the right questions and take the right decision
+     before going on and writing code.
+
+** DONE Setting up the development environment
+   CLOSED: [2018-08-14 Tue 01:26]
 *** DONE Installing Scala
     CLOSED: [2018-05-29 Tue 13:12]
 **** DONE Tips for installing Scala manually
@@ -607,15 +632,21 @@
 
 *** DONE Scala IDEs
     CLOSED: [2018-05-29 Tue 13:13]
-*** TODO Dependency management
+*** DONE Dependency management
+    CLOSED: [2018-08-14 Tue 01:22]
 **** SBT
 **** Maven
 **** SBT versus Maven
 
-** TODO Summary
+** DONE Summary
+   CLOSED: [2018-08-14 Tue 01:26]
+   - In MANY CASES, we could _use Scala's features_
+     in order to
+     _make a pattern OBSOLETE, SIMPLER, or DIFFERENT to implement compared to
+     the classical case like in old Java (Before Java 8)_.
 
-* 2. Traits and Mixin Compositions
-** Traits
+* TODO 2. Traits and Mixin Compositions
+** TODO Traits
 *** Traits as interfaces
 **** Mixing in traits with variables
 
@@ -623,7 +654,7 @@
 *** Extending classes
 *** Extending traits
 
-** Mixin compositions
+** TODO Mixin compositions
 *** Mixing traits in
 *** Composing
 **** Composing simple traits
@@ -636,18 +667,18 @@
 **** Same signatures and return types mixins
 **** Same signatures and different return types mixins
 
-** Multiple inheritance
+** TODO Multiple inheritance
 *** The diamond problem
 *** The limitations
 
-** Linearization
+** TODO Linearization
 *** Rules of inheritance hierarchies
 *** Linearization rules
 *** How linearization works
 *** Initialization
 *** Method overriding
 
-** Testing traits
+** TODO Testing traits
 *** Using a class
 *** Mixing the trait in
 **** Mixing into the test class
@@ -655,21 +686,66 @@
 
 *** Running the tests
 
-** Traits versus classes
+** TODO Traits versus classes
 *** Summary
 
-* 3. Unification
-** Functions and classes
-*** Functions as classes
+* TODO 3. Unification
+** TODO Functions and classes
+*** DONE Functions as classes
+    CLOSED: [2018-08-14 Tue 01:38]
 **** Function literals
 **** Functions without syntactic sugar
 
 *** Increased expressivity
+    From the example, you see:
+    - *Unifying classes and functions* leads to _increased expressivity_
+      and
+      + we can easily achieve various things such as /callbacks/, /lazy parameter
+        evaluation/, /centralized exception handling/, and others,
+        AND
+        without writing extra code and logic.
+
+    - Moreover, /functions/ as /classes/ mean that we can extend them to _provide
+      EXTRA functionality_.
 
 ** Algebraic data types and class hierarchies
-*** ADTs
-**** Sum ADTs
-**** Product ADTs
+   - Scala's ADT -- Use /case classes/.
+
+*** TODO ADTs
+    - =TODO=
+      The following few subsections will give
+      + a bit more insight on what ADTs are
+        and
+      + what types are out there.
+   
+**** DONE Sum ADTs
+     CLOSED: [2018-08-14 Tue 01:51]
+     - /Sum ADTs/ is good for enumerable variants cases.
+
+     - Example:
+       #+BEGIN_SRC scala
+         sealed abstract trait Month
+         case object January extends Month
+         case object February extends Month
+         case object March extends Month
+         case object April extends Month
+         case object May extends Month
+         case object June extends Month
+         case object July extends Month
+         case object August extends Month
+         case object September extends Month
+         case object October extends Month
+         case object November extends Month
+         case object December extends Month
+       #+END_SRC
+
+**** DONE Product ADTs
+     CLOSED: [2018-08-14 Tue 01:51]
+     - /Product ADTs/ for NOT-be-enumerable variants cases.
+
+     - Example:
+       ~sealed case class RGB(red: Int, greet: Int, blue: Int}~
+
 **** Hybrid ADTs
 **** The unification
 
