@@ -537,7 +537,8 @@
    - *Swing and AWT*
 
 * TODO I Fundamentals - 13
-* TODO 2 Thread Safety - 15
+* DONE 2 Thread Safety - 15
+  CLOSED: [2018-08-19 Sun 20:05]
   - Writing /thread-safe/ code is, at its core, about *managing access to state*,
     and in particular to *shared, mutable state*.
 
@@ -995,7 +996,8 @@
      At the same time, *synchronizing EVERY method can lead to liveness or
      performance problems*, as we saw in ~SynchronizedFactorizer~.
 
-** TODO 2.5 Liveness and performance - 29
+** DONE 2.5 Liveness and performance - 29
+   CLOSED: [2018-08-19 Sun 20:05]
    - The way we used synchronization in ~SynchronizedFactorizer~ makes it *perform
      badly*.
        It is a simple approach -- guard EACH /state variable/ with the /servlet
@@ -1023,19 +1025,6 @@
        _long-running operations_ that do *not* affect /shared state/, so that
        *OTHER /threads/ are NOT prevented from accessing* the /shared state/
        while the long-running operation is in progress.
-
-   - ----------------------------------- Start (=\downarrow=)
-
-   - ~CachedFactorizer~ in Listing 2.8 restructures the servlet to use two separate
-     synchronized blocks, each limited to a short section of code. One guards the
-     check-then-act sequence that tests whether we can just return the cached result,
-     and the other guards updating both the cached number and the cached factors.
-     As a bonus, we’ve reintroduced the hit counter and added a “cache hit” counter
-     as well, updating them within the initial synchronized block. Because these
-     counters constitute shared mutable state as well, we must use synchronization
-     everywhere they are accessed. The portions of code that are outside the synch-
-     ronized blocks operate exclusively on local (stack-based) variables, which are not
-     shared across threads and therefore do not require synchronization.
 
    - Listing 2.8. Servlet that caches its last request and result.
      #+BEGIN_SRC java
@@ -1071,39 +1060,27 @@
            }
        }
      #+END_SRC
+     + Q :: Why not keep using ~AtomicLong~?
 
-   - ----------------------------------- Start (=\uparrow=)
+     + A :: It would be safe to use ~AtomicLong~ here,
 
-   - ----------------------------------- Start (=\downarrow=)
+            _BUT_ there is less benefit than there was in ~CountingFactorizer~:
+            /Atomic variables/ are useful for effecting /atomic operations/ on a
+            _SINGLE_ variable, but since we are already using /synchronized blocks/
+            to construct /atomic operations/,
 
-   - CachedFactorizer no longer uses AtomicLong for the hit counter, instead re-
-     verting to using a long field. It would be safe to use AtomicLong here, but there is
-     less benefit than there was in CountingFactorizer . Atomic variables are useful
-     for effecting atomic operations on a single variable, but since we are already using
-     synchronized blocks to construct atomic operations, using two different synchro-
-     nization mechanisms would be confusing and would offer no performance or
-     safety benefit.
+            *using two different _synchronization mechanisms_ would be CONFUSING
+            and would offer no performance or safety benefit.*
 
-   - The restructuring of CachedFactorizer provides a balance between simplic-
-     ity (synchronizing the entire method) and concurrency (synchronizing the short-
-     est possible code paths). Acquiring and releasing a lock has some overhead, so
-     it is undesirable to break down synchronized blocks too far (such as factoring
-     ++hits into its own synchronized block), even if this would not compromise
-     atomicity. CachedFactorizer holds the lock when accessing state variables and
-     for the duration of compound actions, but releases it before executing the poten-
-     tially long-running factorization operation. This preserves thread safety without
-     unduly affecting concurrency; the code paths in each of the synchronized blocks
-     are “short enough”.
+   - The restructuring of ~CachedFactorizer~ provides a balance between
+     + simplicity (synchronizing the entire method)
 
-   - Deciding how big or small to make synchronized blocks may require tradeoffs
-     among competing design forces, including safety (which must not be compro-
-     mised), simplicity, and performance. Sometimes simplicity and performance are
-     at odds with each other, although as CachedFactorizer illustrates, a reasonable
-     balance can usually be found.
+     + concurrency (synchronizing the shortest possible code paths) --
+       though the ~++hits;~ can be put into a separate /synchronization block/,
+       people usually don't do this -- *acquiring and releasing a lock has some
+       overhead*.
 
-   - ----------------------------------- Start (=\uparrow=)
-
-   - Quote =DONE=
+   - Quote
      #+BEGIN_QUOTE
      There is frequently a tension between simplicity and performance.
 
@@ -1131,32 +1108,89 @@
 
      introduces the risk of /liveness/ or /performance/ problems.
 
-   - Quote =DONE=
+   - Quote
      #+BEGIN_QUOTE
      Avoid holding locks during _LENGTHY_ computations or operations at risk of
      _NOT completing quickly_ such as network or console I/O.
      #+END_QUOTE
 
 * TODO 3 Sharing Objects - 33
-** 3.1 Visibility - 33
+  - At the beginning of _Chapter 2_ we say *writing correct concurrent programs
+    is primarily about _managing access_ to /shared mutable state/.*
+
+    That chapter was about
+    using /synchronization/ to *prevent* multiple threads *from* accessing the
+    same data at the same time;
+
+  - This chapter examines techniques for
+    *sharing* and *publishing* objects so they can be safely accessed by multiple
+    threads.
+
+  - Chapter 2 and Chapter 3 together lay the foundation for building /thread-safe
+    classes/ and /safely structuring concurrent applications/ using the
+    ~java.util.concurrent~ library classes.
+
+  - The function of /synchronized blocks and methods/:
+    + NOT ONLY ensure that operations execute atomically (as we see in Chapter 2)
+
+    + BUT ALSO ensure /memory visibility/ -- we also want to ensure that when a
+      thread modifies the state of an object, other threads can actually see the
+      changes that were made.
+
+      *Without synchronization, this may not happen.*
+
+  - You can ensure that /memory visibility/ either 
+    + by using explicit /synchronization/
+      or
+    + by taking advantage of the synchronization built into *library classes*
+      (for example, /classes/ in ~java.util.concurrent~).
+
+** TODO 3.1 Visibility - 33
+   - In general,
+     there is *no guarantee* that the reading thread will see a value written by
+     another thread on a timely basis, or even at all.
+
+     In order to *ensure* _visibility of memory writes across threads_, you *must
+     use synchronization*.
+
 *** 3.1.1 Stale data - 35
+    Listing 3.2. Non-thread-safe mutable integer holder.
+    #+BEGIN_SRC java
+      @NotThreadSafe
+      public class MutableInteger {
+          private int value;
+          public int get() { return value; }
+          public void set(int value) { this.value = value; }
+      }
+    #+END_SRC
+
+    Listing 3.3. Thread-safe mutable integer holder.
+    #+BEGIN_SRC java
+      @ThreadSafe
+      public class SynchronizedInteger {
+          @GuardedBy("this") private int value;
+          public synchronized int get() { return value; }
+          public synchronized void set(int value) { this.value = value; }
+      }
+    #+END_SRC
+
 *** 3.1.2 Nonatomic 64-bit operations - 36
 *** 3.1.3 Locking and visibility - 36
 *** 3.1.4 Volatile variables - 37
 
-** 3.2 Publication and escape - 39
+** TODO 3.2 Publication and escape - 39
 *** 3.2.1 Safe construction practices - 41
 
-** 3.3 Thread confinement - 42
+** TODO 3.3 Thread confinement - 42
 *** 3.3.1 Ad-hoc thread confinement - 43
 *** 3.3.2 Stack confinement - 44
 *** 3.3.3 ThreadLocal - 45
 
-** 3.4 Immutability - 46
+** TODO 3.4 Immutability - 46
 *** 3.4.1 Final fields - 48
 *** 3.4.2 Example: Using volatile to publish immutable objects - 48
 
-** 3.5 Safe publication - 49
+** TODO 3.5 Safe publication - 49
 *** 3.5.1 Improper publication: when good objects go bad - 50
 *** 3.5.2 Immutable objects and initialization safety - 51
 *** 3.5.3 Safe publication idioms - 52
@@ -1169,53 +1203,53 @@
     - *Guarded*
 
 * TODO 4 Composing Objects - 55
-** 4.1 Designing a thread-safe class - 55
+** TODO 4.1 Designing a thread-safe class - 55
 *** 4.1.1 Gathering synchronization requirements - 56
 *** 4.1.2 State-dependent operations - 57
 *** 4.1.3 State ownership - 57
 
-** 4.2 Instance confinement - 58
+** TODO 4.2 Instance confinement - 58
 *** 4.2.1 The Java monitor pattern - 60
 *** 4.2.2 Example: tracking fleet vehicles - 61
 
-** 4.3 Delegating thread safety - 62
+** TODO 4.3 Delegating thread safety - 62
 *** 4.3.1 Example: vehicle tracker using delegation - 64
 *** 4.3.2 Independent state variables - 66
 *** 4.3.3 When delegation fails - 67
 *** 4.3.4 Publishing underlying state variables - 68
 *** 4.3.5 Example: vehicle tracker that publishes its state - 69
 
-** 4.4 Adding functionality to existing thread-safe classes - 71
+** TODO 4.4 Adding functionality to existing thread-safe classes - 71
 *** 4.4.1 Client-side locking - 72
 *** 4.4.2 Composition - 73
 
-** 4.5 Documenting synchronization policies - 74
+** TODO 4.5 Documenting synchronization policies - 74
 *** 4.5.1 Interpreting vague documentation - 76
 
 * TODO 5 Building Blocks - 79
-** 5.1 Synchronized collections - 79
+** TODO 5.1 Synchronized collections - 79
 *** 5.1.1 Problems with synchronized collections - 79
 *** 5.1.2 Iterators and ~ConcurrentModificationException~ - 82
 *** 5.1.3 Hidden iterators - 83
 
-** 5.2 Concurrent collections - 84
+** TODO 5.2 Concurrent collections - 84
 *** 5.2.1 ~ConcurrentHashMap~ - 85
 *** 5.2.2 Additional atomic ~Map~ operations - 86
 *** 5.2.3 ~CopyOnWriteArrayList~ - 86
 
-** 5.3 Blocking queues and the producer-consumer pattern - 87
+** TODO 5.3 Blocking queues and the producer-consumer pattern - 87
 *** 5.3.1 Example: desktop search - 89
 *** 5.3.2 Serial thread confinement - 90
 *** 5.3.3 Deques and work stealing - 92
 
-** 5.4 Blocking and interruptible methods - 92
-** 5.5 Synchronizers - 94
+** TODO 5.4 Blocking and interruptible methods - 92
+** TODO 5.5 Synchronizers - 94
 *** 5.5.1 Latches - 94
 *** 5.5.2 ~FutureTask~ - 95
 *** 5.5.3 Semaphores - 98
 *** 5.5.4 Barriers - 99
 
-** 5.6 Building an efficient, scalable result cache - 101
+** TODO 5.6 Building an efficient, scalable result cache - 101
 * TODO Summary of Part I
 * II Structuring Concurrent Applications - 111
 * TODO 6 Task Execution - 113

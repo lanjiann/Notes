@@ -1019,11 +1019,71 @@
 ** Discussion
    - *SUMMARY*
 
-* TODO 35. A Listful of Dollars - 205
+* DONE 35. A Listful of Dollars - 205
+  CLOSED: [2018-08-24 Fri 20:01]
+  The following program uses both of these features. What does it do?
+  #+BEGIN_SRC scala
+    type Dollar = Int
+    final val Dollar: Dollar = 1
+    val x: List[Dollar] = List(1, 2, 3)
+
+    println(x map { x: Int => Dollar })
+    println(x.map(x: Int => Dollar))
+  #+END_SRC
+
 ** Possibilities
+   The first ~println~ statement prints:
+   ~List(1, 1, 1)~
+   and the second one throws
+
 ** Explanation
+   For an anonymous function, The /block expression/ can be parsed differently,
+   as opposed to being passed directly!
+
+   - ~println(x map { x: Int => Dollar })~:
+     it is equivalent to ~println(x map((x: Int) => Dollar))~. and its result is
+     ~List(1, 1, 1)~, as expected.
+
+   - ~println(x map(x: Int => Dollar))~:
+     This can compile, but it has a run time error:
+     ~java.lang.IndexOutOfBoundsException: 3~
+
+     This error message is a little tricky, but from it you know the ~x~ in
+     ~x: Int => Dollar~ is NOT a /free variable/ that will be bound to ~List(1,
+     2, 3)~'s elements. It is acutally the ~List(1, 2, 3)~.
+
+     How this can happen?
+
+     + ~List~'s in Scala are functions, which have non-static ~apply~ /method/.
+
+     + Accidently, the ~apply~ /method/ of this list ~x~ is ~Int => Dollar~.
+       By default, in the ~x.map(x: Int => Dollar)~, the ~x: Int => Dollar~ is
+       interpreted as ~x: (Int => Dollar)~, rather than ~(x: Int) => Dollar~.
+         Then the ~x~ here is considered as the list ~x~ (if you use other
+       variable name, like ~y~, there will be a /compilation error/ of =not
+       found: value y=), rather than a /free variable/.
+
+       This is also why the ~IndexOutOfBoundsException: 3~ is there. The length
+       of ~x~ is 3, and it doesn't have the 4th element, which index is ~3~.
+
 ** Discussion
+   - You need parentheses if you doesn't mean ~x: (Int => Dollar)~.
+     Use ~(x: Int) => Dollar~ or ~x => Dollar~, and here you can use other
+     variable name besides ~x~.
+
    - *SUMMARY*
+     - Be aware that
+       passing an /anonymous function/ *in curly braces* actually creates a
+       /block/.
+
+     - /Anonymous functions/
+       passed in a /block/
+       *can be parsed differently* than when
+       passed directly.
+
+     - If you are passing an /anonymous, single-parameter function/ _in parentheses_,
+       *make sure you enclose the parameter in parentheses if it has a type
+       annotation.*
 
 * DONE 36. Size It Up - 210
   CLOSED: [2018-08-18 Sat 21:09]

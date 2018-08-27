@@ -155,7 +155,7 @@
 - [[11. Traits and Generics - 235 - =Reading=][11. Traits and Generics - 235 - =Reading=]]
   - [[Using Traits - 237][Using Traits - 237]]
     - [[Trait Objects - 238][Trait Objects - 238]]
-    - [[Trait Object Layout - 239][Trait Object Layout - 239]]
+    - [[Trait Object Layout - 239 - =Re-Read= =2018-08-22=][Trait Object Layout - 239 - =Re-Read= =2018-08-22=]]
     - [[Generic Functions - 240][Generic Functions - 240]]
     - [[Which to Use - 243][Which to Use - 243]]
   - [[Defining and Implementing Traits - 245][Defining and Implementing Traits - 245]]
@@ -5686,23 +5686,28 @@
    TODO: NOTES
 
 * TODO 11. Traits and Generics - 235 - =Reading=
-  - Rust supports /polymorphism/ with two related features: /traits/ and /generics/.
+  - Rust supports /polymorphism/ with two related features:
+    + /traits/ -- =From Jian= /Ad hoc polymorphism/
+      and
+    + /generics/ -- =From Jian= /parametric polymorphism/
 
     These concepts will be familiar to many programmers,
     =???=
     *but Rust takes a fresh approach inspired by Haskell's /typeclasses/.*
 
   - About /traits/:
-    + We'll also use /traits/ to add /extension methods/ to EXISTING types, even
-      built-in types like ~str~ and ~bool~.
+    + We'll also use /traits/ to add /extension methods/ to EXISTING /types/,
+      even built-in types like ~str~ and ~bool~.
 
-    + We'll explain why adding a trait to a type costs no extra memory and how to
-      use traits without virtual method call overhead.
+    + We'll explain
+      * *why* adding a /trait/ to a /type/ costs no extra memory
+        and
+      * *how* to use /traits/ *without virtual method call overhead*.
 
     + We'll see that built-in /traits/ are the hook into the language that Rust
-      provides for /operator overloading/ and other features.
+      provides for /operator overloading/ and _other features_.
 
-    + =TODO=
+    + =TODO= =???=
       We'll cover /the ~Self~ type/, /associated methods/, and /associated types/,
       *three features Rust lifted from Haskell* that elegantly solve problems that
       other languages address with workarounds and hacks.
@@ -5714,14 +5719,53 @@
     Rust makes us declare the ~T: Ord~ requirement (called a /bound/) up front,
     before using the ~<=~ operator to compare two values of type ~T~.
 
-    + So we'll also talk about
+    + So we'll also talk about =TODO=
       * how ~&mut Write~ and ~<T: Write>~ are *similar*,
       * how they're *different*, and
       * how to *choose between* these two ways of using /traits/.
 
 ** DONE Using Traits - 237
    CLOSED: [2018-06-21 Thu 19:19]
-   - In Rust, there is one UNUSUAL RULE about /trait methods/:
+   - Most often,
+     a /trait/ _represents_ a *capability*: something a type can do.
+
+     + For example:
+       A value that implements
+       * ~std::io::Write~
+         can write out bytes.
+
+       * ~std::iter::Iterator~
+         can produce a sequence of values (=From Jian= Lazily???).
+
+       * ~std::clone::Clone~
+         can make clones of itself in memory.
+
+       * ~std::fmt::Debug~
+         can be printed using ~println!()~ with the ~{:?}~ /format specifier/.
+
+   - These /traits/ in the entry above are all part of /Rust's standard library/,
+     and many standard types implement them.
+     + ~Write~ is implemented by
+       * ~std::fs::File~: writes bytes *to a local file*
+
+       * ~std::net::TcpStream~ writes *to a network connection*.
+
+       * ~Vec<u8>~ appends some data *to the end*.
+
+     + ~Iterator~ is implemented by
+       * ~Range<i32>~ (the type of ~0..10~),
+         do some _iterator types_ associated with /slices/, /hash tables/, and
+         so on.
+
+       * *Most* _standard library types_ implement ~Clone~.
+
+         =TODO= =???= =???=
+         The *EXCEPTIONS* are mainly types like ~TcpStream~ that represent more
+         than just data in memory.
+
+       * Likewise, *most* standard library types support ~Debug~ .
+
+   - In Rust, there is one _UNUSUAL rule_ about /trait methods/:
      *the /trait/ itself must be in scope. Otherwise, all its /methods/ are
      HIDDEN.*
      For example,
@@ -5731,18 +5775,42 @@
        let mut buf: Vec<u8> = vec![];
        buf.write_all(b"hello")?;  // This is ok only when we have the `use` line above.
      #+END_SRC
+     + This rule is the result of a Rust design:
+       you can *add new methods* to any type -- even standard library types like
+       ~u32~ and ~str~.
+
+     + This rule help resolving most name confliction problems in DIFFERENT /traits/.
+       This can happen in languages like Java.
 
    - If a /trait/ is inside /the standard prelude/, you don't need a ~use~ statement.
      =TODO= We'l cover many of them in Chapter 13.
 
-   - Rust's /traits/' /methods/ are like /virtual methods/ in C++ and C#, while
-     there is NO runtime overhead in Rust.
+   - Rust's /traits/' /methods/ are like /virtual methods/ in C++ and C#, while,
+     in Rust, there is *NO* /runtime overhead/ *except* the ONLY case. Use the
+     code below as an illustration:
+     + *Without* /runtime overhead/ (the compiler knows the ~write_all~ method is
+       called from a ~Vec<u8>~):
+       #+BEGIN_SRC rust
+         use std::io::Write;
+
+         let mut buf: Vec<u8> = vec![];
+         buf.write_all(b"hello")?;  // no runtime overhead
+       #+END_SRC
+
+     + *With* /runtime overhead/:
+       #+BEGIN_SRC rust
+         use std::io::Write;
+
+         // Here `&mut Write` is the type of `writer` below.
+         // If we can't infer its exact type, there is runtiem overhead.
+         writer.write_all(b"hello")?;
+       #+END_SRC
 
      Rust can even /inline/ the /method/ (C++ and C# will _often_ do the same,
      _although the posibility of subclassing sometimes precludes this_.)
 
 *** DONE Trait Objects - 238
-    CLOSED: [2018-06-20 Wed 02:00]
+    CLOSED: [2018-08-22 Wed 05:44]
     - There are *two* ways of using /traits/ to write /polymorphic/ code in Rust:
       + /trait objects/, which is presented in this section
       + /generics/
@@ -5757,10 +5825,11 @@
       + *The _SIZE_ of a variable has to be known at compile time*, and types that
         implement ~Write~ can be any size.
 
-      + You may be surprising if you're coming from C# or Java, but the reason is
-        simple. In both of them, you actually save a /reference/, which has a
-        known size -- this is NOT the case in Rust, Rust doesn't save a reference
-        by default.
+      + It seems C# and Java do not have this restriction.
+        *However*, the reality is they acutally save a /reference/, which as a
+        known size -- this is *NOT* the case in Rust, Rust does NOT have a
+        /reference/ by default.
+
 
       + The right one -- write out the /reference/ EXPLICITLY:
         #+BEGIN_SRC rust
@@ -5782,11 +5851,19 @@
         * You can't query the type information directly,
           =From Jian= Reflection???
 
-        * Rust does _NOT support_ /downcasting/ from the /trait object/ ~&mut Write~
+        * Rust does *NOT support* /downcasting/ from the /trait object/ ~&mut Write~
           back to a concrete type like ~Vec<u8>~.
 
-*** DONE Trait Object Layout - 239
-    CLOSED: [2018-06-20 Wed 02:30]
+          =From Jian=
+          This is very important!!! 
+          Solving a problem is the process of information reduction.
+          In most cases, you should NOT add information back -- the opposite direction
+          of information reduction.
+
+          =TODO= It seems we should never do /downcast/ from a /trait object/
+          back to a concrete type. *Is this 100% right?*??
+
+*** TODO Trait Object Layout - 239 - =Re-Read= =2018-08-22=
     - In memory, a /trait object/ takes up two machine words, and it is a /fat
       pointer/ consisting of
       + a /pointer/ to the /value/
