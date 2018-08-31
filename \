@@ -1,0 +1,206 @@
+#+TITLE: Reactive Web Applications
+#+SUBTITLE: Covers Play , Akka , AND Reactive Streams
+#+VERSION: 2016
+#+AUTHOR: Manuel Bernhardt, Foreword by James Roper
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[foreword - xiii][foreword - xiii]]
+- [[preface - xv][preface - xv]]
+- [[acknowledgments - xvii][acknowledgments - xvii]]
+- [[about this book - xix][about this book - xix]]
+- [[about the cover illustration - xxiii][about the cover illustration - xxiii]]
+- [[PART 1 GETTING STARTED WITH REACTIVE WEB APPLICATIONS - 1][PART 1 GETTING STARTED WITH REACTIVE WEB APPLICATIONS - 1]]
+- [[1. Did you say reactive? - 3][1. Did you say reactive? - 3]]
+  - [[1.1 Putting reactive into context - 4][1.1 Putting reactive into context - 4]]
+    - [[Origins of reactive - 4][Origins of reactive - 4]]
+    - [[The Reactive Manifesto - 5][The Reactive Manifesto - 5]]
+    - [[Reactive programming - 6][Reactive programming - 6]]
+    - [[The emergence of reactive technologies - 7][The emergence of reactive technologies - 7]]
+  - [[1.2 Rethinking computational resource utilization - 8][1.2 Rethinking computational resource utilization - 8]]
+    - [[Threaded versus evented web application servers 9][Threaded versus evented web application servers 9]]
+    - [[Developing web applications fit for multicore architectures 11][Developing web applications fit for multicore architectures 11]]
+    - [[The horizontal application architecture 14][The horizontal application architecture 14]]
+  - [[1.3 Failure-handling as first-class concern - 17][1.3 Failure-handling as first-class concern - 17]]
+    - [[Failure is inevitable - 17][Failure is inevitable - 17]]
+    - [[Building applications with failure in mind - 20][Building applications with failure in mind - 20]]
+    - [[Dealing with load - 22][Dealing with load - 22]]
+  - [[1.4 Summary - 25][1.4 Summary - 25]]
+- [[2 Your first reactive web application - 26][2 Your first reactive web application - 26]]
+  - [[2.1 Creating and running a new project - 26][2.1 Creating and running a new project - 26]]
+  - [[2.2 Connecting to Twitter’s streaming API - 29][2.2 Connecting to Twitter’s streaming API - 29]]
+    - [[Getting the connection credentials to the Twitter API - 29][Getting the connection credentials to the Twitter API - 29]]
+    - [[Working around a bug with OAuth authentication - 30][Working around a bug with OAuth authentication - 30]]
+    - [[Streaming data from the Twitter API - 30][Streaming data from the Twitter API - 30]]
+    - [[Asynchronously transforming the Twitter stream - 35][Asynchronously transforming the Twitter stream - 35]]
+  - [[2.3 Streaming tweets to clients using a WebSocket - 38][2.3 Streaming tweets to clients using a WebSocket - 38]]
+    - [[Creating an actor - 39][Creating an actor - 39]]
+    - [[Setting up the WebSocket connection and interacting with it - 40][Setting up the WebSocket connection and interacting with it - 40]]
+    - [[Sending tweets to the WebSocket - 42][Sending tweets to the WebSocket - 42]]
+  - [[2.4  scaling out - 45][2.4  scaling out - 45]]
+    - [[Making the application resilient and scaling out 45][Making the application resilient and scaling out 45]]
+    - [[Making the client resilient 45][Making the client resilient 45]]
+    - [[2.5][2.5]]
+    - [[3][3]]
+    - [[Summary][Summary]]
+    - [[■][■]]
+    - [[Scaling out][Scaling out]]
+    - [[46][46]]
+    - [[49][49]]
+    - [[Functional programming primer 50][Functional programming primer 50]]
+    - [[3.1][3.1]]
+    - [[3.2][3.2]]
+    - [[A few words on functional programming][A few words on functional programming]]
+    - [[Immutability 51][Immutability 51]]
+    - [[50][50]]
+    - [[The fallacy of mutable state 51 Immutable values as snapshots of][The fallacy of mutable state 51 Immutable values as snapshots of]]
+    - [[reality 53 Expression-oriented programming 53][reality 53 Expression-oriented programming 53]]
+    - [[■][■]]
+    - [[■][■]]
+    - [[3.3][3.3]]
+    - [[Functions][Functions]]
+    - [[55][55]]
+    - [[Functions in object-oriented programming languages 56][Functions in object-oriented programming languages 56]]
+    - [[Functions as first-class values 56 Moving behavior around][Functions as first-class values 56 Moving behavior around]]
+    - [[Composing functions 58 The size of functions 59][Composing functions 58 The size of functions 59]]
+    - [[■][■]]
+    - [[57][57]]
+    - [[■][■]]
+    - [[3.4][3.4]]
+    - [[Manipulating immutable collections][Manipulating immutable collections]]
+    - [[Transformations instead of loops 61][Transformations instead of loops 61]]
+    - [[manipulating collections 62][manipulating collections 62]]
+    - [[3.5][3.5]]
+    - [[61][61]]
+    - [[Higher-order functions for][Higher-order functions for]]
+    - [[■][■]]
+    - [[Making the switch to a declarative programming style][Making the switch to a declarative programming style]]
+    - [[68][68]]
+    - [[Never use the get method on an Option 69 Only use immutable][Never use the get method on an Option 69 Only use immutable]]
+    - [[values and data structures 69 Aim for small and crisp][values and data structures 69 Aim for small and crisp]]
+    - [[functions 69 Iterate and refine your functional style 70][functions 69 Iterate and refine your functional style 70]]
+    - [[■][■]]
+    - [[■][■]]
+    - [[■][■]]
+    - [[3.6][3.6]]
+    - [[4][4]]
+    - [[Summary][Summary]]
+    - [[70][70]]
+    - [[Quick introduction to Play 71][Quick introduction to Play 71]]
+    - [[4.1][4.1]]
+    - [[Play application structure and configuration][Play application structure and configuration]]
+    - [[72][72]]
+    - [[Introducing the Simple Vocabulary Teacher 72 Creating a][Introducing the Simple Vocabulary Teacher 72 Creating a]]
+    - [[minimal Play application scaffold 73 Building the project 75][minimal Play application scaffold 73 Building the project 75]]
+    - [[■][■]]
+    - [[■][■]]
+    - [[4.2][4.2]]
+    - [[Request handling][Request handling]]
+    - [[77][77]]
+    - [[The request lifecycle 77][The request lifecycle 77]]
+    - [[actions, and results 85][actions, and results 85]]
+    - [[request-handling pipeline][request-handling pipeline]]
+    - [[4.3][4.3]]
+    - [[Summary][Summary]]
+    - [[99][99]]
+
+* foreword - xiii
+* preface - xv
+* acknowledgments - xvii
+* about this book - xix
+* about the cover illustration - xxiii
+* PART 1 GETTING STARTED WITH REACTIVE WEB APPLICATIONS - 1
+* 1. Did you say reactive? - 3
+** 1.1 Putting reactive into context - 4
+*** Origins of reactive - 4
+*** The Reactive Manifesto - 5
+*** Reactive programming - 6
+*** The emergence of reactive technologies - 7
+
+** 1.2 Rethinking computational resource utilization - 8
+*** Threaded versus evented web application servers 9
+*** Developing web applications fit for multicore architectures 11
+*** The horizontal application architecture 14
+
+** 1.3 Failure-handling as first-class concern - 17
+*** Failure is inevitable - 17
+*** Building applications with failure in mind - 20
+*** Dealing with load - 22
+
+** 1.4 Summary - 25
+
+* 2 Your first reactive web application - 26
+** 2.1 Creating and running a new project - 26
+** 2.2 Connecting to Twitter’s streaming API - 29
+*** Getting the connection credentials to the Twitter API - 29
+*** Working around a bug with OAuth authentication - 30
+*** Streaming data from the Twitter API - 30
+*** Asynchronously transforming the Twitter stream - 35
+
+** 2.3 Streaming tweets to clients using a WebSocket - 38
+*** Creating an actor - 39
+*** Setting up the WebSocket connection and interacting with it - 40
+*** Sending tweets to the WebSocket - 42
+
+** 2.4 Making the application resilient and scaling out - 45
+*** Making the client resilient - 45
+*** scaling out - 46
+
+** 2.5 Summary - 49
+
+* 3 Functional programming primer - 50
+*** 3.1
+*** 3.2
+*** A few words on functional programming
+*** Immutability 51
+*** 50
+*** The fallacy of mutable state 51 Immutable values as snapshots of
+*** reality 53 Expression-oriented programming 53
+*** ■
+*** ■
+*** 3.3
+*** Functions
+*** 55
+*** Functions in object-oriented programming languages 56
+*** Functions as first-class values 56 Moving behavior around
+*** Composing functions 58 The size of functions 59
+*** ■
+*** 57
+*** ■
+*** 3.4
+*** Manipulating immutable collections
+*** Transformations instead of loops 61
+*** manipulating collections 62
+*** 3.5
+*** 61
+*** Higher-order functions for
+*** ■
+*** Making the switch to a declarative programming style
+*** 68
+*** Never use the get method on an Option 69 Only use immutable
+*** values and data structures 69 Aim for small and crisp
+*** functions 69 Iterate and refine your functional style 70
+*** ■
+*** ■
+*** ■
+*** 3.6
+*** 4
+*** Summary
+*** 70
+*** Quick introduction to Play 71
+*** 4.1
+*** Play application structure and configuration
+*** 72
+*** Introducing the Simple Vocabulary Teacher 72 Creating a
+*** minimal Play application scaffold 73 Building the project 75
+*** ■
+*** ■
+*** 4.2
+*** Request handling
+*** 77
+*** The request lifecycle 77
+*** actions, and results 85
+*** request-handling pipeline
+*** 4.3
+*** Summary
+*** 99

@@ -72,7 +72,7 @@
 - [[Functors, Applicative Functors and Monoids][Functors, Applicative Functors and Monoids]]
   - [[Functors redux][Functors redux]]
   - [[Applicative functors][Applicative functors]]
-  - [[The newtype keyword][The newtype keyword]]
+  - [[The ~newtype~ keyword][The ~newtype~ keyword]]
   - [[Monoids][Monoids]]
 - [[A Fistful of Monads][A Fistful of Monads]]
   - [[Getting our feet wet with Maybe][Getting our feet wet with Maybe]]
@@ -91,8 +91,13 @@
 - [[Zippers][Zippers]]
   - [[Taking a walk][Taking a walk]]
   - [[A trail of breadcrumbs][A trail of breadcrumbs]]
+    - [[Going back up][Going back up]]
+    - [[Manipulating trees under focus][Manipulating trees under focus]]
+    - [[I'm going straight to top, oh yeah, up where the air is fresh and clean!][I'm going straight to top, oh yeah, up where the air is fresh and clean!]]
   - [[Focusing on lists][Focusing on lists]]
   - [[A very simple file system][A very simple file system]]
+    - [[A zipper for our file system][A zipper for our file system]]
+    - [[Manipulating our file system][Manipulating our file system]]
   - [[Watch your step][Watch your step]]
 - [[Tips][Tips]]
 
@@ -160,9 +165,37 @@
 ** Reverse Polish notation calculator
 ** Heathrow to London
 * Functors, Applicative Functors and Monoids
+  - =TODO=
+    We'll talk about a slightly stronger and more useful versions of /functors/
+    called /applicative functors/.
+
 ** Functors redux
+   - Refresh:
+     The /typeclass/ ~Functor~ has ONLY ONE /typeclass method/:
+     ~fmap :: (a -> b) -> f a -> f b~
+
+   - *A word of advice*:
+     We often use "box analogy" to describe /functors/, and later we will also
+     use it to describe /applicative functors/ and /monads/.
+
+     Do NOT take the phrase"box analogy" to literally.
+     *The /computational context/ is a better term!*
+
+   - We have seen some ~Functor~'s instances (by theirselves they are /type
+     constructors/), like ~[]~, ~Maybe~, ~Either a~ (with one of the two type
+     parameters), and /Tree/.
+
+   - In this section, we'll take a look at two more /instances of functor/, namely
+     ~IO~ and ~(->) r~.
+
+   - ~IO~
+
+   - ~(->) r~
+     How are functions functors? Well, let's take a look at the implementation,
+     which lies in ~Control.Monad.Instances~.
+
 ** Applicative functors
-** The newtype keyword
+** The ~newtype~ keyword
 ** Monoids
 * A Fistful of Monads
 ** Getting our feet wet with Maybe
@@ -178,10 +211,363 @@
 ** Error error on the wall
 ** Some useful monadic functions
 ** Making monads
-* Zippers
-** Taking a walk
-** A trail of breadcrumbs
-** Focusing on lists
-** A very simple file system
-** Watch your step
+* TODO Zippers
+  - _While_ Haskell's *purity* comes with a whole bunch of benefits,
+    it makes us tackle some problems _DIFFERENTLY_ than we would in /impure
+    languages/.
+
+    Because of /referential transparency/, one value is as good as another in
+    Haskell if it represents the same thing.
+
+  - So if we have a tree full of fives (high-fives, maybe?) and we want to change
+    one of them into a six, we have to have some way of knowing exactly which
+    five in our tree we want to change. *We have to know where it is in our
+    tree.*
+
+    + In impure languages, we could just note where in our memory the five is
+      located and change that.
+
+    + In Haskell,
+      * _CANNOT_
+        - one five is as good as another, so we *cannot discriminate* based on
+          where in our memory they are.
+
+        - We also *cannot really change anything*;
+          when we say that we change a tree, we actually mean that we take a
+          tree and return a new one that's similar to the original tree, but
+          slightly different.
+
+      * _CAN_
+        - Remember a path from the root of the tree to the element that we want
+          to change.
+
+          + We could say, take this tree, go left, go right and then left again
+            and change the element that's there. While this works, it can be
+            *inefficient*:
+              If we want to later change an element that's near the element that
+            we previously changed, we have to walk all the way from the root of
+            the tree to our element _again_!
+
+  - In this chapter, we'll see
+    how we can take some data structure and focus on a part of it in a way that
+    + makes changing its elements easy
+      and
+    + walking around it efficient. Nice!
+
+** DONE Taking a walk
+   CLOSED: [2018-08-30 Thu 21:48]
+   #+BEGIN_SRC haskell
+     data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show)
+
+     freeTree :: Tree Char
+     freeTree =
+         Node 'P'
+             (Node 'O'
+                 (Node 'L'
+                     (Node 'N' Empty Empty)
+                     (Node 'T' Empty Empty)
+                 )
+                 (Node 'Y'
+                     (Node 'S' Empty Empty)
+                     (Node 'A' Empty Empty)
+                 )
+             )
+             (Node 'L'
+                 (Node 'W'
+                     (Node 'C' Empty Empty)
+                     (Node 'R' Empty Empty)
+                 )
+                 (Node 'A'
+                     (Node 'A' Empty Empty)
+                     (Node 'C' Empty Empty)
+                 )
+             )
+
+     data Direction = L | R deriving (Show)
+     type Directions = [Direction]
+
+     -- Return the a new tree whoes only 'W' is replaced with 'P'
+     changeToP :: Directions-> Tree Char -> Tree Char
+     changeToP (L:ds) (Node x l r) = Node x (changeToP ds l) r
+     changeToP (R:ds) (Node x l r) = Node x l (changeToP ds r)
+     changeToP [] (Node _ l r) = Node 'P' l r
+
+     -- Show the element at the end of a list of `Direction`'s
+     elemAt :: Directions -> Tree a -> a
+     elemAt (L:ds) (Node _ l _) = elemAt ds l
+     elemAt (R:ds) (Node _ _ r) = elemAt ds r
+     elemAt [] (Node x _ _) = x
+
+
+     -- Try it!
+     -- ghci>
+     newTree = changeToP [R, L] freeTree
+     -- ghci>
+     elemAt [R, L] newTree -- 'P'
+   #+END_SRC
+
+** DONE A trail of breadcrumbs
+   CLOSED: [2018-08-30 Thu 21:47]
+   #+BEGIN_SRC haskell
+     type Breadcrumbs = [Direction]
+
+     goLeft :: (Tree a, Breadcrumbs) -> (Tree a, Breadcrumbs)
+     goLeft (Node _ l _, bs) = (l, L:bs)
+
+     goLeft :: (Tree a, Breadcrumbs) -> (Tree a, Breadcrumbs)
+     goLeft (Node _ _ r, bs) = (r, R:bs)
+
+     -- Try it!
+     goLeft (goRight (freeTree, []))
+     -- (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty),[L,R])
+   #+END_SRC
+
+   - Let's try a better way -- define a pipeline like grammer:
+     #+BEGIN_SRC haskell
+       x -: f = f x
+
+       (freeTree, []) -: goRight -: goLeft
+       -- (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty),[L,R])
+     #+END_SRC
+
+*** Going back up
+    Currently, we don't have enough information to go back up.
+
+    - In general, a single breadcrumb should contain all the data needed to re-
+      construct the parent node.
+
+      + So 
+        * it should have the information from all the paths that we didn't take
+          and
+        * it should also know the direction that we did take,
+          _BUT_ it *must not* contain the sub-tree that we're currently focusing on.
+            That's because we already have that sub-tree in the first component of
+          the tuple, so if we also had it in the breadcrumbs, we'd have duplicate
+          information -- =From Jian= may be trapped in repeating some operation,
+          and cannot stop.
+
+      + Then, we need
+
+        1. Instead of ~Direction~, we'll make a new data type:
+           #+BEGIN_SRC haskell
+             data Crumb a =
+                 LeftCrumb a (Tree a)
+               | RightCrumb a (Tree a)
+               deriving (Show)
+
+             type Breadcrumbs a = [Crumb a]
+           #+END_SRC
+
+        2. Modify ~goLeft~ and ~goRight~ to save enough information:
+
+           *Notice*:
+           Assume that the current tree that's under focus is NOT
+           ~Empty~, which doesn't have any subtrees.
+
+           #+BEGIN_SRC haskell
+             goLeft :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+             goLeft (Node x l r, bs) = (l, LeftCrumb x r:bs)
+
+             goRight :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+             goRight (Node x l r, bs) = (r, RightCrumb x l:bs)
+           #+END_SRC
+
+        3. Let's define ~goUp~:
+           #+BEGIN_SRC haskell
+             goUp :: (Tree a, Brreadcrumbs a) -> (Tree a, Breadcrumbs a)
+             goUp (t, LeftCrumb x r:bs) -> (Node x t r, bs)
+             goUp (t, LeftCrumb x l:bs) -> (Node x l t, bs)
+           #+END_SRC
+           * Note that this function causes an error if we're already at the top
+             of a tree and we want to move up.
+
+             =TODO= =Solution=
+             Later on, we'll use the ~Maybe~ /monad/ to represent possible
+             failure when moving focus.
+
+        4. ~type Zipper a = (Tree a, Breadcrumbs a)~
+           With a pair of ~Tree a~ and ~Breadcrumbs a~,
+           * we have *ALL the information* to *rebuild* the whole tree
+             and
+           * we also have a _focus_ on a sub-tree.
+
+           This scheme also enables us to *EASILY* _move up, left and right_.
+
+    - Zipper :: A pair that contains
+      + a focused part of a data structure
+        and
+      + its surroundings
+
+      because moving our focus up and down the data structure resembles the
+      operation of a zipper on a regular pair of pants. So it's cool to make a
+      type synonym ~Zipper~.
+
+*** Manipulating trees under focus
+    - Let's make a function that _modifies_ the element in the /root/ of the
+      sub-tree that the /zipper/ is focusing on: 
+      #+BEGIN_SRC haskell
+        modify :: (a -> a) -> Zipper a -> Zipper a
+        modify f (Node x l r, bs) = (Node (f x) l r, bs)
+        modify f (Empty, bs) = (Empty, bs)
+      #+END_SRC
+
+    - Examples:
+      #+BEGIN_SRC haskell
+        newFocus = (freeTree,[]) -: goLeft -: goRight -: modify (\_ -> 'P')
+        newFocus2 = newFocus -: goUp -: modify (\_ -> 'X')
+      #+END_SRC
+
+    - Take a /tree/ and a /zipper/.
+      Return a NEW /zipper/ with a new focus on the given tree.
+      #+BEGIN_SRC haskell
+        attach :: Tree a -> Zipper a -> Zipper a
+        attach t (_, bs) = (t, bs)
+      #+END_SRC
+
+      + Replace the leftmost of our ~freeTree~:
+        #+BEGIN_SRC haskell
+          -- In our `freeTree`, this is a empty node.
+          farLeft = (freeTree, []) -: goLeft -: goLeft -: goLeft -: goLeft
+          newFocus = farLeft -: attach (Node 'Z' Empty Empty)
+        #+END_SRC
+
+        After this step, if we go up and re-construct a tree, we will get a
+        ~freeTree~-like /tree/, and the only difference is a new leftmost /leaf
+        node/ with ~'Z'~ value.
+
+*** I'm going straight to top, oh yeah, up where the air is fresh and clean!
+    #+BEGIN_SRC haskell
+      topMost :: Zipper a -> Zipper a
+      topMost (t, []) = (t, [])
+      topMost z = topMost (goUp z)
+    #+END_SRC
+
+** DONE Focusing on lists
+   CLOSED: [2018-08-31 Fri 00:56]
+   /Zippers/ can be used with pretty much any data structure -- it is a category
+   of data structure or a way to construct data structures, NOT one data structure.
+
+   - It's no surprise that they can be used to focus on sub-lists of lists.
+     List is a single branch tree!
+
+   - Code:
+     #+BEGIN_SRC haskell
+       data List a = Empty | Cons a (List a) deriving (Show, Read, Eq, Ord)
+       type ListZipper a = ([a], [a])  -- (focus, crumbs)
+
+       goForward :: ListZipper a -> ListZipper a
+       goForward (x:xs, bs) = (xs, x:bs)
+
+       goBack :: ListZipper a -> ListZipper a
+       goBack (xs, b:bs) = (b:xs, bs)
+
+       -- Try it!
+       xs = [1, 2, 3, 4]
+       goForward(xs, [])          -- ([2, 3, 4], [1])
+       goForward([2, 3, 4], [1])  -- ([3, 4], [2, 1])
+       goForward([3, 4], [2, 1])  -- ([4], [3, 2, 1])
+       goBack([4], [3, 2, 1])     -- ([3, 4], [2, 1])
+     #+END_SRC
+
+   - This also makes it easier to see why we call this a /zipper/,
+     because this really looks like the slider of a zipper moving up and down.
+
+** TODO A very simple file system
+   Now that we know how /zippers/ work, let's use /trees/ to represent a _very
+   simple file system_ and then make a /zipper/ for that _file system_, which
+   will allow us to *move between folders*, just like we usually do when jumping
+   around our file system.
+
+   - xxx
+     #+BEGIN_SRC haskell
+       type Name = String
+       type Data = String
+       data FSItem = File Name Data | Folder Name [FSItem] deriving (Show)
+     #+END_SRC
+
+   - A example folder with some files and sub-folders:
+     #+BEGIN_SRC haskell
+       -- The author says: "That's actually what my disk contains right now."
+       myDisk :: FSItem
+       myDisk =
+           Folder "root"
+               [ File "goat_yelling_like_man.wmv" "baaaaaa"
+               , File "pope_time.avi" "god bless"
+               , Folder "pics"
+                   [ File "ape_throwing_up.jpg" "bleargh"
+                   , File "watermelon_smash.gif" "smash!!"
+                   , File "skull_man(scary).bmp" "Yikes!"
+                   ]
+               , File "dijon_poupon.doc" "best mustard"
+               , Folder "programs"
+                   [ File "fartwizard.exe" "10gotofart"
+                   , File "owl_bandit.dmg" "mov eax, h00t"
+                   , File "not_a_virus.exe" "really not a virus"
+                   , Folder "source code"
+                       [ File "best_hs_prog.hs" "main = print (fix error)"
+                       , File "random.hs" "main = print 4"
+                       ]
+                   ]
+               ]
+     #+END_SRC
+
+*** TODO A zipper for our file system
+    #+BEGIN_SRC haskell
+      data FSCrumb = FSCrumb Name [FSItem] [FSItem] deriving (Show)
+      type FSZipper = (FSItem, [FSCrumb])
+    #+END_SRC
+
+*** TODO Manipulating our file system
+    
+** DONE Watch your step
+   CLOSED: [2018-08-30 Thu 21:47]
+   - Till now we didn't consider some situations like (Use the /tree zipper/ as
+     a example):
+     + Go left or right when the node is an ~Empty~.
+     + Go up when you have already reach the /root/ -- no crumb can be found.
+
+     We mentioned that we will deal with them at the last.
+
+   - For the code we have now, if we meet the situations I mentioned above, there
+     will be /runtime errors/ -- failures.
+
+     We need to find a way to deal with the failures. This remind us one thing
+     -- the /monads/! More specifically, the ~Maybe~ /monad/, which adds a
+     context of possible failure to normal values.
+
+   - Use the ~Maybe~ /monnad/ to add a context of possible failure to our movements:
+     #+BEGIN_SRC haskell
+       goLeft :: Zipper a -> Maybe (Zipper a)
+       goLeft (Node x l r, bs) = Just (l, LeftCrumb x r:bs)
+       goLeft (Empty, _) = Nothing
+
+       goRight :: Zipper a -> Maybe (Zipper a)
+       goRight (Node x l r, bs) = Just (r, RightCrumb x l:bs)
+       goRight (Empty, _) = Nothing
+
+       goUp :: Zipper a -> Maybe (Zipper a)
+       goUp (t, LeftCrumb x r:bs) = Just (Node x t r, bs)
+       goUp (t, RightCrumb x l:bs) = Just (Node x l t, bs)
+       goUp (_, []) = Nothing
+     #+END_SRC
+
+   - Use the modified /monadic functions/ above, we *cannot* use the ~-:~ to
+     pipeline our operations any more!
+
+     However, since there are /monads/, we can use ~>>=~ to replace all the
+     ~-:~, and make everythings works well again.
+
+     + Example:
+       #+BEGIN_SRC haskell
+         coolTree = Node 1 Empty (Node 3 Empty Empty)
+         return (coolTree,[]) >>= goRight
+         -- Just (Node 3 Empty Empty,[RightCrumb 1 Empty])
+
+         return (coolTree,[]) >>= goRight >>= goRight
+         -- Just (Empty,[RightCrumb 3 Empty,RightCrumb 1 Empty])
+
+         return (coolTree,[]) >>= goRight >>= goRight >>= goRight
+         -- Nothing
+       #+END_SRC
+
 * Tips

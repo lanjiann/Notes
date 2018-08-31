@@ -66,7 +66,7 @@
       - [[Scala example - 48][Scala example - 48]]
       - [[Blocking threads in tests - 50][Blocking threads in tests - 50]]
     - [[Understanding futures and promises - 51][Understanding futures and promises - 51]]
-      - [[Future – expressing failure and latency in types - 51][Future – expressing failure and latency in types - 51]]
+      - [[Future – *expressing failure and latency in types* - 51][Future – *expressing failure and latency in types* - 51]]
     - [[Preparing the DB and messages - 60][Preparing the DB and messages - 60]]
       - [[The messages - 61][The messages - 61]]
       - [[Implementing the DB functionality - 62][Implementing the DB functionality - 62]]
@@ -76,7 +76,7 @@
       - [[Starting the DB - 65][Starting the DB - 65]]
     - [[Producing the client - 65][Producing the client - 65]]
       - [[Scaffolding the project - 65][Scaffolding the project - 65]]
-      - [[Modifying build.sbt - 66][Modifying build.sbt - 66]]
+      - [[Modifying =build.sbt= - 66][Modifying =build.sbt= - 66]]
       - [[Building the client - 66][Building the client - 66]]
       - [[Testing - 67][Testing - 67]]
   - [[Homework - 68][Homework - 68]]
@@ -243,7 +243,7 @@
 - [[Index 241][Index 241]]
 
 * Preface - ix
-* Chapter 1: Starting Life as an Actor - 1
+* TODO Chapter 1: Starting Life as an Actor - 1
 ** What's in this book? - 2
 ** Chapter overview - 2
 ** What is Akka - 3
@@ -293,7 +293,8 @@
 ** Homework
 ** Summary
 
-* Chapter 2: Actors and Concurrency - 31
+* DONE Chapter 2: Actors and Concurrency - 31
+  CLOSED: [2018-08-29 Wed 13:27]
   - The chapter will cover the following topics:
     + The *anatomy of*, *creation of*, and *communication with* an /actor/
 
@@ -413,7 +414,8 @@
        *Don't sleep or block outside tests.*
      - 
 
-*** Understanding futures and promises - 51
+*** DONE Understanding futures and promises - 51
+    CLOSED: [2018-08-28 Tue 16:52]
     - Modern /futures/ make _TWO_ effects implicit:
       + failure
       + latency
@@ -422,27 +424,189 @@
       we MUST *learn some abstractions* that express handling with _failure_ and
       _latency_ in different ways.
 
-**** Future – expressing failure and latency in types - 51
+**** Future – *expressing failure and latency in types* - 51
+     - An asynchronous API, such as the /ask pattern/ =???=, will return one of
+       the placeholder future types mentioned previously.
+
+       We can try to demonstrate how the code becomes clearer by looking at
+       different ways in which we can work with our ~PongActor~ in the test
+       case.
+
+       _It's very strongly advised that you do follow along in this section with
+       the test case we built previously._
+
 ***** Preparing for the Java example - 51
 ***** Preparing for the Scala example - 52
+      #+BEGIN_SRC scala
+        def askPong(message: String): Future[String] =
+          (pongActor ? message).mapTo[String]
+
+        describe("FutureExamples") {
+          import scala.concurrent.ExecutionContext.Implicits.global
+          it("should print to console"){
+            (pongActor ? "Ping").onSuccess({
+              case x: String => println("replied with: " + x)
+            })
+            Thread.sleep(100)
+          }
+        }
+      #+END_SRC
+
 ***** Note on sleeping - 52
 ***** Anatomy of a future - 53
-***** Handling success cases - 53
+***** DONE Handling success cases - 53
+      CLOSED: [2018-08-28 Tue 15:37]
 ****** Executing code with the result - 53
+       #+BEGIN_SRC scala
+         askPong("Ping").onSuccess {
+           case x: String => println("replied with: " + x)
+         }
+       #+END_SRC
+
 ****** Transforming the result - 53
+       ~askPong("Ping").map(x => x.charAt(0))~
+
 ****** Transforming the result asynchronously - 54
+       ~val f: Future[String] = askPong("Ping").flatMap(x => askPong("Ping"))~
+       
+***** DONE Handling failure cases - 55
+      CLOSED: [2018-08-28 Tue 16:13]
+      - /Failures/ always have a cause represented by a ~Throwable~.
 
-***** Handling failure cases - 55
-****** Executing code in the failure case - 55
-****** Recovering from failure - 55
-****** Recovering from failure asynchronously - 56
+****** DONE Executing code in the failure case - 55
+       CLOSED: [2018-08-28 Tue 15:50]
+       - Scala (the ~onFailure~ /method/)
+         #+BEGIN_SRC scala
+           askPong("causeError").onFailure {
+             case e: Exception => println("Got exception")
+           }
+         #+END_SRC
 
-***** Composing futures - 56
-****** Chaining operations together - 56
-****** Combining futures - 57
-****** Dealing with lists of futures - 58
+       - Java (no specific /method/ -- use ~handle~, which is use for both success
+         and failure. Therefore, you need manually check the ~Throwable~)
+         #+BEGIN_SRC java
+           askPong("cause error").handle((x, t) -> {
+                   if(t!=null){
+                       System.out.println("Error: " + t);
+                   }
+                   return null;
+               });
+         #+END_SRC
+         + ~handle~ takes a ~BiFunction~.
 
-***** Future cheat-sheet - 59
+****** DONE Recovering from failure - 55
+       CLOSED: [2018-08-28 Tue 16:02]
+       - Scala:
+         #+BEGIN_SRC scala
+           val f = askPong("causeError").recover {
+             case t: Exception => "default"
+           }
+         #+END_SRC
+
+       - Java:
+         #+BEGIN_SRC java
+           CompletionStage<String> cs =
+               askPong("cause error")
+               .exceptionally(t -> "default");
+         #+END_SRC
+
+****** DONE Recovering from failure asynchronously - 56
+       CLOSED: [2018-08-28 Tue 16:12]
+       - Scala:
+         #+BEGIN_SRC scala
+           askPong("causeError").recoverWith {
+             case t: Exception => askPong("Ping")
+           }
+         #+END_SRC
+
+       - Java:
+         #+BEGIN_SRC java
+           askPong("cause error")
+               .handle( (pong, ex) ->
+                        ex == null ?
+                        CompletableFuture.completedFuture(pong) :
+                        askPong("Ping")
+               ).thenCompose(x -> x);
+         #+END_SRC
+
+***** DONE Composing futures - 56
+      CLOSED: [2018-08-28 Tue 16:40]
+****** DONE Chaining operations together - 56
+       CLOSED: [2018-08-28 Tue 16:22]
+       We can focus on the happy path and then collect errors at the end of the
+       chain of operations.
+
+       =From Jian= After a error, the methods in the "happy path" after it won't
+       have computation cost.
+
+       - Scala
+         #+BEGIN_SRC scala
+           val f = askPong("Ping").
+             flatMap(x => askPong("Ping" + x)).
+             recover { case _: Exception => "There was an error"}
+         #+END_SRC
+
+       - Java
+         #+BEGIN_SRC java
+           askPong("Ping").
+               thenCompose(x -> askPong("Ping" + x)).
+               handle((x, t) -> {
+                       if (t != null) {
+                           return "default";
+                       } else {
+                           return x;
+                       }
+                   });
+         #+END_SRC
+
+****** DONE Combining futures - 57
+       CLOSED: [2018-08-28 Tue 16:26]
+       - Java
+         #+BEGIN_SRC java
+           askPong("Ping").
+               thenCombine(askPong("Ping"),
+                           (a,b) -> a + b  // "PongPong"
+                           );
+         #+END_SRC
+
+       - Scala
+         #+BEGIN_SRC scala
+           val futureAddition: Future[Int] =
+             for {
+               res1 <- askPong("Ping")
+               res2 <- askPong("Ping")
+             } yield res1 + res2
+         #+END_SRC
+         After code expansion, this is a ~flatMap~.
+
+****** DONE Dealing with lists of futures - 58
+       CLOSED: [2018-08-28 Tue 16:40]
+       #+BEGIN_SRC scala
+         val listOfFuture: List[Future[String]] =
+           List("Pong", "Pong", "failed").map(x => askPong(x))
+       #+END_SRC
+
+       - Sometimes we want convert a ~List[Future[String]]~ value to a
+         ~Future[List[String]]~.
+
+         Use the ~sequence~ /static method/ of ~Future~:
+         ~val futureOfList: Future[List[String]] = Future.sequence(listOfFutures)~
+
+       - The call to ~sequence~ will fail if any of the /futures/ in the list fail.
+         Avoid the fail by recovering failure when running ~map~:
+         #+BEGIN_SRC scala
+           Future.sequence(
+             listOfFutures.map(_.recover { case _: Exception => "" })
+           )
+         #+END_SRC
+
+       - =TODO=
+         There is *no equivalent in the Java8 core library*,
+         but there are gists around that cover the functionality for sequencing
+         futures in the same manner.
+
+***** DONE Future cheat-sheet - 59 - *Re-Read*
+      CLOSED: [2018-08-28 Tue 16:40]
       | Operation                   | Scala Future                   | Java CompletableFuture                           |
       |-----------------------------+--------------------------------+--------------------------------------------------|
       | Transform Value             | ~.map(x => y)~                 | ~.thenApply(x -> y)~                             |
@@ -450,34 +614,380 @@
       | Return Value if Error       | ~.recover(t => y)~             | ~.exceptionally(t -> y)~                         |
       | Return Value Async if Error | ~.recoverWith(t => futureOfY)~ | ~.handle(t, x -> futureOfY).thenCompose(x -> x)~ |
 
-***** Composing a Distributed System – AkkademyDb and client - 59
+***** TODO Composing a Distributed System – AkkademyDb and client - 59
+      *PLAN*
 
-*** Preparing the DB and messages - 60
-**** The messages - 61
-**** Implementing the DB functionality - 62
-**** Enabling remoting - 63
-**** Main - 64
-**** Publishing the messages - 64
-**** Starting the DB - 65
+      =TODO= NOTE
 
-*** Producing the client - 65
-**** Scaffolding the project - 65
-**** Modifying build.sbt - 66
-**** Building the client - 66
-**** Testing - 67
+*** DONE Preparing the DB and messages - 60
+    CLOSED: [2018-08-28 Tue 17:44]
+    - We want to expose a few messages to start with.
+      + Get message:
+        Return a key if it exists
+
+      + Key Not Found exception:
+        If a key isn't found, return this failure
+
+      + Set message:
+        Sets a value and reply with a status
+
+**** DONE The messages - 61
+     CLOSED: [2018-08-28 Tue 17:02]
+     Since /messages/ should always be *immutable* (NO /setter/ required due to
+     this nature). Also, for this simple example, use /public fields/ instead of
+     /private fields/ and their /getters/.
+
+     - Scala
+       #+BEGIN_SRC scala
+         case class SetRequest(key: String, value: Object)
+         case class GetRequest(key: String)
+         case class KeyNotFoundException(key: String) extends Exception
+       #+END_SRC
+
+       /case classes/ are ~Serializable~!
+
+     - Java
+       #+BEGIN_SRC java
+         public class SetRequest implements Serializable {
+             public final String key;
+             public final Object value;
+             public SetRequest(String key, Object value) {
+                 this.key = key;
+                 this.value = value;
+             }
+         }
+
+         public class GetRequest implements Serializable {
+             public final String key;
+             public GetRequest(String key) {
+                 this.key = key;
+             }
+         }
+
+         public class KeyNotFoundException extends Exception implements Serializable {
+             public final String key;
+             public KeyNotFoundException(String key) {
+                 this.key = key;
+             }
+         }
+       #+END_SRC
+
+**** DONE Implementing the DB functionality - 62
+     CLOSED: [2018-08-28 Tue 17:11]
+     - Scala:
+       #+BEGIN_SRC scala
+         override def receive = {
+           case SetRequest(key, value) =>
+             log.info("received SetRequest - key: {} value: {}", key, value)
+             map.put(key, value)
+             sender() ! Status.Success
+
+           case GetRequest(key) =>
+             log.info("received GetRequest - key: {}", key)
+             val response: Option[String] = map.get(key)
+             response match {
+               case Some(x) => sender() ! x
+               case None => sender() ! Status.Failure(KeyNotFoundException(key))
+             }
+
+           case o =>
+             Status.Failure(new ClassNotFoundException)
+         }
+       #+END_SRC
+
+     - Java
+       #+BEGIN_SRC java
+         receive(ReceiveBuilder.
+                 match(SetRequest.class, message -> {
+                         log.info("Received Set request: {}", message);
+                         map.put(message.key, message.value);
+                         sender().tell(new Status.Success(message. key), self());
+                     }).
+                 match(GetRequest.class, message -> {
+                         log.info("Received Get request: {}", message);
+                         String value = map.get(message.key);
+                         Object response = (value != null) ?
+                             value :
+                             new Status.Failure(new KeyNotFoundException(message.key));
+                         sender().tell(response, self());
+                     }).
+                 matchAny(o ->
+                          sender().
+                          tell(new Status.Failure(new ClassNotFoundException()), self())).
+                 build()
+                 );
+       #+END_SRC
+
+     - The default case above can be a custom one, rather than
+       ~ClassNotFoundException~, which can make greater clarity.
+
+**** TODO Enabling remoting - 63
+     - Add a dependency and a configuration file (for Akka):
+       1. ~"com.typesafe.akka" %% "akka-remote" % "2.3.6"~  =TODO= NEWER Version!
+
+       2. =src/main/resources/application.conf= -- a =typesafe-config HOCON= file:
+          #+BEGIN_SRC text
+            akka {
+              actor {
+                provider = "akka.remote.RemoteActorRefProvider"
+              }
+              remote {
+                enabled-transports = ["akka.remote.netty.tcp"]
+                netty.tcp {
+                  hostname = "127.0.0.1"
+                  port = 2552
+                }
+              }
+            }
+          #+END_SRC
+
+     - =TODO= More Notes and Details.
+
+**** DONE Main - 64
+     CLOSED: [2018-08-28 Tue 17:31]
+     - Finally, for the datastore, we need to add a ~main~ /method/ to
+       + *start* the /actor system/
+         and
+       + *create* the /actor/.
+
+     - Scala
+       #+BEGIN_SRC scala
+         // com.akkademy.AkkademyDb
+         object Main extends App {
+           val system = ActorSystem("akkademy")
+           system.actorOf(Props[AkkademyDb], name = "akkademy-db")
+         }
+       #+END_SRC
+
+     - Java
+       #+BEGIN_SRC java
+         // com.akkademy.Main
+         public class Main {
+             public static void main(String... args) {
+                 ActorSystem system = ActorSystem.create("akkademy");
+                 system.actorOf(Props.create(AkkademyDb.class), "akkademy-db");
+             }
+         }
+       #+END_SRC
+
+     - We simply need to create an ~ActorSystem~, and then create the /actor/ in it.
+
+     - We give the /actor/ a name ="akkademy-db"=, and
+       + we use a name to be able to easily look up the /actor/ in the _client_,
+
+       + the name can also ease debugging as Akka will log the Actor's name in
+         error scenarios.
+
+**** DONE Publishing the messages - 64
+     CLOSED: [2018-08-28 Tue 17:40]
+     Here we do the simple thing -- ONLY publish our project locally.
+     The the repository information in =build.sbt= is:
+     #+BEGIN_SRC text
+       // build.sbt
+       name := "akkademy-db"
+       organization := "com.akkademy-db"
+       version := "0.0.1-SNAPSHOT"
+     #+END_SRC
+
+     - About the *-SNAPSHOT*:
+       It indicates that the version is *unstable* and can change.
+
+       If we were to release the code, then we would remove it from the version
+       to indicate that it will not (and cannot) change again.
+
+     - Lastly, we need to *exclude* the =application.conf= file
+       so that the client doesn't try to start a remote server.
+
+       Again, it's better to put the messages in a standalone library -- we're
+       cutting corners for brevity.
+
+       Put this in your =build.sbt= file to exclude the =application.conf= when publishing:
+       #+BEGIN_SRC scala
+         mappings in (Compile, packageBin) -= {
+           _.filterNot { case (_, name) => Seq("application.conf").contains(name) }
+         }
+       #+END_SRC
+
+       + If we put the messages in a separate library (and you certainly can), we wouldn't
+         have needed to exclude the configuration from the build. We're done
+         with the build configuration. From the command line, in the root of our
+         project, we simply run the activator publish-local target to publish
+         the project:
+         ~$ activator publish-local~
+
+         =TODO= The *activator* is deprecated already!. Try to find out a
+         similar result sbt command instead.
+
+**** DONE Starting the DB - 65
+     CLOSED: [2018-08-28 Tue 17:44]
+     ~$ activator run~ and you'll see that Akka log that it is listening for
+     remote connections and tells us the address (which we will use shortly in
+     the client):
+     #+BEGIN_SRC text
+       [Remoting] Remoting now listens on addresses: [akka.tcp://
+       akkademy@127.0.0.1:2552]
+     #+END_SRC
+
+*** DONE Producing the client - 65
+    CLOSED: [2018-08-29 Wed 13:27]
+    We've published our messages, and have the key-value store running.
+
+    We're ready to wrap up our first distributed application by consuming the
+    service with a client.
+
+**** DONE Scaffolding the project - 65
+     CLOSED: [2018-08-29 Wed 11:48]
+     Create a project of the client with name =akkademy-db-client=
+
+**** DONE Modifying =build.sbt= - 66
+     CLOSED: [2018-08-29 Wed 11:48]
+     Add the dependency to the server project:
+     ~"com.akkademy-db" %% "akkademy-db" % "0.0.1-SNAPSHOT"~
+     
+     - In the Java project,
+       we need to also add the =scala-java8-compat= library to be able to convert
+       the /futures/ the /actor/ will produce: =TODO= =DETAILS=
+       ~"org.scala-lang.modules" %% "scala-java8-compat" % "0.6.0"~
+    
+**** DONE Building the client - 66
+     CLOSED: [2018-08-29 Wed 11:56]
+     - Scala
+       #+BEGIN_SRC scala
+         package com.akkademy
+
+         class SClient(remoteAddress: String){
+           private implicit val timeout = Timeout(2 seconds)
+           private implicit val system = ActorSystem("LocalSystem")
+           private val remoteDb = system.actorSelection(
+             s"akka.tcp://akkademy@$remoteAddress/user/akkademy-db"
+           )
+
+           def set(key: String, value: Object): Unit = {
+             remoteDb ? SetRequest(key, value)
+           }
+
+           def get(key: String): Unit = {
+             remoteDb ? GetRequest(key)
+           }
+         }
+       #+END_SRC
+
+     - Java
+       #+BEGIN_SRC java
+         package com.akkademy;
+
+         public class JClient {
+             private final ActorSystem system = ActorSystem.create("LocalSystem");
+             private final ActorSelection remoteDb;
+
+             public JClient(String remoteAddress){
+                 remoteDb = system.actorSelection("akka.tcp://akkademy@" +
+                                                  remoteAddress + "/user/akkademy-db");
+             }
+
+             public CompletionStage set(String key, Object value) {
+                 return toJava(ask(remoteDb, new SetRequest(key, value), 2000));
+             }
+
+             public CompletionStage<Object> get(String key){
+                 return toJava(ask(remoteDb, new GetRequest(key), 2000));
+             }
+         }
+       #+END_SRC
+       + For the Java code, we convert the ~scala.concurrent.Future~ to Java's
+         ~CompletionStage~ and return that.
+           This gives us a better Java API for the consumer of our library to work
+         with.
+
+**** DONE Testing - 67
+     CLOSED: [2018-08-29 Wed 13:27]
+     We need to make sure the ~db~ is running as these are /integration tests/.
+     Here we'll simply create and then retrieve a record from the remote database.
+
+     - Scala
+       #+BEGIN_SRC scala
+         class SClientIntegrationSpec extends FunSpecLike with Matchers {
+           val client = new SClient("127.0.0.1:2552")
+
+           describe("akkademyDbClient") {
+             it("should set a value"){
+               client.set("123", new Integer(123))
+               val futureResult = client.get("123")
+               val result = Await.result(futureResult, 10 seconds)
+               result should equal(123)
+             }
+           }
+         }
+       #+END_SRC
+
+     - Java
+       #+BEGIN_SRC java
+         public class JClientIntegrationTest {
+             JClient client = new JClient("127.0.0.1:2552");
+
+             @Test
+             public void itShouldSetRecord() throws Exception {
+                 client.set("123", 123);
+                 Integer result = (Integer) ((CompletableFuture) client.get("123")).get();
+                 assert(result == 123);
+             }
+         }
+       #+END_SRC
 
 ** TODO Homework - 68
-*** General learning - 68
-*** Project homework - 68
+*** TODO General learning - 68
+*** TODO Project homework - 68
 
 ** TODO Summary - 69
-
+   
 * Chapter 3: Getting the Message Across - 71
-** Setting the stage with an example problem - 71
-*** Sketching the project - 72
-*** Core functionality - 72
+  - In this chapter, we will cover _ALL_ of the details of *message delivery
+    mechanisms* in Akka.
 
-** Messaging delivery - 73
+    + We'll look at DIFFERENT /messaging patterns/ -- different ways in which we
+      can get /messages/ between /Actors/ to get work done;
+
+    + We'll look at /scheduling message delivery/ as well -- a way of *delaying*
+      or *repeating* DELIVERY of /messages/;
+
+    + We'll cover how these /messaging patterns/ can be used to *compose* /Actors/
+      together to get work done in this chapter;
+
+  - A new example service will be introduced as a consumer of ~Akkademy-DB~ as
+    well -- a simple article parsing component
+
+    *TO demonstrate* _all the ways_ in which we can get /messages/ between
+    /Actors/.
+
+  - This chapter will COVER some of the essential _MECHANICS around Handling
+    Messages_:
+    + Making /Messages/ *Immutable*
+    + Asking an /Actor/ for a *Reply*
+    + *Forwarding* /Messages/
+    + *Piping* /Futures/
+
+** TODO Setting the stage with an example problem - 71
+*** Sketching the project - 72
+    - The name is ="akkademaid"=
+
+    - Dependencies:
+      #+BEGIN_SRC scala
+        libraryDependencies ++= Seq(
+          "com.syncthemall" % "boilerpipe" % "1.2.2",
+          "com.akkademy-db" %% "akkademy-db" % "0.0.1-SNAPSHOT",
+          "com.syncthemail" % "boilerpipe" % "1.2.2"
+        )
+      #+END_SRC
+
+*** TODO Core functionality - 72
+    - The ~boilerpipe~ library takes care of the article parsing for us.
+      We simply need to call ~ArticleExtractor.getInstance.getText(input)~ where
+      input is a /Stream/ or /String/.
+
+    - We'll revisit the example and /Akkademy-DB/ as we work through different
+      approaches to solving the problem.
+
+** TODO Messaging delivery - 73
 *** Messages should be immutable - 73
 *** Ask message pattern - 77
 **** Designing with Ask - 78
@@ -492,11 +1002,11 @@
 **** Forward - 94
 **** Pipe - 96
 
-** Homework - 97
+** TODO Homework - 97
 *** General learning - 97
 *** Project homework - 97
 
-** Summary - 98
+** TODO Summary - 98
 
 * Chapter 4: Actor Lifecycle – Handling State and Failure - 99
 ** The - 8 Fallacies of Distributed Computing - 99
