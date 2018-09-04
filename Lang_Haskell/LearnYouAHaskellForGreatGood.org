@@ -39,14 +39,14 @@
   - [[Maps and filters][Maps and filters]]
   - [[Lambdas][Lambdas]]
   - [[Only folds and horses][Only folds and horses]]
-  - [[Function application with $][Function application with $]]
+  - [[Function application with ~$~][Function application with ~$~]]
   - [[Function composition][Function composition]]
 - [[Modules][Modules]]
   - [[Loading modules][Loading modules]]
-  - [[Data.List][Data.List]]
-  - [[Data.Char][Data.Char]]
-  - [[Data.Map][Data.Map]]
-  - [[Data.Set][Data.Set]]
+  - [[~Data.List~][~Data.List~]]
+  - [[~Data.Char~][~Data.Char~]]
+  - [[~Data.Map~][~Data.Map~]]
+  - [[~Data.Set~][~Data.Set~]]
   - [[Making our own modules][Making our own modules]]
 - [[Making Our Own Types and Typeclasses][Making Our Own Types and Typeclasses]]
   - [[Algebraic data types intro][Algebraic data types intro]]
@@ -72,7 +72,19 @@
 - [[Functors, Applicative Functors and Monoids][Functors, Applicative Functors and Monoids]]
   - [[Functors redux][Functors redux]]
   - [[Applicative functors][Applicative functors]]
+    - [[~Maybe~ Applicative Functors (Title Add by Jian)][~Maybe~ Applicative Functors (Title Add by Jian)]]
+    - [[~[]~ Applicative Functors (Title Add by Jian)][~[]~ Applicative Functors (Title Add by Jian)]]
+    - [[~IO~ Applicative Functors (Title Add by Jian)][~IO~ Applicative Functors (Title Add by Jian)]]
+    - [[~(->) r~ Applicative Functors (Title Add by Jian)][~(->) r~ Applicative Functors (Title Add by Jian)]]
+    - [[~ZipList~ Applicative Functors (Title Add by Jian)][~ZipList~ Applicative Functors (Title Add by Jian)]]
+    - [[The ~liftA2~ Funciton (Title Add by Jian)][The ~liftA2~ Funciton (Title Add by Jian)]]
+    - [[The ~sequenceA~ Funciton (Title Add by Jian)][The ~sequenceA~ Funciton (Title Add by Jian)]]
+    - [[Applicative Functor Laws (Title Add by Jian) -- =Try to Verify them in examples=][Applicative Functor Laws (Title Add by Jian) -- =Try to Verify them in examples=]]
+    - [[Conclusion (Title Add by Jian)][Conclusion (Title Add by Jian)]]
   - [[The ~newtype~ keyword][The ~newtype~ keyword]]
+    - [[Using ~newtype~ to make type class instances][Using ~newtype~ to make type class instances]]
+    - [[On ~newtype~ laziness][On ~newtype~ laziness]]
+    - [[~type~ vs. ~newtype~ vs. ~data~][~type~ vs. ~newtype~ vs. ~data~]]
   - [[Monoids][Monoids]]
 - [[A Fistful of Monads][A Fistful of Monads]]
   - [[Getting our feet wet with Maybe][Getting our feet wet with Maybe]]
@@ -105,6 +117,7 @@
 ** About this tutorial
 ** So what's Haskell?
 ** What you need to dive in
+
 * Starting Out
 ** Ready, set, go!
 ** Baby's first functions
@@ -112,37 +125,43 @@
 ** Texas ranges
 ** I'm a list comprehension
 ** Tuples
+
 * Types and Typeclasses
 ** Believe the type
 ** Type variables
 ** Typeclasses 101
+
 * Syntax in Functions
 ** Pattern matching
 ** Guards, guards!
 ** Where!?
 ** Let it be
 ** Case expressions
+
 * Recursion
 ** Hello recursion!
 ** Maximum awesome
 ** A few more recursive functions
 ** Quick, sort!
 ** Thinking recursively
+
 * Higher Order Functions
 ** Curried functions
 ** Some higher-orderism is in order
 ** Maps and filters
 ** Lambdas
 ** Only folds and horses
-** Function application with $
+** Function application with ~$~
 ** Function composition
+
 * Modules
 ** Loading modules
-** Data.List
-** Data.Char
-** Data.Map
-** Data.Set
+** ~Data.List~
+** ~Data.Char~
+** ~Data.Map~
+** ~Data.Set~
 ** Making our own modules
+
 * Making Our Own Types and Typeclasses
 ** Algebraic data types intro
 ** Record syntax
@@ -154,6 +173,7 @@
 ** A yes-no typeclass
 ** The Functor typeclass
 ** Kinds and some type-foo
+
 * Input and Output
 ** Hello, world!
 ** Files and streams
@@ -161,15 +181,18 @@
 ** Randomness
 ** Bytestrings
 ** Exceptions
+
 * Functionally Solving Problems
 ** Reverse Polish notation calculator
 ** Heathrow to London
+
 * Functors, Applicative Functors and Monoids
   - =TODO=
     We'll talk about a slightly stronger and more useful versions of /functors/
     called /applicative functors/.
 
-** Functors redux
+** DONE Functors redux
+   CLOSED: [2018-08-31 Fri 17:10]
    - Refresh:
      The /typeclass/ ~Functor~ has ONLY ONE /typeclass method/:
      ~fmap :: (a -> b) -> f a -> f b~
@@ -188,15 +211,408 @@
    - In this section, we'll take a look at two more /instances of functor/, namely
      ~IO~ and ~(->) r~.
 
-   - ~IO~
+   - ~IO~ =TODO=
 
    - ~(->) r~
      How are functions functors? Well, let's take a look at the implementation,
      which lies in ~Control.Monad.Instances~.
+     #+BEGIN_SRC haskell
+       instance Functor ((->) r) where
+         fmap f g = (\x -> f (g x))
+     #+END_SRC
 
-** Applicative functors
-** The ~newtype~ keyword
-** Monoids
+     + Let's check the type of ~fmap~, in this case, in details.
+       1. ~fmap :: (a -> b) -> f a -> f b~
+
+       2. ~fmap :: (a -> b) -> ((->) r a) -> ((->) r b)~
+
+       3. ~fmap :: (a -> b) -> (r -> a) -> (r -> b)~
+
+       Yes! You fmap a function to a function, and get a new function.
+       You may notice this is a /composition/!
+       #+BEGIN_SRC haskell
+         instance Functor ((->) r) where
+           fmap = (.)
+       #+END_SRC
+
+   - =From Jian=
+     + Q :: Why NOT implement ~fmap f g = \x -> g (f x)~ in the /Functor instance/
+            of ~((->) r)~?
+       * =From Jian=
+         This is a naive guess reasoning by considering /functor/ with the
+         _box metaphor_.
+
+     + A :: Because this implementation violate the second *Functor LAWS* below!
+            It satisfies that ~fmap (f . g) = fmap g . fmap f~.
+       * There is NO guarantee that the types are compatible.
+
+       * This is NOT the REAL law we require: ~fmap (f . g) = fmap f . fmap g~.
+
+   - From another point of view, we can re-group the types in the signature of
+     ~fmap~:
+     #+BEGIN_SRC haskell
+       fmap :: (a -> b) -> (f a -> f b)
+     #+END_SRC
+     This re-group is reasonable and nothing real changed.
+
+     + We can think of ~fmap~
+       * _NOT_ as a function that takes one function and a /functor/ and returns a
+         /functor/,
+
+       * _BUT_ as a function that
+         - takes a function
+           and
+         - returns a new function
+
+     + lifting :: We call the operation from ~a -> b~ to ~f a -> f b~ as _lifting_.
+
+   - The *Functor LAWS* are *NOT enforced* by Haskell automatically,
+     and you have to test them out yourself.
+     + ~fmap id = id~
+
+     + ~fmap (f . g) = fmap f . fmap g~
+
+       Or write in another way:
+       ~fmap (f . g) F = fmap f . (fmap g F)~
+
+   - Counter example (even if you make a ~Functor~ instance, it can be non-functor
+     if it does NOT obey those two laws):
+     #+BEGIN_SRC haskell
+       -- NOT functor --
+       data CMaybe a = CNothing | CJust Int a deriving (Show)
+
+       -- NO guarantee!!!
+       instance Functor CMaybe where
+           fmap f CNothing = CNothing
+           fmap f (CJust counter x) = CJust (counter+1) (f x)
+
+       -- Violate the first law!!!
+       fmap id (CJust 0 "haha")  -- CJust 1 "haha"
+       id (CJust 0 "haha")       -- CJust 0 "haha"
+     #+END_SRC
+
+** TODO Applicative functors
+   /Applicative functors/ are beefed up /functors/.
+
+   This chapter will will talk about the /applicative functors/ of ~Maybe~, ~[]~,
+   ~IO~, and ~(->) r~.
+
+   - You can find the ~Applicative~ typeclass in the ~Control.Applicative~ module.
+
+   - Q :: WHY do we need ~Applicative~
+
+   - A :: Consider some use cases:
+     1. If we ~fmap~ a function, which takes a value and generate another function
+        (~g~), over a /functor/, we get a functor of function ~g~. 
+
+        For example,
+        #+BEGIN_SRC haskell
+          ghci> :t fmap (++) (Just "hey")
+          fmap (++) (Just "hey") :: Maybe ([Char] -> [Char])
+  
+          ghci> :t fmap compare (Just 'a')
+          fmap compare (Just 'a') :: Maybe (Char -> Ordering)
+  
+          ghci> :t fmap compare "A LIST OF CHARS"
+          fmap compare "A LIST OF CHARS" :: [Char -> Ordering]
+  
+          ghci> :t fmap (\x y z -> x + y / z) [3,4,5,6]
+          fmap (\x y z -> x + y / z) [3,4,5,6] :: (Fractional a) => [a -> a -> a]
+        #+END_SRC
+  
+        This is reasonable, and interesting.
+        *However, sometimes we need more!*
+
+     2. Can we /map/ the function in a /functor/ to the value in another /functor/?
+
+        At least, we *cannot ONLY use* the ~Functor~'s ~fmap~ to write a concise
+        solution!
+
+        *We need ~Applicative~!*
+
+   - ~Control.Applicative~ Definition:
+     #+BEGIN_SRC haskell
+       class (Functor f) => Applicative f where
+           pure :: a -> f a
+           (<*>) :: f (a -> b) -> f a -> f b
+     #+END_SRC
+
+     + Q :: How to think ~pure~?
+
+     + A :: ~pure~ would be to say that it takes a value and puts it in some sort
+            of *default (or pure) context* -- a *minimal context* that still yields
+            that value.
+
+     + ~<*>~ is like a beefed up ~fmap~:
+       #+BEGIN_SRC haskell
+         (<*>) :: f (a -> b) -> f a -> f b
+
+         fmap :: (a -> b) -> f a -> f b
+       #+END_SRC
+
+*** DONE ~Maybe~ Applicative Functors (Title Add by Jian)
+    CLOSED: [2018-09-01 Sat 01:00]
+    - Definition:
+      #+BEGIN_SRC haskell
+        instance Applicative Maybe where
+            pure = Just
+            Nothing <*> _ = Nothing
+            (Just f) <*> something = fmap f something
+      #+END_SRC
+      + Again, from the _class definition_ we see that the ~f~ that plays the role
+        of the /applicative functor/ should take one *concrete type* as a parameter,
+
+        so we write ~instance Applicative Maybe where~ _instead of_ writing
+        ~instance Applicative (Maybe a) where~.
+
+      + Example:
+        #+BEGIN_SRC haskell
+          Just (+3) <*> Just 9         -- Just 12
+          pure (+3) <*> Just 10        -- Just 13
+          pure (+3) <*> Just 9         -- Just 12
+          Just (++"hahah") <*> Nothing -- Nothing
+          Nothing <*> Just "woot"      -- Nothing
+        #+END_SRC
+
+    - ~Applicative~ provide a way to combine /functors/ DIRECTLY, which can't be
+      done _concisely_ ONLY with the operations of /non-applicative functors/ --
+      for example, you *can't get the result out from a /non-applicative functor/
+      in any _GENERAL_ way*, even if the result is a /partially applied
+      function/.
+
+      =IMPORTANT=
+      /Applicative functors/, on the other hand, allow you to operate on several
+      functors with a single function. Check out this piece of code:
+      #+BEGIN_SRC haskell
+        pure (+) <*> Just 3 <*> Just 5     -- Just 8
+        pure (+) <*> Just 3 <*> Nothing    -- Nothing
+        pure (+) <*> Nothing <*> Just 5    -- Nothing
+      #+END_SRC
+
+    - *This is one of the /applicative/ laws*.
+      ~pure f <*> x equals fmap f x~.
+
+    - ~pure f <*> x <*> y <*> ...~
+
+      is equivalent to
+
+      ~fmap f x <*> y <*> ...~
+
+      This is why ~Control.Applicative~ exports a function called ~<$>~, which is
+      just ~fmap~ as an infix operator.
+      #+BEGIN_SRC haskell
+        (<$>) :: (Functor f) => (a -> b) -> f a -> f b
+        f <$> x = fmap f x
+      #+END_SRC
+
+    - ~<$>~ is NOT ONLY for convenient!
+
+      By using ~<$>~, the /applicative/ style really shines,
+      because now if we want to apply a function ~f~ between _three_ /applicative
+      functors/, we can write ~f <$> x <*> y <*> z~.
+
+      If the parameters weren't /applicative functors/ but normal values, we'd write
+      ~f x y z~
+
+      + A concrete example:
+        #+BEGIN_SRC haskell
+          (++) <$> Just "johntra" <*> Just "Volta"   -- Just "johntravolta"
+          (++) "johntra" "Volta"                     -- "johntravolta"
+        #+END_SRC
+
+*** DONE ~[]~ Applicative Functors (Title Add by Jian)
+    CLOSED: [2018-09-01 Sat 01:00]
+    - Definition:
+      #+BEGIN_SRC haskell
+        instance Applicative [] where
+          pure x = [x]
+          fs <*> xs = [f x | f <- fs, x <- xs]
+      #+END_SRC
+
+      + ~pure~ examples
+        #+BEGIN_SRC haskell
+          pure "Hey" :: [String]
+          -- ["Hey"]
+
+          pure "Hey" :: Maybe String
+          -- Just "Hey" 
+        #+END_SRC
+
+      + ~<*>~ example (with /list applicative functors/):
+        #+BEGIN_SRC haskell
+          [(*0), (+100), (^2)] <*> [1, 2, 3]
+          -- [0, 0, 0, 101, 102, 103, 1, 4, 9]
+
+          [(+), (*)] <*> [1, 2] <*> [3, 4]
+          -- [4, 5, 5, 6, 3, 4, 6, 8]
+        #+END_SRC
+
+    - Using the /applicative style/ _on lists_ is often a *good replacement* for
+      /list comprehensions/.
+
+      + /list comprehensions/
+        #+BEGIN_SRC haskell
+          [ x*y | x <- [2,5,10], y <- [8,10,11]]
+          -- [16,20,22,40,50,55,80,100,110]
+        #+END_SRC
+
+      + /applicative style/
+        #+BEGIN_SRC haskell
+          (*) <$> [2, 5, 10] <*> [8, 10, 11]
+          -- [16,20,22,40,50,55,80,100,110]
+        #+END_SRC
+
+    - An example, still replace /list comprehensions/ with /applicative style/ code.
+      #+BEGIN_SRC haskell
+        filter (>50) $ (*) <$> [2,5,10] <*> [8,10,11]
+        -- [55,80,100,110]
+      #+END_SRC
+
+*** DONE ~IO~ Applicative Functors (Title Add by Jian)
+    CLOSED: [2018-09-01 Sat 01:05]
+    - The ~IO~ is also an /applicative/:
+      #+BEGIN_SRC haskell
+        instance Applicative IO where
+          pure = return
+          a <*> b = do
+            f <- a
+            x <- b
+            return (f x)
+      #+END_SRC
+
+    - If you ever find yourself
+      1. binding some I/O actions to names and then
+
+      2. calling some function on them and presenting that as the result by using
+         ~return~,
+
+      consider using the /applicative style/ because it's arguably *a bit more
+      concise and terse*.
+
+    - do-notation style:
+      #+BEGIN_SRC haskell
+        myAction :: IO String
+        myAction = do
+            a <- getLine
+            b <- getLine
+            return $ a ++ b
+      #+END_SRC
+
+    - applicative style:
+      #+BEGIN_SRC haskell
+        myAction :: IO String
+        myAction = (++) <$> getLine <*> getLine
+      #+END_SRC
+
+*** TODO ~(->) r~ Applicative Functors (Title Add by Jian)
+    - Definition:
+      #+BEGIN_SRC haskell
+        instance Applicative ((->) r) where
+          pure x = (\_ -> x)
+          f <*> g = \x -> f x (g x)
+      #+END_SRC
+      + ~pure 3 "blah~ is ~3~
+
+      + ~(+) <$> (+3) <*> (*100) $ 5~
+
+        =From Jian=
+        If consider /functors/ as a box, the ~fmap~ implementation of the ~((->) r)~
+        /functor/ is a little wierd! This is the reason why I am confused!!!
+
+        * Intuitively, if I consider /functors/ as boxes, I may expect
+          #+BEGIN_SRC haskell
+            ------------------------------------
+            -- NOT the one used by Haskell!!! --
+            ------------------------------------
+            instance Functor ((->) r) where
+              fmap f g = (\x -> g (f x))
+          #+END_SRC
+
+        * The actual ~fmap~ of ~((->) r)~ is
+          ~fmap f g = (\x -> f (g x))~
+
+          Use this we can write down the evaluation process of
+          ~(+) <$> (+3) <*> (*100) $ 5~:
+          1. ~((+) . (+3)) <*> (*100) $ 5~
+          2. ~(\x -> ((+) . (+3)) x (x * 100))) 5~
+          3. ~((+) . (+3)) 5 500)~
+          4. ~(\x y -> (3 + x) + y) 5 500~
+          5. ~3 + 5 + 500~
+          6. ~508~
+
+*** TODO ~ZipList~ Applicative Functors (Title Add by Jian)
+    For the /list applicative functors/, why do we define ~<*>~ that way above?
+
+    - Q :: Can we define it like zip two list, and combine them with a given function.
+
+    - A :: Yes you can!!!
+           However, *one type can only instantiate once*.
+
+           The solution is we define a new type called ~ZipList~, and it has only
+           ONE field, which is a ~List~.
+
+    - Definition:
+      #+BEGIN_SRC haskell
+        instance Applicative ZipList where
+          pure x = ZipList (repeat x)
+          ZipList fs <*> ZipList xs = ZipList (zipWith (\f x -> f x) fs xs)
+      #+END_SRC
+
+*** TODO The ~liftA2~ Funciton (Title Add by Jian)
+    - xxx
+
+*** TODO The ~sequenceA~ Funciton (Title Add by Jian)
+    - xxx
+
+*** TODO Applicative Functor Laws (Title Add by Jian) -- =Try to Verify them in examples=
+    - ~pure f <*> x = fmap f x~
+
+    - ~pure id <*> v = v~
+
+    - ~pure (.) <*> u <*> v <*> w = u <*> (v <*> w)~
+
+    - ~pure f <*> pure x = pure (f x)~
+
+    - ~u <*> pure y = pure ($ y) <*> u~
+
+*** DONE Conclusion (Title Add by Jian)
+    CLOSED: [2018-09-01 Sat 17:25]
+    - /Applicative functors/ aren't just interesting, they're also useful -- they
+      allow us to combine different computations, such as
+      + I/O computations
+      + non-deterministic computations
+      + computations that might have failed, etc.
+
+    - By using the /applicative style/. Just by using ~<$>~ and ~<*>~ we can use
+      + normal functions to uniformly operate on *any number* of /applicative
+        functors/
+
+      + take advantage of the semantics of each one. =???= =TODO=
+
+** TODO The ~newtype~ keyword
+   - We learned how to use ~data~ to make our own /algebraic data types/.
+     We learned how to use ~type~ to make /types synonyms/.
+
+   - We'll learn to use ~newtype~ to create new types out of _EXISTING_ /data types/,
+     and why we'd want to do that in the first place -- why NOT keep using ~data~???
+
+*** Using ~newtype~ to make type class instances
+
+*** On ~newtype~ laziness
+
+*** ~type~ vs. ~newtype~ vs. ~data~
+    - ~type~ makes /type synonyms/.
+      + /Type synonyms/ is chosen with better names for certain specific use.
+
+      + The /Type synonyms/ of the same type are interchangeable.
+        =From Jian=
+        *NOT like* the design of _Go_'s ~type~, which is introduce to create
+        _type aliases (type synonyms)_, but it's more like Haskell's ~newtype~
+        like type with implicit type constructors -- you don't need to write it
+        out, the compiler knows. _No implicit cast_ and _no interchangeablility_
+
+
+** TODO Monoids
 * A Fistful of Monads
 ** Getting our feet wet with Maybe
 ** The Monad type class
