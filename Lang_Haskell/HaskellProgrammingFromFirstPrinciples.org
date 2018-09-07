@@ -573,7 +573,7 @@
   - [[20.2 The ~Foldable~ class][20.2 The ~Foldable~ class]]
   - [[20.3 Revenge of the monoids][20.3 Revenge of the monoids]]
     - [[And now for something different][And now for something different]]
-  - [[20.4 Demonstrating Foldable instances][20.4 Demonstrating Foldable instances]]
+  - [[20.4 Demonstrating ~Foldable~ instances][20.4 Demonstrating ~Foldable~ instances]]
     - [[~Identity~][~Identity~]]
     - [[~Maybe~][~Maybe~]]
   - [[20.5 Some basic derived operations][20.5 Some basic derived operations]]
@@ -840,12 +840,12 @@
     - [[Config directories - 1179][Config directories - 1179]]
   - [[29.10 Follow-up resources - 1179][29.10 Follow-up resources - 1179]]
 - [[30 When things go wrong - 1180][30 When things go wrong - 1180]]
-  - [[30.1 Exceptions - 1181][30.1 Exceptions - 1181]]
-  - [[30.2 The Exception class and methods - 1181][30.2 The Exception class and methods - 1181]]
+  - [[30.1 Exceptions - 1181 =PARTIAL=-][30.1 Exceptions - 1181 =PARTIAL=-]]
+  - [[30.2 The ~Exception~ class and methods - 1181][30.2 The ~Exception~ class and methods - 1181]]
     - [[But there is something different going on here - 1183][But there is something different going on here - 1183]]
     - [[A brief introduction to existential quantification - 1183][A brief introduction to existential quantification - 1183]]
     - [[So, wait, what? - 1185][So, wait, what? - 1185]]
-    - [[Typeable - 1187][Typeable - 1187]]
+    - [[~Typeable~ - 1187][~Typeable~ - 1187]]
   - [[30.3 This machine kills programs - 1188][30.3 This machine kills programs - 1188]]
     - [[Catch me if you can - 1190][Catch me if you can - 1190]]
   - [[30.4 Want either? Try! - 1193][30.4 Want either? Try! - 1193]]
@@ -10205,16 +10205,16 @@
    - _Pay attention to the ignored arguments above_.
 
 ** TODO 16.4 Let's talk about ~f~, baby - 631
-   The ~f~ in the typeclass definition for ~Functor~ must be the same ~f~
-   throughout the entire definition,
+   The ~f~ in the /typeclass/ definition for ~Functor~ *must be the same ~f~
+   throughout the entire definition*,
    and
-   it must refer to a type that implements the typeclass.
+   it must refer to a /type/ that implements the /typeclass/.
 
    This section details the practical ramifications of those facts.
 
    - ~f~ has the kind ~* -> *~.
-     This is true and it is also required by the type signature:
-     + Each argument (and result) in the type signature for a function must be a
+     This is true and it is also required by the /type signature/:
+     + Each argument (and result) in the /type signature/ for a function must be a
        fully applied (and inhabitable, /modulo/ Void =TODO= =???=, etc.) type.
        Each argument must have the kind ~*~.
        =IMPORANT= =???=
@@ -10577,7 +10577,9 @@
 
 ** TODO (Partially DONE) 16.10 Exercises: Instances of Func - 663
 
+   =TODO=
    =TODO= Use ~QuickCheck~ properties to validate them.
+   =TODO=
 
    #+BEGIN_SRC haskell
      -- 1
@@ -10629,8 +10631,11 @@
        fmap f (Four' av av' av'' bv) = Four av av' av'' (f bv)
 
      -- 8
-     -- NO! I CANNOT! Wrong "kind" (not * -> *)!
+     ~data Trival = Trivial~
+     -- NO Functor instance
+     -- Wrong "kind" (not * -> *)!
    #+END_SRC
+
 ** DONE 16.11 Ignoring possibilities - 663
    CLOSED: [2017-06-29 Thu 03:08]
 *** DONE ~Maybe~ - 663
@@ -11136,8 +11141,8 @@
 ** TODO 17.4 Applicative functors are monoidal functors - 691
    - First let us notice something:
      #+BEGIN_SRC haskell
-       ($) :: (a -> b) -> a -> b
-       (<$>) :: (a -> b) -> f a -> f b
+        ($)  ::   (a -> b) ->   a ->   b
+       (<$>) ::   (a -> b) -> f a -> f b
        (<*>) :: f (a -> b) -> f a -> f b
      #+END_SRC
 
@@ -12332,8 +12337,68 @@
    1. =TODO=
 
 * TODO 20 ~Foldable~ - 822
-** TODO 20.1 ~Foldable~
-** TODO 20.2 The ~Foldable~ class
+** DONE 20.1 ~Foldable~
+   CLOSED: [2018-09-06 Thu 03:27]
+   This ~Foldable~ /typeclass/ has been appearing in type signatures at least since
+   Chapter 3, but we just consider it like a foldable thing as a list.
+
+   This chapter, we will explain what ~Foldable~ is in general.
+   We will expand on the idea of /catamorphisms/ and generalize it to many /datatypes/.
+
+   - The folding function is always dependent on some ~Monoid~ /instance/.
+
+     The folds we wrote previously mostly relied on *implicit* _monoidal operations_.
+     As we'll see in this chapter, generalizing /catamorphisms/ to other datatypes
+     depends on understanding the /monoids/ for those structures and, *in some
+     cases, making them explicit*.
+
+   - This chapter will cover:
+     + the ~Foldable~ /typeclass/ and its core operations;
+     + the *monoidal nature* of /folding/;
+     + standard operations _derived from_ /folding/.
+
+** DONE 20.2 The ~Foldable~ class
+   CLOSED: [2018-09-06 Thu 03:27]
+   The ~Foldable~ includes many operations.
+   We're going to go through the full definition a little at a time.
+
+   - The defintion in the librar begins:
+     #+BEGIN_SRC haskell
+       class Foldable t where
+         {-# MINIMAL foldMap | foldr #-}
+     #+END_SRC
+     + The ~MINIMAL~ /annotation/ on the /typeclass/ tells you that
+       *a minimally complete definition* of the /typeclass/ will define ~foldMap~
+       *OR* ~foldr~ for a /datatype/.
+
+       * You may notice the *OR* (~|~ in code) above:
+         ~foldMap~ and ~foldr~ can each be implemented in terms of the other.
+
+   - Run ~:i Foldable~ in your GHCi, and you'll see:
+     ~class Foldable (t :: * -> *) where~
+
+     =TODO=
+     =TODO=
+     =TODO= Review /higher-kinded type/ part!!!
+
+     That ~t~ should be a /higher-kinded type/ is not surprising:
+     /lists/ are /higher-kinded types/.
+
+     We need ~t~ to be a /type constructor/ for the same reasons we did with
+     ~Functor~, and we will see that the effects are very similar.
+
+     Types that take more than one type argument, such as /tuples/ and ~Either~,
+     will necessarily have their *first type argument* _included as part of their
+     structure_.
+
+   - Preparation for the example code in this chapter:
+     + Use GHC 7.10 or later versions.
+
+     + Also, while the ~Prelude~ as of GHCi 7.10 includes many changes related to
+       the ~Foldable~ /typeclass/, *not all* of ~Foldable~ is in the ~Prelude~.
+
+       To follow along with the examples in the chapter, you will need to *import*
+       ~Data.Foldable~ and ~Data.Monoid~ (for some of the ~Monoid~ /newtypes/).
 ** TODO 20.3 Revenge of the monoids
    #+BEGIN_SRC haskell
      class Foldable (t :: * -> *) where
@@ -12343,7 +12408,7 @@
 
 *** And now for something different
 
-** TODO 20.4 Demonstrating Foldable instances
+** TODO 20.4 Demonstrating ~Foldable~ instances
 *** ~Identity~
 
 *** ~Maybe~
@@ -12752,12 +12817,89 @@
 ** TODO 29.10 Follow-up resources - 1179
 
 * TODO 30 When things go wrong - 1180
-** TODO 30.1 Exceptions - 1181
-** TODO 30.2 The Exception class and methods - 1181
-*** TODO But there is something different going on here - 1183
+** DONE 30.1 Exceptions - 1181 =PARTIAL=- 
+   CLOSED: [2018-09-06 Thu 03:37]
+   - TODO NOTE
+
+   - In this chapter, we will:
+     + examine the ~Exception~ /typeclass/ and /methods/;
+     + dip our toes into /existential quantification/; =TODO= =???=
+     + discuss _WAYS of handling exceptions_.
+
+** TODO 30.2 The ~Exception~ class and methods - 1181
+   - Background =TODO= =TODO=
+
+   - The ~Exception~ /typeclass/ definition looks like this:
+     #+BEGIN_SRC haskell
+       class (Typeable e, Show e) =>
+           Exception e where
+         toException :: e -> SomeException
+         fromException :: e -> SomeException -> Maybe e
+         displayException :: e -> String
+         -- Defined in 'GHC.Exception'
+     #+END_SRC
+     + ~Typeable~ is a /typeclass/ that defines /methods/ of *identifying types
+       at runtime*.
+
+       =TODO=
+       We will talk about this more and explain why these constraints are
+       necessary to our ~Exception~ /typeclass/ _soon_.
+
+   - The list of types that have an ~Exception~ /instance/ is long:
+     #+BEGIN_SRC haskell
+       -- some instances elided
+       instance Exception IOException
+       instance Exception Deadlock
+       instance Exception BlockedIndefinitelyOnSTM
+       instance Exception BlockedIndefinitelyOnMVar
+       instance Exception AsyncException
+       instance Exception AssertionFailed
+       instance Exception AllocationLimitExceeded
+       instance Exception SomeException
+       instance Exception ErrorCall
+       instance Exception ArithException
+     #+END_SRC
+
+   - Two types that have ~Exception~ /instances/:
+     #+BEGIN_SRC haskell
+       -- 1 --
+       data BlockedIndefinitelyOnMVar =
+         BlockedIndefinitelyOnMVar
+         -- Defined in ‘GHC.IO.Exception’
+
+       -- 2 --
+       data ArithException
+         = Overflow
+         | Underflow
+         | LossOfPrecision
+         | DivideByZero
+         | Denormal
+         | RatioZeroDenominator
+
+       instance Exception ArithException
+     #+END_SRC
+
+*** DONE But there is something different going on here - 1183
+    CLOSED: [2018-09-06 Thu 04:05]
+    - We don't have much occasion to use the ~toException~ and ~fromException~
+      function themselves. Instead, we use other functions that call them for
+      us.
+
+    - You may have noticed that the ~toException~ /method/ is quite similar to
+      the /data constructor/ for ~SomeException~.
+
+      ~SomeException~ (listed in a above entry) is also a type that is listed as
+      having an /instance/ of the ~Exception~ /typeclass/, and now here it is in
+      the ~Exception~ /methods/.
+
+      =TODO= =TODO= =IMPORTANT=
+      It seems a bit circular,
+      but it turns out that ~SomeException~ is *ultimately the key to the way we
+      _handle exceptions_.*
+
 *** TODO A brief introduction to existential quantification - 1183
 *** TODO So, wait, what? - 1185
-*** TODO Typeable - 1187
+*** TODO ~Typeable~ - 1187
 
 ** TODO 30.3 This machine kills programs - 1188
 *** TODO Catch me if you can - 1190

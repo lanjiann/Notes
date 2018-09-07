@@ -101,7 +101,7 @@
   - [[Writer? I hardly know her!][Writer? I hardly know her!]]
     - [[Monoids to the rescue][Monoids to the rescue]]
     - [[The Writer type][The Writer type]]
-    - [[Using do notation with Writer][Using do notation with Writer]]
+    - [[Using do notation with ~Writer~][Using do notation with ~Writer~]]
     - [[Adding logging to programs][Adding logging to programs]]
     - [[Inefficient list construction][Inefficient list construction]]
     - [[Difference lists][Difference lists]]
@@ -111,10 +111,10 @@
     - [[Stacks and stones][Stacks and stones]]
     - [[The State monad][The State monad]]
     - [[Randomness and the state monad][Randomness and the state monad]]
-  - [[Error error on the wall][Error error on the wall]]
+  - [[Error error on the wall - =Exercise=][Error error on the wall - =Exercise=]]
   - [[Some useful monadic functions][Some useful monadic functions]]
     - [[~liftM~ and friends][~liftM~ and friends]]
-    - [[The join function][The join function]]
+    - [[The ~join~ function - =Re-Read=][The ~join~ function - =Re-Read=]]
     - [[~filterM~][~filterM~]]
     - [[~foldM~][~foldM~]]
     - [[Making a safe RPN calculator][Making a safe RPN calculator]]
@@ -690,6 +690,8 @@
           ~fmap f g = (\x -> f (g x))~
 
           Use this we can write down the evaluation process of
+          (since there are /commutative laws/ for both ~+~ and ~*~, I did pay
+          attention on the order of their operands):
           ~(+) <$> (+3) <*> (*100) $ 5~:
           1. ~((+) . (+3)) <*> (*100) $ 5~
           2. ~(\x -> ((+) . (+3)) x (x * 100))) 5~
@@ -821,7 +823,6 @@
         like type with implicit type constructors -- you don't need to write it
         out, the compiler knows. _No implicit cast_ and _no interchangeablility_
 
-        
 ** TODO Monoids
 * TODO A Fistful of Monads
 ** TODO Getting our feet wet with ~Maybe~
@@ -1099,29 +1100,364 @@
 
   - Use ~ghc-pkg list~ in the command line to check the installed Haskell packages.
 
-** TODO Writer? I hardly know her!
-*** Monoids to the rescue
-*** The Writer type
-*** Using do notation with Writer
-*** Adding logging to programs
-*** Inefficient list construction
-*** Difference lists
-*** Comparing Performance
+** DONE Writer? I hardly know her!
+   CLOSED: [2018-09-06 Thu 01:39]
+   - ~Maybe~ /monad/ is for values with an added context of failure
+
+   - The list /monad/ is for non-deterministic values
+
+   - The ~Writer~ /monad/ is for values that have another value attached that
+     acts as a sort of log value.
+
+     Writer allows us to
+     *do computations while making sure that all the log values are combined
+     into one log value that then gets attached to the result*.
+
+*** TODO Monoids to the rescue
+*** DONE The Writer type
+    CLOSED: [2018-09-05 Wed 23:35]
+    #+BEGIN_SRC haskell
+      newtype Writer w a = Writer { runWriter :: (a, w) }
+
+      instance (Monoid w) => Monad (Writer w) where
+        return x = Writer (x, mempty)
+
+        (Writer (x, v)) >>= f =
+          let (Writer (y, v')) = f x
+          in Writer (y, v `mappend` v')
+    #+END_SRC
+    - The ~Writer~ instance doesn't feature an implementation for ~fail~,
+      so if a pattern match fails in /do notation/, ~error~ is called (the
+      default ~fail~ implementation).
+
+    - How to tell ~return~ the type directly?
+      You can do, for example,
+      #+BEGIN_SRC haskell
+        runWriter (return 3 :: Writer String Int)
+        -- (3, "")
+
+        runWriter (return 3 :: Writer (Sum Int) Int)
+        -- (3, Sum {getSum = 0})
+
+        runWriter (return 3 :: Writer (Product Int) Int)
+        -- (3, Product {getProduct = 1})
+      #+END_SRC
+
+      + ~Writer~ does NOT have a ~Show~ instance, we had to use ~runWriter~ to
+        convert our ~Writer~ values to normal tuples that can be shown.
+
+*** DONE Using do notation with ~Writer~
+    CLOSED: [2018-09-06 Thu 00:31]
+    - Example:
+      #+BEGIN_SRC haskell
+        import Control.Monad.Writer
+
+        logNumber :: Int -> Writer [String] Int
+        logNumber x = Writer (x, ["Got number: " ++ show x])
+
+        multWithLog :: Writer [String] Int
+        multWithLog = do
+          a <- logNumber 3
+          b <- logNumber 5
+          return (a*b)
+
+        runWriter multWithLog
+        -- (15, ["Got number: 3", "Got number: 5"])
+      #+END_SRC
+
+    - Use ~tell~ (from ~MonadWriter~).
+      It take a /monoid value/, like ~["This is going on"]~ and creates a ~Writer~
+      value that presents the dummy value ~()~ as its result but has our desired
+      /monoid value/ attached.
+      #+BEGIN_SRC haskell
+        multWithLog :: Writer [String] Int
+        multWithLog = do
+          a <- logNumber 3
+          b <- logNumber 5
+          tell ["Gonna multiply these two"]
+          return (a*b)
+
+        runWriter multWithLog
+        (15, ["Got number: 3", "Got number: 5", "Gonna multiply these two"])
+      #+END_SRC
+
+*** DONE Adding logging to programs
+    CLOSED: [2018-09-06 Thu 00:55]
+    Implement /Euclid's algorithm/, and _equip it with logging capabilities_.
+
+    - The normal algorithm:
+      #+BEGIN_SRC haskell
+        gcd' :: Int -> Int -> Int
+        gcd' a b
+          | b == 0    = a
+          | otherwise = gcd' b (a `mod` b)
+      #+END_SRC
+
+    - The ~gcd'~ with _logging capabilities_:
+      #+BEGIN_SRC haskell
+        import Control.Monad.Writer
+
+        gcd' :: Int -> Int -> Writer [String] Int
+        gcd' a b
+          | b == 0 = do
+              tell ["Finish with" ++ show a]
+              return a
+          | otherwise = do
+              tell [show a ++ " mod " ++ show b ++ " = " ++ show (a `mod` b)]
+              gcd' b (a `mod` b)
+      #+END_SRC
+
+*** DONE Inefficient list construction
+    CLOSED: [2018-09-06 Thu 01:38]
+    - We must be carefully when write down the implementation:
+      the ~++~ can be slow if we use it in the wrong way to combine /lists/.
+
+    - In our ~gcd'~, the combination can be written as
+      #+BEGIN_SRC haskell
+        a ++ (b ++ (c ++ (d ++ (e ++ f))))
+      #+END_SRC
+
+      This efficient!
+
+    - If we did something wrong, we may use this way:
+      #+BEGIN_SRC haskell
+        ((((a ++ b) ++ c) ++ d) ++ e) ++ f
+      #+END_SRC
+
+      For example, if we can accept a reverse log, the implementation can be:
+      #+BEGIN_SRC haskell
+        import Control.Monad.Writer
+
+        gcdReverse :: Int -> Int -> Writer [String] Int
+        gcdReverse a b
+            | b == 0 = do
+                tell ["Finished with " ++ show a]
+                return a
+            | otherwise = do
+                result <- gcdReverse b (a `mod` b)
+                tell [show a ++ " mod " ++ show b ++ " = " ++ show (a `mod` b)]
+                return result
+      #+END_SRC
+      This implementation is inefficient because of the way we use ~++~.
+
+    - Let's read next section, which has the solution for ~gcdReverse~!
+
+*** DONE Difference lists
+    CLOSED: [2018-09-06 Thu 01:31]
+    #+BEGIN_SRC haskell
+      newtype DiffList a = DiffList { getDiffList :: [a] -> [a] }
+
+      toDiffList :: [a] -> DiffList a
+      toDiffList xs = DiffList (xs++)
+
+      fromDiffList :: DiffList a -> [a]
+      fromDiffList (DiffList f) = f []
+
+      instance Monoid (DiffList a) where
+         mempty = DiffList (\xs -> [] ++ xs)
+         (DiffList f) `mappend` (DiffList g) = DiffList (\xs -> f (g xs))
+    #+END_SRC
+
+*** DONE Comparing Performance
+    CLOSED: [2018-09-06 Thu 01:30]
+    Compare the performance of using /lists/ and /difference lists/.
+
+    - Problem:
+      Consider this function that just *counts down from some number to zero*,
+      but produces its *log in reverse*, like ~gcdReverse~, so that the numbers
+      in the log will actually be _counted up_.
+
+    - The efficient implementation (use ~DiffList~):
+      #+BEGIN_SRC haskell
+        finalCountDown :: Int -> Writer (DiffList String) ()
+        finalCountDown 0 = do
+          tell (toDiffList ["0"])
+        finalCountDown x = do
+          finalCountDown (x - 1)
+          tell (toDiffList [show x])
+      #+END_SRC
+
+    - The inefficient implementation (use ~[]~):
+      #+BEGIN_SRC haskell
+        finalCountDown :: Int -> Writer [String] ()
+        finalCountDown 0 = do
+            tell ["0"]
+        finalCountDown x = do
+            finalCountDown (x-1)
+            tell [show x]
+      #+END_SRC
+
+    - Run ~mapM_ putStrLn . snd . runWriter $ finalCountDown 500000~ to test.
+      The one use ~[]~ is *really SLOW* (it ltakes minutes in my notebook, and
+      only reach ~10000~), if comparing with the ~DiffList~ version.
 
 ** TODO Reader? Ugh, not this joke again.
-** TODO Tasteful stateful computations
-*** Stacks and stones
-*** The State monad
-*** Randomness and the state monad
+   - In the ~Control.Monad.Instances~
+     #+BEGIN_SRC haskell
+       instance Monad ((->) r) where
+         return x = \_ -> x
+         h >>= f = \w -> f (h w) w
+     #+END_SRC
 
-** TODO Error error on the wall
+   - =TODO=
+     More about /reader monad/
+
+** TODO Tasteful stateful computations
+   A stateful computation in Haskell has type ~s -> (a, s)~
+
+*** TODO Stacks and stones
+*** TODO The State monad
+    - From ~Control.Monad.State~
+      ~newtype State s a = State { runState :: s -> (a ,s) }~
+
+*** DONE Randomness and the state monad
+    CLOSED: [2018-09-06 Thu 20:21]
+    - The ~random~ /function/ is from ~System.Random~.
+      It's /type signature/:
+      ~random :: (RandomGen g, Random m) => g -> (a, g)~
+
+    - It is clear that ~random~ is a /stateful computation/!
+      We can wrap ~random~ in the ~State~, and then use it as a /monadic value/
+      so that passing of the /state/ gets handled for us:
+      #+BEGIN_SRC haskell
+        import System.Random
+        import Control.Monad.State
+
+        randomSt :: (RandomGen g, Random a) => State g a
+        randomSt = State random
+      #+END_SRC
+
+      Then, the ~threeCoins~ can be re-written as:
+      #+BEGIN_SRC haskell
+        import System.Random
+        import Control.Monad.State
+
+        type CoinSide = Bool
+        -- `True` means `Tail`
+        -- `False` means `Head`
+
+        threeCoins :: State StdGen (CoinSide, CoinSide, CoinSide)
+        threeCoins = do
+            a <- randomSt
+            b <- randomSt
+            c <- randomSt
+            return (a,b,c)
+      #+END_SRC
+
+** DONE Error error on the wall - =Exercise=
+   CLOSED: [2018-09-06 Thu 02:36]
+   ~Either~ is like a enhanced ~Maybe~!
+   #+BEGIN_SRC haskell
+     instance (Error e) => Monad (Either e) where
+       return x       = Right x
+       Right x  >>= f = fx
+       Left err >>= f = Left err
+       fail msg       = Left (strMsg msg)
+   #+END_SRC
+   - There ~return~ here is like the ~return~ to ~Maybe~ -- the /minimal context/
+     here is the answer context, rather than the failure context (~Nothing~ for
+     ~Maybe~, and ~Left~ for ~Either~).
+
+   - When we write something like ~Right 3 >>= \x -> return (x + 100)~ without
+     context, the ghc/ghci will complain that it doesn't know the type of ~e~
+     for ~Either e Int~ here.
+
+     We have to write ~Right 3 >>= \x -> return (x + 100) :: Either String Int~.
+
+   - =TODO= =Exercise=
+     Use the ~Either~ /monad/ to re-write the tightrope walker problem, and this
+     time you can give the reason of lose balance.
+
 ** TODO Some useful monadic functions
-*** ~liftM~ and friends
-*** The join function
-*** ~filterM~
-*** ~foldM~
-*** Making a safe RPN calculator
-*** Composing monadic functions
+   - monadic functions :: operate on /monadic values/, or return /monadic values/, or both.
+
+*** DONE ~liftM~ and friends
+    CLOSED: [2018-09-06 Thu 03:07]
+    - ~liftM~ is like ~fmap~, but with constraint ~Monad m~ rather than ~Functor f~.
+      #+BEGIN_SRC haskell
+        liftM :: (Monad m) => (a -> b) -> m a -> m b
+        liftM f m = m >>= (\x -> return (f x))
+
+        -- do notation form
+        liftM :: (Monad m) => (a -> b) -> m a -> m b
+        liftM f m = do
+          x <- m
+          return (f x)
+      #+END_SRC
+
+    - Remember ~fmap :: (Functor f) => (a -> b) -> f a -> f b~
+
+    - If the ~Functor~ and ~Monad~ /instances/ for a type obey the /functor and
+      monad laws/, these two amount to the same thing (and *all the /monads/ that
+      we've met so far obey both*).
+
+    - ~ap~ is like ~(<*>)~, but with constraint ~Monad m~ rather than ~Applicative f~.
+      #+BEGIN_SRC haskell
+        ap :: (Monad m) => m (a -> b) -> m a -> m b
+        ap mf m = do
+            f <- mf
+            x <- m
+            return (f x)
+      #+END_SRC
+
+    - Since /monad/ is stronger than /applicative functor/, and /applicative functor/
+      is stronger than /functor/.
+
+      *OLD DAYS*:
+      Before the the constraints was add back, many times people first write up
+      a ~Monad~ /instance/ and then make an ~Applicative~ /instance/ by just saying
+      that ~pure~ is ~return~ and ~<*>~ is ~ap~.
+
+      Similarly, if you already have a ~Monad~ /instance/ for something, you can
+      give it a ~Functor~ /instance/ just saying that ~fmap~ is ~liftM~.
+
+    - The ~liftA2~ function is a convenience function for applying a function between
+      two /applicative/ values.
+      #+BEGIN_SRC haskell
+        liftA2 :: (Applicative f) => (a -> b -> c) -> f a -> f b -> f c
+        liftA2 f x y = f <$> x <*> y
+      #+END_SRC
+
+    - The ~liftM2~ function does the same thing, only it has a ~Monad~ /constraint/.
+      There also exist ~liftM3~ and ~liftM4~ and ~liftM5~.
+      =TODO= More details!!!
+
+    - With these functions, we can use a /monad/ as a /functor/ or a /applicative/.
+      Since we know in math it must also be a /functor/ or a /applicative/.
+        It does NOT need to be their /instances/ in Haskell, although this is NOT
+      idiomatic.
+
+*** DONE The ~join~ function - =Re-Read=
+    CLOSED: [2018-09-06 Thu 20:33]
+    #+BEGIN_SRC haskell
+      join :: (Monad m) => m (m a) -> m a
+      join mm = do
+        m <- mm
+        m
+    #+END_SRC
+
+    - Examples:
+      #+BEGIN_SRC haskell
+        join (Just (Just 9)) -- Just 9
+        join (Just Nothing)  -- Nothing
+        join Nothing         -- Nothing
+
+        join [[1,2,3],[4,5,6]] -- [1,2,3,4,5,6]
+
+        runWriter $ join (Writer (Writer (1,"aaa"),"bbb"))  --  (1,"bbbaaa")
+
+        join (Right (Right 9)) :: Either String Int       --  Right 9
+        join (Right (Left "error")) :: Either String Int  --  Left "error"
+        join (Left "error") :: Either String Int          --  Left "error"
+      #+END_SRC
+
+    - ~m >>= f~ always equals ~join (fmap f m)~
+
+*** TODO ~filterM~
+*** TODO ~foldM~
+*** TODO Making a safe RPN calculator
+*** TODO Composing monadic functions
+
 
 ** TODO Making monads
 
