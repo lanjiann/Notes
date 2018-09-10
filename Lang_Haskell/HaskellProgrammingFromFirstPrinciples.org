@@ -249,7 +249,7 @@
     - [[Writing your own standard functions][Writing your own standard functions]]
   - [[9.13 Definitions - 345][9.13 Definitions - 345]]
   - [[9.14 Follow-up resources - 347][9.14 Follow-up resources - 347]]
-- [[10 Folding lists - 348][10 Folding lists - 348]]
+- [[10 Folding lists - 348 - ~Finish Reading~ ~TODO: NOTE~][10 Folding lists - 348 - ~Finish Reading~ ~TODO: NOTE~]]
   - [[10.1 Folds - 349][10.1 Folds - 349]]
   - [[10.2 Bringing you into the fold - 349][10.2 Bringing you into the fold - 349]]
   - [[10.3 Recursive patterns - 351][10.3 Recursive patterns - 351]]
@@ -361,11 +361,11 @@
   - [[13.9 Hangman game - 514][13.9 Hangman game - 514]]
   - [[13.10 Step One: Importing modules - 516][13.10 Step One: Importing modules - 516]]
   - [[13.11 Step Two: Generating a word list - 519][13.11 Step Two: Generating a word list - 519]]
-  - [[13.12 Step Three: Making a puzzle - 522 - =RE-READ=][13.12 Step Three: Making a puzzle - 522 - =RE-READ=]]
+  - [[13.12 Step Three: Making a puzzle - 522][13.12 Step Three: Making a puzzle - 522]]
   - [[13.13 Adding a ~newtype~ - 530][13.13 Adding a ~newtype~ - 530]]
-  - [[13.14 Chapter exercises - 531][13.14 Chapter exercises - 531]]
+  - [[13.14 Chapter exercises - 531 - =TODO=][13.14 Chapter exercises - 531 - =TODO=]]
     - [[Hangman game logic][Hangman game logic]]
-    - [[Modifying code][Modifying code]]
+    - [[Modifying code - =TODO=][Modifying code - =TODO=]]
   - [[13.15 Follow-up resources - 534][13.15 Follow-up resources - 534]]
 - [[14 [ =Reading= ] Testing - 535][14 [ =Reading= ] Testing - 535]]
   - [[14.1 Testing - 536][14.1 Testing - 536]]
@@ -677,7 +677,7 @@
   - [[24.12 Definitions - 980][24.12 Definitions - 980]]
   - [[24.13 Follow-up resources - 980][24.13 Follow-up resources - 980]]
 - [[25 Composing types - 982][25 Composing types - 982]]
-  - [[25.1 Composing types][25.1 Composing types]]
+  - [[25.1 Composing types - ~More Notes~][25.1 Composing types - ~More Notes~]]
   - [[25.2 Common functions as types][25.2 Common functions as types]]
     - [[~Identity~ is boring][~Identity~ is boring]]
     - [[~Compose~][~Compose~]]
@@ -5202,7 +5202,7 @@
 ** TODO 9.14 Follow-up resources - 347
    1. 
    2. 
-* TODO 10 Folding lists - 348
+* TODO 10 Folding lists - 348 - ~Finish Reading~ ~TODO: NOTE~
 ** DONE 10.1 Folds - 349
    CLOSED: [2017-06-01 Thu 18:46]
    - /Folding/ is a concept that extends in _usefulness_ and _importance_ BEYOUND
@@ -7781,42 +7781,57 @@
 
 * DONE 13 Building projects - 492
   CLOSED: [2017-07-28 Fri 20:37]
-  _Page 480 ~ 522_
 ** DONE 13.1 Modules - 493
    CLOSED: [2017-06-15 Thu 14:49]
+   - /Modules/ contain the
+     + /datatypes/
+     + /type synonyms/
+     + /typeclasses/
+     + /typeclass instances/
+     + /values/ you've defined at the top level.
+
+   - /Modules/ _OFFER_ a means to *import* other /modules/ into the scope of your program.
+
+   - /Modules/ also _CONTAIN_ /values/ that can be *exported* to OTHER /modules/.
+
+   - If you've ever used a language with /namespaces/, /modules/ are the same.
+
    - This chapter's primary focus is
      + NOT so much on code
      + but on how to set up a project in Haskell,
-       * use the package manager _Cabal_,
+       * use the /package manager/ _Cabal_,
        * build the project with _Stack_, and work with modules as they are in Haskell.
 
    - In this chapter, we'll cover:
-     + writing Haskell programs with modules;
-     + using the Cabal package manager;
-     + building our project with Stack;
-     + conventions around Haskell project organization; =TODO=
+     + writing Haskell programs with /modules/;
+     + using the /Cabal package manager/;
+     + building our project with /Stack/;
+     + *conventions* around Haskell project organization; =TODO=
      + building a small interactive game.
+
+   - In this chapter, we need Stack, Cabal, and Git.
 
 ** DONE 13.2 Making packages with Stack - 494
    CLOSED: [2017-07-22 Sat 23:34]
-   - /Cabal (*C* ommon *A* rchitecture for *B* uilding *A* pplications and *L* ibraries)/ ::
-     A package manager for Haskell.
+   - /Cabal/ :: A package manager for Haskell.
 
-   - /package/ :: A /package/ is a program, including all of its modules and
+   - Cabal === *C* ommon *A* rchitecture for *B* uilding *A* pplications and *L* ibraries
+     
+   - /package/ :: a program you are building, including all of its modules and
                   dependencies.
 
    - /package dependencies/ :: it includes
-     + the interlinked elements of that program,
-     + the other packages and libraries it may depend on and
-     + any test and documentation associated with the project.
+     + the interlinked elements of that program
+     + the other /packages/ (libraries) it may depend on
+     + any _test_ and _documentation_ associated with the project
 
    - /Stack/ :: A project manager program.
-                It helps you manage both projects
-     + made up of multiple packages
-       as well as
-     + individual package
+                It helps you manage both projects made up of
+     + _MULTIPLE_ /packages/
+        as well as
+     + _INDIVIDUAL_ /package/
 
-   - /Cabal/ exists primarily to describe a single package with a =.cabal= file.
+   - /Cabal/ exists primarily to describe a *single package* with a =.cabal= file.
 
    - /Stack/ is built on top of /Cabal/ in some important senses, so we will
      _still_ be working with =.cabal= files.
@@ -7824,19 +7839,21 @@
      projects with multiple dependencies, by allowing you to build those large
      libraries only once and use the across projects. =TODO= =???=
 
-   - /Stackage/ :: An online Haskell packages source, which maintains many LTS
-                   snapshots.
+   - /Stackage/ :: An *online* /Haskell packages source/, which maintains many
+                   /LTS snapshots/.
 
-                   With in one LTS snapshots, packages are guaranteed to work
-                   together. When you use /stack/, it guarantees the packages
-                   it help you to download are from one specified LTS snapshot.
+                   With in ONE /LTS snapshots/, /packages/ are *guaranteed to
+                   work together*.
 
-   - Packages from /Hackage/ may have conflicting dependencies.
+   - Stack guarantees the /packages/ it help you to download are _from *one*
+     specified LTS snapshot_.
+
+   - /Packages/ from /Hackage/ may have conflicting dependencies.
 
    - The Haskell community does _NOT_ have a prescribed project layout,
 
      _Recommendation_ of this book:
-     _the basic structure embodied in the Stack templates_.
+     *the basic structure embodied in the Stack templates*.
 
 ** DONE 13.3 Working with a basic project - 495
    CLOSED: [2017-06-24 Sat 22:47]
@@ -7845,13 +7862,14 @@
 
 *** DONE Building the project
     CLOSED: [2017-06-24 Sat 21:53]
+    1. ~git clone https://github.com/haskellbook/hello~
+
     1. ~cd hello~ 
 
     2. ~stack setup~:
        + Install the version of GHC LTS snapshot specified in the =stack.yaml=.
-
-         If there is a cached version which satisfies the requirement, it will be
-         used.
+           If there is a cached version which satisfies the requirement, it will
+         be used.
 
        + Set up the other requirement of this project. =TODO= =???=
 
@@ -7928,24 +7946,27 @@
 
          This name must match the name of the =.cabal= file.
 
-      2. Tells this stanza where to look for source code -- in this case, the
-         =src= subdirectory.
+      2. The folder where the source code resides.
 
       3. Execution of this binary should begin by looking for a ~main~ function
-         inside a file named ~Main~ with the module name ~Main~.
+         inside a file named =Main.hs= with the /module name/ ~Main~.
 
-         _NOTE_ that modules name have to match filenames.
+         _NOTE_ that /modules name/ *HAVE TO MATCH* =IMPORTANT= /filenames/.
 
-         Your compiler (not just /Stack/) will _reject_ using a file that isn't a
-         ~Main~ module as the entry point to executing the program.
+         =IMPORTANT=
+         Your compiler (NOT just Stack) will *reject* using a file that isn't a
+         ~Main~ /module/ as the entry point to executing the program.
 
          It'll look for the ~Main.hs~ file under _all_ directories you specified
          in =hs-source-dirs=.
 
       4. Defines _the version of the Haskell standard to expect._ 
 
-      5. ...
-         =TODO= We'll show you how to add and install dependencies later.
+      5. =TODO= We'll show you how to add and install dependencies later.
+
+         Here the ~base~ is really the bare minimum or baseline dependency in almost
+         ANY Haskell project as _you *CANNOT* really get anything done *WITHOUT*
+         the ~base~ library_.
 
     - *A sidebar about executables and libraries*
       + The =.cabal= file above only has an ~executable~ stanza.
@@ -7956,7 +7977,7 @@
 
 ** DONE 13.4 Making our project a library - 498
    CLOSED: [2017-06-24 Sat 23:06]
-   - First, add a library stanza to =hello.cab=:
+   - First, add a library stanza to =hello.cabal=:
      #+BEGIN_SRC yaml
        -- (part of a cabal file)
 
@@ -7986,6 +8007,39 @@
        main :: IO ()
        main = do
          sayHello
+     #+END_SRC
+
+   - =From Jian=
+     You also need to add ~other-modules: Hello~ to the ~executable hello~
+     section. Or, even though Cabal can find it, two warnings will be issued.
+
+     _THIS IS NOT MENTIONED IN THE BOOK!_
+
+   - =hello.cabal=
+     #+BEGIN_SRC yaml
+       name:                hello
+       version:             0.1.0.0
+       synopsis:            Simple project template from stack
+       description:         Please see README.mdhomepage:            https://github.com/bitemyapp/hello#readme
+       license:             BSD3
+       license-file:        LICENSE
+       author:              Jian Lan
+       maintainer:          example@email.com
+       copyright:           2018, Jian Lan
+       category:            Web
+       build-type:          Simple
+       cabal-version:       >=1.10executable hello
+         hs-source-dirs:      exe
+         main-is:             Main.hs
+         default-language:    Haskell2010
+         build-depends:       base >= 4.7 && < 5
+                            , hello
+
+       library
+         hs-source-dirs:    src
+         exposed-modules:   Hello
+         build-depends:     base >= 4.7 && < 5
+         default-language:  Haskell2010%
      #+END_SRC
 
    - After the steps above you can execute it with the command:
@@ -8028,9 +8082,10 @@
 
 ** DONE 13.5 Module exports - 500
    CLOSED: [2017-06-16 Fri 23:15]
-   - By default,
+   - _By default_,
      when you don't specify any exports in a module,
-     every top-level binding is exported and can be imported by another module.
+     *every* top-level binding is exported and can be imported by another module.
+     =IMPORTANT=
 
    - How to specify what can be exported:
      #+BEGIN_SRC haskell
@@ -8043,28 +8098,79 @@
        sayHello = do
          putStrLn "hello world"
      #+END_SRC
-     If the parenthesis in ~module ModuleName (...) where~ is empty, nothing
-     will be exported.
+
+     + If the parenthesis in ~module ModuleName (...) where~ is _empty_,
+       *nothing* will be exported.
 
 *** DONE Exposing modules
     CLOSED: [2017-06-16 Fri 23:15]
     If you add a module, don't forget to add the module to the =exposed-modules=
     of the =library= stanza.
 
+    #+BEGIN_SRC yaml
+      name:          hello
+      version:       0.1.0.0
+      synopsis:      Simple project template from stack
+      description:   Please see README.md
+      homepage:      https://github.com/bitemyapp/hello#readme
+      license:       BSD3
+      license-file:  LICENSE
+      author:        Jian Lan
+      maintainer:    example@email.com
+      copyright:     2018, Jian Lan
+      category:      Web
+      build-type:    Simple
+      cabal-version: >=1.10
+
+      executable hello
+        hs-source-dirs:    exe
+        main-is:           Main.hs
+        default-language:  Haskell2010
+        build-depends:     base >= 4.7 && < 5
+                         , hello
+
+      library
+        hs-source-dirs:    src
+        exposed-modules:   DogsRule
+                         , Hello
+        default-language:  Haskell2010 
+        build-depends:     base >= 4.7 && < 5
+    #+END_SRC
+
+    - =TODO=
+      WHY NOT add ~DogsRule~ as a =build-depends=???
+
 ** DONE 13.6 More on importing modules - 502
    CLOSED: [2017-06-16 Fri 23:34]
-   - Use a pragma (or language extension) when start GHCi to turn ~Prelude~ off:
-     =IMPORTANT=
+   - The ~:browse~ command allows us to see what functions are included in the
+     named /module/.
      #+BEGIN_SRC haskell
-       -- In shell run:
-       -- stack ghci --ghci-options -XNoImplicitPrelude
+       -------------
+       -- in GHCi --
+       -------------
 
-       -- >
-       -- ATTENSION: Here is NOT "Prelude>"
+       -- Prelude>
+       :browse Data.Bool
+       -- bool :: a -> a -> Bool -> a
+       -- (&&) :: Bool -> Bool -> Bool
+       -- data Bool = False | True
+       -- not :: Bool -> Bool
+       -- otherwise :: Bool
+       -- (||) :: Bool -> Bool -> Bool
      #+END_SRC
+
+   - Use a ~pragma~ (or /language extension/) when start GHCi to turn ~Prelude~
+     off. Run ~stack ghci --ghci-options -XNoImplicitPrelude~ in the shell, and
+     you'll see a ~>~ REPL prompt.
+
+     + =From Jian=
+       Here Chris make a typo: ~Prelude>~ should be ~>~
 
    - A /selective import/ example:
      ~import Data.Bool (bool)~
+
+   - /Import declarations/ have to be at the beginning of a /module/.
+     =IMPORTANT=
 
 *** DONE Qualified imports
     CLOSED: [2017-06-16 Fri 23:24]
@@ -8082,16 +8188,19 @@
 
       + Set prompt:
         ~:set prompt "Lambda> "~ (ATTENSION to the space after ~>~)
+
 *** DONE Intermission: Check your understanding
     CLOSED: [2017-06-16 Fri 23:34]
     1. ~forever~ and ~when~
     2. The ~import Data.Bits~ line, and the ~import Database.Blacktip.Types~ line
     3. The ~import Database.Blacktip.Types~ line
     4. Answer to sub-questions:
-       a) ~MV~ <- ~Control.Concurrent.MVar~,
-          ~FPC~ <- ~Filesystem.Path.CurrentOS~,
-          ~CC~ <- ~Control.Concurrent~
+       a) ~MV~ : ~Control.Concurrent.MVar~,
+          ~FPC~: ~Filesystem.Path.CurrentOS~,
+          ~CC~ : ~Control.Concurrent~
+
        b) The ~import qualified Filesystem as FS~ line
+
        c) The ~import Control.Monad (forever, when)~ line
 
 ** DONE 13.7 Making our program interactive - 507
@@ -8122,16 +8231,16 @@
    #+END_SRC
 
    - The ~do~ syntax, which is /syntactic sugar/.
-     Use ~do~ inside functions that return ~IO~ in order to sequence side effects
-     in a convenient syntax.
+     Use ~do~ inside functions that return ~IO~ in order to sequence side
+     effects in a convenient syntax.
 
    - ~<-~ in ~do~ notation above is pronounced /bind/.
-     =TODO= Explain later.
+     Explain later.
 
    - The result of binding (~<-~ in ~do~) over the ~IO String~ is ~String~.
 
-   - *What if we tried to pass getLine to sayHello?*
-     Type error
+   - *What if we tried to pass ~getLine~ to ~sayHello~?*
+     Type error -- More details in the chapters of Monad and IO.
 
 *** DONE Adding a prompt
     CLOSED: [2017-06-17 Sat 00:02]
@@ -8155,16 +8264,16 @@
 
 ** DONE 13.8 ~do~ syntax and ~IO~ - 510
    CLOSED: [2017-06-17 Sat 00:17]
-   - The ~main~ executable in a Haskell program _MUST ALWAYS_ have the type
+   - The ~main~ executable in a Haskell program *MUST ALWAYS* have the type
      ~IO ()~.
 
      =TODO= =toAuthor=
-     According to this, code example in page 500 is wrong -- ~return (x1 ++ x2)~
+     According to this, code example in page 511 is wrong -- ~return (x1 ++ x2)~
      shouldn't be the last expression of the do block of ~main~.
 
-   - The ~do~ syntax specifically allows us to _sequence_ /monadic actions/.
+   - The ~do~ syntax specifically allows us to *sequence* /monadic actions/.
 
-   - Here, the instance of typeclass ~Monad~ we care about is ~IO~.
+   - Here, the /instance/ of /typeclass/ ~Monad~ we care about is ~IO~.
 
    - ~<-~ is used to bind a variable, and it is part of the ~do~ sugar.
 
@@ -8173,8 +8282,8 @@
     - ~return :: Monad m => a -> m a~ doesn't do much but return a value.
       However, it returns a value inside /monadic structure/.
 
-    - *Do notation considered harmful!*
-      _Just kidding._ But sometimes enthusiastic programmers _overuse_ do blocks.
+    - /do notation/ considered harmful!
+      _Just kidding._ But sometimes enthusiastic programmers _overuse_ ~do~ blocks.
 
       + Functions like ~putStrLn~ already have right types.
 
@@ -8261,36 +8370,43 @@
        import System.Exit (exitSuccess)
        import System.Random (randomRIO)
      #+END_SRC
-     + ~toLower \colon{}\colon{} Char -> Char~ won't change the non-letter characters.
-     + ~isJust \colon{}\colon{} Maybe a -> Bool~ won't change the non-letter characters.
-     + Combine the functions above with ~all~ (a standard function in the
-       ~Prelude~).
-     + ~intersperse \colon{}\colon{} a -> [a] -> [a]~
+     1. We ~forever~, but this is just our preference.
+        It makes an _infinite loop_.
 
-   - We can make the type more specific by asserting a type signature like so:
-     #+BEGIN_SRC haskell
-       -- all :: Foldable t => (a -> Bool) -> t a -> Bool
+     2. ~toLower \colon{}\colon{} Char -> Char~ won't change the non-letter characters.
 
-       -- Prelude> :t all :: (a -> Bool) -> [a] -> Bool
-       all :: (a -> Bool) -> [a] -> Bool
+     3. ~isJust \colon{}\colon{} Maybe a -> Bool~.
 
-       -- Prelude> :t all :: (a -> Bool) -> Maybe a -> Bool
-       all :: (a -> Bool) -> Maybe a -> Bool
+        * We will combine this with
+          ~all :: Foldable t => (a -> Bool) -> t a -> Bool~ (a standard function
+          in the ~Prelude~).
 
-       -- Prelude> :t all :: (a -> Bool) -> Either b a -> Bool
-       all :: (a -> Bool) -> Either b a -> Bool
-     #+END_SRC
+          We can make the type more specific by asserting a /type signature/ like
+          so. Of course, there is a restriction -- ~Foldable~ structure bound.
+          #+BEGIN_SRC haskell
+            -- Prelude> :t all :: (a -> Bool) -> [a] -> Bool
+            all :: (a -> Bool) -> [a] -> Bool
 
-   - Use ~exitSuccess~ from ~System.Exit~ to exit successfully -- no errors.
-     + Evaluate ~exitSuccess~ in the REPL, it'll just report that an exception
-       occurred.
+            -- Prelude> :t all :: (a -> Bool) -> Maybe a -> Bool
+            all :: (a -> Bool) -> Maybe a -> Bool
 
-     + In a normal running program that doesn't catch the exception, it'll end
-       your whole program.
+            -- Prelude> :t all :: (a -> Bool) -> Either b a -> Bool
+            all :: (a -> Bool) -> Either b a -> Bool
+          #+END_SRC
 
-   - Use ~randomRIO \colon{}\colon{} Random a => (a, a) -> IO a~ (from ~System.Random~) to
-     generate a random index in range, and then with the index select a word from
-     our dictionary at random. 
+     4. ~intersperse \colon{}\colon{} a -> [a] -> [a]~
+        Example: ~intersperse ' ' "Blah"~ returns ="B l a h"=
+
+     5. Use ~exitSuccess~ from ~System.Exit~ to *exit successfully* -- no errors.
+        Mostly, it is used in source file code.
+
+        Evaluate ~exitSuccess~ in the REPL, it'll just report that an exception
+        occurred.
+
+     6. Use ~randomRIO \colon{}\colon{} Random a => (a, a) -> IO a~ (from ~System.Random~) to
+        generate a random index in range, and then with the index select a word
+        from our dictionary at random.
+          For example, ~randomRIO (0, 5)~ returns ~IO 4~
 
 ** DONE 13.11 Step Two: Generating a word list - 519
    CLOSED: [2017-06-17 Sat 01:59]
@@ -8307,6 +8423,10 @@
       + ~readFile \colon{}\colon{} FilePath -> IO String~
 
       + ~lines \colon{}\colon{} String -> [String]~
+        The result of ~lines "aardvark\naaron"~ is ~["aardvark","aaron"]~.
+
+        This does something similar but different from ~words~, which splits by
+        _spaces_ and _newlines_.
 
    2. 
       #+BEGIN_SRC haskell
@@ -8318,8 +8438,8 @@
           aw <- allWords
           return (filter gameLength aw)
           where gameLength w =
-                  let l length (w :: String)
-                  in  l > minWordLength && l < maxWordLength
+                  let l = length (w :: String)
+                  in  l >= minWordLength && l < maxWordLength
       #+END_SRC
 
    3.
@@ -8335,9 +8455,7 @@
         randomWord' = gameWords >>= randomWord
       #+END_SRC
 
-      =TODO=: ~>>=~ later.
-
-** DONE 13.12 Step Three: Making a puzzle - 522 - =RE-READ=
+** DONE 13.12 Step Three: Making a puzzle - 522
    CLOSED: [2017-06-25 Sun 22:34]
    - A ~Puzzle~ type:
      #+BEGIN_SRC haskell
@@ -8350,8 +8468,7 @@
      #+END_SRC
 
    - An instance of the typeclass ~Show~ for our datatype ~Puzzle~ (Since we want
-     a customized look of a ~Puzzle~, no ~deriving~ in datatype declaration
-     above):
+     a customized look of a ~Puzzle~, no ~deriving~ in datatype declaration above):
      #+BEGIN_SRC haskell
        instance Show Puzzle where
          show (Puzzle _ discovered gueesed) =
@@ -8359,15 +8476,16 @@
            ++ " Guessed so far: " ++ guessed
      #+END_SRC
 
-   - xx
+   - Generate a fresh puzzle: with answer string, but no discovered and guessed.
      #+BEGIN_SRC haskell
        freshPuzzle :: String -> Puzzle
        freshPuzzle answer = Puzzle answer currentAnswer ""
          where currentAnswer = map (const Noting) answer
      #+END_SRC
      + Here is a typical usage of ~const~.  =IMPORTANT=
+       ~const~ is used to write a concise version of ~_ -> somthing~
 
-   - Some helper functions:
+   - Some simple helper functions:
      #+BEGIN_SRC haskell
        charInWord :: Puzzle -> Char -> Bool
        charInWord (Puzzle answer _ _) char = char `elem` answer
@@ -8380,42 +8498,39 @@
        renderPuzzleChar (Just c)  = c
      #+END_SRC
 
-   - 
-      #+BEGIN_SRC haskell
-        fillInCharacter :: Puzzle -> Char -> Puzzle
-        fillInCharacter (Puzzle word filledInSoFar s) c =
-          Puzzle word newFilledInSoFar (c : s)
-          where zipper gueesed wordChar guessChar =
-                  if wordChar == guessed
-                  then Just wordChar
-                  else guessChar
+   - Other helper functions:
+     #+BEGIN_SRC haskell
+       fillInCharacter :: Puzzle -> Char -> Puzzle
+       fillInCharacter (Puzzle word filledInSoFar s) c =
+         Puzzle word newFilledInSoFar (c : s)
+         where zipper gueesed wordChar guessChar =
+                 if wordChar == guessed
+                 then Just wordChar
+                 else guessChar
 
-                newFilledInSoFar =
-                  zipWith (zipper c) word filledInSoFar
-      #+END_SRC
+               newFilledInSoFar =
+                 zipWith (zipper c) word filledInSoFar
 
-   - 
-      #+BEGIN_SRC haskell
-        handleguess :: Puzzle -> Char -> IO Puzzle
-        handleguess puzzle guess = do
-          putStrLn $ "Your guess was: " ++ [guess]
-          case (charInWord puzzle guess,
-                alreadyGuessed puzzle guess) of
-            (_, True) -> do
-              putStrLn "You already guessed that\
-                        \ character, pick something else!"
-              return puzzle
-            (True, _) -> do
-              putStrLn "This character was in the word,\
-                        \ filling in the word accordingly"
-              return (fillInCharacter puzzle guess)
-            (False, _) -> do
-              putStrLn "This character was in the word,\
-                        \ filling in the word accordingly"
-              return (fillInCharacter puzzle guess)
-      #+END_SRC
+       handleguess :: Puzzle -> Char -> IO Puzzle
+       handleguess puzzle guess = do
+         putStrLn $ "Your guess was: " ++ [guess]
+         case (charInWord puzzle guess,
+               alreadyGuessed puzzle guess) of
+           (_, True) -> do
+             putStrLn "You already guessed that\
+                       \ character, pick something else!"
+             return puzzle
+           (True, _) -> do
+             putStrLn "This character was in the word,\
+                       \ filling in the word accordingly"
+             return (fillInCharacter puzzle guess)
+           (False, _) -> do
+             putStrLn "This character was in the word,\
+                       \ filling in the word accordingly"
+             return (fillInCharacter puzzle guess)
+     #+END_SRC
 
-   - x
+   - Is game over?
      #+BEGIN_SRC haskell
        gameOver :: Puzzle -> IO ()
        gameOver (Puzzle wordToGuess _ guessed) =
@@ -8430,7 +8545,7 @@
      even if the final (seventh) guess is the final letter to fill into the word.
      (This isn't quite reasonable, we encourage you to play with that.)
 
-   - x
+   - Does the player win the game?
      #+BEGIN_SRC haskell
        gameWin :: Puzzle -> IO ()
        gameWin (Puzzle _ filledInSoFar _) =
@@ -8452,7 +8567,7 @@
          case guess of
            [c] -> handleGuess puzzle c >>= runGame
            _ -> putStrLn "Your guess must\
-                          \ be a single character"
+                        \ be a single character"
      #+END_SRC
 
    - The ~main~:
@@ -8463,8 +8578,12 @@
          let puzzle = freshPuzzle (fmap toLower word)
          runGame puzzle
      #+END_SRC
-     No explanation to the ~let~ in ~do~ block. I think this is just like the one
-     in GHCi. =TODO= =???=
+     No explanation to the ~let~ in ~do~ block.
+     I think you need the ~let~ because of that ~freshPuzzle~ doesn't return an/
+     IO monad/, it's just a ~Puzzle~ value.
+
+     =TODO= =???=
+     Can't be without ~let~, Right?  =WHY=
 
 ** DONE 13.13 Adding a ~newtype~ - 530
    CLOSED: [2017-06-17 Sat 04:19]
@@ -8494,11 +8613,11 @@
        return $ wl !! randomIndex
    #+END_SRC
    
-** DONE 13.14 Chapter exercises - 531
+** DONE 13.14 Chapter exercises - 531 - =TODO=
    CLOSED: [2017-07-28 Fri 20:35]
 *** DONE Hangman game logic
     CLOSED: [2017-07-28 Fri 20:34]
-*** DONE Modifying code
+*** DONE Modifying code - =TODO=
     CLOSED: [2017-06-25 Sun 22:36]
     1. =TODO=
        #+BEGIN_SRC haskell
@@ -8590,26 +8709,48 @@
 * TODO 14 [ =Reading= ] Testing - 535
 ** DONE 14.1 Testing - 536
    CLOSED: [2017-06-17 Sat 04:46]
+   This chapter, like the one before it, is more *focused on practical matters*
+   _rather than_ writing Haskell code per se.
+
    - We will
      be covering _TWO_ testing libraries for Haskell (_there are others_)
      and
      _HOW_ and _WHEN_ to use them
 
+   - As ALWAYS, if you type rather than copy and paste, you can learn more!!!
+
    - Well-specified types can enable programmers to avoid many obvious and
      tedious tests that might otherwise be necessary to maintain in untyped
      programming languages,
 
-     =TODO= =???=
-     BUT there's still a lot of value to be obtained in executable
-     specifications.
+     *However, there still can be wrong values!!!*
+     AND
+
+     =from JIAN=
+     Don't forget! Haskell by default is NOT a dependent typed language, and
+     sometimes you need to prove by hand on paper the instances of that some
+     algebraic structure corresponding /typeclasses/ can really satisfy the laws
+     enforced on them. Usually you need to do two things:
+
+     + proof by hand on paper is required!
+
+     + write tests for the enforced laws:
+       1. you proof might be wrong!
+
+       2. even if your proof is right for your current implementation, it might
+          become wrong in your future implementations. You need the tests as
+          your guards.
 
    - This chapter will cover:
-     + the whats and whys of testing;
-     + using the testing libraries _Hspec_ and _QuickCheck_;
+     + the *what's* and *why's* of /testing/;
+     + using the _testing libraries_ *Hspec* and *QuickCheck*;
      + a bit of fun with Morse code.
 
 ** DONE 14.2 A quick tour of testing for the uninitated - 536
    CLOSED: [2017-06-17 Sat 05:21]
+   - Haskell compiler cannot prevent all bugs.
+     Runtime errors can still occur. That's where testing comes in.
+
    - For the sake of simplicity, we'll say there are _TWO_ broad categories of
      testing:
      + unit testing
@@ -8631,48 +8772,49 @@
      because /spec testing/ is more often written in terms of assertions that
      are in human-readable language.
 
-   - _Hspec_ for /spec testing/
-     _HUnit_ for /unit testing/
+   - *Hspec* for /spec testing/
+     *HUnit* for /unit testing/
 
    - One Limitation of both /spec testing/ and /unit testing/:
      They do NOT verify all the pieces work _TOGETHER_ properly.
 
    - /property testing/: test the formal properties of programs
-     without requiring formal proofs
+     _WITHOUT_ requiring formal proofs
      by allowing you to express a truth-valued, universally qualified (that is,
-     will apply to all cases) function -- usually equality -- which will then
-     be checked _against RANDOMLY generated input_.
+     will apply to all cases) function -- usually equality -- which will then be
+     checked _against RANDOMLY generated input_.
 
-   - /property testing/ was pioneered in Haskell
+   - /property testing/ was *pioneered in Haskell*
 
      because
-     + the type system
+     + the type system (=from JIAN= well-designed, powerful)
        and 
-     + straightforward logic
+     + straightforward logic (=from JIAN= Purely functional, no mutable value)
 
-     of the language lend themselves to property test,
+     of the language lend themselves to /property test/,
 
-     but it has since been adopted by other languages (=???=) as well.
+     but it has since been adopted by other languages (for example, Scala) as
+     well.
 
-   - _QuickCheck_ (for Haskell /property testing/)
+   - *QuickCheck* (for Haskell /property testing/)
 
    - The inputs of /property testing/ of Haskell are generated randomly by the
-     standard functions inside the _QuickCheck_ library -- this relies on the
-     type system to know what kinds of ata to generate.
+     standard functions inside the _QuickCheck_ library -- *this relies on the
+     type system to know what kinds of data to generate.*
 
      + The default setting is for 100 inputs.
 
-     + _QuickCheck_ is cleverly written to be
-       as thorough as possile and will usually check the most common edge cases,
-       for example,
+     + *QuickCheck* is cleverly written to be
+       _as thorough as possile_ and will _usually check the *most common edge
+       cases*,_ for example,
        * empty lists
        * maxBound and minBound of the types in question.
 
    - /Property testing/ is fantastic for ensuring that you’ve met the minimum
      requirements to satisfy laws,
      such as
-     + the laws of monads;  =TODO= =Concrete Exmples?=
-     + basic associativity. =TODO= =Concrete Exmples?=
+     + the laws of monads;  =TODO= =Concrete Exmples?= =TODO=
+     + basic associativity. =TODO= =Concrete Exmples?= =TODO=
      
 ** DONE 14.3 Conventional testing - 538
    CLOSED: [2017-06-27 Tue 02:24]
@@ -12588,10 +12730,40 @@
 ** TODO 24.13 Follow-up resources - 980
 
 * TODO 25 Composing types - 982
-** TODO 25.1 Composing types
+** DONE 25.1 Composing types - ~More Notes~
+   CLOSED: [2018-09-09 Sun 03:20]
+   - There are times when *composing monads* is desirable:
+     1. Different monads allow us to work with different effects.
+
+     2. Composing monads allows you to build up computations with multiple effects.
+        For example,
+        By stacking, for example, a ~Maybe~ /monad/ with an ~IO~, you can
+        + be performing /IO actions/
+          _WHILE also_
+        + building up computations that have a possibility of failure, handled by
+          the ~Maybe~ /monad/.
+
+   - =TODO= NOTE
+
+   - In this chapter, we will
+     + demonstrate why composing _TWO_ /monads/ *does not* give you another /monad/;
+
+     + examine the ~Identity~ and ~Compose~ types;
+
+     + manipulate types until we can *make monads compose*;
+
+     + meet some _common monad transformers_;
+
+     + work through an ~Identity~ crisis.
+
 ** TODO 25.2 Common functions as types
 *** TODO ~Identity~ is boring
+    #+BEGIN_SRC haskell
+      new Identity a =
+        Identity { runIdentity :: a }
+    #+END_SRC
     - *A note about* ~newtypes~
+
 *** TODO ~Compose~
 
 ** TODO 25.3 Two little functors sittin' in a tree, L-I-F-T-I-N-G

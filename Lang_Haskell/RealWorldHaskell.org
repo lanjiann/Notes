@@ -146,8 +146,8 @@
   - [[What Are Typeclasses? - 136][What Are Typeclasses? - 136]]
   - [[Declaring Typeclass Instances - 139][Declaring Typeclass Instances - 139]]
   - [[Important Built-in Typeclasses - 139][Important Built-in Typeclasses - 139]]
-    - [[Show - 139][Show - 139]]
-    - [[Read - 141][Read - 141]]
+    - [[~Show~ - 139][~Show~ - 139]]
+    - [[~Read~ - 141][~Read~ - 141]]
     - [[Serialization with read and show - 143][Serialization with read and show - 143]]
     - [[Numeric Types - 144][Numeric Types - 144]]
     - [[Equality, Ordering, and Comparisons - 148][Equality, Ordering, and Comparisons - 148]]
@@ -420,7 +420,7 @@
     - [[Runtime Overhead - 444][Runtime Overhead - 444]]
     - [[Unwieldy Interfaces - 444][Unwieldy Interfaces - 444]]
     - [[Pulling It All Together - 445][Pulling It All Together - 445]]
-- [[19. Error Handling - 447][19. Error Handling - 447]]
+- [[19 Error Handling - 447][19 Error Handling - 447]]
   - [[Error Handling with Data Types - 447][Error Handling with Data Types - 447]]
     - [[Use of Maybe - 448][Use of Maybe - 448]]
     - [[Use of Either - 452][Use of Either - 452]]
@@ -434,7 +434,7 @@
     - [[Dynamic Exceptions - 459][Dynamic Exceptions - 459]]
   - [[Error Handling in Monads - 462][Error Handling in Monads - 462]]
     - [[A Tiny Parsing Framework - 463][A Tiny Parsing Framework - 463]]
-- [[20. Systems Programming in Haskell - 467][20. Systems Programming in Haskell - 467]]
+- [[20 Systems Programming in Haskell - 467][20 Systems Programming in Haskell - 467]]
   - [[Running External Programs - 467][Running External Programs - 467]]
   - [[Directory and File Information - 468][Directory and File Information - 468]]
   - [[Program Termination - 469][Program Termination - 469]]
@@ -445,7 +445,7 @@
     - [[Using Pipes for Redirection - 477][Using Pipes for Redirection - 477]]
     - [[Better Piping - 483][Better Piping - 483]]
     - [[Final Words on Pipes - 491][Final Words on Pipes - 491]]
-- [[21. Using Databases - 493][21. Using Databases - 493]]
+- [[21 Using Databases - 493][21 Using Databases - 493]]
   - [[Overview of HDBC - 493][Overview of HDBC - 493]]
   - [[Installing HDBC and Drivers - 494][Installing HDBC and Drivers - 494]]
   - [[Connecting to Databases - 495][Connecting to Databases - 495]]
@@ -795,64 +795,308 @@
 *** Learning to Use ~seq~ - 109
 
 * TODO 5 Writing a Library: Working with JSON Data - 111
-** A Whirlwind Tour of JSON - 111
-** Representing JSON Data in Haskell - 111
-** The Anatomy of a Haskell Module - 113
-** Compiling Haskell Source - 114
-** Generating a Haskell Program and Importing Modules - 114
-** Printing JSON Data - 115
-** Type Inference Is a Double-Edged Sword - 117
-** A More General Look at Rendering - 118
-** Developing Haskell Code Without Going Nuts - 119
-** Pretty Printing a String - 120
-** Arrays and Objects, and the Module Header - 122
-** Writing a Module Header - 123
-** Fleshing Out the Pretty-Printing Library - 124
+** TODO A Whirlwind Tour of JSON - 111
+** DONE Representing JSON Data in Haskell - 111
+   CLOSED: [2018-09-09 Sun 17:21]
+   =from Jian= I change some details!
+
+   1. Shell command: =stack new SimpleJSON simple=
+
+   2. Create a =SimpleJSON.hs= in the =src= folder:
+      #+BEGIN_SRC haskell
+        -- Core code, which does NOT include module name and exportion info
+        type Object = [(String, JValue)]
+        type Array = [JValue]
+
+        data JValue = JString String
+                    | JNumber Double
+                    | JBool Bool
+                    | JNull
+                    | JObject Object
+                    | JArray Array
+                      deriving (Eq, Ord, Show)
+
+        getString :: JValue -> Maybe String
+        getString (JString s) = Just s
+        getString _           = Nothing
+
+        getInt :: JValue -> Maybe Int
+        getInt (JNumber d) = Just (truncate d)
+        getInt _           = Nothing
+
+        getDouble :: JValue -> Maybe Double
+        getDouble (JNumber d) = Just d
+        getDouble _           = Nothing
+
+        getBool :: JValue -> Maybe Bool
+        getBool (JBool b) = Just b
+        getBool _         = Nothing
+
+        getObject :: JValue -> Maybe Object
+        getObject (JObject o) = Just o
+        getObject _           = Nothing
+
+        getArray :: JValue -> Maybe Array
+        getArray (JArray a) = Just a
+        getArray _          = Nothing
+
+        isNull :: JValue -> Bool
+        isNull v = v == JNull
+      #+END_SRC
+
+** DONE The Anatomy of a Haskell Module - 113
+   CLOSED: [2018-09-09 Sun 17:21]
+   #+BEGIN_SRC haskell
+     -- Core code, which does NOT include module name and exportion info
+     module SimpleJSON
+       (
+         JValue(..)
+       , Object
+       , Array
+       , getString
+       , getInt
+       , getDouble
+       , getBool
+       , getObject
+       , getArray
+       , isNull
+       ) where
+
+     -- Core code -- see the previous section!
+   #+END_SRC
+   - If you export ~JValue~ rather than ~JValue(..)~, the realted /type constructors/
+     will be invisible to the outside!
+
+   - ~()~ means nothing will be exported!
+
+   - The DEFAULT (No parentheses form) means export everything!
+
+** DONE Compiling Haskell Source - 114
+   CLOSED: [2018-09-09 Sun 18:01]
+   - Use _stack_ (*Preferred*):
+     Run =stack build=
+
+     The =SimpleJSON.cabal= content:
+     #+BEGIN_SRC yaml
+       library
+         hs-source-dirs:      src
+         exposed-modules:     SimpleJSON
+         default-language:    Haskell2010
+         build-depends:       base >= 4.7 && < 5
+     #+END_SRC
+
+   - Use *ghc*
+     =ghc -c SimpleJSON.hs=
+
+     + =-c= means generate only object code.
+
+       Since there is no ~Main~ module and its ~main~ function, if you omit the
+       =-c= option, *ghc* will try to generate an executable. It will fail!!!
+
+     + After this compilation, you'll see _two_ files:
+       1. ~SimpleJSON.hi~: interface file,
+          in which _ghc_ stores information about the names exported from our
+          module in machine-readable form.
+
+       2. ~SimpleJSON.o~: object file,
+          which contains the generated machine code.
+
+** DONE Generating a Haskell Program and Importing Modules - 114
+   CLOSED: [2018-09-09 Sun 18:12]
+   - Use _stack_ (*Preferred*):
+     The =SimpleJSON.cabal= content:
+     #+BEGIN_SRC yaml
+       executable simple
+         hs-source-dirs:      src
+         main-is:             Main.hs
+         other-modules:       SimpleJSON
+         default-language:    Haskell2010
+         build-depends:       base >= 4.7 && < 5
+
+       library
+         hs-source-dirs:      src
+         exposed-modules:     SimpleJSON
+         default-language:    Haskell2010
+         build-depends:       base >= 4.7 && < 5
+     #+END_SRC
+
+   - Use _ghc_ content:
+     + Without proper configuration, the _ghc_ CANNOT find ~Prelude~.
+       =from Jian= I don't plan to figure this out. I'll use =stack ghc= command.
+
+     + =stack ghc Main.hs SimpleJSON.hs -o simple=
+       Of course, you can also use the =SimpleJSON.o= object you generated in the
+       last section!
+
+       =from Jian=
+       There is a complain about the =-o= option if I use the command in the
+       book (=ghc -o simple Main.hs SimpleJSON.o=) with =stack ghc=
+
+** DONE Printing JSON Data - 115
+   CLOSED: [2018-09-09 Sun 18:20]
+   #+BEGIN_SRC haskell
+     module PutJSON where
+
+     import Data.List (intercalate)
+     import SimpleJSON
+
+     renderJValue :: JValue -> String
+
+     renderJValue (JString s)   = show s
+     renderJValue (JNumber n)   = show n
+     renderJValue (JBool True)  = "true"
+     renderJValue (JBool False) = "false"
+     renderJValue JNull         = "null"
+
+     renderJValue (JObject o) = "{" ++ pairs o ++ "}"
+       where pairs [] = ""
+             pairs ps = intercalate ", " (map renderPair ps)
+             renderPair (k, v) = show k ++ ": " ++ renderJValue v
+
+     renderJValue (JArray a) = "[" ++ values a ++ "]"
+       where values [] = ""
+             values vs = intercalate ", " (map renderJValue vs)
+
+     -- Separate pure code from this `putJValue` IO code
+     putJValue :: JValue -> IO ()
+     putJValue v = putStrLn (renderJValue v)
+   #+END_SRC
+
+** DONE Type Inference Is a Double-Edged Sword - 117
+   CLOSED: [2018-09-09 Sun 18:25]
+** DONE A More General Look at Rendering - 118
+   CLOSED: [2018-09-09 Sun 18:54]
+   The output of the rendering until now can be unfriendly to human eyes.
+   Createa a /pretty printer/ for this project.
+
+   - Our _pretty print module_ is named as ~Prettify~.
+
+   - Our *NEW* _rendering module_ is named as ~PrettyJSON~.
+     #+BEGIN_SRC haskell
+       odule PrettyJSON where
+
+       import Prettify
+       import SimpleJSON
+
+       renderJValue :: JValue -> Doc
+       renderJValue (JBool True)  = text "true"
+       renderJValue (JBool False) = text "false"
+       renderJValue JNull         = text "null"
+       renderJValue (JNumber num) = double num
+       renderJValue (JString str) = string str
+     #+END_SRC
+     + Our ~Prettify~ /module/ provides the ~Doc~ type, and the ~text~, ~double~,
+       and ~string~ functions.
+
+** DONE Developing Haskell Code Without Going Nuts - 119
+   CLOSED: [2018-09-09 Sun 18:56]
+   Write stub, the skeleton of a program, before we fill in details.
+   #+BEGIN_SRC haskell
+     module Prettify
+       (
+         Doc
+       , text
+       , double
+       , string
+       ) where
+
+     data Doc = ToBeDefined
+         deriving (Show)
+
+     string :: String -> Doc
+     string str = undefined
+
+     text :: String -> Doc
+     text str = undefined
+
+     double :: Double -> Doc
+     double str = undefined
+   #+END_SRC
+
+** TODO Pretty Printing a String - 120
+   #+BEGIN_SRC haskell
+     -- PrettyJSON
+     string :: String -> Doc
+     string = enclose '"' '"' . hcat . map oneChar
+
+     enclose :: Char -> Char -> Doc -> Doc
+     enclose left right x = char left <> x <> char right
+
+     (<>) :: Doc -> Doc -> Doc
+     a <> b = undefined
+
+     char :: Char -> Doc
+     char c = undefined
+
+     hcat :: [Doc] -> Doc
+     hcat xs = undefined
+
+     oneChar :: Char -> Doc
+     oneChar c =
+       case lookup c simpleEscapes of
+         Just r -> text r
+         Nothing | mustEscape c -> hexEscape c
+                 | otherwise    -> char c
+       where mustEscape c = c < ' ' ||  c == '\x7f' || c > '\xff'
+
+     simpleEscapes :: [(Char, String)]
+     simpleEscapes = zipWith ch "\b\n\f\r\t\\\"/" "bnfrt\\\"/"
+       where ch a b = (a, ['\\', b])
+
+     smallHex :: Int -> Doc
+     smallHex x = text "\\u"
+       <> text (replicate (4 - length h) '0')
+       <> text h
+       where h = showHex x ""
+   #+END_SRC
+
+** TODO Arrays and Objects, and the Module Header - 122
+** TODO Writing a Module Header - 123
+** TODO Fleshing Out the Pretty-Printing Library - 124
 *** Compact Rendering - 127
 *** True Pretty Printing - 128
 *** Following the Pretty Printer - 129
 
-** Creating a Package - 131
+** TODO Creating a Package - 131
 *** Writing a Package Description - 131
 *** GHC’s Package Manager - 133
 *** Setting Up, Building, and Installing - 133
 
-** Practical Pointers and Further Reading - 134
+** TODO Practical Pointers and Further Reading - 134
 
 * TODO 6 Using Typeclasses - 135
-** The Need for Typeclasses - 135
-** What Are Typeclasses? - 136
-** Declaring Typeclass Instances - 139
-** Important Built-in Typeclasses - 139
-*** Show - 139
-*** Read - 141
+** TODO The Need for Typeclasses - 135
+** TODO What Are Typeclasses? - 136
+** TODO Declaring Typeclass Instances - 139
+** TODO Important Built-in Typeclasses - 139
+*** ~Show~ - 139
+*** ~Read~ - 141
 *** Serialization with read and show - 143
 *** Numeric Types - 144
 *** Equality, Ordering, and Comparisons - 148
 
-** Automatic Derivation - 148
-** Typeclasses at Work: Making JSON Easier to Use - 149
+** TODO Automatic Derivation - 148
+** TODO Typeclasses at Work: Making JSON Easier to Use - 149
 *** More Helpful Errors - 151
 *** Making an Instance with a Type Synonym - 151
 
-** Living in an Open World - 152
+** TODO Living in an Open World - 152
 *** When Do Overlapping Instances Cause Problems? - 153
 *** Relaxing Some Restrictions on Typeclasses - 154
 *** How Does Show Work for Strings? - 155
 
-** How to Give a Type a New Identity - 155
+** TODO How to Give a Type a New Identity - 155
 *** Differences Between Data and Newtype Declarations - 157
 *** Summary: The Three Ways of Naming Types - 158
 
-** JSON Typeclasses Without Overlapping Instances - 159
-** The Dreaded Monomorphism Restriction - 162
-** Conclusion - 163
+** TODO JSON Typeclasses Without Overlapping Instances - 159
+** TODO The Dreaded Monomorphism Restriction - 162
+** TODO Conclusion - 163
 
 * TODO 7 I/O - 165
 ** Classic I/O in Haskell - 165
 *** Pure Versus I/O - 168
 *** Why Purity Matters - 169
-*
 ** Working with Files and Handles - 169
 *** More on openFile - 171
 *** Closing Handles - 172
@@ -860,25 +1104,21 @@
 *** Standard Input, Output, and Error - 173
 *** Deleting and Renaming Files - 174
 *** Temporary Files - 174
-*
 ** Extended Example: Functional I/O and Temporary Files - 175
 ** Lazy I/O - 178
 *** hGetContents - 178
 *** readFile and writeFile - 180
 *** A Word on Lazy Output - 181
 *** interact - 181
-*
 ** The IO Monad - 183
 *** Actions - 183
 *** Sequencing - 186
 *** The True Nature of Return - 187
-*
 ** Is Haskell Really Imperative? - 188
 ** Side Effects with Lazy I/O - 188
 ** Buffering - 189
 *** Buffering Modes - 189
 *** Flushing The Buffer - 190
-*
 ** Reading Command-Line Arguments - 190
 ** Environment Variables - 191
 
@@ -943,7 +1183,6 @@
 ** Using Functors for Parsing - 251
 ** Rewriting Our PGM Parser - 252
 ** Future Directions - 254
-
 
 
 
@@ -1177,7 +1416,7 @@
 *** Unwieldy Interfaces - 444
 *** Pulling It All Together - 445
 
-* TODO 19. Error Handling - 447
+* TODO 19 Error Handling - 447
 ** TODO Error Handling with Data Types - 447
 *** Use of Maybe - 448
 *** Use of Either - 452
@@ -1194,7 +1433,7 @@
 ** TODO Error Handling in Monads - 462
 *** A Tiny Parsing Framework - 463
 
-* TODO 20. Systems Programming in Haskell - 467
+* TODO 20 Systems Programming in Haskell - 467
 ** Running External Programs - 467
 ** Directory and File Information - 468
 ** Program Termination - 469
@@ -1214,8 +1453,7 @@
 
 
 
-
-* TODO 21. Using Databases - 493
+* TODO 21 Using Databases - 493
 ** Overview of HDBC - 493
 ** Installing HDBC and Drivers - 494
 ** Connecting to Databases - 495
@@ -1313,7 +1551,6 @@
 *** Tuning the Generated Assembly - 579
 
 ** Conclusions - 580
-
 
 
 
