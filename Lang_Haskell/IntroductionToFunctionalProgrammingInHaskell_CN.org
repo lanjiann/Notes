@@ -16,7 +16,7 @@
     - [[2.1.1 Haskell 常用数据类型 - 43][2.1.1 Haskell 常用数据类型 - 43]]
     - [[2.1.2 函数类型 - 48][2.1.2 函数类型 - 48]]
     - [[2.1.3 类型的别名 - 53][2.1.3 类型的别名 - 53]]
-    - [[2.1.4 类型的重要性 - 54][2.1.4 类型的重要性 - 54]]
+    - [[2.1.4 类型的重要性 - 54 - =Re-READ=][2.1.4 类型的重要性 - 54 - =Re-READ=]]
   - [[2.2 Haskell 中的类型类 - 55][2.2 Haskell 中的类型类 - 55]]
     - [[2.2.1 相等类型类: ~Eq~ - 56][2.2.1 相等类型类: ~Eq~ - 56]]
     - [[2.2.2 有序类型类: ~Ord~ - 57][2.2.2 有序类型类: ~Ord~ - 57]]
@@ -26,7 +26,7 @@
   - [[2.3 Haskell 中的函数 - 68][2.3 Haskell 中的函数 - 68]]
     - [[2.3.1 Haskell 中的值 - 68][2.3.1 Haskell 中的值 - 68]]
     - [[2.3.2 函数思想入门 - 69][2.3.2 函数思想入门 - 69]]
-    - [[2.3.3 函数的基本定义格式 - 71][2.3.3 函数的基本定义格式 - 71]]
+    - [[2.3.3 函数的基本定义格式 - 71 - =TODO=][2.3.3 函数的基本定义格式 - 71 - =TODO=]]
   - [[2.4 λ 表达式 - 73][2.4 λ 表达式 - 73]]
     - [[2.4.1 λ 表达式的应用 - 75][2.4.1 λ 表达式的应用 - 75]]
     - [[2.4.2 参数的绑定 - 76][2.4.2 参数的绑定 - 76]]
@@ -39,11 +39,11 @@
     - [[2.5.6 运算符与自定义运算符 - 80][2.5.6 运算符与自定义运算符 - 80]]
   - [[2.6 在 GHCi 中定义函数 - 83][2.6 在 GHCi 中定义函数 - 83]]
 - [[3 基于布尔值的函数 - 85][3 基于布尔值的函数 - 85]]
-  - [[3.1 关键字 module 与 import 简介 - 85][3.1 关键字 module 与 import 简介 - 85]]
+  - [[3.1 关键字 ~module~ 与 ~import~ 简介 - 85 - =TODO= =READING=][3.1 关键字 ~module~ 与 ~import~ 简介 - 85 - =TODO= =READING=]]
   - [[3.2 简易布尔值的函数 - 86][3.2 简易布尔值的函数 - 86]]
   - [[3.3 与非门和或非门 - 89][3.3 与非门和或非门 - 89]]
 - [[4 库函数及其应用 - 93][4 库函数及其应用 - 93]]
-  - [[4.1 预加载库函数 - 93][4.1 预加载库函数 - 93]]
+  - [[4.1 预加载库函数 - 93 - =Re-Read=][4.1 预加载库函数 - 93 - =Re-Read=]]
     - [[4.1.1 常用函数 - 93][4.1.1 常用函数 - 93]]
     - [[4.1.2 基于列表的函数 - 96][4.1.2 基于列表的函数 - 96]]
   - [[4.2 定义历法公式 - 103][4.2 定义历法公式 - 103]]
@@ -702,30 +702,225 @@
        OR
      + just directly run it with the shell command =runghc Helloworld.hs=.
 
-* 2 类型系统和函数 - 43
-** 2.1 Haskell 的类型与数据 - 43
-*** 2.1.1 Haskell 常用数据类型 - 43
-*** 2.1.2 函数类型 - 48
-*** 2.1.3 类型的别名 - 53
-*** 2.1.4 类型的重要性 - 54
+* TODO 2 类型系统和函数 - 43
+** TODO 2.1 Haskell 的类型与数据 - 43
+*** DONE 2.1.1 Haskell 常用数据类型 - 43
+    CLOSED: [2018-09-11 Tue 16:26]
+    - strong type -:: xxx =TODO=
 
-** 2.2 Haskell 中的类型类 - 55
+    - ~Bool~
+
+    - ~Char~
+      + You can also use backslash + number form.
+        For example,
+        #+BEGIN_SRC haskell
+          '\100'  -- 'd'
+          '你'    -- '\20320', which is Unicode codepoint
+        #+END_SRC
+
+      + Haskell does NOT support the octal escape form. =TODO= =EN=
+
+      + Table 2.1 Common escaped character
+        | \b | =TODO= |
+        | \n | =TODO= |
+        | \t | =TODO= |
+        | \& | =TODO= |
+        | \\ | =TODO= |
+        | \" | =TODO= |
+        | \' | =TODO= |
+
+    - Singed Integer: ~Int~
+      32 bits -- [-2^{31}, 2^{31} - 1]
+
+      The default integer type is ~Integer~, NOT ~Int~.
+        If you want to use ~Int~, you need to explicitly write the type annotation
+      out.
+
+    - Unsinged Integer: ~Word~
+      Its range is _system dependent_!
+
+      + In GHCi, use ~:m +Data.Word~ to import the ~Data.Word~ /moudle/, and use
+        ~:m Data.Word~ to remove it! =IMPORTANT=
+
+    - Any precision Integer: ~Integer~
+      + The ONLY limitation to it the the memory of the computer you are using.
+
+      + Use it carefully if your code is performance critical.
+
+    - ~Int8~, ~Int16~, ~Int32~, and ~Int64~ from ~Data.Int~
+
+    - ~Word8~, ~Word16~, ~Word32~, and ~Word64~ from ~Data.Word~
+
+    - Haskell also supports multiple representations of integers:
+      + Octal : ~0o~ prefixed
+
+      + Hex   : ~0x~ prefixed
+
+      + Binary: ~0b~ prefixed 
+        ~GHC 7.10+~ and the ~BinaryLiterals~ /language extension/ is required --
+        Haskell2010 standard does *NOT* have definitions and rules to the
+        /binary literals/.
+
+    - Fraction numbers: ~Float~, ~Double~, ~Rational~
+      The ~Float~ and ~Double~ are the same as their counterparts in most other
+      languages.
+
+      Example (~%~ here in the output is just the ~/~ in the handwriting form):
+      #+BEGIN_SRC haskell
+        4.1332 :: Rational
+        -- 10333 % 2500
+      #+END_SRC
+
+    - ~String~
+      Haskell ~String~ is the alias of ~[Char]~
+
+    - Tuple
+      Haskell support N-Tuple (Comment 2.1.1. The maximum N is *62*).
+
+      Two import functions to 2-Tuple (pair): ~fst~ and ~snd~
+
+*** TODO 2.1.2 函数类型 - 48
+    - Polymorphism Functions
+    - Overloaded Functions
+
+*** DONE 2.1.3 类型的别名 - 53
+    CLOSED: [2018-09-11 Tue 16:34]
+    type synonym
+
+    Example:
+    #+BEGIN_SRC haskell
+      -- `Word8` is more proper for this case.
+      -- However, this tripl-Int example can give a better illustration.
+      type RGB = (Int, Int, Int)
+
+      type ID        = Int
+      type BookName  = String
+      type Author    = String
+      type ISBN      =
+      type Publisher = String
+
+      type Book = (ID, BookName, Author, ISBN, Publisher)  -- A record syntax is better, but we haven't learn it.
+    #+END_SRC
+
+*** DONE 2.1.4 类型的重要性 - 54 - =Re-READ=
+    CLOSED: [2018-09-11 Tue 16:36]
+
+** TODO 2.2 Haskell 中的类型类 - 55
 *** 2.2.1 相等类型类: ~Eq~ - 56
 *** 2.2.2 有序类型类: ~Ord~ - 57
 *** 2.2.3 枚举类型类: ~Enum~ - 57
 *** 2.2.4 有界类型类: ~Bounded~ - 58
-*** 2.2.5 数类型类: ~Num~ - 58
+*** TODO 2.2.5 数类型类: ~Num~ - 58
+    =IMPORTANT= =TODO=
 
-** 2.3 Haskell 中的函数 - 68
-*** 2.3.1 Haskell 中的值 - 68
-*** 2.3.2 函数思想入门 - 69
-*** 2.3.3 函数的基本定义格式 - 71
+** DONE 2.3 Haskell 中的函数 - 68
+   CLOSED: [2018-09-12 Wed 04:26]
+*** DONE 2.3.1 Haskell 中的值 - 68
+    CLOSED: [2018-09-12 Wed 03:55]
+*** TODO 2.3.2 函数思想入门 - 69
+*** DONE 2.3.3 函数的基本定义格式 - 71 - =TODO=
+    CLOSED: [2018-09-12 Wed 04:26]
+    - =TODO= =TRY IT=
+      The syntax like ~function :: Show a => Ord a => a -> a -> a~ is equivalent
+      to the one we use everyday: ~function :: (Show a, Ord a) => a -> a -> a~.
 
-** 2.4 λ 表达式 - 73
-*** 2.4.1 λ 表达式的应用 - 75
-*** 2.4.2 参数的绑定 - 76
+      The former is not part of the standard of Haskell 98!
+      =from Jian= How about Haskell 2010?????? =TODO=
 
-** 2.5 Haskell 中的表达式 - 77
+    - Module top-level functions must start from the beginning of a line!
+
+    - Don't use Tab. Use space!
+
+    - /Types/ and /typeclasss/ must be capitalized!
+
+    - The ~curry~ funciton is NOT correspond the currying concept in general!
+      Let't check its type:
+      #+BEGIN_SRC haskell
+        curry :: ((a, b) -> c) -> a -> b
+      #+END_SRC
+
+** DONE 2.4 λ 表达式 - 73
+   CLOSED: [2018-09-12 Wed 04:55]
+   - After compilation, all functions will be converted to /lambda expressions/.
+
+   - Forms like ~\x y -> x + y~ is just a syntactic sugar of the fundamental forms
+     like ~\x -> \y -> x + y~.
+
+   - ~\alpha~-conversion:
+     If no name confliction, rename parameter names won't change a function.
+
+     + ~\alpha~-equivalence:
+       ~\x -> \y -> x + y~ ===_a ~\a -> \y -> a + y~
+
+       When doing ~\alpha~-conversion, we should confirm ~\alpha~-equivalence before and
+       after the conversion.
+
+       We should NOT do something like (~\alpha~-equivalence is NOT satisfied): 
+       ~\x -> \y -> x + y~ ===_a ~\y -> \y -> y + y~
+
+   - ~\beta~-reduction:
+     (\x -> M) N ->_{b} [N/x]M 
+
+     If do the reduction directly will introduce name confliction, do the ~\alpha{}~-conversion
+     first, and then the ~\beta~-reduction.
+
+     For example,
+     #+BEGIN_SRC haskell
+       (\x -> \y -> x y) (abs) (-5)
+
+        beta-reduction
+       ----------------> (\y -> abs y) (-5)
+
+        beta-reduction
+       ----------------> abs (-5)
+
+ 
+       ----------------> 5
+     #+END_SRC
+
+   - ~\eta~-reduction:
+     Example:
+     #+BEGIN_SRC haskell
+       g :: Int -> Int -> Int
+       g = \y -> \x -> (+) x y
+     #+END_SRC
+     After two steps of eta-reductions:
+     ~g = (+)~
+
+     + =TODO=
+       Footnote 7:
+       有类型类限定的函数做eta化简会引起/单一同态限定/的问题，现在这个问题不重要，我们会在16.7中讨论。
+       =TODO= =TODO=
+
+*** DONE 2.4.1 λ 表达式的应用 - 75
+    CLOSED: [2018-09-12 Wed 04:49]
+    - Two main usages:
+      + Construct an /anonymous function/.
+
+      + With the help of /lambda expressions/, you do NOT need to pass values to
+        them in the order of the arguments in the definition.
+
+        =from Jian= ~flip~ can help to do the samething in some cases.
+
+*** DONE 2.4.2 参数的绑定 - 76
+    CLOSED: [2018-09-12 Wed 04:55]
+    ~let ... in ...~ and ~where~
+
+    - /name capture/
+      For example, the ~x~ in
+      #+BEGIN_SRC haskell
+        let x = 6
+        in x * let x = 2
+               in x * x
+      #+END_SRC
+      does NOT have the same meaning.
+
+    - _NESTED_ ~where~ can also have /name capture/.
+      However, we rarelly use nested ~where~'s.
+
+      We often use _NESTED_ ~let ... in ...~, and we need to pay attention to it.
+
+** TODO 2.5 Haskell 中的表达式 - 77
 *** 2.5.1 条件表达式 - 77
 *** 2.5.2 情形分析表达式 - 78
 *** 2.5.3 守卫表达式 - 78
@@ -733,21 +928,78 @@
 *** 2.5.5 运算符与函数 - 80
 *** 2.5.6 运算符与自定义运算符 - 80
 
-** 2.6 在 GHCi 中定义函数 - 83
+** DONE 2.6 在 GHCi 中定义函数 - 83
+   CLOSED: [2018-09-12 Wed 05:03]
+   - *Before* GHCi 8.0:
+     + ~let f x y = 4 * x + y^2~
 
-* 3 基于布尔值的函数 - 85
-** 3.1 关键字 module 与 import 简介 - 85
-** 3.2 简易布尔值的函数 - 86
-** 3.3 与非门和或非门 - 89
+     + Multiple line definition =from Jian= Try this in OLD GHCi.
+       #+BEGIN_SRC haskell
+
+         :{
+           let { foo :: Int -> Int
+               ; foo 1 = 2
+               ; foo 2 = 1
+               ; foo n = 0 }
+         :}
+       #+END_SRC
+
+   - *From* GHCi 8.0 *on*:
+     + ~f x y = 4 * x + y^2~ also works
+
+     + Multiple line definition need a block starts from ~:{~
+       and ends with ~:}~ like:
+       #+BEGIN_SRC haskell
+         :{
+           foo :: Int -> Int
+           foo 1 = 2
+           foo 2 = 1
+           foo n = 0
+         :}
+       #+END_SRC
+
+* TODO 3 基于布尔值的函数 - 85
+** DONE 3.1 关键字 ~module~ 与 ~import~ 简介 - 85 - =TODO= =READING=
+   CLOSED: [2018-09-11 Tue 11:06]
+   - The first line in a Haskell source code file you can write some _compiler
+     options_.
+
+     After this optional line, it should be a ~module~ line in the pattern of
+     ~module ModuleName where~. Here ~ModuleName~ *must* be an /CAPITALIZED
+     identifier/.
+
+   - ~import Test (f1)~
+
+   - ~import Prelude hiding (catch)~
+
+   - ~import qualified Test as T~
+
+   - Use full path instead of the ~import~ keyword is also OK!
+     For example, ~Data.List.permutations~.
+
+   - =TODO=
+     Reading -
+     关于 ~module~ 与 ~import~ 关键字的更多细节，读者可以参阅[61] 5.3 Import Declarations。
+
+** DONE 3.2 简易布尔值的函数 - 86
+   CLOSED: [2018-09-11 Tue 11:06]
+   - The halfadder fulladder examples
+     =TOOD= Note
+
+** TODO 3.3 与非门和或非门 - 89
 
 * 4 库函数及其应用 - 93
-** 4.1 预加载库函数 - 93
+** DONE 4.1 预加载库函数 - 93 - =Re-Read=
+   CLOSED: [2018-09-11 Tue 11:22]
 *** 4.1.1 常用函数 - 93
 *** 4.1.2 基于列表的函数 - 96
+    - 当然，有的时候要用到将三个列表的中元素合成有三个元件的元组，这时可以用到预
+      加载库中的zip3、unzip3。此外，Prelude 中还提供zipWith3 等函数，读者可以
+      自己查阅一下API，然后试用一下。
 
-** 4.2 定义历法公式 - 103
-** 4.3 字符串处理的函数 - 104
-** 4.4 常用模块简介 - 106
+** TODO 4.2 定义历法公式 - 103
+** TODO 4.3 字符串处理的函数 - 104
+** TODO 4.4 常用模块简介 - 106
 *** 4.4.1 ~Data.Char~ - 106
 *** 4.4.2 ~Data.List~ - 106
 *** 4.4.3 ~Data.Bits~ - 106
@@ -798,7 +1050,7 @@
 
 ** 6.7 最短路径与矩阵乘法 - 168
 
-* 7 高阶函数 - 175
+* TODO 7 高阶函数 - 175
 ** 7.1 简单高阶函数 - 175
 ** 7.2 折叠函数 ~foldr~ 与 ~foldl~ - 177
 *** 7.2.1 右折叠函数 ~foldr~ - 177
@@ -807,7 +1059,7 @@
 ** 7.3 ~mapAccumL~ 与 ~mapAccumR~ 函数 - 184
 ** 7.4 复合函数 - 185
 
-* 8 定义数据类型 - 189
+* TODO 8 定义数据类型 - 189
 ** 8.1 数据类型的定义 - 189
 *** 8.1.1 枚举类型 - 189
 *** 8.1.2 构造类型 - 192
@@ -839,7 +1091,7 @@
 
 ** 8.13 空类型的声明 - 239
 
-* 9 类型类简介 - 243
+* TODO 9 类型类简介 - 243
 ** 9.1 定义类型类 - 243
    - /typeclass/ definition Syntax:
      #+BEGIN_SRC haskell
@@ -1445,7 +1697,6 @@
 ** 16.11 GHC 的原始类型与函数 * - 555
 *** 16.11.1 ghc-prim 库 - 555
 *** 16.11.2 运行时类型表示的多态 * - 558
-
 
 
 * 17 通用编程 - 561
