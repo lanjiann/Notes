@@ -250,6 +250,57 @@
 
 * 2 Up and running - 28
 ** 2.1 Clone, build, and test interface - 29
+   ~git clone https://github.com/RayRoestenburg/akka-in-action.git~
+   We only need the =chapter-up-and-running= part, which is for this chapter.
+
+   - We'll use /sbt/, /Git/, the /Heroku toolbelt/, and ~httpie~ (an easy to use
+     command-line HTTP client) in this chapter.
+
+   - We use sbt 0.13.7, Scala 2.11 and Akka 2.4 (requires Java 8).
+
+   - =from Jian=
+     + I'm not very familiar with sbt, and I won't change it version, though 0.13.7 is old.
+
+     + Use the newest Akka 2.5.16.
+
+     + I modified the _dependency_ part of the =build.sbt= of this project:
+       #+BEGIN_SRC scala
+         enablePlugins(JavaServerAppPackaging)
+
+         name := "goticks"
+
+         version := "1.0"
+
+         scalaVersion := "2.12.6"
+
+         organization := "com.goticks"
+
+         libraryDependencies ++= {
+           val akkaVersion = "2.5.16"
+           Seq(
+             "com.typesafe.akka" %% "akka-actor"      % akkaVersion,
+             "com.typesafe.akka" %% "akka-http-core"  % "10.1.5",
+             "com.typesafe.akka" %% "akka-http-spray-json"  % "10.1.5",
+             "com.typesafe.akka" %% "akka-stream"     % akkaVersion,
+             "com.typesafe.akka" %% "akka-slf4j"      % akkaVersion,
+             "ch.qos.logback"    %  "logback-classic" % "1.2.3",
+             "com.typesafe.akka" %% "akka-testkit"    % akkaVersion    % Test,
+             "org.scalatest"     %% "scalatest"       % "3.2.0-SNAP10" % Test
+           )
+         }
+
+         // Assembly settings
+         mainClass in assembly := Some("com.goticks.Main")
+
+         assemblyJarName in assembly := "goticks.jar"
+       #+END_SRC
+
+     + I also modified the code to coordinate with these changes!!!
+
+   - =sbt assembly=
+
+   - 
+
 *** 2.1.1 Build with sbt - 30
 *** 2.1.2 Fast-forward to the GoTicks.com REST server - 31
 
