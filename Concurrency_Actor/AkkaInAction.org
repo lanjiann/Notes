@@ -345,19 +345,83 @@
 ** 2.4 Summary - 48
 
 * 3 Test-driven development with actors - 49
-** TODO 3.1 Testing actors - 50
+** DONE 3.1 Testing actors - 50
+   CLOSED: [2018-09-21 Fri 22:01]
+   - First, we'll work on how to _test SENDING and RECEIVING /messages/,_
+     + in fire-and-forget style (one-way)
+     + in by request-response style (two-way) interaction
+
+   - Use ~ScalaTest~ and the Akka testkit.
+
+   - _Testing Actors_ is *more difficult* than testing normal objects for a couple
+     of reasons:
+     + *Timing*
+       Sending messages is /asynchronous/,
+       so it's _DIFFICULT to know WHEN to assert expected values in the unit test_.
+
+     + *Asynchronicity*
+       Actors are meant to be run in parallel on several threads.
+
+       /Multithreaded tests/
+       * are more difficult than single-threaded tests
+       * require concurrency primitives like /locks/, /latches/, and /barriers/ to
+         *synchronize* results from VARIOUS /actors/.
+           _This is exactly the kind of thing you want to get further away from._
+         Incorrect usage of just one barrier can block a unit test, which in
+         turn halts the execution of a full test suite.
+
+     + *Statelessness*
+       An /actor/ *hides* its /internal state/ and does *NOT allow access to
+       this state*. Access should only be possible through the ~ActorRef~.
+         Calling a method on an /actor/ and checking its /state/, which is something
+       you’d like to be able to do when unit testing, is prevented by design.
+
+       =from Jian= This is why we have ~TestActorRef~!!! =TODO=
+
+     + *Collaboration/Integration*
+       If you wanted to do an integration test of a couple of /actors/, you’d need
+       to eavesdrop on the /actors/ to assert that the messages have the expected
+       values.
+
+       It’s _not immediately clear_ how this can be done.
+
+   - The /for test actor systems/ have a special requirement:
+     they should stop after tests are done!
+
+     To make life easier, we create small trait to satisfy this requirement:
+     #+BEGIN_SRC scala
+       import org.scalatest.{ Suite, BeforeAndAfterAll }
+       import akka.testkit.TestKit
+
+       trait StopSystemAfterAll extends BeforeAndAfterAll {
+         this: Testit with Suite =>
+         override protected def afterAll() {
+           super.afterAll()
+           system.shutdown()
+         }
+       }
+     #+END_SRC
+
 ** 3.2 One-way messages - 52
    *We _NO LONGER_ invoke a function and wait on the response!*,
+
    so
 
    - the fact that our examples merely send one-way messages with tell is
-     *deliberate*!
-     
-     If we use ~ActorRef~ only, mostly we can only know if errors exists.
-     Even if there is no error, we *CANNOT* say the work we want to do is done!
+     *deliberate*:
+     + This is a fire-and-forget style,
+       we do NOT know
+       1. if a message arrives an /actor/?
+       2. if it arrives, when?
 
-     That's why ~TestActorRef~ is created! There are three variations that we
-     will look at:
+     + The /actors/ can do a lot of things, but if things they done are completely
+       invisible from the outside, we can only check if it handled the messages
+       without any errors. This is mostly way far from enough!!!
+
+       ~TestActorRef~ can help us to look into the state of an /actors/.
+       This kind of operations is NOT allowed by the plain ~ActorRef~.
+
+     ~TestActorRef~ has three variations that we will look at:
      + ~SilentActor~
        An actor’s behavior is not directly observable from the outside; it might
        be an intermediate step that the actor takes to create some internal
