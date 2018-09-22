@@ -222,10 +222,38 @@
 * acknowledgments - xii
 * about this book - xiii
 * 1 Introducing Akka - 1
+  - In this chapter
+    + Why scaling is hard
+    + Write once, scale anywhere
+    + Introduction to the actor programming model
+    + Akka actors
+    + What is Akka?
+
+  - History:
+    + Up until the middle of the 90's, just before the internet revolution,
+      most applications would only ever run on a single computer a single CPU.
+
+      At that time, if an app is slow, just wait a free lunch -- the rapid
+      upgrade of hardware.
+
+    + In 2005 Herb Sutter wrote in Dr. Dobb's Journal:
+      http://www.gotw.ca/publications/concurrency-ddj.htm
+
+      In short:
+      a limit to increasing CPU clock speeds has been reached, and the free
+      lunch is over.
+
+    + Call for /concurrency/!
+      /Concurrency/ SHOULD ALSO MEANS to achieve scalability.
+
+    + =TODO= NOTE
+
+    + =TODO= NOTE
+
 ** 1.1 What is Akka? - 4
-** 1.2 Actors: a quick overview - 4
-** 1.3 Two approaches to scaling: setting up our example - 6
-** 1.4 Traditional scaling - 7
+** TODO 1.2 Actors: a quick overview - 4
+** TODO 1.3 Two approaches to scaling: setting up our example - 6
+** TODO 1.4 Traditional scaling - 7
 *** 1.4.1 Traditional scaling and durability: move everything to the database - 7
 *** 1.4.2 Traditional scaling and interactive use: polling - 10
 *** 1.4.3 Traditional scaling and interactive use: polling - 12 =TODO=
@@ -317,8 +345,37 @@
 ** 2.4 Summary - 48
 
 * 3 Test-driven development with actors - 49
-** 3.1 Testing actors - 50
+** TODO 3.1 Testing actors - 50
 ** 3.2 One-way messages - 52
+   *We _NO LONGER_ invoke a function and wait on the response!*,
+   so
+
+   - the fact that our examples merely send one-way messages with tell is
+     *deliberate*!
+     
+     If we use ~ActorRef~ only, mostly we can only know if errors exists.
+     Even if there is no error, we *CANNOT* say the work we want to do is done!
+
+     That's why ~TestActorRef~ is created! There are three variations that we
+     will look at:
+     + ~SilentActor~
+       An actor’s behavior is not directly observable from the outside; it might
+       be an intermediate step that the actor takes to create some internal
+       state. We want to test that the actor at least handled the message and
+       didn’t throw any exceptions. We want to be sure that the actor has
+       finished. We want to test the internal state change.
+
+     + ~SendingActor~
+       An actor sends a message to another actor (or possibly many actors) after
+       it’s done processing the received message. We’ll treat the actor as a
+       black box and inspect the message that’s sent out in response to the
+       message it received
+
+     + ~SideEffectingActor~
+       An actor receives a message and interacts with a normal object in some
+       kind of way. After we send a message to the actor, we’d like to assert if
+       the object was affected.
+
 *** 3.2.1 SilentActor examples - 53
 *** 3.2.2 SendingActor example - 56
 *** 3.2.3 SideEffectingActor example - 61
