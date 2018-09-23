@@ -33,7 +33,7 @@
   - [[Wrap-Up - 113][Wrap-Up - 113]]
 - [[5. Actors - 115][5. Actors - 115]]
   - [[More Object-Oriented than Objects - 115][More Object-Oriented than Objects - 115]]
-  - [[Day 1: Messages and Mailboxes - 116][Day 1: Messages and Mailboxes - 116]]
+  - [[Day 1: Messages and Mailboxes - 116 - =TODO - Wrap-Up=][Day 1: Messages and Mailboxes - 116 - =TODO - Wrap-Up=]]
     - [[Our First Actor - 116][Our First Actor - 116]]
     - [[Mailboxes Are Queues - 117][Mailboxes Are Queues - 117]]
     - [[Receiving Messages - 118][Receiving Messages - 118]]
@@ -50,6 +50,10 @@
   - [[Day 2: Error Handling and Resilience - 127][Day 2: Error Handling and Resilience - 127]]
     - [[A Caching Actor - 127][A Caching Actor - 127]]
     - [[Fault Detection - 130][Fault Detection - 130]]
+      - [[Links Propagate Abnormal Termination - 130][Links Propagate Abnormal Termination - 130]]
+      - [[Links Are Bidirectional - 131][Links Are Bidirectional - 131]]
+      - [[Normal Termination - 131][Normal Termination - 131]]
+      - [[System Processes - 132][System Processes - 132]]
     - [[Supervising a Process - 132][Supervising a Process - 132]]
     - [[Timeouts - 133][Timeouts - 133]]
     - [[The Error-Kernel Pattern - 134][The Error-Kernel Pattern - 134]]
@@ -168,7 +172,8 @@
      beyond a single machine and recover from failure of one or more of those
      machines.
 
-** TODO Day 1: Messages and Mailboxes - 116
+** DONE Day 1: Messages and Mailboxes - 116 - =TODO - Wrap-Up=
+   CLOSED: [2018-09-23 Sun 00:15]
    - *Joe asks: Actor or Process?*
      =TODO=
 
@@ -340,7 +345,8 @@
     Next, let's make bidirectional communication, and then we can do something
     more interesting than just print out states.
 
-*** TODO Bidirectional Communication - 122
+*** DONE Bidirectional Communication - 122
+    CLOSED: [2018-09-22 Sat 22:31]
     The /actor model/ does *NOT* provide direct support for replies,
 
     but it's something we can _build for ourselves very easily_ *by including
@@ -389,43 +395,296 @@
       We'll make one further improvement to ~Counter~ before we move on --
       _giving it a name to make it discoverable_.
 
-*** TODO Naming Processes - 123
+*** DONE Naming Processes - 123
+    CLOSED: [2018-09-22 Sat 22:31]
     - Unitl now, we only sent messages to /actors/ we created. Then,
       + Q :: How to send messages to /actors/ that are NOT created by us???
 
       + A :: There are several ways!
              The most convenient is to _register a name_ for the /process (actor
-             in elixir)/.
+             in Elixir)/.
 
-    
+    - Example:
+      #+BEGIN_SRC elixir
+        pid = Counter.start(42)              # #PID<0.47.0>
+        Process.register(pid, :counter)      # true
+        counter = Process.whereis(:counter)  # #PID<0.47.0>
+        Counter.next(counter)                # 42
+      #+END_SRC
 
-    xxx
+      + Run ~Process.registered~ to see all registered /actors (or processes,
+        another name of actor in Elixir)/.
 
-*** TODO Interlude—First-Class Functions - 124
-    xxx
+        As you can see, the virtual machine _automatically_ registers a number
+        of standard processes at startup.
 
-*** TODO Parallel Map - 125
-    xxx
+      + The ~send~ function can take a /process name/ instead of a /process identifier/.
+        #+BEGIN_SRC elixir
+          send(:counter, {:next, self(), make_ref()})  # {:next, #PID<0.45.0>, #Reference<0.0.0.107>}
+          receive do msg -> msg end                    # {:ok, #Reference<0.0.0.107>, 43}
+        #+END_SRC
+
+    - Modified code that use /process name/ rather than /process identifier/:
+      #+BEGIN_SRC elixir
+        def start(count) do
+          pid = spawn(__MODULE__, :loop, [count])
+          Process.register(pid, :counter)
+          pid
+        end
+
+        def next do
+          ref = make_ref()
+          send(:counter, {:next, self(), ref})
+          receive do
+            {:ok, ^ref, count} -> count
+          end
+        end
+
+        Counter.start(42)  # #PID<0.47.0>
+        Counter.next       # 42
+        Counter.next       # 43
+      #+END_SRC
+
+    - Next:
+      Parallel Map,
+      First, its prelude
+
+*** DONE Interlude—First-Class Functions - 124
+    CLOSED: [2018-09-22 Sat 22:37]
+    #+BEGIN_SRC elixir
+      Enum.map([1, 2, 3, 4], fn(x) -> x * 2 end)
+      # Shorthand syntax
+      Enum.map([1, 2, 3, 4], &(&1 * 2))
+
+      double = &(&1 * 2)    # #Function<erl_eval.6.80484245>
+      double.(3)            # 6
+
+      twice = fn(fun) -> fn(x) -> fun.(fun.(x)) end end  # #Function<erl_eval.680484245>
+      twice.(double).(3)                                 # 12
+    #+END_SRC
+
+*** DONE Parallel Map - 125
+    CLOSED: [2018-09-23 Sun 00:06]
+    Here this "map" is the operation, not the same name data structure.
+
+    #+BEGIN_SRC elixir
+      defmodule Parallel do
+        def map(collection, fun) do
+          parent = self()
+
+          processes = Enum.map(collection, fn(e) ->
+            spawn_link(
+              fn() ->
+                send(parent, {self(), fun.(e)})
+              end)
+            end)
+
+          Enum.map(processes,
+            fn(pid) ->
+              receive do
+                {^pid, result} -> result
+              end
+            end)
+        end
+      end
+    #+END_SRC
+
+    + =from Jian=
+      It seems the cost of creating /processes (actor)/ in sequential does NOT
+      have much overhead.
+
+    + Test:
+      #+BEGIN_SRC elixir
+        slow_double = fn(x) -> :timer.sleep(1000); x * 2 end            # #Function<6.80484245 in :erl_eval.expr/5>
+        :timer.tc(fn() -> Enum.map([1, 2, 3, 4], slow_double) end)      # {4003414, [2, 4, 6, 8]}
+        :timer.tc(fn() -> Parallel.map([1, 2, 3, 4], slow_double) end)  # {1001131, [2, 4, 6, 8]}
+      #+END_SRC
 
 *** TODO Day 1 Wrap-Up - 126
-    xxx
+    End day 1!
+
+    In day 2, learn how the actor model helps with _error handling_ and
+    _resilience_.
+
 **** What We Learned in Day 1 - 126
+     - Actors (processes)
+       + run concurrently
+       + do not share state
+       + communicate by asynchronously sending messages to mailboxes.
+
+     - We covered how to do the following:
+       + *Create* a new /process/ with ~spawn()~
+
+       + *Send* a /message/ to a /process/ with ~send()~
+
+       + Use /pattern matching/ to *handle* /messages/
+
+       + *Create* a _link between two processes_ and _receive notification when
+         one terminates_
+
+       + *Implement* _bidirectional_, _synchronous messaging_ ON TOP OF the _standard
+         asynchronous messaging_
+
+       + *Register* a name for a /process/
+
 **** Day 1 Self-Study - 126
 ***** Find
-***** Do
+      - =TODO=
+        The video of Erik Meijer and Clemens Szyperski talking to Carl Hewitt
+        about the actor model at Lang.NEXT 2012
+
+***** TODO Do
+      - =TODO=
+        Measure the cost of creating a process on the BEAM.
+        How does it compare with the cost of creating a thread on the JVM?
+
+      - =TODO=
+        Measure the cost of the parallel map function we created compared to a
+        sequential map. When would it make sense to use a parallel map, and when
+        a sequential map?
+
+      - =TODO=
+        Write a parallel reduce function along the lines of the parallel map
+        function we just created.
 
 ** TODO Day 2: Error Handling and Resilience - 127
+   One of the key benefits of /concurrency/ is that it enables us to write
+   /fault-tolerant/ code -- ech concurrency modle has their own way. We will show
+   how the /actor modle/ do this.
+
+   Create a more complicated and realistic example as a basis for today's
+   discussion.
+
 *** TODO A Caching Actor - 127
+    - We'll use the map data structure.
+      #+BEGIN_SRC elixir
+        d = Map.new                            ### %{}
+        d1 = Map.put(d, :a, "A value for a")   ### %{a: "A value for a"}
+        d2 = Map.put(d1, :b, "A value for b")  ### %{a: "A value for a", b: "A value for b"}
+        d1                                     ### %{a: "A value for a"}
+        d2[:a]                                 ### "A value for a"
+      #+END_SRC
+
+    - Then,
+      #+BEGIN_SRC elixir
+        defmodule Cache do
+          def loop(pages, size) do
+            receive do
+              {:put, url, page} ->
+                new_pages = Map.put(pages, url, page)
+                new_size = size + byte_size(page)
+                loop(new_pages, new_size)
+
+              {:get, sender, ref, url} ->
+                send(sender, {:ok, ref, pages[url]})
+                loop(pages, size)
+
+              {:size, sender, ref} ->
+                send(sender, {:ok, ref, size})
+                loop(pages, size)
+
+              {:terminate} -> # Terminate request - don't recurse
+            end
+          end
+        end
+      #+END_SRC
+
+      To provide a better API, we add these functions to ~Cache~:
+      #+BEGIN_SRC elixir
+        def put(url, page) do
+          send(:cache, {:put, url, page})
+        end
+
+        def get(url) do
+          ref = make_ref()
+          send(:cache, {:get, self(), ref, url})
+          receive do
+            {:ok, ^ref, page} -> page
+          end
+        end
+
+        def size do
+          ref = make_ref()
+          send(:cache, {:size, self(), ref})
+          receive do
+            {:ok, ^ref, s} -> s
+          end
+        end
+
+        def terminate do
+          send(:cache, {:terminate})
+        end
+      #+END_SRC
+
+    - For this program, if you try to put a ~nil~ as page into it, the ~byte_size~
+      function invocation will crash.
+
+      We will see how does the /actor model/ deal with it.
+      (Use /supervisor process/).
+
 *** TODO Fault Detection - 130
+    - In Linking Processes, on page 119,
+
+      we used ~spawn_link()~ to *create a link between two processes*
+      so that we could *detect when one of them terminated*.
+
+    - /Links/ are one of the *most important concepts* in Elixir programming.
+
+**** DONE Links Propagate Abnormal Termination - 130
+     CLOSED: [2018-09-23 Sun 14:33]
+     - We can establish a /link/ between two /processes/ at _any time_ with
+       ~Process.link()~.
+       #+BEGIN_SRC elixir
+         defmodule LinkTest do
+           def loop do
+             receive do
+               {:exit_because, reason} -> exit(reason)
+               {:link_to, pid}         -> Process.link(pid)
+               {:EXIT, pid, reason}    -> IO.puts("#{inspect(pid)} exited because #{reason}")
+             end
+             loop
+           end
+         end
+       #+END_SRC
+
+     - Create a couple of instances of THIS /actor/, _link them_, and
+       see what happens when one of them fails:
+       #+BEGIN_SRC elixir
+         pid1 = spawn(&LinkTest.loop/0)                    # #PID<0.47.0>
+         pid2 = spawn(&LinkTest.loop/0)                    # #PID<0.49.0>
+         send(pid1, {:link_to, pid2})                      # {:link_to, #PID<0.49.0>}
+         send(pid2, {:exit_because, :bad_thing_happened})  # {:exit_because, :bad_thing_happened}
+
+         Process.info(pid2, :status)  # nil
+         Process.info(pid1, :status)  # nil
+       #+END_SRC
+
+     - Though when we check the status of ~pid1~ and ~pid2~, we found they both exit,
+       we may also want to say something when we send the exit message to ~pid2~.
+       This need set ~:trap_exit~.
+
+**** TODO Links Are Bidirectional - 131
+**** TODO Normal Termination - 131
+**** TODO System Processes - 132
+
 *** TODO Supervising a Process - 132
+
+
 *** TODO Timeouts - 133
+    - xx
+
 *** TODO The Error-Kernel Pattern - 134
+    - xx
+
 *** TODO Let It Crash! - 135
+    - xx
+
 *** TODO Day 2 Wrap-Up - 137
 **** What We Learned in Day 2 - 137
 **** Day 2 Self-Study - 137
 ***** Find
 ***** Do
+
 ** TODO Day 3: Distribution - 137
 *** OTP - 138
     - *Joe asks: What Does OTP Stand For?*
