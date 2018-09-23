@@ -359,15 +359,87 @@
 
 ** DONE Creating an actor - 38
    CLOSED: [2018-08-26 Sun 14:22]
-   #+BEGIN_SRC scala
-     val actor: ActorRef =
-       actorSystem.actorSystem(Props(classOf[ScalaPongActor]))
-   #+END_SRC
+   - History:
+     Using _message-passing_ instead of _method invocation_ enforces encapsulation.
+     =from Jian= you can NOT access the memebers of a instance directly!
+
+     Alan Kay, who originally described Object-Oriented programming, actually
+     included _message-passing_ as one of the definitions of object-oriented
+     programming.
+     #+BEGIN_QUOTE
+     I made up the term 'object-oriented', and I can tell you I didn't have C++ in mind
+                                                                -- Alan Kay, OOPSLA '97
+     #+END_QUOTE
+
+   - Using a message-based approach allows to encapsulate the instance of an actor
+     quite completely -- _ONLY communicate through messages_, then there is never
+     any need to access the actor instance and its members directly.
+
+   - The ~ActorRef~ is an _un-typed reference_ that encapsulates the /actor/ behind
+     a layer of abstraction and gives us the mechanisms to interact with the /actor/.
+
+   - Create an /actor/ and return its /reference/:
+     + Scala
+       #+BEGIN_SRC scala
+         val actor: ActorRef =
+           actorSystem.actorOf(Props(classOf[ScalaPongActor]))
+       #+END_SRC
+
+     + Java
+       #+BEGIN_SRC java
+         ActorRef actor =
+           actorSystem.actorOf(Props.create(javaPongActor.class));
+       #+END_SRC
+
+     =from Jian=
+     Why NOT use ~actorSystem.actorOf(new ScalaPongActor)~ instead of ~Props~???
+     =TODO= =TODO= =TODO= =TODO=
 
    - The /actor/ are encapsulated -- they *should NOT* be accessible.
 
 *** Props - 39
-    - You can use ~ActorRef~ to get a /reference/ to an /actor/.
+    - *Two* ways to get an /actor reference/:
+      1. we can create an ~Actor~ and gain a /reference/ to it by calling
+         ~system.actorOf~ and pass it a ~Props~ /instance/
+         * an /actor instance/
+           OR
+         * an /actor class/ and its arguments for construction.
+
+         We can also give the actor a name by passing that into the ~actorOf~ method.
+
+      2. Finally, we can look up an _existing_ /actor/, even on a _remote_ system,
+         by using ~actorSelection~.
+
+    - A complete syntax of the ~Props~ usage:
+      + Scala
+        #+BEGIN_SRC scala
+          Props(classOf[requiredActorClass], arg1, arg2, ..argi.., argn)
+
+          // The IDE says this is better:
+          Props(new requiredActorClass(arg1, arg2, ..argi.., argn))
+        #+END_SRC
+
+      + Java
+        #+BEGIN_SRC java
+          Props.create(requiredActorClass.class, arg1, arg2, ..argi.., argn);
+        #+END_SRC
+
+    - We can create factory methods ~props~
+      + Scala
+        #+BEGIN_SRC scala
+          object ScalaPongActor {
+            def props(response: String): Props = {
+              Props(new ScalaPongActor(response))
+            }
+          }
+        #+END_SRC
+
+      + Java
+        #+BEGIN_SRC java
+          public static Props props(String response) {
+              return Props.create(this.class, response);
+          }
+        #+END_SRC
 
     - You can use ~ActorRef.path~ to get the /path/ of an /actor/, for example:
       + Local /actor/:
@@ -376,15 +448,11 @@
       + Remote /actor/:
         ~akka.tcp://my-sys@remotehost:5678/user/CharlieChaplin~
 
-    - If you know the /path/ of an /actor/, you can also use ~actorSelection~ to
-      get a /reference/ to an /actor/.
+    - Use ~actorSelection~ and an /actor path/ to its /actor reference/:
       #+BEGIN_SRC scala
         val selection: ActorSelection =
           system.actorSelection("akka.tcp://actorSystem@host.jason-goodwin.com:5678/user/KeanuReeves")
       #+END_SRC
-
-      + The ~ActorSelection~ here is a reference to a remote actor -- we can use the
-        ~ActorSelection~ like the ~ActorRef~ to communicate over the network.
 
     - =TODO=
       NOTE

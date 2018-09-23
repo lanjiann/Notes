@@ -34,9 +34,54 @@
 - [[5. Actors - 115][5. Actors - 115]]
   - [[More Object-Oriented than Objects - 115][More Object-Oriented than Objects - 115]]
   - [[Day 1: Messages and Mailboxes - 116][Day 1: Messages and Mailboxes - 116]]
+    - [[Our First Actor - 116][Our First Actor - 116]]
+    - [[Mailboxes Are Queues - 117][Mailboxes Are Queues - 117]]
+    - [[Receiving Messages - 118][Receiving Messages - 118]]
+    - [[Linking Processes - 119][Linking Processes - 119]]
+    - [[Stateful Actors - 120][Stateful Actors - 120]]
+    - [[Hiding Messages Behind an API - 121][Hiding Messages Behind an API - 121]]
+    - [[Bidirectional Communication - 122][Bidirectional Communication - 122]]
+    - [[Naming Processes - 123][Naming Processes - 123]]
+    - [[Interlude—First-Class Functions - 124][Interlude—First-Class Functions - 124]]
+    - [[Parallel Map - 125][Parallel Map - 125]]
+    - [[Day 1 Wrap-Up - 126][Day 1 Wrap-Up - 126]]
+      - [[What We Learned in Day 1 - 126][What We Learned in Day 1 - 126]]
+      - [[Day 1 Self-Study - 126][Day 1 Self-Study - 126]]
   - [[Day 2: Error Handling and Resilience - 127][Day 2: Error Handling and Resilience - 127]]
+    - [[A Caching Actor - 127][A Caching Actor - 127]]
+    - [[Fault Detection - 130][Fault Detection - 130]]
+    - [[Supervising a Process - 132][Supervising a Process - 132]]
+    - [[Timeouts - 133][Timeouts - 133]]
+    - [[The Error-Kernel Pattern - 134][The Error-Kernel Pattern - 134]]
+    - [[Let It Crash! - 135][Let It Crash! - 135]]
+    - [[Day 2 Wrap-Up - 137][Day 2 Wrap-Up - 137]]
+      - [[What We Learned in Day 2 - 137][What We Learned in Day 2 - 137]]
+      - [[Day 2 Self-Study - 137][Day 2 Self-Study - 137]]
   - [[Day 3: Distribution - 137][Day 3: Distribution - 137]]
+    - [[OTP - 138][OTP - 138]]
+      - [[Functions and Pattern Matching - 138][Functions and Pattern Matching - 138]]
+      - [[Reimplementing Cache with GenServer - 139][Reimplementing Cache with GenServer - 139]]
+      - [[An OTP Supervisor - 141][An OTP Supervisor - 141]]
+    - [[Nodes - 141][Nodes - 141]]
+      - [[Connecting Nodes - 142][Connecting Nodes - 142]]
+      - [[Remote Execution - 143][Remote Execution - 143]]
+      - [[Remote Messaging - 143][Remote Messaging - 143]]
+    - [[Distributed Word Count - 145][Distributed Word Count - 145]]
+      - [[Counting Words - 145][Counting Words - 145]]
+      - [[Keeping Track of Totals - 147][Keeping Track of Totals - 147]]
+      - [[Parsing and Fault Tolerance - 147][Parsing and Fault Tolerance - 147]]
+      - [[The Big Win - 149][The Big Win - 149]]
+    - [[Day 3 Wrap-Up - 150][Day 3 Wrap-Up - 150]]
+      - [[What We Learned in Day 3 - 150][What We Learned in Day 3 - 150]]
+      - [[Day 3 Self-Study - 150][Day 3 Self-Study - 150]]
   - [[Wrap-Up - 150][Wrap-Up - 150]]
+    - [[Strengths - 151][Strengths - 151]]
+      - [[Messaging and Encapsulation - 151][Messaging and Encapsulation - 151]]
+      - [[Fault Tolerance - 151][Fault Tolerance - 151]]
+      - [[Distributed Programming - 151][Distributed Programming - 151]]
+    - [[Weaknesses - 152 - =RE-READ=][Weaknesses - 152 - =RE-READ=]]
+    - [[Other Languages - 152][Other Languages - 152]]
+    - [[Final Thoughts - 152][Final Thoughts - 152]]
 - [[6. Communicating Sequential Processes - 153][6. Communicating Sequential Processes - 153]]
   - [[Communication Is Everything - 153][Communication Is Everything - 153]]
   - [[Day 1: Channels and Go Blocks - 154][Day 1: Channels and Go Blocks - 154]]
@@ -92,12 +137,369 @@
 ** Day 3: In Depth - 106
 ** Wrap-Up - 113
 
-* 5. Actors - 115
-** More Object-Oriented than Objects - 115
-** Day 1: Messages and Mailboxes - 116
-** Day 2: Error Handling and Resilience - 127
-** Day 3: Distribution - 137
-** Wrap-Up - 150
+* TODO 5. Actors - 115
+** TODO More Object-Oriented than Objects - 115
+   - Functional programming AVOIDS the problems associated with *shared mutable state*,
+     by *avoiding* /mutable state/
+
+     /Actor model/ AVOIDS *share*, but retains *mutable state*.
+
+   - Many concepts in /actor modle/ is similar to the ones in the _popular OO
+     program_, but they have some significant differences:
+     + /actors/ run concurrently with each other
+
+     + /actors/ _REALLY_ communicate by passing messages.
+
+       However, the message passing of _popular OO program_ is mostly limited to
+       calling /methods/.
+
+   - Use Elixir code as an illustration!
+
+   - In day 1
+     The basics of the actor model -- creating actors and sending and receiving
+     messages.
+
+     In day 2
+     How failure detection, coupled with the "let it crash" philosophy, allows
+     actor programs to be fault-tolerant.
+
+     In day 3
+     How actors' support for distributed programming allows us to both scale
+     beyond a single machine and recover from failure of one or more of those
+     machines.
+
+** TODO Day 1: Messages and Mailboxes - 116
+   - *Joe asks: Actor or Process?*
+     =TODO=
+
+*** DONE Our First Actor - 116
+    CLOSED: [2018-09-22 Sat 14:20]
+    #+BEGIN_SRC elixir
+      # Actors/hello_actors/hello_actors.exs
+      defmodule Talker do
+        def loop do
+          receive do
+            {:greet,     name     } -> IO.puts {"Hello #{name}"}
+            {:praise,    name     } -> IO.puts {"#{name}, you're amazing"}
+            {:celebrate, name, age} -> IO.puts {"Here's to another #{age} years, #{name}"}
+          end
+          loop
+        end
+      end
+
+      pid = spawn(&Talker.loop/0)  ## Create an actor, and use `pid` to refer it.
+      send(pid, {:greet, "Huey"})
+      send(pid, {:praise, "Dewey"})
+      send(pid, {:celebrate, "Louie", 16})
+      sleep(1000)  ## NOT a good way, learn a better way later!
+
+      # Hello Huey
+      # Dewey, you're amazing
+      # Here's to another 16 years, Louie
+    #+END_SRC
+
+    See what's going on under the hood.
+
+*** DONE Mailboxes Are Queues - 117
+    CLOSED: [2018-09-22 Sat 14:28]
+    - One of the most important features of /actor/ programming is that
+      _messages are sent /asynchronously/_ -- to each /mailbox/ of the receiver
+      /actors/.
+
+    - This means that actors are *decoupled* --
+      /actors/ run at their own speed and do _NOT block_ when sending messages.
+
+    - An /actor/ *runs* /concurrently/ with other /actors/
+      but *handles messages* /sequentially/, in the order they were added to the
+      mailbox, moving on to the next message only when it's finished processing
+      the current message.
+
+      =TODO= =IMPORTANT=
+      We only have to worry about concurrency when sending messages.
+
+*** DONE Receiving Messages - 118
+    CLOSED: [2018-09-22 Sat 14:34]
+    - An /actor/ typically sits in an _infinite loop_, waiting for a message to
+      arrive with receive and then processing it.
+
+      Our ~loop~ function (in ~Talker~ module) implements an _infinite loop_ by
+      calling itself recursively
+
+    - *Joe asks: Won’t Infinite Recursion Blow Up the Stack?*
+     Exilir implements /tail-call elimination/
+    1
+*** DONE Linking Processes - 119
+    CLOSED: [2018-09-22 Sat 15:50]
+    - We need two things to be able to shut down cleanly.
+      1. we need a way to tell our /actor/ to stop when it's finished processing
+         all the messages in its queue.
+
+         + solution: add a new kind of message and its handler:
+           ~{:shutdown} -> exit(:normal)~
+
+      2. we need some way to know that it has done so.
+
+         + solution:
+           Use
+           #+BEGIN_SRC elixir
+             Process.flag(:trap_exit, true)
+             pid = spawn_link(&Talker.loop/0)
+           #+END_SRC
+
+           and then, after sending ~{:shutdown}~,
+
+           #+BEGIN_SRC elixir
+             receive do
+               {:EXIT, ^pid, reason} -> IO.puts("Talker has exited (#{reason})")
+             end
+           #+END_SRC
+
+    - Solution:
+      #+BEGIN_SRC elixir
+        defmodule Talker do
+          def loop do
+            receive do
+              {:greet,     name}      -> IO.puts("Hello #{name}")
+              {:praise,    name}      -> IO.puts("#{name}, you're amazing")
+              {:celebrate, name, age} -> IO.puts("Here's to another #{age} years, #{name}")
+              {:shutdown}             -> exit(:normal)
+            end
+            loop
+          end
+        end
+
+        Process.flag(:trap_exit, true)
+        pid = spawn_link(&Talker.loop/0)
+        send(pid, {:greet, "Huey"})
+        send(pid, {:praise, "Dewey"})
+        send(pid, {:celebrate, "Louie", 16})
+        send(pid, {:shutdown})
+
+        receive do
+          {:EXIT, ^pid, reason} -> IO.puts("Talker has exited (#{reason})")
+        end
+
+        # Hello Huey
+        # Dewey, you're amazing
+        # Here's to another 16 years, Louie
+        # Talker has exited (normal)
+      #+END_SRC
+
+    - 
+
+*** DONE Stateful Actors - 120
+    CLOSED: [2018-09-22 Sat 16:02]
+    They are actually recursions.
+    #+BEGIN_SRC elixir
+      ## Actors/counter/counter.ex
+      defmodule Counter do
+        def loop(count) do
+          receive do
+            {:next} ->
+              IO.puts("Current count: #{count}")
+              loop(count + 1)
+          end
+        end
+      end
+
+      counter = spawn(Counter, :loop, [1])
+      send(counter, {:next})  # Current count: 1
+      send(counter, {:next})  # Current count: 2
+      send(counter, {:next})  # Current count: 3
+    #+END_SRC
+
+    This is the actor, which can safely access the states withough any
+    concurrency bugs -- messages are *handled sequentially*.
+
+*** DONE Hiding Messages Behind an API - 121
+    CLOSED: [2018-09-22 Sat 16:47]
+    #+BEGIN_SRC elixir
+      defmodule Counter do
+        def start(count) do
+          spawn(__MODULE__, :loop, [count])
+        end
+
+        def next(counter) do
+          send(counter, {:next})
+        end
+
+        def loop(count) do
+          receive do
+            {:next} ->
+              IO.puts("Current count: #{count}")
+              loop(count + 1)
+          end
+        end
+      end
+
+      counter = Counter.start(42)  ## #PID<0.44.0>
+      Counter.next(counter)  ## Current count: 42 # {:next}
+      Counter.next(counter)  ## Current count: 43 # {:next}
+    #+END_SRC
+
+    Next, let's make bidirectional communication, and then we can do something
+    more interesting than just print out states.
+
+*** TODO Bidirectional Communication - 122
+    The /actor model/ does *NOT* provide direct support for replies,
+
+    but it's something we can _build for ourselves very easily_ *by including
+    the identifier of the sending process in the message*, which allows the
+    recipient to send a reply:
+    #+BEGIN_SRC elixir
+      defmodule Counter do
+        def start(count) do
+          spawn(__MODULE__, :loop, [count])
+        end
+
+        def next(counter) do
+          ref = make_ref()
+          send(counter, {:next, self(), ref})
+          receive do
+            {:ok, ^ref, count} -> count
+          end
+        end
+
+        def loop(count) do
+          receive do
+            {:next, sender, ref} ->
+              send(sender, {:ok, ref, count})
+              loop(count + 1)
+          end
+        end
+      end
+
+      counter = Counter.start(42)  ## #PID<0.47.0>
+      Counter.next(counter)        ## 42
+      Counter.next(counter)        ## 43
+    #+END_SRC
+    
+    - *Joe asks: Why Reply with a Tuple?*
+      Certainly, you can simply reply the _count_, like ~send(sender, count)~,
+      rather than a tuple contains it.
+
+      However, *idiomatic Elixir* typically uses _tuples as messages_, where
+      + the first element indicates success or failure.
+
+      In this instance, we also include a unique reference generated by the
+      client, which ensures that the reply will be correctly identified in the
+      event that there are multiple messages waiting in the client's mailbox.
+
+    - NEXT: =TODO=
+      We'll make one further improvement to ~Counter~ before we move on --
+      _giving it a name to make it discoverable_.
+
+*** TODO Naming Processes - 123
+    - Unitl now, we only sent messages to /actors/ we created. Then,
+      + Q :: How to send messages to /actors/ that are NOT created by us???
+
+      + A :: There are several ways!
+             The most convenient is to _register a name_ for the /process (actor
+             in elixir)/.
+
+    
+
+    xxx
+
+*** TODO Interlude—First-Class Functions - 124
+    xxx
+
+*** TODO Parallel Map - 125
+    xxx
+
+*** TODO Day 1 Wrap-Up - 126
+    xxx
+**** What We Learned in Day 1 - 126
+**** Day 1 Self-Study - 126
+***** Find
+***** Do
+
+** TODO Day 2: Error Handling and Resilience - 127
+*** TODO A Caching Actor - 127
+*** TODO Fault Detection - 130
+*** TODO Supervising a Process - 132
+*** TODO Timeouts - 133
+*** TODO The Error-Kernel Pattern - 134
+*** TODO Let It Crash! - 135
+*** TODO Day 2 Wrap-Up - 137
+**** What We Learned in Day 2 - 137
+**** Day 2 Self-Study - 137
+***** Find
+***** Do
+** TODO Day 3: Distribution - 137
+*** OTP - 138
+    - *Joe asks: What Does OTP Stand For?*
+**** Functions and Pattern Matching - 138
+**** Reimplementing Cache with GenServer - 139
+**** An OTP Supervisor - 141
+     - *Joe asks: What Is a Restart Strategy?*
+
+*** Nodes - 141
+    - *Joe asks: What Else Does OTP Do?*
+
+**** Connecting Nodes - 142
+     - *Joe asks: What If I Only Have One Computer?*
+
+**** Remote Execution - 143
+**** Remote Messaging - 143
+     - *Joe asks: How Do I Manage My Cluster?*
+
+*** Distributed Word Count - 145
+**** Counting Words - 145
+**** Keeping Track of Totals - 147
+**** Parsing and Fault Tolerance - 147
+**** The Big Win - 149
+
+*** Day 3 Wrap-Up - 150
+**** What We Learned in Day 3 - 150
+**** Day 3 Self-Study - 150
+***** Find
+***** Do
+
+** TODO Wrap-Up - 150
+   #+BEGIN_QUOTE
+   I’m sorry that I long ago coined the term “objects” for this topic because it
+   gets many people to focus on the lesser idea.
+
+   The big idea is “messaging” ... The Japanese have a small word—ma—for “that
+   which is in-between”—perhaps the nearest English equivalent is
+   “interstitial.” The key in making great and growable systems is much more to
+   design how its modules communicate rather than what their internal properties
+   and behaviors should be.     -- by Alan Kay (http://c2.com/cgi/wiki?AlanKayOnMessaging)
+   #+END_QUOTE
+
+*** Strengths - 151
+**** Messaging and Encapsulation - 151
+**** Fault Tolerance - 151
+**** Distributed Programming - 151
+
+*** DONE Weaknesses - 152 - =RE-READ=
+    CLOSED: [2018-09-22 Sat 14:18]
+    - actors are still susceptible to problems
+      like deadlock plus a few failure modes unique to actors (such as overflowing
+      an actor’s mailbox).
+      Although a program constructed with /actors/ is easier to debug than one
+      constructed with threads and locks,
+
+    - As with /threads/ and /locks/, /actors/ provide *no direct support for
+      parallelism*.
+      Parallel solutions need to be built from concurrent building blocks,
+      raising the specter of nondeterminism. =TODO= =???=
+
+      And because /actors/ do _NOT share state_ and can ONLY communicate through
+      message passing, /actors/ are *not a suitable choice if you need fine-grained
+      parallelism*.
+
+*** DONE Other Languages - 152
+    CLOSED: [2018-09-22 Sat 14:14]
+    - The /actor model/ is first described in the 1970s, most notably by Carl Hewitt.
+
+    - The most popular one: Erlang
+
+    - Now, many languages have actor model library:
+      Akka for Scala and Java (theoretically and more generally, JVM-based languages).
+
+*** Final Thoughts - 152
 
 * 6. Communicating Sequential Processes - 153
 ** Communication Is Everything - 153
