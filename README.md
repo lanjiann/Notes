@@ -136,6 +136,7 @@ Algorithm, Programming Languages Theory, and Concurrencies.
 │   └── Thinking-in-Java-4th.org</br>
 ├── Lang_JavaScript</br>
 │   └── Eloquent-JavaScript-2nd.org</br>
+│   └── Eloquent-JavaScript-3nd.org</br>
 ├── Lang_Kotlin</br>
 │   └── Kotlin-in-Action.org [**PAUSE**]</br>
 ├── Lang_ML</br>
