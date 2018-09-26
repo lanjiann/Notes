@@ -1,0 +1,3234 @@
+#+TITLE: Programming Elixir \ge{} 1.6
+#+SUBTITLE: Functional |> Concurrent |> Pragmatic |> Fun
+#+AUTHOR: Dave Thomas
+#+Foreword by: José Valim
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Foreword - ?][Foreword - ?]]
+- [[A Vain Attempt at a Justification - ?][A Vain Attempt at a Justification - ?]]
+  - [[Acknowledgments - ?][Acknowledgments - ?]]
+- [[1. Take the Red Pill - 1][1. Take the Red Pill - 1]]
+  - [[Programming Should Be About Transforming Data - 1][Programming Should Be About Transforming Data - 1]]
+    - [[Combine Transformations with Pipelines][Combine Transformations with Pipelines]]
+    - [[Functions Are Data Transformers][Functions Are Data Transformers]]
+  - [[Installing Elixir - 4][Installing Elixir - 4]]
+  - [[Running Elixir - 4][Running Elixir - 4]]
+    - [[iex—Interactive Elixir][iex—Interactive Elixir]]
+    - [[IEx Helpers][IEx Helpers]]
+    - [[Customizing iex][Customizing iex]]
+    - [[Compile and Run][Compile and Run]]
+  - [[Suggestions for Reading the Book - 9][Suggestions for Reading the Book - 9]]
+  - [[Exercises - 10][Exercises - 10]]
+  - [[Think Different(ly) - 10][Think Different(ly) - 10]]
+- [[Part I. Conventional Programming][Part I. Conventional Programming]]
+- [[2. Pattern Matching - 13][2. Pattern Matching - 13]]
+  - [[Assignment: I Do Not Think It Means What You Think It Means - 13][Assignment: I Do Not Think It Means What You Think It Means - 13]]
+  - [[More Complex Matches - 14][More Complex Matches - 14]]
+  - [[Ignoring a Value with ~_~ (Underscore) - 16][Ignoring a Value with ~_~ (Underscore) - 16]]
+  - [[Variables Bind Once (per Match) - 16][Variables Bind Once (per Match) - 16]]
+  - [[Another Way of Looking at the Equals Sign - 18][Another Way of Looking at the Equals Sign - 18]]
+- [[3. Immutability - 19][3. Immutability - 19]]
+  - [[You Already Have (Some) Immutable Data - 19][You Already Have (Some) Immutable Data - 19]]
+  - [[Immutable Data Is Known Data - 20][Immutable Data Is Known Data - 20]]
+  - [[Performance Implications of Immutability - 21][Performance Implications of Immutability - 21]]
+    - [[Copying Data][Copying Data]]
+    - [[Garbage Collection][Garbage Collection]]
+  - [[Coding with Immutable Data - 22][Coding with Immutable Data - 22]]
+- [[4. Elixir Basics - 23 - =TODO: Left=][4. Elixir Basics - 23 - =TODO: Left=]]
+  - [[Built-in Types - 23][Built-in Types - 23]]
+  - [[Value Types - 24][Value Types - 24]]
+    - [[Integers][Integers]]
+    - [[Floating-Point Numbers][Floating-Point Numbers]]
+    - [[Atoms][Atoms]]
+    - [[Ranges][Ranges]]
+    - [[Regular Expressions][Regular Expressions]]
+  - [[System Types - 26][System Types - 26]]
+    - [[PIDs and Ports][PIDs and Ports]]
+    - [[References - =TODO=][References - =TODO=]]
+  - [[Collection Types - 26][Collection Types - 26]]
+    - [[Tuples][Tuples]]
+    - [[Lists][Lists]]
+      - [[Keyword Lists =More Example=][Keyword Lists =More Example=]]
+  - [[Maps - 29][Maps - 29]]
+    - [[Accessing a Map][Accessing a Map]]
+  - [[Binaries - 30][Binaries - 30]]
+  - [[Dates and Times - 31][Dates and Times - 31]]
+  - [[Names, Source Files, Conventions, Operators, and So On - 32][Names, Source Files, Conventions, Operators, and So On - 32]]
+    - [[Truth][Truth]]
+    - [[Operators][Operators]]
+  - [[Variable Scope - 34][Variable Scope - 34]]
+    - [[Do-block Scope][Do-block Scope]]
+    - [[The ~with~ Expression][The ~with~ Expression]]
+    - [[~with~ and Pattern Matching][~with~ and Pattern Matching]]
+    - [[A Minor Gotcha][A Minor Gotcha]]
+  - [[End of the Basics - 36][End of the Basics - 36]]
+- [[5. Anonymous Functions - 37][5. Anonymous Functions - 37]]
+  - [[Functions and Pattern Matching - 38][Functions and Pattern Matching - 38]]
+  - [[One Function, Multiple Bodies - 39][One Function, Multiple Bodies - 39]]
+  - [[Functions Can Return Functions - 41][Functions Can Return Functions - 41]]
+    - [[Functions Remember Their Original Environment][Functions Remember Their Original Environment]]
+    - [[Parameterized Functions][Parameterized Functions]]
+  - [[Passing Functions As Arguments - 43][Passing Functions As Arguments - 43]]
+    - [[Pinned Values and Function Parameters][Pinned Values and Function Parameters]]
+    - [[The ~&~ Notation][The ~&~ Notation]]
+  - [[Functions Are the Core - 46][Functions Are the Core - 46]]
+- [[6. Modules and Named Functions - 47][6. Modules and Named Functions - 47]]
+  - [[Compiling a Module - 47][Compiling a Module - 47]]
+  - [[The Function's Body Is a Block - 48][The Function's Body Is a Block - 48]]
+  - [[Function Calls and Pattern Matching - 49][Function Calls and Pattern Matching - 49]]
+  - [[Guard Clauses - 52][Guard Clauses - 52]]
+    - [[Guard-Clause Limitations =TODO= =RE-READ=][Guard-Clause Limitations =TODO= =RE-READ=]]
+  - [[Default Parameters - 53][Default Parameters - 53]]
+  - [[Private Functions - 57][Private Functions - 57]]
+  - [[The Amazing Pipe Operator: ~|>~ - 58][The Amazing Pipe Operator: ~|>~ - 58]]
+  - [[Modules - 59][Modules - 59]]
+    - [[Directives for Modules][Directives for Modules]]
+    - [[The ~import~ Directive][The ~import~ Directive]]
+    - [[The ~alias~ Directive][The ~alias~ Directive]]
+    - [[The ~require~ Directive][The ~require~ Directive]]
+  - [[Module Attributes - 62][Module Attributes - 62]]
+  - [[Module Names: Elixir, Erlang, and Atoms - 63][Module Names: Elixir, Erlang, and Atoms - 63]]
+  - [[Calling a Function in an Erlang Library - 63][Calling a Function in an Erlang Library - 63]]
+  - [[Finding Libraries - 64][Finding Libraries - 64]]
+- [[7. Lists and Recursion - 65][7. Lists and Recursion - 65]]
+  - [[Heads and Tails - 65][Heads and Tails - 65]]
+  - [[Using Head and Tail to Process a List - 66][Using Head and Tail to Process a List - 66]]
+  - [[Using Head and Tail to Build a List - 68][Using Head and Tail to Build a List - 68]]
+  - [[Creating a Map Function - 69][Creating a Map Function - 69]]
+  - [[Reducing a List to a Single Value - ?? - =TODO= =1 Exercise=][Reducing a List to a Single Value - ?? - =TODO= =1 Exercise=]]
+  - [[More Complex List Patterns - 73][More Complex List Patterns - 73]]
+    - [[Lists of Lists][Lists of Lists]]
+  - [[The List Module in Action - 76 - =TODO= =Re-Read=][The List Module in Action - 76 - =TODO= =Re-Read=]]
+  - [[Get Friendly with Lists - 77][Get Friendly with Lists - 77]]
+- [[8. Maps, Keyword Lists, Sets, and Structs - 79][8. Maps, Keyword Lists, Sets, and Structs - 79]]
+  - [[How to Choose Between Maps, Structs, and Keyword Lists - 79][How to Choose Between Maps, Structs, and Keyword Lists - 79]]
+  - [[Keyword Lists - 79][Keyword Lists - 79]]
+  - [[Maps - 80][Maps - 80]]
+  - [[Pattern Matching and Updating Maps - 81][Pattern Matching and Updating Maps - 81]]
+    - [[Pattern Matching Can't Bind Keys][Pattern Matching Can't Bind Keys]]
+    - [[Pattern Matching Can Match Variable Keys][Pattern Matching Can Match Variable Keys]]
+  - [[Updating a Map - 83][Updating a Map - 83]]
+  - [[Structs - 83][Structs - 83]]
+  - [[Nested Dictionary Structures - 85][Nested Dictionary Structures - 85]]
+    - [[Nested Accessors and Nonstructs][Nested Accessors and Nonstructs]]
+    - [[Dynamic (Runtime) Nested Accessors][Dynamic (Runtime) Nested Accessors]]
+    - [[The Access Module][The Access Module]]
+  - [[Sets - 90][Sets - 90]]
+  - [[With Great Power Comes Great Temptation - 91][With Great Power Comes Great Temptation - 91]]
+- [[9. An Aside -- What Are Types? - 93][9. An Aside -- What Are Types? - 93]]
+- [[10. Processing Collections - ~Enum~ and ~Stream~ - 95][10. Processing Collections - ~Enum~ and ~Stream~ - 95]]
+  - [[~Enum~ -- Processing Collections - 95][~Enum~ -- Processing Collections - 95]]
+    - [[A Note on Sorting][A Note on Sorting]]
+  - [[Streams -- Lazy Enumerables - 99][Streams -- Lazy Enumerables - 99]]
+    - [[A Stream Is a Composable Enumerator][A Stream Is a Composable Enumerator]]
+    - [[Infinite Streams][Infinite Streams]]
+    - [[Creating Your Own Streams][Creating Your Own Streams]]
+      - [[~Stream.cycle~][~Stream.cycle~]]
+      - [[~Stream.repeatedly~][~Stream.repeatedly~]]
+      - [[~Stream.iterate~][~Stream.iterate~]]
+      - [[~Stream.unfold~ - =RE-DO=][~Stream.unfold~ - =RE-DO=]]
+      - [[~Stream.resource~][~Stream.resource~]]
+    - [[Streams in Practice][Streams in Practice]]
+  - [[The ~Collectable~ Protocol - 106][The ~Collectable~ Protocol - 106]]
+  - [[Comprehensions - 107][Comprehensions - 107]]
+    - [[Comprehensions Work on Bits, Too - =Re-Read= =TODO=][Comprehensions Work on Bits, Too - =Re-Read= =TODO=]]
+    - [[Scoping and Comprehensions][Scoping and Comprehensions]]
+    - [[The Value Returned by a Comprehension][The Value Returned by a Comprehension]]
+  - [[Moving Past Divinity - 111][Moving Past Divinity - 111]]
+- [[11. Strings and Binaries - 113][11. Strings and Binaries - 113]]
+  - [[String Literals - 113][String Literals - 113]]
+    - [[Heredocs][Heredocs]]
+    - [[Sigils][Sigils]]
+  - [[The Name "strings" - 116][The Name "strings" - 116]]
+  - [[Single-Quoted Strings -- Lists of Character Codes - 117][Single-Quoted Strings -- Lists of Character Codes - 117]]
+  - [[Binaries - 119][Binaries - 119]]
+  - [[Double-Quoted Strings Are Binaries - 120][Double-Quoted Strings Are Binaries - 120]]
+    - [[Strings and Elixir Libraries][Strings and Elixir Libraries]]
+  - [[Binaries and Pattern Matching - 126][Binaries and Pattern Matching - 126]]
+    - [[String Processing with Binaries][String Processing with Binaries]]
+  - [[Familiar Yet Strange - 127][Familiar Yet Strange - 127]]
+- [[12. Control Flow - 129][12. Control Flow - 129]]
+  - [[~if~ and ~unless~ - 129][~if~ and ~unless~ - 129]]
+  - [[~cond~ - 130][~cond~ - 130]]
+  - [[~case~ - 133][~case~ - 133]]
+  - [[Raising Exceptions - 134][Raising Exceptions - 134]]
+  - [[Designing with Exceptions - 134][Designing with Exceptions - 134]]
+  - [[Doing More with Less - 135][Doing More with Less - 135]]
+- [[13. Organizing a Project - 137][13. Organizing a Project - 137]]
+  - [[The Project: Fetch Issues from GitHub - 137][The Project: Fetch Issues from GitHub - 137]]
+    - [[How Our Code Will Do It][How Our Code Will Do It]]
+  - [[Step 1: Use Mix to Create Our New Project - 138][Step 1: Use Mix to Create Our New Project - 138]]
+    - [[Create the Project Tree][Create the Project Tree]]
+  - [[Transformation: Parse the Command Line - 141][Transformation: Parse the Command Line - 141]]
+  - [[Write Some Basic Tests - 142][Write Some Basic Tests - 142]]
+    - [[Refactor: Big Function Alert][Refactor: Big Function Alert]]
+  - [[Transformation: Fetch from GitHub - 144][Transformation: Fetch from GitHub - 144]]
+  - [[Step 2: Use Libraries - 145][Step 2: Use Libraries - 145]]
+    - [[Finding an External Library][Finding an External Library]]
+    - [[Adding a Library to Your Project][Adding a Library to Your Project]]
+    - [[Back to the Transformation][Back to the Transformation]]
+  - [[Transformation: Convert Response - 150][Transformation: Convert Response - 150]]
+    - [[Application Configuration][Application Configuration]]
+  - [[Transformation: Sort Data - 152][Transformation: Sort Data - 152]]
+  - [[Transformation: Take First n Items - 154][Transformation: Take First n Items - 154]]
+  - [[Transformation: Format the Table - 154][Transformation: Format the Table - 154]]
+  - [[Step 3: Make a Command-Line Executable - 157][Step 3: Make a Command-Line Executable - 157]]
+  - [[Step 4: Add Some Logging - 158][Step 4: Add Some Logging - 158]]
+  - [[Step 5: Create Project Documentation - 160][Step 5: Create Project Documentation - 160]]
+  - [[Coding by Transforming Data - 161][Coding by Transforming Data - 161]]
+- [[14. Tooling - 165][14. Tooling - 165]]
+  - [[Debugging with IEx][Debugging with IEx]]
+    - [[Injecting Breakpoints Using IEx.pry][Injecting Breakpoints Using IEx.pry]]
+    - [[Setting Breakpoints with Break][Setting Breakpoints with Break]]
+    - [[Does This Seem a Little Artificial?][Does This Seem a Little Artificial?]]
+  - [[Testing - 165][Testing - 165]]
+    - [[Testing the Comments][Testing the Comments]]
+    - [[Structuring Tests][Structuring Tests]]
+    - [[Property-Based Testing][Property-Based Testing]]
+    - [[Digging Deeper][Digging Deeper]]
+    - [[Test Coverage][Test Coverage]]
+  - [[Code Dependencies - 178][Code Dependencies - 178]]
+  - [[Server Monitoring - 179][Server Monitoring - 179]]
+  - [[Source-Code Formatting - ???][Source-Code Formatting - ???]]
+  - [[Inevitably, There's More - 182][Inevitably, There's More - 182]]
+- [[Part II. Concurrent Programming][Part II. Concurrent Programming]]
+- [[15. Working with Multiple Processes - 185][15. Working with Multiple Processes - 185]]
+  - [[A Simple Process][A Simple Process]]
+    - [[Sending Messages Between Processes][Sending Messages Between Processes]]
+    - [[Handling Multiple Messages][Handling Multiple Messages]]
+    - [[Recursion, Looping, and the Stack][Recursion, Looping, and the Stack]]
+  - [[Process Overhead][Process Overhead]]
+  - [[When Processes Die][When Processes Die]]
+    - [[Linking Two Processes][Linking Two Processes]]
+    - [[Monitoring a Process - =3 Exercises=][Monitoring a Process - =3 Exercises=]]
+  - [[Parallel Map -- The "Hello, World" of Erlang - =TODO= =EXERCISES=][Parallel Map -- The "Hello, World" of Erlang - =TODO= =EXERCISES=]]
+  - [[A Fibonacci Server][A Fibonacci Server]]
+    - [[The Task Scheduler][The Task Scheduler]]
+  - [[Agents -- A Teaser][Agents -- A Teaser]]
+  - [[Thinking in Processes][Thinking in Processes]]
+- [[16. Nodes -- The Key to Distributing Services - 207][16. Nodes -- The Key to Distributing Services - 207]]
+  - [[Naming Nodes][Naming Nodes]]
+    - [[Nodes, Cookies, and Security][Nodes, Cookies, and Security]]
+  - [[Naming Your Processes][Naming Your Processes]]
+  - [[Input, Output, PIDs, and Nodes][Input, Output, PIDs, and Nodes]]
+  - [[Nodes Are the Basis of Distribution][Nodes Are the Basis of Distribution]]
+- [[17. OTP: Servers - 217][17. OTP: Servers - 217]]
+  - [[Some OTP Definitions][Some OTP Definitions]]
+  - [[An OTP Server][An OTP Server]]
+    - [[State and the Single Server][State and the Single Server]]
+    - [[Our First OTP Server][Our First OTP Server]]
+      - [[Create a New Project Using Mix][Create a New Project Using Mix]]
+      - [[Create the Basic Sequence Server][Create the Basic Sequence Server]]
+      - [[Fire Up Our Server Manually][Fire Up Our Server Manually]]
+      - [[One-Way Calls][One-Way Calls]]
+      - [[Tracing a Server’s Execution][Tracing a Server’s Execution]]
+  - [[GenServer Callbacks][GenServer Callbacks]]
+  - [[Naming a Process][Naming a Process]]
+  - [[Tidying Up the Interface][Tidying Up the Interface]]
+  - [[Making Our Server into a Component][Making Our Server into a Component]]
+- [[18. OTP: Supervisors - 231][18. OTP: Supervisors - 231]]
+  - [[Supervisors and Workers][Supervisors and Workers]]
+    - [[Managing Process State Across Restarts][Managing Process State Across Restarts]]
+    - [[Simplifying the Stash][Simplifying the Stash]]
+  - [[Worker Restart Options][Worker Restart Options]]
+    - [[A Little More Detail][A Little More Detail]]
+  - [[Supervisors Are the Heart of Reliability][Supervisors Are the Heart of Reliability]]
+- [[19. A More Complex Example][19. A More Complex Example]]
+  - [[Introduction to Duper][Introduction to Duper]]
+    - [[Q1: What is the environment and what are its constraints?][Q1: What is the environment and what are its constraints?]]
+      - [[What this means:][What this means:]]
+    - [[Q2: What are the focal points?][Q2: What are the focal points?]]
+      - [[What this means:][What this means:]]
+    - [[Q3: What are the runtime characteristics?][Q3: What are the runtime characteristics?]]
+    - [[Q4: What do I protect from errors?][Q4: What do I protect from errors?]]
+      - [[What this means:][What this means:]]
+    - [[Q5. How do I get this thing running?][Q5. How do I get this thing running?]]
+      - [[What this means:][What this means:]]
+  - [[The Duper Application][The Duper Application]]
+    - [[The Results Server][The Results Server]]
+    - [[The PathFinder Server][The PathFinder Server]]
+    - [[The Worker Supervisor][The Worker Supervisor]]
+    - [[Thinking About Supervision Strategies][Thinking About Supervision Strategies]]
+    - [[The Gatherer Server][The Gatherer Server]]
+    - [[What About the Workers?][What About the Workers?]]
+  - [[But Does It Work?][But Does It Work?]]
+    - [[Let's Play with Timing][Let's Play with Timing]]
+  - [[Planning Your Elixir Application][Planning Your Elixir Application]]
+  - [[Next Up][Next Up]]
+- [[20. OTP: Applications - 241][20. OTP: Applications - 241]]
+  - [[This Is Not Your Father's Application][This Is Not Your Father's Application]]
+  - [[The Application Specification File][The Application Specification File]]
+  - [[Turning Our Sequence Program into an OTP Application][Turning Our Sequence Program into an OTP Application]]
+    - [[More on Application Parameters][More on Application Parameters]]
+  - [[Supervision Is the Basis of Reliability][Supervision Is the Basis of Reliability]]
+  - [[Releasing Your Code][Releasing Your Code]]
+  - [[Distillery -- The Elixir Release Manager][Distillery -- The Elixir Release Manager]]
+    - [[Before We Start][Before We Start]]
+    - [[Your First Release][Your First Release]]
+    - [[A Toy Deployment Environment][A Toy Deployment Environment]]
+    - [[Deploy and Run the App][Deploy and Run the App]]
+    - [[A Second Release][A Second Release]]
+    - [[Deploying an Upgrade][Deploying an Upgrade]]
+    - [[Migrating Server State][Migrating Server State]]
+  - [[OTP Is Big -- Unbelievably Big][OTP Is Big -- Unbelievably Big]]
+- [[21. Tasks and Agents - 257][21. Tasks and Agents - 257]]
+  - [[Tasks - 257][Tasks - 257]]
+    - [[Tasks and Supervision][Tasks and Supervision]]
+  - [[Agents - 258][Agents - 258]]
+  - [[A Bigger Example - 261][A Bigger Example - 261]]
+    - [[Making It Distributed][Making It Distributed]]
+  - [[Agents and Tasks, or GenServer? - 263][Agents and Tasks, or GenServer? - 263]]
+- [[Part III — More Advanced Elixir][Part III — More Advanced Elixir]]
+- [[22. Macros and Code Evaluation - 267][22. Macros and Code Evaluation - 267]]
+  - [[Implementing an if Statement - 267][Implementing an if Statement - 267]]
+  - [[Macros Inject Code - 269][Macros Inject Code - 269]]
+    - [[Load Order][Load Order]]
+    - [[The ~quote~ Function][The ~quote~ Function]]
+  - [[Using the Representation as Code - 271][Using the Representation as Code - 271]]
+    - [[The ~unquote~ Function][The ~unquote~ Function]]
+    - [[Expanding a List - ~unquote_splicing~][Expanding a List - ~unquote_splicing~]]
+    - [[Back to Our myif Macro][Back to Our myif Macro]]
+  - [[Using Bindings to Inject Values - 276][Using Bindings to Inject Values - 276]]
+  - [[Macros Are Hygienic - 277][Macros Are Hygienic - 277]]
+  - [[Other Ways to Run Code Fragments - 278][Other Ways to Run Code Fragments - 278]]
+  - [[Macros and Operators - 279][Macros and Operators - 279]]
+  - [[Digging Deeper - 280][Digging Deeper - 280]]
+  - [[Digging Ridiculously Deep - 280][Digging Ridiculously Deep - 280]]
+- [[23. Linking Modules: Behavio(u)rs and Use - 283][23. Linking Modules: Behavio(u)rs and Use - 283]]
+  - [[Behaviours - 283][Behaviours - 283]]
+    - [[Defining Behaviours][Defining Behaviours]]
+    - [[Declaring Behaviours][Declaring Behaviours]]
+    - [[Taking It Further][Taking It Further]]
+  - [[use and ~__using__~ - 285][use and ~__using__~ - 285]]
+  - [[Putting It Together -- Tracing Method Calls - 286][Putting It Together -- Tracing Method Calls - 286]]
+  - [[Use ~use~ - 289][Use ~use~ - 289]]
+- [[24. Protocols -- Polymorphic Functions - 291][24. Protocols -- Polymorphic Functions - 291]]
+  - [[Defining a Protocol - 291][Defining a Protocol - 291]]
+  - [[Implementing a Protocol - 292][Implementing a Protocol - 292]]
+  - [[The Available Types - 293][The Available Types - 293]]
+  - [[Protocols and Structs - 294][Protocols and Structs - 294]]
+  - [[Built-In Protocols - 295][Built-In Protocols - 295]]
+    - [[Built-in Protocols: Enumerable and Collectable][Built-in Protocols: Enumerable and Collectable]]
+    - [[Collectable][Collectable]]
+    - [[Remember the Big Picture][Remember the Big Picture]]
+    - [[Built-in Protocols: Inspect][Built-in Protocols: Inspect]]
+    - [[Better Formatting with Algebra Documents][Better Formatting with Algebra Documents]]
+    - [[Built-in Protocols: ~List.Chars~ and ~String.Chars~][Built-in Protocols: ~List.Chars~ and ~String.Chars~]]
+  - [[Protocols Are Polymorphism - 302][Protocols Are Polymorphism - 302]]
+- [[25. More Cool Stuff - 305][25. More Cool Stuff - 305]]
+  - [[Writing Your Own Sigils - 305][Writing Your Own Sigils - 305]]
+    - [[Picking Up the Options][Picking Up the Options]]
+  - [[Multi-app Umbrella Projects - 309][Multi-app Umbrella Projects - 309]]
+    - [[Create an Umbrella Project][Create an Umbrella Project]]
+    - [[Create the Subprojects][Create the Subprojects]]
+    - [[Making the Subproject Decision][Making the Subproject Decision]]
+    - [[The LineSigil Project][The LineSigil Project]]
+    - [[The Evaluator Project][The Evaluator Project]]
+    - [[Linking the Subprojects][Linking the Subprojects]]
+  - [[But Wait! There's More! - 313][But Wait! There's More! - 313]]
+- [[A1. Exceptions: ~raise~ and ~try~, ~catch~ and ~throw~ - 315][A1. Exceptions: ~raise~ and ~try~, ~catch~ and ~throw~ - 315]]
+  - [[Raising an Exception - 315][Raising an Exception - 315]]
+  - [[~catch~, ~exit~, and ~throw~ - 317][~catch~, ~exit~, and ~throw~ - 317]]
+  - [[Defining Your Own Exceptions - 318][Defining Your Own Exceptions - 318]]
+  - [[Now Ignore This Appendix - 319][Now Ignore This Appendix - 319]]
+- [[A2. Type Specifications and Type Checking - 321][A2. Type Specifications and Type Checking - 321]]
+  - [[When Specifications Are Used - 321][When Specifications Are Used - 321]]
+  - [[Specifying a Type - 322][Specifying a Type - 322]]
+  - [[Defining New Types - 324][Defining New Types - 324]]
+  - [[Specs for Functions and Callbacks - 325][Specs for Functions and Callbacks - 325]]
+  - [[Using Dialyzer - 326][Using Dialyzer - 326]]
+- [[Bibliography - 333][Bibliography - 333]]
+- [[Index - 335][Index - 335]]
+
+* Foreword - ?
+* A Vain Attempt at a Justification - ?
+** Acknowledgments - ?
+
+* DONE 1. Take the Red Pill - 1
+  CLOSED: [2018-09-24 Mon 22:36]
+  The Elixir programming language wraps functional programming with immutable
+  state and an actor-based approach to concurrency in a tidy, modern syntax. And
+  it runs on the industrial-strength, high-performance, distributed Erlang VM.
+
+  This means
+  - You can _stop worrying_ about many of the difficult things that currently
+    consume your time.
+
+  - You _no longer have to think too hard_ about protecting your /data consistency/
+    in a /multithreaded environment/.
+
+  - You _worry less_ about *scaling* your applications.
+
+  And, most importantly, you can think about programming in a different way.
+
+** DONE Programming Should Be About Transforming Data - 1
+   CLOSED: [2018-09-24 Mon 22:36]
+   - =NTOES= =TODO=
+
+*** DONE Combine Transformations with Pipelines
+    CLOSED: [2018-09-24 Mon 22:27]
+    - /Pipelines/ are good for combinations.
+
+    - /Pipelines/ are also good for operations in parallel.
+      For example,
+      ~grep Elixir *.pml | wc -l~
+
+      ~wc~ runs at the same time as the ~grep~ command.
+      Because ~wc~ consumes ~grep~'s output as it is produced, the answer is ready
+      with VIRTUALLY NO DELAY once ~grep~ finishes.
+
+*** DONE Functions Are Data Transformers
+    CLOSED: [2018-09-24 Mon 22:34]
+    - _The smaller_ -- *more focused* -- those functions, _the more flexibility_
+      we have when combining them.
+
+    - Quote:
+      #+BEGIN_QUOTE
+      Most programmers treat threads and processes as a necessary evil;
+      Elixir developers feel they are an important simplification.
+                                                                   -- Bruce Tate 
+      #+END_QUOTE
+
+    - You'll find the Elixir way is powerful, but this power comes at a price:
+      You're going to have to *unlearn* a whole lot of what you know about
+      programming. Many of *your instincts will be WRONG*.
+
+      And this will be frustrating, because you're going to feel like a total n00b.
+
+      =from Jian= However, that is worth it.
+
+** DONE Installing Elixir - 4 
+   CLOSED: [2018-09-24 Mon 00:03]
+   https://elixir-lang.org/install.html#unix-and-unix-like
+
+** DONE Running Elixir - 4 
+   CLOSED: [2018-09-23 Sun 23:56]
+*** DONE iex—Interactive Elixir
+    CLOSED: [2018-09-23 Sun 23:41]
+    - ~iex~ command
+
+    - Quit Elixir REPL:
+      + =Ctrl-C= twice
+      + =Ctrl-G= then =q= then =Return=
+      + One some systems, =Ctrl-\=
+
+*** DONE IEx Helpers
+    CLOSED: [2018-09-23 Sun 23:41]
+    - ~h IO~ or ~h(IO)~ check the help info.
+
+    - ~i 123~ displays information about a value.
+
+*** DONE Customizing iex
+    CLOSED: [2018-09-23 Sun 23:44]
+    Run ~h IEx.configure~ to learn.
+    - The configuration file is =.iex.exs=.
+
+    - Example:
+      ~IEx.configure colors: [eval_result: [:cyan, :bright]]~
+
+    - If your IEx session looks messed up (and things such as ~[33m~ appear in
+      the output), it's likely your console does *not support ANSI escape
+      sequences*. In that case, disable colorization using.
+      ~IEx.configure colors: [enabled: false]~
+
+    - You can put any Elixir code into =.iex.exs=.
+
+*** DONE Compile and Run
+    CLOSED: [2018-09-23 Sun 23:55]
+    - Convention:
+      + =.ex= files are intended to be compiled into bytecodes and then run
+
+      + =.exs= files are more like programs in scripting languages -- they are
+        effectively interpreted at the source level.
+
+    - By convention, we write /tests/ into =.exs= file.
+      You can imagine the rationale.
+
+    - Run it as a script:
+      The =hello.exes= includes one line ~IO.puts "Hello, World!"~
+      ~$ elixir hello.exs~.
+
+    - Inside IEx, compile and run with ~c~: ~c "hello.exs"~,
+
+      , and the return value is a list of /module names/, for this specific
+      example, it is ~[]~.
+
+    - Use ~import_file~. In this case, local variables set in the file are available
+      in the IEx session.
+
+    - Elixir convetion is to use two-column indentation and spaces (NOT tabs).
+
+** DONE Suggestions for Reading the Book - 9 
+   CLOSED: [2018-09-23 Sun 23:57]
+   - This book is NOT a top-to-bottom reference guide to Elixir.
+     It gives you enough info for you to ask questions.
+
+   - Join the Elixir mailing list and community.
+
+** DONE Exercises - 10
+   CLOSED: [2018-09-23 Sun 23:58]
+** DONE Think Different(ly) - 10
+   CLOSED: [2018-09-24 Mon 00:00]
+   - Object orientation is not the only way to design code.
+
+   - Functional programming need not be complex or mathematical.
+
+   - The bases of programming are not assignments, if statements, and loops.
+
+   - Concurrency does not need locks, semaphores, monitors, and the like.
+
+   - Processes are not necessarily expensive resources.
+
+   - Metaprogramming is not just something tacked onto a language.
+
+   - Even if it is work, programming should be fun.
+
+* TODO Part I. Conventional Programming
+* DONE 2. Pattern Matching - 13
+  CLOSED: [2018-09-24 Mon 00:33]
+  - =EN= engenders - 醞釀
+
+** DONE Assignment: I Do Not Think It Means What You Think It Means - 13
+   CLOSED: [2018-09-24 Mon 00:15]
+   - In Elixir, the _equals sign_ is *NOT* an /assignment/.
+     Instead it's LIKE an /assertion/. It succeeds if Elixir can find a way of
+     making the left-hand side equal the right-hand side. Elixir calls the ~=~
+     symbol the /match operator/.
+
+   - Example:
+     #+BEGIN_SRC elixir
+       a = 1  # 1
+       1 = a  # 1
+
+       a = 3  # 3
+
+       2 = a
+       # ** (MatchError) no match of right hand side value: 3
+     #+END_SRC
+
+     Yes, ~a~ can be both side, but a match leads a binding when the /variable name/
+     is in the LHS of ~=~. The right value of ~=~ will be first evaluated, and then
+     used (nothing is related the variable name after the value evaluated).
+
+** DONE More Complex Matches - 14
+   CLOSED: [2018-09-24 Mon 00:20]
+   - List: use the ~[1, 2]~-like syntax.
+
+   - Pattern matching /lists/:
+     #+BEGIN_SRC elixir
+       list = [1, 2, [3, 4, 5]] # [1, 2, [3, 4, 5]]
+       [a, b, c] = list         # [1, 2, [3, 4, 5]]
+
+       a  # 1
+       b  # 2
+       c  # [3, 4, 5]
+
+
+       [d, 2, f] = [1, 2, 3]
+       d  # 1
+       f  # 3
+     #+END_SRC
+
+   - Your turn
+     =from Jian= Exercise: PatternMatching-1 is simple
+
+** DONE Ignoring a Value with ~_~ (Underscore) - 16
+   CLOSED: [2018-09-24 Mon 00:21]
+   #+BEGIN_SRC elixir
+     [1, _, _] = [1, 2, 3]          # [1, 2, 3]
+     [1, _, _] = [1, "cat", "dog"]  # [1, "cat", "dog"]
+   #+END_SRC
+
+** DONE Variables Bind Once (per Match) - 16
+   CLOSED: [2018-09-24 Mon 00:26]
+   - Once a variable has been bound to a value in the matching process,
+     _it keeps that value for the remainder of the match._
+     #+BEGIN_SRC elixir
+       [a, a] = [1, 1]  # [1, 1]
+       a                # 1
+
+       [b, b] = [1, 2]
+       # ** (MatchError) no match of right hand side value: [1, 2]
+     #+END_SRC
+
+   - A variable can be bound to a new value subsequent match:
+     #+BEGIN_SRC elixir
+       a = 1
+       [1, a, 3] = [1, 2, 3]
+       a  # 2
+     #+END_SRC
+
+   - Use a existing value in a pattern - ~^~:
+     #+BEGIN_SRC elixir
+       a = 1
+       a = 2
+
+       ^a = 1
+       # ** (MatchError) no match of right hand side value: 1
+     #+END_SRC
+
+   - Your turn
+     =from Jian= Exercise: PatternMatching-2 and PatternMatching-2 is simple
+
+** DONE Another Way of Looking at the Equals Sign - 18
+   CLOSED: [2018-09-24 Mon 00:32]
+   - Elixir's /pattern matching/ is _SIMILAR_ to Erlang's.
+     The main difference:
+     + Elixir allows a match to _reassign_ to a variable that was assigned in a
+       prior match;
+
+     + whereas in Erlang a variable _can be assigned only once_.
+
+   - =Re-Read=
+     Joe Armstrong's talk about ~=~
+
+* DONE 3. Immutability - 19
+  CLOSED: [2018-09-24 Mon 01:24]
+  - =EN= aficionados - 迷
+
+  - *Elixir enforces immutable data*
+
+** DONE You Already Have (Some) Immutable Data - 19
+   CLOSED: [2018-09-24 Mon 01:20]
+** DONE Immutable Data Is Known Data - 20
+   CLOSED: [2018-09-24 Mon 01:21]
+** DONE Performance Implications of Immutability - 21
+   CLOSED: [2018-09-24 Mon 01:23]
+   The reason why use immutable data can be efficiency.
+
+*** DONE Copying Data
+    CLOSED: [2018-09-24 Mon 01:22]
+    - =from Jian= /persistence/
+
+*** DONE Garbage Collection
+    CLOSED: [2018-09-24 Mon 01:22]
+
+** DONE Coding with Immutable Data - 22
+   CLOSED: [2018-09-24 Mon 01:24]
+
+* DONE 4. Elixir Basics - 23 - =TODO: Left=
+  CLOSED: [2018-09-24 Mon 13:01]
+  In this chapter we’ll look at the types that are baked into Elixir, along with
+  a few other things you need to know to get started.
+
+** DONE Built-in Types - 23
+   CLOSED: [2018-09-24 Mon 01:30]
+   - Elixir's built-in types are =IMPORTANT=
+     + Value types:
+       * Arbitrary-sized integers
+       * Floating-point numbers
+       * Atoms
+       * Ranges
+       * Regular expressions
+
+     + System types:
+       * PIDs and ports
+       * References
+
+     + Collection types:
+       * Tuples
+       * Lists
+       * Maps
+       * Binaries
+
+   - /Functions/ are a /type/ too.
+     =TODO= Next Chapter
+
+   - Strings and structures are built from these basic types.
+     They are important, and they have their own chapters.
+     =TODO=
+
+   - =TODO= =???= =???=
+     Finally, there's some debate about whether /regular expressions/ and
+     /ranges/ are /value types/. Technically they aren't -- under the hood they
+     are just /structures/.
+       But right now it's convenient to treat them as distinct types.
+
+** TODO Value Types - 24
+*** Integers
+    - /literals/:
+      + decimal      ~1234~
+      + hexadecimal  ~0xcafe~
+      + octal        ~0o765~
+      + binary       ~0b1010~
+
+    - Decimal numbers may contain underscores
+
+    - _NOT fixed limit_ on the size of integers.
+
+*** Floating-Point Numbers
+    /Floats/ are *IEEE 754 double precision*, giving them about 16 digits of
+    accuracy and a maximum exponent of around 10^{308}.
+
+*** Atoms
+    - /Atoms/ have leading ~:~.
+
+    - An /atom/ word is a sequence of
+      + UTF-8 letters (including combining marks),
+      + digits
+      + underscores
+      + @
+
+    - It may *end with* an _exclamation point_ or a _question mark_.
+
+    - You can also create /atoms/ containing *ARBITRARY characters* by _enclosing
+      the characters following the colon in double quotes._
+
+    - Atom examples:
+      #+BEGIN_SRC elixir
+        :fred
+        :is_binary?
+        :var@2
+        :<>
+        :===
+        :"func/3"
+        :"long john silver"
+        :эликсир
+        :mötley_crüe
+      #+END_SRC
+
+    - An /atom's name/ is its /value/.
+
+      =IMPORTANT=
+      Two /atoms/ with the same name will always compare as being equal,
+      even if they were created by different applications on two computers
+      separated by an ocean.
+
+*** Ranges
+    /Ranges/ are represented as ~start..end~, where start and end are integers.
+
+*** TODO Regular Expressions
+
+** DONE System Types - 26
+   CLOSED: [2018-09-24 Mon 01:44]
+   These /types/ reflect *resources* in the underlying Erlang VM.
+
+*** DONE PIDs and Ports
+    CLOSED: [2018-09-24 Mon 01:44]
+    - PID :: /reference/ to a /local or remote process/
+
+    - Port :: /reference/ to a *resource* (typically external to the application)
+              that you'll be reading or writing.
+
+    - The /PID/ of the /CURRENT process/ is available by *CALLING* ~self~.
+      A new /PID/ is created when you /spawn/ a new /process/.
+
+      =TODO=
+      We'll talk about this in Part II.
+
+*** DONE References - =TODO=
+    CLOSED: [2018-09-24 Mon 01:44]
+    The function ~make_ref~ creates a *GLOBALLY UNIQUE reference*; no other /reference/
+    will be equal to it.
+
+    =TODO= =???= =???= =WHY=
+    We don't use references in this book.
+
+** DONE Collection Types - 26
+   CLOSED: [2018-09-24 Mon 01:55]
+*** DONE Tuples
+    CLOSED: [2018-09-24 Mon 01:46]
+    Use ~{~ and ~}~
+*** DONE Lists
+    CLOSED: [2018-09-24 Mon 01:54]
+    #+BEGIN_SRC elixir
+      [ 1, 2, 3 ] ++ [ 4, 5, 6 ]    # [1, 2, 3, 4, 5, 6] # concatenation
+      [1, 2, 3, 4] -- [2, 4]        # [1, 3]             # difference
+      1 in [1,2,3,4]                # true               # membership
+      "wombat" in [1, 2, 3, 4]      # false
+    #+END_SRC
+
+**** Keyword Lists =More Example=
+     - If we write ~[ name: "Dave", city: "Dallas", likes: "Programming" ]~
+
+     - Elixir converts it into a /list of two-value tuples/:
+       ~[ {:name, "Dave"}, {:city, "Dallas"}, {:likes, "Programming"} ]~
+
+     - If a keyword list is the last argument in a funciton call. Thus,
+       ~DB.save record, [ {:use_transaction, true}, {:logging, "HIGH"} ]~
+       can be written more cleanly as
+       ~DB.save record, use_transaction: true, logging: "HIGH"~
+
+     - We can also _leave off the brackets_
+       if a /keyword list/ appears as the *last* item in any context where a
+       list of values is expected.
+       For instance:
+       #+BEGIN_SRC elixir
+         [1, fred: 1, done: 2]
+         ## [1, {:fred, 1}, {:dave, 2}]
+
+         {1, fred: 1, done: 2}
+         ## {1, [fred: 1, :dave, 2]}
+
+       #+END_SRC
+
+** DONE Maps - 29
+   CLOSED: [2018-09-24 Mon 10:52]
+   - A map literal looks like: ~%{ key1 => value1, key2 => value2 }~
+
+   - If the /key/ is an atom, you can use the same shortcut that you use with
+     /keyword lists/: ~colors = %{ red: 0xff0000, gree: 0x00ff00, blue: 0x0000ff }~
+
+   - Q :: Why do we have both /maps/ and /keyword lists/?
+
+   - A :: /Maps/ allow *only one* entry for a particular key,
+          whereas /keyword lists/ allow the key to be *repeated*.
+
+   - In general,
+     use /keyword lists/ for things such as command-line parameters and passing
+     around options,
+     _AND_
+     use /maps/ when you want an associative array.
+
+*** DONE Accessing a Map
+    CLOSED: [2018-09-24 Mon 10:52]
+    - You can always use a square-bracket syntax:
+      #+BEGIN_SRC elixir
+        states = %{ "AL" => "Alabama", "WI" => "Wisconsin" }  # ...
+        states["AL"]  #  "Alabama"
+        states["TX"]  #  nil
+      #+END_SRC
+
+    - If a /key/ is an /atom/, you can also use a /dot notation/:
+      #+BEGIN_SRC elixir
+        colors = %{ red: 0xff0000, green: 0x00ff00, blue: 0x0000ff }  # ...
+        colors[:red]  # 16711680
+        colors.green  # 65280
+      #+END_SRC
+
+      If there is no match key, for the /dot notation/, you'll get a ~KeyError~.
+
+** TODO Binaries - 30
+** DONE Dates and Times - 31
+   CLOSED: [2018-09-24 Mon 11:44]
+   - History:
+     _Elixir 1.3_ added a /calendar module/ and _FOUR_ new date- and
+     time-related types.
+
+     Initially, they were little more than data holders,
+     but _Elixir 1.5_ started to add some functionality to them.
+
+   - The ~Calendar~ module represents the rules used to manipulate dates.
+
+     The only current implementation is ~Calendar.ISO~, the ISO-8601 representation
+     of the Gregorian calendar.
+
+   - The ~Date~ type holds
+     + a _year_
+     + a _month_
+     + a _day_
+     + a _reference_ to the ruling calendar.
+
+   - Example:
+     #+BEGIN_SRC elixir
+       d1 = Date.new(2018, 12, 25)
+       # {:ok, ~D[2018-12-25]}
+
+       {:ok, d1} = Date.new(2018, 12, 25)
+       # {:ok, ~D[2018-12-25]}
+
+       d2 = ~D[2018-12-25]
+       # ~D[2018-12-25]
+
+       d1 == d2
+       # true
+
+       Date.day_of_week(d1)
+       # 2
+
+       Date.add(d1, 7)
+       # ~D[2019-01-01]
+
+       inspect d1, structs: false
+       # "%{__struct__: Date, calendar: Calendar.ISO, day: 25, month: 12, year: 2018}"
+     #+END_SRC
+
+     + =TODO=
+       /sigils/ - =~D[...]= and =~T[...]= like things.
+       They are a way of constructing literal values.
+
+   - You can also represent a range of ~Date~'s:
+     #+BEGIN_SRC elixir
+       d1 = ~D[2018-01-01]
+       # ~D[2018-01-01]
+
+       d2 = ~D[2018-06-30]
+       # ~D[2018-06-30]
+
+       first_half = Date.range(d1, d2)
+       # #DateRange<~D[2018-01-01], ~D[2018-06-30]>
+
+       Enum.count(first_half)
+       # 181
+
+       ~D[2018-03-15] in first_half
+       # true
+     #+END_SRC
+
+   - ~Time~ contains:
+     + an hour
+
+     + a minute
+
+     + a second
+
+     + a fractions of a second, which is stored as a tuple containing microseconds
+       and the number of significant digits.
+
+       The number of significant digits is important:
+       =~T[12:34:56.0]= is *NOT* equal to =~T[12:34:56:00]=
+
+   - Example of ~Time~:
+     #+BEGIN_SRC elixir
+       {:ok, t1} = Time.new(12, 34, 56)
+       # {:ok, ~T[12:34:56]}
+
+       t2 = ~T[12:34:56.78]
+       # ~T[12:34:56.78]
+
+       t1 == t2
+       # false
+
+       Time.add(t1, 3600)
+       # ~T[13:34:56.000000]
+
+       Time.add(t1, 3600, :millisecond)
+       # ~T[12:34:59.600000]
+     #+END_SRC
+
+   - There are two date/time types:
+     ~DateTime~ and ~NaiveDateTime~.
+     + The naive version contains just a date and a time; =???=
+       ~DateTime~ adds the ability to associate a time zone.
+
+     + The =~N[...]= /sigil/ constructs ~NaiveDateTime~ structs.
+
+   - =IMPORTANT= =PRACTICAL=
+     If you are using dates and times in your code, you might want to augment
+     these built-in types with a third-party library, such as *Lau Taarnskov’s
+     Calendar library*  https://github.com/lau/calendar.
+
+** DONE Names, Source Files, Conventions, Operators, and So On - 32
+   CLOSED: [2018-09-24 Mon 12:05]
+   - Elixir Identifiers:
+     + must start with a letter or underscore
+     + optionally followed by _letters_, _digits_, and _underscores_.
+     + The /identifiers/ may end with a _question mark_ or an _exclamation mark_.
+
+     Here _letter_ means any _UTF-8 letter character (optionally with a combining
+     mark)_ and _digit_ means a _UTF-8 decimal-digit character_. If you're using
+     ASCII, this does what you’d expect.
+
+   - /Module/, /record/, /protocol/, and /behavior/ names *start with an uppercase
+     letter* and are *BumpyCase*.
+
+     ALL OTHER /identifiers/ start with a *lowercase letter* or *an underscore*,
+     and by convention use underscores between words.
+
+     If the first character is an _underscore_, Elixir does _NOT report a warning_
+     if the variable is UNUSED in a /pattern match/ or /function parameter list/.
+
+   - By convention, two-character indentation, and use use spaces.
+
+   - Line comment: ~#~
+
+   - The Elixir distribution comes with a code formatter.
+
+*** Truth
+    - Elixir has three special values related to Boolean operations:
+      ~true~ , ~false~ , and ~nil~.
+
+      + all three of these values are _aliases_ for /atoms/ of the SAME name,
+        so ~true~ is the same as the /atom/ ~:true~.
+
+    - ~nil~ is treated as false in Boolean contexts.
+
+    - In most contexts, *any value _OTHER THAN_ ~false~ or ~nil~ is treated as
+      ~true~.*
+
+      We sometimes refer to this as /truthy/ as opposed to ~true~. =TODO= =???=
+
+*** Operators
+    - Comparison operators
+      #+BEGIN_SRC elixir
+        a === b   # strict equality
+        a !== b   # strict inequality
+        a ==  b   # value equality
+        a !=  b   # value inequality
+        a >   b   # normal comparison
+        a >=  b   #    :
+        a <   b   #    :
+        a <=  b   #    :
+      #+END_SRC
+
+    - Same type values comparison uses /natural ordering/.
+
+      Otherwise comparison is based on type according to this rule:
+      *number < atom < reference < function < port < pid < tuple < map < list < binary*
+      =from Jian= yes, there is a rule like this, but I shouldn't use it.
+
+    - Boolean operators
+      ~or~, ~and~, and ~not~
+
+    - Relaxed Boolean operators (take arguments of any type)
+      ~||~, ~&&~, and ~!~
+
+    - Arithmetic operators
+      ~+~, ~-~, ~*~, ~/~, ~div~, and ~rem~
+
+      + ~div~ is the integer division.
+
+      + ~rem~ differs from /normal modulo operations/ in that
+        the result will have the same sign as the function's first argument.
+
+    - Join operators
+      + ~<>~ concatenate two binaries
+      + ~++~ concatenate two lists
+      + ~--~ remove elements of list 2 from a copy of list 1
+
+    - The ~in~ operator
+      Existence checking.
+
+** DONE Variable Scope - 34
+   CLOSED: [2018-09-24 Mon 13:00]
+   - /Modules/ define a /scope/ for local variables,
+
+     _BUT_ these are accessible *ONLY* at the _top level_ of that /module/,
+     and NOT in /functions/ defined _in_ the /module/.
+
+*** Do-block Scope
+    You'll see a warning if you write:
+    #+BEGIN_SRC elixir
+      line_no = 50
+      # ...
+
+      if (line_no == 50) do
+        IO.puts "new-page\f"
+        line_no = 0
+      end
+
+      IO.puts line_no
+    #+END_SRC
+
+    The suggested form is:
+    #+BEGIN_SRC elixir
+      line_no = 50
+      # ...
+
+      line_no =
+        case line_no do
+          50 ->
+            IO.puts "new-page\f"
+            0
+
+          _ ->
+            line_no
+      end
+
+      IO.puts line_no
+    #+END_SRC
+
+*** The ~with~ Expression
+    - ~with~ serves double duty:
+      + create a local scope for variables
+      + give you some control over pattern-matching failures =TODO=
+
+    - Example:
+      In the =/etc/passwd= file, we have lines:
+      #+BEGIN_SRC text
+        _installassistant:*:25:25:Install Assistant:/var/empty:/usr/bin/false
+        _lp:*:26:26:Printing Services:/var/spool/cups:/usr/bin/false
+        _postfix:*:27:27:Postfix Mail Server:/var/spool/postfix:/usr/bin/false
+      #+END_SRC
+
+      #+BEGIN_SRC elixir
+        content = "Now is the time"
+        lp = with {:ok, file}   = File.open("/etc/passwd"),
+                  content       = IO.read(file, :all), # note: same name as above
+                  :ok           = File.close(file),
+                  [_, uid, gid] = Regex.run(~r/^lp:.*?:(\d+):(\d+)/m, content)
+             do
+                    "Group: #{gid}, User: #{uid}"
+             end
+
+        IO.puts lp       #=> Group: 26, User: 26
+        IO.puts content  #=> Now is the time
+      #+END_SRC
+
+*** ~with~ and Pattern Matching
+    #+BEGIN_SRC elixir
+      result = with {:ok, file}   = File.open("/etc/passwd"),
+                    content       = IO.read(file, :all),
+                    :ok           = File.close(file),
+                    [_, uid, gid] <- Regex.run(~r/^xxx:.*?:(\d+):(\d+)/, content)
+             do
+                    "Group: #{gid}, User: #{uid}"
+             end
+
+      IO.puts inspect(result)  #=> nil
+    #+END_SRC
+
+    + Change the might fail line's ~=~ to ~<-~
+
+    + ~inspecet~ ??? =TODO= =TODO=
+
+*** A Minor Gotcha
+    Underneath the covers, ~with~ is treated by Elixir as if it were a call to a
+    function or macro.
+
+    - You *CANNOT* do this:
+      #+BEGIN_SRC elixir
+        mean = with   # WRONG!!!!
+                 count = Enum.count(values1),
+                 sum = Enum.sum(values2)
+               do
+                 sum/count
+               end
+      #+END_SRC
+
+    - Write the first parameter in the same line or use parentheses:
+      #+BEGIN_SRC elixir
+        mean = with(
+                 count = Enum.count(values1),
+                 sum = Enum.sum(values2)
+               do
+                 sum/count
+               end)
+      #+END_SRC
+
+    - Or shortcut:
+      #+BEGIN_SRC elixir
+        mean = with count = Enum.count(values1),
+                    sum   = Enum.sum(values2),     # <- `,` must be here!!!
+               do: sum/count
+      #+END_SRC
+
+** DONE End of the Basics - 36
+   CLOSED: [2018-09-24 Mon 13:00]
+
+* DONE 5. Anonymous Functions - 37
+  CLOSED: [2018-09-24 Mon 14:57]
+  - We cover:
+    + /Anonymous functions/
+    + /Pattern matching/ and /arguments/
+    + /Higher-order functions/
+    + /Closures/
+    + The ~&~ /function literal/
+
+  - Syntax:
+    #+BEGIN_SRC elixir
+      fn
+        parameter-list -> body
+        parameter-list -> body ...
+      end
+    #+END_SRC
+
+  - Example:
+    #+BEGIN_SRC elixir
+      sum = fun (a, b) -> a + b end
+      sum.(1, 2)  # 3
+    #+END_SRC
+    + The ~.~ in the second line *indicates* the /function call/.
+
+      This is also the difference between /named function/ and /anonymous functions/.
+
+    + You still need the parentheses to call it, even if it takes NO arguments.
+      #+BEGIN_SRC elixir
+        greet = fn -> IO.puts "Hello" end
+        greet.()  ## Hello # :ok
+      #+END_SRC
+
+  - You can, however, _omit the parentheses_ in a /function definition/:
+    #+BEGIN_SRC elixir
+      f1 = fn a, b -> a * b end
+      f1.(5, 6)  # 30
+
+      f2 = fn -> 99 end
+      f2.()  # 99
+    #+END_SRC
+
+** DONE Functions and Pattern Matching - 38
+   CLOSED: [2018-09-24 Mon 13:15]
+   #+BEGIN_SRC elixir
+     swap = fn { a, b } -> { b, a } end
+     swap.({6, 8})  # {8, 6}
+   #+END_SRC
+
+   - Your Turn
+     Exercise: Functions-1
+     + ~list_concat= fn l1, l2 -> l1 ++ l2 end~
+     + ~sum = fn x, y, z -> x + y + z end~
+     + ~pair_tuple_to_list = fn {a, b} -> [a, b] end~
+
+** DONE One Function, Multiple Bodies - 39
+   CLOSED: [2018-09-24 Mon 13:31]
+   - Example
+     #+BEGIN_SRC elixir
+       handle_open = fn
+         {:ok, file} -> "Read data: #{IO.read(file, :line)}"
+         {_, error} -> "Error: #{:file.format_error(error)}"
+       end
+  
+       handle.open(File.open("code/intro/hello.exs"))  # this file exists
+       # "Read data: IO.puts \"Hello, World!\"\n"
+  
+       handle.open(File.open("nonexistent"))  # this one does NOT exist
+       # "Error: no such file or directory"
+     #+END_SRC
+  
+     + The Elixir's /string interpolation/:
+       ~"... #{} ..."~
+  
+     + Line 3: ~:file.format_error~
+       Here ~:file~ refers to *Erlang*, NOT Elixir, ~File~ /module/.
+  
+     + Line 6: ~File~ refers to Elixir's /built-in module/
+
+   - Your Turn 
+     + Exercise: Functions-2
+       #+BEGIN_SRC elixir
+         fizzbuzz = fn
+           0, 0, _ -> "FizzBuzz"
+           0, _, _ -> "Fizz"
+           _, 0, _ -> "Buzz"
+           _, _, i -> i
+         end
+       #+END_SRC
+
+     + Exercise: Functions-3
+       #+BEGIN_SRC elixir
+         use_fizzbuzz = fn
+           n -> fizzbuzz.(rem(n, 3), rem(n, 5), n)
+         end
+       #+END_SRC
+
+** DONE Functions Can Return Functions - 41
+   CLOSED: [2018-09-24 Mon 14:36]
+   Example: ~fun1 = fn -> fn -> "Hello" end end~
+   Print ="Hello"= with ~fun1.().()~
+
+*** Functions Remember Their Original Environment
+*** Parameterized Functions
+
+   - Your Turn 
+     Exercise: Functions-4
+     #+BEGIN_SRC elixir
+       prefix = fn pf -> fn str -> pf <> " " <> str end end
+     #+END_SRC
+
+** DONE Passing Functions As Arguments - 43
+   CLOSED: [2018-09-24 Mon 14:57]
+   #+BEGIN_SRC elixir
+     times_2 = fn n -> n * 2 end
+     apply = fn (fun, value) -> fun.(value) end
+     apply.(times_2, 6)
+     # 12
+
+     list = [1, 3, 5, 7, 9]
+     Enum.map list, fn elem -> elem * 2 end
+     # [2, 6, 10, 14, 18]
+   #+END_SRC
+
+*** Pinned Values and Function Parameters
+    #+BEGIN_SRC elixir
+      defmodule Greeter do
+        def for(name, greeting) do
+          fn
+            (^name) -> "#{greeting} #{name}"
+            (_)     -> "I don't know you"
+          end
+        end
+      end
+
+      mr_valim = Greeter.for("José", "Oi!")
+
+      IO.puts mr_valim.("José")  # => Oi! José
+      IO.puts mr_valim.("Dave")  # => I don't know you
+    #+END_SRC
+
+*** The ~&~ Notation
+    - ~&(&1 + &2)~ means ~fn p1, p2 -> p1 + p2 end~
+
+    - Because ~[]~ and ~{}~ are /operators/ in Elixir,
+      *literal lists and tuples can also be turned into functions.*
+      #+BEGIN_SRC elixir
+        divrem = &{ div(&1,&2), rem(&1,&2) }
+        divrem.(13, 5)
+        # {2, 3}
+      #+END_SRC
+
+    - The ~&~ capture operator works with /string (and string-like) literals/:
+      #+BEGIN_SRC elixir
+        s = &"bacon and #{&1}"
+        s.("custard")
+        # "bacon and custard"
+
+        ## TODO: ???
+        match_end = &~r/.*#{&1}$/
+        "cat" =~ match_end.("t")
+        # true
+
+        "cat" =~ match_end.("!")
+        # false
+      #+END_SRC
+
+    - Another syntax: turn a /named function/ to an /anonymous function/:
+      #+BEGIN_SRC elixir
+        l = &length/1  # &:erlang.length/1
+        l.([1,3,5,7])  # 4
+
+        len = &Enum.count/1  # &Enum.count/1
+        len.([1,2,3,4])      # 4
+
+        m = &Kernel.min/2  # &:erlang.min/2
+        m.(99,88)          # 88
+      #+END_SRC
+
+    - You may prefer this shortcut syntax when passing /anonymous functions/ as
+      parameters.
+
+    - Your Turn:
+      Exercise: Functions-5
+      + ~Enum.map [1, 2, 3, 4], &(&1 + 2)~
+      + ~Enum.each [1, 2, 3, 4], &IO.inspect/1~
+
+** DONE Functions Are the Core - 46
+   CLOSED: [2018-09-24 Mon 14:57]
+
+* DONE 6. Modules and Named Functions - 47
+  CLOSED: [2018-09-24 Mon 18:57]
+  - We cover:
+    + Modules, the basic units of code
+    + Defining public and private named
+    + functions
+    + Guard clauses
+    + Module directives and attributes
+    + Calling functions in Erlang modules
+
+  - Elixir /named functions/ *must be* written inside /modules/.
+
+** DONE Compiling a Module - 47
+   CLOSED: [2018-09-24 Mon 15:02]
+   - In command line,
+     Give IEx a source file's name, and it compiles and loads the file before it
+     displays a prompt.
+
+   - In IEx,
+     ~c "filename.exs"~
+
+   - In Elixir a /named function/ is identified by both
+     + its name
+
+     + its number of parameters (its /arity/).
+
+** DONE The Function's Body Is a Block - 48
+   CLOSED: [2018-09-24 Mon 15:10]
+   - You can use
+     + ~do ... end~ syntax
+     + ~do:~ syntax (group code with parentheses)
+
+   - Typically people use the ~do:~ syntax for *single-line* blocks,
+     and ~do ... end~ for *multiline* ones.
+
+   - Your Turn
+     #+BEGIN_SRC elixir
+       defmodule Times do
+         def double(n), do: n * 2
+
+         def triple(n), do: n * 3
+
+         def quadruple(n), do: double(double(n))
+       end
+     #+END_SRC
+
+     + Exercise: ModulesAndFunctions-1
+     + Exercise: ModulesAndFunctions-2
+     + Exercise: ModulesAndFunctions-3
+
+** DONE Function Calls and Pattern Matching - 49
+   CLOSED: [2018-09-24 Mon 15:53]
+   - Example: factorial
+     #+BEGIN_SRC elixir
+       defmodule Factorial do
+         def of(0), do: 1
+         def of(n), do: n * of(n - 1)
+       end
+     #+END_SRC
+  
+     + Improve this when we learn /tail recursion/.
+
+   - Elixir *tries functions from the top down*, executing the first match.
+     So the following code will not work:
+     #+BEGIN_SRC elixir
+       # WRONG!!!!!!!!!
+       defmodule BadFactorial do
+         def of(n), do: n * of(n-1)
+         def of(0), do: 1
+       end
+     #+END_SRC
+
+     Good news is that the compiler can detect this!
+
+   - Your Turn
+     + Exercise: ModulesAndFunctions-4
+       #+BEGIN_SRC elixir
+         defmodule Sum do
+           # Require n >= 1
+           def sum(1), do: 1
+           def sum(n), do: n + sum(n - 1)
+         end
+       #+END_SRC
+
+     + Exercise: ModulesAndFunctions-5
+       #+BEGIN_SRC elixir
+         defmodule GCD do
+           def gcd(x, 0), do: x
+           def gcd(x, y), do: gcd(y, rem(x, y))
+         end
+       #+END_SRC
+
+** DONE Guard Clauses - 52
+   CLOSED: [2018-09-24 Mon 16:04]
+   - These are predicates that are attached to a function definition using one or
+     more ~when~ keywords.
+
+   - Example
+     #+BEGIN_SRC elixir
+       defmodule Guard do
+         def what_is(x) when is_number(x) do
+           IO.puts "#{x} is a number"
+         end
+
+         def what_is(x) when is_list(x) do
+           IO.puts "#{inspect(x)} is a list"
+         end
+
+         def what_is(x) when is_atom(x) do
+           IO.puts "#{x} is an atom"
+         end
+       end
+
+       Guard.what_is(99)       # => 99 is a number
+       Guard.what_is(:cat)     # => cat is an atom
+       Guard.what_is([1,2,3])  # => [1,2,3] is a list
+     #+END_SRC
+
+   - A better (more strict factorial implementation):
+     #+BEGIN_SRC elixir
+       defmodule Factorial do
+         def of(0), do: 1
+
+         def of(n) when is_integer(n) and n > 0 do
+           n * of(n-1)
+         end
+       end
+     #+END_SRC
+
+   - *Guard Clauses vs. Conditional Logic
+     Have another look at our factorial function:*
+     Compare
+     #+BEGIN_SRC elixir
+       def of(0), do: 1
+
+       def of(n) when is_integer(n) and n > 0 do
+         n * of(n-1)
+       end
+     #+END_SRC
+
+     with 
+
+     #+BEGIN_SRC elixir
+       def of(0), do: 1
+
+       def of(n) do
+         if n < 0 do
+           raise "factorial called on a negative number"
+         else
+           n * of(n-1)
+         end
+       end
+     #+END_SRC
+
+     They looks have similar logic, but they actually DO NOT!!!
+     _The difference is subtle!_
+
+     The first case make the domain explicit -- it does NOT defined on negative
+     parameters.
+
+     The second case accept any number, and refuse wrong input when detect
+     during calculation.
+
+*** Guard-Clause Limitations =TODO= =RE-READ=
+    =from Jian= What is the origin of this limitation??????
+
+    You can write only a _SUBSET_ of Elixir expressions in /guard clauses/.
+    - Comparison operators
+      + ~==~
+      + ~!=~
+      + ~===~
+      + ~!==~
+      + ~>~
+      + ~<~
+      + ~<=~
+      + ~>=~
+
+    - Boolean and negation operators *(~||~ and ~&&~ are _NOT allowed_)*
+      + ~or~
+      + ~and~
+      + ~not~
+      + ~!~
+
+    - Arithmetic operators
+      + ~+~
+      + ~-~
+      + ~*~
+      + ~/~
+
+    - Join operators
+      + ~<>~
+      + ~++~
+      *as long as the left side is a literal*
+
+    - The in operator
+      Membership in a /collection/ or /range/
+
+    - Type-check functions
+      These built-in /Erlang functions/ return ~true~ if their argument is a given type.
+      You can find their documentation online. [9]
+      + ~is_atom~
+      + ~is_binary~
+      + ~is_bitstring~
+      + ~is_boolean~
+      + ~is_exception~
+      + ~is_float~
+      + ~is_function~
+      + ~is_integer~
+      + ~is_list~
+      + ~is_map~
+      + ~is_number~
+      + ~is_pid~
+      + ~is_port~
+      + ~is_record~
+      + ~is_reference~
+      + ~is_tuple~
+
+    - Other functions
+      These built-in functions return values (*NOT* ~true~ or ~false~).
+
+      Their documentation is online, on the same page as the type-check
+      functions. ~abs(number)~, ~bit_size(bitstring)~, ~byte_size(bitstring)~
+      ~div(number,number)~, ~elem(tuple, n)~, ~float(term)~, ~hd(list)~,
+      ~length(list)~, ~node()~ ~node(pid|ref|port)~, ~rem(number,number)~,
+      ~round(number)~, ~self()~, ~tl(list)~ ~trunc(number)~, ~tuple_size(tuple)~
+
+** DONE Default Parameters - 53
+   CLOSED: [2018-09-24 Mon 17:26]
+   - Syntax  ~param \\ value~
+
+   - Rules: =TODO= Note
+
+   - Example:
+     #+BEGIN_SRC elixir
+       defmodule Example do
+         def func(p1, p2 \\ 2, p3 \\ 3, p4) do
+           IO.inspect [p1, p2 ,p3, p4]
+         end
+       end
+
+       Example.func("a", "b")            # => ["a", 2, 3, "b"]
+       Example.func("a", "b", "c")       # => ["a", "b", 3, "c"]
+       Example.func("a", "b", "c", "d")  # => ["a", "b", "c", "d"]
+     #+END_SRC
+
+   - With /default parameters/, patterns like ~def func(p1, p2 \\ 2, p3 \\ 3, p4)~,
+     and ~def func(p1, p2)~ will conflict.
+
+   - There is one more thing:
+
+     If you write
+     #+BEGIN_SRC elixir
+       defmodule DefaultParams1 do
+         def func(p1, p2 \\ 123) do
+           IO.inspect [p1, p2]
+         end
+
+         def func(p1, 99) do
+           IO.puts "you said 99"
+         end
+       end
+     #+END_SRC
+
+     you'll get a warning -- for the patterns above, the second one cannot be reach!
+
+     The compiler suggests that:
+     #+BEGIN_SRC elixir
+       defmodule Params do
+         def func(p1, p2 \\ 123)
+
+         def func(p1, p2) when is_list(p1) do
+           "You said #{p2} with a list"
+         end
+
+         def func(p1, p2) do
+           "You passed in #{p1} and #{p2}"
+         end
+       end
+
+       IO.puts Params.func(99)           # You passed in 99 and 123
+       IO.puts Params.func(99, "cat")    # You passed in 99 and cat
+       IO.puts Params.func([99])         # You said 123 with a list
+       IO.puts Params.func([99], "dog")  # You said dog with a list
+     #+END_SRC
+     Then the /default value/ can be used for all the other patterns without any
+     confusion.
+
+
+
+
+
+
+** DONE Private Functions - 57
+   CLOSED: [2018-09-24 Mon 15:56]
+   Use the ~defp~ /macro/
+
+   You *cannot* use one /function name/, which have both public and private
+   patterns.
+
+** DONE The Amazing Pipe Operator: ~|>~ - 58
+   CLOSED: [2018-09-24 Mon 17:31]
+   - The ~|>~ operator takes the result of the expression to its left and _inserts
+     it as the FIRST parameter_ of the function invocation to its right.
+
+     for example, ~val |> f(a,b)~ is basically the same as calling ~f(val, a, b)~.
+
+   - You should *always* use parentheses around function parameters in /pipelines/.
+     =IMPORTANT=
+
+     Example,
+     ~(1..10) |> Enum.map(&(&1*&1)) |> Enum.filter(&(&1 < 40))~
+
+     The ~&~ shortcut and the pipe operator fight if you don't add parentheses
+     to wrap the parameter list. 
+     =IMPORTANT=
+
+** DONE Modules - 59
+   CLOSED: [2018-09-24 Mon 17:53]
+   /Modules/ provide /namespaces/ for things you define.
+   Besides /functions/, they also act as wrappers for /macros/, /structs/,
+   /protocols/, and other /modules/.
+
+   - /Module nesting/ in Elixir is an illusion --
+     ALL /modules/ are defined at the _top level_.
+
+     When we define a /module/ inside another,
+     _Elixir simply *prepends* the outer module name to the inner module name,
+     putting a dot between the two._
+
+     Therefore, you can do
+     #+BEGIN_SRC elixir
+       defmodule Mix.Tasks.Doctest do
+         def fun do
+           ...
+         end
+       end
+     #+END_SRC
+     directly.
+
+*** DONE Directives for Modules
+    CLOSED: [2018-09-24 Mon 17:49]
+    - Elixir has *three* /directives/ that _simplify_ working with /modules/.
+
+    - _All_ *three* are executed as your program runs, and the effect of ALL
+      *three* is /lexically scoped/ -- it starts at the point the /directive/ is
+      encountered, and stops at the end of the enclosing /scope/.
+
+*** DONE The ~import~ Directive
+    CLOSED: [2018-09-24 Mon 17:49]
+    - Syntax
+      ~import Module [, only:|except: ]~
+
+      For example, ~import List, only: [flatten: 1]~
+      The ~flatten: 1~ here is a ~name:arity~ pair.
+
+    - You can also give ~:only~ one of the atoms ~:functions~ or ~:macros~, and
+      import will bring only the specified part in.
+
+*** DONE The ~alias~ Directive
+    CLOSED: [2018-09-24 Mon 17:52]
+    - Syntax: ~alias My.Other.Module.{Parser, Runner}~
+
+    - For example:
+      ~alias My.Other.Module.Parser, as: Parser~
+      This can be abbreviated to ~alias My.Other.Module.Parser~
+
+      This works for mutiple modules with the same prefix:
+      ~alias My.Other.Module.{Parser, Runner}~
+
+*** DONE The ~require~ Directive
+    CLOSED: [2018-09-24 Mon 17:53]
+    ~require~ a /module/ if you want to use any /macros/ it defines.
+
+    =TODO= Talk about ~require~ in the /macros/ part.
+
+** DONE Module Attributes - 62
+   CLOSED: [2018-09-24 Mon 18:24]
+   - Elixir /modules/ each have /associated metadata/.
+
+     Each item of /metadata/ is called an /attribute/ of the /module/ and is
+     identified by a _name_.
+
+   - Inside a module, you can _access_ these /attributes/ _by prefixing the name with
+     an at sign (~@~)_.
+
+     + Give an /attribute/ a value:
+       ~@name value~
+       This can be done ONLY at the _top level_ of a /module/.
+
+     + Acces an /attribue/ can be inside functions.
+
+   - The function will see the value of an /attribute/ when this function is defined:
+     #+BEGIN_SRC elixir
+       defmodule Example do
+         @attr "one"
+         def first, do: @attr
+         @attr "two"
+         def second, do: @attr
+       end
+
+       IO.puts "#{Example.second} #{Example.first}"  # => two one
+     #+END_SRC
+
+   - These /attributes/ are *not* /variables in the conventional sense/.
+
+     Use them for /configuration/ and /metadata/ only.
+
+     (Many Elixir programmers employ them where Java or Ruby programmers might
+     use /constants/.)
+
+** DONE Module Names: Elixir, Erlang, and Atoms - 63
+   CLOSED: [2018-09-24 Mon 18:29]
+   What's happening here is *subtle*.
+
+   - _Internally_, /module/ names are just /atoms/.
+     When you write a name starting with an uppercase letter, such as ~IO~,
+     Elixir *converts* it internally into an /atom/ of the same name with
+     ~Elixir.~ *prepended*. So ~IO~ becomes ~Elixir.IO~ and ~Dog~ becomes
+     ~Elixir.Dog~.
+
+     #+BEGIN_SRC elixir
+       is_atom IO           # true
+       to_string IO         # "Elixir.IO"
+       :"Elixir.IO" === IO  # true
+     #+END_SRC
+
+   - You can:
+     #+BEGIN_SRC elixir
+       IO.puts 123
+       # 123
+       # :ok
+
+       :"Elixir.IO".puts 123
+       # 123
+       # :ok
+
+       ####---------
+
+       my_io = IO
+       # IO
+
+       my_io.puts 123
+       # 123
+       # :ok
+     #+END_SRC
+
+** DONE Calling a Function in an Erlang Library - 63
+   CLOSED: [2018-09-24 Mon 18:34]
+   - The /Erlang conventions/ for _names_ are different -- /variables/ _start with
+     an uppercase letter_ and /atoms/ are simple _lowercase names_.
+
+   - So, for example, the Erlang module ~timer~ is called just that, the /atom/
+     ~timer~.
+
+     In Elixir we write that as ~:timer~.
+     If you want to refer to the ~tc~ function in ~timer~, you'd write ~:timer.tc~.
+
+   - Code example (use the Erlang ~io.format~ function):
+     #+BEGIN_SRC elixir
+       :io.format("The number is ~3.1f~n", [5.678])
+       # The number is 5.7
+       # :ok
+     #+END_SRC
+
+** DONE Finding Libraries - 64
+   CLOSED: [2018-09-24 Mon 18:56]
+   - First, try the existing /Elixir modules/.
+     + The built in ones are documented on the Elixir website.
+     + http://hex.pm
+     + Search GitHub
+
+   - Second, if First fails, try /Erlang modules/.
+     You need to pay attention to the Erlang conventions.
+     Erlang atom ~tomato~ in Elixir should be ~:tomato~.
+     
+     Find the differences between them here: https://elixir-lang.org/crash-course.html
+
+   - Your Turn
+     Exercise: ModulesAndFunctions-7
+     + Q :: [Erlang]
+            Convert a float to a string with two decimal digits.
+
+     + A :: 
+       #+BEGIN_SRC elixir
+         def float_to_2digits_str(number) do
+           :io_lib.format("~.2f",[number])
+         end
+       #+END_SRC
+
+     + Q :: [Elixir]
+            Get the value of an operating-system environment variable.
+
+     + A :: The ~System.get_env/1~ function.
+
+     + Q :: [Elixir]
+            Return the extension component of a file name (so return =.exs= if
+            given ="dave/test.exs"=).
+
+     + A :: The ~Path.extname/1~ function.
+
+     + Q :: Convert a string containing JSON into Elixir data structures.
+            (Just find; don't install.)
+
+     + A :: GitHub: devinus/poison [Elixir]
+            [Erlang] =TODO= =???=
+
+     + Q :: Execute a command in your operating system's shell.
+
+     + A :: [Elixir] Like ~System.cmd("whoami", [])~
+            [Erlang] =TODO= =???=
+
+* DONE 7. Lists and Recursion - 65
+  CLOSED: [2018-09-24 Mon 20:11]
+** DONE Heads and Tails - 65
+   CLOSED: [2018-09-24 Mon 19:06]
+   - Empty list: ~[]~
+
+   - ~[1, 2, 3]~ is equivalent to ~[1 | [2 | [3 | []]]]~
+
+   - Pattern matching /head/ and /tail/:
+     #+BEGIN_SRC elixir
+       [ head | tail ] = [1, 2, 3]
+       head  # 1
+       tail  # [2, 3]
+     #+END_SRC
+
+   - *How IEx Displays Lists*
+     =TODO= =RE-READ=
+
+** DONE Using Head and Tail to Process a List - 66
+   CLOSED: [2018-09-24 Mon 19:11]
+   #+BEGIN_SRC elixir
+     defmodule MyList do
+       def len([]),               do: 0
+       def len([ _head | tail ]), do: 1 + len(tail)
+     end
+   #+END_SRC
+
+** DONE Using Head and Tail to Build a List - 68
+   CLOSED: [2018-09-24 Mon 19:12]
+   #+BEGIN_SRC elixir
+     def add_1([]),              do: []
+     def add_1([ head | tail ]), do: [ head+1 | add_1(tail) ]
+   #+END_SRC
+
+** DONE Creating a Map Function - 69
+   CLOSED: [2018-09-24 Mon 19:13]
+   #+BEGIN_SRC elixir
+     ists/mylist1.exs
+     def map([], _func),             do: []
+     def map([ head | tail ], func), do: [ func.(head) | map(tail, func) ]
+   #+END_SRC
+
+** TODO Reducing a List to a Single Value - ?? - =TODO= =1 Exercise=
+   #+BEGIN_SRC elixir
+     def reduce([], value, _) do
+       value
+     end
+
+     def reduce([head | tail], value, func) do
+       reduce(tail, func.(head, value), func)
+     end
+   #+END_SRC
+
+   - Your Turn
+     #+BEGIN_SRC elixir
+       # Exercise: ListsAndRecursion-1
+       def mapsum(_, []), do: 0
+
+       def mapsum(func, lst) do
+         [head | tail] -> func.(head) + mapsum(func, tail)
+       end
+
+       ## OR
+       mapsum = &(map(&1, &2) |> reduce(0, fn x, y -> x + y end))
+
+
+       # Exercise: ListsAndRecursion-2
+       def max([]), do: raise "Cannot max an empty number lists"
+
+       def max([head | tail]) do
+         reduce(tail, head, &(if &1 > &2, do: &1, else: &2))
+       end
+
+       # Exercise: ListsAndRecursion-3
+       # TODO:
+       # TODO:
+       # TODO:
+     #+END_SRC
+
+** DONE More Complex List Patterns - 73
+   CLOSED: [2018-09-24 Mon 20:03]
+   Patterns like ~[a, b | tail]~ are also useful.
+
+   - Example
+     #+BEGIN_SRC elixir
+       defmodule Swapper do
+         def swap([]),              do: []
+         def swap([_]),             do: raise "Can't swap a list with an odd number of elements"
+         def swap([ a, b | tail ]), do: [ b, a | swap(tail) ]
+       end
+     #+END_SRC
+
+*** Lists of Lists
+    - Example 1
+      #+BEGIN_SRC elixir
+        defmodule WeatherHistory do
+          def for_location_27([]), do: []
+
+          def for_location_27([ [time, 27, temp, rain ] | tail]) do
+            [ [time, 27, temp, rain] | for_location_27(tail) ]
+          end
+
+          def for_location_27([ _ | tail]), do: for_location_27(tail)
+        end
+      #+END_SRC
+
+    - Example 2
+      #+BEGIN_SRC elixir
+        defmodule WeatherHistory do
+          def for_location([], _target_loc), do: []
+
+          def for_location([ head = [_, target_loc, _, _ ] | tail], target_loc) do
+            [ head | for_location(tail, target_loc) ]
+          end
+
+          def for_location([ _ | tail], target_loc), do: for_location(tail, target_loc)
+        end
+      #+END_SRC
+      + The syntax of ~head = [_, target_loc, _, _ ]~ in /pattern matching/ is useful!
+
+    - Your Turn
+      Exercise: ListsAndRecursion-4
+      #+BEGIN_SRC elixir
+        def span(from, to) do
+          if from <= to do
+            [from | span(from + 1, to)]
+          else
+            []
+          end
+        end
+      #+END_SRC
+
+** DONE The List Module in Action - 76 - =TODO= =Re-Read=
+   CLOSED: [2018-09-24 Mon 20:11]
+   ~List~ /module/ functions:
+   - ~List.flatten~
+   - ~List.foldl~ and ~List.foldr~
+   - ~List.replace_at~
+   - ~List.keyfind~
+   - ~List.keyreplace~
+
+** DONE Get Friendly with Lists - 77
+   CLOSED: [2018-09-24 Mon 20:11]
+
+* TODO 8. Maps, Keyword Lists, Sets, and Structs - 79
+** DONE How to Choose Between Maps, Structs, and Keyword Lists - 79
+   CLOSED: [2018-09-25 Tue 14:43]
+   =Re-Read=
+   Ask yourself these questions (in this order):
+   - Q :: Do I want to pattern-match against the contents (for example, matching
+          a dictionary that has a key of ~:name~ somewhere in it)?
+   - A :: If so, use a /map/.
+
+   - Q :: Want _more than one entry with the same key_?
+   - A :: If so, you'll have to use the ~Keyword~ /module/.
+
+   - Q :: Need to guarantee the elements are *ordered*?
+   - A :: If so, again, use the ~Keyword~ /module/.
+
+   - Q :: Do I have a *fixed set of fields* (that is, is the structure of the
+          data always the same)?
+   - A :: If so, use a ~struct~ .
+
+   - Q :: Otherwise, if you've reached this point,
+   - A :: Use a /map/.
+
+** DONE Keyword Lists - 79
+   CLOSED: [2018-09-25 Tue 14:20]
+   #+BEGIN_SRC elixir
+     defmodule Canvas do
+       @defaults [ fg: "black", bg: "white", font, "Merriweather"]
+
+       def draw_text(text, options \\ []) do
+         options = Keyword.merge(@defaults, options)
+         IO.puts "Drawing text #{inspect{text}}"
+         IO.puts "Foreground:  #{options[:fg]}"
+         IO.puts "Background:  #{Keyword.get(options, :bg)}"
+         IO.puts "Font:        #{Keyword.get(options, :font)}"
+         IO.puts "Pattern:     #{Keyword.get(options, :pattern, "solid")}"
+         IO.puts "Style:       #{inspect Keyword.get_values(options, :style)}"
+       end
+     end
+
+     Canvas.draw_text("hello", fg: "red", style: "italic", style: "bold")
+
+     # Drawing text "hello"
+     # Foreground:  red
+     # Background:  white
+     # Font:        Merriweather
+     # Pattern:     solid
+     # Style:       ["italic", "bold"]
+   #+END_SRC
+
+** DONE Maps - 80
+   CLOSED: [2018-09-25 Tue 14:24]
+   /Maps/ have _good performance_ at all sizes.
+
+   #+BEGIN_SRC elixir
+     map = %{ name: "Dave", likes: "Programming", where: "Dallas" }
+     # %{likes: "Programming", name: "Dave", where: "Dallas"}
+
+     Map.keys map
+     # [:likes, :name, :where]
+
+     Map.values map
+     # ["Programming", "Dave", "Dallas"]
+
+     map[:name]
+     # "Dave"
+
+     map.name
+     # "Dave"
+
+     map1 = Map.drop map, [:where, :likes]
+     # %{name: "Dave"}
+
+     map2 = Map.put map, :also_likes, "Ruby"
+     # %{also_likes: "Ruby", likes: "Programming", name: "Dave", where: "Dallas"}
+
+     Map.keys map2
+     # [:also_likes, :likes, :name, :where]
+
+     Map.has_key? map1, :where
+     # false
+
+     { value, updated_map } = Map.pop map2, :also_likes
+     # {"Ruby", %{likes: "Programming", name: "Dave", where: "Dallas"}}
+
+     Map.equal? map, updated_map
+     # true
+   #+END_SRC
+
+** DONE Pattern Matching and Updating Maps - 81
+   CLOSED: [2018-09-25 Tue 14:44]
+   By Examples:
+   - Is there an entry with the key ~:name~?
+     #+BEGIN_SRC elixir
+       %{ name: a_name } = person  # %{height: 1.88, name: "Dave"}
+       a_name                      # "Dave"
+     #+END_SRC
+
+   - Are there entries for the keys ~:name~ and ~:height~?
+     #+BEGIN_SRC elixir
+       %{ name: _, height: _ } = person
+       # %{height: 1.88, name: "Dave"}
+     #+END_SRC
+
+   - Does the entry with key ~:name~ have the value ~"Dave"~?
+     #+BEGIN_SRC elixir
+       %{ name: "Dave" } = person
+       # %{height: 1.88, name: "Dave"}
+     #+END_SRC
+
+   - Iterate a map and filter it with ~for~
+     #+BEGIN_SRC elixir
+       people = [
+         %{ name: "Grumpy",    height: 1.24 },
+         %{ name: "Dave",      height: 1.88 },
+         %{ name: "Dopey",     height: 1.32 },
+         %{ name: "Shaquille", height: 2.16 },
+         %{ name: "sneezy",    height: 1.28 },
+       ]
+
+       IO.inspect(for person = %{ height: height } <- people, height > 1.5, do: person)
+       # [%{height: 1.88, name: "Dave"}, %{height: 2.16, name: "Shaquille"}]
+     #+END_SRC
+
+   - Guards
+     #+BEGIN_SRC elixir
+       defmodule HotelRoom do
+         def book(%{name: name, height: height})
+         when height > 1.9 do
+           IO.puts "Need extra-long bed for #{name}"
+         end
+
+         def book(%{name: name, height: height})
+         when height < 1.3 do
+           IO.puts "Need low shower controls for #{name}"
+         end
+
+         def book(person) do
+           IO.puts "Need regular bed for #{person.name}"
+         end
+       end
+
+       people |> Enum.each(&HotelRoom.book/1)
+
+       # Need low shower controls for Grumpy
+       # Need regular bed for Dave
+       # Need regular bed for Dopey
+       # Need extra-long bed for Shaquille
+       # Need low shower controls for Sneezy
+     #+END_SRC
+
+*** DONE Pattern Matching Can't Bind Keys
+    CLOSED: [2018-09-25 Tue 14:27]
+*** DONE Pattern Matching Can Match Variable Keys
+    CLOSED: [2018-09-25 Tue 14:30]
+    The ~^~:
+    #+BEGIN_SRC elixir
+      data = %{ name: "Dave", state: "TX", likes: "Elixir" }
+      # %{likes: "Elixir", name: "Dave", state: "TX"}
+
+      for key <- [ :name, :likes ] do
+          %{ ^key => value } = data
+          value
+      end
+      # ["Dave", "Elixir"]
+    #+END_SRC
+
+** DONE Updating a Map - 83
+   CLOSED: [2018-09-25 Tue 14:45]
+   - The simplest way to update a map is with this syntax:
+     ~new_map = %{ old_map | key => value, ... }~
+
+     + However, this syntax will *NOT add a new key* to a map.
+
+   - You need ~Map.put_new/3~ to add a *new* key.
+
+** DONE Structs - 83
+   CLOSED: [2018-09-25 Tue 15:03]
+   - Use /structs/ and Elixir knows the exact structure of your data.
+     It does NOT know this when it see the ~%{...}~. It only knows this is a /map/.
+
+   - A /struct/ is just a /module/ that wraps a _limited form_ of /map/.
+
+     It's limited
+     + because the /keys/ *MUST BE* /atoms/, and 
+     + because these /maps/ do NOT have ~Dict~ capabilities.
+
+     The name of the /module/ becomes the name of the /map/ type.
+
+   - Inside a /module/, use the ~defstruct~ /macro/ to define your /structs/.
+     For example,
+     #+BEGIN_SRC elixir
+       defmodule Subscriber do
+         defstruct name: "", paid: false, over_18: true
+       end
+
+       s1 = %Subscriber{}
+       # %Subscriber{name: "", over_18: true, paid: false}
+
+       s2 = %Subscriber{ name: "Dave" }
+       # %Subscriber{name: "Dave", over_18: true, paid: false}
+
+       s3 = %Subscriber{ name: "Mary", paid: true }
+       # %Subscriber{name: "Mary", over_18: true, paid: true}
+     #+END_SRC
+     + The usage syntax is very similr to /maps/.
+
+   - Access:
+     #+BEGIN_SRC elixir
+       s3.name  # "Mary"
+
+       %Subscriber{name: a_name} = s3
+       a_name # "Mary"
+     #+END_SRC
+
+   - Update:
+     #+BEGIN_SRC elixir
+       s4 = %Subscriber{ s3 | name: "Marie" }
+       %Subscriber{name: "Marie", over_18: true, paid: true}
+     #+END_SRC
+
+   - Add struct-specific behavior:
+     #+BEGIN_SRC elixir
+       defmodule Attendee do
+         defstruct name: "", paid: false, over_18: true
+         def may_attend_after_party(attendee = %Attendee{}) do
+           attendee.paid && attendee.over_18
+         end
+         def print_vip_badge(%Attendee{name: name}) when name !=
+           IO.puts "Very cheap badge for #{name}"
+       end
+       def print_vip_badge(%Attendee{}) do
+         raise "missing name for badge"
+       end
+       end
+
+       a1 = %Attendee{name: "Dave", over_18: true}
+       Attendee.may_attend_after_party(a1)  # false
+
+       a2 = %Attendee{a1 | paid: true}
+       Attendee.may_attend_after_party(a2)  # true
+
+       Attendee.print_vip_badge(a2)
+       # Very cheap badge for Dave
+       # :ok
+
+       a3 = %Attendee{}
+       # %Attendee{name: "", over_18: true, paid: false}
+       Attendee.print_vip_badge(a3)
+       ## ** (RuntimeError) missing name for badge...
+     #+END_SRC
+
+   - =TODO=
+     /Structs/ also play a large role when _implementing_ /polymorphism/, which
+     we'll see when we look at /protocols/. =TODO=
+
+** TODO Nested Dictionary Structures - 85
+*** TODO Nested Accessors and Nonstructs
+*** TODO Dynamic (Runtime) Nested Accessors
+*** TODO The Access Module
+
+** DONE Sets - 90
+   CLOSED: [2018-09-25 Tue 15:05]
+   /Sets/ are implemented using the /module/ ~MapSet~.
+
+   #+BEGIN_SRC elixir
+     set1 = 1..5 |> Enum.into(MapSet.new)      #  #MapSet<[1, 2, 3, 4, 5]>
+     set2 = 3..8 |> Enum.into(MapSet.new)      #  #MapSet<[3, 4, 5, 6, 7, 8]>
+     MapSet.member? set1, 3                    #  true
+     MapSet.union set1, set2                   #  #MapSet<[1, 2, 3, 4, 5, 6, 7, 8]>
+     MapSet.difference set1, set2              #  #MapSet<[1, 2]>
+     MapSet.difference set2, set1              #  #MapSet<[6, 7, 8]>
+     MapSet.intersection set2, set1            #  #MapSet<[3, 4, 5]>
+   #+END_SRC
+
+** DONE With Great Power Comes Great Temptation - 91
+   CLOSED: [2018-09-25 Tue 15:10]
+   Map-like data structures are powerful, but you should not be tempted to use
+   them (especially /struct/) to simulate OO paradigms -- NOT because OO is bad,
+   but because you'd better NOT mix paradigms!
+
+* DONE 9. An Aside -- What Are Types? - 93
+  CLOSED: [2018-09-25 Tue 15:16]
+  You should distinguish the type in abstraction and the implementation.
+
+* TODO 10. Processing Collections - ~Enum~ and ~Stream~ - 95
+  - Besides /lists/ and /maps/, /ranges/, /files/, and even /functions/ can also
+    _act as_ /collections/.
+
+  - =TODO=
+    And as we'll discuss when we look at /protocols/, you can also define your
+    own.
+
+  - /Collections/ DIFFER in their _implementation_, but
+    + they all share something: can be iterated.
+
+    + some of them share something: can add things to them.
+
+  - Technically, _things that can be iterated_ are said to *implement* the
+    ~Enumerable~ /protocol/. =TODO= =???=
+
+  - ~Enum~ is eager, and ~Stream~ is lazy.
+
+** DONE ~Enum~ -- Processing Collections - 95
+   CLOSED: [2018-09-25 Tue 15:40]
+   - NOTES =TODO=
+
+*** DONE A Note on Sorting
+    CLOSED: [2018-09-25 Tue 15:40]
+    #+BEGIN_SRC elixir
+      Enum.sort ["there", "was", "a", "crooked", "man"],
+                &(String.length(&1) <= String.length(&2))
+    #+END_SRC
+
+    =TODO=
+    It's important to use ~<=~ and *not* just ~<~ if you want the sort to be
+    *stable*.
+
+    - Your Turn =TODO= =TEST=
+      + Exercise: ListsAndRecursion-5
+        #+BEGIN_SRC elixir
+          def EnumList do
+            def all?([], pred),      do: true
+            def all?([h | t], pred), do: pred.(h) and all?(t, pred)
+
+            def each([], f), do: []
+            def each([h | t], f) do
+              f.(h)
+              each(t, f)
+            end
+
+
+            def filter([], pred), do: []
+            def filter([h | t], pred) do
+              if pred.(h)
+              do:   [h | filter(t, pred)]
+              else: filter(t, pred)
+              end
+
+            defp split_helper(first, left, 0), do: [Enum.reverse(first), left]
+
+            defp split_helper(first, [h | t], count) do
+              split_helper([h | first], t, count - 1)
+            end
+
+            def split(l, count) do
+              split_helper([], l, count)
+            end
+
+            defp take_helper(acc, left, 0), do: Enum.reverse(acc)
+
+            defp take_helper(acc, [h | t], count) do
+              take_helper([h | first], t, count - 1)
+            end
+
+            def take(l, n) do
+              take_helper(l, n)
+            end
+
+          end
+        #+END_SRC
+
+      + Exercise: ListsAndRecursion-6 =TODO=
+        #+BEGIN_SRC elixir
+          def flatten(l) do
+  
+          end
+        #+END_SRC
+
+** TODO Streams -- Lazy Enumerables - 99
+   Sometimes, what we really want is to process the elements in the collection
+   as we need them. We do *NOT need to store _intermediate_ results* as full
+   collections; we just need to pass the current element from function to
+   function. And that's what /streams/ do.
+
+*** DONE A Stream Is a Composable Enumerator
+    CLOSED: [2018-09-25 Tue 16:14]
+    #+BEGIN_SRC elixir
+      s = Stream.map [1, 3, 5, 7], &(&1 + 1)
+      ##   #Stream<[enum: [1, 3, 5, 7], funs: [#Function<46.3851/1 in Stream.map/2>] ]>
+
+      Enum.to_list s
+      ##   [2, 4, 6, 8]
+    #+END_SRC
+
+    - /Stream/ operations doesn't generate intermediate results, and it good to
+      chain stream operations (the next operation do *NOT* need to wait for the
+      intermediate result of this operation).
+      #+BEGIN_SRC elixir
+        [1,2,3,4]
+        |> Stream.map(&(&1*&1))
+        |> Stream.map(&(&1+1))
+        |> Stream.filter(fn x -> rem(x,2) == 1 end)
+        |> Enum.to_list
+      #+END_SRC
+
+    - The open file and find the longest line example can be re-written with a
+      /stream/:
+      #+BEGIN_SRC elixir
+        IO.puts File.open!("/usr/share/dict/words")
+                |> IO.stream(:line)
+                |> Enums.max_by(&String.length/1)
+      #+END_SRC
+
+      + A shortcut:
+        #+BEGIN_SRC elixir
+          IO.puts File.stream!("/usr/share/dict/words")
+          |> Enum.max_by(&String.length/1)
+        #+END_SRC
+
+*** DONE Infinite Streams
+    CLOSED: [2018-09-25 Tue 16:16]
+    - =from Jian= BAD title
+
+*** TODO Creating Your Own Streams
+    The actual implementation of /streams/ is complex, but the library has already
+    provided some.
+
+**** DONE ~Stream.cycle~
+     CLOSED: [2018-09-25 Tue 16:30]
+     You know the colors alternate between green and white. You may not know how
+     long, or you don't care how long, or you want to decide how long at the end.
+     The use ~Stream.cycle~. For example:
+     #+BEGIN_SRC elixir
+       Stream.cycle(~w{ green white })
+       |> Stream.zip(1..5)
+       |> Enum.map(fn {class, value} ->
+         "<tr class='#{class}'><td>#{value}</td></tr>\n" end)
+       |> IO.puts
+
+       # <tr class="green"><td>1</td></tr>
+       # <tr class="white"><td>2</td></tr>
+       # <tr class="green"><td>3</td></tr>
+       # <tr class="white"><td>4</td></tr>
+       # <tr class="green"><td>5</td></tr>
+       #   :ok
+     #+END_SRC
+
+**** DONE ~Stream.repeatedly~
+     CLOSED: [2018-09-25 Tue 16:30]
+     #+BEGIN_SRC elixir
+       Stream.repeatedly(fn -> true end) |> Enum.take(3)
+       # [true, true, ture]
+
+       Stream.repeatedly(&:random.uniform/0) |> Enum.take(3)
+       # [0.7230402056221108, 0.94581636451987, 0.5014907142064751]
+     #+END_SRC
+
+**** DONE ~Stream.iterate~
+     CLOSED: [2018-09-25 Tue 16:30]
+     #+BEGIN_SRC elixir
+       Stream.iterate(0, &(&1+1)) |> Enum.take(5)
+       # [0, 1, 2, 3, 4]
+
+       Stream.iterate(2, &(&1*&1)) |> Enum.take(5)
+       # [2, 4, 16, 256, 65536]
+
+       Stream.iterate([], &[&1]) |> Enum.take(5)
+       # [[], [[]], [[[]]], [[[[]]]], [[[[[]]]]]]
+     #+END_SRC
+
+**** TODO ~Stream.unfold~ - =RE-DO=
+     Fibonacci numbers
+     #+BEGIN_SRC elixir
+       Stream.unfold({0, 1}, fn {f1, f2} -> {f1, {f2, f1+f2}} end)
+       |> Enum.take(15)
+
+       [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
+     #+END_SRC
+
+     - =TODO= NOTE
+
+     - =from Jian= Monad???
+
+**** TODO ~Stream.resource~
+     - ~Stream.resource~ builds upon ~Stream.unfold~. It makes _TWO_ changes.
+
+*** DONE Streams in Practice
+    CLOSED: [2018-09-25 Tue 16:31]
+    Consider using a /stream/
+    - _WHEN_ you want to defer processing until you need the data
+
+    - _WHEN_ you need to deal with large numbers of things without necessarily
+      generating them all at once.
+
+** DONE The ~Collectable~ Protocol - 106
+   CLOSED: [2018-09-25 Tue 16:44]
+   - The ~Enumerable~ /protocol/ lets you iterate over the elements in a type -- given a
+     collection, you can get the elements.
+
+     ~Collectable~ is in some sense the opposite - it allows you to build a
+     collection by inserting elements into it.
+
+   - *Not all collections are /collectable/.*
+     /Ranges/, for example, cannot have new entries added to them.
+
+   - The collectable API is *pretty low-level*, so you'll typically access it
+     *via* ~Enum.into~ and when using /comprehensions/ (which we cover in the
+     next section).
+
+     For example,
+     + we can inject the elements of a /range/ into an /empty list/ using:
+       #+BEGIN_SRC elixir
+         Enum.into 1..5, []
+         # [1, 2, 3, 4, 5]
+       #+END_SRC
+
+     + If the list is not empty, the new elements are tacked _onto the end_:
+     #+BEGIN_SRC elixir
+       Enum.into 1..5, [ 100, 101 ]
+       # [100, 101, 1, 2, 3, 4, 5]
+     #+END_SRC
+
+   - Output /streams/ are /collectable/, so the following code _lazily copies
+     standard input to standard output_:
+     #+BEGIN_SRC elixir
+       Enum.into IO.stream(:stdio, :line), IO.stream(:stdio, :line)
+     #+END_SRC
+     =IMPORTANT=
+
+** TODO Comprehensions - 107
+   - The general _SYNTAX_ for /comprehensions/ is deceptively simple:
+     ~result = for generator or filter... [ , into: value ] , do: expression~
+
+     + The ~generator~ here is ~pattern <- enumerable_thing~
+
+   - Basic Examples:
+     #+BEGIN_SRC elixir
+       for x <- [ 1, 2, 3, 4, 5 ], do: x * x
+       # [1, 4, 9, 16, 25]
+
+       for x <- [ 1, 2, 3, 4, 5 ], x < 4, do: x * x
+       # [1, 4, 9]
+     #+END_SRC
+
+   - Multiple Generators:
+     #+BEGIN_SRC elixir
+       for x <- [1, 2], y <- [5, 6], do: x * y
+       # [5, 6, 10, 12]
+
+       for x <- [1, 2], y <- [5, 6], do: {x, y}
+       # [{1, 5}, {1, 6}, {2, 5}, {2, 6}]
+     #+END_SRC
+
+   - Use variables from the former /generator/ in the latter /generator/:
+     #+BEGIN_SRC elixir
+       min_maxes = [{1,4}, {2,3}, {10, 15}]
+
+       for {min,max} <- min_maxes, n <- min..max, do: n
+       # [1, 2, 3, 4, 2, 3, 10, 11, 12, 13, 14, 15]
+     #+END_SRC
+
+   - Filters:
+     #+BEGIN_SRC elixir
+       first8 = [ 1,2,3,4,5,6,7,8 ]
+
+       for x <- first8, y <- first8, x >= y, rem(x*y, 10)==0, do: { x, y }
+       # [{5, 2}, {5, 4}, {6, 5}, {8, 5}]
+     #+END_SRC
+     The first filter runs 64 times, and the second one runs 36 times.
+
+   - Use the /pattern matching/ part of /generators/
+     #+BEGIN_SRC elixir
+       reports = [ dallas: :hot, minneapolis: :cold, dc: :muggy, la: :smoggy ]
+
+       for { city, weather } <- reports, do: { weather, city }
+       # [hot: :dallas, cold: :minneapolis, muggy: :dc, smoggy: :la]
+     #+END_SRC
+
+*** DONE Comprehensions Work on Bits, Too - =Re-Read= =TODO=
+    CLOSED: [2018-09-25 Tue 17:01]
+    - =from Jian= Binary Operations???
+      =TODO= Learn more!!!!
+
+    #+BEGIN_SRC elixir
+      for << ch <- "hello" >>, do: ch
+      # 'hello'
+
+      for << ch <- "hello" >>, do: <<ch>>
+      # ["h", "e", "l", "l", "o"]
+
+      for << << b1::size(2), b2::size(3), b3::size(3) >> <- "hello" >>,
+        do: "0#{b1}#{b2}#{b3}"
+      # ["0150", "0145", "0154", "0154", "0157"]
+    #+END_SRC
+
+*** DONE Scoping and Comprehensions
+    CLOSED: [2018-09-25 Tue 16:58]
+    Elixir does the right and reasonable thing.
+
+*** TODO The Value Returned by a Comprehension
+
+** TODO Moving Past Divinity - 111
+
+* TODO 11. Strings and Binaries - 113
+** TODO String Literals - 113
+*** Heredocs
+*** Sigils
+
+** TODO The Name "strings" - 116
+** TODO Single-Quoted Strings -- Lists of Character Codes - 117
+** TODO Binaries - 119
+** TODO Double-Quoted Strings Are Binaries - 120
+*** Strings and Elixir Libraries
+
+** TODO Binaries and Pattern Matching - 126
+*** String Processing with Binaries
+
+** TODO Familiar Yet Strange - 127
+
+* TODO 12. Control Flow - 129
+  - Elixir code tries to be /declarative/, NOT /imperative/.
+
+  - Try to use a combination of guard clauses and pattern matching of parameters
+    _rather than_ control flow seen in other languages.
+
+    + You definitely will, and should, drop the occasional ~cond~ or ~case~ into
+      your code.
+      _But before you do, consider more functional alternatives._
+
+  - *Functions written without explicit control flow tend to be shorter and more
+    focused*
+
+** DONE ~if~ and ~unless~ - 129
+   CLOSED: [2018-09-24 Mon 15:19]
+   #+BEGIN_SRC elixir
+     if 1 == 1, do: "true part", else: "false part"
+
+     if 1 == 1 do
+       "true part"
+     else
+       "false part"
+     end
+     # true part
+
+     #----
+     unless 1 == 1, do: "error", else: "OK"
+
+     unless 1 == 2 do
+       "OK"
+     else
+       "error"
+     end
+     # "OK"
+   #+END_SRC
+
+** TODO ~cond~ - 130
+** DONE ~case~ - 133
+   CLOSED: [2018-09-24 Mon 15:26]
+   #+BEGIN_SRC elixir
+     case File.open("case.ex") do
+       { :ok, file }      -> IO.puts "First line: #{IO.read(file, :line)}"
+       { :error, reason } -> IO.puts "Failed to open file: #{reason}"
+     end
+
+     # Nested pattern matches
+     defmodule Users do
+       dave = %{ name: "Dave", state: "TX", likes: "programming" }
+       case dave do
+         %{state: some_state} = person ->
+           IO.puts "#{person.name} lives in #{some_state}"
+
+         _ ->
+           IO.puts "No matches"
+       end
+     end
+
+     # With guard
+     dave = %{name: "Dave", age: 27}
+     case dave do
+       person = %{age: age} when is_number(age) and age >= 21 ->
+         IO.puts "You are cleared to enter the Foo Bar, #{person.name}"
+
+       _ ->
+         IO.puts "Sorry, no admission"
+     end
+   #+END_SRC
+
+** TODO Raising Exceptions - 134
+** TODO Designing with Exceptions - 134
+** TODO Doing More with Less - 135
+   - Your Turn
+     + Exercise: ControlFlow-1
+       #+BEGIN_SRC elixir
+         fizzbuzz = &(case &1 do
+           {0, 0, _} -> "FizzBuzz"
+           {0, _, _} -> "Fizz"
+           {_, 0, _} -> "Buzz"
+           {_, _, i} -> i
+         end)
+
+         use_fizzbuzz = &(case &1 do
+           n -> fizzbuzz.(rem(n, 3), rem(n, 5), n)
+         end)
+       #+END_SRC
+
+     + Exercise: ControlFlow-2 =TODO=
+       We now have three different implementations of FizzBuzz. One uses cond ,
+       one uses case , and one uses separate functions with guard clauses.
+       Take a minute to look at all three. Which do you feel best expresses the
+       problem. Which will be easiest to maintain?
+       The case style and the implementation using guard clauses are different
+       from control structures in most other languages. If you feel that one of these
+       was the best implementation, can you think of ways to remind yourself to
+       investigate these options as you write Elixir code in the future?
+
+     + Exercise: ControlFlow-3 =TODO=
+       Many built-in functions have two forms. The xxx form returns the tuple {:ok,
+       data} and the xxx! form returns data on success but raises an exception
+       otherwise. However, some functions don’t have the xxx! form.
+       Write an ok! function that takes an arbitrary parameter. If the parameter is
+       the tuple {:ok, data} , return the data. Otherwise, raise an exception containing
+       information from the parameter.
+       You could use your function like this:
+       file = ok! File.open("somefile")    
+
+* TODO 13. Organizing a Project - 137
+** TODO The Project: Fetch Issues from GitHub - 137
+*** How Our Code Will Do It
+
+** TODO Step 1: Use Mix to Create Our New Project - 138
+*** Create the Project Tree
+
+** TODO Transformation: Parse the Command Line - 141
+** TODO Write Some Basic Tests - 142
+*** Refactor: Big Function Alert
+
+** TODO Transformation: Fetch from GitHub - 144
+** TODO Step 2: Use Libraries - 145
+*** Finding an External Library
+*** Adding a Library to Your Project
+*** Back to the Transformation
+
+** TODO Transformation: Convert Response - 150
+*** Application Configuration
+
+** TODO Transformation: Sort Data - 152
+** TODO Transformation: Take First n Items - 154
+** TODO Transformation: Format the Table - 154
+** TODO Step 3: Make a Command-Line Executable - 157
+** TODO Step 4: Add Some Logging - 158
+** TODO Step 5: Create Project Documentation - 160
+** TODO Coding by Transforming Data - 161
+
+* TODO 14. Tooling - 165
+  This chapter is not the full list.
+
+** TODO Debugging with IEx
+   - There are _TWO_ ways to create /breakpoints/.
+     + Add calls into the code you want to debug.
+
+     + Initiate from inside IEx.
+
+   - The buggy code:
+     #+BEGIN_SRC elixir
+       defmodule Buggy do
+         def parse_header(
+           <<
+           format::integer-16,
+           tracks::integer-16,
+           division::integer-16
+           >>
+         ) do
+           IO.puts "format: #{format}"
+           IO.puts "tracks: #{tracks}"
+           IO.puts "division: #{decode(division)}"
+         end
+         def decode(<< 1::1, beats::15 >>) do
+           "♩ = #{beats}"
+         end
+         def decode(<< 0::1, fps::7, beats::8 >>) do
+           "#{-fps} fps, #{beats}/frame"
+         end
+       end
+     #+END_SRC
+
+*** Injecting Breakpoints Using IEx.pry
+*** Setting Breakpoints with Break
+*** Does This Seem a Little Artificial?
+
+** TODO Testing - 165
+*** Testing the Comments
+*** Structuring Tests
+*** Property-Based Testing
+*** Digging Deeper
+*** Test Coverage
+
+** TODO Code Dependencies - 178
+** TODO Server Monitoring - 179
+** TODO Source-Code Formatting - ???
+** TODO Inevitably, There's More - 182
+
+* Part II. Concurrent Programming
+* TODO 15. Working with Multiple Processes - 185
+  Summarize the prelude of this chapter
+
+** DONE A Simple Process
+   CLOSED: [2018-09-24 Mon 20:38]
+   #+BEGIN_SRC elixir
+     defmodule SpawnBasic do
+       def greet do
+         IO.puts "Hello"
+       end
+     end
+   #+END_SRC
+
+   - Run this function: ~SpawnBasic.greet~
+
+   - Use ~spawn~ Create a separate /process/ to run a function:
+     #+BEGIN_SRC elixir
+       spawn(SpawnBasic, :greet, [])
+       # Hello
+       # PID<0.42.0>
+     #+END_SRC
+     + This is async, and the order of =Hello= and =PID<0.42.0>= is undeterministic.
+       You can't reply on it.
+
+*** Sending Messages Between Processes
+    #+BEGIN_SRC elixir
+      defmodule Spawn1 do
+        def greet do
+          receive do
+            {sender, msg} ->
+              send sender, { :ok, "Hello, #{msg}" }
+          end
+        end
+      end
+
+      # here's a client
+      pid = spawn(Spawn1, :greet, [])
+      send pid, {self(), "World!"}receive do
+        {:ok, message} ->
+          IO.puts message
+      end
+
+      # "Hello, World!"
+      # [Spawn1]
+    #+END_SRC
+
+*** Handling Multiple Messages
+    If you use the code in the last section, and send another /message/, you will
+    see no response, and IEx just hangs.
+
+    This is because you code only accept one message, and it also doesn't know
+    what to do after the first message -- cannot accept more messages, and cannot
+    quit by itself (WHY Quit? WHY NOT Quit? The machine does NOT know).
+
+    Solution:
+    - Set a /timeout/ to tell the code when to quit.
+    - Use recursion to repeat its action of waiting for receiving messages.
+
+    #+BEGIN_SRC elixir
+      defmodule Spawn4 do
+        def greet do
+          receive do
+            {sender, msg} ->
+              send sender, { :ok, "Hello, #{msg}" }
+              greet()  # !!! IMPORTANT !!!
+          end
+        end
+      end
+
+      # here's a client
+      pid = spawn(Spawn4, :greet, [])
+
+      send pid, {self(), "World!"}
+      receive do
+        {:ok, message} ->
+          IO.puts message
+      end
+
+      send pid, {self(), "Kermit!"}
+      receive do
+        {:ok, message} ->
+          IO.puts message
+
+        after 500 ->
+          IO.puts "The greeter has gone away"
+      end
+
+      #######################
+      # Hello, World!
+      # Hello, Kermit!
+      # [Spawn4]
+    #+END_SRC
+
+*** Recursion, Looping, and the Stack
+    /tail-call optimization/
+
+** TODO Process Overhead
+   - Your Turn
+     + Exercise: WorkingWithMultipleProcesses-1
+
+     + Exercise: WorkingWithMultipleProcesses-2
+
+** DONE When Processes Die
+   CLOSED: [2018-09-24 Mon 22:09]
+   Who gets told when a /process/ dies? *By default, no one.*
+
+   #+BEGIN_SRC elixir
+     defmodule Link1 do
+       import :timer, only: [ sleep: 1 ]
+
+       def sad_function do
+         sleep 500
+         exit(:boom)
+       end
+
+       def run do
+         spawn(Link1, :sad_function, [])
+         receive do
+           msg ->
+             IO.puts "MESSAGE RECEIVED: #{inspect msg}"
+         after 1000 ->
+             IO.puts "Nothing happened as far as I am concerned"
+         end
+       end
+     end
+
+     Link1.run
+
+     # Nothing happend as far as I am concerned
+   #+END_SRC
+   - ~elixir -r link1.exs~
+
+*** DONE Linking Two Processes
+    CLOSED: [2018-09-24 Mon 22:09]
+    ~spawn_link~
+    #+BEGIN_SRC elixir
+      defmodule Link2 do
+        import :timer, only: [ sleep: 1 ]
+
+        def sad_function do
+          sleep 500
+          exit(:boom)
+        end
+
+        def run do
+          spawn_link(Link2, :sad_function, [])
+          receive do
+            msg ->
+              IO.puts "MESSAGE RECEIVED: #{inspect msg}"
+            after 1000 ->
+              IO.puts "Nothing happened as far as I am concerned"
+          end
+        end
+      end
+
+
+      Link2.run
+      # ** (EXIT from #PID<0.73.0>) :boom
+    #+END_SRC
+    - =$ elixir -r links.exs=
+
+    - ~spawn_link~'s are bidirectional!
+
+    - What if you WANT to _handle the death of another process_?
+      Well, you probably do *NOT* want to do this.
+
+      *Use OTP*
+
+      Elixir uses the /OTP framework/ for constructing /process trees/, and OTP
+      includes the concept of /process supervision/. An incredible amount of
+      effort has been spent getting this right, so I recommend using it most of
+      the time. (We cover this in Chapter 18, OTP: Supervisors.) =TODO=
+
+    - However, you can tell Elixir to
+      *convert* the /exit signals/ from a /linked process/ into a /message/ you can handle.
+      Do this by *trapping the exit*.
+      #+BEGIN_SRC elixir
+        defmodule Link3 do
+          import :timer, only: [ sleep: 1 ]
+          def sad_function do
+            sleep 500
+            exit(:boom)
+          end
+          def run do
+            Process.flag(:trap_exit, true)
+            spawn_link(Link3, :sad_function, [])
+            receive do
+              msg ->
+                IO.puts "MESSAGE RECEIVED: #{inspect msg}"
+              after 1000 ->
+                IO.puts "Nothing happened as far as I am concerned"
+            end
+          end
+        end
+
+        Link3.run
+        # MESSAGE RECEIVED: {:EXIT, #PID<0.78.0>, :boom}
+      #+END_SRC
+
+      + =$ elixir -r link3.exs=
+
+*** TODO Monitoring a Process - =3 Exercises=
+    ~spawn_monitor~
+    ~Process.monitor~
+
+    - Use ~spawn_monitor~ to turn on monitoring *WHEN you spawn* a /process/,
+
+    - Use ~Process.monitor~ to monitor an *existing* /process/.
+
+    - Difference between ~spawn_monitor~ and ~Process.monitor~:
+      + ~Process.monitor~ (or link to an EXISTING /process/),
+        there is a POTENTIAL /race condition/ -- if the other /process/ dies
+        *before* your monitor call completes, you may NOT receive a notification.
+
+        * It's clear that logically, the only way to avoid this POTENTIAL /race
+          condition/ is to create a /link/ when you spawn a new /process/ -- the
+          ~spawn_monitor~ operation is *atomic*, and you'll *ALWAYS* catch a
+          failure.
+
+    - Example:
+      #+BEGIN_SRC elixir
+        defmodule Monitor1 do
+          import :timer, only: [ sleep: 1 ]
+
+          def sad_function do
+            sleep 500
+            exit(:boom)
+          end
+
+          def run do
+            res = spawn_monitor(Monitor1, :sad_function, [])
+            IO.puts inspect res
+            receive do
+              msg ->
+                IO.puts "MESSAGE RECEIVED: #{inspect msg}"
+              after 1000 ->
+                IO.puts "Nothing happened as far as I am concerned"
+            end
+          end
+        end
+
+        Monitor1.run
+
+        # {#PID<0.78.0>, #Reference<0.1328...>}
+        # MESSAGE RECEIVED: {:DOWN, #Reference<0.1328...>, :process,
+        #                    #PID<0.78.0>, :boom}
+      #+END_SRC
+      + The results are similar to the ~spawn_link~ version.
+
+      + Run with =$ elixir -r monitor1.exs=
+
+      + The ~Reference~ record in the /message/ is the _identity of the monitor_
+        that was created. The ~spawn_monitor~ call also returns it, along with the PID.
+
+    - It depends on your /process's semantics/ that _when_ do you use /links/ and
+      _when_ should you choose /monitors/.
+      + If "One has a failure, and the other should terminate", choose /links/.
+
+      + If "One should know when some other process exits for any reason", choose
+        /monitors/.
+
+    - Your Turn =TODO=
+      + Exercise: WorkingWithMultipleProcesses-3
+      + Exercise: WorkingWithMultipleProcesses-4
+      + Exercise: WorkingWithMultipleProcesses-5
+
+** TODO Parallel Map -- The "Hello, World" of Erlang - =TODO= =EXERCISES=
+   #+BEGIN_SRC elixir
+     defmodule Parallel do
+       def pmap(collection, fun) do
+         me = self()
+         collection
+         |> Enum.map(fn (elem) ->
+           spawn_link fn -> (send me, { self(), fun.(elem) }) end
+         end)
+         |> Enum.map(fn (pid) ->
+           receive do { ^pid, result } -> result end
+         end)
+       end
+     end
+
+     Parallel.pmap 1..10, &(&1 * &1)
+     # [1, 4, 9, 16, 25, 49, 64, 81, 100]
+   #+END_SRC
+
+   - =CAUTION= =IMPORTANT=
+     Note how it uses ~^pid~ in the ~receive~ block to get the result for each PID _in turn_.
+
+     *Without this we'd get back the results in random order.*
+
+   - That's pretty sweet, but it gets better, as we’ll cover
+     _when we look at tasks and agents._ =TODO=
+
+   - Your Turn =TODO=
+     + Exercise: WorkingWithMultipleProcesses-6
+     + Exercise: WorkingWithMultipleProcesses-7
+
+** TODO A Fibonacci Server
+*** The Task Scheduler
+
+** TODO Agents -- A Teaser
+** TODO Thinking in Processes
+
+* TODO 16. Nodes -- The Key to Distributing Services - 207
+** Naming Nodes
+*** Nodes, Cookies, and Security
+
+** Naming Your Processes
+** Input, Output, PIDs, and Nodes
+** Nodes Are the Basis of Distribution
+
+* TODO 17. OTP: Servers - 217
+** TODO Some OTP Definitions
+** TODO An OTP Server
+*** State and the Single Server
+*** Our First OTP Server
+**** Create a New Project Using Mix
+**** Create the Basic Sequence Server
+**** Fire Up Our Server Manually
+**** One-Way Calls
+**** Tracing a Server’s Execution
+
+** TODO GenServer Callbacks
+** TODO Naming a Process
+** TODO Tidying Up the Interface
+** TODO Making Our Server into a Component
+
+* TODO 18. OTP: Supervisors - 231
+** TODO Supervisors and Workers
+*** Managing Process State Across Restarts
+*** Simplifying the Stash
+
+** TODO Worker Restart Options
+*** A Little More Detail
+
+** TODO Supervisors Are the Heart of Reliability
+
+* TODO 19. A More Complex Example
+** TODO Introduction to Duper
+*** Q1: What is the environment and what are its constraints?
+**** What this means:
+
+*** Q2: What are the focal points?
+**** What this means:
+
+*** Q3: What are the runtime characteristics?
+
+*** Q4: What do I protect from errors?
+**** What this means:
+
+*** Q5. How do I get this thing running?
+**** What this means:
+
+** TODO The Duper Application
+*** The Results Server
+*** The PathFinder Server
+*** The Worker Supervisor
+*** Thinking About Supervision Strategies
+*** The Gatherer Server
+*** What About the Workers?
+
+** TODO But Does It Work?
+*** Let's Play with Timing
+
+** TODO Planning Your Elixir Application
+** TODO Next Up
+
+* TODO 20. OTP: Applications - 241
+** TODO This Is Not Your Father's Application
+** TODO The Application Specification File
+** TODO Turning Our Sequence Program into an OTP Application
+*** More on Application Parameters
+
+** TODO Supervision Is the Basis of Reliability
+** TODO Releasing Your Code
+** TODO Distillery -- The Elixir Release Manager
+*** Before We Start
+*** Your First Release
+*** A Toy Deployment Environment
+*** Deploy and Run the App
+*** A Second Release
+*** Deploying an Upgrade
+*** Migrating Server State
+
+** TODO OTP Is Big -- Unbelievably Big
+
+* TODO 21. Tasks and Agents - 257
+** TODO Tasks - 257
+*** Tasks and Supervision
+
+** TODO Agents - 258
+** TODO A Bigger Example - 261
+*** Making It Distributed 
+
+** TODO Agents and Tasks, or GenServer? - 263
+
+* Part III — More Advanced Elixir
+* TODO 22. Macros and Code Evaluation - 267
+  *Never use a macro when you could use a function.*
+
+** TODO Implementing an if Statement - 267
+** TODO Macros Inject Code - 269
+*** Load Order
+*** The ~quote~ Function
+
+** TODO Using the Representation as Code - 271
+*** The ~unquote~ Function
+*** Expanding a List - ~unquote_splicing~
+*** Back to Our myif Macro
+
+** TODO Using Bindings to Inject Values - 276
+** TODO Macros Are Hygienic - 277
+** TODO Other Ways to Run Code Fragments - 278
+** TODO Macros and Operators - 279
+** TODO Digging Deeper - 280
+** TODO Digging Ridiculously Deep - 280
+
+* TODO 23. Linking Modules: Behavio(u)rs and Use - 283
+** TODO Behaviours - 283
+*** Defining Behaviours
+*** Declaring Behaviours
+*** Taking It Further
+
+** TODO use and ~__using__~ - 285
+** TODO Putting It Together -- Tracing Method Calls - 286
+** TODO Use ~use~ - 289
+
+* TODO 24. Protocols -- Polymorphic Functions - 291
+** TODO Defining a Protocol - 291
+** TODO Implementing a Protocol - 292
+** TODO The Available Types - 293
+** TODO Protocols and Structs - 294
+** TODO Built-In Protocols - 295
+*** Built-in Protocols: Enumerable and Collectable
+*** Collectable
+*** Remember the Big Picture
+*** Built-in Protocols: Inspect
+*** Better Formatting with Algebra Documents
+*** Built-in Protocols: ~List.Chars~ and ~String.Chars~
+
+** TODO Protocols Are Polymorphism - 302
+
+* TODO 25. More Cool Stuff - 305
+** TODO Writing Your Own Sigils - 305
+*** Picking Up the Options
+
+** TODO Multi-app Umbrella Projects - 309
+*** Create an Umbrella Project
+*** Create the Subprojects
+*** Making the Subproject Decision
+*** The LineSigil Project
+*** The Evaluator Project
+*** Linking the Subprojects
+
+** TODO But Wait! There's More! - 313
+
+* TODO A1. Exceptions: ~raise~ and ~try~, ~catch~ and ~throw~ - 315
+** Raising an Exception - 315
+** ~catch~, ~exit~, and ~throw~ - 317
+** Defining Your Own Exceptions - 318
+** Now Ignore This Appendix - 319
+
+* TODO A2. Type Specifications and Type Checking - 321
+** When Specifications Are Used - 321
+** Specifying a Type - 322
+** Defining New Types - 324
+** Specs for Functions and Callbacks - 325
+** Using Dialyzer - 326
+
+* Bibliography - 333
+* Index - 335
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
