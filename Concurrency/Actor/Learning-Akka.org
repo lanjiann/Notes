@@ -58,7 +58,7 @@
     - [[Scala Actor API - 34][Scala Actor API - 34]]
   - [[Creating an actor - 38][Creating an actor - 38]]
     - [[Props - 39][Props - 39]]
-  - [[Promises, futures, and event-driven programming models - 41][Promises, futures, and event-driven programming models - 41]]
+  - [[Promises, futures, and event-driven programming models - 41 - =TODO= =NOTE=][Promises, futures, and event-driven programming models - 41 - =TODO= =NOTE=]]
     - [[Blocking versus event-driven APIs - 41][Blocking versus event-driven APIs - 41]]
       - [[Skills check-point  - 45][Skills check-point  - 45]]
     - [[Having an Actor respond via a future - 45][Having an Actor respond via a future - 45]]
@@ -308,7 +308,10 @@
    CLOSED: [2018-08-26 Sun 12:51]
    This section will briefly introduce the _FOUR_ tenets of the *Reactive Manifesto*.
 
-** TODO The 4 reactive tenets - 32
+** DONE The 4 reactive tenets - 32
+   CLOSED: [2018-09-25 Tue 22:00]
+   Read the *The reactive manifesto*, which is short and easy to understand.
+
 *** DONE Responsive - 32
     CLOSED: [2018-08-26 Sun 13:00]
     Our applications should respond to requests as fast as possible.
@@ -337,8 +340,27 @@
     - If possible, failure of a component should not cause any impact in behavior
       by employing replication and redundancy in critical components and data.
 
-*** TODO Event-driven/message-driven - 33
-*** TODO Reactive Tenet Correlation - 33
+*** DONE Event-driven/message-driven - 33
+    CLOSED: [2018-09-25 Tue 21:59]
+    =from Jian= =TODO= =Summary=
+    Using /messages/ instead of /method invocation/ prescribes a way in which we
+    can meet _the other THREE reactive tenets._
+
+    /Message-driven systems/ move the control over _how_, _when_, and _where_
+    requests are responded, which allows /routing/ and /load balancing/ of the
+    responding component.
+
+    An /asynchronous message-driven system/ can more efficiently utilize a
+    system's resources as it only consumes resources like threads when they are
+    actually needed.
+
+    /Messages/ can be delivered to remote machines as well (/location transparency/).
+    As messages are queued and delivered outside an /actor/, it's possible to
+    self-heal a failing system _via_ /supervision/.
+
+*** DONE Reactive Tenet Correlation - 33
+    CLOSED: [2018-09-25 Tue 21:59]
+    They depend on each other.
 
 ** DONE Anatomy of an Actor - 34
    CLOSED: [2018-08-26 Sun 13:20]
@@ -457,12 +479,28 @@
     - =TODO=
       NOTE
 
-** TODO Promises, futures, and event-driven programming models - 41
-   - what if we need to get some output from the actor in response to that message?
-     Let's say we need to get a record from our in-memory key-value store?
+** DONE Promises, futures, and event-driven programming models - 41 - =TODO= =NOTE=
+   CLOSED: [2018-09-26 Wed 01:46]
+   - _BEFORE_ moving on to working with more complex Actor-based applications,
+     we need to understand some _basic abstractions_ for working in an
+     _event-driven programming model -- ~Promises~ and ~Futures~._
+
+   - In Chapter 1, Starting Life as an Actor
+     we saw
+     + how to *send* a /message/ to an /actor/ and
+       *have it invoke* some _behavior_ in response to that /event/.
+
+       But, what if we need to
+       *get some output from the /actor/ in response to that message?*
+       (=from Jian= The Question for this section!)
+       Let's say we need to get a record from our in-memory key-value store?
 
 *** DONE Blocking versus event-driven APIs - 41
     CLOSED: [2018-08-26 Sun 15:50]
+    - For example, in an IO procedure,
+      Code that waits for IO to complete is called /blocking/ as _a thread sits
+      and waits -- it is blocked from doing any other work until the IO is complete._
+
     - To summarize, there are a few problems with using many threads to handle
       blocking IO:
       + Code does not obviously express failure in the response type
@@ -470,13 +508,42 @@
       + Blocking models have throughput limitations due to fixed threadpool sizes
       + Creating and using many threads has a performance overhead due to context-switching
 
-    - 
+    - ~Future~'s are always created with ~ExecutionContext~, so you *can choose*
+      _where_ to run them.
 
-**** Skills check-point  - 45
+    - All of the variables in scope are available to the /lambda/ registered.
+
+      =TODO= =???=
+      /Methods/, however, should be invoked with special care, or simply should
+      not be invoked within the closures, as they won't be invoked in the same
+      lexical scope. We'll look at this gotcha in the next chapter.
+
+    - Note that /futures/ can fail and *should always be bounded by* a /timeout/
+      (required in the Scala API) so they will not hang around forever and will
+      *always finish* -- *either successfully or with failure.*
+
+      =TODO= 
+      We'll take a closer look at handling futures now.
+
+**** DONE Skills check-point  - 45
+     CLOSED: [2018-09-25 Tue 22:36]
 
 *** TODO Having an Actor respond via a future - 45
 **** Java example - 46
+     - Akka is built in Scala, and, generally, the Scala and Java APIs are one to
+       one.
+
+       There is a *notable exception* and that is that *ALL* /asynchronous methods/
+       that return a /future/ will return the Scala ~scala.concurrent.Future~.
+
+***** Working with Scala futures - 46
+***** Test case - 46
+***** Actor creation - 47
+
 **** Scala example - 48
+***** Test case - 48
+***** Actor creation - 49
+
 **** Blocking threads in tests - 50
      - TIP:
        *Don't sleep or block outside tests.*
@@ -484,7 +551,7 @@
 
 *** DONE Understanding futures and promises - 51
     CLOSED: [2018-08-28 Tue 16:52]
-    - Modern /futures/ make _TWO_ effects implicit:
+    - Modern /futures/ make _TWO_ effects *implicit*:
       + failure
       + latency
 
@@ -493,8 +560,8 @@
       _latency_ in different ways.
 
 **** Future – *expressing failure and latency in types* - 51
-     - An asynchronous API, such as the /ask pattern/ =???=, will return one of
-       the placeholder future types mentioned previously.
+     - An asynchronous API, such as the /ask pattern/, will return one of the
+       /placeholder future types/ mentioned previously.
 
        We can try to demonstrate how the code becomes clearer by looking at
        different ways in which we can work with our ~PongActor~ in the test
@@ -504,7 +571,7 @@
        the test case we built previously._
 
 ***** Preparing for the Java example - 51
-***** Preparing for the Scala example - 52
+***** TODO Preparing for the Scala example - 52
       #+BEGIN_SRC scala
         def askPong(message: String): Future[String] =
           (pongActor ? message).mapTo[String]
@@ -520,8 +587,8 @@
         }
       #+END_SRC
 
-***** Note on sleeping - 52
-***** Anatomy of a future - 53
+***** TODO Note on sleeping - 52
+***** TODO Anatomy of a future - 53
 ***** DONE Handling success cases - 53
       CLOSED: [2018-08-28 Tue 15:37]
 ****** Executing code with the result - 53
@@ -1034,43 +1101,163 @@
     + *Forwarding* /Messages/
     + *Piping* /Futures/
 
-** TODO Setting the stage with an example problem - 71
+** DONE Setting the stage with an example problem - 71
+   CLOSED: [2018-09-26 Wed 20:46]
    - Requirement Overview:
      + Expose an HTTP Endpoint that accepts the URL of an article
      + Return the main body of text from the article
      + Cache the article in /Akkademy DB/
 
-*** Sketching the project - 72
+*** DONE Sketching the project - 72
+    CLOSED: [2018-09-26 Wed 20:46]
     - The name is ="akkademaid"=
+
+    - =from Jian= I don't use ~Activator~, which is deprecated!
 
     - Dependencies:
       #+BEGIN_SRC scala
         libraryDependencies ++= Seq(
           "com.syncthemall" % "boilerpipe" % "1.2.2",
           "com.akkademy-db" %% "akkademy-db" % "0.0.1-SNAPSHOT",
-          "com.syncthemail" % "boilerpipe" % "1.2.2"
         )
       #+END_SRC
 
-*** TODO Core functionality - 72
-    - The ~boilerpipe~ library takes care of the article parsing for us.
-      We simply need to call ~ArticleExtractor.getInstance.getText(input)~ where
-      input is a /Stream/ or /String/.
-
-    - We'll revisit the example and /Akkademy-DB/ as we work through different
-      approaches to solving the problem.
+*** DONE Core functionality - 72
+    CLOSED: [2018-09-26 Wed 20:45]
+    - The ~boilerpipe~ library takes care of the article parsing.
+      Simply call ~ArticleExtractor.getInstance.getText(input)~ where ~input~ is a
+      /Stream/ or /String/.
 
 ** TODO Messaging delivery - 73
-*** Messages should be immutable - 73
-*** Ask message pattern - 77
-**** Designing with Ask - 78
-**** Callbacks execute in another execution context - 82
-**** Timeouts are required - 83
-**** Timeout stacktraces aren't useful - 84
-**** Ask has overhead - 85
-**** Complexity of Actors and Ask - 85
+   - This section:
+     + ways of _getting_ messages _to_ an ~Actor~.
+     + core messaging _patterns_
+     + Also INTRODUCE /scheduling/ along the way.
 
-*** Tell - 86
+   - There are four core Actor messaging patterns:
+     + /tell/ - ~!~
+     + /ask/ - ~?~
+     + /forward/
+     + /pipe/
+
+   - We will introduce all message passing concepts here _from the perspective of_
+     an /Actor/ sending messages to another /Actor/:
+     + *Ask*: Send a message to an Actor, and get a response back via a ~Future~.
+       * When the Actor replies, it completes the future.
+       * No messages are sent to the sender's mailbox
+
+     + *Tell*:
+       Send a message to an Actor.
+
+       Any replies to ~sender()~ are sent back to the sending Actor
+
+     + *Forward*:
+       Take a message that has been received and send it to another Actor.
+
+       Any replies to ~sender()~ are delivered back to the sender of the
+       original message
+
+       =from Jian= tunneling
+
+     + *Pipe*: =TODO= =???=
+       This is used to send the result of a /future/
+       back to ~sender()~ or _another Actor_.
+
+       If using *Ask* or handling a /future/, using *Pipe* is the correct way to
+       reply with the result of the /future/.
+
+*** DONE Messages should be immutable - 73
+    CLOSED: [2018-09-26 Wed 21:04]
+    Must be completely immutable: immutable references that contain values of immutable types.
+
+    - =TODO= =NOTE= 
+
+*** TODO Ask message pattern - 77
+    - When you ask an Actor, Akka actually _creates_ a *temporary Actor* in the
+      Actor system.
+
+      The ~sender()~ reference that the Actor replies to becomes this *temporary
+      Actor*.
+
+      When an Actor replies to the message it receives from an /ask/, this
+      *temporary Actor* completes the /future/ with the response as shown in the
+      following figure - Page 77
+
+**** DONE Designing with Ask - 78
+     CLOSED: [2018-09-26 Wed 21:40]
+     - =TODO= NOTE
+
+     - The use of ask is a simple solution, but there are a few "gotchas" and
+       issues to look out for when using ask as the primary message patterns in
+       Actors. Ask is a good place to start with for building simple solutions,
+       but it can sometimes be better to design with tell as we'll look at
+       shortly. Let's look at a few of the elements of using ask that we need to
+       be aware of.
+       =TODO= =Re-Phrase=
+
+**** DONE Callbacks execute in another execution context - 82
+     CLOSED: [2018-09-26 Wed 21:40]
+     The ~val senderRef = sender()~ is always required!!!
+     The ~sender()~ is NOT /reference transparent/ (due to the change of
+     /execution context/), *use the ()*!!!
+     Always at the top!!!
+
+     - =NOTE= =TODO=
+
+**** DONE Timeouts are required - 83
+     CLOSED: [2018-09-26 Wed 21:46]
+     - Selecting the correct timeout value can be difficult without real data
+       from production systems under load.
+
+     - To set timeouts, you'll want to have statistics on the operations in
+       production. You can't control the performance of systems you depend on,
+       so it can be difficult to get this correct.
+
+     - Because every ask requires a timeout, if Actors are asking Actors that are
+       asking Actors, it's not easy to enforce a single timeout. If an error
+       occurs at some point, it's possible you'll see several timeouts in your
+       logs, which can make debugging quite difficult as shown in the following
+       figure:
+
+       CallingObject -- 2 sec timeout --> /user/myActor -- 4 sec timeout --> /user/myActor1
+
+       In the preceding image, it's possible that the 2-second timeout causes
+       the future to fail, even if all of the code is working correctly and all
+       systems are responding.
+
+     - Arbitrary and large timeouts should be considered an anti-pattern --
+       it violates the responsive tenent of reactive design.
+
+**** DONE Timeout stacktraces aren't useful - 84
+     CLOSED: [2018-09-26 Wed 21:50]
+     =Re-Phrase= Notes
+     - The lesson here is that when using ask, you should always reply to messages
+       with failures when errors are encountered in your code. If an Actor throws an
+       exception, the Actor will not reply with a message. In an Actor, you're responsible
+       for implementing all message handling behavior—if an actor expects a reply, Akka
+       will not implicitly handle any replies for you—you must always reply to messages
+       yourself when a reply is expected.
+
+     - Ask is a pattern built on top of Akka—it's a useful helper, but there is no mechanism
+       in Akka to automatically reply to messages or fail Futures generated by the Ask
+       pattern. The Ask pattern creates a Scala Promise and a temporary (extra) Actor to
+       receive a reply that it uses to fulfill the Promise. There is no mechanism to make the
+       temporary Actor aware of an exception encountered in another Actor, so if you don't
+       reply to the temporary Actor the Ask creates, it will not fulfill the Promise, and the
+       timeout will fail the corresponding Future as in the following figure:
+
+**** DONE Ask has overhead - 85
+     CLOSED: [2018-09-26 Wed 21:20]
+     - Overhead:
+       + Create a *temporary Actor* in the path ~/temp~;
+       + Create a /future/ -- this is not much, but you may need to consider.
+
+     - /Ask/ can be simpler, but there are more efficient solutions using only
+       /tell/ where preformance matters. =TODO= =???=
+
+**** TODO Complexity of Actors and Ask - 85
+
+*** TODO Tell - 86
 **** Designing with Tell - 87
 **** Forward - 94
 **** Pipe - 96
@@ -1119,7 +1306,6 @@
 ***** Defining behavior in FSMs - 121
 
 **** Using restarts to transition through states - 124
-
 
 ** Homework - 124
 ** Summary - 125
