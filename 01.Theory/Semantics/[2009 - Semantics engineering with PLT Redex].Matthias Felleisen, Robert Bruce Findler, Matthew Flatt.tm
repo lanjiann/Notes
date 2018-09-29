@@ -194,32 +194,185 @@
     <em|reflexive>, <em|symmetric>, NOR <em|transitive>:
 
     <\equation*>
-      <stack|<tformat|<cwith|1|1|4|4|cell-width|2cm>|<cwith|1|1|4|4|cell-hmode|exact>|<table|<row|<cell|<around*|(|f\<bullet\>B<rsub|1>|)>>|<cell|\<b-up-r\>>|<cell|B<rsub|1>>|<cell|>|<cell|<around*|[|a|]>>>|<row|<cell|<around*|(|t\<bullet\>B<rsub|1>|)>>|<cell|\<b-up-r\>>|<cell|t>|<cell|>|<cell|<around*|[|b|]>>>>>>
+      <stack|<tformat|<cwith|1|1|4|4|cell-width|2cm>|<cwith|1|1|4|4|cell-hmode|exact>|<cwith|1|-1|1|1|cell-halign|r>|<table|<row|<cell|<around*|(|f\<bullet\>B<rsub|1>|)>>|<cell|\<b-up-r\>>|<cell|B<rsub|1>>|<cell|>|<cell|<around*|[|a|]>>>|<row|<cell|<around*|(|t\<bullet\>B<rsub|1>|)>>|<cell|\<b-up-r\>>|<cell|t>|<cell|>|<cell|<around*|[|b|]>>>>>>
     </equation*>
 
     In the context of a <em|reduction semantics>, such relations are known as
     <strong|notions of reduction>.
 
-    <item>
+    <item>A minor modification of this definition yields a relation
+    <math|\<asymp\><rsub|\<b-up-r\>>> that is <em|reflexive>:
+
+    <\equation*>
+      <stack|<tformat|<cwith|1|1|4|4|cell-width|2cm>|<cwith|1|1|4|4|cell-hmode|exact>|<cwith|1|-1|1|1|cell-halign|r>|<table|<row|<cell|<around*|(|f\<bullet\>B<rsub|1>|)>>|<cell|\<asymp\><rsub|\<b-up-r\>>>|<cell|B<rsub|1>>|<cell|>|<cell|<around*|[|a|]>>>|<row|<cell|<around*|(|t\<bullet\>B<rsub|1>|)>>|<cell|\<asymp\><rsub|\<b-up-r\>>>|<cell|t>|<cell|>|<cell|<around*|[|b|]>>>|<row|<cell|B<rsub|1>>|<cell|\<asymp\><rsub|\<b-up-r\>>>|<cell|B<rsub|1>>|<cell|>|<cell|<around*|[|c|]>>>>>>
+    </equation*>
+
+    An <underline|alternative way> of defining
+    <math|\<asymp\><rsub|\<b-up-r\>>> is to extend <math|\<b-up-r\>> and
+    explicitly constrain the new relation to be <em|reflexive>:
+
+    <\equation*>
+      <stack|<tformat|<cwith|1|1|4|4|cell-width|2cm>|<cwith|1|1|4|4|cell-hmode|exact>|<cwith|1|-1|1|1|cell-halign|r>|<cwith|1|-1|4|4|cell-halign|l>|<table|<row|<cell|B<rsub|1>>|<cell|\<asymp\><rsub|\<b-up-r\>>>|<cell|B<rsub|2>>|<cell|if
+      B<rsub|1> \<b-up-r\> B<rsub|2>>|<cell|<around*|[|a
+      b|]>>>|<row|<cell|B<rsub|1>>|<cell|\<asymp\><rsub|\<b-up-r\>>>|<cell|B<rsub|1>>|<cell|>|<cell|<around*|[|c|]>>>>>>
+    </equation*>
+
+    The relation <math|\<asymp\><rsub|\<b-up-r\>>> is therefore called the
+    <strong|reflective closure> of the <math|\<b-up-r\>> relation.
+
+    <item>We define yet another relation by adding <em|symmetry >and
+    <em|transitiveity> constraints:
+
+    <\equation*>
+      <stack|<tformat|<cwith|1|1|4|4|cell-width|2cm>|<cwith|1|1|4|4|cell-hmode|exact>|<cwith|1|-1|1|1|cell-halign|r>|<cwith|1|-1|4|4|cell-halign|l>|<table|<row|<cell|B<rsub|1>>|<cell|\<approx\><rsub|\<b-up-r\>>>|<cell|B<rsub|2>>|<cell|<text|if
+      >B<rsub|1> \<b-up-r\> B<rsub|2>>|<cell|<around*|[|a
+      b|]>>>|<row|<cell|B<rsub|1>>|<cell|\<approx\><rsub|\<b-up-r\>>>|<cell|B<rsub|1>>|<cell|>|<cell|<around*|[|c|]>>>|<row|<cell|B<rsub|2>>|<cell|\<approx\><rsub|\<b-up-r\>>>|<cell|B<rsub|1>>|<cell|<text|if
+      >B<rsub|1>\<approx\><rsub|\<b-up-r\>>B<rsub|2>>|<cell|<around*|[|d|]>>>|<row|<cell|B<rsub|1>>|<cell|\<approx\><rsub|\<b-up-r\>>>|<cell|B<rsub|3>>|<cell|<text|
+      if >B<rsub|1>\<approx\><rsub|\<b-up-r\>>B<rsub|2><text| and
+      >B<rsub|2>\<approx\><rsub|\<b-up-r\>>B<rsub|3>>|<cell|<around*|[|e|]>>>>>>
+    </equation*>
+
+    <\itemize-minus>
+      <item>The <math|\<approx\><rsub|\<b-up-r\>>> relation is the
+      <strong|symmetric-transitive closure> of
+      <math|\<asymp\><rsub|\<b-up-r\>>>
+
+      <item>The <math|\<approx\><rsub|\<b-up-r\>>> relation is the
+      <strong|reflexive-symmetric-transitive closure> or <strong|equivalence
+      closure> of <math|\<b-up-r\>>
+    </itemize-minus>
   </itemize-dot>
 
   <subsection|Semantics as an Equivalence Relation.>
 
   <subsection|Semantics via Reduction.>
 
+  <\itemize-dot>
+    <item><with|color|red|TODO>
+
+    <item><strong|Exercise 1.2.> Show that
+    <math|<around*|(|f\<bullet\><around*|(|f\<bullet\><around*|(|f\<bullet\>f|)>|)>|)>\<rightsquigarrow\><rsub|\<b-up-r\>>f>
+    by constructing a reduction sequence based on the <math|\<b-up-r\>>
+    one-step relation.
+
+    <\answer>
+      \;
+
+      <\eqnarray*>
+        <tformat|<table|<row|<cell|<around*|(|f\<bullet\><around*|(|f\<bullet\><around*|(|f\<bullet\>f|)>|)>|)>>|<cell|\<b-up-r\>>|<cell|<around*|(|f\<bullet\><around*|(|f\<bullet\>f|)>|)>>>|<row|<cell|>|<cell|\<b-up-r\>>|<cell|<around*|(|f\<bullet\>f|)>>>|<row|<cell|>|<cell|\<b-up-r\>>|<cell|f>>>>
+      </eqnarray*>
+
+      Then we get <math|<around*|(|f\<bullet\><around*|(|f\<bullet\><around*|(|f\<bullet\>f|)>|)>|)>\<rightsquigarrow\><rsub|\<b-up-r\>>f>.
+    </answer>
+  </itemize-dot>
+
   <subsection|Reduction in Context.>
+
+  <\itemize-dot>
+    <item><strong|Exercise 1.3.> Explain why
+    <math|<around*|(|f\<bullet\><around*|(|<around*|(|t\<bullet\>f|)>\<bullet\>f|)>|)>/\<rightsquigarrow\><rsub|\<b-up-r\>>f>.
+
+    <\answer>
+      According to rules of <math|\<rightsquigarrow\><rsub|\<b-r\>>>, we can
+      do the reduction: <math|<around*|(|f\<bullet\><around*|(|<around*|(|t\<bullet\>f|)>\<bullet\>f|)>|)>\<rightsquigarrow\><rsub|\<b-up-r\>><around*|(|<around*|(|t\<bullet\>f|)>\<bullet\>f|)>>.
+      However, we can't proceed anymore! The is no rule for
+      <math|\<rightsquigarrow\><rsub|\<b-r\>>> to do further reduction(s).
+    </answer>
+
+    <item><strong|Exercise 1.4.> Show that
+    <math|<around*|(|f\<bullet\><around*|(|<around*|(|t\<bullet\>f|)>\<bullet\>f|)>|)>\<twoheadrightarrow\><rsub|\<b-up-r\>>t>
+    with a reduction sequence based on <math|<long-arrow|\<rubber-rightarrow\>|><rsub|\<b-up-r\>>>.
+
+    <\answer>
+      According to rules of <math|<long-arrow|\<rubber-rightarrow\>|><rsub|\<b-up-r\>>>,
+      we can do the reduction:
+
+      <\eqnarray*>
+        <tformat|<table|<row|<cell|<around*|(|f\<bullet\><around*|(|<around*|(|t\<bullet\>f|)>\<bullet\>f|)>|)>>|<cell|<long-arrow|\<rubber-rightarrow\>|><rsub|\<b-up-r\>>>|<cell|<around*|(|<around*|(|t\<bullet\>f|)>\<bullet\>f|)>>>|<row|<cell|>|<cell|\<rightarrow\><rsub|\<b-up-r\>>>|<cell|<around*|(|t\<bullet\>f|)>>>|<row|<cell|>|<cell|\<rightarrow\><rsub|\<b-up-r\>>>|<cell|t>>>>
+      </eqnarray*>
+
+      Then we can get <math|<around*|(|f\<bullet\><around*|(|<around*|(|t\<bullet\>f|)>\<bullet\>f|)>|)>\<twoheadrightarrow\><rsub|\<b-up-r\>>t>
+      </answer>
+  </itemize-dot>
+
+  \;
 
   <subsection|Evaluation Functions.>
 
+  <\itemize-dot>
+    <item><strong|Exercise 1.5.> Among the relations <math|\<b-up-r\>>,
+    <math|\<asymp\><rsub|\<b-up-r\>>>, <math|\<approx\><rsub|\<b-up-r\>>>,
+    <math|\<rightsquigarrow\><rsub|\<b-up-r\>>>,
+    <math|\<rightarrow\><rsub|\<b-up-r\>>>,
+    <math|\<twoheadrightarrow\><rsub|\<b-up-r\>>>, and
+    <math|=<rsub|\<b-up-r\>>> which are functions? For each non-function
+    relation, find an expression and two expressions that it relates to.
+
+    <\answer>
+      <with|color|red|TODO>
+    </answer>
+
+    <item><strong|Exercise 1.6.> Use the above definitions to find the
+    results of <math|<text|eval><rsub|\<b-up-r\>><rsup|<long-arrow|\<rubber-equal\>|><rsub|\<b-up-r\>>><around*|(|<around*|(|<around*|(|f\<bullet\>t|)>\<bullet\>t|)>|)>>
+    and <math|<text|eval><rsub|\<b-up-r\>><rsup|\<twoheadrightarrow\><rsub|\<b-up-r\>>><around*|(|<around*|(|<around*|(|f\<bullet\>t|)>\<bullet\>f|)>|)>>.
+
+    <\answer>
+      <with|color|red|TODO>\ 
+    </answer>
+  </itemize-dot>
+
   <subsection|Notation Summary.>
 
-  \;
-
-  \;
-
-  \;
-
-  \;
+  <\wide-block>
+    <tformat|<cwith|7|7|2|2|cell-row-span|1>|<cwith|7|7|2|2|cell-col-span|2>|<cwith|7|7|2|2|cell-halign|c>|<table|<row|<\cell>
+      name
+    </cell>|<\cell>
+      definition
+    </cell>|<\cell>
+      intuition
+    </cell>>|<row|<\cell>
+      <math|->
+    </cell>|<\cell>
+      the base relation on members of an expression grammar
+    </cell>|<\cell>
+      a single \Preduction\Q step with no context
+    </cell>>|<row|<\cell>
+      <math|<long-arrow|\<rubber-rightarrow\>|><rsub|_>>
+    </cell>|<\cell>
+      the compatible closure of <math|_> with respect to the expression
+      grammar
+    </cell>|<\cell>
+      a single step within a context
+    </cell>>|<row|<\cell>
+      <math|<long-arrow|\<rubber-twoheadrightarrow\>|><rsub|_>>
+    </cell>|<\cell>
+      the reflexive-transitive closure of <math|\<rightarrow\><rsub|_>>
+    </cell>|<\cell>
+      multiple evaluation steps (zero or more)
+    </cell>>|<row|<\cell>
+      <\math>
+        <long-arrow|\<rubber-equal\>|><rsub|_>
+      </math>
+    </cell>|<\cell>
+      the symmetric-transitive closure of
+      <math|<long-arrow|\<rubber-twoheadrightarrow\>|><rsub|_>>
+    </cell>|<\cell>
+      equates expressions that produce the same result
+    </cell>>|<row|<\cell>
+      <math|<text|eval><rsub|_><rsup|_>>
+    </cell>|<\cell>
+      a relation projected to a range (results)
+    </cell>|<\cell>
+      complte evaluation based on <math|<long-arrow|\<rubber-twoheadrightarrow\>|><rsub|_>>
+      or <math|<long-arrow|\<rubber-equal\>|><rsub|_>>
+    </cell>>|<row|<\cell>
+      <math|<text|eval><rsub|_>>
+    </cell>|<\cell>
+      a generic <em|eval> relation
+    </cell>|<\cell>
+      \;
+    </cell>>>>
+  </wide-block>
 
   \;
 
