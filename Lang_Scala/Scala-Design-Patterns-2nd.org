@@ -646,18 +646,202 @@
      the classical case like in old Java (Before Java 8)_.
 
 * TODO 2. Traits and Mixin Compositions
-** TODO Traits
-*** Traits as interfaces
-**** Mixing in traits with variables
+  - =todo= NOTE
 
-*** Traits as classes
-*** Extending classes
-*** Extending traits
+  - We will go through the following main topics in this chapter:
+    + /Traits/
+
+    + /Mixin compositions/
+
+    + /Multiple inheritance/
+
+    + /Linearization/
+
+    + Testing /traits/
+
+    + /Traits/ vs. /classes/
+
+** DONE Traits
+   CLOSED: [2018-10-04 Thu 02:07]
+   - People have different perspectives of /traits/ in Scala:
+     + They can be viewed not only as /interfaces/ in other languages
+       but also
+     + as /classes/ with *only parameter-less constructors*.
+       =comment= This point will be change in Dotty!
+
+   - In the following few sections,
+     =TODO=
+     we will see the /traits/
+     + from different points of view
+       and
+     + try to give you some ideas about how they can be used.
+   
+*** DONE Traits as interfaces
+    CLOSED: [2018-10-04 Thu 02:07]
+    - Whenever there is some code in a /trait/ -- not pure abstract as Java /interface/
+      before Java 8 (without /default method/) -- the /trait/ is called a /mixin/.
+
+    - =from Jian=
+      It seems we can category /traits/ as (*in my words*):
+      + interface traits
+
+      + mixin traits (similar to /abstract class/ in other languages)
+
+    - Example (these /traits/ are used in the next section -- Mixin compositions):
+      #+BEGIN_SRC scala
+        trait Alarm {  // from Jian: interface trait
+          def trigger(): String
+        }
+
+        trait Notifier {  // from Jian: mixin trait
+          val notificationMessage: String
+
+          def printNotification(): Unit = {
+            System.out.println(notificationMessage)
+          }
+
+          def clear()
+        }
+
+      #+END_SRC
+
+**** DONE Mixing in traits with variables
+     CLOSED: [2018-10-04 Thu 22:43]
+     #+BEGIN_SRC scala
+       class NotifierImpl(val notificationMessage: String) extends Notifier {
+         override def clear(): Unit = System.out.println("cleared")
+       }
+     #+END_SRC
+
+     - Here you apply ~val~ on ~notificationMessage~, then it is a part of the
+       /class/ as a /field/, and a /getter/ will be generated for it.
+       (*required*: 1. ~val~; 2. same name ~notificationMessage~)
+
+     - If there is NO ~val~, we need implement ~notificationMessage~ in the body
+       with ~override val notificationMessage~ (for implementing /trait field/,
+       ~override~ is *optional* -- =from Jian= I think keep using ~override~ is
+       a good practice -- a hint to its origin. However, I don't think ~override~
+       meaning is fit for this, I prefer a NOT ACTUALLY EXIST in Scala keyword
+       like ~impl~).
+
+*** DONE Traits as classes
+    CLOSED: [2018-10-04 Thu 02:07]
+    - /Traits/ can also be seen _from the perspective of_ /classes/. In this case,
+      + they have to *implement ALL their methods*
+      + they have ONLY ONE /constructor that does *NOT* accept any parameters/.
+
+    - Example:
+      #+BEGIN_SRC scala
+        trait Beeper {
+          def beep(times: Int): Unit =
+            (1 to times).
+              view.
+              map(i => s"Beep number: $i").
+              foreach(println)
+        }
+
+        object BeeperRunner {
+          val TIMES = 10
+
+          def main(args: Array[String]): Unit = {
+            // Because you can't instantiate a `trait`,
+            // you CANNOT write `new Beeper` without the following `{}`
+            val beeper = new Beeper {}
+            beeper beep TIMES
+          }
+        }
+      #+END_SRC
+
+*** DONE Extending classes
+    CLOSED: [2018-10-04 Thu 02:07]
+    /Traits/ can *extend* /classes/.
+
+    - Example:
+      #+BEGIN_SRC scala
+        abstract class Connector {
+          def connect()
+          def close()
+        }
+
+        trait ConnectorWithHelper extends Connector {
+          def findDriver(): Unit = {
+            System.out.println("Find driver called.")
+          }
+        }
+
+        class PgSqlConnector extends ConnectorWithHelper {
+          override def connect(): Unit = {
+            System.out.println("Connected...")
+          }
+          override def close(): Unit = {
+            System.out.println("Closed...")
+          }
+        }
+      #+END_SRC
+
+      =TODO= =TODO= =TODO=
+      However, Scala will put a *limit* to some cases, and we will =TODO= see how
+      it will affect us later in this chapter when we look at compositions.
+
+*** DONE Extending traits
+    CLOSED: [2018-10-04 Thu 02:06]
+    /Traits/ can *extend* /traits/.
+
+    - Example:
+      #+BEGIN_SRC scala
+        trait Ping {
+          def ping(): Unit = {
+            System.out.println("ping")
+          }
+        }
+
+        trait Pong {
+          def pong(): Unit = {
+            System.out.println("pong")
+          }
+        }
+
+        trait PingPong extends Ping with Pong {
+          def pingPong(): Unit = {
+            ping()
+            pong()
+          }
+        }
+
+        object Runner extends PingPong {
+          def main(args: Array[String]): Unit = {
+            pingPong()
+          }
+        }
+      #+END_SRC
+      + This is just a example. Of course, your ~Runner~ can extends the /super
+        traits/ of ~PingPong~ (~Ping~ and ~Pong~) DIRECTLY, rather than
+        ~PingPong~ itself.
+
+    - =from Jian= didn't metion the *forbided* /circular extension/!!!
+
+    - =TODO= /Stackable Traits/
 
 ** TODO Mixin compositions
-*** Mixing traits in
-*** Composing
+   Show how /traits/ can be *mixed in* a SPECIFIC /class/
+
+   OR
+
+   used to *create* /anonymous classes/ with some specific functionality while
+   writing our code.
+
+*** DONE Mixing traits in
+    CLOSED: [2018-10-04 Thu 22:20]
+*** TODO Composing
+    Composing at creation time gives us an opportunity to CREATE /anonymous
+    classes/ *without* the need to explicitly define them.
+
 **** Composing simple traits
+     Compose simple /traits/, which do NOT extend other /traits/ or /classes/:
+     #+BEGIN_SRC scala
+
+     #+END_SRC
+
 **** Composing complex traits
 **** Composing with self-types
 
