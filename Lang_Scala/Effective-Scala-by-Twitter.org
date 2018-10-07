@@ -59,19 +59,107 @@
 * Introduction
   - x
 
-* TODO Formatting
-** Whitespace
+* DONE Formatting
+  CLOSED: [2018-10-05 Fri 11:44]
+  This doc adhere to the OFFICIAL /Scala style guide/ plus the following rules.
+
+** DONE Whitespace
+   CLOSED: [2018-10-05 Fri 11:16]
    =Check if this is the same as the Scala Style Guide=
    - Indent by *two spaces*.
 
-   - Try to avoid lines greater than *100 columns* in length.
+   - Try to _avoid lines greater than_ *100 columns* in length.
 
    - Use *one blank line* between /method/, /class/, and /object definitions/.
+     =from Jian= I prefer add *two blank lines* between class-level things.
 
-** Naming
-** Imports
+** DONE Naming
+   CLOSED: [2018-10-05 Fri 11:27]
+   - Use SHORT _names_ for small scopes, and use LONGER _names_ for larger scopes.
+
+   - Use common _abbreviations_ but eschew esoteric ones
+     + comment:
+       Everyone knows ~ok~, ~err~, or ~defn~ whereas ~sfri~ is NOT so common --
+       =from Jian=
+       you should only use a name like this when your code is read by a specific
+       group of people, who have this kind of domain knowledge.
+
+   - Don't rebind names for different uses -- use ~val~'s
+
+   - Avoid using ~`~ s to overload reserved names.
+     For example, use ~typ~ instead of ~`type`~
+
+   - Use _active names_ for operations with /side effects/
+     ~user.activate()~ *not* ~user.setActive()~
+     =???= =TODO= =???=
+
+   - Use descriptive names for /methods/ that return values
+     ~src.isDefined~ *not* ~src.defined~
+
+   - *Don't prefix* /getters/ with ~get~ prefix
+     As per the previous rule, it's redundant: ~site.count~ *not* ~site.getCount~
+
+   - *Don't repeat names* that are already encapsulated in /package/ or /object/
+     name
+
+     *Prefer*
+     #+BEGIN_SRC scala
+       object User {
+         def get(id: Int): Option[User]
+       }
+     #+END_SRC
+
+     *TO*
+
+     #+BEGIN_SRC scala
+       object User {
+         def getUser(id: Int): Option[User]
+       }
+     #+END_SRC
+     They are redundant in use: ~User.getUser~ provides no more information than
+     ~User.get~.
+
+** DONE Imports
+   CLOSED: [2018-10-05 Fri 11:35]
+   - *Sort ~import~ lines alphabetically*
+     This makes it easy to examine visually, and is simple to automate.
+
+   - Use braces when importing several names from a package
+     ~import com.twitter.concurrent.{Broker, Offer}~
+
+   - Use /wildcards/ when *MORE THAN _six_ names* are imported
+     e.g.: ~import com.twitter.concurrent._~
+     Don't apply this blindly: some packages export too many names
+
+   - When using /collections/, qualify names by importing ~scala.collection.immutable~
+     and/or ~scala.collection.mutable~ --- mutable and immutable collections
+     have dual names. Qualifiying the names makes is obvious to the reader which
+     variant is being used (e.g. ~immutable.Map~)
+
+     =from Jian= I prefer using, for example, non-prefixed ones as immutable!
+
+   - *Do not use relative imports from other packages* =IMPORTANT=
+     Avoid
+     #+BEGIN_SRC scala
+       import com.twitter
+       import concurrent
+     #+END_SRC
+
+     in favor of the unambiguous
+
+     #+BEGIN_SRC scala
+       import com.twitter.concurrent
+     #+END_SRC
+
+   - Put ~import~'s *at the top of the file*
+     *The reader can refer to ALL _imports_ in one place.*
+
 ** DONE Braces
    CLOSED: [2018-01-31 Wed 18:43]
+   Avoid using braces for single expression.
+   For example,
+   Use ~def square(x: Int) = x * x~, rather than ~def square(x: Int) = { x * x }~
+
 ** DONE Pattern matching
    CLOSED: [2018-01-31 Wed 18:47]
    Use /partial function/, rather than explicitly write ~match~
@@ -82,7 +170,37 @@
      }
    #+END_SRC
 
-** TODO Comments
+   Do *NOT* use
+   #+BEGIN_SRC scala
+     list map { item =>
+       item match {
+         case Some(x) => x
+         case None    => default
+       }
+     }
+   #+END_SRC
+
+** DONE Comments
+   CLOSED: [2018-10-05 Fri 11:41]
+   - This doc prefer
+     #+BEGIN_SRC scala
+       /**
+         * ServiceBuilder builds services
+         * ...
+         */
+     #+END_SRC
+
+     rather than the ScalaDoc style:
+     #+BEGIN_SRC scala
+       /** ServiceBuilder builds services
+         * ...
+         */
+     #+END_SRC
+
+   - =from Jian=
+     Which style to choose depends the project team preference!!!
+
+   - Do NOT resort to ASCII art or other visual embelishments.
 
 * TODO Types and Generics
 ** DONE Return type annotations
@@ -200,6 +318,11 @@
      the reader _should beware of these implications_.
 
 * TODO Collections
+  Read the [[https://www.scala-lang.org/docu/files/collections-api/collections.html][collections design document]] (for 2.8+).
+
+  =TODO= =IMPORTANT=
+  =from Jian= We need this kind of document for 2.13+.
+
 ** Hierarchy
 ** Use
 ** Style
@@ -370,7 +493,28 @@
        }
      #+END_SRC
 
-* TODO Garbage collection
+* DONE Garbage collection
+  CLOSED: [2018-10-05 Fri 11:55]
+  We spend a lot of time *tuning* /garbage collection/ in production.
+
+  - The /garbage collection/ concerns are largely similar to those of Java
+    though idiomatic Scala code tends to generate more (short-lived) garbage
+    than idiomatic Java code — a byproduct of the functional style.
+
+    Hotspot’s generational garbage collection typically makes this a nonissue
+    as short-lived garbage is effectively free in most circumstances.
+
+  - Before tackling GC performance issues, watch this presentation by Attila that
+    illustrates some of our experiences with GC tuning.
+    =TODO= =TODO= =TODO=
+
+  - In Scala proper, your only tool to mitigate GC problems is to generate less
+    garbage; but do not act without data!
+
+    =IMPORTANT= =TODO=
+    Unless you are doing something obviously degenerate =TODO= =???=, use the
+    various *Java profiling tools* — our own include ~heapster~ and ~gcprof~.
+
 * DONE Java compatibility
   CLOSED: [2018-02-01 Thu 13:51]
   - _MOSTLY_, it requires *NO extra effort* to get Java compatibility,

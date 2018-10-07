@@ -87,7 +87,7 @@
       - [[Composing simple traits][Composing simple traits]]
       - [[Composing complex traits][Composing complex traits]]
       - [[Composing with self-types][Composing with self-types]]
-    - [[Clashing traits][Clashing traits]]
+    - [[Clashing traits - =TODO= NOTES][Clashing traits - =TODO= NOTES]]
       - [[Same signatures and return types][Same signatures and return types]]
       - [[Same signatures and different return types traits][Same signatures and different return types traits]]
       - [[Same signatures and return types mixins][Same signatures and return types mixins]]
@@ -646,7 +646,7 @@
      the classical case like in old Java (Before Java 8)_.
 
 * TODO 2. Traits and Mixin Compositions
-  - =todo= NOTE
+  - =TODO= NOTE
 
   - We will go through the following main topics in this chapter:
     + /Traits/
@@ -702,7 +702,6 @@
 
           def clear()
         }
-
       #+END_SRC
 
 **** DONE Mixing in traits with variables
@@ -822,7 +821,8 @@
 
     - =TODO= /Stackable Traits/
 
-** TODO Mixin compositions
+** DONE Mixin compositions
+   CLOSED: [2018-10-06 Sat 01:37]
    Show how /traits/ can be *mixed in* a SPECIFIC /class/
 
    OR
@@ -832,46 +832,179 @@
 
 *** DONE Mixing traits in
     CLOSED: [2018-10-04 Thu 22:20]
-*** TODO Composing
-    Composing at creation time gives us an opportunity to CREATE /anonymous
+*** DONE Composing
+    CLOSED: [2018-10-06 Sat 01:27]
+    Composing at _creation time_ gives us an opportunity to CREATE /anonymous
     classes/ *without* the need to explicitly define them.
-
-**** Composing simple traits
+    
+**** DONE Composing simple traits
+     CLOSED: [2018-10-06 Sat 00:50]
      Compose simple /traits/, which do NOT extend other /traits/ or /classes/:
      #+BEGIN_SRC scala
+       class Watch(val brand: String, initialTime: Long) {
+         def getTime(): Long = System.currentTimeMillis() - initialTime
+       }
 
+       object WatchUser {
+         def main(args: Array[String]): Unit = {
+           val expensiveWatch = new Watch("expensive brand", 1000L) with Alarm with
+               Notifier {
+             override def trigger(): String = "The alarm was triggered."
+             override def clear(): Unit = {
+               System.out.println("Alarm cleared.")
+             }
+             override val notificationMessage: String = "Alarm is running!"
+           }
+           val cheapWatch = new Watch("cheap brand", 1000L) with Alarm {
+             override def trigger(): String = "The alarm was triggered."
+           }
+             // show some watch usage.
+           System.out.println(expensiveWatch.trigger())
+           expensiveWatch.printNotification()
+           System.out.println(s"The time is ${expensiveWatch.getTime()}.")
+           expensiveWatch.clear()
+           System.out.println(cheapWatch.trigger())
+           System.out.println(s"${cheapWatch.brand} watches cannot manually stop the alarm...")
+         }
+       }
+     #+END_SRC
+     =from Jian= The original code does neither use ~brand~, nor create a /field/
+     for it. This is not reasonable -- I modified the code and convert ~brand~ to
+     a ~val~ field.
+
+**** DONE Composing complex traits
+     CLOSED: [2018-10-06 Sat 01:02]
+     We defined ~ConnectorWithHelper~ /trait/ before, and it extends the
+     /abstract class/ ~Connector~. Now let's use ~ConnectorWithHelper~:
+     #+BEGIN_SRC scala
+       object ReallyExpensiveWatchUser {
+         def main(args: Array[String]): Unit = {
+           val reallyExpensiveWatch =
+             new Watch("really expensive brand", 1000L)
+                 with ConnectorWithHelper {
+               override def connect(): Unit = {
+                 System.out.println("Connected with another connector.")
+               }
+
+               override def close(): Unit = {
+                 System.out.println("Closed with another connector.")
+               }
+             }
+
+           System.out.println("Using the really expensive watch.")
+           reallyExpensiveWatch.findDriver()
+           reallyExpensiveWatch.connect()
+           reallyExpensiveWatch.close()
+         }
+       }
      #+END_SRC
 
-**** Composing complex traits
-**** Composing with self-types
+     You compile the code above and will see a /compilation error/ like:
+     #+BEGIN_SRC text
+       Error:(36, 80) illegal inheritance; superclass Watch
+        is not a subclass of the superclass Connector
+        of the mixin trait ConnectorWithHelper
+           val reallyExpensiveWatch = new Watch("really expensive brand", 1000L)
+       with ConnectorWithHelper {
+       ^
+     #+END_SRC
 
-*** Clashing traits
-**** Same signatures and return types
-**** Same signatures and different return types traits
-**** Same signatures and return types mixins
-**** Same signatures and different return types mixins
+     ~Watch~ is a /class/ and it is NOT the /subclass/ of ~Connector~, thus it
+     *CANNOT* extends a /trait/ that extends ~Connector~ -- for here,
+     ~ConnectorWithHelper~ is the one.
+
+     This is a case that how Scala *limit* multiple inheritance in order to prevent
+     dangerous errors from happening. (=from Jian= "limit" not "forbid" --
+     /trait/ based /mutiple inheritance/ is still a /mutiple inheritance/).
+     
+**** DONE Composing with self-types
+     CLOSED: [2018-10-06 Sat 01:27]
+     We can *enforce* a /trait/ to be /mixed into/ a /class/ that also has another
+     /trait/ or /multiple traits/ mixed into it.
+
+     - Example:
+       #+BEGIN_SRC scala
+         trait AlarmNotifier {
+           this: Notifier =>
+
+           def trigger(): String
+         }
+       #+END_SRC
+       + Of course, ~this~ here must be ~AlarmNotifier~ itself, but it is also a
+         ~Notifier~.
+
+       + In the preceding code, we've shown a /self-type/.
+         * The highlighted piece of code brings all the /methods/ of ~Notifier~
+           to the scope of our new ~trait~
+           and
+         * it also requires that ANY /class/ that /mixes in/ ~AlarmNotifier~ should
+           *also* /mix in/ ~Notifier~. Otherwise, a compilation error will occur.
+
+       + Instead of this, we can use ~self~ and then refer to the ~Notifier~ /methods/
+         inside ~AlarmNotifier~ by typing, for example, ~self.printNotification()~.
+
+         =Urgent= =TODO= =IMPORTANT= =???= =Experiment=
+         =from Jian= Does this mean if we write ~self: Notifier =>~, we can, in
+         the body of this /trait/, use ~self~ to refer ~Notifier~ and use ~this~
+         to refer ~AlarmNotifier~???
+
+     - Code use the ~AlarmNotifier~ in the right way:
+       #+BEGIN_SRC scala
+         object SelfTypeWatchUser {
+           def main(args: Array[String]): Unit = {
+             //// uncomment to see the self-type error.
+             // val watch = new Watch("alarm with notification", 1000L) with AlarmNotifier
+             val watch = new Watch("alarm with notification", 1000L) with
+                 AlarmNotifier with Notifier {
+               override def trigger(): String = "Alarm triggered."
+               override def clear(): Unit = System.out.println("Alarm cleared.")
+               override val notificationMessage: String = "The notification."
+             }
+             System.out.println(watch.trigger())
+             watch.printNotification()
+             System.out.println(s"The time is ${watch.getTime()}.")
+             watch.clear()
+           }
+         }
+       #+END_SRC
+
+     - Multiple /traits/ /self-types/ are also allowed, just use ~with~.
+
+     - /Self-types/ are a key part of the /cake design pattern/, which is used for
+       /dependency injection/.
+       =TODO= More interesting cases later in this book!
+
+*** DONE Clashing traits - =TODO= NOTES
+    CLOSED: [2018-10-06 Sat 01:36]
+    Resolve the question of _mix in_ /traits/ that have /methods/ with
+    *IDENTICAL* /signatures/.
+
+**** TODO Same signatures and return types
+**** TODO Same signatures and different return types traits
+**** TODO Same signatures and return types mixins
+**** TODO Same signatures and different return types mixins
 
 ** TODO Multiple inheritance
-*** The diamond problem
-*** The limitations
+*** TODO The diamond problem
+*** TODO The limitations
 
 ** TODO Linearization
-*** Rules of inheritance hierarchies
-*** Linearization rules
-*** How linearization works
-*** Initialization
-*** Method overriding
+*** TODO Rules of inheritance hierarchies
+*** TODO Linearization rules
+*** TODO How linearization works
+*** TODO Initialization
+*** TODO Method overriding
 
 ** TODO Testing traits
-*** Using a class
-*** Mixing the trait in
+*** TODO Using a class
+*** TODO Mixing the trait in
 **** Mixing into the test class
 **** Mixing into the test cases
 
-*** Running the tests
+*** TODO Running the tests
 
 ** TODO Traits versus classes
-*** Summary
+*** TODO Summary
 
 * TODO 3. Unification
 ** TODO Functions and classes
