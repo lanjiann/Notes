@@ -1,0 +1,380 @@
+#+TITLE: Java Generics and Collections
+#+VERSION: 2007
+#+AUTHOR: Maurice Naftalin, Philip Wadler
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface - xi][Preface - xi]]
+- [[Part I. Generics][Part I. Generics]]
+- [[1. Introduction - 3][1. Introduction - 3]]
+  - [[1.1 Generics - 4][1.1 Generics - 4]]
+  - [[1.2 Boxing and Unboxing - 6][1.2 Boxing and Unboxing - 6]]
+  - [[1.3 Foreach - 9][1.3 Foreach - 9]]
+  - [[1.4 Generic Methods and Varargs - 10][1.4 Generic Methods and Varargs - 10]]
+  - [[1.5 Assertions - 12][1.5 Assertions - 12]]
+- [[2. Subtyping and Wildcards - 15][2. Subtyping and Wildcards - 15]]
+  - [[2.1 Subtyping and the Substitution Principle - 15][2.1 Subtyping and the Substitution Principle - 15]]
+  - [[2.2 Wildcards with extends - 17][2.2 Wildcards with extends - 17]]
+  - [[2.3 Wildcards with super - 18][2.3 Wildcards with super - 18]]
+  - [[2.4 The Get and Put Principle - 19][2.4 The Get and Put Principle - 19]]
+  - [[2.5 Arrays - 22][2.5 Arrays - 22]]
+  - [[2.6 Wildcards Versus Type Parameters - 25][2.6 Wildcards Versus Type Parameters - 25]]
+  - [[2.7 Wildcard Capture - 27][2.7 Wildcard Capture - 27]]
+  - [[2.8 Restrictions on Wildcards - 28][2.8 Restrictions on Wildcards - 28]]
+- [[3. Comparison and Bounds - 31][3. Comparison and Bounds - 31]]
+  - [[3.1 Comparable - 31][3.1 Comparable - 31]]
+  - [[3.2 Maximum of a Collection - 34][3.2 Maximum of a Collection - 34]]
+  - [[3.3 A Fruity Example - 36][3.3 A Fruity Example - 36]]
+  - [[3.4 Comparator - 37][3.4 Comparator - 37]]
+  - [[3.5 Enumerated Types - 42][3.5 Enumerated Types - 42]]
+  - [[3.6 Multiple Bounds - 45][3.6 Multiple Bounds - 45]]
+  - [[3.7 Bridges - 47][3.7 Bridges - 47]]
+  - [[3.8 Covariant Overriding - 49][3.8 Covariant Overriding - 49]]
+- [[4. Declarations - 51][4. Declarations - 51]]
+  - [[4.1 Constructors - 51][4.1 Constructors - 51]]
+  - [[4.2 Static Members - 52][4.2 Static Members - 52]]
+  - [[4.3 Nested Classes - 53][4.3 Nested Classes - 53]]
+  - [[4.4 How Erasure Works - 55][4.4 How Erasure Works - 55]]
+- [[5. Evolution, Not Revolution - 59][5. Evolution, Not Revolution - 59]]
+  - [[5.1 Legacy Library with Legacy Client - 60][5.1 Legacy Library with Legacy Client - 60]]
+  - [[5.2 Generic Library with Generic Client - 60][5.2 Generic Library with Generic Client - 60]]
+  - [[5.3 Generic Library with Legacy Client - 62][5.3 Generic Library with Legacy Client - 62]]
+  - [[5.4 Legacy Library with Generic Client - 65][5.4 Legacy Library with Generic Client - 65]]
+    - [[5.4.1 Evolving a Library using Minimal Changes - 65][5.4.1 Evolving a Library using Minimal Changes - 65]]
+    - [[5.4.2 Evolving a Library using Stubs - 68][5.4.2 Evolving a Library using Stubs - 68]]
+    - [[5.4.3 Evolving a Library using Wrappers - 68][5.4.3 Evolving a Library using Wrappers - 68]]
+  - [[5.5 Conclusions - 71][5.5 Conclusions - 71]]
+- [[6. Reification - 73][6. Reification - 73]]
+  - [[6.1  Reifiable Types - 73][6.1  Reifiable Types - 73]]
+  - [[6.2  Instance Tests and Casts - 74][6.2  Instance Tests and Casts - 74]]
+  - [[6.3  Exception Handling - 79][6.3  Exception Handling - 79]]
+  - [[6.4  Array Creation - 80][6.4  Array Creation - 80]]
+  - [[6.5  The Principle of Truth in Advertising - 82][6.5  The Principle of Truth in Advertising - 82]]
+  - [[6.6  The Principle of Indecent Exposure - 86][6.6  The Principle of Indecent Exposure - 86]]
+  - [[6.7  How to Define ArrayList - 89][6.7  How to Define ArrayList - 89]]
+  - [[6.8  Array Creation and Varargs - 90][6.8  Array Creation and Varargs - 90]]
+  - [[6.9  Arrays as a Deprecated Type? - 92][6.9  Arrays as a Deprecated Type? - 92]]
+  - [[6.10 Summing Up - 95][6.10 Summing Up - 95]]
+- [[7. Reflection - 97][7. Reflection - 97]]
+  - [[7.1 Generics for Reflection - 97][7.1 Generics for Reflection - 97]]
+  - [[7.2 Reflected Types are Reifiable Types - 100][7.2 Reflected Types are Reifiable Types - 100]]
+  - [[7.3 Reflection for Primitive Types - 101][7.3 Reflection for Primitive Types - 101]]
+  - [[7.4 A Generic Reflection Library - 101][7.4 A Generic Reflection Library - 101]]
+  - [[7.5 Reflection for Generics - 104][7.5 Reflection for Generics - 104]]
+  - [[7.6 Reflecting Generic Types - 105][7.6 Reflecting Generic Types - 105]]
+- [[8. Effective Generics - 109][8. Effective Generics - 109]]
+  - [[8.1 Take Care when Calling Legacy Code - 109][8.1 Take Care when Calling Legacy Code - 109]]
+  - [[8.2 Use Checked Collections to Enforce Security - 111][8.2 Use Checked Collections to Enforce Security - 111]]
+  - [[8.3 Specialize to Create Reifiable Types - 112][8.3 Specialize to Create Reifiable Types - 112]]
+  - [[8.4 Maintain Binary Compatibility - 117][8.4 Maintain Binary Compatibility - 117]]
+- [[9. Design Patterns - 123][9. Design Patterns - 123]]
+  - [[9.1 Visitor - 123][9.1 Visitor - 123]]
+  - [[9.2 Interpreter - 127][9.2 Interpreter - 127]]
+  - [[9.3 Function - 128][9.3 Function - 128]]
+  - [[9.4 Strategy - 131][9.4 Strategy - 131]]
+  - [[9.5 Subject-Observer - 136][9.5 Subject-Observer - 136]]
+- [[Part II. Collections][Part II. Collections]]
+- [[10. The Main Interfaces of the Java Collections Framework - 145][10. The Main Interfaces of the Java Collections Framework - 145]]
+- [[11. Preliminaries - 147][11. Preliminaries - 147]]
+  - [[11.1 ~Iterable~ and ~Iterator~'s - 147][11.1 ~Iterable~ and ~Iterator~'s - 147]]
+  - [[11.2 Implementations - 149][11.2 Implementations - 149]]
+  - [[11.3 Efficiency and the O-Notation - 150][11.3 Efficiency and the O-Notation - 150]]
+  - [[11.4 Contracts - 152][11.4 Contracts - 152]]
+  - [[11.5 Collections and Thread Safety - 153][11.5 Collections and Thread Safety - 153]]
+    - [[11.5.1 Synchronization and the Legacy Collections - 155][11.5.1 Synchronization and the Legacy Collections - 155]]
+    - [[11.5.2 JDK 1.2: Synchronized Collections and Fail-Fast Iterators - 156][11.5.2 JDK 1.2: Synchronized Collections and Fail-Fast Iterators - 156]]
+    - [[11.5.3 Concurrent Collections: Java 5 and Beyond - 158][11.5.3 Concurrent Collections: Java 5 and Beyond - 158]]
+- [[12. The Collection Interface - 161][12. The Collection Interface - 161]]
+  - [[12.1 Using the Methods of Collection - 164][12.1 Using the Methods of Collection - 164]]
+  - [[12.2 Implementing Collection - 169][12.2 Implementing Collection - 169]]
+  - [[12.3 Collection Constructors - 169][12.3 Collection Constructors - 169]]
+- [[13. Sets - 171][13. Sets - 171]]
+  - [[13.1 Implementing ~Set~ - 171][13.1 Implementing ~Set~ - 171]]
+    - [[13.1.1 ~HashSet~ - 172][13.1.1 ~HashSet~ - 172]]
+    - [[13.1.2 ~LinkedHashSet~ - 174][13.1.2 ~LinkedHashSet~ - 174]]
+    - [[13.1.3 ~CopyOnWriteArraySet~ - 175][13.1.3 ~CopyOnWriteArraySet~ - 175]]
+    - [[13.1.4 ~EnumSet~ - 176][13.1.4 ~EnumSet~ - 176]]
+  - [[13.2 ~SortedSet~ and ~NavigableSet~ - 178][13.2 ~SortedSet~ and ~NavigableSet~ - 178]]
+    - [[13.2.1 ~NavigableSet~ - 181][13.2.1 ~NavigableSet~ - 181]]
+    - [[13.2.2 ~TreeSet~ - 184][13.2.2 ~TreeSet~ - 184]]
+    - [[13.2.3 ~ConcurrentSkipListSet~ - 186][13.2.3 ~ConcurrentSkipListSet~ - 186]]
+  - [[13.3 Comparing ~Set~ Implementations - 188][13.3 Comparing ~Set~ Implementations - 188]]
+- [[14. Queues - 191][14. Queues - 191]]
+  - [[14.1 Using the Methods of ~Queue~ - 193][14.1 Using the Methods of ~Queue~ - 193]]
+  - [[14.2 Implementing ~Queue~ - 195][14.2 Implementing ~Queue~ - 195]]
+    - [[14.2.1 ~PriorityQueue~ - 195][14.2.1 ~PriorityQueue~ - 195]]
+    - [[14.2.2 ~ConcurrentLinkedQueue~ - 197][14.2.2 ~ConcurrentLinkedQueue~ - 197]]
+  - [[14.3 ~BlockingQueue~ - 198][14.3 ~BlockingQueue~ - 198]]
+    - [[14.3.1 Using the Methods of ~BlockingQueue~ - 199][14.3.1 Using the Methods of ~BlockingQueue~ - 199]]
+    - [[14.3.2 Implementing ~BlockingQueue~ - 202][14.3.2 Implementing ~BlockingQueue~ - 202]]
+  - [[14.4 ~Deque~ - 206][14.4 ~Deque~ - 206]]
+    - [[14.4.1 Implementing ~Deque~ - 208][14.4.1 Implementing ~Deque~ - 208]]
+    - [[14.4.2 ~BlockingDeque~ - 209][14.4.2 ~BlockingDeque~ - 209]]
+  - [[14.5 Comparing ~Queue~ Implementations - 210][14.5 Comparing ~Queue~ Implementations - 210]]
+- [[15. Lists - 213][15. Lists - 213]]
+  - [[15.1 Using the Methods of ~List~ - 215][15.1 Using the Methods of ~List~ - 215]]
+  - [[15.2 Implementing ~List~ - 218][15.2 Implementing ~List~ - 218]]
+    - [[15.2.1 ~ArrayList~ - 218][15.2.1 ~ArrayList~ - 218]]
+    - [[15.2.2 ~LinkedList~ - 221][15.2.2 ~LinkedList~ - 221]]
+    - [[15.2.3 ~CopyOnWriteArrayList~ - 221][15.2.3 ~CopyOnWriteArrayList~ - 221]]
+  - [[15.3 Comparing ~List~ Implementations - 221][15.3 Comparing ~List~ Implementations - 221]]
+- [[16. Maps - 223][16. Maps - 223]]
+  - [[16.1 Using the Methods of ~Map~ - 225][16.1 Using the Methods of ~Map~ - 225]]
+  - [[16.2 Implementing ~Map~ - 226][16.2 Implementing ~Map~ - 226]]
+    - [[16.2.1 ~HashMap~ - 227][16.2.1 ~HashMap~ - 227]]
+    - [[16.2.2 ~LinkedHashMap~ - 227][16.2.2 ~LinkedHashMap~ - 227]]
+    - [[16.2.3 ~WeakHashMap~ - 229][16.2.3 ~WeakHashMap~ - 229]]
+    - [[16.2.4 ~IdentityHashMap~ - 231][16.2.4 ~IdentityHashMap~ - 231]]
+    - [[16.2.5 ~EnumMap~ - 233][16.2.5 ~EnumMap~ - 233]]
+  - [[16.3 ~SortedMap~ and ~NavigableMap~ - 234][16.3 ~SortedMap~ and ~NavigableMap~ - 234]]
+    - [[16.3.1 ~NavigableMap~ - 235][16.3.1 ~NavigableMap~ - 235]]
+    - [[16.3.2 ~TreeMap~ - 236][16.3.2 ~TreeMap~ - 236]]
+  - [[16.4 ~ConcurrentMap~ - 237][16.4 ~ConcurrentMap~ - 237]]
+    - [[16.4.1 ~ConcurrentHashMap~ - 238][16.4.1 ~ConcurrentHashMap~ - 238]]
+  - [[16.5 ~ConcurrentNavigableMap~ - 238][16.5 ~ConcurrentNavigableMap~ - 238]]
+    - [[16.5.1 ~ConcurrentSkipListMap~ - 239][16.5.1 ~ConcurrentSkipListMap~ - 239]]
+  - [[16.6 Comparing ~Map~ Implementations - 239][16.6 Comparing ~Map~ Implementations - 239]]
+- [[17. The Collections Class - 241][17. The Collections Class - 241]]
+  - [[17.1 Generic Algorithms - 241][17.1 Generic Algorithms - 241]]
+    - [[17.1.1 Changing the Order of List Elements - 241][17.1.1 Changing the Order of List Elements - 241]]
+    - [[17.1.2 Changing the Contents of a List - 242][17.1.2 Changing the Contents of a List - 242]]
+    - [[17.1.3 Finding Extreme Values in a Collection - 243][17.1.3 Finding Extreme Values in a Collection - 243]]
+    - [[17.1.4 Finding Specific Values in a List - 243][17.1.4 Finding Specific Values in a List - 243]]
+  - [[17.2 Collection Factories - 244][17.2 Collection Factories - 244]]
+  - [[17.3 Wrappers - 245][17.3 Wrappers - 245]]
+    - [[17.3.1 Synchronized Collections - 245][17.3.1 Synchronized Collections - 245]]
+    - [[17.3.2 Unmodifiable Collections - 246][17.3.2 Unmodifiable Collections - 246]]
+    - [[17.3.3 Checked Collections - 246][17.3.3 Checked Collections - 246]]
+  - [[17.4 Other Methods - 247][17.4 Other Methods - 247]]
+- [[Index - 251][Index - 251]]
+
+* Preface - xi
+* Part I. Generics
+* 1. Introduction - 3
+** 1.1 Generics - 4
+** 1.2 Boxing and Unboxing - 6
+** 1.3 Foreach - 9
+** 1.4 Generic Methods and Varargs - 10
+** 1.5 Assertions - 12
+
+* 2. Subtyping and Wildcards - 15
+** 2.1 Subtyping and the Substitution Principle - 15
+** 2.2 Wildcards with extends - 17
+** 2.3 Wildcards with super - 18
+** 2.4 The Get and Put Principle - 19
+** 2.5 Arrays - 22
+** 2.6 Wildcards Versus Type Parameters - 25
+** 2.7 Wildcard Capture - 27
+** 2.8 Restrictions on Wildcards - 28
+
+* 3. Comparison and Bounds - 31
+** 3.1 Comparable - 31
+** 3.2 Maximum of a Collection - 34
+** 3.3 A Fruity Example - 36
+** 3.4 Comparator - 37
+** 3.5 Enumerated Types - 42
+** 3.6 Multiple Bounds - 45
+** 3.7 Bridges - 47
+** 3.8 Covariant Overriding - 49
+
+* 4. Declarations - 51
+** 4.1 Constructors - 51
+** 4.2 Static Members - 52
+** 4.3 Nested Classes - 53
+** 4.4 How Erasure Works - 55
+
+* 5. Evolution, Not Revolution - 59
+** 5.1 Legacy Library with Legacy Client - 60
+** 5.2 Generic Library with Generic Client - 60
+** 5.3 Generic Library with Legacy Client - 62
+** 5.4 Legacy Library with Generic Client - 65
+*** 5.4.1 Evolving a Library using Minimal Changes - 65
+*** 5.4.2 Evolving a Library using Stubs - 68
+*** 5.4.3 Evolving a Library using Wrappers - 68
+
+** 5.5 Conclusions - 71
+
+* 6. Reification - 73
+** 6.1  Reifiable Types - 73
+** 6.2  Instance Tests and Casts - 74
+** 6.3  Exception Handling - 79
+** 6.4  Array Creation - 80
+** 6.5  The Principle of Truth in Advertising - 82
+** 6.6  The Principle of Indecent Exposure - 86
+** 6.7  How to Define ArrayList - 89
+** 6.8  Array Creation and Varargs - 90
+** 6.9  Arrays as a Deprecated Type? - 92
+** 6.10 Summing Up - 95
+
+* 7. Reflection - 97
+** 7.1 Generics for Reflection - 97
+** 7.2 Reflected Types are Reifiable Types - 100
+** 7.3 Reflection for Primitive Types - 101
+** 7.4 A Generic Reflection Library - 101
+** 7.5 Reflection for Generics - 104
+** 7.6 Reflecting Generic Types - 105
+
+* 8. Effective Generics - 109
+** 8.1 Take Care when Calling Legacy Code - 109
+** 8.2 Use Checked Collections to Enforce Security - 111
+** 8.3 Specialize to Create Reifiable Types - 112
+** 8.4 Maintain Binary Compatibility - 117
+
+* 9. Design Patterns - 123
+** 9.1 Visitor - 123
+** 9.2 Interpreter - 127
+** 9.3 Function - 128
+** 9.4 Strategy - 131
+** 9.5 Subject-Observer - 136
+
+* Part II. Collections
+  /The Java Collections Framework/ is a set of /interfaces/ and /classes/ in the /packages/
+  ~java.util~ and ~java.util.concurrent~.
+
+* DONE 10. The Main Interfaces of the Java Collections Framework - 145
+  CLOSED: [2018-10-08 Mon 01:48]
+  - =TODO=
+    *NOTE*
+
+  - =TODO= Figure 10-1. The main interfaces of the Java Collections Framework
+    =RE-READ=
+
+* TODO 11. Preliminaries - 147
+** TODO 11.1 ~Iterable~ and ~Iterator~'s - 147
+   - ~Iterator~
+     #+BEGIN_SRC java
+       public Iterator<E> {
+           boolean hasNext();
+           E next();
+           void remove();  // remove the last element returned by the iterator
+       }
+     #+END_SRC
+
+   - ~Iterator~'s are useful, but no one want to write code like:
+     #+BEGIN_SRC java
+       // coll refers to an object which implements `Collection`
+       // ----- not the preferred idiom from Java 5 on -----
+       for (Iterator itr = coll.iterator(); itr.hasNext();) {
+           System.out.println(itr.next());
+       }
+     #+END_SRC
+
+   - From Java 5 on, we have ~Iterable~,
+     #+BEGIN_SRC java
+       public Iterator<T> {
+           Iterator<T> iterator();  // return an iterator over elements of type `T`
+       }
+     #+END_SRC
+
+     Then we can do
+     #+BEGIN_SRC java
+       for (Object o : coll) {
+           System.out.pirntln(o);
+       }
+     #+END_SRC
+
+     =from Jian= In Java 8, you would like to use
+     #+BEGIN_SRC java
+       coll.stream().forEach(System.out::println);
+     #+END_SRC
+
+   - In Java 5, the ~Collection~ /interface/ was made to extend ~Iterable~.
+
+   - In practice, it is _UNUSUAL_ to implement ~Iterable~ _DIRECTLY_ in this way,
+     as /foreach/ is most commonly used with /arrays/ and /the standard collections
+     classes/.
+
+   - ~CocurrentModificationException~ can be thrown from single-threaded code.
+     =TODO= =NOTE=
+     This can happend when you modify a colleciton, at the same time you are
+     using its /iterable/.
+
+** TODO 11.2 Implementations - 149
+** TODO 11.3 Efficiency and the O-Notation - 150
+** TODO 11.4 Contracts - 152
+** TODO 11.5 Collections and Thread Safety - 153
+*** TODO 11.5.1 Synchronization and the Legacy Collections - 155
+*** TODO 11.5.2 JDK 1.2: Synchronized Collections and Fail-Fast Iterators - 156
+*** TODO 11.5.3 Concurrent Collections: Java 5 and Beyond - 158
+
+* TODO 12. The Collection Interface - 161
+** 12.1 Using the Methods of Collection - 164
+** 12.2 Implementing Collection - 169
+** 12.3 Collection Constructors - 169
+
+* TODO 13. Sets - 171
+** 13.1 Implementing ~Set~ - 171
+*** 13.1.1 ~HashSet~ - 172
+*** 13.1.2 ~LinkedHashSet~ - 174
+*** 13.1.3 ~CopyOnWriteArraySet~ - 175
+*** 13.1.4 ~EnumSet~ - 176
+
+** 13.2 ~SortedSet~ and ~NavigableSet~ - 178
+*** 13.2.1 ~NavigableSet~ - 181
+*** 13.2.2 ~TreeSet~ - 184
+*** 13.2.3 ~ConcurrentSkipListSet~ - 186
+
+** 13.3 Comparing ~Set~ Implementations - 188
+
+* TODO 14. Queues - 191
+** 14.1 Using the Methods of ~Queue~ - 193
+** 14.2 Implementing ~Queue~ - 195
+*** 14.2.1 ~PriorityQueue~ - 195
+*** 14.2.2 ~ConcurrentLinkedQueue~ - 197
+
+** 14.3 ~BlockingQueue~ - 198
+*** 14.3.1 Using the Methods of ~BlockingQueue~ - 199
+*** 14.3.2 Implementing ~BlockingQueue~ - 202
+
+** 14.4 ~Deque~ - 206
+*** 14.4.1 Implementing ~Deque~ - 208
+*** 14.4.2 ~BlockingDeque~ - 209
+
+** 14.5 Comparing ~Queue~ Implementations - 210
+
+* TODO 15. Lists - 213
+** 15.1 Using the Methods of ~List~ - 215
+** 15.2 Implementing ~List~ - 218
+*** 15.2.1 ~ArrayList~ - 218
+*** 15.2.2 ~LinkedList~ - 221
+*** 15.2.3 ~CopyOnWriteArrayList~ - 221
+
+** 15.3 Comparing ~List~ Implementations - 221
+
+* TODO 16. Maps - 223
+** 16.1 Using the Methods of ~Map~ - 225
+** 16.2 Implementing ~Map~ - 226
+*** 16.2.1 ~HashMap~ - 227
+*** 16.2.2 ~LinkedHashMap~ - 227
+*** 16.2.3 ~WeakHashMap~ - 229
+*** 16.2.4 ~IdentityHashMap~ - 231
+*** 16.2.5 ~EnumMap~ - 233
+
+** 16.3 ~SortedMap~ and ~NavigableMap~ - 234
+*** 16.3.1 ~NavigableMap~ - 235
+*** 16.3.2 ~TreeMap~ - 236
+
+** 16.4 ~ConcurrentMap~ - 237
+*** 16.4.1 ~ConcurrentHashMap~ - 238
+
+** 16.5 ~ConcurrentNavigableMap~ - 238
+*** 16.5.1 ~ConcurrentSkipListMap~ - 239
+
+** 16.6 Comparing ~Map~ Implementations - 239
+
+* TODO 17. The Collections Class - 241
+** 17.1 Generic Algorithms - 241
+*** 17.1.1 Changing the Order of List Elements - 241
+*** 17.1.2 Changing the Contents of a List - 242
+*** 17.1.3 Finding Extreme Values in a Collection - 243
+*** 17.1.4 Finding Specific Values in a List - 243
+
+** 17.2 Collection Factories - 244
+** 17.3 Wrappers - 245
+*** 17.3.1 Synchronized Collections - 245
+*** 17.3.2 Unmodifiable Collections - 246
+*** 17.3.3 Checked Collections - 246
+
+** 17.4 Other Methods - 247
+
+* Index - 251

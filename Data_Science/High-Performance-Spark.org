@@ -1,0 +1,455 @@
+#+TITLE: High Performance Spark
+#+SUBTITLE: Best Practices for Scaling and Optimizaing Apache Spark
+#+VERSION: 2017
+#+AUTHOR: Holden Karau, Rachel Warren
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface - ix][Preface - ix]]
+- [[1. Introduction to High Performance Spark - 1][1. Introduction to High Performance Spark - 1]]
+  - [[What Is Spark and Why Performance Matters - 1][What Is Spark and Why Performance Matters - 1]]
+  - [[What You Can Expect to Get from This Book - 2][What You Can Expect to Get from This Book - 2]]
+  - [[Spark Versions - 3][Spark Versions - 3]]
+  - [[Why Scala? - 3][Why Scala? - 3]]
+    - [[To Be a Spark Expert You Have to Learn a Little Scala Anyway - 3][To Be a Spark Expert You Have to Learn a Little Scala Anyway - 3]]
+    - [[The Spark Scala API Is Easier to Use Than the Java API - 4][The Spark Scala API Is Easier to Use Than the Java API - 4]]
+    - [[Scala Is More Performant Than Python - 4][Scala Is More Performant Than Python - 4]]
+    - [[Why Not Scala? - 4][Why Not Scala? - 4]]
+    - [[Learning Scala - 5][Learning Scala - 5]]
+  - [[Conclusion - 6][Conclusion - 6]]
+- [[2. How Spark Works - 7][2. How Spark Works - 7]]
+  - [[How Spark Fits into the Big Data Ecosystem - 8][How Spark Fits into the Big Data Ecosystem - 8]]
+    - [[Spark Components - 8][Spark Components - 8]]
+  - [[Spark Model of Parallel Computing: RDDs - 10][Spark Model of Parallel Computing: RDDs - 10]]
+    - [[Lazy Evaluation - 11][Lazy Evaluation - 11]]
+    - [[In-Memory Persistence and Memory Management - 13][In-Memory Persistence and Memory Management - 13]]
+    - [[Immutability and the RDD Interface - 14][Immutability and the RDD Interface - 14]]
+    - [[Types of RDDs - 16][Types of RDDs - 16]]
+    - [[Functions on RDDs: Transformations Versus Actions - 17][Functions on RDDs: Transformations Versus Actions - 17]]
+    - [[Wide Versus Narrow Dependencies - 17][Wide Versus Narrow Dependencies - 17]]
+  - [[Spark Job Scheduling - 19][Spark Job Scheduling - 19]]
+    - [[Resource Allocation Across Applications - 20][Resource Allocation Across Applications - 20]]
+    - [[The Spark Application - 20][The Spark Application - 20]]
+  - [[The Anatomy of a Spark Job - 22][The Anatomy of a Spark Job - 22]]
+    - [[The DAG - 22][The DAG - 22]]
+    - [[Jobs - 23][Jobs - 23]]
+    - [[Stages - 23][Stages - 23]]
+    - [[Tasks - 24][Tasks - 24]]
+  - [[Conclusion - 26][Conclusion - 26]]
+- [[3. DataFrames, Datasets, and Spark SQL - 27][3. DataFrames, Datasets, and Spark SQL - 27]]
+  - [[Getting Started with the SparkSession (or HiveContext or SQLContext) - 28][Getting Started with the SparkSession (or HiveContext or SQLContext) - 28]]
+  - [[Spark SQL Dependencies - 30][Spark SQL Dependencies - 30]]
+    - [[Managing Spark Dependencies - 31][Managing Spark Dependencies - 31]]
+    - [[Avoiding Hive JARs - 32][Avoiding Hive JARs - 32]]
+  - [[Basics of Schemas - 33][Basics of Schemas - 33]]
+  - [[DataFrame API - 36][DataFrame API - 36]]
+    - [[Transformations - 36][Transformations - 36]]
+    - [[Multi-DataFrame Transformations - 48][Multi-DataFrame Transformations - 48]]
+    - [[Plain Old SQL Queries and Interacting with Hive Data - 49][Plain Old SQL Queries and Interacting with Hive Data - 49]]
+  - [[Data Representation in DataFrames and Datasets - 49][Data Representation in DataFrames and Datasets - 49]]
+    - [[Tungsten - 50][Tungsten - 50]]
+  - [[Data Loading and Saving Functions - 51][Data Loading and Saving Functions - 51]]
+    - [[DataFrameWriter and DataFrameReader - 51][DataFrameWriter and DataFrameReader - 51]]
+    - [[Formats - 52][Formats - 52]]
+    - [[Save Modes - 61][Save Modes - 61]]
+    - [[Partitions (Discovery and Writing) - 61][Partitions (Discovery and Writing) - 61]]
+  - [[Datasets - 62][Datasets - 62]]
+    - [[Interoperability with RDDs, DataFrames, and Local Collections - 62][Interoperability with RDDs, DataFrames, and Local Collections - 62]]
+    - [[Compile-Time Strong Typing - 64][Compile-Time Strong Typing - 64]]
+    - [[Easier Functional (RDD “like”) Transformations - 64][Easier Functional (RDD “like”) Transformations - 64]]
+    - [[Relational Transformations - 64][Relational Transformations - 64]]
+    - [[Multi-Dataset Relational Transformations - 65][Multi-Dataset Relational Transformations - 65]]
+    - [[Grouped Operations on Datasets - 65][Grouped Operations on Datasets - 65]]
+  - [[Extending with User-Defined Functions and Aggregate Functions (UDFs, UDAFs) - 66][Extending with User-Defined Functions and Aggregate Functions (UDFs, UDAFs) - 66]]
+  - [[Query Optimizer - 69][Query Optimizer - 69]]
+    - [[Logical and Physical Plans - 69][Logical and Physical Plans - 69]]
+    - [[Code Generation - 69][Code Generation - 69]]
+    - [[Large Query Plans and Iterative Algorithms - 70][Large Query Plans and Iterative Algorithms - 70]]
+  - [[Debugging Spark SQL Queries - 70][Debugging Spark SQL Queries - 70]]
+  - [[JDBC/ODBC Server - 70][JDBC/ODBC Server - 70]]
+  - [[Conclusion - 72][Conclusion - 72]]
+- [[4. Joins (SQL and Core) - 73][4. Joins (SQL and Core) - 73]]
+  - [[Core Spark Joins - 73][Core Spark Joins - 73]]
+    - [[Choosing a Join Type - 75][Choosing a Join Type - 75]]
+    - [[Choosing an Execution Plan - 76][Choosing an Execution Plan - 76]]
+  - [[Spark SQL Joins - 79][Spark SQL Joins - 79]]
+    - [[DataFrame Joins - 79][DataFrame Joins - 79]]
+    - [[Dataset Joins - 83][Dataset Joins - 83]]
+  - [[Conclusion - 84][Conclusion - 84]]
+- [[5. Effective Transformations - 85][5. Effective Transformations - 85]]
+  - [[Narrow Versus Wide Transformations - 86][Narrow Versus Wide Transformations - 86]]
+    - [[Implications for Performance - 88][Implications for Performance - 88]]
+    - [[Implications for Fault Tolerance - 89][Implications for Fault Tolerance - 89]]
+    - [[The Special Case of coalesce - 89][The Special Case of coalesce - 89]]
+  - [[What Type of RDD Does Your Transformation Return? - 90][What Type of RDD Does Your Transformation Return? - 90]]
+  - [[Minimizing Object Creation - 92][Minimizing Object Creation - 92]]
+    - [[Reusing Existing Objects - 92][Reusing Existing Objects - 92]]
+    - [[Using Smaller Data Structures - 95][Using Smaller Data Structures - 95]]
+  - [[Iterator-to-Iterator Transformations with mapPartitions - 98][Iterator-to-Iterator Transformations with mapPartitions - 98]]
+    - [[What Is an Iterator-to-Iterator Transformation? - 99][What Is an Iterator-to-Iterator Transformation? - 99]]
+    - [[Space and Time Advantages - 100][Space and Time Advantages - 100]]
+    - [[An Example - 101][An Example - 101]]
+  - [[Set Operations - 104][Set Operations - 104]]
+  - [[Reducing Setup Overhead - 105][Reducing Setup Overhead - 105]]
+    - [[Shared Variables - 106][Shared Variables - 106]]
+    - [[Broadcast Variables - 106][Broadcast Variables - 106]]
+    - [[Accumulators - 107][Accumulators - 107]]
+  - [[Reusing RDDs - 112][Reusing RDDs - 112]]
+    - [[Cases for Reuse - 112][Cases for Reuse - 112]]
+    - [[Deciding if Recompute Is Inexpensive Enough - 115][Deciding if Recompute Is Inexpensive Enough - 115]]
+    - [[Types of Reuse: Cache, Persist, Checkpoint, Shuffle Files - 116][Types of Reuse: Cache, Persist, Checkpoint, Shuffle Files - 116]]
+    - [[Alluxio (nee Tachyon) - 120][Alluxio (nee Tachyon) - 120]]
+    - [[LRU Caching - 121][LRU Caching - 121]]
+    - [[Noisy Cluster Considerations - 122][Noisy Cluster Considerations - 122]]
+    - [[Interaction with Accumulators - 123][Interaction with Accumulators - 123]]
+  - [[Conclusion - 124][Conclusion - 124]]
+- [[6. Working with Key/Value Data - 125][6. Working with Key/Value Data - 125]]
+  - [[The Goldilocks Example - 127][The Goldilocks Example - 127]]
+    - [[Goldilocks Version 0: Iterative Solution - 128][Goldilocks Version 0: Iterative Solution - 128]]
+    - [[How to Use PairRDDFunctions and OrderedRDDFunctions - 130][How to Use PairRDDFunctions and OrderedRDDFunctions - 130]]
+  - [[Actions on Key/Value Pairs - 131][Actions on Key/Value Pairs - 131]]
+  - [[What’s So Dangerous About the groupByKey Function - 132][What’s So Dangerous About the groupByKey Function - 132]]
+    - [[Goldilocks Version 1: groupByKey Solution - 132][Goldilocks Version 1: groupByKey Solution - 132]]
+  - [[Choosing an Aggregation Operation - 136][Choosing an Aggregation Operation - 136]]
+    - [[Dictionary of Aggregation Operations with Performance Considerations - 136][Dictionary of Aggregation Operations with Performance Considerations - 136]]
+  - [[Multiple RDD Operations - 139][Multiple RDD Operations - 139]]
+    - [[Co-Grouping - 139][Co-Grouping - 139]]
+  - [[Partitioners and Key/Value Data - 140][Partitioners and Key/Value Data - 140]]
+    - [[Using the Spark Partitioner Object - 142][Using the Spark Partitioner Object - 142]]
+    - [[Hash Partitioning - 142][Hash Partitioning - 142]]
+    - [[Range Partitioning - 142][Range Partitioning - 142]]
+    - [[Custom Partitioning - 143][Custom Partitioning - 143]]
+    - [[Preserving Partitioning Information Across Transformations - 144][Preserving Partitioning Information Across Transformations - 144]]
+    - [[Leveraging Co-Located and Co-Partitioned RDDs - 144][Leveraging Co-Located and Co-Partitioned RDDs - 144]]
+    - [[Dictionary of Mapping and Partitioning Functions PairRDDFunctions - 146][Dictionary of Mapping and Partitioning Functions PairRDDFunctions - 146]]
+  - [[Dictionary of OrderedRDDOperations - 147][Dictionary of OrderedRDDOperations - 147]]
+    - [[Sorting by Two Keys with SortByKey - 149][Sorting by Two Keys with SortByKey - 149]]
+  - [[Secondary Sort and repartitionAndSortWithinPartitions - 149][Secondary Sort and repartitionAndSortWithinPartitions - 149]]
+    - [[Leveraging repartitionAndSortWithinPartitions for a Group by Key and Sort Values Function - 150][Leveraging repartitionAndSortWithinPartitions for a Group by Key and Sort Values Function - 150]]
+    - [[How Not to Sort by Two Orderings - 153][How Not to Sort by Two Orderings - 153]]
+    - [[Goldilocks Version 2: Secondary Sort - 154][Goldilocks Version 2: Secondary Sort - 154]]
+    - [[A Different Approach to Goldilocks - 157][A Different Approach to Goldilocks - 157]]
+    - [[Goldilocks Version 3: Sort on Cell Values - 162][Goldilocks Version 3: Sort on Cell Values - 162]]
+  - [[Straggler Detection and Unbalanced Data - 163][Straggler Detection and Unbalanced Data - 163]]
+    - [[Back to Goldilocks (Again) - 165][Back to Goldilocks (Again) - 165]]
+    - [[Goldilocks Version 4: Reduce to Distinct on Each Partition - 165][Goldilocks Version 4: Reduce to Distinct on Each Partition - 165]]
+  - [[Conclusion - 171][Conclusion - 171]]
+- [[7. Going Beyond Scala - 173][7. Going Beyond Scala - 173]]
+  - [[Beyond Scala within the JVM - 174][Beyond Scala within the JVM - 174]]
+  - [[Beyond Scala, and Beyond the JVM - 178][Beyond Scala, and Beyond the JVM - 178]]
+    - [[How PySpark Works - 179][How PySpark Works - 179]]
+    - [[How SparkR Works - 187][How SparkR Works - 187]]
+    - [[Spark.jl (Julia Spark) - 189][Spark.jl (Julia Spark) - 189]]
+    - [[How Eclair JS Works - 190][How Eclair JS Works - 190]]
+    - [[Spark on the Common Language Runtime (CLR)—C# and Friends - 191][Spark on the Common Language Runtime (CLR)—C# and Friends - 191]]
+  - [[Calling Other Languages from Spark - 191][Calling Other Languages from Spark - 191]]
+    - [[Using Pipe and Friends - 191][Using Pipe and Friends - 191]]
+    - [[JNI - 193][JNI - 193]]
+    - [[Java Native Access (JNA) - 196][Java Native Access (JNA) - 196]]
+    - [[Underneath Everything Is FORTRAN - 196][Underneath Everything Is FORTRAN - 196]]
+    - [[Getting to the GPU - 198][Getting to the GPU - 198]]
+  - [[The Future - 198][The Future - 198]]
+  - [[Conclusion - 198][Conclusion - 198]]
+- [[8. Testing and Validation - 201][8. Testing and Validation - 201]]
+  - [[Unit Testing - 201][Unit Testing - 201]]
+    - [[General Spark Unit Testing - 202][General Spark Unit Testing - 202]]
+    - [[Mocking RDDs - 206][Mocking RDDs - 206]]
+  - [[Getting Test Data - 208][Getting Test Data - 208]]
+    - [[Generating Large Datasets - 208][Generating Large Datasets - 208]]
+    - [[Sampling - 209][Sampling - 209]]
+  - [[Property Checking with ScalaCheck - 211][Property Checking with ScalaCheck - 211]]
+    - [[Computing RDD Difference - 211][Computing RDD Difference - 211]]
+  - [[Integration Testing - 214][Integration Testing - 214]]
+    - [[Choosing Your Integration Testing Environment - 214][Choosing Your Integration Testing Environment - 214]]
+  - [[Verifying Performance - 215][Verifying Performance - 215]]
+    - [[Spark Counters for Verifying Performance - 215][Spark Counters for Verifying Performance - 215]]
+    - [[Projects for Verifying Performance - 216][Projects for Verifying Performance - 216]]
+  - [[Job Validation - 216][Job Validation - 216]]
+  - [[Conclusion - 217][Conclusion - 217]]
+- [[9. Spark MLlib and ML - 219][9. Spark MLlib and ML - 219]]
+  - [[Choosing Between Spark MLlib and Spark ML - 219][Choosing Between Spark MLlib and Spark ML - 219]]
+  - [[Working with MLlib - 220][Working with MLlib - 220]]
+    - [[Getting Started with MLlib (Organization and Imports) - 220][Getting Started with MLlib (Organization and Imports) - 220]]
+    - [[MLlib Feature Encoding and Data Preparation - 221][MLlib Feature Encoding and Data Preparation - 221]]
+    - [[Feature Scaling and Selection - 226][Feature Scaling and Selection - 226]]
+    - [[MLlib Model Training - 226][MLlib Model Training - 226]]
+    - [[Predicting - 227][Predicting - 227]]
+    - [[Serving and Persistence - 228][Serving and Persistence - 228]]
+    - [[Model Evaluation - 230][Model Evaluation - 230]]
+  - [[Working with Spark ML - 231][Working with Spark ML - 231]]
+    - [[Spark ML Organization and Imports - 231][Spark ML Organization and Imports - 231]]
+    - [[Pipeline Stages - 232][Pipeline Stages - 232]]
+    - [[Explain Params - 233][Explain Params - 233]]
+    - [[Data Encoding - 234][Data Encoding - 234]]
+    - [[Data Cleaning - 236][Data Cleaning - 236]]
+    - [[Spark ML Models - 237][Spark ML Models - 237]]
+    - [[Putting It All Together in a Pipeline - 238][Putting It All Together in a Pipeline - 238]]
+    - [[Training a Pipeline - 239][Training a Pipeline - 239]]
+    - [[Accessing Individual Stages - 239][Accessing Individual Stages - 239]]
+    - [[Data Persistence and Spark ML - 239][Data Persistence and Spark ML - 239]]
+    - [[Extending Spark ML Pipelines with Your Own Algorithms - 242][Extending Spark ML Pipelines with Your Own Algorithms - 242]]
+    - [[Model and Pipeline Persistence and Serving with Spark ML - 250][Model and Pipeline Persistence and Serving with Spark ML - 250]]
+  - [[General Serving Considerations - 250][General Serving Considerations - 250]]
+  - [[Conclusion - 251][Conclusion - 251]]
+- [[10. Spark Components and Packages - 253][10. Spark Components and Packages - 253]]
+  - [[Stream Processing with Spark - 255][Stream Processing with Spark - 255]]
+    - [[Sources and Sinks - 255][Sources and Sinks - 255]]
+    - [[Batch Intervals - 257][Batch Intervals - 257]]
+    - [[Data Checkpoint Intervals - 258][Data Checkpoint Intervals - 258]]
+    - [[Considerations for DStreams - 259][Considerations for DStreams - 259]]
+    - [[Considerations for Structured Streaming - 260][Considerations for Structured Streaming - 260]]
+    - [[High Availability Mode (or Handling Driver Failure or Checkpointing) - 268][High Availability Mode (or Handling Driver Failure or Checkpointing) - 268]]
+  - [[GraphX - 269][GraphX - 269]]
+  - [[Using Community Packages and Libraries - 269][Using Community Packages and Libraries - 269]]
+    - [[Creating a Spark Package - 271][Creating a Spark Package - 271]]
+  - [[Conclusion - 272][Conclusion - 272]]
+- [[A. Tuning, Debugging, and Other Things Developers Like to Pretend Don’t Exist - 273][A. Tuning, Debugging, and Other Things Developers Like to Pretend Don’t Exist - 273]]
+- [[Index - 323][Index - 323]]
+
+* Preface - ix
+* TODO 1. Introduction to High Performance Spark - 1
+** What Is Spark and Why Performance Matters - 1
+** What You Can Expect to Get from This Book - 2
+** Spark Versions - 3
+** Why Scala? - 3
+*** To Be a Spark Expert You Have to Learn a Little Scala Anyway - 3
+*** The Spark Scala API Is Easier to Use Than the Java API - 4
+*** Scala Is More Performant Than Python - 4
+*** Why Not Scala? - 4
+*** Learning Scala - 5
+
+** Conclusion - 6
+
+* TODO 2. How Spark Works - 7
+** How Spark Fits into the Big Data Ecosystem - 8
+*** Spark Components - 8
+
+** Spark Model of Parallel Computing: RDDs - 10
+*** Lazy Evaluation - 11
+*** In-Memory Persistence and Memory Management - 13
+*** Immutability and the RDD Interface - 14
+*** Types of RDDs - 16
+*** Functions on RDDs: Transformations Versus Actions - 17
+*** Wide Versus Narrow Dependencies - 17
+
+** Spark Job Scheduling - 19
+*** Resource Allocation Across Applications - 20
+*** The Spark Application - 20
+
+** The Anatomy of a Spark Job - 22
+*** The DAG - 22
+*** Jobs - 23
+*** Stages - 23
+*** Tasks - 24
+
+** Conclusion - 26
+
+* TODO 3. DataFrames, Datasets, and Spark SQL - 27
+** Getting Started with the SparkSession (or HiveContext or SQLContext) - 28
+** Spark SQL Dependencies - 30
+*** Managing Spark Dependencies - 31
+*** Avoiding Hive JARs - 32
+
+** Basics of Schemas - 33
+** DataFrame API - 36
+*** Transformations - 36
+*** Multi-DataFrame Transformations - 48
+*** Plain Old SQL Queries and Interacting with Hive Data - 49
+
+** Data Representation in DataFrames and Datasets - 49
+*** Tungsten - 50
+
+** Data Loading and Saving Functions - 51
+*** DataFrameWriter and DataFrameReader - 51
+*** Formats - 52
+*** Save Modes - 61
+*** Partitions (Discovery and Writing) - 61
+
+** Datasets - 62
+*** Interoperability with RDDs, DataFrames, and Local Collections - 62
+*** Compile-Time Strong Typing - 64
+*** Easier Functional (RDD “like”) Transformations - 64
+*** Relational Transformations - 64
+*** Multi-Dataset Relational Transformations - 65
+*** Grouped Operations on Datasets - 65
+
+** Extending with User-Defined Functions and Aggregate Functions (UDFs, UDAFs) - 66
+** Query Optimizer - 69
+*** Logical and Physical Plans - 69
+*** Code Generation - 69
+*** Large Query Plans and Iterative Algorithms - 70
+
+** Debugging Spark SQL Queries - 70
+** JDBC/ODBC Server - 70
+** Conclusion - 72
+
+* TODO 4. Joins (SQL and Core) - 73
+** Core Spark Joins - 73
+*** Choosing a Join Type - 75
+*** Choosing an Execution Plan - 76
+
+** Spark SQL Joins - 79
+*** DataFrame Joins - 79
+*** Dataset Joins - 83
+
+** Conclusion - 84
+
+* TODO 5. Effective Transformations - 85
+** Narrow Versus Wide Transformations - 86
+*** Implications for Performance - 88
+*** Implications for Fault Tolerance - 89
+*** The Special Case of coalesce - 89
+
+** What Type of RDD Does Your Transformation Return? - 90
+** Minimizing Object Creation - 92
+*** Reusing Existing Objects - 92
+*** Using Smaller Data Structures - 95
+
+** Iterator-to-Iterator Transformations with mapPartitions - 98
+*** What Is an Iterator-to-Iterator Transformation? - 99
+*** Space and Time Advantages - 100
+*** An Example - 101
+
+** Set Operations - 104
+** Reducing Setup Overhead - 105
+*** Shared Variables - 106
+*** Broadcast Variables - 106
+*** Accumulators - 107
+
+** Reusing RDDs - 112
+*** Cases for Reuse - 112
+*** Deciding if Recompute Is Inexpensive Enough - 115
+*** Types of Reuse: Cache, Persist, Checkpoint, Shuffle Files - 116
+*** Alluxio (nee Tachyon) - 120
+*** LRU Caching - 121
+*** Noisy Cluster Considerations - 122
+*** Interaction with Accumulators - 123
+
+** Conclusion - 124
+
+* TODO 6. Working with Key/Value Data - 125
+** The Goldilocks Example - 127
+*** Goldilocks Version 0: Iterative Solution - 128
+*** How to Use PairRDDFunctions and OrderedRDDFunctions - 130
+
+** Actions on Key/Value Pairs - 131
+** What’s So Dangerous About the groupByKey Function - 132
+*** Goldilocks Version 1: groupByKey Solution - 132
+
+** Choosing an Aggregation Operation - 136
+*** Dictionary of Aggregation Operations with Performance Considerations - 136
+
+** Multiple RDD Operations - 139
+*** Co-Grouping - 139
+
+** Partitioners and Key/Value Data - 140
+*** Using the Spark Partitioner Object - 142
+*** Hash Partitioning - 142
+*** Range Partitioning - 142
+*** Custom Partitioning - 143
+*** Preserving Partitioning Information Across Transformations - 144
+*** Leveraging Co-Located and Co-Partitioned RDDs - 144
+*** Dictionary of Mapping and Partitioning Functions PairRDDFunctions - 146
+
+** Dictionary of OrderedRDDOperations - 147
+*** Sorting by Two Keys with SortByKey - 149
+
+** Secondary Sort and repartitionAndSortWithinPartitions - 149
+*** Leveraging repartitionAndSortWithinPartitions for a Group by Key and Sort Values Function - 150
+*** How Not to Sort by Two Orderings - 153
+*** Goldilocks Version 2: Secondary Sort - 154
+*** A Different Approach to Goldilocks - 157
+*** Goldilocks Version 3: Sort on Cell Values - 162
+
+** Straggler Detection and Unbalanced Data - 163
+*** Back to Goldilocks (Again) - 165
+*** Goldilocks Version 4: Reduce to Distinct on Each Partition - 165
+
+** Conclusion - 171
+
+* TODO 7. Going Beyond Scala - 173
+** Beyond Scala within the JVM - 174
+** Beyond Scala, and Beyond the JVM - 178
+*** How PySpark Works - 179
+*** How SparkR Works - 187
+*** Spark.jl (Julia Spark) - 189
+*** How Eclair JS Works - 190
+*** Spark on the Common Language Runtime (CLR)—C# and Friends - 191
+
+** Calling Other Languages from Spark - 191
+*** Using Pipe and Friends - 191
+*** JNI - 193
+*** Java Native Access (JNA) - 196
+*** Underneath Everything Is FORTRAN - 196
+*** Getting to the GPU - 198
+
+** The Future - 198
+** Conclusion - 198
+
+* TODO 8. Testing and Validation - 201
+** Unit Testing - 201
+*** General Spark Unit Testing - 202
+*** Mocking RDDs - 206
+
+** Getting Test Data - 208
+*** Generating Large Datasets - 208
+*** Sampling - 209
+
+** Property Checking with ScalaCheck - 211
+*** Computing RDD Difference - 211
+
+** Integration Testing - 214
+*** Choosing Your Integration Testing Environment - 214
+
+** Verifying Performance - 215
+*** Spark Counters for Verifying Performance - 215
+*** Projects for Verifying Performance - 216
+
+** Job Validation - 216
+** Conclusion - 217
+
+* TODO 9. Spark MLlib and ML - 219
+** Choosing Between Spark MLlib and Spark ML - 219
+** Working with MLlib - 220
+*** Getting Started with MLlib (Organization and Imports) - 220
+*** MLlib Feature Encoding and Data Preparation - 221
+*** Feature Scaling and Selection - 226
+*** MLlib Model Training - 226
+*** Predicting - 227
+*** Serving and Persistence - 228
+*** Model Evaluation - 230
+
+** Working with Spark ML - 231
+*** Spark ML Organization and Imports - 231
+*** Pipeline Stages - 232
+*** Explain Params - 233
+*** Data Encoding - 234
+*** Data Cleaning - 236
+*** Spark ML Models - 237
+*** Putting It All Together in a Pipeline - 238
+*** Training a Pipeline - 239
+*** Accessing Individual Stages - 239
+*** Data Persistence and Spark ML - 239
+*** Extending Spark ML Pipelines with Your Own Algorithms - 242
+*** Model and Pipeline Persistence and Serving with Spark ML - 250
+
+** General Serving Considerations - 250
+** Conclusion - 251
+
+* TODO 10. Spark Components and Packages - 253
+** Stream Processing with Spark - 255
+*** Sources and Sinks - 255
+*** Batch Intervals - 257
+*** Data Checkpoint Intervals - 258
+*** Considerations for DStreams - 259
+*** Considerations for Structured Streaming - 260
+*** High Availability Mode (or Handling Driver Failure or Checkpointing) - 268
+
+** GraphX - 269
+** Using Community Packages and Libraries - 269
+*** Creating a Spark Package - 271
+
+** Conclusion - 272
+
+* TODO A. Tuning, Debugging, and Other Things Developers Like to Pretend Don’t Exist - 273
+* TODO Index - 323

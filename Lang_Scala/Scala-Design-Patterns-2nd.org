@@ -96,9 +96,9 @@
     - [[The diamond problem][The diamond problem]]
     - [[The limitations][The limitations]]
   - [[Linearization][Linearization]]
-    - [[Rules of inheritance hierarchies][Rules of inheritance hierarchies]]
-    - [[Linearization rules][Linearization rules]]
-    - [[How linearization works][How linearization works]]
+    - [[Rules of inheritance hierarchies - =TODO= =NOTE=][Rules of inheritance hierarchies - =TODO= =NOTE=]]
+    - [[Linearization rules - =TODO= =NOTE=][Linearization rules - =TODO= =NOTE=]]
+    - [[How linearization works - =TODO= =NOTE=][How linearization works - =TODO= =NOTE=]]
     - [[Initialization][Initialization]]
     - [[Method overriding][Method overriding]]
   - [[Testing traits][Testing traits]]
@@ -984,15 +984,88 @@
 **** TODO Same signatures and return types mixins
 **** TODO Same signatures and different return types mixins
 
-** TODO Multiple inheritance
-*** TODO The diamond problem
-*** TODO The limitations
+** DONE Multiple inheritance
+   CLOSED: [2018-10-07 Sun 15:57]
+*** DONE The diamond problem
+    CLOSED: [2018-10-07 Sun 15:57]
+    In Scala, the ambiguity of /the diamond problem/ is resolved -- use
+    /linearization/. Even though, it is still prone to errors (even the *order*
+    of /traits/ matters). For example,
+    #+BEGIN_SRC scala
+      trait A {
+        def hello(): String = "Hello from A"
+      }
+
+      trait B extends A {
+        override def hello(): String = "Hello from B"
+      }
+
+      trait C extends A {
+        override def hello(): String = "Hello from C"
+      }
+
+      trait D extends B with C {
+        override def hello(): String = "Hello from C"
+      }
+
+      object Diamond extends D {
+        def main(args: Array[Strng]): Unit {
+          System.our.println(hello())
+        }
+      }
+    #+END_SRC
+    - this print ="Hello from C"=
+    - if we change the order by which ~D~ was implemented to ~trait D extends C with B~
+    
+*** DONE The limitations
+    CLOSED: [2018-10-07 Sun 15:26]
+    Scala *multiple inheritance limitations*:
+    /Multiple inheritance/ in Scala is _achieved using_ /traits/
+    and
+    it follows the rules of /linearization/.
+    
+    - In the inheritance hierarchy, if there is a /trait/ that EXPLICITLY =???=
+      extends a /class/, the /class/ that /mixes in/ this /trait/ *must also be
+      a /subclass/ of the /trait/ parent.* This means that when /mixing in/
+      /traits/ that extend /classes/, they must all have the same parent.
+
+    - It is *not possible* to mix /traits/ in, which define or declare /methods/ with
+      _the SAME /signatures/, but DIFFERENT /return types/._
 
 ** TODO Linearization
-*** TODO Rules of inheritance hierarchies
-*** TODO Linearization rules
-*** TODO How linearization works
+   - As we already saw, /traits/ offer a form of /multiple inheritance/.
+     In such cases, the hierarchy is NOT NECESSARILY /linear/, but forms an
+     /acyclic graph/ that needs to be flattened upon compilation.
+
+     What /linearization/ does is this -- it specifies a single linear order for
+     all of the ancestors of a /class/, including both the regular /superclass
+     chain/ and the /parent chains of all of the traits/.
+
+   - We will not have to deal with /linearization/ in _traits that contain no code_
+     (=from Jian= in my word: /interface trait/).
+     However, if we use /mixins/, we will have to consider it. The following will
+     be affected by /linearization/:
+     + Method definitions
+     + Variables (both /mutable/ and /immutable/)
+
+   - We already saw a simple example of linearization previously. Things, however,
+     can get much more complicated and unexpected if the rules of /linearization/
+     are not clear.
+     =TODO= =TODO= =TODO=
+
+*** DONE Rules of inheritance hierarchies - =TODO= =NOTE=
+    CLOSED: [2018-10-07 Sun 17:20]
+*** DONE Linearization rules - =TODO= =NOTE=
+    CLOSED: [2018-10-07 Sun 17:20]
+*** DONE How linearization works - =TODO= =NOTE=
+    CLOSED: [2018-10-07 Sun 17:20]
 *** TODO Initialization
+    Now that we know what happens during linearization,
+    we will understand how instances are being created.
+
+    The rule is that the /constructor/ code is *executed in a /reverse order/
+    compared to the /linearization order/.*
+
 *** TODO Method overriding
 
 ** TODO Testing traits
@@ -1165,7 +1238,53 @@
 ** Summary
 
 * 6. Creational Design Patterns
+  - _Based on the aspects of a program on which a piece of code is written to
+    solve a problem_, we can split /design patterns/ into the following main
+    groups:
+    + *Creational*
+
+    + *Structural*
+
+    + *Behavioral*
+
+  - This chapter will focus on the /creational design patterns/, and of course,
+    we will look at them from the point of view of the Scala programming
+    language. We will go through the following topics:
+
+    + *What* are /creational design patterns/
+
+    + The /factory method/
+
+    + The /abstract factory/
+
+    + Other /factory design patterns/
+
+    + /Lazy initialization/
+
+    + The /singleton/
+
+    + The /builder/
+
+    + The /prototype/
+
 ** What are creational design patterns?
+   - Creational Design Patterns :: the design patterns deal with /object creation/.
+
+   - Creating objects could involve some extra complexities,
+     and
+     /creational design patterns/ *hide these complexities* IN ORDER TO *make the
+     use of software components easier.*
+
+   - The object creation complexity could be _caused by_ any of the following:
+     + The *number* of initialization parameters
+
+     + Required *validation*
+
+     + The complexity of *acquiring* the required parameters
+
+     This list can be expanded, and these factors are present NOT just
+     individually, but in combinations.
+
 ** The factory method design pattern
 *** An example class diagram
 *** A code example
