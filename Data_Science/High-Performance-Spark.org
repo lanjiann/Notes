@@ -8,7 +8,7 @@
 - [[Preface - ix][Preface - ix]]
 - [[1. Introduction to High Performance Spark - 1][1. Introduction to High Performance Spark - 1]]
   - [[What Is Spark and Why Performance Matters - 1][What Is Spark and Why Performance Matters - 1]]
-  - [[What You Can Expect to Get from This Book - 2][What You Can Expect to Get from This Book - 2]]
+  - [[What You Can Expect to Get from This Book - 2 - =Re-READ=][What You Can Expect to Get from This Book - 2 - =Re-READ=]]
   - [[Spark Versions - 3][Spark Versions - 3]]
   - [[Why Scala? - 3][Why Scala? - 3]]
     - [[To Be a Spark Expert You Have to Learn a Little Scala Anyway - 3][To Be a Spark Expert You Have to Learn a Little Scala Anyway - 3]]
@@ -37,23 +37,30 @@
     - [[Tasks - 24][Tasks - 24]]
   - [[Conclusion - 26][Conclusion - 26]]
 - [[3. DataFrames, Datasets, and Spark SQL - 27][3. DataFrames, Datasets, and Spark SQL - 27]]
-  - [[Getting Started with the SparkSession (or HiveContext or SQLContext) - 28][Getting Started with the SparkSession (or HiveContext or SQLContext) - 28]]
+  - [[Getting Started with the ~SparkSession~ (or ~HiveContext~ or ~SQLContext~) - 28][Getting Started with the ~SparkSession~ (or ~HiveContext~ or ~SQLContext~) - 28]]
   - [[Spark SQL Dependencies - 30][Spark SQL Dependencies - 30]]
     - [[Managing Spark Dependencies - 31][Managing Spark Dependencies - 31]]
     - [[Avoiding Hive JARs - 32][Avoiding Hive JARs - 32]]
   - [[Basics of Schemas - 33][Basics of Schemas - 33]]
-  - [[DataFrame API - 36][DataFrame API - 36]]
+  - [[~DataFrame~ API - 36][~DataFrame~ API - 36]]
     - [[Transformations - 36][Transformations - 36]]
+      - [[Simple ~DataFrame~ transformations and SQL expressions - 37][Simple ~DataFrame~ transformations and SQL expressions - 37]]
+      - [[Specialized ~DataFrame~ transformations for missing and noisy data - 42][Specialized ~DataFrame~ transformations for missing and noisy data - 42]]
+      - [[Beyond row-by-row transformations - 42][Beyond row-by-row transformations - 42]]
+      - [[Aggregates and groupBy - 43][Aggregates and groupBy - 43]]
+      - [[Windowning - 46][Windowning - 46]]
+      - [[Sorting - 48][Sorting - 48]]
     - [[Multi-DataFrame Transformations - 48][Multi-DataFrame Transformations - 48]]
+      - [[Set-like operations - 48][Set-like operations - 48]]
     - [[Plain Old SQL Queries and Interacting with Hive Data - 49][Plain Old SQL Queries and Interacting with Hive Data - 49]]
-  - [[Data Representation in DataFrames and Datasets - 49][Data Representation in DataFrames and Datasets - 49]]
+  - [[Data Representation in ~DataFrame~'s and ~Dataset~'s - 49][Data Representation in ~DataFrame~'s and ~Dataset~'s - 49]]
     - [[Tungsten - 50][Tungsten - 50]]
   - [[Data Loading and Saving Functions - 51][Data Loading and Saving Functions - 51]]
-    - [[DataFrameWriter and DataFrameReader - 51][DataFrameWriter and DataFrameReader - 51]]
+    - [[~DataFrameWriter~ and ~DataFrameReader~ - 51][~DataFrameWriter~ and ~DataFrameReader~ - 51]]
     - [[Formats - 52][Formats - 52]]
     - [[Save Modes - 61][Save Modes - 61]]
     - [[Partitions (Discovery and Writing) - 61][Partitions (Discovery and Writing) - 61]]
-  - [[Datasets - 62][Datasets - 62]]
+  - [[~Dataset~'s - 62][~Dataset~'s - 62]]
     - [[Interoperability with RDDs, DataFrames, and Local Collections - 62][Interoperability with RDDs, DataFrames, and Local Collections - 62]]
     - [[Compile-Time Strong Typing - 64][Compile-Time Strong Typing - 64]]
     - [[Easier Functional (RDD “like”) Transformations - 64][Easier Functional (RDD “like”) Transformations - 64]]
@@ -208,9 +215,20 @@
 
 * Preface - ix
 * TODO 1. Introduction to High Performance Spark - 1
-** What Is Spark and Why Performance Matters - 1
-** What You Can Expect to Get from This Book - 2
-** Spark Versions - 3
+** TODO What Is Spark and Why Performance Matters - 1
+** TODO What You Can Expect to Get from This Book - 2 - =Re-READ=
+** DONE Spark Versions - 3
+   CLOSED: [2018-10-14 Sun 02:01]
+   - Spark follows /semantic versioning/ with the standard
+     *[MAJOR].[MINOR].[MAINTENANCE]*.
+
+   - Spark also tries for /binary API compatibility/ between releases, using MiMa;
+     You generally should NOT need to recompile if you use a stable API of the
+     same major version.
+
+   - *TIP*
+     This book was created using the *Spark 2.0.1 APIs*.
+
 ** Why Scala? - 3
 *** To Be a Spark Expert You Have to Learn a Little Scala Anyway - 3
 *** The Spark Scala API Is Easier to Use Than the Java API - 4
@@ -245,27 +263,170 @@
 ** Conclusion - 26
 
 * TODO 3. DataFrames, Datasets, and Spark SQL - 27
-** Getting Started with the SparkSession (or HiveContext or SQLContext) - 28
-** Spark SQL Dependencies - 30
-*** Managing Spark Dependencies - 31
-*** Avoiding Hive JARs - 32
+  /Spark SQL/ and its /DataFrames/ and /Datasets/ /interfaces/ are the future of
+  Spark *performance*, with _MORE efficient storage options_, _advanced optimizer_,
+  and _direct operations on serialized data_.
+
+  *These components are super important for getting the best of Spark performance.*
+  Figure 3-1 can illustrate this point!!!
+
+  - These are relatively _NEW_ components:
+    + /Datasets/ were introduced in _Spark 1.6_;
+    + /DataFrames/ in _Spark 1.3_;
+    + /SQL engine/ in _Spark 1.0_.
+
+  - *Chapter Target*
+    This chapter is focused on helping you learn 
+    + how to best use /Spark SQL's tools/
+
+      and
+
+    + how to *intermix* /Spark SQL/ with _traditional Spark operations_.
+
+** Getting Started with the ~SparkSession~ (or ~HiveContext~ or ~SQLContext~) - 28
+   - Much as the ~SparkContext~ is the _entry point_ for ALL /Spark applications/,
+     and the ~StreamingContext~ is for all /streaming applications/,
+     *the ~SparkSession~ serves as the _entry point_ for /Spark SQL/.*
+
+** TODO Spark SQL Dependencies - 30
+   - To *enable* _Hive support_ in ~SparkSession~ or use the ~HiveContext~ you
+     will need to add both Spark's _SQL and Hive components_ to your _dependencies_.
+
+   - Add /Spark SQL/ and /Hive/ component to "regular" sbt build
+     #+BEGIN_SRC scala
+       // sbt
+       libraryDependencies ++= Seq(
+         "org.apache.spark" %% "spark-sql" % "2.0.0",
+         "org.apache.spark" %% "spark-hive" % "2.0.0"
+       )
+     #+END_SRC
+
+*** DONE Managing Spark Dependencies - 31
+    CLOSED: [2018-10-14 Sun 14:22]
+    - Use sbt-spark-package plug-in to SIMPLIFY manage Spark dependencies.
+
+      This plug-in is normally used for creating community packages
+      =TODO= (discussed in “Creating a Spark Package” on page 271),
+      BUT also assist in building software that depends on Spark.
+
+      + Including sbt-spark-package in =project/plugins.sbt=
+        #+BEGIN_SRC scala
+          // sbt
+          resolvers += ["Spark Package Main Repo" at "https://dl.bintray.com/spark-packages/mave"]
+
+          addSbtPlugin("org.spark-packages" % "sbt-spark-package" % "0.2.5")
+        #+END_SRC
+
+    - For _spark-packages_ to work you will need to specify
+      + a Spark version
+        and
+      + at least one Spark component (core),
+
+      which can be done in sbt settings
+      #+BEGIN_SRC scala
+        // sbt
+        sparkVersion := "2.1.0"
+        sparkComponents ++ Seq("core")
+      #+END_SRC
+
+    - If you use _sbt-spark-package_ plug-in, you can add SQL and Hive componenets
+      in a simpler way like: =from Jian= *??? without specify in ~libraryDependencies~ ???*
+      ~sparkComponents ++ Seq("sql", "hive", "hive-thriftserver")~
+
+    - You can use existing /Hive Metastore/ to which you wish to connect with Spark by
+      copying your =hive-site.xml= to Spark's =conf/= directory.
+
+    - *TIP* =TODO=
+      Hive Metastore version
+
+*** TODO Avoiding Hive JARs - 32
 
 ** Basics of Schemas - 33
-** DataFrame API - 36
+   - JSON data and its equivalent /case class/
+     + JSON
+       #+BEGIN_SRC json
+         {
+             "name": "mission",
+             "pandas": [{"id":1,"zip":"94110","pt":"giant", "happy":true, "attributes":[0.4,0.5]}]
+         }
+       #+END_SRC
+
+     + Schema
+       #+BEGIN_SRC scala
+         case class RawPanda(id: Long, zip: String, pt: String, happy: Boolean, attributes: Array[Double])
+         case class PandaPlace(name: String, pandas: Array[RawPanda])
+       #+END_SRC
+
+   - Example 3-14. Create a Dataset withthe /case classes/:
+     #+BEGIN_SRC scala
+       def createAndPrintSchema() = {
+         val damao = RawPanda(1, "M1B 5K7", "giant", true, Array(0.1, 0.1))
+         val pandaPlace = PandaPlace("toronto", Array(damao))
+         val df = session.createDataFrame(Seq(pandaPlace))
+         df.printSchema()
+       }
+
+       //  root
+       //   |-- name: string (nullable = true)
+       //   |-- pandas: array (nullable = true)
+       //   |    |-- element: struct (containsNull = true)
+       //   |    |    |-- id: long (nullable = false)
+       //   |    |    |-- zip: string (nullable = true)
+       //   |    |    |-- pt: string (nullable = true)
+       //   |    |    |-- happy: boolean (nullable = false)
+       //   |    |    |-- attributes: array (nullable = true)
+       //   |    |    |    |-- element: double (containsNull = false)
+     #+END_SRC
+
+** ~DataFrame~ API - 36
+   - /Spark SQL/'s ~DataFrame~ API allows us to work with ~DataFrame~'s
+     *WITHOUT* having to
+     + register temporary tables
+       or
+     + generate SQL expressions.
+
+     The ~DataFrame~ API has both /transformations/ and /actions/.
+
+   - =TODO= NOTE
+
+   - *TIP*
+     /Spark SQL/ schemas are *eagerly evaluated*, unlike the data underneath.
+
 *** Transformations - 36
+    - *CAUTION*
+      /Spark SQL transformations/ are only *partially lazy* -- the /schema/ is
+      *eagerly evaluated*.
+
+**** Simple ~DataFrame~ transformations and SQL expressions - 37
+     - xxx
+
+     - ~DataFrame~ /functions/, like ~filter~, accept /Spark SQL expressions/,
+       which allow the optimizer to understand what the condition represents,
+       INSTEAD OF /lambdas/.
+
+**** Specialized ~DataFrame~ transformations for missing and noisy data - 42
+     - 
+
+**** Beyond row-by-row transformations - 42
+**** Aggregates and groupBy - 43
+**** Windowning - 46
+**** Sorting - 48
+
 *** Multi-DataFrame Transformations - 48
+**** Set-like operations - 48
+
 *** Plain Old SQL Queries and Interacting with Hive Data - 49
 
-** Data Representation in DataFrames and Datasets - 49
+** Data Representation in ~DataFrame~'s and ~Dataset~'s - 49
 *** Tungsten - 50
 
 ** Data Loading and Saving Functions - 51
-*** DataFrameWriter and DataFrameReader - 51
+*** ~DataFrameWriter~ and ~DataFrameReader~ - 51
 *** Formats - 52
 *** Save Modes - 61
 *** Partitions (Discovery and Writing) - 61
 
-** Datasets - 62
+** ~Dataset~'s - 62
 *** Interoperability with RDDs, DataFrames, and Local Collections - 62
 *** Compile-Time Strong Typing - 64
 *** Easier Functional (RDD “like”) Transformations - 64
