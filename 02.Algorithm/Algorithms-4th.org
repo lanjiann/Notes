@@ -221,6 +221,122 @@
 
   - *Rules of the game*
 
+  - Template for sort classes:
+    #+BEGIN_SRC java
+      public class Example
+      {
+          public static void sort(Comparable[] a)
+          { /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
+          }
+
+          private static boolean less(Comparable v, Comparable w)
+          { return v.compareTo(w) < 0; }
+
+          private static void exch(Comparable[] a, int i, int j)
+          { Comparable t = a[i]; a[i] = a[j]; a[j] = t; }
+
+          private static void show(Comparable[] a)
+          { // Print the array, on a single line.
+              for (int i = 0; i < a.length; i++)
+                  StdOut.print(a[i] + " ");
+              StdOut.println();
+          }
+
+          public static boolean isSorted(Comparable[] a)
+          { // Test whether the array entries are in order.
+              for (int i = 1; i < a.length; i++)
+                  if (less(a[i], a[i-1])) return false;
+              return true;
+          }
+
+          public static void main(String[] args)
+          { // Read strings from standard input, sort them, and print.
+              String[] a = In.readStrings();
+              sort(a);
+              assert isSorted(a);
+              show(a);
+          }
+      }
+    #+END_SRC
+
+    + Scala version:
+      * Translation (imperative):
+        #+BEGIN_SRC scala
+          object SortingTemplate
+          {
+            def sort(a: Array[Comparable]): Unit =
+            { /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
+            }
+  
+            private def less(v: Comparable, w: Comparable): Boolean =
+              v.compareTo(w) < 0
+  
+            private def exch(a: Array[Comparable], i: Int, j: Int): Unit =
+            {
+              val t = a(i)
+              a(i) = a(j)
+              a(j) = t
+            }
+  
+            private def show(a: Array[Comparable]): Unit =
+            { // Print the array, on a single line.
+                println("Array(" + a.mkString(", ") + ")")
+            }
+  
+            def isSortedAscending(a: Array[Comparable]): Boolean = 
+              a.indices.sliding(2) forall {
+                case Vector(a)    => true
+                case Vecoor(a, b) => less(a, b)
+              }
+  
+  
+            def isSorted(a: Array[Comparable]): Boolean =
+              isSortedAscending _
+  
+            def main(args: Array[String]): Unit =
+            { // Read strings from standard input, sort them, and print.
+                val a: Array[String] = In.readStrings()
+                sort(a)
+                assert(isSorted(a))
+                show(a)
+            }
+          }
+        #+END_SRC
+
+      * Translation:
+        #+BEGIN_SRC scala
+          object SortingTemplate {
+            /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
+            def sort[T](a: Vector[T])(implicit ord: Ordering[T]): Vector[T] =
+              ???
+
+            private def less[T](v: T, w: T)(implicit ord: Ordering[T]): Boolean =
+              v.compareTo(w) < 0
+
+            private def exch[T](a: Vector[T], i: Int, j: Int): Vector[T] =
+              a.updated(i, a(j)).updated(j, a(i))
+
+            private def show[T](a: Vector[T]): Unit =
+              println("Array(" + a.mkString(", ") + ")")
+
+            def isSortedAscending[T](a: Vector[T]): Boolean =
+              a.indices.sliding(2) forall {
+                case Vector(a)    => true
+                case Vector(a, b) => less(a, b)
+              }
+
+            def isSorted[T](a: Vector[T]): Boolean =
+              isSortedAscending _
+
+            def main(args: Array[String]): Unit = {
+              val a: Vector[String] = In.readStrings()
+              val sortedA = sort(a)
+              assert(isSorted(sortedA))
+              show(sortedA)
+            }
+          }
+        #+END_SRC
+
 ** 2.1 Elementary Sorts - 244
 ** 2.2 Mergesort - 270
 ** 2.3 Quicksort - 288

@@ -1,0 +1,218 @@
+#+TITLE: PostgreSQL 11.0 Documentation
+#+AUTHOR: The PostgreSQL Global Development Group
+#+Copyright © 1996-2018 The PostgreSQL Global Development Group
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Legal Notice][Legal Notice]]
+- [[Preface][Preface]]
+  - [[1. What is PostgreSQL?][1. What is PostgreSQL?]]
+  - [[2. A Brief History of PostgreSQL][2. A Brief History of PostgreSQL]]
+  - [[3. Conventions][3. Conventions]]
+  - [[4. Further Information][4. Further Information]]
+  - [[5. Bug Reporting Guidelines][5. Bug Reporting Guidelines]]
+- [[I. Tutorial][I. Tutorial]]
+  - [[1. Getting Started][1. Getting Started]]
+  - [[2. The SQL Language][2. The SQL Language]]
+  - [[3. Advanced Features][3. Advanced Features]]
+- [[II. The SQL Language][II. The SQL Language]]
+  - [[4. SQL Syntax][4. SQL Syntax]]
+  - [[5. Data Definition][5. Data Definition]]
+  - [[6. Data Manipulation][6. Data Manipulation]]
+  - [[7. Queries][7. Queries]]
+  - [[8. Data Types][8. Data Types]]
+  - [[9. Functions and Operators][9. Functions and Operators]]
+  - [[10. Type Conversion][10. Type Conversion]]
+  - [[11. Indexes][11. Indexes]]
+  - [[12. Full Text Search][12. Full Text Search]]
+  - [[13. Concurrency Control][13. Concurrency Control]]
+  - [[14. Performance Tips][14. Performance Tips]]
+  - [[15. Parallel Query][15. Parallel Query]]
+- [[III. Server Administration][III. Server Administration]]
+  - [[16. Installation from Source Code][16. Installation from Source Code]]
+  - [[17. Installation from Source Code on Windows][17. Installation from Source Code on Windows]]
+  - [[18. Server Setup and Operation][18. Server Setup and Operation]]
+  - [[19. Server Configuration][19. Server Configuration]]
+  - [[20. Client Authentication][20. Client Authentication]]
+  - [[21. Database Roles][21. Database Roles]]
+  - [[22. Managing Databases][22. Managing Databases]]
+  - [[23. Localization][23. Localization]]
+  - [[24. Routine Database Maintenance Tasks][24. Routine Database Maintenance Tasks]]
+  - [[25. Backup and Restore][25. Backup and Restore]]
+  - [[26. High Availability, Load Balancing, and Replication][26. High Availability, Load Balancing, and Replication]]
+  - [[27. Recovery Configuration][27. Recovery Configuration]]
+  - [[28. Monitoring Database Activity][28. Monitoring Database Activity]]
+  - [[29. Monitoring Disk Usage][29. Monitoring Disk Usage]]
+  - [[30. Reliability and the Write-Ahead Log][30. Reliability and the Write-Ahead Log]]
+  - [[31. Logical Replication][31. Logical Replication]]
+  - [[32. Just-in-Time Compilation (JIT)][32. Just-in-Time Compilation (JIT)]]
+  - [[33. Regression Tests][33. Regression Tests]]
+- [[IV. Client Interfaces][IV. Client Interfaces]]
+  - [[34. libpq - C Library][34. libpq - C Library]]
+  - [[35. Large Objects][35. Large Objects]]
+  - [[36. ECPG - Embedded SQL in C][36. ECPG - Embedded SQL in C]]
+  - [[37. The Information Schema][37. The Information Schema]]
+- [[V. Server Programming][V. Server Programming]]
+  - [[38. Extending SQL][38. Extending SQL]]
+  - [[39. Triggers][39. Triggers]]
+  - [[40. Event Triggers][40. Event Triggers]]
+  - [[41. The Rule System][41. The Rule System]]
+  - [[42. Procedural Languages][42. Procedural Languages]]
+  - [[43. PL/pgSQL - SQL Procedural Language][43. PL/pgSQL - SQL Procedural Language]]
+  - [[44. PL/Tcl - Tcl Procedural Language][44. PL/Tcl - Tcl Procedural Language]]
+  - [[45. PL/Perl - Perl Procedural Language][45. PL/Perl - Perl Procedural Language]]
+  - [[46. PL/Python - Python Procedural Language][46. PL/Python - Python Procedural Language]]
+  - [[47. Server Programming Interface][47. Server Programming Interface]]
+  - [[48. Background Worker Processes][48. Background Worker Processes]]
+  - [[49. Logical Decoding][49. Logical Decoding]]
+  - [[50. Replication Progress Tracking][50. Replication Progress Tracking]]
+- [[VI. Reference][VI. Reference]]
+  - [[I. SQL Commands][I. SQL Commands]]
+  - [[II. PostgreSQL Client Applications][II. PostgreSQL Client Applications]]
+  - [[III. PostgreSQL Server Applications][III. PostgreSQL Server Applications]]
+- [[VII. Internals][VII. Internals]]
+  - [[51. Overview of PostgreSQL Internals][51. Overview of PostgreSQL Internals]]
+  - [[52. System Catalogs][52. System Catalogs]]
+  - [[53. Frontend/Backend Protocol][53. Frontend/Backend Protocol]]
+  - [[54. PostgreSQL Coding Conventions][54. PostgreSQL Coding Conventions]]
+  - [[55. Native Language Support][55. Native Language Support]]
+  - [[56. Writing A Procedural Language Handler][56. Writing A Procedural Language Handler]]
+  - [[57. Writing A Foreign Data Wrapper][57. Writing A Foreign Data Wrapper]]
+  - [[58. Writing A Table Sampling Method][58. Writing A Table Sampling Method]]
+  - [[59. Writing A Custom Scan Provider][59. Writing A Custom Scan Provider]]
+  - [[60. Genetic Query Optimizer][60. Genetic Query Optimizer]]
+  - [[61. Index Access Method Interface Definition][61. Index Access Method Interface Definition]]
+  - [[62. Generic WAL Records][62. Generic WAL Records]]
+  - [[63. B-Tree Indexes][63. B-Tree Indexes]]
+  - [[64. GiST Indexes][64. GiST Indexes]]
+  - [[65. SP-GiST Indexes][65. SP-GiST Indexes]]
+  - [[66. GIN Indexes][66. GIN Indexes]]
+  - [[67. BRIN Indexes][67. BRIN Indexes]]
+  - [[68. Database Physical Storage][68. Database Physical Storage]]
+  - [[69. System Catalog Declarations and Initial Contents][69. System Catalog Declarations and Initial Contents]]
+  - [[70. How the Planner Uses Statistics][70. How the Planner Uses Statistics]]
+- [[VIII. Appendixes][VIII. Appendixes]]
+  - [[A. PostgreSQL Error Codes][A. PostgreSQL Error Codes]]
+  - [[B. Date/Time Support][B. Date/Time Support]]
+  - [[C. SQL Key Words][C. SQL Key Words]]
+  - [[D. SQL Conformance][D. SQL Conformance]]
+  - [[E. Release Notes][E. Release Notes]]
+  - [[F. Additional Supplied Modules][F. Additional Supplied Modules]]
+  - [[G. Additional Supplied Programs][G. Additional Supplied Programs]]
+  - [[H. External Projects][H. External Projects]]
+  - [[I. The Source Code Repository][I. The Source Code Repository]]
+  - [[J. Documentation][J. Documentation]]
+  - [[K. Acronyms][K. Acronyms]]
+- [[Bibliography][Bibliography]]
+- [[Index][Index]]
+
+* Legal Notice
+* Preface
+** 1. What is PostgreSQL?
+** 2. A Brief History of PostgreSQL
+** 3. Conventions
+** 4. Further Information
+** 5. Bug Reporting Guidelines
+
+* I. Tutorial
+** 1. Getting Started
+** 2. The SQL Language
+** 3. Advanced Features
+
+* II. The SQL Language
+** 4. SQL Syntax
+** 5. Data Definition
+** 6. Data Manipulation
+** 7. Queries
+** 8. Data Types
+** 9. Functions and Operators
+** 10. Type Conversion
+** 11. Indexes
+** 12. Full Text Search
+** 13. Concurrency Control
+** 14. Performance Tips
+** 15. Parallel Query
+
+* III. Server Administration
+** 16. Installation from Source Code
+** 17. Installation from Source Code on Windows
+** 18. Server Setup and Operation
+** 19. Server Configuration
+** 20. Client Authentication
+** 21. Database Roles
+** 22. Managing Databases
+** 23. Localization
+** 24. Routine Database Maintenance Tasks
+** 25. Backup and Restore
+** 26. High Availability, Load Balancing, and Replication
+** 27. Recovery Configuration
+** 28. Monitoring Database Activity
+** 29. Monitoring Disk Usage
+** 30. Reliability and the Write-Ahead Log
+** 31. Logical Replication
+** 32. Just-in-Time Compilation (JIT)
+** 33. Regression Tests
+
+* IV. Client Interfaces
+** 34. libpq - C Library
+** 35. Large Objects
+** 36. ECPG - Embedded SQL in C
+** 37. The Information Schema
+
+* V. Server Programming
+** 38. Extending SQL
+** 39. Triggers
+** 40. Event Triggers
+** 41. The Rule System
+** 42. Procedural Languages
+** 43. PL/pgSQL - SQL Procedural Language
+** 44. PL/Tcl - Tcl Procedural Language
+** 45. PL/Perl - Perl Procedural Language
+** 46. PL/Python - Python Procedural Language
+** 47. Server Programming Interface
+** 48. Background Worker Processes
+** 49. Logical Decoding
+** 50. Replication Progress Tracking
+
+* VI. Reference
+** I. SQL Commands
+** II. PostgreSQL Client Applications
+** III. PostgreSQL Server Applications
+
+* VII. Internals
+** 51. Overview of PostgreSQL Internals
+** 52. System Catalogs
+** 53. Frontend/Backend Protocol
+** 54. PostgreSQL Coding Conventions
+** 55. Native Language Support
+** 56. Writing A Procedural Language Handler
+** 57. Writing A Foreign Data Wrapper
+** 58. Writing A Table Sampling Method
+** 59. Writing A Custom Scan Provider
+** 60. Genetic Query Optimizer
+** 61. Index Access Method Interface Definition
+** 62. Generic WAL Records
+** 63. B-Tree Indexes
+** 64. GiST Indexes
+** 65. SP-GiST Indexes
+** 66. GIN Indexes
+** 67. BRIN Indexes
+** 68. Database Physical Storage
+** 69. System Catalog Declarations and Initial Contents
+** 70. How the Planner Uses Statistics
+
+* VIII. Appendixes
+** A. PostgreSQL Error Codes
+** B. Date/Time Support
+** C. SQL Key Words
+** D. SQL Conformance
+** E. Release Notes
+** F. Additional Supplied Modules
+** G. Additional Supplied Programs
+** H. External Projects
+** I. The Source Code Repository
+** J. Documentation
+** K. Acronyms
+
+* Bibliography
+* Index

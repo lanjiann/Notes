@@ -69,15 +69,15 @@
   - [[Summary][Summary]]
 - [[Lesson 9. Summarizing Data][Lesson 9. Summarizing Data]]
   - [[9.1 Using Aggregate Functions][9.1 Using Aggregate Functions]]
-    - [[The ~AVG()~ Function][The ~AVG()~ Function]]
-    - [[The ~COUNT()~ Function][The ~COUNT()~ Function]]
-    - [[The ~MAX()~ Function][The ~MAX()~ Function]]
-    - [[The ~MIN()~ Function][The ~MIN()~ Function]]
-    - [[The ~SUM()~ Function][The ~SUM()~ Function]]
+    - [[9.1.1 The ~AVG()~ Function][9.1.1 The ~AVG()~ Function]]
+    - [[9.1.2 The ~COUNT()~ Function][9.1.2 The ~COUNT()~ Function]]
+    - [[9.1.3 The ~MAX()~ Function][9.1.3 The ~MAX()~ Function]]
+    - [[9.1.4 The ~MIN()~ Function][9.1.4 The ~MIN()~ Function]]
+    - [[9.1.5 The ~SUM()~ Function][9.1.5 The ~SUM()~ Function]]
   - [[9.2 Aggregates on Distinct Values][9.2 Aggregates on Distinct Values]]
   - [[9.3 Combining Aggregate Functions][9.3 Combining Aggregate Functions]]
   - [[9.4 Summary][9.4 Summary]]
-- [[Lesson 10. Grouping Data][Lesson 10. Grouping Data]]
+- [[Lesson 10. Grouping Data - =TODO= =NOTE=][Lesson 10. Grouping Data - =TODO= =NOTE=]]
   - [[10.1 Understanding Data Grouping][10.1 Understanding Data Grouping]]
   - [[10.2 Creating Groups][10.2 Creating Groups]]
   - [[10.3 Filtering Groups][10.3 Filtering Groups]]
@@ -111,7 +111,10 @@
 - [[Lesson 14. Combining Queries][Lesson 14. Combining Queries]]
   - [[14.1 Understanding Combined Queries][14.1 Understanding Combined Queries]]
   - [[14.2 Creating Combined Queries][14.2 Creating Combined Queries]]
-    - [[14.2.1 Sorting Combined Query Results][14.2.1 Sorting Combined Query Results]]
+    - [[14.2.1 Using ~UNION~][14.2.1 Using ~UNION~]]
+    - [[14.2.2 ~UNION~ Rules][14.2.2 ~UNION~ Rules]]
+    - [[14.2.3 Including or Eliminating Duplicate Rows][14.2.3 Including or Eliminating Duplicate Rows]]
+    - [[14.2.4 Sorting Combined Query Results][14.2.4 Sorting Combined Query Results]]
   - [[14.3 Summary][14.3 Summary]]
 - [[Lesson 15. Inserting Data][Lesson 15. Inserting Data]]
   - [[15.1 Understanding Data Insertion][15.1 Understanding Data Insertion]]
@@ -859,7 +862,7 @@
    - aggregate functions ::
         Functions that operate on a set of rows to calculate and return a single value.
 
-*** DONE The ~AVG()~ Function
+*** DONE 9.1.1 The ~AVG()~ Function
     CLOSED: [2018-10-17 Wed 01:10]
     - For a /column/
       #+BEGIN_SRC sql
@@ -880,7 +883,7 @@
     - *Note*: ~NULL~ values
       ~NULL~'s are ignored by ~AVG()~
 
-*** DONE The ~COUNT()~ Function
+*** DONE 9.1.2 The ~COUNT()~ Function
     CLOSED: [2018-10-17 Wed 01:13]
     - Two ways to use ~COUNT()~:
       + ~COUNT(*)~ takes into account the number of ~NULL~.
@@ -895,7 +898,7 @@
           FROM Customers;
         #+END_SRC
 
-*** DONE The ~MAX()~ Function
+*** DONE 9.1.3 The ~MAX()~ Function
     CLOSED: [2018-10-17 Wed 01:17]
     #+BEGIN_SRC sql
       SELECT MAX(prod_price) AS max_price
@@ -913,11 +916,11 @@
     - *NOTE*
       ~MAX()~ *IGNORES* ~NULL~ rows.
 
-*** DONE The ~MIN()~ Function
+*** DONE 9.1.4 The ~MIN()~ Function
     CLOSED: [2018-10-17 Wed 01:17]
     Similar to ~MAX()~
 
-*** DONE The ~SUM()~ Function
+*** DONE 9.1.5 The ~SUM()~ Function
     CLOSED: [2018-10-17 Wed 01:20]
     - Examples:
       #+BEGIN_SRC sql
@@ -963,8 +966,9 @@
 
    - *CAUTION*: _No_ ~DISTINCT~ With ~COUNT(*)~
      ~DISTINCT~ may only be used with ~COUNT()~ if a column name is
-     specified. ~DISTINCT~ may not be used with ~COUNT(*)~. Similarly,
-     ~DISTINCT~ must be used with a /column name/ and not with a
+     specified. ~DISTINCT~ may not be used with ~COUNT(*)~.
+
+     Similarly, ~DISTINCT~ must be used with a /column name/ and not with a
      /calculation/ or /expression/.
      =TODO= =TODO= =TODO=
      =TODO= =TODO= =TODO=
@@ -1000,19 +1004,188 @@
 ** DONE 9.4 Summary
    CLOSED: [2018-10-17 Wed 02:35]
 
-* TODO Lesson 10. Grouping Data
-  
-** TODO 10.1 Understanding Data Grouping
+* DONE Lesson 10. Grouping Data - =TODO= =NOTE=
+  CLOSED: [2018-10-17 Wed 21:12]
+  Learn how to *group data* so that you can *summarize subsets* of table contents.
+  This involves _TWO_ new ~SELECT~ /statement/ /clauses/:
+  - the ~GROUP BY~ /clause/
+  - the ~HAVING~ /clause/
+
+** DONE 10.1 Understanding Data Grouping
+   CLOSED: [2018-10-17 Wed 19:11]
+   We learned _summarizing data_ in the last lesson.
+
+   _Mostly, we need to summarize subsets, rather than the whole dataset itself._
+   In the last lesson, we used ~WHERE~ to filter and get a group to summarize like:
+   #+BEGIN_SRC sql
+     SELECT COUNT(*) AS num_prods
+     FROM Products
+     WHERE vend_id = 'DLL01';
+   #+END_SRC
+
+   *This is NOT enough! How about we want to get ALL groups?*
+
 ** TODO 10.2 Creating Groups
-** TODO 10.3 Filtering Groups
-** TODO 10.4 Grouping and Sorting
-** TODO 10.5 ~SELECT~ Clause Ordering
-** TODO 10.6 Summary
+   Group with ~GROUP BY~ clauses.
+
+   - Example:
+     #+BEGIN_SRC sql
+       SELECT vend_id, COUNT(*) AS num_prods
+       FROM Products
+       GROUP BY vend_id;
+     #+END_SRC
+     This time the output can be multiple rows, and each row is like the ~WHERE
+     vend_id = specific_id~ output.
+
+** DONE 10.3 Filtering Groups
+   CLOSED: [2018-10-17 Wed 20:50]
+   - ~WHERE~ can only filter by /row/.
+     Use ~HAVING~ to filter by /group/, which support ALL the operators of ~WHERE~.
+
+   - Example:
+     #+BEGIN_SRC sql
+       SELECT cust_id, COUNT(*) AS orders
+       FROM Orders
+       GROUP BY cust_id
+       HAVING COUNT(*) >= 2;
+     #+END_SRC
+
+   - Example (combine ~WHERE~ and ~HAVING~)
+     #+BEGIN_SRC sql
+       SELECT vend_id, COUNT(*) AS num_prods
+       FROM Products
+       WHERE prod_price >= 4
+       GROUP BY vend_id
+       HAVING COUNT(*) >= 2;
+     #+END_SRC
+
+   - Note: Using ~HAVING~ and ~WHERE~
+     They have different semantics.
+
+     However, when there is no ~GROUP BY~, each /row/ by default is a /group/,
+     and ~HAVING~ do the same thing as ~WHERE~.
+       Even in this situation, you should avoid using ~HAVING~ -- you should
+     make that distinction yourself.
+
+** DONE 10.4 Grouping and Sorting
+   CLOSED: [2018-10-17 Wed 21:07]
+   By the standard, ~GROUP BY~ has NO guarantee to the /order/ of _output_.
+   Actually, it's about how you /group/, and it has no relation with how to
+   _output_.
+
+   - This can be a legal grouped by ~items~ data output from a DBSM:
+     #+BEGIN_SRC text
+       order_num  items
+       ---------  -----
+       20006      3
+       20007      5
+       20008      5
+       20009      3
+     #+END_SRC
+
+     #+BEGIN_SRC sql
+       SELECT order_num, COUNT(*) AS items
+       FROM OrderItems
+       GROUP BY order_num
+       HAVING COUNT(*) >= 3;
+     #+END_SRC
+
+   - If you want the above example has an ordered by group output, do
+     #+BEGIN_SRC sql
+       SELECT order_num, COUNT(*) AS items
+       FROM OrderItems
+       GROUP BY order_num
+       HAVING COUNT(*) >= 3
+       ORDER BY items, order_num;
+     #+END_SRC
+
+     + *Note*: /Microsoft Access/ Incompatibility
+       /Microsoft Access/ does *NOT allow sorting by alias,* and so this example
+       will fail.
+       * Solution:
+         REPLACE ~items~ (in the ~ORDER BY~ /clause/) WITH the _actual calculation_
+         or with the _field position_.
+
+         As such, ~ORDER BY COUNT(*), order_num~ or ~ORDER BY 2, order_num~ will
+         BOTH work.
+
+   - Table 10.1. ~ORDER BY~ vs. ~GROUP BY~
+     | ~ORDER BY~                    | ~GROUP BY~                                     |
+     |-------------------------------+------------------------------------------------|
+     | *Sorts* generated _output_.   | Groups rows. The output might not be in        |
+     |                               | group order, however.                          |
+     |-------------------------------+------------------------------------------------|
+     | Any /columns/ (even /columns/ | ONLY /SELECTED columns/ or /expressions        |
+     | NOT selected) may be used.    | columns/ may be used, and every /selected      |
+     |                               | column expression/  *MUST* be used.            |
+     |-------------------------------+------------------------------------------------|
+     | Never required.               | Required if using /columns/ (or /expressions/) |
+     |                               | with /aggregate functions/.                    |
+     |-------------------------------+------------------------------------------------|
+     =IMPORTANT= =TODO= =RE-READ=
+
+   - You should *ALWAYS* provide an *EXPLICIT* ~ORDER BY~ /clause/ as well,
+     EVEN IF it is identical (NO guarantee in SQL specification) to the ~GROUP
+     BY~ /clause/.
+
+** DONE 10.5 ~SELECT~ Clause Ordering
+   CLOSED: [2018-10-17 Wed 21:12]
+   =IMPORTANT=
+   =IMPORTANT=
+   =IMPORTANT=
+   Table 10.2. ~SELECT~ /Clauses/ and Their _Sequence_
+   | Clause     | Description                          | Required                                |
+   |------------+--------------------------------------+-----------------------------------------|
+   | ~SELECT~   | Columns or expression to be returned | Yes                                     |
+   | ~FROM~     | Table to retrieve data from          | Only if selecting data from a table     |
+   | ~WHERE~    | R0w-level filtering                  | No                                      |
+   | ~GROUP BY~ | Group specification                  | Only if calculating aggregates by group |
+   | ~HAVING~   | Group-level filtering                | No                                      |
+   | ~ORDER BY~ | Output sort order                    | No                                      |
+
+** DONE 10.6 Summary
+   CLOSED: [2018-10-17 Wed 21:12]
   
 * TODO Lesson 11. Working with Subqueries
-** TODO 11.1 Understanding Subqueries
+** DONE 11.1 Understanding Subqueries
+   CLOSED: [2018-10-17 Wed 21:15]
+   - *Query*
+     Any SQL statement.
+
+     However, the term is USUALLY used to refer to ~SELECT~ /statements/.
+
+   - subqueries :: /queries/ that are embedded into other /queries/.
+
+   - *Note*: MySQL Support
+     If you are using MySQL, be aware that support for /subqueries/ was introduced
+     in version 4.1.
+
+     _Earlier versions_ of MySQL do *NOT support* /subqueries/.
+
 ** TODO 11.2 Filtering by Subquery
+   - *Tip*: Formatting Your SQL =TODO= =NOTE=
+     =TODO=
+
+   - *Caution*: Single Column Only
+     Subquery SELECT statements can only retrieve a single column.
+     Attempting to retrieve multiple columns will return an error.
+
+   - *Caution*: Subqueries and Performance
+     The code shown here works, and it achieves the desired result.
+     However, using subqueries is not always the most efficient way to
+     perform this type of data retrieval. More on this in Lesson 12, “Joining
+     Tables,” where you will revisit this same example.
+
 ** TODO 11.3 Using Subqueries as Calculated Fields
+   - *Caution*: Fully Qualified Column Names
+     =TODO=
+
+   - *Tip*: Subqueries May Not Always Be the Best Option
+     As explained earlier in this lesson, although the sample code shown
+     here works, it is often not the most efficient way to perform this type of
+     data retrieval. You will revisit this example when you learn about
+     JOINs in the next two lessons.
+
 ** TODO 11.4 Summary
 
 * TODO Lesson 12. Joining Tables
@@ -1038,14 +1211,116 @@
 ** TODO !3.4 Using Joins and Join Conditions
 ** TODO !3.5 Summary
 ** 
-* TODO Lesson 14. Combining Queries
-** TODO 14.1 Understanding Combined Queries
-** TODO 14.2 Creating Combined Queries
-*** 14.2.1 Sorting Combined Query Results
+* DONE Lesson 14. Combining Queries
+  CLOSED: [2018-10-20 Sat 21:07]
+  Learn
+  - how to use the ~UNION~ operator to *combine multiple* ~SELECT~ /statements/
+    *into one* result set.
 
-** TODO 14.3 Summary
+** DONE 14.1 Understanding Combined Queries
+   CLOSED: [2018-10-20 Sat 18:11]
+   Use MULTIPLE ~SELECT~ /statements/ and combine their results to return.
+
+   - /Combined queries/ are usually known as /unions/ or /compound queries/.
+
+   - There are basically _TWO_ scenarios in which you'd use _combined queries_:
+     + To return similarly structured data _from different tables_ in a single query
+
+     + To perform multiple queries against _a single table_ returning the data as
+       one query
+
+   - *Tip*: Combining Queries and Multiple WHERE Conditions
+     _ANY_ ~SELECT~ /statement/ with *MULTIPLE* ~WHERE~ /clauses/ can also be
+     specified as a ~UNION~ /combined query/.
+
+     This is NOT true for ~UNION ALL~ queries.
+
+** DONE 14.2 Creating Combined Queries
+   CLOSED: [2018-10-20 Sat 18:22]
+*** DONE 14.2.1 Using ~UNION~
+    CLOSED: [2018-10-20 Sat 18:22]
+    - Equivalent SQL's:
+      + With ~Union~
+        #+BEGIN_SRC sql
+          SELECT cust_name, cust_contact, cust_email
+          FROM Customers
+          WHERE cust_state IN ('IL','IN','MI')
+
+          UNION
+
+          SELECT cust_name, cust_contact, cust_email
+          FROM Customers
+          WHERE cust_name = 'Fun4All';
+        #+END_SRC
+
+      + With ~WHERE~
+        #+BEGIN_SRC sql
+          SELECT cust_name, cust_contact, cust_email
+          FROM Customers
+          WHERE cust_state IN ('IL','IN','MI') OR cust_name = 'Fun4All';
+        #+END_SRC
+
+    - *TIP*: ~UNION~ Limits
+      *NO standard SQL limit* to the number of ~SELECT~ /statements/ that can be
+      combined with ~UNION~.
+
+      However, *DBMS's can have this limitation*, as you guess, for practical
+      reasons.
+
+    - *CAUTION*: Performance Issues
+      Most good DBMSs use an internal /query optimizer/ to combine the ~SELECT~
+      /statements/ *before* they are even processed.
+        In theory, this means that from a performance perspective, there should
+      be _no real difference_ between using MULTIPLE ~WHERE~ clause conditions
+      or a ~UNION~.
+
+      I say in theory, because, in practice, MOST /query optimizers/ do NOT
+      always do as good a job as they should. *Your best bet is to test both
+      methods to see which will work best for you.*
+
+*** DONE 14.2.2 ~UNION~ Rules
+    CLOSED: [2018-10-20 Sat 18:31]
+    As you can see, unions are very easy to use. But there are a few rules
+    governing exactly which can be combined:
+
+    - ~UNION~ is a binary operator, and one ~UNION~ must be composed of two ~SELECT~
+      /statements/.
+
+    - _EACH_ /query/ in a ~UNION~ must contain the *same columns, expressions, or
+      aggregate functions* (and _some DBMSs_ even require that *columns be listed
+      in the same order*).
+
+    - *Column datatypes must be compatible*:
+      Same type or one type can be converted to another implicitly.
+
+    Aside from these basic rules and restrictions,
+    /unions/ can be used for any data retrieval tasks.
+
+*** DONE 14.2.3 Including or Eliminating Duplicate Rows
+    CLOSED: [2018-10-20 Sat 20:56]
+    By default, ~UNION~ de-duplicates.
+    You can use ~UNION ALL~ to keep all rows of each ~SELECT~.
+
+    - *TIP*: ~UNION~ vs. ~WHERE~
+    ~UNION~ almost always accomplishes the same thing as mutiple ~WHERE~
+    /condtions/, _WHILE_ ~UNION ALL~ has no corresponding ~WHERE~!!!
+
+*** DONE 14.2.4 Sorting Combined Query Results
+    CLOSED: [2018-10-20 Sat 21:03]
+    - *ONLY ONE* ~OEDER BY~ can be used for ONE set of /unioned queries/, and it
+      MUST occur AFTER the final ~SELECT~ /statement/.
+
+    - *NOTE* Other ~UNION~ Types
+      Some DBMS's provides ~UNION EXCEPT~ (or ~MINUS~), and ~INTERSECT~.
+      They are rarely used -- you can use /joins/ to do this kind of things.
+
+    - *TIP* Working with Multiple Tables
+
+** DONE 14.3 Summary
+   CLOSED: [2018-10-20 Sat 21:03]
 
 * TODO Lesson 15. Inserting Data
+
 ** TODO 15.1 Understanding Data Insertion
 *** 15.1.1 Inserting Complete Rows
 *** 15.1.2 Inserting Partial Rows
@@ -1054,14 +1329,134 @@
 ** TODO 15.2 Copying from One Table to Another
 ** TODO 15.3 Summary
 
-* TODO Lesson 16. Updating and Deleting Data
+* DONE Lesson 16. Updating and Deleting Data
+  CLOSED: [2018-10-20 Sat 22:17]
   Learn how to use the ~UPDATE~ and ~DELETE~ /statements/ to enable you to
   further manipulate your /table data/.
 
-** TODO 16.1 Updating Data
-** TODO 16.2 Deleting Data
-** TODO 16.3 Guidelines for Updating and Deleting Data
-** TODO 16.4 Summary 
+** DONE 16.1 Updating Data
+   CLOSED: [2018-10-20 Sat 21:50]
+   - Two ways to ~UPDATE~:
+     + update specific rows
+     + update all rows in a table
+
+   - *CAUTION*: Don't Omit the ~WHERE~ /Clause/
+     If you don't use ~WHERE~, you update all rows in a table, which is mostly
+     NOT what you want.
+     =IMPORTANT=
+     =IMPORTANT=
+     =IMPORTANT=
+
+   - *TIP*: ~UPDATE~ and Security
+     In client-server DBMS's, you may need some _special security privileges_
+     to do ~UPDATE~.
+
+   - The basic format of an ~UPDATE~ /statement/ is made up of *three* parts:
+     + The table to be updated
+     + The column names and their new values
+     + The filter condition that determines which rows should be updated
+
+   - Example:
+     Customer 1000000005 has NO e-mail address on file now now has one.
+     Update this info.
+     #+BEGIN_SRC sql
+       UPDATE Customers
+       SET cust_email = 'kim@thetoystore.com'
+       WHERE cust_id = '1000000005';
+     #+END_SRC
+
+     + =IMPORTANT=
+       As we mentioned above, without using ~WHERE~, you'll update all the ~cust_emal~
+       of this table.
+
+   - Example:
+     Update multiple columns
+     #+BEGIN_SRC sql
+       UPDATE Customers
+       SET cust_contact = 'Sam roberts'
+           cust_email = 'sam@toyland.com'
+       WHERE cust_id = '1000000006';
+     #+END_SRC
+
+   - *TIP*: USing Subqueries in an ~UPDATE~ Statement
+     =EXAMPLES= =???=
+
+   - *TIP*: The ~FROM~ Keyword
+     _SOME_ SQL implementations support a ~FROM~ /clause/ in the ~UPDATE~
+     statement that can be used to update the rows in one table with data from
+     another table.
+     _Check the document of the DBMS you are using._
+
+   - You can /update/ a column to ~NULL~ -- this is a kind of deletion.
+
+** DONE 16.2 Deleting Data
+   CLOSED: [2018-10-20 Sat 22:11]
+   - *CAUTION*: Don't Omit the ~WHERE~ /Clause/
+     AS the same title in the last section.
+
+   - *TIP*: ~DELETE~ and Security
+     AS the "~UPDATE~ and Security".
+
+   - Example:
+     #+BEGIN_SRC sql
+       DELETE FROM Customers
+       WHERE cust_id = '1000000006';
+     #+END_SRC
+
+   - *TIP*: Foreign Keys Are Your Friend
+     =TODO= =RE-READ=
+     =TODO= =RE-READ=
+     =IMPORTANT=
+     =IMPORTANT=
+
+   - *TIP*: The ~FROM~ Keyword
+     In Some SQL implementations, the ~FROM~ in ~DELETE FROM~ is an optional part.
+     However, you should always keep it for portability!
+
+   - ~DELETE~ takes *NO* _column names_ or _wildcard characters_.
+     ~DELETE~ *deletes entire rows*, *NOT* columns.
+
+     To delete specific columns use an ~UPDATE~ statement, and set ~NULL~ value.
+
+   - *TIP*: Table Contents, Not Tables
+     ~DELETE~ deletes /table/ _contents_, NOT /tables/.
+     Even if you delete ALL the /rows/ in a /table/, the /table/ itself is still
+     there.
+
+   - *TIP*: Faster Deletes
+     ~TRUNCATE TABLE~ can delete all rows of a /table/ like ~DELETE FROM~ _WITHOUT_
+     ~WHERE~, but the former is much faster -- data changes are _not logged_.
+
+** DONE 16.3 Guidelines for Updating and Deleting Data
+   CLOSED: [2018-10-20 Sat 22:17]
+   Here are some IMPORTANT GUIDELINES that many SQL programmers follow:
+   - *Never* execute an ~UPDATE~ or a ~DELETE~ *without* a ~WHERE~ clause
+     _unless you really_ do intend to update and delete every row.
+
+   - Make sure EVERY /table/ has a /primary key/ (refer back to Lesson 12,
+     "Joining Tables," if you have forgotten what this is), and use it as the
+     ~WHERE~ /clause/ whenever possible. (You may specify _individual primary
+     keys_, _multiple values_, or _value ranges_.)
+     =TODO= =???= =EXAMPLE=
+
+   - Before you use a ~WHERE~ clause with an ~UPDATE~ or a ~DELETE~, first test
+     it with a ~SELECT~ to make sure it is filtering the right records -- it is
+     far too easy to write incorrect ~WHERE~ clauses.
+
+   - Use database enforced /referential integrity/ (refer back to Lesson 12 for
+     this one, too) so that the DBMS will *not allow* the _deletion_ of rows that
+     have data in other tables related to them.
+
+   - Some DBMSs allow
+     /database administrators/ to *impose restrictions* that prevent the
+     execution of ~UPDATE~ or ~DELETE~ without a ~WHERE~ /clause/.
+     =GOOD=
+
+     If your DBMS supports this feature, consider using it.
+     =IMPORTANT=
+
+** DONE 16.4 Summary 
+   CLOSED: [2018-10-20 Sat 22:17]
 
 * TODO Lesson 17. Creating and Manipulating Tables
 ** TODO 17.1 Creating Tables
