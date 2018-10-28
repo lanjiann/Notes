@@ -86,14 +86,17 @@
     - [[3.8.2 Left-to-Right Elimination - 71][3.8.2 Left-to-Right Elimination - 71]]
   - [[3.9 Summary - 74][3.9 Summary - 74]]
 - [[4 Monads - 77][4 Monads - 77]]
-  - [[4.1 What is a Monad? - 77][4.1 What is a Monad? - 77]]
+  - [[4.1 What issequencing a Monad? - 77][4.1 What issequencing a Monad? - 77]]
+      - [[~Option~'s - 78][~Option~'s - 78]]
+      - [[~List~'s - 80][~List~'s - 80]]
+      - [[~Future~'s - 81][~Future~'s - 81]]
     - [[4.1.1 Definition of a Monad - 82][4.1.1 Definition of a Monad - 82]]
     - [[4.1.2 Exercise: Getting Func-y - 83][4.1.2 Exercise: Getting Func-y - 83]]
   - [[4.2 ~Monad~'s in Cats - 84][4.2 ~Monad~'s in Cats - 84]]
-    - [[4.2.1 The Monad Type Class - 84][4.2.1 The Monad Type Class - 84]]
+    - [[4.2.1 The ~Monad~ Type Class - 84][4.2.1 The ~Monad~ Type Class - 84]]
     - [[4.2.2 Default Instances - 85][4.2.2 Default Instances - 85]]
-    - [[4.2.3 Monad Syntax - 86][4.2.3 Monad Syntax - 86]]
-  - [[4.3 The ~Identity~ Monad - 88][4.3 The ~Identity~ Monad - 88]]
+    - [[4.2.3 ~Monad~ Syntax - 86][4.2.3 ~Monad~ Syntax - 86]]
+  - [[4.3 The Identity Monad - 88][4.3 The Identity Monad - 88]]
     - [[4.3.1 Exercise: Monadic Secret Identies - 91][4.3.1 Exercise: Monadic Secret Identies - 91]]
   - [[4.4 ~Either~ - 91][4.4 ~Either~ - 91]]
     - [[4.4.1 Le and Right Bias - 91][4.4.1 Le and Right Bias - 91]]
@@ -1006,16 +1009,83 @@
 
     *This type class is one of the benefits brought to us by Cats.*
 
-** 4.1 What is a Monad? - 77
-*** 4.1.1 Definition of a Monad - 82
-*** 4.1.2 Exercise: Getting Func-y - 83
+** DONE 4.1 What issequencing a Monad? - 77
+   CLOSED: [2018-10-28 Sun 01:00]
+   - *A /monad/ is a mechanism for _SEQUENCING computations_.*
 
-** 4.2 ~Monad~'s in Cats - 84
-*** 4.2.1 The Monad Type Class - 84
+**** ~Option~'s - 78
+**** ~List~'s - 80
+**** ~Future~'s - 81
+
+*** DONE 4.1.1 Definition of a Monad - 82
+    CLOSED: [2018-10-28 Sun 00:04]
+    #+BEGIN_SRC scala
+      import scala.language.higherKinds
+
+      trait Monad[F[_]] {
+        def pure[A](value: A): F[A]
+
+        def flatMap[A, B](value: F[A])(func: A => F[B]): F[B]
+      }
+    #+END_SRC
+
+    - *Monad Laws*
+      ~pure~ and ~flatMap~ must obey a set of /laws/ that allow us to sequence
+      operations freely *WITHOUT* unintended glitches and side-effects:
+
+      + Left identity:
+        calling ~pure~ and transforming the result with ~func~ is the same as
+        calling ~func~:
+        ~pure(a).flatMap(func)~ \equiv{} ~func(a)~
+
+      + Right identity:
+        passing ~pure~ to ~flatMap~ is the same as doing nothing:
+        ~m.flatMap(pure)~  \equiv{} ~m~
+
+      + Associativity:
+        flatMapping over two functions ~f~ and ~g~ is the same as flatMapping
+        over ~f~ and then flatMapping over ~g~:
+        ~m.flatMap(f).flatMap(g)~ \equiv{} ~m.flatMap(x => f(x).flatMap(g))~
+
+*** DONE 4.1.2 Exercise: Getting Func-y - 83
+    CLOSED: [2018-10-28 Sun 00:04]
+    #+BEGIN_SRC scala
+      import scala.language.higherKinds
+
+      trait Monad[F[_]] {
+        def pure[A](a: A): F[A]
+
+        def flatMap[A, B](value: F[A])(func: A => F[B]): F[B]
+
+        def map[A, B](value: F[A])(func: A => B): F[B] =
+          flatMap(value)(a => pure(func(a)))
+          // from Jian:
+          // can I write: flatMap(value){(pure compose func)(_)}
+      }
+    #+END_SRC
+
+** DONE 4.2 ~Monad~'s in Cats - 84
+   CLOSED: [2018-10-28 Sun 01:00]
+   Still
+   - type class
+   - instances
+   - syntax
+
+*** 4.2.1 The ~Monad~ Type Class - 84
+    - ~Monad~ extends two other /type classes/:
+      + ~FlatMap~, which provides ~flatMap~;
+      + ~Applicative~, which provides ~pure~.
+
 *** 4.2.2 Default Instances - 85
-*** 4.2.3 Monad Syntax - 86
+    Still inside ~cats.instances~
 
-** 4.3 The ~Identity~ Monad - 88
+*** 4.2.3 ~Monad~ Syntax - 86
+    - The syntax for /monads/ comes from three places:
+      + ~cats.syntax.flatMap~ provides syntax for ~flatMap~;
+      + ~cats.syntax.functor~ provides syntax for ~map~;
+      + ~cats.syntax.applicative~ provides syntax for ~pure~.
+
+** 4.3 The Identity Monad - 88
 *** 4.3.1 Exercise: Monadic Secret Identies - 91
 
 ** 4.4 ~Either~ - 91
@@ -1099,23 +1169,35 @@
 ** TODO 6.6 Summary - 162
 
 * TODO 7 ~Foldable~ and ~Traverse~ - 165
+  In this chapter we’ll look at two type classes that capture itera on over
+  collecons:
+  + ~Foldable~ abstracts the familiar ~foldLeft~ and ~foldRight~ operations;
+
+  + ~Traverse~ is a higher-level abstraction that uses ~Applicative~'s to *iterate*
+    _with less pain than folding_.
+
+  We'll start by looking at ~Foldable~, and then _examine cases where folding
+  becomes complex and ~Traverse~ becomes convenient._
+
 ** TODO 7.1 ~Foldable~ - 165
-*** 7.1.1 Folds and Folding - 166
-*** 7.1.2 Exercise: Reflecting on Folds - 167
-*** 7.1.3 Exercise: Scaf-fold-ing Other Methods - 167
-*** 7.1.4 Foldable in Cats - 168
-**** 7.1.4.1 Folding Right - 168
-**** 7.1.4.2 Folding with Monoids - 170
-**** 7.1.4.3 Syntax for Foldable - 171
+   ~Foldable~ gives us greate use cases for ~Monoid~'s and the ~Eval~ /monad/.
+
+*** TODO 7.1.1 Folds and Folding - 166
+*** TODO 7.1.2 Exercise: Reflecting on Folds - 167
+*** TODO 7.1.3 Exercise: Scaf-fold-ing Other Methods - 167
+*** TODO 7.1.4 Foldable in Cats - 168
+**** TODO 7.1.4.1 Folding Right - 168
+**** TODO 7.1.4.2 Folding with Monoids - 170
+**** TODO 7.1.4.3 Syntax for Foldable - 171
 
 ** TODO 7.2 ~Traverse~ - 172
-*** 7.2.1 Traversing with Futures - 172
-*** 7.2.2 Traversing with Applicatives - 175
-**** 7.2.2.1 Exercise: Traversing with Vectors - 177
-**** 7.2.2.2 Exercise: Traversing with Options - 177
-**** 7.2.2.3 Exercise: Traversing with Validated - 177
+*** TODO 7.2.1 Traversing with Futures - 172
+*** TODO 7.2.2 Traversing with Applicatives - 175
+**** TODO 7.2.2.1 Exercise: Traversing with Vectors - 177
+**** TODO 7.2.2.2 Exercise: Traversing with Options - 177
+**** TODO 7.2.2.3 Exercise: Traversing with Validated - 177
 
-*** 7.2.3 Traverse in Cats - 178
+*** TODO 7.2.3 Traverse in Cats - 178
 
 ** TODO 7.3 Summary - 180
 
