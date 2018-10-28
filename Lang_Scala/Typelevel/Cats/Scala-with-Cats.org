@@ -1,0 +1,1257 @@
+#+TITLE: Scala with Cats
+#+AUTHOR: Noel Welsh and Dave Gurnell
+#+Date: November 2017
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface - 1][Preface - 1]]
+  - [[Versions - 2][Versions - 2]]
+    - [[Template Projects - 2][Template Projects - 2]]
+  - [[Conventions Used in This Book - 3][Conventions Used in This Book - 3]]
+    - [[Typographical Conventions - 3][Typographical Conventions - 3]]
+    - [[Source Code - 3][Source Code - 3]]
+    - [[Callout Boxes - 4][Callout Boxes - 4]]
+  - [[Acknowledgements - 4][Acknowledgements - 4]]
+    - [[Backers - 4][Backers - 4]]
+- [[Part I. Theory - 7][Part I. Theory - 7]]
+- [[1 Introduction - 9][1 Introduction - 9]]
+  - [[1.1 Anatomy of a Type Class - 10][1.1 Anatomy of a Type Class - 10]]
+    - [[1.1.1 The Type Class - 10][1.1.1 The Type Class - 10]]
+    - [[1.1.2 Type Class Instances - 10][1.1.2 Type Class Instances - 10]]
+    - [[1.1.3 Type Class Interfaces - 11][1.1.3 Type Class Interfaces - 11]]
+  - [[1.2 Working with Implicits - 13][1.2 Working with Implicits - 13]]
+    - [[1.2.1 Packaging Implicits - 13][1.2.1 Packaging Implicits - 13]]
+    - [[1.2.2 Implicit Scope - 14][1.2.2 Implicit Scope - 14]]
+    - [[1.2.3 Recursive Implicit Resolution - 15][1.2.3 Recursive Implicit Resolution - 15]]
+  - [[1.3 Exercise: Printable Library - 18][1.3 Exercise: Printable Library - 18]]
+  - [[1.4 Meet Cats - 20][1.4 Meet Cats - 20]]
+    - [[1.4.1 Importing Type Classes - 20][1.4.1 Importing Type Classes - 20]]
+    - [[1.4.2 Importing Default Instances - 21][1.4.2 Importing Default Instances - 21]]
+    - [[1.4.3 Importing Interface Syntax - 22][1.4.3 Importing Interface Syntax - 22]]
+    - [[1.4.4 Importing All The Things! - 22][1.4.4 Importing All The Things! - 22]]
+    - [[1.4.5 Defining Custom Instances - 23][1.4.5 Defining Custom Instances - 23]]
+    - [[1.4.6 Exercise: Cat Show - 24][1.4.6 Exercise: Cat Show - 24]]
+  - [[1.5 Example: ~Eq~ - 24][1.5 Example: ~Eq~ - 24]]
+    - [[1.5.1 Equality, Liberty, and Fraternity - 25][1.5.1 Equality, Liberty, and Fraternity - 25]]
+    - [[1.5.2 Comparing Ints - 25][1.5.2 Comparing Ints - 25]]
+    - [[1.5.3 Comparing Options - 26][1.5.3 Comparing Options - 26]]
+    - [[1.5.4 Comparing Custom Types - 28][1.5.4 Comparing Custom Types - 28]]
+    - [[1.5.5 Exercise: Equality, Liberty, and Felinity - 28][1.5.5 Exercise: Equality, Liberty, and Felinity - 28]]
+  - [[1.6 Controlling Instance Selection - 29][1.6 Controlling Instance Selection - 29]]
+    - [[1.6.1 Variance - 29][1.6.1 Variance - 29]]
+      - [[Covariance - 29][Covariance - 29]]
+      - [[Contravariance - 30][Contravariance - 30]]
+      - [[Invariance - 31][Invariance - 31]]
+  - [[1.7 Summary - 32][1.7 Summary - 32]]
+- [[2 Monoids and Semigroups - 35][2 Monoids and Semigroups - 35]]
+    - [[Integer addition - 35][Integer addition - 35]]
+    - [[Integer multiplication - 36][Integer multiplication - 36]]
+    - [[String and sequence concatenation - 36][String and sequence concatenation - 36]]
+  - [[2.1 Definition of a Monoid - 37][2.1 Definition of a Monoid - 37]]
+  - [[2.2 Definition of a Semigroup - 38][2.2 Definition of a Semigroup - 38]]
+  - [[2.3 Exercise: The Truth About Monoids - 39 - =TODO= =Incomplete=][2.3 Exercise: The Truth About Monoids - 39 - =TODO= =Incomplete=]]
+  - [[2.4 Exercise: All Set for Monoids - 40 - =TODO= =Incomplete=][2.4 Exercise: All Set for Monoids - 40 - =TODO= =Incomplete=]]
+  - [[2.5 Monoids in Cats - 40][2.5 Monoids in Cats - 40]]
+    - [[2.5.1 The Monoid Type Class - 40][2.5.1 The Monoid Type Class - 40]]
+    - [[2.5.2 Monoid Instances - 41][2.5.2 Monoid Instances - 41]]
+    - [[2.5.3 Monoid Syntax - 42][2.5.3 Monoid Syntax - 42]]
+    - [[2.5.4 Exercise: Adding All The Things - 43 - =TODO= =???=][2.5.4 Exercise: Adding All The Things - 43 - =TODO= =???=]]
+  - [[2.6 Applications of Monoids - 43][2.6 Applications of Monoids - 43]]
+    - [[2.6.1 Big Data - 44][2.6.1 Big Data - 44]]
+    - [[2.6.2 Distributed Systems - 44 - =TODO= =Case-Study= =NOTE=][2.6.2 Distributed Systems - 44 - =TODO= =Case-Study= =NOTE=]]
+    - [[2.6.3 Monoids in the Small - 45][2.6.3 Monoids in the Small - 45]]
+  - [[2.7 Summary - 45][2.7 Summary - 45]]
+- [[3 Functors - 47][3 Functors - 47]]
+  - [[3.1 Examples of Functors - 47][3.1 Examples of Functors - 47]]
+  - [[3.2 More Examples of Functors - 49][3.2 More Examples of Functors - 49]]
+    - [[~Futures~ - 49 - =TODO= =RE-READ=][~Futures~ - 49 - =TODO= =RE-READ=]]
+    - [[Functions (?!) - 49 - =TODO=][Functions (?!) - 49 - =TODO=]]
+  - [[3.3 Definition of a Functor - 54][3.3 Definition of a Functor - 54]]
+  - [[3.4 Aside: Higher Kinds and Type Constructors - 55][3.4 Aside: Higher Kinds and Type Constructors - 55]]
+  - [[3.5 Functors in Cats - 57][3.5 Functors in Cats - 57]]
+    - [[3.5.1 The Functor Type Class - 57][3.5.1 The Functor Type Class - 57]]
+    - [[3.5.2 Functor Syntax - 58][3.5.2 Functor Syntax - 58]]
+    - [[3.5.3 Instances for Custom Types - 60][3.5.3 Instances for Custom Types - 60]]
+    - [[3.5.4 Exercise: Branching out with Functors - 61][3.5.4 Exercise: Branching out with Functors - 61]]
+  - [[3.6 Contravariant and Invariant Functors - 61 - =TODO= =OPTIONAL=][3.6 Contravariant and Invariant Functors - 61 - =TODO= =OPTIONAL=]]
+    - [[3.6.1 Contravariant Functors and the ~contramap~ Method - 62][3.6.1 Contravariant Functors and the ~contramap~ Method - 62]]
+      - [[3.6.1.1 Exercise: Showing off with Contramap - 63][3.6.1.1 Exercise: Showing off with Contramap - 63]]
+    - [[3.6.2 Invariant functors and the ~imap~ method - 65][3.6.2 Invariant functors and the ~imap~ method - 65]]
+      - [[3.6.2.1 Transformative Thinking with ~imap~ - 66][3.6.2.1 Transformative Thinking with ~imap~ - 66]]
+  - [[3.7 Contravariant and Invariant in Cats - 68][3.7 Contravariant and Invariant in Cats - 68]]
+    - [[3.7.1 Contravariant in Cats - 68][3.7.1 Contravariant in Cats - 68]]
+    - [[3.7.2 Invariant in Cats - 69][3.7.2 Invariant in Cats - 69]]
+  - [[3.8 Aside: Partial Unification - 70][3.8 Aside: Partial Unification - 70]]
+    - [[3.8.1 Unifying Type Constructors - 70][3.8.1 Unifying Type Constructors - 70]]
+    - [[3.8.2 Left-to-Right Elimination - 71][3.8.2 Left-to-Right Elimination - 71]]
+  - [[3.9 Summary - 74][3.9 Summary - 74]]
+- [[4 Monads - 77][4 Monads - 77]]
+  - [[4.1 What is a Monad? - 77][4.1 What is a Monad? - 77]]
+    - [[4.1.1 Definition of a Monad - 82][4.1.1 Definition of a Monad - 82]]
+    - [[4.1.2 Exercise: Getting Func-y - 83][4.1.2 Exercise: Getting Func-y - 83]]
+  - [[4.2 ~Monad~'s in Cats - 84][4.2 ~Monad~'s in Cats - 84]]
+    - [[4.2.1 The Monad Type Class - 84][4.2.1 The Monad Type Class - 84]]
+    - [[4.2.2 Default Instances - 85][4.2.2 Default Instances - 85]]
+    - [[4.2.3 Monad Syntax - 86][4.2.3 Monad Syntax - 86]]
+  - [[4.3 The ~Identity~ Monad - 88][4.3 The ~Identity~ Monad - 88]]
+    - [[4.3.1 Exercise: Monadic Secret Identies - 91][4.3.1 Exercise: Monadic Secret Identies - 91]]
+  - [[4.4 ~Either~ - 91][4.4 ~Either~ - 91]]
+    - [[4.4.1 Le and Right Bias - 91][4.4.1 Le and Right Bias - 91]]
+    - [[4.4.2 Creating Instances - 92][4.4.2 Creating Instances - 92]]
+    - [[4.4.3 Transforming Eithers - 94][4.4.3 Transforming Eithers - 94]]
+    - [[4.4.4 Error Handling - 96][4.4.4 Error Handling - 96]]
+    - [[4.4.5 Exercise: What is Best? - 98][4.4.5 Exercise: What is Best? - 98]]
+  - [[4.5 Aside: Error Handling and ~MonadError~ - 98][4.5 Aside: Error Handling and ~MonadError~ - 98]]
+    - [[4.5.1 The ~MonadError~ Type Class - 98][4.5.1 The ~MonadError~ Type Class - 98]]
+    - [[4.5.2 Raising and Handling Errors - 99][4.5.2 Raising and Handling Errors - 99]]
+    - [[4.5.3 Instances of ~MonadError~ - 101][4.5.3 Instances of ~MonadError~ - 101]]
+    - [[4.5.4 Exercise: Abstracting - 101][4.5.4 Exercise: Abstracting - 101]]
+  - [[4.6 The ~Eval~ Monad - 101][4.6 The ~Eval~ Monad - 101]]
+    - [[4.6.1 Eager, Lazy, Memoized, Oh My! - 101][4.6.1 Eager, Lazy, Memoized, Oh My! - 101]]
+    - [[4.6.2 Eval's Models of Evaluation - 103][4.6.2 Eval's Models of Evaluation - 103]]
+    - [[4.6.3 ~Eval~ as a ~Monad~ - 105][4.6.3 ~Eval~ as a ~Monad~ - 105]]
+    - [[4.6.4 Trampolining and ~Eval.defer~ - 107][4.6.4 Trampolining and ~Eval.defer~ - 107]]
+    - [[4.6.5 Exercise: Safer Folding using ~Eval~ - 108][4.6.5 Exercise: Safer Folding using ~Eval~ - 108]]
+  - [[4.7 The ~Writer~ Monad - 108][4.7 The ~Writer~ Monad - 108]]
+    - [[4.7.1 Creating and Unpacking Writers - 109][4.7.1 Creating and Unpacking Writers - 109]]
+    - [[4.7.2 Composing and Transforming Writers - 111][4.7.2 Composing and Transforming Writers - 111]]
+    - [[4.7.3 Exercise: Show Your Working - 113][4.7.3 Exercise: Show Your Working - 113]]
+  - [[4.8 The ~Reader~ Monad - 114][4.8 The ~Reader~ Monad - 114]]
+    - [[4.8.1 Creating and Unpacking Readers - 115][4.8.1 Creating and Unpacking Readers - 115]]
+    - [[4.8.2 Composing Readers - 115][4.8.2 Composing Readers - 115]]
+    - [[4.8.3 Exercise: Hacking on Readers - 116][4.8.3 Exercise: Hacking on Readers - 116]]
+    - [[4.8.4 When to Use Readers? - 118][4.8.4 When to Use Readers? - 118]]
+  - [[4.9 The ~State~ Monad - 119][4.9 The ~State~ Monad - 119]]
+    - [[4.9.1 Creating and Unpacking State - 119][4.9.1 Creating and Unpacking State - 119]]
+    - [[4.9.2 Composing and Transforming State - 120][4.9.2 Composing and Transforming State - 120]]
+    - [[4.9.3 Exercise: Post-Order Calculator - 123][4.9.3 Exercise: Post-Order Calculator - 123]]
+  - [[4.10 Defining Custom Monads - 126][4.10 Defining Custom Monads - 126]]
+    - [[4.10.1 Exercise: Branching out Further with Monads - 127][4.10.1 Exercise: Branching out Further with Monads - 127]]
+  - [[4.11 Summary - 128][4.11 Summary - 128]]
+- [[5 Monad Transformers - 129][5 Monad Transformers - 129]]
+  - [[5.1 Exercise: Composing Monads - 130][5.1 Exercise: Composing Monads - 130]]
+  - [[5.2 A Transformative Example - 131][5.2 A Transformative Example - 131]]
+  - [[5.3 Monad Transformers in Cats - 133][5.3 Monad Transformers in Cats - 133]]
+    - [[5.3.1 The Monad Transformer Classes - 133][5.3.1 The Monad Transformer Classes - 133]]
+    - [[5.3.2 Building Monad Stacks - 134][5.3.2 Building Monad Stacks - 134]]
+    - [[5.3.3 Constructing and Unpacking Instances - 136][5.3.3 Constructing and Unpacking Instances - 136]]
+    - [[5.3.4 Default Instances - 137][5.3.4 Default Instances - 137]]
+    - [[5.3.5 Usage Patterns - 138][5.3.5 Usage Patterns - 138]]
+  - [[5.4 Exercise: Monads: Transform and Roll Out - 140][5.4 Exercise: Monads: Transform and Roll Out - 140]]
+  - [[5.5 Summary - 141][5.5 Summary - 141]]
+- [[6 ~Semigroupal~ and ~Applicative~ - 143][6 ~Semigroupal~ and ~Applicative~ - 143]]
+  - [[6.1 ~Semigroupal~ - 144][6.1 ~Semigroupal~ - 144]]
+    - [[6.1.1 Joining Two Contexts - 145][6.1.1 Joining Two Contexts - 145]]
+    - [[6.1.2 Joining Three or More Contexts - 145][6.1.2 Joining Three or More Contexts - 145]]
+  - [[6.2 Apply Syntax - 146][6.2 Apply Syntax - 146]]
+    - [[6.2.1 Fancy Functors and Apply Syntax - 148][6.2.1 Fancy Functors and Apply Syntax - 148]]
+  - [[6.3 ~Semigroupal~ Applied to Different Types - 149][6.3 ~Semigroupal~ Applied to Different Types - 149]]
+      - [[Future - 149][Future - 149]]
+      - [[List - 150][List - 150]]
+      - [[Either - 150][Either - 150]]
+    - [[6.3.1 Semigroupal Applied to Monads - 151][6.3.1 Semigroupal Applied to Monads - 151]]
+  - [[6.4 Validated - 152][6.4 Validated - 152]]
+    - [[6.4.1 Creating Instances of Validated - 153][6.4.1 Creating Instances of Validated - 153]]
+    - [[6.4.2 Combining Instances of Validated - 154][6.4.2 Combining Instances of Validated - 154]]
+    - [[6.4.3 Methods of Validated - 156][6.4.3 Methods of Validated - 156]]
+    - [[6.4.4 Exercise: Form Validation - 158][6.4.4 Exercise: Form Validation - 158]]
+  - [[6.5 Apply and ~Applicative~ - 159][6.5 Apply and ~Applicative~ - 159]]
+    - [[6.5.1 The Hierarchy of Sequencing Type Classes - 160][6.5.1 The Hierarchy of Sequencing Type Classes - 160]]
+  - [[6.6 Summary - 162][6.6 Summary - 162]]
+- [[7 ~Foldable~ and ~Traverse~ - 165][7 ~Foldable~ and ~Traverse~ - 165]]
+  - [[7.1 ~Foldable~ - 165][7.1 ~Foldable~ - 165]]
+    - [[7.1.1 Folds and Folding - 166][7.1.1 Folds and Folding - 166]]
+    - [[7.1.2 Exercise: Reflecting on Folds - 167][7.1.2 Exercise: Reflecting on Folds - 167]]
+    - [[7.1.3 Exercise: Scaf-fold-ing Other Methods - 167][7.1.3 Exercise: Scaf-fold-ing Other Methods - 167]]
+    - [[7.1.4 Foldable in Cats - 168][7.1.4 Foldable in Cats - 168]]
+      - [[7.1.4.1 Folding Right - 168][7.1.4.1 Folding Right - 168]]
+      - [[7.1.4.2 Folding with Monoids - 170][7.1.4.2 Folding with Monoids - 170]]
+      - [[7.1.4.3 Syntax for Foldable - 171][7.1.4.3 Syntax for Foldable - 171]]
+  - [[7.2 ~Traverse~ - 172][7.2 ~Traverse~ - 172]]
+    - [[7.2.1 Traversing with Futures - 172][7.2.1 Traversing with Futures - 172]]
+    - [[7.2.2 Traversing with Applicatives - 175][7.2.2 Traversing with Applicatives - 175]]
+      - [[7.2.2.1 Exercise: Traversing with Vectors - 177][7.2.2.1 Exercise: Traversing with Vectors - 177]]
+      - [[7.2.2.2 Exercise: Traversing with Options - 177][7.2.2.2 Exercise: Traversing with Options - 177]]
+      - [[7.2.2.3 Exercise: Traversing with Validated - 177][7.2.2.3 Exercise: Traversing with Validated - 177]]
+    - [[7.2.3 Traverse in Cats - 178][7.2.3 Traverse in Cats - 178]]
+  - [[7.3 Summary - 180][7.3 Summary - 180]]
+- [[Part II. Case Studies 181][Part II. Case Studies 181]]
+- [[8 Case Study: Testing Asynchronous Code 183][8 Case Study: Testing Asynchronous Code 183]]
+  - [[8.1 Abstracting over Type Constructors - 185][8.1 Abstracting over Type Constructors - 185]]
+  - [[8.2 Abstracting over Monads - 186][8.2 Abstracting over Monads - 186]]
+  - [[8.3 Summary - 187][8.3 Summary - 187]]
+- [[9 Case Study: Map-Reduce - 189][9 Case Study: Map-Reduce - 189]]
+  - [[9.1 Parallelizing ~map~ and ~fold~ - 189][9.1 Parallelizing ~map~ and ~fold~ - 189]]
+  - [[9.2 Implementing ~foldMap~ - 191][9.2 Implementing ~foldMap~ - 191]]
+  - [[9.3 Parallelising ~foldMap~ - 193][9.3 Parallelising ~foldMap~ - 193]]
+    - [[9.3.1 Futures, Thread Pools, and ~ExecutionContexts~ - 193][9.3.1 Futures, Thread Pools, and ~ExecutionContexts~ - 193]]
+    - [[9.3.2 Dividing Work - 196][9.3.2 Dividing Work - 196]]
+    - [[9.3.3 Implementing ~parallelFoldMap~ - 197][9.3.3 Implementing ~parallelFoldMap~ - 197]]
+    - [[9.3.4 ~parallelFoldMap~ with more Cats - 197][9.3.4 ~parallelFoldMap~ with more Cats - 197]]
+  - [[9.4 Summary - 198][9.4 Summary - 198]]
+- [[10 Case Study: Data Validation - 199][10 Case Study: Data Validation - 199]]
+  - [[10.1 Sketching the Library Structure - 200][10.1 Sketching the Library Structure - 200]]
+  - [[10.2 The Check Datatype - 203][10.2 The Check Datatype - 203]]
+  - [[10.3 Basic Combinators - 204][10.3 Basic Combinators - 204]]
+  - [[10.4 Transforming Data - 205][10.4 Transforming Data - 205]]
+    - [[10.4.1 Predicates - 206][10.4.1 Predicates - 206]]
+    - [[10.4.2 Checks - 208][10.4.2 Checks - 208]]
+    - [[10.4.3 Recap - 210][10.4.3 Recap - 210]]
+  - [[10.5 Kleislis - 211][10.5 Kleislis - 211]]
+  - [[10.6 Summary - 215][10.6 Summary - 215]]
+- [[11 Case Study: CRDTs - 217][11 Case Study: CRDTs - 217]]
+  - [[11.1 Eventual Consistency - 217][11.1 Eventual Consistency - 217]]
+  - [[11.2 The GCounter - 218][11.2 The GCounter - 218]]
+    - [[11.2.1 Simple Counters - 218][11.2.1 Simple Counters - 218]]
+    - [[11.2.2 GCounters - 220][11.2.2 GCounters - 220]]
+    - [[11.2.3 Exercise: GCounter Implementation - 221][11.2.3 Exercise: GCounter Implementation - 221]]
+  - [[11.3 Generalisation - 222][11.3 Generalisation - 222]]
+    - [[11.3.1 Implementation - 224][11.3.1 Implementation - 224]]
+    - [[11.3.2 Exercise: ~BoundedSemiLattice~ Instances - 225][11.3.2 Exercise: ~BoundedSemiLattice~ Instances - 225]]
+    - [[11.3.3 Exercise: Generic GCounter - 225][11.3.3 Exercise: Generic GCounter - 225]]
+  - [[11.4 Abstracting GCounter to a Type Class - 225][11.4 Abstracting GCounter to a Type Class - 225]]
+  - [[11.5 Abstracting a Key Value Store - 227][11.5 Abstracting a Key Value Store - 227]]
+  - [[11.6 Summary - 228][11.6 Summary - 228]]
+- [[Part III. Solutions to Exercises - 231][Part III. Solutions to Exercises - 231]]
+- [[A Solutions for: Introduction - 233][A Solutions for: Introduction - 233]]
+  - [[A.1 Printable Library - 233][A.1 Printable Library - 233]]
+  - [[A.2 Printable Library Part 2 - 234][A.2 Printable Library Part 2 - 234]]
+  - [[A.3 Printable Library Part 3 - 235][A.3 Printable Library Part 3 - 235]]
+  - [[A.4 Cat Show - 236][A.4 Cat Show - 236]]
+  - [[A.5 Equality, Liberty, and Felinity - 237][A.5 Equality, Liberty, and Felinity - 237]]
+- [[B Solutions for: Monoids and Semigroups - 239][B Solutions for: Monoids and Semigroups - 239]]
+  - [[B.1 The Truth About Monoids - 239][B.1 The Truth About Monoids - 239]]
+  - [[B.2 All Set for Monoids - 240][B.2 All Set for Monoids - 240]]
+  - [[B.3 Adding All The Things - 241][B.3 Adding All The Things - 241]]
+  - [[B.4 Adding All The Things Part 2 - 242][B.4 Adding All The Things Part 2 - 242]]
+  - [[B.5 Adding All The Things Part 3 - 243][B.5 Adding All The Things Part 3 - 243]]
+- [[C Solutions for: Functors - 245][C Solutions for: Functors - 245]]
+  - [[C.1 Branching out with Functors - 245][C.1 Branching out with Functors - 245]]
+  - [[C.2 Showing off with Contramap - 246][C.2 Showing off with Contramap - 246]]
+  - [[C.3 Showing off with Contramap Part 2 - 247][C.3 Showing off with Contramap Part 2 - 247]]
+  - [[C.4 Transforma ve Thinking with imap - 248][C.4 Transforma ve Thinking with imap - 248]]
+  - [[C.5 Transforma ve Thinking with imap Part 2 - 248][C.5 Transforma ve Thinking with imap Part 2 - 248]]
+  - [[C.6 Transforma ve Thinking with imap Part 3 - 248][C.6 Transforma ve Thinking with imap Part 3 - 248]]
+- [[D Solutions for: Monads - 251][D Solutions for: Monads - 251]]
+  - [[D.1 Ge ng Func-y - 251][D.1 Ge ng Func-y - 251]]
+  - [[D.2 Monadic Secret Identities - 252][D.2 Monadic Secret Identities - 252]]
+  - [[D.3 What is Best? - 253][D.3 What is Best? - 253]]
+  - [[D.4 Safer Folding using Eval - 254][D.4 Safer Folding using Eval - 254]]
+  - [[D.5 Show Your Working - 255][D.5 Show Your Working - 255]]
+  - [[D.6 Hacking on Readers - 256][D.6 Hacking on Readers - 256]]
+  - [[D.7 Hacking on Readers Part 2 - 257][D.7 Hacking on Readers Part 2 - 257]]
+  - [[D.8 Hacking on Readers Part 3 - 257][D.8 Hacking on Readers Part 3 - 257]]
+  - [[D.9 Post-Order Calculator - 258][D.9 Post-Order Calculator - 258]]
+  - [[D.10 Post-Order Calculator Part 2 - 259][D.10 Post-Order Calculator Part 2 - 259]]
+  - [[D.11 Post-Order Calculator Part 3 - 259][D.11 Post-Order Calculator Part 3 - 259]]
+  - [[D.12 Branching out Further with Monads - 260][D.12 Branching out Further with Monads - 260]]
+- [[E Solutions for: Monad Transformers - 263][E Solutions for: Monad Transformers - 263]]
+  - [[E.1 Monads: Transform and Roll Out - 263][E.1 Monads: Transform and Roll Out - 263]]
+  - [[E.2 Monads: Transform and Roll Out Part 2 - 263][E.2 Monads: Transform and Roll Out Part 2 - 263]]
+  - [[E.3 Monads: Transform and Roll Out Part 3 - 264][E.3 Monads: Transform and Roll Out Part 3 - 264]]
+  - [[E.4 Monads: Transform and Roll Out Part 4 - 264][E.4 Monads: Transform and Roll Out Part 4 - 264]]
+- [[F Solutions for: Semigroupal and Applicative - 267][F Solutions for: Semigroupal and Applicative - 267]]
+  - [[F.1 The Product of Monads - 267][F.1 The Product of Monads - 267]]
+  - [[F.2 Form Validation - 268][F.2 Form Validation - 268]]
+  - [[F.3 Form Validation Part 2 - 269][F.3 Form Validation Part 2 - 269]]
+  - [[F.4 Form Validation Part 3 - 270][F.4 Form Validation Part 3 - 270]]
+  - [[F.5 Form Validation Part 4 - 270][F.5 Form Validation Part 4 - 270]]
+  - [[F.6 Form Validation Part 5 - 271][F.6 Form Validation Part 5 - 271]]
+- [[G Solutions for: ~Foldable~ and ~Traverse~ - 273][G Solutions for: ~Foldable~ and ~Traverse~ - 273]]
+  - [[G.1 Reflecting on Folds - 273][G.1 Reflecting on Folds - 273]]
+  - [[G.2 Scaf-fold-ing Other Methods - 274][G.2 Scaf-fold-ing Other Methods - 274]]
+  - [[G.3 Traversing with Vectors - 275][G.3 Traversing with Vectors - 275]]
+  - [[G.4 Traversing with Vectors Part 2 - 276][G.4 Traversing with Vectors Part 2 - 276]]
+  - [[G.5 Traversing with Options - 276][G.5 Traversing with Options - 276]]
+  - [[G.6 Traversing with Validated 277][G.6 Traversing with Validated 277]]
+- [[H Solutions for: Case Study: Testing Asynchronous Code - 279][H Solutions for: Case Study: Testing Asynchronous Code - 279]]
+  - [[H.1 Abstracting over Type Constructors - 279][H.1 Abstracting over Type Constructors - 279]]
+  - [[H.2 Abstracting over Type Constructors Part 2 - 280][H.2 Abstracting over Type Constructors Part 2 - 280]]
+  - [[H.3 Abstracting over Monads - 280][H.3 Abstracting over Monads - 280]]
+  - [[H.4 Abstracting over Monads Part 2 - 281][H.4 Abstracting over Monads Part 2 - 281]]
+- [[I Solutions for: Case Study: Map-Reduce 283][I Solutions for: Case Study: Map-Reduce 283]]
+  - [[I.1 Implementing ~foldMap~ - 283][I.1 Implementing ~foldMap~ - 283]]
+  - [[I.2 Implementing ~foldMap~ Part 2 - 283][I.2 Implementing ~foldMap~ Part 2 - 283]]
+  - [[I.3 Implementing ~parallelFoldMap~ - 284][I.3 Implementing ~parallelFoldMap~ - 284]]
+  - [[I.4 ~parallelFoldMap~ with more Cats - 286][I.4 ~parallelFoldMap~ with more Cats - 286]]
+- [[J Solutions for: Case Study: Data Validation - 289][J Solutions for: Case Study: Data Validation - 289]]
+  - [[J.1 Basic Combinators - 289][J.1 Basic Combinators - 289]]
+  - [[J.2 Basic Combinators Part 2 - 290][J.2 Basic Combinators Part 2 - 290]]
+  - [[J.3 Basic Combinators Part 3 - 290][J.3 Basic Combinators Part 3 - 290]]
+  - [[J.4 Basic Combinators Part 4 - 294][J.4 Basic Combinators Part 4 - 294]]
+  - [[J.5 Basic Combinators Part 5 - 295][J.5 Basic Combinators Part 5 - 295]]
+  - [[J.6 Checks - 296][J.6 Checks - 296]]
+  - [[J.7 Checks Part 2 - 297][J.7 Checks Part 2 - 297]]
+  - [[J.8 Checks Part 3 - 298][J.8 Checks Part 3 - 298]]
+  - [[J.9 Recap - 298][J.9 Recap - 298]]
+  - [[J.10 Recap Part 2 - 301][J.10 Recap Part 2 - 301]]
+  - [[J.11 Kleislis - 304][J.11 Kleislis - 304]]
+  - [[J.12 Kleislis Part 2 - 304][J.12 Kleislis Part 2 - 304]]
+- [[K Solutions for: Case Study: CRDTs - 307][K Solutions for: Case Study: CRDTs - 307]]
+  - [[K.1 GCounter Implementation - 307][K.1 GCounter Implementation - 307]]
+  - [[K.2 ~BoundedSemiLattice~ Instances - 308][K.2 ~BoundedSemiLattice~ Instances - 308]]
+  - [[K.3 Generic GCounter - 308][K.3 Generic GCounter - 308]]
+  - [[K.4 Abstracting GCounter to a Type Class - 309][K.4 Abstracting GCounter to a Type Class - 309]]
+  - [[K.5 Abstracting a Key Value Store - 310][K.5 Abstracting a Key Value Store - 310]]
+
+* DONE Preface - 1
+  CLOSED: [2018-10-25 Thu 00:07]
+  - The *AIMS* of this book are _TWO-FOLD_:
+    + to introduce /monads/, /functors/, and OTHER /functional programming patterns/
+      as a way to *structure program design*,
+
+      AND
+
+    + to *explain* HOW these concepts are *implemented in Cats*.
+
+  - Functional patterns differ from OO patterns in *TWO* main ways:
+    + thye are _formally_, and thus precisely, defined;
+
+      =from Jian= OO patterns also have formal theory, but not as the functional
+      patterns, which are math itself. For OO, a bridge need to be built between
+      it and math.
+
+      AND
+
+    + they are extremely (rextremely) GENERAL.
+
+** DONE Versions - 2
+   CLOSED: [2018-10-25 Thu 00:07]
+   This book use *Scala 2.12.3* and *Cats 1.0.0*.
+   You can use this minimal =build.sbt=:
+   #+BEGIN_SRC scala
+     scalaVersion := "2.12.3"
+
+     libraryDependencies +=
+       "org.typelevel" %% "cats-core" % "1.0.0"
+
+     scalacOptions ++= Seq(
+       "-Xfatal-warnings",
+       "-Ypartial-unification"
+     )
+   #+END_SRC
+
+*** DONE Template Projects - 2
+    CLOSED: [2018-10-25 Thu 00:06]
+    - The minimal one:
+      ~sbt new underscoreio/cats-seed.g8~
+
+    - The more batteries-included one:
+      ~sbt new typelevel/sbt-catalysts.g8~
+
+    - =TODO= =LEARN MORE=
+      =tut-enabled=, =catalysts=, =sbt-catalysts=.
+
+** DONE Conventions Used in This Book - 3
+   CLOSED: [2018-10-25 Thu 00:07]
+*** Typographical Conventions - 3
+*** Source Code - 3
+*** Callout Boxes - 4
+
+** DONE Acknowledgements - 4
+   CLOSED: [2018-10-25 Thu 00:07]
+*** Backers - 4
+
+* Part I. Theory - 7
+* TODO 1 Introduction - 9
+** TODO 1.1 Anatomy of a Type Class - 10
+*** 1.1.1 The Type Class - 10
+*** 1.1.2 Type Class Instances - 10
+*** 1.1.3 Type Class Interfaces - 11
+
+** TODO 1.2 Working with Implicits - 13
+*** 1.2.1 Packaging Implicits - 13
+*** 1.2.2 Implicit Scope - 14
+*** 1.2.3 Recursive Implicit Resolution - 15
+
+** TODO 1.3 Exercise: Printable Library - 18
+** TODO 1.4 Meet Cats - 20
+*** 1.4.1 Importing Type Classes - 20
+*** 1.4.2 Importing Default Instances - 21
+*** 1.4.3 Importing Interface Syntax - 22
+*** 1.4.4 Importing All The Things! - 22
+*** 1.4.5 Defining Custom Instances - 23
+*** 1.4.6 Exercise: Cat Show - 24
+
+** DONE 1.5 Example: ~Eq~ - 24
+   CLOSED: [2018-10-24 Wed 22:10]
+   - ~Eq~ is designed to
+     + support *type-safe equality*
+       and
+     + address annoyances using Scala's built-in ~==~ operator.
+
+   - _Starting point_
+     You may made this mistake before, or, at least, similar mistake(s):
+     #+BEGIN_SRC scala
+       List(1, 2, 3).map(Option.apply).filter(_ == 1)
+       // res0: List[Option[Int]] = List()
+     #+END_SRC
+
+     At that time, you may think that
+     it will be perfect if this is a /type error/ rather than /runtime error/.
+     ~cats.Eq~ is designed to do this!!!
+
+*** DONE 1.5.1 Equality, Liberty, and Fraternity - 25
+    CLOSED: [2018-10-24 Wed 21:18]
+    We can use Eq to define type-safe equality between instances of any given type:
+    #+BEGIN_SRC scala
+      package cats
+
+      trait Eq[A] {
+        def eqv(a: A, b: A): Boolean
+        // other concrete methods based on `eqv`...
+      }
+    #+END_SRC
+    The /interface syntax/, defined in ~cats.syntax.eq~, provides *two* /methods/
+    for performing equality checks provided there is an instance ~Eq[A]~ _in
+    scope_:
+    - ~===~ compares two objects for /equality/;
+
+    - ~=!=~ compares two objects for /inequality/.
+
+*** DONE 1.5.2 Comparing Ints - 25
+    CLOSED: [2018-10-24 Wed 21:21]
+    #+BEGIN_SRC scala
+      import cats.Eq
+      import cats.instances.int._  // for `Eq`
+
+      val eqInt = Eq[Int]
+
+      eqInt.eqv(123, 123)
+      // res2: Boolean = true
+
+      eqInt.eqv(123, 234)
+      // res2: Boolean = false
+
+      eqInt.eqv(123, "234")
+      //// type mismatch error
+
+      import cats.syntax.eq._  // for `===` and `=!=`
+
+      123 === 123
+      // res5: Boolean = true
+
+      123 =!= 234
+      // res6: Boolean = true
+    #+END_SRC
+
+*** DONE 1.5.3 Comparing Options - 26
+    CLOSED: [2018-10-24 Wed 21:26]
+    #+BEGIN_SRC scala
+      import cats.instances.int._     // for `Eq`
+      import cats.instances.option._  // for `Eq`
+      import cats.syntax.eq._
+
+      Some(1) === None
+      //// type mismatch
+
+      (Some(1): Option[Int]) === (None: Option[Int])  // too verbose
+      // res9: Boolean = false
+
+      Option(1) === Option.empty[Int]
+      // res10: Boolean = false
+    #+END_SRC
+
+    =IMPORTANT= =RE-READ= =RE-READ=
+    =from Jian= 
+    Must be ~(Some(1): Option[Int])~ or ~Option(1)~.
+    ~Some(1) === (None: Option[Int])~ have /type error/ -- here you can only
+    compre ~Option[Int]~ with ~Option[Int]~, and compre its different subtypes
+    will lead to /type error/ -- extremely strict type checking!!!
+
+    OR use special syntax from ~cats.syntax.option~:
+    #+BEGIN_SRC scala
+      import cats.syntax.option._  // for some and none
+
+      1.some === none[Int]
+      // res11: Boolean = false
+
+      1.some =!= none[Int]
+      // res12: Boolean = true
+    #+END_SRC
+
+*** DONE 1.5.4 Comparing Custom Types - 28
+    CLOSED: [2018-10-24 Wed 21:30]
+    Define our own instances of ~Eq~ with ~Eq.instance~ /method/, which accepts a
+    function of type ~(A, A) => Boolean~ and returns an ~Eq[A]~:
+    #+BEGIN_SRC scala
+      import java.util.Date
+      import cats.instances.long._  // for `Eq`
+
+      implicit val dateEq: Eq[Date] =
+        Eq.instance[Date] { (date1, date2) =>
+          date1.getTime === date2.getTime
+        }
+
+      val x = new Date()  // now
+      val y = new Date()  // a bit later than `x`
+
+      x === x  // true
+      x === y  // false
+    #+END_SRC
+
+*** DONE 1.5.5 Exercise: Equality, Liberty, and Felinity - 28
+    CLOSED: [2018-10-24 Wed 22:06]
+    #+BEGIN_SRC scala
+      import cats.Eq
+      import cats.syntax.eq._
+      import cats.instances.int._
+      import cats.instances.string._
+
+      final case class Cat(name: String, age: Int, color: String)
+
+      implicit val catEq: Eq[Cat] =
+        Eq.instance[Cat] { case (Cat(nm1, ag1, clr1), Cat(nm2, ag2, clr2)) =>
+          nm1 == nm2 &&
+            ag1 == ag2 &&
+            clr1 == clr2
+        }
+
+      val cat1 = Cat("Garfield",   38, "orange and black")
+      val cat2 = Cat("Heathcliff", 33, "orange and black")
+
+      cat1 === cat2  // 
+      cat1 =!= cat2  // 
+
+      // `Option[Cat]`
+      import cats.instances.option._
+
+      val optionCat1 = Option(cat1)
+      val optionCat2 = Option.empty[Cat]
+
+      optionCat1 === optionCat2  // 
+      optionCat1 =!= optionCat2  // 
+    #+END_SRC
+
+    =from Jian= I think, after considering the features of /case classes/, a
+    better implementation of ~catEq~ (still *type safe equality check*):
+    #+BEGIN_SRC scala
+      implicit val catEq: Eq[Cat] =
+        Eq.instance[Cat] { (c1, c2) => c1 == c2 }
+    #+END_SRC
+    This is NOT applicable for /non-case classes/.
+
+    - =IMPORTANT= =TODO=
+      Justify!!!
+      Re-consider it with corner cases.
+      =from Jian= Till now, it is right!
+
+** TODO 1.6 Controlling Instance Selection - 29
+*** TODO 1.6.1 Variance - 29
+**** TODO Covariance - 29
+**** TODO Contravariance - 30
+**** TODO Invariance - 31
+
+** DONE 1.7 Summary - 32
+   CLOSED: [2018-10-24 Wed 22:18]
+   - First, we use plain Scala to introduce the concept of /type classes/.
+     =TODO= LINK IN YOUTUBE
+     We implementated our own ~Printable~ /type class/ using plain Scala before
+     looking at two examples from /Cats/ -- ~Show~ and ~Eq~.
+
+   - We have now seen the _general patterns_ in ~Cats~ /type classes/:
+     + The /type classes/ THEMSELVES are /generic traits/ in the ~cats~ package.
+
+     + EACH /type class/ has a /companion object/ with, an ~apply~ /method/ for
+       materializing instances, ONE or MORE /construction methods/ for creating
+       /instances/, and a collection of other relevant /helper methods/.
+       =TODO= =READ API=
+
+     + /DEFAULT instances/ are provided via objects in the ~cats.instances~
+       /package/, and are organized *BY* /parameter type/ RATHER THAN BY /type
+       class/.
+
+     + MANY /type classes/ have syntax provided via the ~cats.syntax~ /package/.
+
+   - *NEXT*
+     Look at several broad and powerful /type classes/ -- ~Semigroup~, ~Monoid~,
+     ~Functor~, ~Monad~, ~Semigroupal~, ~Applicative~, ~Traverse~, and more.
+
+* TODO 2 Monoids and Semigroups - 35
+*** DONE Integer addition - 35
+    CLOSED: [2018-10-26 Fri 21:35]
+*** DONE Integer multiplication - 36
+    CLOSED: [2018-10-26 Fri 21:35]
+*** DONE String and sequence concatenation - 36
+    CLOSED: [2018-10-26 Fri 21:35]
+
+** DONE 2.1 Definition of a Monoid - 37
+   CLOSED: [2018-10-26 Fri 22:43]
+   #+BEGIN_SRC scala
+     trait Monoid[A] {
+       def combine(x: A, y: A): A
+       def empty: A
+     }
+   #+END_SRC
+   - Only this ~trait~ *cannot* describe the _monoid in math_ -- /monoids/ *must
+     formally obey* several /laws/.
+
+     Functions that can be used to test the /laws/:
+     #+BEGIN_SRC scala
+       def associativeLaw[A : Monoid](x: A, y: A, z: A): Boolean = {
+         val m = implicitly[A]
+         m.combine(x, m.combine(y, z)) == m.combine(m.combine(x, y), z)
+       }
+
+       def identityLaw[A : Monoid](x: A): Boolean = {
+         val m = implicitly[A]
+         (m.combine(x, m.empty) == x) && (m.combine(m.empty, x) == x)
+       }
+     #+END_SRC
+
+** DONE 2.2 Definition of a Semigroup - 38
+   CLOSED: [2018-10-26 Fri 22:52]
+   /Semigroups/ have only ~combine~ and NO ~empty~.
+
+   - /Semigroups/ are often /monoids/.
+
+   - We can add some _restriction_ to eliminate /identitis/ of /monoids/, and
+     make them no longer /monids/, but /semigroups/ ONLY.
+     For example,
+     + positive numbers
+     + none empty sequences.
+
+   - In /Cats/:
+     #+BEGIN_SRC scala
+       trait Semigroup[A] {
+         def combine(x: A, y: A): A
+       }
+
+       trait Monoid[A] extends Semigroup[A] {
+         def empty: A
+       }
+     #+END_SRC
+
+     This means if we define a ~Monoid~, we can get a ~Semigroup~ for free;
+     we can also use a ~Monoid~ instance as a ~Semigroup~ instance.
+
+** DONE 2.3 Exercise: The Truth About Monoids - 39 - =TODO= =Incomplete=
+   CLOSED: [2018-10-26 Fri 22:59]
+   #+BEGIN_SRC scala
+     implict val BooleanAndMonoid = new Monoid[Boolean] {
+       def combine(x: Boolean, y: Boolean): Boolean = x && y
+       def empty: Boolean = true
+     }
+   #+END_SRC
+
+   #+BEGIN_SRC scala
+     implict val BooleanOrMonoid = new Monoid[Boolean] {
+       def combine(x: Boolean, y: Boolean): Boolean = x || y
+
+       def empty: Boolean = false
+     }
+   #+END_SRC
+
+** DONE 2.4 Exercise: All Set for Monoids - 40 - =TODO= =Incomplete=
+   CLOSED: [2018-10-26 Fri 23:06]
+   #+BEGIN_SRC scala
+     implicit val setUnionMonoid[A] = new Monoid[Set[A]] {
+       def combine(x: Set[A], y: Set[A]): Set[A] =
+         x union y
+
+       def empty: Set[A] = Set.empty[A]
+     }
+   #+END_SRC
+
+** DONE 2.5 Monoids in Cats - 40
+   CLOSED: [2018-10-26 Fri 23:35]
+*** DONE 2.5.1 The Monoid Type Class - 40
+    CLOSED: [2018-10-26 Fri 23:09]
+    ~cats.Monoid~ (an alias of ~cats.kernel.Monoid~) and ~cats.Semigroup~ (an
+    alias of ~cats.kernel.Semigroup~).
+
+    - *Cats Kernel?* 
+      =TODO=
+      =NOTE=
+
+*** DONE 2.5.2 Monoid Instances - 41
+    CLOSED: [2018-10-26 Fri 23:12]
+    Example (usage):
+    #+BEGIN_SRC scala
+      import cats.Monoid
+      import cats.instances.string._
+
+      Monoid[String].combine("Hi ", "there")  // "Hi there"
+      Monoid[String].empty                    // ""
+    #+END_SRC
+
+*** DONE 2.5.3 Monoid Syntax - 42
+    CLOSED: [2018-10-26 Fri 23:14]
+    ~|+|~ is the /combine/ operator, which comes from ~cats.syntax.semigroup._~
+    #+BEGIN_SRC scala
+      import cats.instances.string._
+      import cats.syntax.semigroup._ // for |+|
+
+      val stringResult = "Hi " |+| "there" |+| Monoid[String].empty
+      // stringResult: String = Hi there
+
+      import cats.instances.int._ // for Monoid
+      val intResult = 1 |+| 2 |+| Monoid[Int].empty
+      // inResult: Int = 3
+    #+END_SRC
+
+*** DONE 2.5.4 Exercise: Adding All The Things - 43 - =TODO= =???=
+    CLOSED: [2018-10-26 Fri 23:35]
+    - Write ~add~ for ~Int~
+      #+BEGIN_SRC scala
+        import cats.Monoid
+        import cats.instances.int._
+        import cats.syntax.semigroup._
+  
+        def add(items: List[Int]): Int =
+          items.reduceLeft(_ |+| _)
+      #+END_SRC
+
+    - Write generics that can work for ~Int~ and ~Option[Int]~
+      #+BEGIN_SRC scala
+        import cats.Monoid
+        import cats.syntax.semigroup._
+
+        def add[A : Monoid](items: List[A]): A =
+          items.reduceLeft(_ |+| _)
+      #+END_SRC
+
+      If there is NOT ~None~ in the list, we'll see:
+      #+BEGIN_SRC scala
+        add(List(Some(1), Some(2), Some(3)))
+        // <console>:61: error: could not find implicit value for evidence parameter of type cats.Monoid[Some[Int]]
+        //        add(List(Some(1), Some(2), Some(3)))
+        //           ^
+      #+END_SRC
+      This is because /Cats/ will ONLY generate a ~Monoid~ for ~Option[Int]~.
+
+      =TODO= =IMPORTANT= 
+      We'll se how to get around this in a moment.
+      =TODO= =IMPORTANT=
+
+    - Make ~Order~ addable.
+      #+BEGIN_SRC scala
+        import cats.Monoid
+        import cats.instances.int._
+        import cats.instances.option._
+        import cats.syntax.semigroup._
+  
+        def add(items: List[A]): A =
+          items.reduceLeft(_ |+| _)
+  
+        def add(items: List[Option[Int]]): Int =
+          items.reduceLeft(_ |+| _)
+  
+        case class Order(totalCost: Double, quantity: Double)
+  
+        implicit val orderMonoid = new Monoid[Order] {
+          def combine(x: Order, y: Order): Order =
+            Order(x.totalCost + y.totalCost, x.quantity + y.quantity)
+  
+          def empty: Order =
+            Order(0.0, 0.0)
+        }
+      #+END_SRC
+
+** DONE 2.6 Applications of Monoids - 43
+   CLOSED: [2018-10-27 Sat 00:08]
+   Here are a few big ideas where /monoids/ play a major role.
+
+*** DONE 2.6.1 Big Data - 44
+    CLOSED: [2018-10-26 Fri 23:46]
+    - Use cases (Need process a huge amount of logs, NOT/CANNOT in ONLY one
+      computer):
+      + Calculate how many total visitors a web site has received.
+        -- thanks for the reality non-negative ~Int~ under the operation of
+           /addition/ and the /zero element/ of ~0~ is a /monoid/.
+
+      + Calculate how many unique visitors a web site has received.
+        -- thanks for the reality that ~Set(Int)~ under the operation of
+           /union/ and the /zero element/ of ~Set.empty[Int]~ is a /monoid/.
+
+      + If we want to calculate 99% and 95% response times from our server logs,
+        we can use a data structure called a ~QTree~ for which there is a /monoid/.
+        =TODO= =???= ~QTree~.
+
+    - Summary:
+      Almost every analysis that we might want to do over a large data set is a
+      /monoid/, and therefore we can build an expressive and powerful analytics
+      system around this idea.
+
+      This is exactly what Twitter's Algebird and Summingbird projects have
+      done. We explore this idea further in the map-reduce case study.
+
+*** DONE 2.6.2 Distributed Systems - 44 - =TODO= =Case-Study= =NOTE=
+    CLOSED: [2018-10-27 Sat 00:06]
+    We explore this idea further in *the CRDT case study*.
+
+*** DONE 2.6.3 Monoids in the Small - 45
+    CLOSED: [2018-10-27 Sat 00:08]
+    There are also many cases where having a monoid around makes it easier to
+    write a small code fragment.
+
+    See *case studies* of this book
+
+** TODO 2.7 Summary - 45
+
+* TODO 3 Functors - 47
+  /Functors/ allow us to represent sequences of operations within a /context/.
+
+  /Functor/ is the base of /applicative functor/ and /monad/, and the latter two
+  are the special cases of /functor/.
+
+** DONE 3.1 Examples of Functors - 47
+   CLOSED: [2018-10-27 Sat 00:22]
+** DONE 3.2 More Examples of Functors - 49
+   CLOSED: [2018-10-27 Sat 00:54]
+*** DONE ~Futures~ - 49 - =TODO= =RE-READ=
+    CLOSED: [2018-10-27 Sat 00:26]
+    - *Futures and Referen al Transparency* =TODO= =RE-READ=
+      =NOTE=
+      Note that Scala’s Futures are *NOT* a great example of pure functional pro-
+      gramming because they are *NOT* /referentially transparent/.
+
+    - If Future is *NOT* /referentially transparent/, perhaps we should look at another
+      similar data-type that is. You should recognise this one...
+
+*** DONE Functions (?!) - 49 - =TODO=
+    CLOSED: [2018-10-27 Sat 00:53]
+    - *Partial Unification*
+      You need ~scalaOptions += "-Ypartial-unification"~
+
+      Or you'll see some error like:
+      #+BEGIN_SRC scala
+        func1.map(func2)
+        // <console>: error: value map is not a member of Int => Double
+        //        func1.map(func2)
+      #+END_SRC
+
+      + =TODO= EXPLAIN in Seciton 3.8
+
+** DONE 3.3 Definition of a Functor - 54
+   CLOSED: [2018-10-27 Sat 00:53]
+   #+BEGIN_SRC scala
+     package cats
+
+     import scala.language.higherKinds
+
+     trait Functor[F[_]] {
+       def map[A, B](fa: F[A])(f: A => B): F[B]
+     }
+   #+END_SRC
+
+   - *Functor Laws*
+     =from Jian= You implment the ~Functor[F[_]]~ /trait/, you only create a
+     /functor in code/, you must verify these /laws/ to guarantee a FORMAL
+     /functor in math/.
+
+     + *Identity*:
+       calling map with the iden ty func on is the same as doing nothing:
+       _fa.map(identity) \equiv{} fa_
+
+     + *Composition*:
+       mapping with two functions ~f~ and ~g~ is the same as mapping with ~f~
+       and then mapping with ~g~:
+       _fa.map(g(f(_))) \equiv{} fa.map(f).map(g)_
+
+   - If you haven't seen syntax like ~F[_]~ before, it's me to take a brief de-
+     tour to discuss /type constructors/ and /higher kinded types/. =TODO= =NEXT SECTION=
+
+     We'll explain that ~scala.language~ import as well.
+
+** DONE 3.4 Aside: Higher Kinds and Type Constructors - 55
+   CLOSED: [2018-10-27 Sat 01:50]
+   - kinds :: "types" for /types/ -- a concept used to category /types/.
+
+   - Informally, a /kind/ of a /type/ is the "hole" in a type -- how many
+     /types/ we need to feed in to get a *no ~=>~ /type/.*
+
+   - If a type has "hole" (a /type/ on the left hand side of ~=>~ is a "hole"),
+     it is called a /higher kinded type/ or a /type constructor/.
+
+     + For example,
+       ~List~ is a /type constructor/ (/higher kinded type/), and ~List[Int]~ is a
+       /type/ (/kind/ one type).
+
+     + A close analogy:
+       In Scala, function is also a /value/ in general, but we can also call it
+       "value constructor", and call the /value/ that cannot take any parameter
+       "value".
+
+   - In Scala
+     #+BEGIN_SRC scala
+       def myMethod[F[_]] = {            // Define
+         val functor = Functor.apply[F]  // Reference
+       }
+     #+END_SRC
+     1. we *declare* /type constructors/ using _underscores_.
+        Once we've declared them, however,
+     2. we *refer to* them as SIMPLE /identifiers/:
+
+     This is analogous to specifying a function's parameters in its definition and
+     ommiting them when refering to it:
+     #+BEGIN_SRC scala
+       val f = (x: Int) => x * 2  // Declare
+       val f2 = f andThen f       // Reference
+     #+END_SRC
+
+   - *Language Feature Imports*
+     /Higher kinded types/ are considered an _ADVANCED language feature_ in
+     Scala, and you need to enable it in the compiler. There are two ways:
+     + Explicit import: ~import scala.language.higherKinds~
+
+     + Set in =build.sbt=:
+       ~scalacOptions += "-language:higherKinds~
+
+** TODO 3.5 Functors in Cats - 57
+   Examine the aspects we did for /monoids/:
+   1. the /type class/
+   2. the /instances/
+   3. the /syntax/
+
+*** DONE 3.5.1 The Functor Type Class - 57
+    CLOSED: [2018-10-27 Sat 02:10]
+    - Basic usage:
+      #+BEGIN_SRC scala
+        import scala.language.higherKinds
+        import cats.Functor
+        import cats.instances.list._   // for Functor
+        import cats.instances.option._ // for Functor
+  
+        val list1 = List(1, 2, 3)
+        // list1: List[Int] = List(1, 2, 3)
+  
+        val list2 = Functor[List].map(list1)(_ * 2)
+        // list2: List[Int] = List(2, 4, 6)
+  
+        val option1 = Option(123)
+        // option1: Option[Int] = Some(123)
+  
+        val option2 = Functor[Option].map(option1)(_.toString)
+        // option2: Option[String] = Some(123)
+      #+END_SRC
+
+    - Lift: ~A => B~ to ~F[A] => F[B]~
+      #+BEGIN_SRC scala
+        val func = (x: Int) => x + 1
+        // func: Int => Int = <function1>
+
+        val liftedFunc = Functor[Option].lift(func)
+        // liftedFunc: Option[Int] => Option[Int] = cats.Functor$$Lambda$11699/1098992879@279f562e
+
+        liftedFunc(Option(1))
+        // res0: Option[Int] = Some(2)
+      #+END_SRC
+
+*** TODO 3.5.2 Functor Syntax - 58
+*** TODO 3.5.3 Instances for Custom Types - 60
+*** DONE 3.5.4 Exercise: Branching out with Functors - 61
+    CLOSED: [2018-10-27 Sat 02:24]
+    #+BEGIN_SRC scala
+      sealed trait Tree[+A]
+      final case class Branch[A](left: Tree[A], right: Tree[A])
+          extends Tree[A]
+      final case class Leaf[A](value: A)
+          extends Tree[A]
+
+      implicit treeFunctor = new Functor[Tree] {
+        def map[A, B](tree: Tree[A])(func: A => B): Tree[B] =
+          tree match {
+            case Branch(l, r) => Branch(map(l)(func), map(r)(func))
+            case Leaf(v)      => Leaf(func(value))
+          }
+      }
+    #+END_SRC
+
+** TODO 3.6 Contravariant and Invariant Functors - 61 - =TODO= =OPTIONAL=
+   - As we have seen, we can think of ~Functor~'s ~map~ /method/ as *appending* a
+     transformation to a /chain/.
+
+     We're now going to look at _TWO_ other /type classes/:
+
+     + one representing *prepending* operations to a chain,
+
+     + one representing building a *bidirectional* chain of opera ons.
+
+     These are called /contravariant functor/ and /invariant functor/, respectively.
+
+*** 3.6.1 Contravariant Functors and the ~contramap~ Method - 62
+**** 3.6.1.1 Exercise: Showing off with Contramap - 63
+
+*** 3.6.2 Invariant functors and the ~imap~ method - 65
+**** 3.6.2.1 Transformative Thinking with ~imap~ - 66
+
+** TODO 3.7 Contravariant and Invariant in Cats - 68
+*** 3.7.1 Contravariant in Cats - 68
+*** 3.7.2 Invariant in Cats - 69
+
+** TODO 3.8 Aside: Partial Unification - 70
+*** 3.8.1 Unifying Type Constructors - 70
+*** 3.8.2 Left-to-Right Elimination - 71
+
+** TODO 3.9 Summary - 74
+
+* TODO 4 Monads - 77
+  - Informally, a /monad/ is anything with a /computational context/ and a ~flatMap~
+    /method/ that obey the /monad laws/.
+
+  - _Special syntax_ to SUPPORT /monads/: /for comprehensions/.
+
+    However, despite the ubiquity of the concept,
+    *the Scala standard library lacks a concrete type to encompass "things that
+    can be flatMapped".*
+
+    =from Jian=
+    Programming languages like Scala and Rust don't want to scare their users
+    with Monad concept support in their standard library.
+      However, because of the good type system and their design, /monad/ is
+    inevitable -- actually we should give a hug to it. I believe They will
+    definitely support /monad/ in their standard libary in the future.
+    =END Comment=
+
+    *This type class is one of the benefits brought to us by Cats.*
+
+** 4.1 What is a Monad? - 77
+*** 4.1.1 Definition of a Monad - 82
+*** 4.1.2 Exercise: Getting Func-y - 83
+
+** 4.2 ~Monad~'s in Cats - 84
+*** 4.2.1 The Monad Type Class - 84
+*** 4.2.2 Default Instances - 85
+*** 4.2.3 Monad Syntax - 86
+
+** 4.3 The ~Identity~ Monad - 88
+*** 4.3.1 Exercise: Monadic Secret Identies - 91
+
+** 4.4 ~Either~ - 91
+*** 4.4.1 Le and Right Bias - 91
+*** 4.4.2 Creating Instances - 92
+*** 4.4.3 Transforming Eithers - 94
+*** 4.4.4 Error Handling - 96
+*** 4.4.5 Exercise: What is Best? - 98
+
+** 4.5 Aside: Error Handling and ~MonadError~ - 98
+*** 4.5.1 The ~MonadError~ Type Class - 98
+*** 4.5.2 Raising and Handling Errors - 99
+*** 4.5.3 Instances of ~MonadError~ - 101
+*** 4.5.4 Exercise: Abstracting - 101
+
+** 4.6 The ~Eval~ Monad - 101
+*** 4.6.1 Eager, Lazy, Memoized, Oh My! - 101
+*** 4.6.2 Eval's Models of Evaluation - 103
+*** 4.6.3 ~Eval~ as a ~Monad~ - 105
+*** 4.6.4 Trampolining and ~Eval.defer~ - 107
+*** 4.6.5 Exercise: Safer Folding using ~Eval~ - 108
+
+** 4.7 The ~Writer~ Monad - 108
+*** 4.7.1 Creating and Unpacking Writers - 109
+*** 4.7.2 Composing and Transforming Writers - 111
+*** 4.7.3 Exercise: Show Your Working - 113
+
+** 4.8 The ~Reader~ Monad - 114
+*** 4.8.1 Creating and Unpacking Readers - 115
+*** 4.8.2 Composing Readers - 115
+*** 4.8.3 Exercise: Hacking on Readers - 116
+*** 4.8.4 When to Use Readers? - 118
+
+** 4.9 The ~State~ Monad - 119
+*** 4.9.1 Creating and Unpacking State - 119
+*** 4.9.2 Composing and Transforming State - 120
+*** 4.9.3 Exercise: Post-Order Calculator - 123
+
+** 4.10 Defining Custom Monads - 126
+*** 4.10.1 Exercise: Branching out Further with Monads - 127
+
+** 4.11 Summary - 128
+
+* TODO 5 Monad Transformers - 129
+** 5.1 Exercise: Composing Monads - 130
+** 5.2 A Transformative Example - 131
+** 5.3 Monad Transformers in Cats - 133
+*** 5.3.1 The Monad Transformer Classes - 133
+*** 5.3.2 Building Monad Stacks - 134
+*** 5.3.3 Constructing and Unpacking Instances - 136
+*** 5.3.4 Default Instances - 137
+*** 5.3.5 Usage Patterns - 138
+
+** 5.4 Exercise: Monads: Transform and Roll Out - 140
+** 5.5 Summary - 141
+
+* TODO 6 ~Semigroupal~ and ~Applicative~ - 143
+** TODO 6.1 ~Semigroupal~ - 144
+*** 6.1.1 Joining Two Contexts - 145
+*** 6.1.2 Joining Three or More Contexts - 145
+
+** TODO 6.2 Apply Syntax - 146
+*** 6.2.1 Fancy Functors and Apply Syntax - 148
+
+** TODO 6.3 ~Semigroupal~ Applied to Different Types - 149
+**** Future - 149
+**** List - 150
+**** Either - 150
+
+*** 6.3.1 Semigroupal Applied to Monads - 151
+
+** TODO 6.4 Validated - 152
+*** 6.4.1 Creating Instances of Validated - 153
+*** 6.4.2 Combining Instances of Validated - 154
+*** 6.4.3 Methods of Validated - 156
+*** 6.4.4 Exercise: Form Validation - 158
+
+** TODO 6.5 Apply and ~Applicative~ - 159
+*** 6.5.1 The Hierarchy of Sequencing Type Classes - 160
+
+** TODO 6.6 Summary - 162
+
+* TODO 7 ~Foldable~ and ~Traverse~ - 165
+** TODO 7.1 ~Foldable~ - 165
+*** 7.1.1 Folds and Folding - 166
+*** 7.1.2 Exercise: Reflecting on Folds - 167
+*** 7.1.3 Exercise: Scaf-fold-ing Other Methods - 167
+*** 7.1.4 Foldable in Cats - 168
+**** 7.1.4.1 Folding Right - 168
+**** 7.1.4.2 Folding with Monoids - 170
+**** 7.1.4.3 Syntax for Foldable - 171
+
+** TODO 7.2 ~Traverse~ - 172
+*** 7.2.1 Traversing with Futures - 172
+*** 7.2.2 Traversing with Applicatives - 175
+**** 7.2.2.1 Exercise: Traversing with Vectors - 177
+**** 7.2.2.2 Exercise: Traversing with Options - 177
+**** 7.2.2.3 Exercise: Traversing with Validated - 177
+
+*** 7.2.3 Traverse in Cats - 178
+
+** TODO 7.3 Summary - 180
+
+* Part II. Case Studies 181
+* 8 Case Study: Testing Asynchronous Code 183
+** 8.1 Abstracting over Type Constructors - 185
+** 8.2 Abstracting over Monads - 186
+** 8.3 Summary - 187
+
+* 9 Case Study: Map-Reduce - 189
+** 9.1 Parallelizing ~map~ and ~fold~ - 189
+** 9.2 Implementing ~foldMap~ - 191
+** 9.3 Parallelising ~foldMap~ - 193
+*** 9.3.1 Futures, Thread Pools, and ~ExecutionContexts~ - 193
+*** 9.3.2 Dividing Work - 196
+*** 9.3.3 Implementing ~parallelFoldMap~ - 197
+*** 9.3.4 ~parallelFoldMap~ with more Cats - 197
+
+** 9.4 Summary - 198
+
+* 10 Case Study: Data Validation - 199
+** 10.1 Sketching the Library Structure - 200
+** 10.2 The Check Datatype - 203
+** 10.3 Basic Combinators - 204
+** 10.4 Transforming Data - 205
+*** 10.4.1 Predicates - 206
+*** 10.4.2 Checks - 208
+*** 10.4.3 Recap - 210
+
+** 10.5 Kleislis - 211
+** 10.6 Summary - 215
+
+* 11 Case Study: CRDTs - 217
+** 11.1 Eventual Consistency - 217
+** 11.2 The GCounter - 218
+*** 11.2.1 Simple Counters - 218
+*** 11.2.2 GCounters - 220
+*** 11.2.3 Exercise: GCounter Implementation - 221
+
+** 11.3 Generalisation - 222
+*** 11.3.1 Implementation - 224
+*** 11.3.2 Exercise: ~BoundedSemiLattice~ Instances - 225
+*** 11.3.3 Exercise: Generic GCounter - 225
+
+** 11.4 Abstracting GCounter to a Type Class - 225
+** 11.5 Abstracting a Key Value Store - 227
+** 11.6 Summary - 228
+
+* Part III. Solutions to Exercises - 231
+* A Solutions for: Introduction - 233
+** A.1 Printable Library - 233
+** A.2 Printable Library Part 2 - 234
+** A.3 Printable Library Part 3 - 235
+** A.4 Cat Show - 236
+** A.5 Equality, Liberty, and Felinity - 237
+
+* B Solutions for: Monoids and Semigroups - 239
+** B.1 The Truth About Monoids - 239
+** B.2 All Set for Monoids - 240
+** B.3 Adding All The Things - 241
+** B.4 Adding All The Things Part 2 - 242
+** B.5 Adding All The Things Part 3 - 243
+
+* C Solutions for: Functors - 245
+** C.1 Branching out with Functors - 245
+** C.2 Showing off with Contramap - 246
+** C.3 Showing off with Contramap Part 2 - 247
+** C.4 Transforma ve Thinking with imap - 248
+** C.5 Transforma ve Thinking with imap Part 2 - 248
+** C.6 Transforma ve Thinking with imap Part 3 - 248
+
+* D Solutions for: Monads - 251
+** D.1 Ge ng Func-y - 251
+** D.2 Monadic Secret Identities - 252
+** D.3 What is Best? - 253
+** D.4 Safer Folding using Eval - 254
+** D.5 Show Your Working - 255
+** D.6 Hacking on Readers - 256
+** D.7 Hacking on Readers Part 2 - 257
+** D.8 Hacking on Readers Part 3 - 257
+** D.9 Post-Order Calculator - 258
+** D.10 Post-Order Calculator Part 2 - 259
+** D.11 Post-Order Calculator Part 3 - 259
+** D.12 Branching out Further with Monads - 260
+
+* E Solutions for: Monad Transformers - 263
+** E.1 Monads: Transform and Roll Out - 263
+** E.2 Monads: Transform and Roll Out Part 2 - 263
+** E.3 Monads: Transform and Roll Out Part 3 - 264
+** E.4 Monads: Transform and Roll Out Part 4 - 264
+
+* F Solutions for: Semigroupal and Applicative - 267
+** F.1 The Product of Monads - 267
+** F.2 Form Validation - 268
+** F.3 Form Validation Part 2 - 269
+** F.4 Form Validation Part 3 - 270
+** F.5 Form Validation Part 4 - 270
+** F.6 Form Validation Part 5 - 271
+
+* G Solutions for: ~Foldable~ and ~Traverse~ - 273
+** G.1 Reflecting on Folds - 273
+** G.2 Scaf-fold-ing Other Methods - 274
+** G.3 Traversing with Vectors - 275
+** G.4 Traversing with Vectors Part 2 - 276
+** G.5 Traversing with Options - 276
+** G.6 Traversing with Validated 277
+
+* H Solutions for: Case Study: Testing Asynchronous Code - 279
+** H.1 Abstracting over Type Constructors - 279
+** H.2 Abstracting over Type Constructors Part 2 - 280
+** H.3 Abstracting over Monads - 280
+** H.4 Abstracting over Monads Part 2 - 281
+
+* I Solutions for: Case Study: Map-Reduce 283
+** I.1 Implementing ~foldMap~ - 283
+** I.2 Implementing ~foldMap~ Part 2 - 283
+** I.3 Implementing ~parallelFoldMap~ - 284
+** I.4 ~parallelFoldMap~ with more Cats - 286
+
+* J Solutions for: Case Study: Data Validation - 289
+** J.1 Basic Combinators - 289
+** J.2 Basic Combinators Part 2 - 290
+** J.3 Basic Combinators Part 3 - 290
+** J.4 Basic Combinators Part 4 - 294
+** J.5 Basic Combinators Part 5 - 295
+** J.6 Checks - 296
+** J.7 Checks Part 2 - 297
+** J.8 Checks Part 3 - 298
+** J.9 Recap - 298
+** J.10 Recap Part 2 - 301
+** J.11 Kleislis - 304
+** J.12 Kleislis Part 2 - 304
+
+* K Solutions for: Case Study: CRDTs - 307
+** K.1 GCounter Implementation - 307
+** K.2 ~BoundedSemiLattice~ Instances - 308
+** K.3 Generic GCounter - 308
+** K.4 Abstracting GCounter to a Type Class - 309
+** K.5 Abstracting a Key Value Store - 310

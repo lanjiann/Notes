@@ -1,0 +1,192 @@
+#+TITLE: The Type Astronaut's Guide to Shapeless
+#+SUBTITLE: Algorithms and Information Retrieval in Java
+#+AUTHOR: Dave Gurnell
+#+FORWARD BY: Miles Sabin
+#+COPYRIGHT: 2016 - April 2017
+#+PUBLISHER: Underscore Consulting LLP, Brighton, UK.
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Foreword - 1][Foreword - 1]]
+- [[1 Introduction - 3][1 Introduction - 3]]
+  - [[1.1 What is generic programming? - 3][1.1 What is generic programming? - 3]]
+  - [[1.2 About this book - 5][1.2 About this book - 5]]
+  - [[1.3 Source code and examples - 6][1.3 Source code and examples - 6]]
+  - [[1.4 Acknowledgements - 8][1.4 Acknowledgements - 8]]
+- [[I Type class derivation - 9][I Type class derivation - 9]]
+- [[2 Algebraic data types and generic representations - 11][2 Algebraic data types and generic representations - 11]]
+  - [[2.1 Recap: algebraic data types - 12][2.1 Recap: algebraic data types - 12]]
+    - [[2.1.1 Alterna ve encodings - 13][2.1.1 Alterna ve encodings - 13]]
+  - [[2.2 Generic product encodings - 14][2.2 Generic product encodings - 14]]
+    - [[2.2.1 Switching representations using Generic - 16][2.2.1 Switching representations using Generic - 16]]
+  - [[2.3 Generic coproducts - 18][2.3 Generic coproducts - 18]]
+    - [[2.3.1 Switching encodings using Generic - 19][2.3.1 Switching encodings using Generic - 19]]
+  - [[2.4 Summary - 19][2.4 Summary - 19]]
+- [[3 Automatically deriving type class instances - 21][3 Automatically deriving type class instances - 21]]
+  - [[3.1 Recap: type classes - 21][3.1 Recap: type classes - 21]]
+    - [[3.1.1 Resolving instances - 23][3.1.1 Resolving instances - 23]]
+    - [[3.1.2 Idiomatic type class definitions - 24][3.1.2 Idiomatic type class definitions - 24]]
+  - [[3.2 Deriving instances for products - 26][3.2 Deriving instances for products - 26]]
+    - [[3.2.1 Instances for ~HList~'s - 27][3.2.1 Instances for ~HList~'s - 27]]
+    - [[3.2.2 Instances for concrete products - 28][3.2.2 Instances for concrete products - 28]]
+    - [[3.2.3 So what are the downsides? - 31][3.2.3 So what are the downsides? - 31]]
+  - [[3.3 Deriving instances for coproducts - 32][3.3 Deriving instances for coproducts - 32]]
+    - [[3.3.1 Aligning CSV output - 34][3.3.1 Aligning CSV output - 34]]
+  - [[3.4 Deriving instances for recursive types - 34][3.4 Deriving instances for recursive types - 34]]
+    - [[3.4.1 Implicit divergence - 35][3.4.1 Implicit divergence - 35]]
+    - [[3.4.2 ~Lazy~ - 36][3.4.2 ~Lazy~ - 36]]
+  - [[3.5 Debugging implicit resolution - 37][3.5 Debugging implicit resolution - 37]]
+    - [[3.5.1 Debugging using ~implicitly~ - 38][3.5.1 Debugging using ~implicitly~ - 38]]
+    - [[3.5.2 Debugging using ~reify~ - 39][3.5.2 Debugging using ~reify~ - 39]]
+  - [[3.6 Summary - 39][3.6 Summary - 39]]
+- [[4 Working with types and implicits - 41][4 Working with types and implicits - 41]]
+  - [[4.1 Dependent types - 41][4.1 Dependent types - 41]]
+  - [[4.2 Dependently typed functions - 43][4.2 Dependently typed functions - 43]]
+  - [[4.3 Chaining dependent functions - 47][4.3 Chaining dependent functions - 47]]
+  - [[4.4 Summary - 49][4.4 Summary - 49]]
+- [[5 Accessing names during implicit derivation - 51][5 Accessing names during implicit derivation - 51]]
+  - [[5.1 Literal types - 51][5.1 Literal types - 51]]
+  - [[5.2 Type tagging and phantom types - 54][5.2 Type tagging and phantom types - 54]]
+    - [[5.2.1 Records and ~LabelledGeneric~ - 57][5.2.1 Records and ~LabelledGeneric~ - 57]]
+  - [[5.3 Deriving product instances with ~LabelledGeneric~ - 57][5.3 Deriving product instances with ~LabelledGeneric~ - 57]]
+    - [[5.3.1 Instances for ~HList~'s - 60][5.3.1 Instances for ~HList~'s - 60]]
+    - [[5.3.2 Instances for concrete products - 62][5.3.2 Instances for concrete products - 62]]
+  - [[5.4 Deriving coproduct instances with ~LabelledGeneric~ - 63][5.4 Deriving coproduct instances with ~LabelledGeneric~ - 63]]
+  - [[5.5 Summary - 65][5.5 Summary - 65]]
+- [[II Shapeless ops - 67][II Shapeless ops - 67]]
+- [[6 Working with HLists and Coproducts - 69][6 Working with HLists and Coproducts - 69]]
+  - [[6.1 Simple ops examples - 70][6.1 Simple ops examples - 70]]
+  - [[6.2 Creating a custom op (the "lemma" pattern) - 71][6.2 Creating a custom op (the "lemma" pattern) - 71]]
+  - [[6.3 Case study: case class migrations - 74][6.3 Case study: case class migrations - 74]]
+    - [[6.3.1 The type class - 75][6.3.1 The type class - 75]]
+    - [[6.3.2 Step 1. Removing fields - 75][6.3.2 Step 1. Removing fields - 75]]
+    - [[6.3.3 Step 2. Reordering fields - 76][6.3.3 Step 2. Reordering fields - 76]]
+    - [[6.3.4 Step 3. Adding new fields - 77][6.3.4 Step 3. Adding new fields - 77]]
+  - [[6.4 Record ops - 80][6.4 Record ops - 80]]
+    - [[6.4.1 Selecting fields - 81][6.4.1 Selecting fields - 81]]
+    - [[6.4.2 Updating and removing fields - 81][6.4.2 Updating and removing fields - 81]]
+    - [[6.4.3 Converting to a regular ~Map~ - 82][6.4.3 Converting to a regular ~Map~ - 82]]
+    - [[6.4.4 Other operations - 82][6.4.4 Other operations - 82]]
+  - [[6.5 Summary - 83][6.5 Summary - 83]]
+- [[7 Functional operations on ~HList~'s - 85][7 Functional operations on ~HList~'s - 85]]
+  - [[7.1 Motivation: mapping over an ~HList~ - 85][7.1 Motivation: mapping over an ~HList~ - 85]]
+  - [[7.2 Polymorphic functions - 86][7.2 Polymorphic functions - 86]]
+    - [[7.2.1 How ~Poly~ works - 86][7.2.1 How ~Poly~ works - 86]]
+    - [[7.2.2 ~Poly~ syntax - 88][7.2.2 ~Poly~ syntax - 88]]
+  - [[7.3 Mapping and flatMapping using ~Poly~ - 91][7.3 Mapping and flatMapping using ~Poly~ - 91]]
+  - [[7.4 Folding using ~Poly~ - 93][7.4 Folding using ~Poly~ - 93]]
+  - [[7.5 Defining type classes using ~Poly~ - 93][7.5 Defining type classes using ~Poly~ - 93]]
+  - [[7.6 Summary - 95][7.6 Summary - 95]]
+- [[8 Counting with types - 97][8 Counting with types - 97]]
+  - [[8.1 Representing numbers as types - 97][8.1 Representing numbers as types - 97]]
+  - [[8.2 Length of generic representations - 98][8.2 Length of generic representations - 98]]
+  - [[8.3 Case study: random value generator - 100][8.3 Case study: random value generator - 100]]
+    - [[8.3.1 Simple random values - 101][8.3.1 Simple random values - 101]]
+    - [[8.3.2 Random products - 102][8.3.2 Random products - 102]]
+    - [[8.3.3 Random coproducts - 102][8.3.3 Random coproducts - 102]]
+  - [[8.4 Other opera ons involving ~Nat~ - 105][8.4 Other opera ons involving ~Nat~ - 105]]
+  - [[8.5 Summary - 105][8.5 Summary - 105]]
+- [[Prepare for launch! - 107][Prepare for launch! - 107]]
+
+* Foreword - 1
+* 1 Introduction - 3
+** 1.1 What is generic programming? - 3
+** 1.2 About this book - 5
+** 1.3 Source code and examples - 6
+** 1.4 Acknowledgements - 8
+
+* I Type class derivation - 9
+* 2 Algebraic data types and generic representations - 11
+** 2.1 Recap: algebraic data types - 12
+*** 2.1.1 Alterna ve encodings - 13
+
+** 2.2 Generic product encodings - 14
+*** 2.2.1 Switching representations using Generic - 16
+
+** 2.3 Generic coproducts - 18
+*** 2.3.1 Switching encodings using Generic - 19
+
+** 2.4 Summary - 19
+
+* 3 Automatically deriving type class instances - 21
+** 3.1 Recap: type classes - 21
+*** 3.1.1 Resolving instances - 23
+*** 3.1.2 Idiomatic type class definitions - 24
+
+** 3.2 Deriving instances for products - 26
+*** 3.2.1 Instances for ~HList~'s - 27
+*** 3.2.2 Instances for concrete products - 28
+*** 3.2.3 So what are the downsides? - 31
+
+** 3.3 Deriving instances for coproducts - 32
+*** 3.3.1 Aligning CSV output - 34
+
+** 3.4 Deriving instances for recursive types - 34
+*** 3.4.1 Implicit divergence - 35
+*** 3.4.2 ~Lazy~ - 36
+
+** 3.5 Debugging implicit resolution - 37
+*** 3.5.1 Debugging using ~implicitly~ - 38
+*** 3.5.2 Debugging using ~reify~ - 39
+
+** 3.6 Summary - 39
+
+* 4 Working with types and implicits - 41
+** 4.1 Dependent types - 41
+** 4.2 Dependently typed functions - 43
+** 4.3 Chaining dependent functions - 47
+** 4.4 Summary - 49
+
+* 5 Accessing names during implicit derivation - 51
+** 5.1 Literal types - 51
+** 5.2 Type tagging and phantom types - 54
+*** 5.2.1 Records and ~LabelledGeneric~ - 57
+
+** 5.3 Deriving product instances with ~LabelledGeneric~ - 57
+*** 5.3.1 Instances for ~HList~'s - 60
+*** 5.3.2 Instances for concrete products - 62
+
+** 5.4 Deriving coproduct instances with ~LabelledGeneric~ - 63
+** 5.5 Summary - 65
+
+* II Shapeless ops - 67
+* 6 Working with HLists and Coproducts - 69
+** 6.1 Simple ops examples - 70
+** 6.2 Creating a custom op (the "lemma" pattern) - 71
+** 6.3 Case study: case class migrations - 74
+*** 6.3.1 The type class - 75
+*** 6.3.2 Step 1. Removing fields - 75
+*** 6.3.3 Step 2. Reordering fields - 76
+*** 6.3.4 Step 3. Adding new fields - 77
+
+** 6.4 Record ops - 80
+*** 6.4.1 Selecting fields - 81
+*** 6.4.2 Updating and removing fields - 81
+*** 6.4.3 Converting to a regular ~Map~ - 82
+*** 6.4.4 Other operations - 82
+
+** 6.5 Summary - 83
+
+* 7 Functional operations on ~HList~'s - 85
+** 7.1 Motivation: mapping over an ~HList~ - 85
+** 7.2 Polymorphic functions - 86
+*** 7.2.1 How ~Poly~ works - 86
+*** 7.2.2 ~Poly~ syntax - 88
+
+** 7.3 Mapping and flatMapping using ~Poly~ - 91
+** 7.4 Folding using ~Poly~ - 93
+** 7.5 Defining type classes using ~Poly~ - 93
+** 7.6 Summary - 95
+
+* 8 Counting with types - 97
+** 8.1 Representing numbers as types - 97
+** 8.2 Length of generic representations - 98
+** 8.3 Case study: random value generator - 100
+*** 8.3.1 Simple random values - 101
+*** 8.3.2 Random products - 102
+*** 8.3.3 Random coproducts - 102
+
+** 8.4 Other opera ons involving ~Nat~ - 105
+** 8.5 Summary - 105
+
+* Prepare for launch! - 107
