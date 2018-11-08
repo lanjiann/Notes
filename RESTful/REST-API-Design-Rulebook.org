@@ -1,0 +1,401 @@
+#+TITLE: REST API
+#+SUBTITLE: Design Rulebook
+#+AUTHOR: Mark Massé
+#+YEAR: 2012
+#+PUBLISHER: Packt
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface - ix][Preface - ix]]
+  - [[Greetings Program! - ix - =TODO= =RE-READ=][Greetings Program! - ix - =TODO= =RE-READ=]]
+  - [[Conventions Used in This Book - ix][Conventions Used in This Book - ix]]
+  - [[Using Code Examples - x][Using Code Examples - x]]
+  - [[How to Contact Us - xi][How to Contact Us - xi]]
+  - [[Acknowledgments - xi =TODO= =RE-READ=][Acknowledgments - xi =TODO= =RE-READ=]]
+    - [[Tim Berners-Lee - xi][Tim Berners-Lee - xi]]
+    - [[Roy Fielding - xi][Roy Fielding - xi]]
+    - [[Leonard Richardson - xii][Leonard Richardson - xii]]
+    - [[O'Reilly Media, Inc. - xii][O'Reilly Media, Inc. - xii]]
+    - [[Technical Reviewers - xii][Technical Reviewers - xii]]
+    - [[Colleagues - xiii][Colleagues - xiii]]
+    - [[The REST Community - xiii][The REST Community - xiii]]
+    - [[Stuart Rackham - xiii][Stuart Rackham - xiii]]
+    - [[Personal - xiii][Personal - xiii]]
+- [[1. Introduction - 1][1. Introduction - 1]]
+  - [[Hello World Wide Web - 1][Hello World Wide Web - 1]]
+  - [[Web Architecture - 2][Web Architecture - 2]]
+    - [[Client–Server - 3][Client–Server - 3]]
+    - [[Uniform Interface - 3][Uniform Interface - 3]]
+    - [[Layered System - 4][Layered System - 4]]
+    - [[Cache - 4][Cache - 4]]
+    - [[Stateless - 4][Stateless - 4]]
+    - [[Code-On-Demand - 4][Code-On-Demand - 4]]
+  - [[Web Standards - 5][Web Standards - 5]]
+  - [[REST - 5][REST - 5]]
+  - [[REST APIs - 5][REST APIs - 5]]
+  - [[REST API Design - 6][REST API Design - 6]]
+    - [[Rules - 6][Rules - 6]]
+    - [[WRML - 7][WRML - 7]]
+  - [[Recap - 7][Recap - 7]]
+- [[2. Identifier Design with URIs - 11][2. Identifier Design with URIs - 11]]
+  - [[URIs - 11][URIs - 11]]
+  - [[URI Format - 11][URI Format - 11]]
+    - [[Rule: Forward slash separator (/) must be used to indicate a hierarchical - 12][Rule: Forward slash separator (/) must be used to indicate a hierarchical - 12]]
+    - [[relationship - 12][relationship - 12]]
+    - [[Rule: A trailing forward slash (/) should not be included in URIs - 12][Rule: A trailing forward slash (/) should not be included in URIs - 12]]
+    - [[Rule: Hyphens (-) should be used to improve the readability of URIs - 12][Rule: Hyphens (-) should be used to improve the readability of URIs - 12]]
+    - [[Rule: Underscores (_) should not be used in URIs - 13][Rule: Underscores (_) should not be used in URIs - 13]]
+    - [[Rule: Lowercase letters should be preferred in URI paths - 13][Rule: Lowercase letters should be preferred in URI paths - 13]]
+    - [[Rule: File extensions should not be included in URIs - 14][Rule: File extensions should not be included in URIs - 14]]
+  - [[URI Authority Design - 14][URI Authority Design - 14]]
+    - [[Rule: Consistent subdomain names should be used for your APIs - 14][Rule: Consistent subdomain names should be used for your APIs - 14]]
+    - [[Rule: Consistent subdomain names should be used for your client developer portal - 14][Rule: Consistent subdomain names should be used for your client developer portal - 14]]
+  - [[Resource Modeling - 14][Resource Modeling - 14]]
+  - [[Resource Archetypes - 15][Resource Archetypes - 15]]
+    - [[Document - 15][Document - 15]]
+    - [[Collection - 15][Collection - 15]]
+    - [[Store - 16][Store - 16]]
+    - [[Controller - 16][Controller - 16]]
+  - [[URI Path Design - 16][URI Path Design - 16]]
+    - [[Rule: A singular noun should be used for document names - 17][Rule: A singular noun should be used for document names - 17]]
+    - [[Rule: A plural noun should be used for collection names - 17][Rule: A plural noun should be used for collection names - 17]]
+    - [[Rule: A plural noun should be used for store names - 17][Rule: A plural noun should be used for store names - 17]]
+    - [[Rule: A verb or verb phrase should be used for controller names - 17][Rule: A verb or verb phrase should be used for controller names - 17]]
+    - [[Rule: Variable path segments may be substituted with identity-based values - 18][Rule: Variable path segments may be substituted with identity-based values - 18]]
+    - [[Rule: CRUD function names should not be used in URIs - 18][Rule: CRUD function names should not be used in URIs - 18]]
+  - [[URI Query Design - 19][URI Query Design - 19]]
+    - [[Rule: The query component of a URI may be used to filter collections or stores - 19][Rule: The query component of a URI may be used to filter collections or stores - 19]]
+    - [[Rule: The query component of a URI should be used to paginate collection or store results - 20][Rule: The query component of a URI should be used to paginate collection or store results - 20]]
+  - [[Recap - 20][Recap - 20]]
+- [[3. Interaction Design with HTTP - 23][3. Interaction Design with HTTP - 23]]
+  - [[HTTP/1.1 - 23][HTTP/1.1 - 23]]
+  - [[Request Methods - 23][Request Methods - 23]]
+    - [[Rule: GET and POST must not be used to tunnel other request methods - 24][Rule: GET and POST must not be used to tunnel other request methods - 24]]
+    - [[Rule: GET must be used to retrieve a representation of a resource - 24][Rule: GET must be used to retrieve a representation of a resource - 24]]
+    - [[Rule: HEAD should be used to retrieve response headers - 25][Rule: HEAD should be used to retrieve response headers - 25]]
+    - [[Rule: PUT must be used to both insert and update a stored resource - 25][Rule: PUT must be used to both insert and update a stored resource - 25]]
+    - [[Rule: PUT must be used to update mutable resources - 26][Rule: PUT must be used to update mutable resources - 26]]
+    - [[Rule: POST must be used to create a new resource in a collection - 26][Rule: POST must be used to create a new resource in a collection - 26]]
+    - [[Rule: POST must be used to execute controllers - 26][Rule: POST must be used to execute controllers - 26]]
+    - [[Rule: DELETE must be used to remove a resource from its parent - 27][Rule: DELETE must be used to remove a resource from its parent - 27]]
+    - [[Rule: OPTIONS should be used to retrieve metadata that describes a resource’s available interactions - 27][Rule: OPTIONS should be used to retrieve metadata that describes a resource’s available interactions - 27]]
+  - [[Response Status Codes - 28][Response Status Codes - 28]]
+    - [[Rule: 200 (“OK”) should be used to indicate nonspecific success - 28][Rule: 200 (“OK”) should be used to indicate nonspecific success - 28]]
+    - [[Rule: 200 (“OK”) must not be used to communicate errors in the response body - 28][Rule: 200 (“OK”) must not be used to communicate errors in the response body - 28]]
+    - [[Rule: 201 (“Created”) must be used to indicate successful resource creation - 28][Rule: 201 (“Created”) must be used to indicate successful resource creation - 28]]
+    - [[Rule: 202 (“Accepted”) must be used to indicate successful start of an asynchronous action - 29][Rule: 202 (“Accepted”) must be used to indicate successful start of an asynchronous action - 29]]
+    - [[Rule: 204 (“No Content”) should be used when the response body is intentionally empty - 29][Rule: 204 (“No Content”) should be used when the response body is intentionally empty - 29]]
+    - [[Rule: 301 (“Moved Permanently”) should be used to relocate resources - 29][Rule: 301 (“Moved Permanently”) should be used to relocate resources - 29]]
+    - [[Rule: 302 (“Found”) should not be used - 29][Rule: 302 (“Found”) should not be used - 29]]
+    - [[Rule: 303 (“See Other”) should be used to refer the client to a different URI - 30][Rule: 303 (“See Other”) should be used to refer the client to a different URI - 30]]
+    - [[Rule: 304 (“Not Modified”) should be used to preserve bandwidth - 30][Rule: 304 (“Not Modified”) should be used to preserve bandwidth - 30]]
+    - [[Rule: 307 (“Temporary Redirect”) should be used to tell clients to re-submit the request to another URI - 30][Rule: 307 (“Temporary Redirect”) should be used to tell clients to re-submit the request to another URI - 30]]
+    - [[Rule: 400 (“Bad Request”) may be used to indicate nonspecific failure - 30][Rule: 400 (“Bad Request”) may be used to indicate nonspecific failure - 30]]
+    - [[Rule: 401 (“Unauthorized”) must be used when there is a problem with the client’s credentials - 31][Rule: 401 (“Unauthorized”) must be used when there is a problem with the client’s credentials - 31]]
+    - [[Rule: 403 (“Forbidden”) should be used to forbid access regardless of authorization state - 31][Rule: 403 (“Forbidden”) should be used to forbid access regardless of authorization state - 31]]
+    - [[Rule: 404 (“Not Found”) must be used when a client’s URI cannot be mapped to a resource - 31][Rule: 404 (“Not Found”) must be used when a client’s URI cannot be mapped to a resource - 31]]
+    - [[Rule: 405 (“Method Not Allowed”) must be used when the HTTP method is not supported - 31][Rule: 405 (“Method Not Allowed”) must be used when the HTTP method is not supported - 31]]
+    - [[Rule: 406 (“Not Acceptable”) must be used when the requested media type cannot be served - 32][Rule: 406 (“Not Acceptable”) must be used when the requested media type cannot be served - 32]]
+    - [[Rule: 409 (“Conflict”) should be used to indicate a violation of resource state - 32][Rule: 409 (“Conflict”) should be used to indicate a violation of resource state - 32]]
+    - [[Rule: 412 (“Precondition Failed”) should be used to support conditional operations - 32][Rule: 412 (“Precondition Failed”) should be used to support conditional operations - 32]]
+    - [[Rule: 415 (“Unsupported Media Type”) must be used when the media type of a request’s payload cannot be processed - 32][Rule: 415 (“Unsupported Media Type”) must be used when the media type of a request’s payload cannot be processed - 32]]
+    - [[Rule: 500 (“Internal Server Error”) should be used to indicate API mal-function - 32][Rule: 500 (“Internal Server Error”) should be used to indicate API mal-function - 32]]
+    - [[Recap - 33][Recap - 33]]
+- [[4. Metadata Design - 35][4. Metadata Design - 35]]
+  - [[HTTP Headers - 35][HTTP Headers - 35]]
+    - [[Rule: Content-Type must be used - 35][Rule: Content-Type must be used - 35]]
+    - [[Rule: Content-Length should be used - 35][Rule: Content-Length should be used - 35]]
+    - [[Rule: Last-Modified should be used in responses - 35][Rule: Last-Modified should be used in responses - 35]]
+    - [[Rule: ETag should be used in responses - 36][Rule: ETag should be used in responses - 36]]
+    - [[Rule: Stores must support conditional PUT requests - 36][Rule: Stores must support conditional PUT requests - 36]]
+    - [[Rule: Location must be used to specify the URI of a newly created resource - 37][Rule: Location must be used to specify the URI of a newly created resource - 37]]
+    - [[Rule: Cache-Control, Expires, and Date response headers should be used to encourage caching - 37][Rule: Cache-Control, Expires, and Date response headers should be used to encourage caching - 37]]
+    - [[Rule: Cache-Control, Expires, and Pragma response headers may be used to discourage caching - 38][Rule: Cache-Control, Expires, and Pragma response headers may be used to discourage caching - 38]]
+    - [[Rule: Caching should be encouraged - 38][Rule: Caching should be encouraged - 38]]
+    - [[Rule: Expiration caching headers should be used with 200 (“OK”) responses - 38][Rule: Expiration caching headers should be used with 200 (“OK”) responses - 38]]
+    - [[Rule: Expiration caching headers may optionally be used with 3xx and 4xx responses - 38][Rule: Expiration caching headers may optionally be used with 3xx and 4xx responses - 38]]
+    - [[Rule: Custom HTTP headers must not be used to change the behavior of HTTP methods - 38][Rule: Custom HTTP headers must not be used to change the behavior of HTTP methods - 38]]
+  - [[Media Types - 39][Media Types - 39]]
+    - [[Media Type Syntax - 39][Media Type Syntax - 39]]
+    - [[Registered Media Types - 39][Registered Media Types - 39]]
+    - [[Vendor-Specific Media Types - 40][Vendor-Specific Media Types - 40]]
+  - [[Media Type Design - 41][Media Type Design - 41]]
+    - [[Rule: Application-specific media types should be used - 41][Rule: Application-specific media types should be used - 41]]
+    - [[Rule: Media type negotiation should be supported when multiple rep resentations are available - 43][Rule: Media type negotiation should be supported when multiple rep resentations are available - 43]]
+    - [[Rule: Media type selection using a query parameter may be supported - 44][Rule: Media type selection using a query parameter may be supported - 44]]
+  - [[Recap - 44][Recap - 44]]
+- [[5. Representation Design - 47][5. Representation Design - 47]]
+  - [[Message Body Format - 47][Message Body Format - 47]]
+    - [[Rule: JSON should be supported for resource representation - 47][Rule: JSON should be supported for resource representation - 47]]
+    - [[Rule: JSON must be well-formed - 48][Rule: JSON must be well-formed - 48]]
+    - [[Rule: XML and other formats may optionally be used for resource representation - 48][Rule: XML and other formats may optionally be used for resource representation - 48]]
+    - [[Rule: Additional envelopes must not be created - 49][Rule: Additional envelopes must not be created - 49]]
+  - [[Hypermedia Representation - 49][Hypermedia Representation - 49]]
+    - [[Rule: A consistent form should be used to represent links - 49][Rule: A consistent form should be used to represent links - 49]]
+    - [[Rule: A consistent form should be used to represent link relations - 52][Rule: A consistent form should be used to represent link relations - 52]]
+    - [[Rule: A consistent form should be used to advertise links - 53][Rule: A consistent form should be used to advertise links - 53]]
+    - [[Rule: A self link should be included in response message body representations - 54][Rule: A self link should be included in response message body representations - 54]]
+    - [[Rule: Minimize the number of advertised “entry point” API URIs - 54][Rule: Minimize the number of advertised “entry point” API URIs - 54]]
+    - [[Rule: Links should be used to advertise a resource’s available actions in a state-sensitive manner - 55][Rule: Links should be used to advertise a resource’s available actions in a state-sensitive manner - 55]]
+  - [[Media Type Representation - 56][Media Type Representation - 56]]
+    - [[Rule: A consistent form should be used to represent media type formats - 56][Rule: A consistent form should be used to represent media type formats - 56]]
+    - [[Rule: A consistent form should be used to represent media type schemas - 59][Rule: A consistent form should be used to represent media type schemas - 59]]
+    - [[Error Representation - 68][Error Representation - 68]]
+    - [[Rule: A consistent form should be used to represent errors - 68][Rule: A consistent form should be used to represent errors - 68]]
+    - [[Rule: A consistent form should be used to represent error responses - 69][Rule: A consistent form should be used to represent error responses - 69]]
+    - [[Rule: Consistent error types should be used for common error conditions - 70][Rule: Consistent error types should be used for common error conditions - 70]]
+  - [[Recap - 70][Recap - 70]]
+- [[6. Client Concerns - 71][6. Client Concerns - 71]]
+  - [[Introduction - 71][Introduction - 71]]
+  - [[Versioning - 71][Versioning - 71]]
+    - [[Rule: New URIs should be used to introduce new concepts - 71][Rule: New URIs should be used to introduce new concepts - 71]]
+    - [[Rule: Schemas should be used to manage representational form versions - 72][Rule: Schemas should be used to manage representational form versions - 72]]
+    - [[Rule: Entity tags should be used to manage representational state versions - 72][Rule: Entity tags should be used to manage representational state versions - 72]]
+  - [[Security - 72][Security - 72]]
+    - [[Rule: OAuth may be used to protect resources - 72][Rule: OAuth may be used to protect resources - 72]]
+    - [[Rule: API management solutions may be used to protect resources - 73][Rule: API management solutions may be used to protect resources - 73]]
+  - [[Response Representation Composition - 73][Response Representation Composition - 73]]
+    - [[Rule: The query component of a URI should be used to support partial responses - 74][Rule: The query component of a URI should be used to support partial responses - 74]]
+    - [[Rule: The query component of a URI should be used to embed linked resources - 76][Rule: The query component of a URI should be used to embed linked resources - 76]]
+    - [[Processing Hypermedia - 78][Processing Hypermedia - 78]]
+    - [[JavaScript Clients - 79][JavaScript Clients - 79]]
+    - [[Rule: JSONP should be supported to provide multi-origin read access from JavaScript - 80][Rule: JSONP should be supported to provide multi-origin read access from JavaScript - 80]]
+    - [[Rule: CORS should be supported to provide multi-origin read/write ac cess from JavaScript - 82][Rule: CORS should be supported to provide multi-origin read/write ac cess from JavaScript - 82]]
+    - [[Recap - 83][Recap - 83]]
+- [[7. Final Thoughts - 85][7. Final Thoughts - 85]]
+  - [[State of the Art - 85][State of the Art - 85]]
+  - [[Uniform Implementation - 86][Uniform Implementation - 86]]
+    - [[Principle: REST API designs differ more than necessary - 86][Principle: REST API designs differ more than necessary - 86]]
+    - [[Principle: A REST API should be designed, not coded - 87][Principle: A REST API should be designed, not coded - 87]]
+    - [[Principle: Programmers and their organizations benefit from consistency - 88][Principle: Programmers and their organizations benefit from consistency - 88]]
+    - [[Principle: A REST API should be created using a GUI tool - 89][Principle: A REST API should be created using a GUI tool - 89]]
+  - [[Recap - 91][Recap - 91]]
+- [[Appendix: My First REST API - 93][Appendix: My First REST API - 93]]
+
+* TODO Preface - ix
+** DONE Greetings Program! - ix - =TODO= =RE-READ=
+   CLOSED: [2018-11-06 Tue 03:09]
+   - REST :: Representation State Transfer
+
+   - /REST/ is a _technical description_ of HOW the /World Wide Web/ works.
+
+   - If the Web is said to have an "OS", its _architectural_ STYLE is /REST/.
+
+   - REST Application Programming Interface (REST API) ::
+        The API of _a type of web server_ that enables a client, either
+        user-operated or automated, to access resources that model a system's
+        data and functions in a specific style.
+
+        =from Jian= This sentence in the book is NOT clear, and seems wrong even
+        in semantics (not reasonable)! =TODO= =Re-visit=
+
+   - _THIS_ book is a *REST API designer's _style guide_ and _reference_.*
+     It proposes a set of rules that you can leverage to design and develop REST
+     APIs.
+
+** DONE Conventions Used in This Book - ix
+   CLOSED: [2018-11-06 Tue 03:08]
+** DONE Using Code Examples - x
+   CLOSED: [2018-11-06 Tue 03:08]
+** DONE How to Contact Us - xi
+   CLOSED: [2018-11-06 Tue 03:09]
+** TODO Acknowledgments - xi =TODO= =RE-READ=
+*** TODO Tim Berners-Lee - xi
+*** TODO Roy Fielding - xi
+*** TODO Leonard Richardson - xii
+*** DONE O'Reilly Media, Inc. - xii
+    CLOSED: [2018-11-06 Tue 03:11]
+*** DONE Technical Reviewers - xii
+    CLOSED: [2018-11-06 Tue 03:11]
+*** DONE Colleagues - xiii
+    CLOSED: [2018-11-06 Tue 03:11]
+*** TODO The REST Community - xiii
+*** TODO Stuart Rackham - xiii
+*** TODO Personal - xiii
+
+* TODO 1. Introduction - 1
+** Hello World Wide Web - 1
+** Web Architecture - 2
+   - Upon analysis, Fielding recognized that the Web's *scalability* was _governed
+     by_ a set of key *CONSTRAINTS*. Fielding grouped into _SIX_ categories and
+     collectively referred to as the Web's architectural style:
+     1. Client-server
+     2. Uniform interface
+     3. Layered system
+     4. Cache
+     5. Stateless
+     6. Code-on-demand
+
+*** Client–Server - 3
+*** Uniform Interface - 3
+*** Layered System - 4
+*** Cache - 4
+*** Stateless - 4
+*** Code-On-Demand - 4
+
+** Web Standards - 5
+** REST - 5
+** REST APIs - 5
+** REST API Design - 6
+*** Rules - 6
+*** WRML - 7
+
+** Recap - 7
+
+* 2. Identifier Design with URIs - 11
+** URIs - 11
+   - REST APIs use /Uniform Resource Identifiers (URIs)/ to ADDRESS _resources_.
+
+** URI Format - 11
+*** Rule: Forward slash separator (/) must be used to indicate a hierarchical - 12
+*** relationship - 12
+*** Rule: A trailing forward slash (/) should not be included in URIs - 12
+*** Rule: Hyphens (-) should be used to improve the readability of URIs - 12
+*** Rule: Underscores (_) should not be used in URIs - 13
+*** Rule: Lowercase letters should be preferred in URI paths - 13
+*** Rule: File extensions should not be included in URIs - 14
+
+** URI Authority Design - 14
+*** Rule: Consistent subdomain names should be used for your APIs - 14
+*** Rule: Consistent subdomain names should be used for your client developer portal - 14
+
+** Resource Modeling - 14
+** Resource Archetypes - 15
+*** Document - 15
+*** Collection - 15
+*** Store - 16
+*** Controller - 16
+
+** URI Path Design - 16
+*** Rule: A singular noun should be used for document names - 17
+*** Rule: A plural noun should be used for collection names - 17
+*** Rule: A plural noun should be used for store names - 17
+*** Rule: A verb or verb phrase should be used for controller names - 17
+*** Rule: Variable path segments may be substituted with identity-based values - 18
+*** Rule: CRUD function names should not be used in URIs - 18
+
+** URI Query Design - 19
+*** Rule: The query component of a URI may be used to filter collections or stores - 19
+*** Rule: The query component of a URI should be used to paginate collection or store results - 20
+
+** Recap - 20
+
+* 3. Interaction Design with HTTP - 23
+** HTTP/1.1 - 23
+** Request Methods - 23
+*** Rule: GET and POST must not be used to tunnel other request methods - 24
+*** Rule: GET must be used to retrieve a representation of a resource - 24
+*** Rule: HEAD should be used to retrieve response headers - 25
+*** Rule: PUT must be used to both insert and update a stored resource - 25
+*** Rule: PUT must be used to update mutable resources - 26
+*** Rule: POST must be used to create a new resource in a collection - 26
+*** Rule: POST must be used to execute controllers - 26
+*** Rule: DELETE must be used to remove a resource from its parent - 27
+*** Rule: OPTIONS should be used to retrieve metadata that describes a resource’s available interactions - 27
+
+** Response Status Codes - 28
+*** Rule: 200 (“OK”) should be used to indicate nonspecific success - 28
+*** Rule: 200 (“OK”) must not be used to communicate errors in the response body - 28
+*** Rule: 201 (“Created”) must be used to indicate successful resource creation - 28
+*** Rule: 202 (“Accepted”) must be used to indicate successful start of an asynchronous action - 29
+*** Rule: 204 (“No Content”) should be used when the response body is intentionally empty - 29
+*** Rule: 301 (“Moved Permanently”) should be used to relocate resources - 29
+*** Rule: 302 (“Found”) should not be used - 29
+*** Rule: 303 (“See Other”) should be used to refer the client to a different URI - 30
+*** Rule: 304 (“Not Modified”) should be used to preserve bandwidth - 30
+*** Rule: 307 (“Temporary Redirect”) should be used to tell clients to re-submit the request to another URI - 30
+*** Rule: 400 (“Bad Request”) may be used to indicate nonspecific failure - 30
+*** Rule: 401 (“Unauthorized”) must be used when there is a problem with the client’s credentials - 31
+*** Rule: 403 (“Forbidden”) should be used to forbid access regardless of authorization state - 31
+*** Rule: 404 (“Not Found”) must be used when a client’s URI cannot be mapped to a resource - 31
+*** Rule: 405 (“Method Not Allowed”) must be used when the HTTP method is not supported - 31
+*** Rule: 406 (“Not Acceptable”) must be used when the requested media type cannot be served - 32
+*** Rule: 409 (“Conflict”) should be used to indicate a violation of resource state - 32
+*** Rule: 412 (“Precondition Failed”) should be used to support conditional operations - 32
+*** Rule: 415 (“Unsupported Media Type”) must be used when the media type of a request’s payload cannot be processed - 32
+*** Rule: 500 (“Internal Server Error”) should be used to indicate API mal-function - 32
+*** Recap - 33
+
+* 4. Metadata Design - 35
+** HTTP Headers - 35
+*** Rule: Content-Type must be used - 35
+*** Rule: Content-Length should be used - 35
+*** Rule: Last-Modified should be used in responses - 35
+*** Rule: ETag should be used in responses - 36
+*** Rule: Stores must support conditional PUT requests - 36
+*** Rule: Location must be used to specify the URI of a newly created resource - 37
+*** Rule: Cache-Control, Expires, and Date response headers should be used to encourage caching - 37
+*** Rule: Cache-Control, Expires, and Pragma response headers may be used to discourage caching - 38
+*** Rule: Caching should be encouraged - 38
+*** Rule: Expiration caching headers should be used with 200 (“OK”) responses - 38
+*** Rule: Expiration caching headers may optionally be used with 3xx and 4xx responses - 38
+*** Rule: Custom HTTP headers must not be used to change the behavior of HTTP methods - 38
+
+** Media Types - 39
+*** Media Type Syntax - 39
+*** Registered Media Types - 39
+*** Vendor-Specific Media Types - 40
+
+** Media Type Design - 41
+*** Rule: Application-specific media types should be used - 41
+*** Rule: Media type negotiation should be supported when multiple rep resentations are available - 43
+*** Rule: Media type selection using a query parameter may be supported - 44
+
+** Recap - 44
+
+* 5. Representation Design - 47
+** Message Body Format - 47
+*** Rule: JSON should be supported for resource representation - 47
+*** Rule: JSON must be well-formed - 48
+*** Rule: XML and other formats may optionally be used for resource representation - 48
+*** Rule: Additional envelopes must not be created - 49
+
+** Hypermedia Representation - 49
+*** Rule: A consistent form should be used to represent links - 49
+*** Rule: A consistent form should be used to represent link relations - 52
+*** Rule: A consistent form should be used to advertise links - 53
+*** Rule: A self link should be included in response message body representations - 54
+*** Rule: Minimize the number of advertised “entry point” API URIs - 54
+*** Rule: Links should be used to advertise a resource’s available actions in a state-sensitive manner - 55
+
+** Media Type Representation - 56
+*** Rule: A consistent form should be used to represent media type formats - 56
+*** Rule: A consistent form should be used to represent media type schemas - 59
+*** Error Representation - 68
+*** Rule: A consistent form should be used to represent errors - 68
+*** Rule: A consistent form should be used to represent error responses - 69
+*** Rule: Consistent error types should be used for common error conditions - 70
+
+** Recap - 70
+
+* 6. Client Concerns - 71
+** Introduction - 71
+** Versioning - 71
+*** Rule: New URIs should be used to introduce new concepts - 71
+*** Rule: Schemas should be used to manage representational form versions - 72
+*** Rule: Entity tags should be used to manage representational state versions - 72
+
+** Security - 72
+*** Rule: OAuth may be used to protect resources - 72
+*** Rule: API management solutions may be used to protect resources - 73
+
+** Response Representation Composition - 73
+*** Rule: The query component of a URI should be used to support partial responses - 74
+*** Rule: The query component of a URI should be used to embed linked resources - 76
+*** Processing Hypermedia - 78
+*** JavaScript Clients - 79
+*** Rule: JSONP should be supported to provide multi-origin read access from JavaScript - 80
+*** Rule: CORS should be supported to provide multi-origin read/write ac cess from JavaScript - 82
+*** Recap - 83
+
+* 7. Final Thoughts - 85
+** State of the Art - 85
+** Uniform Implementation - 86
+*** Principle: REST API designs differ more than necessary - 86
+*** Principle: A REST API should be designed, not coded - 87
+*** Principle: Programmers and their organizations benefit from consistency - 88
+*** Principle: A REST API should be created using a GUI tool - 89 
+
+** Recap - 91
+
+* Appendix: My First REST API - 93
