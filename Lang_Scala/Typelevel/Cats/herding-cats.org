@@ -1,0 +1,215 @@
+#+TITLE: Scala with Cats
+#+AUTHOR: Noel Welsh and Dave Gurnell
+#+Date: November 2017
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[1. day 0][1. day 0]]
+  - [[a. What is polymorphism?][a. What is polymorphism?]]
+  - [[b. sum function][b. sum function]]
+  - [[c. FoldLeft][c. FoldLeft]]
+  - [[d. Method injection (enrich my library)][d. Method injection (enrich my library)]]
+- [[2. day 1][2. day 1]]
+  - [[a. sbt][a. sbt]]
+  - [[b. Eq][b. Eq]]
+  - [[c. Order][c. Order]]
+  - [[d. PartialOrder][d. PartialOrder]]
+  - [[e. Show][e. Show]]
+  - [[f. Read][f. Read]]
+  - [[g. Enum][g. Enum]]
+  - [[h. Numeric][h. Numeric]]
+  - [[i. typeclasses 102][i. typeclasses 102]]
+- [[3. day 2][3. day 2]]
+  - [[a. Making our own typeclass with simulacrum][a. Making our own typeclass with simulacrum]]
+  - [[b. Functor][b. Functor]]
+  - [[c. Checking laws with Discipline][c. Checking laws with Discipline]]
+  - [[d. Import guide][d. Import guide]]
+- [[4. day 3][4. day 3]]
+  - [[a. Kinds and some type-foo][a. Kinds and some type-foo]]
+  - [[b. Semigroupal][b. Semigroupal]]
+  - [[c. Apply][c. Apply]]
+  - [[d. Applicative][d. Applicative]]
+- [[5. day 4][5. day 4]]
+  - [[a. Semigroup][a. Semigroup]]
+  - [[b. Monoid][b. Monoid]]
+  - [[c. About Laws][c. About Laws]]
+  - [[d. Using monoids to fold data structures][d. Using monoids to fold data structures]]
+- [[6. day 5][6. day 5]]
+  - [[a. FlatMap][a. FlatMap]]
+  - [[b. Monad][b. Monad]]
+  - [[c. List datatype][c. List datatype]]
+  - [[d. FunctorEmpty][d. FunctorEmpty]]
+  - [[e. A knight’s quest][e. A knight’s quest]]
+- [[7. day 6][7. day 6]]
+  - [[a. do vs for][a. do vs for]]
+  - [[b. Writer datatype][b. Writer datatype]]
+  - [[c. Reader datatype][c. Reader datatype]]
+- [[8. day 7][8. day 7]]
+  - [[a. State datatype][a. State datatype]]
+  - [[b. Validated datatype][b. Validated datatype]]
+  - [[c. Ior datatype][c. Ior datatype]]
+- [[9. day 8][9. day 8]]
+  - [[a. Free monoids][a. Free monoids]]
+  - [[b. Free monads][b. Free monads]]
+  - [[c. Stackless Scala with Free Monads][c. Stackless Scala with Free Monads]]
+  - [[d. Tail Recursive Monads (FlatMap)][d. Tail Recursive Monads (FlatMap)]]
+- [[10. day 9][10. day 9]]
+  - [[a. Some useful monadic functions][a. Some useful monadic functions]]
+  - [[b. Making a safe RPN calculator][b. Making a safe RPN calculator]]
+  - [[c. Composing monadic functions][c. Composing monadic functions]]
+  - [[d. Making monads][d. Making monads]]
+  - [[e. Monads are fractals][e. Monads are fractals]]
+- [[11. day 10][11. day 10]]
+  - [[a. Monad transformers][a. Monad transformers]]
+  - [[b. Stacking Future and Either][b. Stacking Future and Either]]
+- [[12. day 11][12. day 11]]
+  - [[a. Genericity][a. Genericity]]
+  - [[b. Datatype-generic programming with Bifunctor][b. Datatype-generic programming with Bifunctor]]
+  - [[c. Const datatype][c. Const datatype]]
+  - [[d. Combining applicative functors][d. Combining applicative functors]]
+- [[13. day 12][13. day 12]]
+  - [[a. Traverse][a. Traverse]]
+  - [[b. TraverseEmpty][b. TraverseEmpty]]
+  - [[c. Coercing type inference using partial unification][c. Coercing type inference using partial unification]]
+  - [[d. Shape and contents][d. Shape and contents]]
+  - [[e. Applicative wordcount][e. Applicative wordcount]]
+- [[14. day 13][14. day 13]]
+  - [[a. Id datatype][a. Id datatype]]
+  - [[b. Eval datatype][b. Eval datatype]]
+  - [[c. The Abstract Future][c. The Abstract Future]]
+- [[15. day 14][15. day 14]]
+  - [[a. SemigroupK][a. SemigroupK]]
+  - [[b. MonoidK][b. MonoidK]]
+  - [[c. Alternative][c. Alternative]]
+- [[16. day 15][16. day 15]]
+  - [[a. Basic category theory][a. Basic category theory]]
+  - [[b. Arrow][b. Arrow]]
+  - [[c. Isomorphism][c. Isomorphism]]
+- [[17. day 16][17. day 16]]
+  - [[a. Sets][a. Sets]]
+  - [[b. Pos][b. Pos]]
+  - [[c. Finite categories][c. Finite categories]]
+  - [[d. Cat][d. Cat]]
+  - [[e. Monoid as categories][e. Monoid as categories]]
+  - [[f. Grp][f. Grp]]
+- [[18. day 17][18. day 17]]
+  - [[a. Initial and terminal objects][a. Initial and terminal objects]]
+  - [[b. Product][b. Product]]
+  - [[c. Duality][c. Duality]]
+  - [[d. Coproduct][d. Coproduct]]
+- [[Contents in Depth][Contents in Depth]]
+- [[Combined Pages][Combined Pages]]
+
+* 1. day 0
+** a. What is polymorphism?
+** b. sum function
+** c. FoldLeft
+** d. Method injection (enrich my library)
+
+* 2. day 1
+** a. sbt
+** b. Eq
+** c. Order
+** d. PartialOrder
+** e. Show
+** f. Read
+** g. Enum
+** h. Numeric
+** i. typeclasses 102
+
+* 3. day 2
+** a. Making our own typeclass with simulacrum
+** b. Functor
+** c. Checking laws with Discipline
+** d. Import guide
+
+* 4. day 3
+** a. Kinds and some type-foo
+** b. Semigroupal
+** c. Apply
+** d. Applicative
+
+* 5. day 4
+** a. Semigroup
+** b. Monoid
+** c. About Laws
+** d. Using monoids to fold data structures
+
+* 6. day 5
+** a. FlatMap
+** b. Monad
+** c. List datatype
+** d. FunctorEmpty
+** e. A knight’s quest
+
+* 7. day 6
+** a. do vs for
+** b. Writer datatype
+** c. Reader datatype
+
+* 8. day 7
+** a. State datatype
+** b. Validated datatype
+** c. Ior datatype
+
+* 9. day 8
+** a. Free monoids
+** b. Free monads
+** c. Stackless Scala with Free Monads
+** d. Tail Recursive Monads (FlatMap)
+
+* 10. day 9
+** a. Some useful monadic functions
+** b. Making a safe RPN calculator
+** c. Composing monadic functions
+** d. Making monads
+** e. Monads are fractals
+
+* 11. day 10
+** a. Monad transformers
+** b. Stacking Future and Either
+
+* 12. day 11
+** a. Genericity
+** b. Datatype-generic programming with Bifunctor
+** c. Const datatype
+** d. Combining applicative functors
+
+* 13. day 12
+** a. Traverse
+** b. TraverseEmpty
+** c. Coercing type inference using partial unification
+** d. Shape and contents
+** e. Applicative wordcount
+
+* 14. day 13
+** a. Id datatype
+** b. Eval datatype
+** c. The Abstract Future
+
+* 15. day 14
+** a. SemigroupK
+** b. MonoidK
+** c. Alternative
+
+* 16. day 15
+** a. Basic category theory
+** b. Arrow
+** c. Isomorphism
+
+* 17. day 16
+** a. Sets
+** b. Pos
+** c. Finite categories
+** d. Cat
+** e. Monoid as categories
+** f. Grp
+
+* 18. day 17
+** a. Initial and terminal objects
+** b. Product
+** c. Duality
+** d. Coproduct
+
+* Contents in Depth
+* Combined Pages

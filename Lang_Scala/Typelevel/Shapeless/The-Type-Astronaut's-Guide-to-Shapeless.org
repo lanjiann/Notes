@@ -1020,19 +1020,325 @@
 
   - Prerequisite: To begin with we have some theory to cover.
 
-    ~LabelledGeneric~ uses some *clever techniques* to expose _name information_
+    ~LabelledGeneric~ uses some *clever techniques* to expose _name information_ =TODO=
     at the _type level_. To understand these techniques we must discuss
     + /literal types/
     + /singleton types/
     + /phantom types/
     + /type tagging/
 
-** TODO 5.1 Literal types - 51
-** TODO 5.2 Type tagging and phantom types - 54
-*** 5.2.1 Records and ~LabelledGeneric~ - 57
+** DONE 5.1 Literal types - 51
+   CLOSED: [2018-11-11 Sun 03:48]
+   - A Scala value may have multiple types.
+     =from Jian= consider its the /class/, /superclass/, and /trait(s)/.
+
+     For example, "hello" has at least THREE /types/: ~String~, ~AnyRef~, and ~Any~.
+     + footnote:
+       Here we ignore the ~Serializable~ and ~Comparable~,
+       =from Jian= only mention the most concrete one, and the most general ones.
+
+   - Interestingly, ~"hello"~ also has another type:
+     a *singleton type* that belongs exclusively to that one value.
+
+     For example,
+     ~object Foo~ has type ~Foo.type~, and ~Foo~ is the only value of type
+     ~Foo.type~.
+
+   - literal type :: /Singleton types/ applied to /literal values/.
+
+   - /Literal types/ have existed in Scala for a long me, but we don't normally
+     interact with them
+     *BECAUSE the _DEFAULT behaviour_ of the compiler is to "widen" literals to
+     their nearest /non-singleton type/.*
+     =from Jian= NOT only "widen", but "widen" to /non-singleton type/.
+
+     For example, these two expressions are _essentially equivalent_:
+     #+BEGIN_SRC scala
+       "hello"  // type is widened
+       // res4: String = hello
+
+       ("hello" : String)
+       // res4: String = hello
+     #+END_SRC
+
+   - Shapeless provides a few tools for working with /literal types/.
+     + The ~narrow~ /macro/:
+       Convert a /literal expression/ to a /singleton-typed literal expression/.
+       #+BEGIN_SRC scala
+         import shapeless.syntax.singleton._
+
+         var x = 42.narrow
+         // x: Int(42) = 42
+
+         /* Compile Error */
+         x = 43
+         // <console>:16: error: type mismatch:
+         // found   : Int(42)
+         // required: Int(43)
+         //       x = 43
+         //           ^
+       #+END_SRC
+       * If we operate on ~x~, a /non-singleton type/ comes back.
+         #+BEGIN_SRC scala
+           x + 1
+           // res6: Int = 43
+         #+END_SRC
+
+   - We can use ~narrow~ on ANY /literal/ in Scala:
+     #+BEGIN_SRC scala
+       1.narrow
+       // res7: Int(1) = 1
+
+       true.narrow
+       // res8: Boolean(true) = true
+
+       "hello".narrow
+       // res9: String("hello") = hello
+
+       // and so on...
+     #+END_SRC
+
+   - We *CANNOT* use ~narrow~ on /compound expressions/:
+     #+BEGIN_SRC scala
+       math.sqrt(4).narrow
+       // <console>:17: error: Expression scala.math.`package`.sqrt(4.0) does
+       //    not evaluate to a constant or a stable reference value
+       //        math.sqrt(4.0).narrow
+       //                 ^
+       // <console>:17: error: value narrow is not a member of Double
+       //        math.sqrt(4.0).narrow
+       //                       ^
+     #+END_SRC
+
+   - *Literal types in Scala*
+     Since Lightbend Scala 2.12.1, Lightbend Scala 2.11.9, and TypeLevel Scala
+     2.11.8, we have _DIRECT_ syntax support for /literal types/:
+     Use the ~-Yliteral-types~ /compiler option/ and you'll see
+     #+BEGIN_SRC scala
+       val theAnswer: 42 = 42
+       // theAnswer: 42 = 42
+     #+END_SRC
+     
+     Here the ~42~ after ~:~ is the same as the ~Int(42)~ after ~:~ we saw.
+
+     You still see the ~Int(42)~ in output for legacy reasons, but the canonical
+     syntax going forward is 42.
+
+** DONE 5.2 Type tagging and phantom types - 54
+   CLOSED: [2018-11-12 Mon 21:58]
+   - Shapeless uses /literal types/ to *model* the _names_ of _fields_ in /case
+     classes/.
+
+     + It does this by “tagging” the types of the fields with the literal types
+       of their names.
+
+   - phantom type :: types with _NO_ /run-time semantics/.
+     + For example, the ~Serializable~ and ~Cloneable~ in Java.
+
+   - Before we see how shapeless does this, we'll do it ourselves to show that
+     there's _no magic (well... minimal magic, at any rate)_.
+
+     + Suppose we have a number: ~val number = 42~
+       * This number is an ~Int~ in two worlds: =from Jian= Better words???
+         - /Runtime/:
+           the acutual value ~42~ of type ~Int~
+
+         - /Compile time/:
+           its type is used
+           + to calculate which pieces of code work togehter
+             and
+           + to search for /implicits/.
+
+       * We can modify the type of number at /compile time/ *without modifying*
+         its /runtime/ behaviour by "tagging" it with a /phantom type/.
+         #+BEGIN_SRC scala
+           trait Cherries
+
+           val numCherries = number.asInstanceOf[Int with Cherries]
+         #+END_SRC
+
+         Shapeless uses this trick to *tag* /fields/ and /subtypes/ in an ADT
+         with the /singleton types/ of their names.
+
+   - The Shapeless way of doing the _tagging_:
+     + The mostly used syntax:
+       #+BEGIN_SRC scala
+         import shapeless.labelled.{KeyTag, FieldType}
+         import shapeless.syntax.singleton._
+  
+         val someNumber = 123
+         val numCherries = "numCherries" ->> someNumber
+         // numCherries: Int with shapeless.labelled.KeyTag[String("numCherries"), Int] = 123
+       #+END_SRC
+       The _tagged type_ is ~KeyTag["numCherries", Int]~
+
+     + The second syntax:
+       takes the /tag/ as a /type/ _RATHER THAN_ a /literal value/.
+
+       This is useful
+       when we know what /tag/ to use
+       but _do NOT have the ability to write specific literals_ in our code:
+       #+BEGIN_SRC scala
+         import shapeless.labelled.field
+
+         field[Cherries](123)
+         // res11: shapeless.labelled.FieldType[Cherries,Int] = 123
+       #+END_SRC
+
+       Here ~FieldType~ is a type alias:
+       ~type FieldType[K, V] = V with KeyTag[K, V]~
+
+     =TODO=
+     As we'll see in a moment, shapeless uses this mechanism to *tag* /fields/
+     and /subtypes/ with _their names_ in our source code.
+     =TODO= =TODO=
+
+   - The /tag/ encodes both _the NAME and TYPE of the field_,
+     the combination of which is useful when searching for entries in a ~Repr~
+     using /implicit resolution/. =TODO= =???= =???=
+
+   - How to convert /tags/ to values we can use at /runtime/?
+     + Answer:
+       Use the /type class/ ~Witness~ for this purpose.
+       =TODO= footnote: borrowed fro math - check the wiki page of Witness in Math.
+
+     + We can combine ~Withness~ and ~FieldType~ and get something very compelling
+       -- the ABILITY to *extract the /field name/ from a /tagged field/.*
+       #+BEGIN_SRC scala
+         import shapeless.Witness
+
+         val numCherries = "numCherries" ->> 123
+
+         def getFieldName[K, V](value: FieldType[K, V])
+             (implicit witness: Witness.Aux[K]): K =
+           witness.value
+
+         getFieldName(numCherries)
+         // res13: String = numCherries
+
+         // Get the untagged type of a tagged value:
+         def getFieldValue[K, V](value: FieldType[K, V]): V =
+           value
+
+         getFieldValue(numCherries)
+         // res15: Int = 123
+       #+END_SRC
+
+   - (Shapeless) records :: ~HList~ of _tagged elements_.
+
+   - /Records/ has some of the properties of a /map/.
+     We can
+     + *reference* /fields/ _by_ /tag/,
+     + *manipulate* and *replace* them,
+     + *maintain* ALL of the /type and naming information/ along the way.
+
+*** DONE 5.2.1 Records and ~LabelledGeneric~ - 57
+    CLOSED: [2018-11-12 Mon 21:58]
+    - Repeat:
+      /Records/ are ~HList~ of /tagged elements/.
+      For example,
+      #+BEGIN_SRC scala
+        import shapeless.{HList, ::, HNil}
+
+        val garfield = {"cat" ->> "Garfield"} :: {"orange" ->> true} :: HNil
+
+        // Not from the compiler, just for clarify:
+        //
+        // FieldType["cat",    String]  ::
+        // FieldType["orange", Boolean] ::
+        // HNil
+      #+END_SRC
+
+    - =TODO=
+      We don't need to go into depth regarding /records/ here;
+      suffice to say that records are the generic representation used by
+      ~LabelledGeneric~.
+
+      ~LabelledGeneric~ *tags* EACH item in a /product/ or /coproduct/ with the
+      corresponding /field/ or /type name/ from the concrete ADT (although the
+      names are represented as /Symbols/ , *NOT* /Strings/).
+
+    - =TODO=
+      Shapeless provides a suite of Map-like operations on /records/,
+      some of which we'll cover in Section 6.4.
+
+    - =TODO=
+      For now, let's derive some /type classes/ suing ~LabelledGeneric~.
 
 ** TODO 5.3 Deriving product instances with ~LabelledGeneric~ - 57
-   - 
+   We'll use a running example of JSON encoding to illustrate ~LabelledGeneric~.
+
+   We'll define a ~JsonEncoder~ /type class/ that converts values to a /JSON
+   AST/.
+
+   _This is the approach taken by Argonaut, Circe, Play JSON, Spray JSON, and
+   many other Scala JSON libraries._
+
+   1. Define our JSON data type:
+      #+BEGIN_SRC scala
+        sealed trait JsonValue
+        case class JsonObject(fields: List[(String, JsonValue)]) extends JsonValue
+        case class JsonArray(items: List[JsonValue]) extends JsonValue
+        case class JsonString(value: String) extends JsonValue
+        case class JsonNumber(value: Double) extends JsonValue
+        case class JsonBoolean(value: Boolean) extends JsonValue
+        case object JsonNull extends JsonValue
+      #+END_SRC
+
+   2. Then the /type class/ for encoding values as JSON:
+      #+BEGIN_SRC scala
+        trait JsonEncoder[A] {
+          def encoding(value: A): JsonValue
+        }
+
+        object JsonEncoder {
+          def apply[A](implicit enc: JsonEncoder[A]): JsonEncoder[A] = enc
+        }
+      #+END_SRC
+
+   3. A few /primitive instances/:
+      #+BEGIN_SRC scala
+        def createEncoder[A](func: A => JsonValue): JsonEncoder[A] =
+          new JsonEncoder[A] {
+            def encode(value: A): JsonValue = func(value)
+          }
+
+        implicit val stringEncoder: JsonEncoder[String] =
+          createEncoder(str => JsonEncoder(str))
+
+        implicit val intEncoder: JsonEncoder[Int] =
+          createEncoder(num => JsonEncoder(num))
+
+        implicit val booleanEncoder: JsonEncoder[Boolean]
+          createEncoder(bool => JsonEncoder(bool))
+      #+END_SRC
+
+   4. A few /instance combinators/:
+      #+BEGIN_SRC scala
+        implicit def listEncoder[A]
+          (implicit enc: JsonEncoder[A]): JsonEncoder[List[A]] =
+          createEncoder(list => JsonArray(list.map(enc.encode)))
+
+        implicit def optionEncoder[A]
+          (implicit enc: JsonEncoder[A]): JsonEncoder[Option[A]] =
+          createEncoder(opt => opt.map(enc.encode).getOrElse(JsonNull))
+      #+END_SRC
+
+   5. *IDEALLY*, when we *encode* ADTs *as* JSON, we would like to use the
+      correct _field names_ in the output JSON:
+      #+BEGIN_SRC scala
+        case class IceCream(name: String, numCherries: Int, inCone: Boolean)
+        val iceCream = IceCream("Sundae", 1, false)
+
+        // Ideally we'd like to produce something like this:
+        val iceCreamJson: JsonValue =
+          JsonObject(List(
+            "name"        -> JsonString("Sundae"),
+            "numCherries" -> JsonNumber(1),
+            "inCone"      -> JsonBoolean(false)
+        ))
+      #+END_SRC
+
 *** 5.3.1 Instances for ~HList~'s - 60
 *** 5.3.2 Instances for concrete products - 62
 
