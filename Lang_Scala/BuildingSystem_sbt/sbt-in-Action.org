@@ -41,7 +41,7 @@
   - [[1.7 Summary - 23][1.7 Summary - 23]]
 - [[2 Getting started - 24][2 Getting started - 24]]
   - [[2.1 Setting up sbt - 25][2.1 Setting up sbt - 25]]
-    - [[Setting the PATH in bash (for Linux/Mac) - 25][Setting the PATH in bash (for Linux/Mac) - 25]]
+    - [[Setting the ~PATH~ in bash (for Linux/Mac) - 25][Setting the ~PATH~ in bash (for Linux/Mac) - 25]]
     - [[Running sbt - 26][Running sbt - 26]]
   - [[2.2 Setting up a build - 27][2.2 Setting up a build - 27]]
     - [[2.2.1 Tasks - 28][2.2.1 Tasks - 28]]
@@ -209,8 +209,13 @@
 ** DONE 2.1 Setting up sbt - 25
    CLOSED: [2017-11-12 Sun 02:22]
    - This book use the *0.13.5* version /sbt/.
+     =from Jian= I use *0.13.17* -- the last version of sbt 0.13.x.
 
    - Make sure your ~sbt/bin~ folder is in ~PATH~.
+
+     =from Jian= I install /sbt/ with the system package manager, and I don't
+     need to setup this.
+
      + ~sbt/bin/sbt~ is the launcher script for Linux/Mac
 
      + ~sbt/bin/sbt-launch.jar~ is the Launcher it self.
@@ -218,8 +223,9 @@
      + ~sbt/bin/sbt.bat~ and ~sbt/bin/sbt-win~ are launcher scripts for
        Windows/Cygwin
 
-*** DONE Setting the PATH in bash (for Linux/Mac) - 25
+*** DONE Setting the ~PATH~ in bash (for Linux/Mac) - 25
     CLOSED: [2017-11-12 Sun 02:22]
+
 *** DONE Running sbt - 26
     CLOSED: [2017-11-12 Sun 02:22]
     - When you first run ~sbt~ command, it will download some /artifacts/.
@@ -242,12 +248,14 @@
 ** DONE 2.2 Setting up a build - 27
    CLOSED: [2017-11-12 Sun 03:47]
    - Every real world non-practice project using sbt SHOULD have _TWO_ files
-     (though /sbt/ includes settings for a default (the simplest) project,
-     which doesn't require these two files):
      + =project/build.properties= is used to inform sbt which _version_ it
        should use for your build
-       #+BEGIN_SRC text
-         // This book write 0.13.7 here
+       #+BEGIN_SRC scala
+         sbt.version = 0.13.17
+       #+END_SRC
+
+       =Jian= tries this setting
+       #+BEGIN_SRC scala
          sbt.version = 1.0.4
        #+END_SRC
 
@@ -258,13 +266,14 @@
          version := "1.0"
 
          // Jian add this line
-         scalaVersion := "2.12.0"
+         scalaVersion := "2.12.7"
        #+END_SRC
        The empty line between settings _was mandatory_ prior to /sbt/ 0.13.7
+       =from Jian= WHAT A STUPID REQUIREMENT IT IS!!!
 
    - sbt command ~help~
 
-   - In ~help~ output, there are a lot of options. We first talke about _three_
+   - In ~help~ output, there are a lot of options. We first talk about _three_
      most important command-line options:
      + ~tasks~ -- Lists the tasks you can run on the build
 
@@ -278,15 +287,37 @@
 *** DONE 2.2.1 Tasks - 28
     CLOSED: [2017-11-12 Sun 03:46]
     - Try ~tasks~ command in /sbt/ shell. Details later.
-
     - Try the commands listed by ~tasks~ in /sbt/ shell, for example, ~compile~.
 
 *** DONE 2.2.2 Settings - 29
     CLOSED: [2017-11-12 Sun 03:46]
-    - Try ~settings~ command in /sbt/ shell. Details later.
+    - Try ~settings~ command in /sbt/ shell.
 
-    - Try the commands listed by ~settings~ in /sbt/ shell, for example,
-      ~scalaSource~ (the output is =projectPath/src/main/scala=).
+      You'll see a list of settings defined for the current project.
+
+      + It does NOT list the /scopes/ the /settings/ are defined in; use the
+        ~inspect~ command for that.
+
+    - One /setting/ listed by the /sbt command/ ~settings~ is the ~scalaSource~,
+      which by default give you a path like =projectPath/src/main/scala=.
+
+    - *Default project layout*
+      Page 31 =IMPORTANT= =!!!=
+      #+BEGIN_SRC text
+        <build directory>/
+          project/                <--- sbt plugins and build helper code
+          src/
+            main/
+              scala/
+              java/
+              resources/
+          test/
+              scala/
+              java/
+              resources/
+          target/
+          build.sbt
+      #+END_SRC
 
     - Add the first scala source file =src/main/scala/PreownedKittenMain.scala=:
       #+BEGIN_SRC scala
@@ -295,28 +326,31 @@
         }
       #+END_SRC
 
-      Then fist run ~compile~ and then run ~run~ to say the current result -- an
-      output ="Hello, sbt world!"=.
+      Run ~compile~ and then ~run~ to get the current result -- an output
+      ="Hello, sbt world!"=.
 
-    - *Default project layout*
-      Page 31 =IMPORTANT= =!!!=
+    - ~run~ task *found* the ~PreownedKittenMain~ application you just built, and
+      runs it locally.
 
 ** DONE 2.3 Running code - 31
    CLOSED: [2017-11-12 Sun 04:06]
    - In sbt, running code can take on a few different flavors.
      Here's a nonexhaustive list of options:
      + Run any applications (as you saw with ~PreownedKittenMain~).
+
      + Open a Scala interpreted session against your current codebase.
+
      + Run any tests defined on the project.
 
-   - You can use sbt command ~console~ to get into scala shell (still inside sbt)
+   - You can use sbt command ~console~ to get into _scala shell (still inside sbt)_
      which have _PRELOAD all the code in current project_ (the task ~console~
      depends on the task ~compile~), and you can experiment with them.
 
+     =from Jian= How to avoid this dependency??? Sometimes we need to do this!
+
    - =src/main/scala/Models.scala=
      #+BEGIN_SRC scala
-       case class Kitten(id: Long,
-                         attributes: Seq[String])
+       case class Kitten(id: Long, attributes: Seq[String])
        case class BuyerPreferences(attributes: Seq[String])
      #+END_SRC
      Create this file and then you can use the type ~Kitten~ and

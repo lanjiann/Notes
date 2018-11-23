@@ -533,7 +533,7 @@
   - [[10.4. Understanding the Performance of Collections - 261][10.4. Understanding the Performance of Collections - 261]]
   - [[10.5. Declaring a Type When Creating a Collection - 264][10.5. Declaring a Type When Creating a Collection - 264]]
   - [[10.6. Understanding Mutable Variables with Immutable Collections - 265][10.6. Understanding Mutable Variables with Immutable Collections - 265]]
-  - [[10.7. Make Vector Your "Go To" Immutable Sequence - 266][10.7. Make Vector Your "Go To" Immutable Sequence - 266]]
+  - [[10.7. Make ~Vector~ Your "Go To" Immutable Sequence - 266][10.7. Make ~Vector~ Your "Go To" Immutable Sequence - 266]]
   - [[10.8. Make ~ArrayBuffer~ Your "Go To" Mutable Sequence - 268][10.8. Make ~ArrayBuffer~ Your "Go To" Mutable Sequence - 268]]
   - [[10.9. Looping over a Collection with ~foreach~ - 270][10.9. Looping over a Collection with ~foreach~ - 270]]
   - [[10.10. Looping over a Collection with a ~for~ Loop - 272][10.10. Looping over a Collection with a ~for~ Loop - 272]]
@@ -914,51 +914,6 @@
   - [[18.16. Using Build.scala Instead of build.sbt - 602][18.16. Using Build.scala Instead of build.sbt - 602]]
   - [[18.17. Using a Maven Repository Library with SBT - 604][18.17. Using a Maven Repository Library with SBT - 604]]
   - [[18.18. Building a Scala Project with Ant - 606][18.18. Building a Scala Project with Ant - 606]]
-- [[19. Types - 611][19. Types - 611]]
-  - [[Introduction - 611][Introduction - 611]]
-    - [[Variance - 611][Variance - 611]]
-    - [[Bounds - 612][Bounds - 612]]
-    - [[Type Constraints - 613][Type Constraints - 613]]
-    - [[Type Examples in Other Chapters - 613][Type Examples in Other Chapters - 613]]
-  - [[19.1. Creating Classes That Use Generic Types - 614][19.1. Creating Classes That Use Generic Types - 614]]
-    - [[Problem - 614][Problem - 614]]
-    - [[Solution - 614][Solution - 614]]
-    - [[Discussion - 615][Discussion - 615]]
-      - [[Type parameter symbols - 616][Type parameter symbols - 616]]
-    - [[See Also - 617][See Also - 617]]
-  - [[19.2. Creating a Method That Takes a Simple Generic Type - 617][19.2. Creating a Method That Takes a Simple Generic Type - 617]]
-    - [[Problem -  617][Problem -  617]]
-    - [[Solution -  617][Solution -  617]]
-    - [[Discussion - 618][Discussion - 618]]
-  - [[19.3. Using Duck Typing (Structural Types) - 618][19.3. Using Duck Typing (Structural Types) - 618]]
-    - [[Problem - 618][Problem - 618]]
-    - [[Solution - 618][Solution - 618]]
-    - [[Discussion - 619][Discussion - 619]]
-  - [[19.4. Make Mutable Collections Invariant - 620][19.4. Make Mutable Collections Invariant - 620]]
-    - [[Problem - 620][Problem - 620]]
-    - [[Solution - 620][Solution - 620]]
-    - [[Discussion - 622][Discussion - 622]]
-    - [[See Also - 622][See Also - 622]]
-  - [[19.5. Make Immutable Collections Covariant - 622][19.5. Make Immutable Collections Covariant - 622]]
-    - [[Problem - 622][Problem - 622]]
-    - [[Solution - 622][Solution - 622]]
-    - [[Discussion - 623][Discussion - 623]]
-  - [[19.6. Create a Collection Whose Elements Are All of Some Base Type - 624][19.6. Create a Collection Whose Elements Are All of Some Base Type - 624]]
-    - [[Problem - 624][Problem - 624]]
-    - [[Solution - 624][Solution - 624]]
-    - [[Discussion - 626][Discussion - 626]]
-      - [[Methods - 626][Methods - 626]]
-    - [[See Also - 627][See Also - 627]]
-  - [[19.7. Selectively Adding New Behavior to a Closed Model - 627][19.7. Selectively Adding New Behavior to a Closed Model - 627]]
-    - [[Problem - 627][Problem - 627]]
-    - [[Solution - 627][Solution - 627]]
-      - [[Creating a type class - 628][Creating a type class - 628]]
-    - [[Discussion - 629][Discussion - 629]]
-    - [[See Also - 630][See Also - 630]]
-  - [[19.8. Building Functionality with Types - 630][19.8. Building Functionality with Types - 630]]
-    - [[Example 1: Creating a Timer - 630][Example 1: Creating a Timer - 630]]
-    - [[Example 2: Writing Your Own "Try" Classes - 631][Example 2: Writing Your Own "Try" Classes - 631]]
-      - [[The Scala 2.10 Try classes - 633][The Scala 2.10 Try classes - 633]]
 - [[20. Idioms - 635][20. Idioms - 635]]
   - [[Introduction - 635][Introduction - 635]]
     - [[Other Resources][Other Resources]]
@@ -2644,13 +2599,143 @@
      + class constructors
      + the control of field visibility
 
-** TODO 4.1. Creating a Primary Constructor - 100
-*** Problem - 100
-*** Solution - 100
-*** Discussion - 101
-**** A comparison with Java - 102
-**** Those ~_$eq~ methods - 103
-**** Summary - 104
+** DONE 4.1. Creating a Primary Constructor - 100
+   CLOSED: [2018-11-22 Thu 23:27]
+*** DONE Problem - 100
+    CLOSED: [2018-11-22 Thu 22:26]
+    This is different from Java
+
+*** DONE Solution - 100
+    CLOSED: [2018-11-22 Thu 22:40]
+    - The /primary constructor/ of a /Scala class/ is a combination of:
+      + The _constructor parameters_
+
+      + /Methods/ that are called _IN THE BODY OF the class_
+
+      + /Statements/ and /expressions/ that are executed _IN THE BODY OF the class_
+
+    - /Fields/ declared _in the body of a Scala class_ are handled in a manner
+      *similar to Java*;
+      _they are assigned when the class is first instantiated._
+
+    - Example:
+      #+BEGIN_SRC scala
+        class Person(var firstName: String, var lastName: String) {
+          println("the constructor begins")
+
+          // some class fields
+          private val Home = System.getProperty("use.home")
+          var age = 0
+
+          override def toString = s"$firstName $lastName is $age years old"
+          def printHome { println(s"HOME = $HOME") }
+          def printFullName { println(this) }  // uses `toString`
+
+          printHome
+          printFullName
+          println("still in the constructor")
+        }
+      #+END_SRC
+      + =from Jian=
+        ~firstName~ and ~lastName~ is initialized before any other things in the
+        body, they ALWAYS have values.
+
+      + =from Jian=
+        If you write
+        #+BEGIN_SRC scala
+          def printHome { println(s"HOME = $home") }
+          private val home = System.getProperty("use.home")
+        #+END_SRC
+        The ~printHome~ will use the uninitialized ~Home~, which is ~null~.
+
+        The *order* here is IMPORTANT!
+
+*** DONE Discussion - 101
+    CLOSED: [2018-11-22 Thu 23:27]
+    - *Tips*
+      Anything defined within the body of the class
+      _OTHER THAN method declarations_
+      is a part of the /primary class constructor/.
+
+      Because /auxiliary constructors/ *must always call* a previously defined
+      constructor in the same class, /auxiliary constructors/ will also execute
+      the same code.
+
+**** DONE A comparison with Java - 102
+     CLOSED: [2018-11-22 Thu 23:27]
+     Translate the code into Java:
+     #+BEGIN_SRC java
+       // java
+       public class Person {
+           private String firstName;
+           private String lastName;
+           private final String HOME = System.getProperty("user.home");
+           private int age;
+
+           public Person(String firstName, String lastName) {
+               super();
+               this.firstName = firstName;
+               this.lastName = lastName;
+               System.out.println("the constructor begins");
+               age = 0;
+               printHome();
+               printFullName();
+               System.out.println("still in the constructor");
+           }
+
+           public String firstName() { return firstName; }
+           public String lastName() { return lastName; }
+           public int age() { return age; }
+
+           public void firstName_$eq(String firstName) {
+               this.firstName = firstName;
+           }
+
+           public void lastName_$eq(String lastName) {
+               this.lastName = lastName;
+           }
+
+           public void age_$eq(int age) {
+               this.age = age;
+           }
+
+           public String toString() {
+               return firstName + " " + lastName + " is " + age + " years old";
+           }
+
+           public void printHome() {
+               System.out.println(HOME);
+           }
+
+           public void printFullName() {
+               System.out.println(this);
+           }
+       }
+     #+END_SRC
+
+     - This code is more verbose.
+       However, you don't have to reason much about waht the compiler is doing
+       for you.
+
+     - Here you can see the /getter/ and /setter/, which in Scala are generated 
+       automatically according to how you declare a /field/ -- ~var~ or ~val~.
+       #+BEGIN_SRC scala
+         p.name = "Ron Artest"
+         // is actually
+         p.name_$eq("Ron Artest")
+       #+END_SRC
+
+**** DONE Those ~_$eq~ methods - 103
+     CLOSED: [2018-11-22 Thu 23:25]
+
+**** DONE Summary - 104
+     CLOSED: [2018-11-22 Thu 23:25]
+     Java is verbose but straightforward.
+
+     =from Jian= I'm very confused when I learn the /primary constructor/ Scala.
+
+     Scala is more concise, but you need to know more compiler behaviors to
+     understand it.
 
 ** TODO 4.2. Controlling the Visibility of Constructor Fields - 104
 *** Problem - 104
@@ -3813,6 +3898,20 @@
     _understanding how it's organized can be helpful when choosing a
     collection to solve a problem_.
 
+    - =from Jian=
+      + Before Scala 2.7, Scala don't have a good design of collection library,
+        and the one it had is also NOT very functional.
+        =GUESS= Java colleciton with wrapper???
+
+      + Since Scala 2.8, Scala has it own much functional collection library.
+        However, the design is problematic. Even though is very functional and
+        easy to use, it implementation is too complicated, and extend it to get
+        some new fully functional collection types is complicated!
+
+      + From Scala 2.13 on, a new design of collection library will be used.
+        It simplify its implementation, and re-design its hierarchy structure.
+        Scala 2.12 can use, but not as standard library.
+
 *** DONE Solution - 247
 
 ** TODO 10.2. Choosing a Collection Class - 250
@@ -3820,7 +3919,7 @@
 ** TODO 10.4. Understanding the Performance of Collections - 261
 ** TODO 10.5. Declaring a Type When Creating a Collection - 264
 ** TODO 10.6. Understanding Mutable Variables with Immutable Collections - 265
-** TODO 10.7. Make Vector Your "Go To" Immutable Sequence - 266
+** TODO 10.7. Make ~Vector~ Your "Go To" Immutable Sequence - 266
 ** TODO 10.8. Make ~ArrayBuffer~ Your "Go To" Mutable Sequence - 268
 ** TODO 10.9. Looping over a Collection with ~foreach~ - 270
 ** TODO 10.10. Looping over a Collection with a ~for~ Loop - 272
@@ -4631,7 +4730,7 @@
 *** Solution - 489
 *** Discussion - 490
 
-* 15. Web Services - 491
+* TODO 15. Web Services - 491
 ** TODO Introduction - 491
 ** TODO 15.1. Creating a JSON String from a Scala Object - 491
 *** Problem - 491
@@ -4656,7 +4755,7 @@
 ** 15.13. Creating a GET Request Web Service with the Play Framework - 521
 ** 15.14. POSTing JSON Data to a Play Framework Web Service - 524
 
-* 16. Databases and Persistence - 527
+* TODO 16. Databases and Persistence - 527
 ** TODO Introduction - 527
 ** TODO 16.1. Connecting to MySQL with JDBC - 528
 *** Problem - 528
@@ -4735,7 +4834,7 @@
 *** Discussion - 566
 **** Other attempts - 566
 
-* 18. The Simple Build Tool (SBT) - 569
+* TODO 18. The Simple Build Tool (SBT) - 569
 ** TODO Introduction - 569
 ** TODO 18.1. Creating a Project Directory Structure for SBT - 570
 *** Problem - 570
@@ -4765,60 +4864,6 @@
 ** 18.17. Using a Maven Repository Library with SBT - 604
 ** 18.18. Building a Scala Project with Ant - 606
 
-* TODO 19. Types - 611
-** TODO Introduction - 611
-*** Variance - 611
-*** Bounds - 612
-*** Type Constraints - 613
-*** Type Examples in Other Chapters - 613
-
-** TODO 19.1. Creating Classes That Use Generic Types - 614
-*** Problem - 614
-*** Solution - 614
-*** Discussion - 615
-**** Type parameter symbols - 616
-*** See Also - 617
-
-** TODO 19.2. Creating a Method That Takes a Simple Generic Type - 617
-*** Problem -  617
-*** Solution -  617
-*** Discussion - 618
-
-** TODO 19.3. Using Duck Typing (Structural Types) - 618
-*** Problem - 618
-*** Solution - 618
-*** Discussion - 619
-
-** TODO 19.4. Make Mutable Collections Invariant - 620
-*** Problem - 620
-*** Solution - 620
-*** Discussion - 622
-*** See Also - 622
-
-** TODO 19.5. Make Immutable Collections Covariant - 622
-*** Problem - 622
-*** Solution - 622
-*** Discussion - 623
-
-** TODO 19.6. Create a Collection Whose Elements Are All of Some Base Type - 624
-*** Problem - 624
-*** Solution - 624
-*** Discussion - 626
-**** Methods - 626
-*** See Also - 627
-
-** TODO 19.7. Selectively Adding New Behavior to a Closed Model - 627
-*** Problem - 627
-*** Solution - 627
-**** Creating a type class - 628
-
-*** Discussion - 629
-*** See Also - 630
-
-** TODO 19.8. Building Functionality with Types - 630
-*** Example 1: Creating a Timer - 630
-*** Example 2: Writing Your Own "Try" Classes - 631
-**** The Scala 2.10 Try classes - 633
 
 * TODO 20. Idioms - 635
 ** DONE Introduction - 635

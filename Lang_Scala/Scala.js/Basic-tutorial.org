@@ -193,12 +193,92 @@
      we ASSUME you have an sbt with this command running, so we don't need to
      bother with rebuilding each time.
 
-* TODO Step 4: Reacting on User Input
+* DONE Step 4: Reacting on User Input
+  CLOSED: [2018-11-13 Tue 21:26]
+  _Add a button and react to events_ on it by still just using the DOM (we will
+  use jQuery in the next step =TODO=). We want to add a button that adds another
+  ~<p>~ tag to the body when it is clicked.
+
+  1. Add a /method/ to ~TutorialApp~.
+     #+BEGIN_SRC scala
+       import scala.scalajs.js.annotation.JSExportTopLevel
+
+       @JSExportTopLevel("addClickedMessage")
+       def addClickedMessage(): Unit =
+         appendPar(document.body, "You clicked the button!")
+     #+END_SRC
+     This /method/ is called when the button is clicked.
+
+  2. ~@JSExportTopLevel~ tells the _Scala.js compiler_ to *make the annotated
+     method callable from JavaScript*
+
+     =TODO= =TODO= =TODO=
+     To find out _more about how to call Scala.js methods from JavaScript_,
+     have a look at the [[https://www.scala-js.org/doc/interoperability/export-to-javascript.html][Export Scala.js API to JavaScript]] guide.
+
+  3. Add the function call to our HTML and set its ~onclick~ attribute (make sure
+     to add the button *before* the ~<script>~ tags):
+     #+BEGIN_SRC scala
+       <button id="click-me-button" type="button" onclick="addClickedMessage()">
+         Click me!
+       </button>
+     #+END_SRC
+
+  4. =TODO= =from Jian=
+     Error message when do ~sbt run~.
+     However, in browsers, this app works well?
+     =TODO= Try to understand the error message!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 * TODO Step 5: Using jQuery
-** Depending on jQuery
-** Using jQuery
-** Adding JavaScript libraries
-** Setup UI in Scala.js
+  Larger web applications have a tendency to *set up reactions to events in
+  JavaScript rather than specifying attributes*.
+
+  We will
+  - _TRANSFORM_ our current mini-application _TO_ use this paradigm with
+    the help of jQuery.
+
+  - _REPLACE_ all usages of the DOM API _WITH_ jQuery.
+
+** DONE Depending on jQuery
+   CLOSED: [2018-11-13 Tue 21:42]
+   Just like for the DOM, there is a _TYPED library_ for JQuery available in
+   Scala.js: ~jquery-facade~.
+
+   1. Add the following line in your =build.sbtl=:
+      #+BEGIN_SRC scala
+        libraryDependencies += "org.querki" %%% "jquery-facade" % "1.2"
+      #+END_SRC
+
+   2. Don't forget to *reload* the /sbt configuration/:
+      1. Hit enter to abort the =~fastOptJS= command
+
+      2. Type ~reload~
+
+      3. Start =~fastOptJS= again
+
+   3. Again make sure to update your IDE project files if you are using a plugin.
+      =TODO= =???= =???=
+
+** DONE Using jQuery
+   CLOSED: [2018-11-13 Tue 21:51]
+   From the =TutorialApp.scala=, remove the imports for the DOM, and add the
+   import for jQuery:
+   
+   1. ~import org.querki.jquery._~
+
+   2. Remove ~appendPar~ and replace all calls to it by the simple:
+      ~$("body").append("<p>[message]</p>")~
+      , where ~[message]~ is the string originally passed to ~appendPar~, for
+      example: ~$("body").append("<p>Hello World</p>")~
+
+   3. If you try to relad your webpage now, you'll see ~TypeError~.
+      Reason: we have NOT included the jQuery library itself, which is a plain
+      JavaScript library.
+
+      =TODO= Next section!
+
+** TODO Adding JavaScript libraries
+** TODO Setup UI in Scala.js
 
 * TODO Step 6: Testing
 ** Supporting the DOM
