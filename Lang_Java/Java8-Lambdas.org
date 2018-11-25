@@ -25,7 +25,7 @@
   - [[Type Inference - 11][Type Inference - 11]]
   - [[Key Points - 13][Key Points - 13]]
   - [[Exercises - 14][Exercises - 14]]
-- [[3. Streams - 17 - *START*][3. Streams - 17 - *START*]]
+- [[3. Streams - 17][3. Streams - 17]]
   - [[From External Iteration to Internal Iteration - 17][From External Iteration to Internal Iteration - 17]]
   - [[What's Actually Going On - 20][What's Actually Going On - 20]]
   - [[Common Stream Operations - 21][Common Stream Operations - 21]]
@@ -453,7 +453,7 @@
    - Q2. ~ThreadLocal~
      =TODO= =???= =TODO=
 
-* DONE 3. Streams - 17 - *START*
+* DONE 3. Streams - 17
   CLOSED: [2017-09-21 Thu 21:42]
   The most important core library changes are focused around the _Collections API_
   and its new addition: /streams/, which allow us to write collections-processing
@@ -1140,13 +1140,13 @@
 ** TODO Open Exercises - 58
 
 * TODO 5. Advanced Collections and Collectors - 59
-  - New ~Collector~ abstraction.
+  - *NEW ~Collector~ abstraction.*
 
   - /method references/
 
   - More advanced topics within the collections library
-    + element ordering within streams
-    + other useful API changes
+    + element ordering within streams =TODO= =???=
+    + other useful API changes =TODO= =???=
 
 ** DONE Method References - 59
    CLOSED: [2017-10-03 Tue 21:58]
@@ -1154,13 +1154,19 @@
      can be abbreviated as
      ~Artist::getName~
 
-   - The standard form is ~Classname::methodName~
+     =from Jian=
+     From the /lambda expression/ form, you know the passed in is A SPECIFIC
+     ~artist~, this is way ~Artist::getName~ knows on which /instance/ the
+     ~getName~ method should be called.
 
-     No brackets required -- you are *NOT* actually calling the /method/.
-     You're providing the _equivalent_ of a /lambda expression/ that can be called
-     in order to call the /method/.
+   - The _standard form_: ~Classname::methodName~
 
-   - Call constructors in the form of ~Classname::new~
+     No brackets required -- you are *NOT* actually calling the /method/:
+     You're providing the _equivalent_ of a /lambda expression/ that can be
+     called in order to call the /method/.
+
+   - _CALL /constructors/:_ ~Classname::new~
+
      ~(name, nationality) -> new Artist(name, nationality)~
      can be abbreviated as
      ~Artist::new~
@@ -1168,14 +1174,21 @@
    - Use /method references/ to create arrays.
      For example, ~String[]::new~
 
+     =from Jian=
+     Java has /primitive types/, /classes/, and /array types/.
+     This is why we always need to talk about /array types/ separately.
+     =from Jian=
+     I'm confused at the very beginning -- Scala does NOT have a specifc /array
+     types/.
+
 ** DONE Element Ordering - 60
    CLOSED: [2018-08-05 Sun 20:59]
-   How elements are ordered in /streams/?
+   *How elements are ordered in /streams/?*
 
-   - The situation with ordering becomes a little more complex with ~Stream~
+   - The situation with /ordering/ becomes a little _MORE COMPLEX_ with ~Stream~
      operations.
 
-   - A ~Stream~ intuitively presents an order because each element is operated
+   - A ~Stream~ _intuitively presents an order_ because each element is operated
      upon, or encountered, in turn.
 
      + We call this the /encounter order/.
@@ -1185,31 +1198,36 @@
 
        * the *operations* performed on the ~Stream~.
 
-   - When you create a ~Stream~ from a collection with a defined order, the ~Stream~
-     has a defined /encounter order/.
+   - Some intuition you may have are right!!!
+     + If a ~Stream~ created from a collection that has a defined order,
+       a /stream/ created _DIRECTLY_ from it has the same /order/ as its
+       /encounter order/.
 
-   - If a ~Stream~ is created from data structures like ~HashSet~, there won't be
-     /encounter order/.
+     + If a ~Stream~ is created from data structures like ~HashSet~,
+       there won't be /encounter order/.
 
-     However, operations like ~.sorted()~ can create /encounter order/.
+     + Operations like ~.sorted()~ can *create* /encounter order/.
 
-   - The /encounter order/ is propagated across itermediate operations if it exists.
+   - The /encounter order/, if it exists, is *propagated* across itermediate
+     operations.
 
    - Some operations are _more EXPENSIVE_ on /ordered streams/.
-     This problem can be solved by eliminating ordering.
+
+     This problem can be solved by *ELIMINATING* /ordering/.
      To do so, call the /stream/'s ~unordered~ /method/.
 
-     Most operations, however, such as ~filter~, ~map~, and ~reduce~, can operate
-     VERY EFFICIENTLY on /ordered streams/.
+     Most operations, however, such as ~filter~, ~map~, and ~reduce~, can
+     operate VERY EFFICIENTLY on /ordered streams/.
 
-   - This can cause _unexpected behavior_,
+   - /Orders/ can cause _unexpected behavior_,
 
      for example,
-     ~forEach~ provides *NO guarantees as to /encounter order/ if you're
-     using /parallel streams/.* (This will be discussed in more detail in
-     Chapter 6. =TODO=)
-       If you require an ordering guarantee in these situations, then
-     ~forEachOrdered~ is your friend!
+     + ~forEach~ provides *NO guarantees as to /encounter order/ if you're
+       using /parallel streams/.* (This will be discussed in more detail in
+       Chapter 6. =TODO=)
+
+     + If you require an ordering guarantee in these situations, then
+       ~forEachOrdered~ is your friend!
 
 ** TODO Enter the Collector - 62
    The standard library provides a bunch of useful collectors out of the box,
