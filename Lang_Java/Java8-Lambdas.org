@@ -1240,29 +1240,40 @@
     - The /static methods/ ~toList~, ~toSet~, ~toCollection~, etc. come from the
       ~java.util.stream.Collectors~ /class/.
 
-    - =TODO= *parallel operations*
-      But when you’re calling ~toList~ or ~toSet~ , you don’t get to specify the
-      concrete implementation of the List or Set . Under the hood, the streams
-      library is picking an appropriate implementation for you. Later in this
-      book I’ll talk about how you can use the streams library to perform data
-      parallel operations; collecting the results of parallel operations can
-      require a different type of Set to be produced than if there were no
-      requirement for thread safety.
+    - You can produce a ~Collection~ as a final value -- for example:
+      + When passing your collection to existing code that is written to use
+        collections
 
-    - Convert streams to specific collections.
-      For example, ~stream.collect(toCollection(TreeSet::new));~
+      + When creating a final value at the end of a chain of collections
+
+      + When writing test case asserts that operate on a concrete collection
+
+    - But when you're calling ~toList~ or ~toSet~, you don't get to specify the
+      concrete implementation of the ~List~ or ~Set~.
+        Under the hood, the streams library is picking an appropriate
+      implementation for you. =TODO= =HOW=
+
+    - If you really want to convert streams to specific collections,
+      try ~aStream.collect(toCollection(TreeSet::new));~
+
+    - =TODO= *parallel operations* =TODO=
+      Later in this book I’ll talk about how you can use the streams library to
+      perform data parallel operations; collecting the results of parallel
+      operations can require a different type of ~Set~ to be produced than if
+      there were no requirement for thread safety.
+      =TODO=
 
 *** DONE To Values - 63
     CLOSED: [2018-08-05 Sun 23:30]
-    - It's also possible to _collect into a SINGLE value_ using a /collector/.
+    It's also possible to _collect into_ *a SINGLE value* using a /collector/.
 
-      There are ~maxBy~ and ~minBy~ /collectors/ that let you obtain a SINGLE
+    - There are ~maxBy~ and ~minBy~ /collectors/ that let you obtain a SINGLE
       value according to some /ordering/.
 
     - Example 5-6. Finding the band with the most members
       #+BEGIN_SRC java
         public Optional<Artist> biggestGroup(Stream<Artist> artists) {
-            Function<Artist,Long> getCount = artist -> artist.getMembers().count();
+            Function<Artist, Long> getCount = artist -> artist.getMembers().count();
             return artists.collect(maxBy(comparing(getCount)))
         }
       #+END_SRC
@@ -1309,7 +1320,7 @@
       }
     #+END_SRC
 
-    + The /classifier/ (the one passed to ~groupingBy~) is a ~Function~.
+    - The /classifier/ (the one passed to ~groupingBy~) is a ~Function~.
 
 *** DONE Strings - 66
     CLOSED: [2018-08-07 Tue 14:59]

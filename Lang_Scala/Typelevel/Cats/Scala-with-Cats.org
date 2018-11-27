@@ -69,8 +69,8 @@
   - [[3.3 Definition of a Functor - 54][3.3 Definition of a Functor - 54]]
   - [[3.4 Aside: Higher Kinds and Type Constructors - 55][3.4 Aside: Higher Kinds and Type Constructors - 55]]
   - [[3.5 Functors in Cats - 57][3.5 Functors in Cats - 57]]
-    - [[3.5.1 The Functor Type Class - 57][3.5.1 The Functor Type Class - 57]]
-    - [[3.5.2 Functor Syntax - 58][3.5.2 Functor Syntax - 58]]
+    - [[3.5.1 The ~Functor~ Type Class - 57][3.5.1 The ~Functor~ Type Class - 57]]
+    - [[3.5.2 ~Functor~ Syntax - 58][3.5.2 ~Functor~ Syntax - 58]]
     - [[3.5.3 Instances for Custom Types - 60][3.5.3 Instances for Custom Types - 60]]
     - [[3.5.4 Exercise: Branching out with Functors - 61][3.5.4 Exercise: Branching out with Functors - 61]]
   - [[3.6 Contravariant and Invariant Functors - 61 - =TODO= =OPTIONAL=][3.6 Contravariant and Invariant Functors - 61 - =TODO= =OPTIONAL=]]
@@ -907,14 +907,17 @@
    2. the /instances/
    3. the /syntax/
 
-*** DONE 3.5.1 The Functor Type Class - 57
+*** DONE 3.5.1 The ~Functor~ Type Class - 57
     CLOSED: [2018-10-27 Sat 02:10]
     - Basic usage:
       #+BEGIN_SRC scala
         import scala.language.higherKinds
         import cats.Functor
+
+        //------------------------------------------
+        // `List` functor
+        //------------------------------------------
         import cats.instances.list._   // for Functor
-        import cats.instances.option._ // for Functor
   
         val list1 = List(1, 2, 3)
         // list1: List[Int] = List(1, 2, 3)
@@ -922,6 +925,11 @@
         val list2 = Functor[List].map(list1)(_ * 2)
         // list2: List[Int] = List(2, 4, 6)
   
+        //------------------------------------------
+        // `Option` functor
+        //------------------------------------------
+        import cats.instances.option._ // for Functor
+
         val option1 = Option(123)
         // option1: Option[Int] = Some(123)
   
@@ -929,7 +937,9 @@
         // option2: Option[String] = Some(123)
       #+END_SRC
 
-    - Lift: ~A => B~ to ~F[A] => F[B]~
+    - The ~lift~ /method/ of /functors/:
+      ~A => B~ to ~F[A] => F[B]~
+
       #+BEGIN_SRC scala
         val func = (x: Int) => x + 1
         // func: Int => Int = <function1>
@@ -941,8 +951,38 @@
         // res0: Option[Int] = Some(2)
       #+END_SRC
 
-*** TODO 3.5.2 Functor Syntax - 58
+*** DONE 3.5.2 ~Functor~ Syntax - 58
+    CLOSED: [2018-11-26 Mon 01:37]
 *** TODO 3.5.3 Instances for Custom Types - 60
+    - Simple and straightfoward example (already in ~cats.instances~):
+      #+BEGIN_SRC scala
+        implicit val optionFunctor: Functor[Option] =
+          new Functor[Option] {
+            def map[A, B](value: Option[A])(func: A => B): Option[B] =
+              value.map(func)
+          }
+      #+END_SRC
+
+    - Complicated example -- must inject dependencies into our instances:
+      #+BEGIN_SRC scala
+        import scala.concurrent.{Future, ExecutionContext}
+
+        implicit def futureFunctor(implicit ec: ExecutionContext): Functor[Future] =
+          new Functor[Future] {
+            def map[A, B](value: Future[A])(func: A => B): Future[B] =
+              value.map(func)
+          }
+      #+END_SRC
+
+    - =???=
+    - =???=
+    - =???=
+    - =???=
+    - =???=
+    - =???=
+    - =???=
+    - =???=
+
 *** DONE 3.5.4 Exercise: Branching out with Functors - 61
     CLOSED: [2018-10-27 Sat 02:24]
     #+BEGIN_SRC scala
@@ -973,11 +1013,21 @@
 
      These are called /contravariant functor/ and /invariant functor/, respectively.
 
-*** 3.6.1 Contravariant Functors and the ~contramap~ Method - 62
-**** 3.6.1.1 Exercise: Showing off with Contramap - 63
+*** TODO 3.6.1 Contravariant Functors and the ~contramap~ Method - 62
+**** TODO 3.6.1.1 Exercise: Showing off with Contramap - 63
+     #+BEGIN_SRC scala
+       trait Printable[A] {
+         def format(value: A): String
 
-*** 3.6.2 Invariant functors and the ~imap~ method - 65
-**** 3.6.2.1 Transformative Thinking with ~imap~ - 66
+         def contramap[B](func: B => A): Printable[B] =
+           new Printable[B] {
+             def format(value: B): String = ???
+           }
+       }
+     #+END_SRC
+
+*** TODO 3.6.2 Invariant functors and the ~imap~ method - 65
+**** TODO 3.6.2.1 Transformative Thinking with ~imap~ - 66
 
 ** TODO 3.7 Contravariant and Invariant in Cats - 68
 *** 3.7.1 Contravariant in Cats - 68

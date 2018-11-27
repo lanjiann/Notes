@@ -459,7 +459,7 @@
   - [[31.1 Using Scala from Java - 698][31.1 Using Scala from Java - 698]]
     - [[General rules - 698][General rules - 698]]
     - [[Value types - 699][Value types - 699]]
-    - [[Singleton objects - 699][Singleton objects - 699]]
+    - [[Singleton objects - 699 - =Outdated Info= =Re-Read=][Singleton objects - 699 - =Outdated Info= =Re-Read=]]
     - [[Traits as interfaces - 701 =Learn MORE!=][Traits as interfaces - 701 =Learn MORE!=]]
   - [[31.2 Annotations - 701][31.2 Annotations - 701]]
     - [[Additional effects from standard annotations][Additional effects from standard annotations]]
@@ -3760,23 +3760,21 @@ Conclusion - 76]]
    #+BEGIN_SRC scala
      // Returns a row as a sequence
      def makeRowSeq(row: Int) =
-       for (col <1
-            to 10) yield {
-         val prod = (row * col).toString
-         val padding = " " * (4 prod.
-                                length)
-         padding + prod
-       }
+       for {
+         col <- 1 to 10
+         prod = (row * col).toString
+         padding = " " * (4 - prod.length)
+       } yield padding + prod
+
      // Returns a row as a string
-     def makeRow(row: Int) = makeRowSeq(row).mkString
+     def makeRow(row: Int) =
+       makeRowSeq(row).mkString
+
      // Returns table as a string with one row per line
-     def multiTable() = {
-       val tableSeq = // a sequence of row strings
-         for (row <1
-              to 10)
-         yield makeRow(row)
-       tableSeq.mkString("\n")
-     }
+     def multiTable =
+       (1 to 10).
+         map(makeRow).
+         mkString("\n")
    #+END_SRC
 
 ** DONE 7.9 Conclusion - 179
@@ -6558,7 +6556,8 @@ Conclusion - 76]]
      the /extractors/ described in Chapter 26.
      =TODO=
 
-* TODO 16 Working with Lists - 340
+* DONE 16 Working with Lists - 340
+  CLOSED: [2018-11-25 Sun 16:22]
 ** DONE 16.1 ~List~ literals - 340
    CLOSED: [2017-10-24 Tue 01:16]
 ** DONE 16.2 The ~List~ type - 341
@@ -6852,29 +6851,64 @@ Conclusion - 76]]
    CLOSED: [2017-10-24 Tue 13:43]
    ~(List(10, 20), List(3, 4, 5)).zipped.map(_ * _)~
 
-** TODO 16.10 Understanding Scala's type inference algorithm - 368
-   - /Type inference/ in Scala is flow based.
+** DONE 16.10 Understanding Scala's type inference algorithm - 368
+   CLOSED: [2018-11-25 Sun 16:22]
+   /Type inference/ in Scala is *flow based*.
 
-   - Example 1:
+
+   - You may notice there is one difference between the application of ~msort~
+     and the application of ~sortWith~:
      #+BEGIN_SRC scala
        // abcde = ['a', 'b', 'c', 'd', 'e']
+
        // #1
        msort((x: Char, y: Char) => x > y)(abcde)
 
        // #2
        abcde sortWith (_ > _)
      #+END_SRC
+     + The first parameter of ~msort~ must be explicitly typed.
+       ~msort(_ > _)(abcde)~ will lead to a compile error:
+       #+BEGIN_SRC text
+         // <console>:12: error: missing parameter type for expanded
+         // function ((x$1, x$2) => x$1.$greater(x$2))
+         //        msort(_ > _)(abcde)
+         //              ˆ
+       #+END_SRC
 
-     #1 must be explicitly typed
-     + The ~msort~ method needs to be instantiated with a type parameter before
-       it can be applied to its arguments.
+     + The ~msort~ method needs to be instantiated with a /type parameter/
+       BEFORE it can be applied to its arguments.
+
+   - Usually, you have three ways to work around:
+     + Pass the /type parameter/ RATHER THAN EXPLICITLY annotate the /function
+       literal/ like ~msort[Char](_ > _)(abcde)~
+
+     + Two more general solutions, that you need to modify your design:
+
+       The guide rule comes from the fact:
+       Generally, when tasked to infer the /type parameters/ of a /polymorphic
+       method/, the type inferencer consults the types of all value arguments
+       *in the first parameter (ONLY) list BUT NO arguments BEYOND that.*
+
+       * Use ONE parameter list, rather than curring.
+         Now you all the type information are saved in the first parameter list.
+
+       * Keep curring, but swap the parameter lists:
+         #+BEGIN_SRC scala
+           def msortSwapped[T](xs : List[T])
+                           (less: (T, T) => Boolean): List[T] = {
+             // ...
+           }
+         #+END_SRC
+         This is the way we usually take, discussed below!
 
    - This inference scheme suggests the following *library design principle*:
      When designing a /polymorphic method/ that takes
      1. some /non-function arguments/
         and
-     2. a /function argument/, place the function argument last in a curried
-        parameter list on its own.
+     2. a /function argument/,
+        place the /function argument/ *last* in a /curried parameter list/ on
+        its own.
 
      That way, the method's correct instance type can be inferred from the
      non-function arguments, and that type can in turn be used to type check the
@@ -6882,7 +6916,13 @@ Conclusion - 76]]
        The net effect is that users of the method will be able to give less type
      information and write function literals in more compact ways.
 
-   - 
+   - The way Scala do the type inference does NOT use the Hindley-Milner algorithm.
+
+     =TODO= =Learn More= =Read Paper=
+     The Hindley-Milner algorithm does NOT have the issue we met in this section.
+     However, the Scala way is more gracefully with object-oriented subtyping than
+     the Hindley-Milner style does.
+     =TODO= =Learn More= =Read Paper=
 
 ** DONE 16.11 Conclusion - 372
    CLOSED: [2017-10-24 Tue 13:45]
@@ -13575,7 +13615,8 @@ Conclusion - 76]]
      That way, the Scala compiler will add ~equals~ and ~hashCode~ /methods/
      with the right properties *automatically*.
 
-* TODO 31 Combining Scala and Java - 698
+* DONE 31 Combining Scala and Java - 698
+  CLOSED: [2018-11-25 Sun 15:01]
   This chapter describes two aspects of combining Java and Scala:
 
   + it discusses *how Scala is translated to Java*, which is especially important
@@ -13584,7 +13625,8 @@ Conclusion - 76]]
   + it discusses *the use of Java annotations in Scala*, an important feature if
     you want to use Scala with an existing Java framework.
 
-** TODO 31.1 Using Scala from Java - 698
+** DONE 31.1 Using Scala from Java - 698
+   CLOSED: [2018-11-25 Sun 15:00]
    1. _Most of the time_ you can think of Scala _at the source code level_.
 
    2. However,
@@ -13650,65 +13692,189 @@ Conclusion - 76]]
     =From Jian= Review this concept (in Appendix A)
     Use ~Int~ as example,
 
-    - Whenever possible,
-      the compiler translates a Scala ~Int~ to a Java ~int~ to get better
-      performance.
+    - _Whenever possible_,
+      the compiler translates a Scala ~Int~ to a Java ~int~
+      _to get better performance._
 
     - Translate to ~java.lang.Integer~
       when the compiler is not sure if ~int~ is applicable.
-      
-      For example, even if a particular ~List[Any]~ hold only ~Int~'s, the
-      compiler has to use ~java.lang.Integer~ when doing translation -- with the
-      type ~List[Any]~, the compiler cannot infer extra info.
+        For example, even if a particular ~List[Any]~ hold only ~Int~'s, the
+      compiler has to use ~java.lang.Integer~ when doing translation.
 
-    - =TODO=
+    - =TODO= =RE-READ=
       footnote:
       The implementation of /value types/ was discussed in details in Section 11.2
 
-*** TODO Singleton objects - 699
-    Java has no exact equivalent to a singleton object.
+*** DONE Singleton objects - 699 - =Outdated Info= =Re-Read=
+    CLOSED: [2018-11-25 Sun 15:00]
+    =From Jian=
+    Some information of this section is outdated!!!
+    Update required!
+
+    *Java has NO EXACT EQUIVALENT to a singleton object.*
+
+    - The Scala translation of /singleton objects/ uses a combination of
+      + /static methods/
+      + /instance methods/
 
     - There are two types of /singleton object/:
       + "standalone" /singleton object/;
       + "companion" /singleton object/;
 
-      NO matter which case, *TWO* files will be generated!
+      _NO matter which case, *TWO* files will be generated!_
+
       Suppose the name of this /singleton object/ in the source code is ~ABC~,
-      and the generated .class files are: =ABC.class= and =ABC$.class=.
+      and the generated =.class= files are: =ABC.class= and =ABC$.class=.
+
+    - "standalone" /singleton object/;
+      #+BEGIN_SRC scala
+        object App {
+          def main(args: Array[String]): Unit = {
+            println("Hello, world!")
+          }
+        }
+      #+END_SRC
+
+      is translated to
+
+      #+BEGIN_SRC java
+        // Use `javap -c -p` command
+
+        // Compiled from "App.scala"
+        public final class App {
+            public static void main(java.lang.String[]);
+            // Code:
+            // 0: getstatic     #17                 // Field App$.MODULE$:LApp$;
+            // 3: aload_0
+            // 4: invokevirtual #19                 // Method App$.main:([Ljava/lang/String;)V
+            // 7: return
+        }
+
+        // Compiled from "App.scala"
+        public final class App$ {
+            public static App$ MODULE$;
+
+            public static {};
+            // Code:
+            // 0: new           #2                  // class App$
+            // 3: invokespecial #12                 // Method "<init>":()V
+            // 6: return
+
+            public void main(java.lang.String[]);
+            // Code:
+            // 0: getstatic     #20                 // Field scala/Predef$.MODULE$:Lscala/Predef$;
+            // 3: ldc           #22                 // String Hello, world!
+            // 5: invokevirtual #26                 // Method scala/Predef$.println:(Ljava/lang/Object;)V
+            // 8: return
+
+            private App$();
+            // Code:
+            // 0: aload_0
+            // 1: invokespecial #29                 // Method java/lang/Object."<init>":()V
+            // 4: aload_0
+            // 5: putstatic     #31                 // Field MODULE$:LApp$;
+            // 8: return
+        }
+      #+END_SRC
+
+    - "companion" /singleton object/;
+      #+BEGIN_SRC scala
+        class App {
+          val x: Int = 3
+
+          def addX(y: Int): Int =
+            x + y
+        }
+
+        object App {
+          def main(args: Array[String]): Unit = {
+            println("Hello, world!")
+          }
+        }
+      #+END_SRC
+
+      is translated to
+
+      #+BEGIN_SRC java
+        // Compiled from "App.scala"
+        public class App {
+            private final int x;
+
+            public static void main(java.lang.String[]);
+            // Code:
+            // 0: getstatic     #19                 // Field App$.MODULE$:LApp$;
+            // 3: aload_0
+            // 4: invokevirtual #21                 // Method App$.main:([Ljava/lang/String;)V
+            // 7: return
+
+            public int x();
+            // Code:
+            // 0: aload_0
+            // 1: getfield      #24                 // Field x:I
+            // 4: ireturn
+
+            public int addX(int);
+            // Code:
+            // 0: aload_0
+            // 1: invokevirtual #31                 // Method x:()I
+            // 4: iload_1
+            // 5: iadd
+            // 6: ireturn
+
+            public App();
+            // Code:
+            // 0: aload_0
+            // 1: invokespecial #35                 // Method java/lang/Object."<init>":()V
+            // 4: aload_0
+            // 5: iconst_3
+            // 6: putfield      #24                 // Field x:I
+            // 9: return
+        }
+
+
+        // Compiled from "App.scala"
+        public final class App$ {
+            public static App$ MODULE$;
+
+            public static {};
+            // Code:
+            // 0: new           #2                  // class App$
+            // 3: invokespecial #12                 // Method "<init>":()V
+            // 6: return
+
+            public void main(java.lang.String[]);
+            // Code:
+            // 0: getstatic     #20                 // Field scala/Predef$.MODULE$:Lscala/Predef$;
+            // 3: ldc           #22                 // String Hello, world!
+            // 5: invokevirtual #26                 // Method scala/Predef$.println:(Ljava/lang/Object;)V
+            // 8: return
+
+            private App$();
+            // Code:
+            // 0: aload_0
+            // 1: invokespecial #29                 // Method java/lang/Object."<init>":()V
+            // 4: aload_0
+            // 5: putstatic     #31                 // Field MODULE$:LApp$;
+            // 8: return
+        }
+      #+END_SRC
+
+    - Compare the code above, you'll notice if you did have a /class/ named ~App~,
+      Scalac would create a corresponding /Java ~App~ class/ to hold the
+      /members/ of the ~App~ /class/ you defined.
+        In that case it would NOT add any /forwarding methods/ for the same-named
+      singleton object, and Java code would have to access the singleton *via*
+      the ~MODULE$~ field.
 
     - =Comment from Jian=
-      *There are errors in the book for this part.*
-      I have submitted an errata.
-      *Re-Make a note for this part later*, when I get more information.
+      The book use an outdated version of Scala in this section!!!
+      From the result of ~javap~, we know it's Scala 2.9-.
 
-    - =Comment from Jian=
-      *Errata*
-      1. Use command ~javap -p App$~, rather than the command ~javap App$~ in the
-         book, we can get the result:
-         #+BEGIN_SRC java
-           // Pay attention! This is NOT the same as the code listed in the book!
-           public final class App$ {
-               public static App$ MODULE$;
-               public static {};
-               public void main(java.lang.String[]);
-               private App$();
-           }
-         #+END_SRC
+      - From Scala 2.10 on, ~ScalaObject~ was eradicated, and th so does its member
+        ~public int $tag()~
 
-      2. I can't get the /method/ listed in the book: ~public int $tag();~
-         (Use Scala 2.11.6 in Ubuntu 16.04 and Scala 2.12.2 in Windows 10)
-
-    - =TODO= =TODO= =TODO= =TODO=
-      =???= ~MODULE$~ (I don't understand)
-      + this is *NOT* ~final~ when use Scala 2.12.4 in Windows 10
-      + this is ~final~ when use Scala 2.11.6 in Ubuntu 16.04
-
-    - =TODO=
-    - =TODO=
-    - =TODO=
-    - =TODO=
-    - =TODO=
-    - =TODO=
+      - ~MODULE$~ was ~final~, but not ~final~ anymore.
+        =from Jian= WHY??? I think ~final~ is more reasonable!!!
 
 *** DONE Traits as interfaces - 701 =Learn MORE!=
     CLOSED: [2018-02-06 Tue 22:46]
