@@ -65,9 +65,9 @@
   - [[3.1 Examples of Functors - 47][3.1 Examples of Functors - 47]]
   - [[3.2 More Examples of Functors - 49][3.2 More Examples of Functors - 49]]
     - [[~Futures~ - 49 - =TODO= =RE-READ=][~Futures~ - 49 - =TODO= =RE-READ=]]
-    - [[Functions (?!) - 49 - =TODO=][Functions (?!) - 49 - =TODO=]]
+    - [[Functions (?!) - 49][Functions (?!) - 49]]
   - [[3.3 Definition of a Functor - 54][3.3 Definition of a Functor - 54]]
-  - [[3.4 Aside: Higher Kinds and Type Constructors - 55][3.4 Aside: Higher Kinds and Type Constructors - 55]]
+  - [[3.4 Aside: Higher Kinds and Type Constructors - 55 - =RE-READ=][3.4 Aside: Higher Kinds and Type Constructors - 55 - =RE-READ=]]
   - [[3.5 Functors in Cats - 57][3.5 Functors in Cats - 57]]
     - [[3.5.1 The ~Functor~ Type Class - 57][3.5.1 The ~Functor~ Type Class - 57]]
     - [[3.5.2 ~Functor~ Syntax - 58][3.5.2 ~Functor~ Syntax - 58]]
@@ -793,29 +793,48 @@
 ** TODO 2.7 Summary - 45
 
 * TODO 3 Functors - 47
-  /Functors/ allow us to represent sequences of operations within a /context/.
+  - /Functors/ allow us to represent sequences of operations within a /context/.
+    =from Jian=
+    Here /computational context/ is more exact than /structure/.
 
-  /Functor/ is the base of /applicative functor/ and /monad/, and the latter two
-  are the special cases of /functor/.
+      It might NOT be /structure/ -- unless you think the type is a concrete
+    container. =from Jian= This what book told me. Need Examples!!!
+
+  - /Functor/ is the base of /applicative functor/ and /monad/, and the latter
+    two are the special cases of /functor/.
 
 ** DONE 3.1 Examples of Functors - 47
    CLOSED: [2018-10-27 Sat 00:22]
+   - Because ~map~ leaves the the /context/ unchanged, we can call it repeatedly
+     to *sequence* multiple computations on the _contents_ of an initial data
+     structure.
+     
+   - We should think of ~map~
+     + _NOT as an /iteration pattern/,_
+     + BUT as a way of *sequencing* computations on values
+       IGNORING SOME COMPLICATION dictated by the relevant data type.
+
 ** DONE 3.2 More Examples of Functors - 49
    CLOSED: [2018-10-27 Sat 00:54]
 *** DONE ~Futures~ - 49 - =TODO= =RE-READ=
     CLOSED: [2018-10-27 Sat 00:26]
-    - *Futures and Referen al Transparency* =TODO= =RE-READ=
+    - *Futures and Referential Transparency* =TODO= =RE-READ=
       =NOTE=
       Note that Scala’s Futures are *NOT* a great example of pure functional pro-
       gramming because they are *NOT* /referentially transparent/.
 
-    - If Future is *NOT* /referentially transparent/, perhaps we should look at another
-      similar data-type that is. You should recognise this one...
+    - If ~Future~ is *NOT* /referentially transparent/, perhaps we should look at
+      another similar data-type that is. You should recognise this one...
 
-*** DONE Functions (?!) - 49 - =TODO=
+*** DONE Functions (?!) - 49
     CLOSED: [2018-10-27 Sat 00:53]
+    - /Single argument functions/ are also /functors/
+
+    - ~map~ for /single argument functions/ is, by concept, /function composition/
+      (it works like ~andThen~) -- a kind of *sequencing*!
+
     - *Partial Unification*
-      You need ~scalaOptions += "-Ypartial-unification"~
+      _BEFORE Scala 2.13_, You need ~scalaOptions += "-Ypartial-unification"~
 
       Or you'll see some error like:
       #+BEGIN_SRC scala
@@ -840,8 +859,8 @@
 
    - *Functor Laws*
      =from Jian= You implment the ~Functor[F[_]]~ /trait/, you only create a
-     /functor in code/, you must verify these /laws/ to guarantee a FORMAL
-     /functor in math/.
+     /functor in code/, you must verify these /laws/ to guarantee a *FORMAL*
+     functor *in math*.
 
      + *Identity*:
        calling map with the iden ty func on is the same as doing nothing:
@@ -852,12 +871,14 @@
        and then mapping with ~g~:
        _fa.map(g(f(_))) \equiv{} fa.map(f).map(g)_
 
-   - If you haven't seen syntax like ~F[_]~ before, it's me to take a brief de-
-     tour to discuss /type constructors/ and /higher kinded types/. =TODO= =NEXT SECTION=
+   - =TODO=
+     NEXT SECTION will explain:
+     + /type constructors/ and /higher kinded types/ -- be related to the ~F[_]~
+       above.
 
-     We'll explain that ~scala.language~ import as well.
+     + The ~scala.language~ line.
 
-** DONE 3.4 Aside: Higher Kinds and Type Constructors - 55
+** DONE 3.4 Aside: Higher Kinds and Type Constructors - 55 - =RE-READ=
    CLOSED: [2018-10-27 Sat 01:50]
    - kinds :: "types" for /types/ -- a concept used to category /types/.
 
@@ -987,6 +1008,7 @@
     CLOSED: [2018-10-27 Sat 02:24]
     #+BEGIN_SRC scala
       sealed trait Tree[+A]
+
       final case class Branch[A](left: Tree[A], right: Tree[A])
           extends Tree[A]
       final case class Leaf[A](value: A)
@@ -995,34 +1017,51 @@
       implicit treeFunctor = new Functor[Tree] {
         def map[A, B](tree: Tree[A])(func: A => B): Tree[B] =
           tree match {
+            case Leaf(v)      => Leaf(func(v))
             case Branch(l, r) => Branch(map(l)(func), map(r)(func))
-            case Leaf(v)      => Leaf(func(value))
           }
       }
     #+END_SRC
 
 ** TODO 3.6 Contravariant and Invariant Functors - 61 - =TODO= =OPTIONAL=
-   - As we have seen, we can think of ~Functor~'s ~map~ /method/ as *appending* a
-     transformation to a /chain/.
+   - The ~Functor~ we explored is actually /covariant functor/, and its ~map~ 
+     *appends* a transformation to a chain.
 
-     We're now going to look at _TWO_ other /type classes/:
+   - We're now going to look at _TWO_ other /type classes/:
+     + contravariant functor ::
+       one representing *prepending* operations to a chain,
 
-     + one representing *prepending* operations to a chain,
+     + invariant functor ::
+       one representing building a *bidirectional* chain of operations.
 
-     + one representing building a *bidirectional* chain of opera ons.
+   - *This Section is Optional!*
+     You do _NOT NEED_ to know about /contravariant and invariant functors/ to
+     understand /monads/, the most important pattern in this book.
 
-     These are called /contravariant functor/ and /invariant functor/, respectively.
+       HOWEVER, /contravariant/ and /invariant/ do come in HANDY in our
+     discussion of ~Semigroupal~ and ~Applicative~ in Chapter 6.
+     =from Jian= WHY???
+
+     _If you want to move on to monads now, feel free to skip straight to
+     Chapter 4. Come back here before you read Chapter 6._
 
 *** TODO 3.6.1 Contravariant Functors and the ~contramap~ Method - 62
+    - /contravariant functor/:
+      + ~contramap~ - "prepending" an operation to a chain.
+
 **** TODO 3.6.1.1 Exercise: Showing off with Contramap - 63
      #+BEGIN_SRC scala
-       trait Printable[A] {
+       trait Printable[A] { self =>
          def format(value: A): String
 
          def contramap[B](func: B => A): Printable[B] =
            new Printable[B] {
-             def format(value: B): String = ???
+             def format(value: B): String = self.format(func(value))
            }
+
+         //// More concise version:
+         // def contramap[B](func: B => A): Printable[B] =
+         //   value => self.format(func(value))
        }
      #+END_SRC
 

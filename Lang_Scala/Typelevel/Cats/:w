@@ -1,0 +1,347 @@
+#+TITLE: herding cats
+#+AUTHOR: Noel Welsh and Dave Gurnell
+#+Date: November 2017
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[1. day 0][1. day 0]]
+  - [[a. What is polymorphism?][a. What is polymorphism?]]
+    - [[Parametric polymorphism][Parametric polymorphism]]
+    - [[Subtype polymorphism][Subtype polymorphism]]
+    - [[Ad-hoc polymorphism][Ad-hoc polymorphism]]
+  - [[b. sum function][b. sum function]]
+    - [[~Monoid~][~Monoid~]]
+  - [[c. ~FoldLeft~][c. ~FoldLeft~]]
+    - [[Typeclasses in Cats][Typeclasses in Cats]]
+  - [[d. Method injection (enrich my library)][d. Method injection (enrich my library)]]
+    - [[Operator syntax for the standard datatypes][Operator syntax for the standard datatypes]]
+- [[2. day 1][2. day 1]]
+  - [[a. sbt][a. sbt]]
+  - [[b. Eq][b. Eq]]
+  - [[c. Order][c. Order]]
+  - [[d. PartialOrder][d. PartialOrder]]
+  - [[e. Show][e. Show]]
+  - [[f. Read][f. Read]]
+  - [[g. Enum][g. Enum]]
+  - [[h. Numeric][h. Numeric]]
+  - [[i. typeclasses 102][i. typeclasses 102]]
+- [[3. day 2][3. day 2]]
+  - [[a. Making our own typeclass with ~simulacrum~][a. Making our own typeclass with ~simulacrum~]]
+    - [[simulacrum][simulacrum]]
+    - [[Yes-No typeclass][Yes-No typeclass]]
+    - [[Symbolic operators][Symbolic operators]]
+  - [[b. Functor][b. Functor]]
+  - [[c. Checking laws with Discipline][c. Checking laws with Discipline]]
+  - [[d. Import guide][d. Import guide]]
+- [[4. day 3][4. day 3]]
+  - [[a. Kinds and some type-foo][a. Kinds and some type-foo]]
+  - [[b. Semigroupal][b. Semigroupal]]
+  - [[c. Apply][c. Apply]]
+  - [[d. Applicative][d. Applicative]]
+- [[5. day 4][5. day 4]]
+  - [[a. Semigroup][a. Semigroup]]
+  - [[b. Monoid][b. Monoid]]
+  - [[c. About Laws][c. About Laws]]
+  - [[d. Using monoids to fold data structures][d. Using monoids to fold data structures]]
+- [[6. day 5][6. day 5]]
+  - [[a. FlatMap][a. FlatMap]]
+  - [[b. Monad][b. Monad]]
+  - [[c. List datatype][c. List datatype]]
+  - [[d. FunctorEmpty][d. FunctorEmpty]]
+  - [[e. A knight’s quest][e. A knight’s quest]]
+- [[7. day 6][7. day 6]]
+  - [[a. do vs for][a. do vs for]]
+  - [[b. Writer datatype][b. Writer datatype]]
+  - [[c. Reader datatype][c. Reader datatype]]
+- [[8. day 7][8. day 7]]
+  - [[a. State datatype][a. State datatype]]
+  - [[b. Validated datatype][b. Validated datatype]]
+  - [[c. Ior datatype][c. Ior datatype]]
+- [[9. day 8][9. day 8]]
+  - [[a. Free monoids][a. Free monoids]]
+  - [[b. Free monads][b. Free monads]]
+  - [[c. Stackless Scala with Free Monads][c. Stackless Scala with Free Monads]]
+  - [[d. Tail Recursive Monads (FlatMap)][d. Tail Recursive Monads (FlatMap)]]
+- [[10. day 9][10. day 9]]
+  - [[a. Some useful monadic functions][a. Some useful monadic functions]]
+  - [[b. Making a safe RPN calculator][b. Making a safe RPN calculator]]
+  - [[c. Composing monadic functions][c. Composing monadic functions]]
+  - [[d. Making monads][d. Making monads]]
+  - [[e. Monads are fractals][e. Monads are fractals]]
+- [[11. day 10][11. day 10]]
+  - [[a. Monad transformers][a. Monad transformers]]
+  - [[b. Stacking Future and Either][b. Stacking Future and Either]]
+- [[12. day 11][12. day 11]]
+  - [[a. Genericity][a. Genericity]]
+  - [[b. Datatype-generic programming with Bifunctor][b. Datatype-generic programming with Bifunctor]]
+  - [[c. Const datatype][c. Const datatype]]
+  - [[d. Combining applicative functors][d. Combining applicative functors]]
+- [[13. day 12][13. day 12]]
+  - [[a. Traverse][a. Traverse]]
+  - [[b. TraverseEmpty][b. TraverseEmpty]]
+  - [[c. Coercing type inference using partial unification][c. Coercing type inference using partial unification]]
+  - [[d. Shape and contents][d. Shape and contents]]
+  - [[e. Applicative wordcount][e. Applicative wordcount]]
+- [[14. day 13][14. day 13]]
+  - [[a. Id datatype][a. Id datatype]]
+  - [[b. Eval datatype][b. Eval datatype]]
+  - [[c. The Abstract Future][c. The Abstract Future]]
+- [[15. day 14][15. day 14]]
+  - [[a. SemigroupK][a. SemigroupK]]
+  - [[b. MonoidK][b. MonoidK]]
+  - [[c. Alternative][c. Alternative]]
+- [[16. day 15][16. day 15]]
+  - [[a. Basic category theory][a. Basic category theory]]
+  - [[b. Arrow][b. Arrow]]
+  - [[c. Isomorphism][c. Isomorphism]]
+- [[17. day 16][17. day 16]]
+  - [[a. Sets][a. Sets]]
+  - [[b. Pos][b. Pos]]
+  - [[c. Finite categories][c. Finite categories]]
+  - [[d. Cat][d. Cat]]
+  - [[e. Monoid as categories][e. Monoid as categories]]
+  - [[f. Grp][f. Grp]]
+- [[18. day 17][18. day 17]]
+  - [[a. Initial and terminal objects][a. Initial and terminal objects]]
+  - [[b. Product][b. Product]]
+  - [[c. Duality][c. Duality]]
+  - [[d. Coproduct][d. Coproduct]]
+- [[Contents in Depth][Contents in Depth]]
+- [[Combined Pages][Combined Pages]]
+
+* 1. day 0
+  - Cats consists of two parts:
+    + NEW datatypes (~Validated~, ~State~, etc)
+
+    + Implementation of many general functions you need (ad-hoc polymorphism,
+      ~trait~'s + ~implicit~'s) 
+
+** DONE a. What is polymorphism?
+   CLOSED: [2018-11-28 Wed 00:57]
+*** Parametric polymorphism
+*** Subtype polymorphism
+*** Ad-hoc polymorphism
+    - This is *truely* ad-hoc in the sense that
+      + we can
+        _provide_
+        separate function definitions
+        _for_
+        DIFFERENT types of ~A~
+
+      + we can provide function definitions to types (like ~Int~) *without access
+        to its source code*
+
+      + the function definitions can *be enabled or disabled in different scopes* 
+
+        * Comment:
+          The last point makes Scala's /ad-hoc polymorphism/ MORE POWERFUL than
+          that of Haskell.
+
+          - TODO
+            More on this topic can be found at _Debasish Ghosh @debasishg_'s /Scala
+            Implicits/: _Type Classes Here I Come_.
+
+    - NEXT SECTION
+      Let's look into ~plus~ function in more detail. 
+
+** TODO b. sum function
+*** ~Monoid~
+** TODO c. ~FoldLeft~
+*** Typeclasses in Cats
+
+** TODO d. Method injection (enrich my library)
+*** Operator syntax for the standard datatypes
+
+* 2. day 1
+** a. sbt
+** b. Eq
+** c. Order
+** d. PartialOrder
+** e. Show
+** f. Read
+** g. Enum
+** h. Numeric
+** i. typeclasses 102
+
+* 3. day 2
+** a. Making our own typeclass with ~simulacrum~
+*** simulacrum
+    - The _conventional steps_ of *defining a modular /typeclass/ in Scala* used
+      to look like:
+      1. Define /typeclass/ contract ~trait Foo~.
+
+      2. Define a /companion object/ ~Foo~
+         with a helper method ~apply~ that acts like ~implcitly~, and a way of
+         defining ~Foo~ instances typically from a function.
+
+      3. Define ~FooOps~ /class/ that defines _unibary or binary operators_.
+
+      4. Define ~FooSyntax~ /trait/ that IMPLICITLY provides ~FooOps~ from a ~Foo~
+         instance.
+
+    - Frankly, these steps are *MOSTLY copy-paste boilerplate*
+      *EXCEPT for the first one.*
+
+    - Enter =Michael Pilquist (@mpilquist)='s ~simulacrum~.
+      ~simulacrum~ magically generates _MOST_ of steps 2-4 just by putting
+      ~@typeclass~ /annotation/.
+        =Stew O'Connor (@stewoconnor/@stew)='s refactored /Cats/ to use it
+      (_MERGED_).
+
+*** Yes-No typeclass
+    #+BEGIN_SRC scala
+      import simulacrum._
+
+      @typeclass trait CanTruthy[A] { self =>
+        def truthy(a: A): Boolean
+      }
+
+      object CanTruthy {
+        // Since Scala 2.12
+        def fromTruthy[A](f: A => Boolean): CanTruthy[A] =
+          a => f(a)
+
+        //// Before Scala 2.12
+        //
+        // def fromTruthy[A](f: A => Boolean): CanTruthy[A] =
+        //  new CanTruthy[A] {
+        //    def truthy(a: A): Boolean = f(a)
+        //  }
+      }
+    #+END_SRC
+
+    According to the =README= of ~simulacrum~, the macro will _generate_ all the
+    operator enrichment stuff:
+    #+BEGIN_SRC scala
+      // This is the supposed generated code. You don't have to write it!
+      object CanTruthy {
+        def fromTruthy[A](f: A => Boolean): CanTruthy[A] =
+          a => f(a)
+
+        def apply[A](implicit instance: CanTruthy[A]): CanTruthy[A] =
+          instance
+
+        trait Ops[A] {
+          def typeClassInstance: CanTruthy[A]
+          def self: A
+          def truthy: A = typeClassInstance.truthy(self)
+        }
+
+        trait ToCanTruthyOps {
+          implicit def toCanTruthyOps[A](target: A)(implicit tc: CanTruthy[A]): Ops[A] =
+            new Ops[A] {
+              val self = target
+              val typeClassInstance = tc
+            }
+        }
+
+        trait AllOps[A] extends Ops[A] {
+          def typeClassInstance: CanTruthy[A]
+        }
+
+        object ops {
+          implicit def toAllCanTruthyOps[A](target: A)(implicit tc: CanTruthy[A]): AllOps[A] =
+            new AllOps[A] {
+              val self = target
+              val typeClassInstance = tc
+            }
+        }
+      }
+    #+END_SRC
+
+*** Symbolic operators
+
+** b. Functor
+** c. Checking laws with Discipline
+** d. Import guide
+
+* 4. day 3
+** a. Kinds and some type-foo
+** b. Semigroupal
+** c. Apply
+** d. Applicative
+
+* 5. day 4
+** a. Semigroup
+** b. Monoid
+** c. About Laws
+** d. Using monoids to fold data structures
+
+* 6. day 5
+** a. FlatMap
+** b. Monad
+** c. List datatype
+** d. FunctorEmpty
+** e. A knight’s quest
+
+* 7. day 6
+** a. do vs for
+** b. Writer datatype
+** c. Reader datatype
+
+* 8. day 7
+** a. State datatype
+** b. Validated datatype
+** c. Ior datatype
+
+* 9. day 8
+** a. Free monoids
+** b. Free monads
+** c. Stackless Scala with Free Monads
+** d. Tail Recursive Monads (FlatMap)
+
+* 10. day 9
+** a. Some useful monadic functions
+** b. Making a safe RPN calculator
+** c. Composing monadic functions
+** d. Making monads
+** e. Monads are fractals
+
+* 11. day 10
+** a. Monad transformers
+** b. Stacking Future and Either
+
+* 12. day 11
+** a. Genericity
+** b. Datatype-generic programming with Bifunctor
+** c. Const datatype
+** d. Combining applicative functors
+
+* 13. day 12
+** a. Traverse
+** b. TraverseEmpty
+** c. Coercing type inference using partial unification
+** d. Shape and contents
+** e. Applicative wordcount
+
+* 14. day 13
+** a. Id datatype
+** b. Eval datatype
+** c. The Abstract Future
+
+* 15. day 14
+** a. SemigroupK
+** b. MonoidK
+** c. Alternative
+
+* 16. day 15
+** a. Basic category theory
+** b. Arrow
+** c. Isomorphism
+
+* 17. day 16
+** a. Sets
+** b. Pos
+** c. Finite categories
+** d. Cat
+** e. Monoid as categories
+** f. Grp
+
+* 18. day 17
+** a. Initial and terminal objects
+** b. Product
+** c. Duality
+** d. Coproduct
+
+* Contents in Depth
+* Combined Pages
