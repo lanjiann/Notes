@@ -98,9 +98,9 @@
   - [[Clean code][Clean code]]
   - [[Red-Green-Refactor][Red-Green-Refactor]]
   - [[Code smell][Code smell]]
-    - [[Expendable][Expendable]]
+    - [[Expendable - =re-read=][Expendable - =re-read=]]
     - [[Couplers][Couplers]]
-    - [[Modification thwarters][Modification thwarters]]
+    - [[Modification thwarters =???=][Modification thwarters =???=]]
     - [[Bloaters][Bloaters]]
     - [[Object-oriented abusers][Object-oriented abusers]]
     - [[Obsolete libraries][Obsolete libraries]]
@@ -914,34 +914,234 @@
 ** TODO Summary
 
 * TODO 4. Refactor Mercilessly
-** TODO Clean code
-** TODO Red-Green-Refactor
-** TODO Code smell
-*** Expendable
-*** Couplers
-*** Modification thwarters
-*** Bloaters
-*** Object-oriented abusers
-*** Obsolete libraries
+  - In this chapter we will cover:
+    + Clean code
+    + Red-Green-Refactor
+    + Code smell
+    + To refactor or not to refactor?
+    + Refactoring techniques
+    + Building reusable test code
 
-** TODO To refactor or not to refactor
-*** Doing it thrice (rule of three)
-*** Adding new feature
-*** Bug fixing
-*** Code reviews
+** DONE Clean code
+   CLOSED: [2018-12-05 Wed 21:58]
+** DONE Red-Green-Refactor
+   CLOSED: [2018-12-05 Wed 22:02]
+   *Refactoring ALWAYS comes in after the Gree -- passing all tests.*
+
+   - Most /refactoring/ is just common sense.
+     However, NOT ALL!
+     =TODO=
+
+** TODO Code smell
+   - Code smell :: a surface indication that usually corresponds to a deeper
+                   problem in the system (by Martin Fowler).
+   - For example,
+     OVERSIZED /method/ and /testability/ are two /code smells/.
+
+   - There are a few types of code smell that can be identified by looking at the code:
+     =NEXT SUB-SECTIONS=
+
+*** DONE Expendable - =re-read=
+    CLOSED: [2018-12-05 Wed 22:16]
+    An *expendable* is something gratuitous and futile.
+    Removal of such code will make the code cleaner, efficient, and comprehensible.
+
+    It can be one of the follwoing:
+    - *COMMENTS*
+      + Code should be self-documented.
+      + If you have too much coments, this usually means:
+        * Just too much comments that used to describe details what you don't
+          need to explain.
+          OR/AND
+        * The code is bad, and you need to write so much comments to clarify
+          your code.
+
+    - *CODE DUPLICATION*
+
+    - *INSIGNIFICANT CLASSES*
+      =TODO=
+      This is a little hard to detect, but any class that is doing little or has
+      a very insignificant task is a code smell. In most cases, this can just be
+      given an inline class treatment, which we will discuss later.
+
+    - *UNREACHABLE and DEAD CODE*
+      This can be the residue of refactoring or just bad programming.
+      Thanks to the Modern IDE's, which are good at detecting them.
+
+    - *HYPOTHETICAL PLATITUDE*
+      Don't write your code to support anticipated future changes that you don't
+      have high confidence.
+
+*** DONE Couplers
+    CLOSED: [2018-12-05 Wed 22:34]
+    These /code smells/ contribute towards *excessive coupling* between /classes/.
+    This makes the *classes untestable in isolation*.
+
+    These smells are:
+
+    - *Feature envy*:
+      If your method is making extensive use of another class then it would mean
+      that this method should belong in the other class it is envious of.
+
+    - *Inappropriate intimacy*:
+      When your class is using internal fields and methods of another class.
+      This violates the rule of encapsulation.
+
+    - *Function chaining*:
+      When you see multiple functions chained together like ~a.b().c().d()~, then
+      _it means that the client is responsible for *navigation along the class*
+      structure_, resulting in smell.
+
+    - *Broker class*:
+      If the /class/ is designed to /delegate/ functionality to another class
+      then _maybe_ this class is _not required_ at all.
+
+*** DONE Modification thwarters =???=
+    CLOSED: [2018-12-05 Wed 22:36]
+    - Deviating modification:
+      When you find yourself changing many unrelated methods when changing a
+      class. This is mostly a result of "copy-paste programming".
+      =???=
+
+    - Shotgun surgery:
+      If to make one small change you have to make changes to many different
+      classes, this means that the responsibility has been split up among a
+      number of classes.
+
+    - Parallel inheritance hierarchies:
+      Whenever you create a subclass for a class, and you end up having to
+      create a subclass of one or more other classes too.
+      =???=
+
+*** DONE Bloaters
+    CLOSED: [2018-12-05 Wed 22:42]
+    /Bloaters/ are /methods/ OR /classes/ that have increased to such monstrous
+    proportions that they are very hard to work with:
+
+    - *Long method*:
+      The general RULE OF THUMB is that any /method/ _longer than 10 lines_ of
+      code is a /code smell/.
+
+    - *Large class*:
+      This is a /class/ containing many /fields/ and /methods/.
+      Ideally a /class/ should be around _200 at the most_.
+
+    - *Primitive obsession*: TODO =SUMMARIZE=
+      When your code uses primitive types rather than small objects, or
+      constants, for information or as field names. Just as with many other
+      smells, this arises because of moments of weakness, when you just need a
+      field to store some data.
+
+    - *Long parameter list*:
+      When your method requires _MORE THAN Three or Four parameters_.
+      This may mean several algorithms are merged in a single method.
+
+    - *Data clumps*: =???=
+      Sometimes different parts of code contain identical groups of variables,
+      for example, when connecting to a database. These are candidates for
+      moving into their own classes.
+
+*** TODO Object-oriented abusers
+*** TODO Obsolete libraries
+    =from Jian=
+    Keep an eye on the third-party libraries your project are using.
+    If they are =TODO= =TODO=
+
+** DONE To refactor or not to refactor
+   CLOSED: [2018-12-06 Thu 23:36]
+   - =EN= impetus
+
+*** DONE Doing it thrice (rule of three)
+    CLOSED: [2018-12-06 Thu 16:05]
+    When you do a thing the third time.
+
+    - =EN= squirm
+
+*** DONE Adding new feature
+    CLOSED: [2018-12-06 Thu 16:09]
+    When you are *adding* a new feature to someone else's *unclear* code.
+
+    - Refactor can help you understanding the purpose of the unclear code,
+      and make it clear.
+
+    - Refactored code facilitates the smooth addition of new features.
+
+*** DONE Bug fixing
+    CLOSED: [2018-12-06 Thu 16:11]
+    A bug can be a code smell that implies the code is error-prone.
+    You may need to refactor the code when you fix bugs in it.
+
+*** DONE Code reviews
+    CLOSED: [2018-12-06 Thu 23:35]
 
 ** TODO Refactoring techniques
-*** Composing methods
-*** Moving features between objects
-*** Organizing data
+*** DONE Composing methods
+    CLOSED: [2018-12-06 Thu 23:38]
+*** DONE Moving features between objects
+    CLOSED: [2018-12-06 Thu 23:40]
+*** TODO Organizing data
 
 ** TODO Summary
 
 * TODO 5. Another Level of Testing
-** TODO Integration testing
-*** TODO Functional testing
-*** TODO Acceptance testing
-*** TODO Need for user acceptance testing
+  - Test the interaction of your system with other systems outside the ecosystem.
+
+  - We will be covering the following topics:
+    + Integration testing
+
+    + Behavior-driven development (BDD)
+
+** DONE Integration testing
+   CLOSED: [2018-12-08 Sat 12:43]
+   - Integration testing sit, as a phase, *in between* /unit testing/ and
+     /acceptance testing/.
+
+   - The _process_ of /integration testing/:
+     1. *Identify the interfaces* between the units that are used for interaction.
+
+     2. *Specify a collection of units* with interfaces that form a complete
+        end-to-end integration.
+
+     3. *Create integration test cases* along with the inputs and expected outputs.
+
+     4. *Evaluate the test* to determine if the results are matched and record the
+        results.
+
+*** DONE Functional testing
+    CLOSED: [2018-12-07 Fri 22:11]
+    - =from Jian=
+      According to the description, *functionality testing* is a BETTER name.
+
+    - Steps involved in functional testing:
+      1. Identify the functionality to be tested.
+      2. Create test data.
+      3. Ascertain the expected output.
+      4. Execute the test case.
+      5. Compare output with the expected outcome.
+      6. Collate results.
+
+*** DONE Acceptance testing
+    CLOSED: [2018-12-08 Sat 12:41]
+    - /Acceptance testing/ is more FOCUSED on the _end customer_.
+
+    - During /acceptance testing/, each user requirement is tested using a test
+      case that
+      FOCUSES ON
+      the objectiveness, implementation, error handling, and other details
+      specific to user needs.
+
+*** DONE Need for user acceptance testing
+    CLOSED: [2018-12-08 Sat 12:43]
+    - =TODO= NOTE
+
+    - The following are the steps in user acceptance testing:
+      1. Analyze business requirements.
+      2. Create a UAT test plan.
+      3. Identify test scenarios.
+      4. Create UAT test cases.
+      5. Prepare test data (production-like data).
+      6. Run the test cases.
+      7. Record the results.
 
 ** TODO Behavior-driven development
 *** TODO IntroductionThree amigos
