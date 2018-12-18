@@ -102,7 +102,7 @@
   - [[The List Module in Action - 81 - =TODO= =Re-Read=][The List Module in Action - 81 - =TODO= =Re-Read=]]
   - [[Get Friendly with Lists - 82][Get Friendly with Lists - 82]]
 - [[8. Maps, Keyword Lists, Sets, and Structs - 83][8. Maps, Keyword Lists, Sets, and Structs - 83]]
-  - [[How to Choose Between Maps, Structs, and Keyword Lists - 83][How to Choose Between Maps, Structs, and Keyword Lists - 83]]
+  - [[How to Choose Between Maps, Structs, and Keyword Lists - 83 - =IMPORTANT=][How to Choose Between Maps, Structs, and Keyword Lists - 83 - =IMPORTANT=]]
   - [[Keyword Lists - 84][Keyword Lists - 84]]
   - [[Maps - 84][Maps - 84]]
   - [[Pattern Matching and Updating Maps - 85][Pattern Matching and Updating Maps - 85]]
@@ -113,7 +113,7 @@
   - [[Nested Dictionary Structures - 89][Nested Dictionary Structures - 89]]
     - [[Nested Accessors and Nonstructs - 91][Nested Accessors and Nonstructs - 91]]
     - [[Dynamic (Runtime) Nested Accessors - 91][Dynamic (Runtime) Nested Accessors - 91]]
-    - [[The Access Module - 93][The Access Module - 93]]
+    - [[The ~Access~ Module - 93][The ~Access~ Module - 93]]
   - [[Sets - 95][Sets - 95]]
   - [[With Great Power Comes Great Temptation - 95][With Great Power Comes Great Temptation - 95]]
 - [[9. An Aside -- What Are Types? - 97][9. An Aside -- What Are Types? - 97]]
@@ -2022,8 +2022,26 @@
 ** DONE Get Friendly with Lists - 82
    CLOSED: [2018-09-24 Mon 20:11]
 
-* TODO 8. Maps, Keyword Lists, Sets, and Structs - 83
-** DONE How to Choose Between Maps, Structs, and Keyword Lists - 83
+* DONE 8. Maps, Keyword Lists, Sets, and Structs - 83
+  CLOSED: [2018-12-16 Sun 21:08]
+  - In this chapter, you'll see:
+    + The two and a half dictionary data types
+
+    + /Pattern matching/ and *updating* maps
+
+    + /Structs/
+
+    + *Nested* data structures
+
+  - dictionary :: a data type that associates _keys_ with _values_.
+
+  - We've already looked briefly at the /dictionary typeS/:
+    + /maps/
+    + /keyword lists/
+
+  - /struct/ is a special kind of map with a fixed structure.
+
+** DONE How to Choose Between Maps, Structs, and Keyword Lists - 83 - =IMPORTANT=
    CLOSED: [2018-09-25 Tue 14:43]
    =Re-Read=
    Ask yourself these questions (in this order):
@@ -2046,6 +2064,8 @@
 
 ** DONE Keyword Lists - 84
    CLOSED: [2018-09-25 Tue 14:20]
+   /Keyword lists/ are typically used in the CONTEXT of *options passed to functions*.
+
    #+BEGIN_SRC elixir
      defmodule Canvas do
        @defaults [ fg: "black", bg: "white", font, "Merriweather"]
@@ -2073,7 +2093,7 @@
 
 ** DONE Maps - 84
    CLOSED: [2018-09-25 Tue 14:24]
-   /Maps/ have _good performance_ at all sizes.
+   /Maps/ have _good performance_ at ALL sizes.
 
    #+BEGIN_SRC elixir
      map = %{ name: "Dave", likes: "Programming", where: "Dallas" }
@@ -2131,7 +2151,14 @@
        # %{height: 1.88, name: "Dave"}
      #+END_SRC
 
+   - Cannot match
+     #+BEGIN_SRC elixir
+       %{ name: _, weight: _ } = person
+       # ** (MatchError) no match of right hand side value: %{height: 1.88, name: "Dave"}
+     #+END_SRC
+
    - Iterate a map and filter it with ~for~
+     =TODO= enumerating on page 111
      #+BEGIN_SRC elixir
        people = [
          %{ name: "Grumpy",    height: 1.24 },
@@ -2145,7 +2172,7 @@
        # [%{height: 1.88, name: "Dave"}, %{height: 2.16, name: "Shaquille"}]
      #+END_SRC
 
-   - Guards
+   - /Maps/ support general /pattern matching/:
      #+BEGIN_SRC elixir
        defmodule HotelRoom do
          def book(%{name: name, height: height})
@@ -2174,6 +2201,11 @@
 
 *** DONE Pattern Matching Can't Bind Keys - 87
     CLOSED: [2018-09-25 Tue 14:27]
+    #+BEGIN_SRC elixir
+      %{ item => :ok } = %{ 1 => :ok, 2 => :error }
+      # ** (CompileError) iex:5: illegal use of variable item in map key_
+    #+END_SRC
+
 *** DONE Pattern Matching Can Match Variable Keys - 87
     CLOSED: [2018-09-25 Tue 14:30]
     The ~^~:
@@ -2191,16 +2223,18 @@
 ** DONE Updating a Map - 87
    CLOSED: [2018-09-25 Tue 14:45]
    - The simplest way to update a map is with this syntax:
-     ~new_map = %{ old_map | key => value, ... }~
+     #+BEGIN_SRC elixir
+       # Syntax
+       new_map = %{ old_map | key => value, ...other-key-value-pairs }
+     #+END_SRC
 
      + However, this syntax will *NOT add a new key* to a map.
 
-   - You need ~Map.put_new/3~ to add a *new* key.
+   - You need ~Map.put_new/3~ to *add a new key*.
 
 ** DONE Structs - 88
    CLOSED: [2018-09-25 Tue 15:03]
-   - Use /structs/ and Elixir knows the exact structure of your data.
-     It does NOT know this when it see the ~%{...}~. It only knows this is a /map/.
+   - Use /structs/ and then Elixir can know the exact structure of your data.
 
    - A /struct/ is just a /module/ that wraps a _limited form_ of /map/.
 
@@ -2246,15 +2280,18 @@
      #+BEGIN_SRC elixir
        defmodule Attendee do
          defstruct name: "", paid: false, over_18: true
+
          def may_attend_after_party(attendee = %Attendee{}) do
            attendee.paid && attendee.over_18
          end
+
          def print_vip_badge(%Attendee{name: name}) when name !=
            IO.puts "Very cheap badge for #{name}"
-       end
-       def print_vip_badge(%Attendee{}) do
-         raise "missing name for badge"
-       end
+         end
+
+         def print_vip_badge(%Attendee{}) do
+           raise "missing name for badge"
+         end
        end
 
        a1 = %Attendee{name: "Dave", over_18: true}
@@ -2275,12 +2312,273 @@
 
    - =TODO=
      /Structs/ also play a large role when _implementing_ /polymorphism/, which
-     we'll see when we look at /protocols/. =TODO=
+     we'll see when we look at /protocols/.
+     =TODO=
 
-** TODO Nested Dictionary Structures - 89
-*** TODO Nested Accessors and Nonstructs - 91
-*** TODO Dynamic (Runtime) Nested Accessors - 91
-*** TODO The Access Module - 93
+** DONE Nested Dictionary Structures - 89
+   CLOSED: [2018-12-16 Sun 21:08]
+   - *Define* /nested dictionary structures/:
+     #+BEGIN_SRC elixir
+       defmodule Customer do
+         defstruct name: "", company: ""
+       end
+  
+       defmodule BugReport do
+         defstruct owner: %Customer{}, details: "", severity: 1
+       end
+  
+       report = %BugReport{owner: %Customer{name: "Dave", company: "Pragmatic"}, details: "broken"}
+  
+       report.owner.company
+       # "Pragmatic"
+     #+END_SRC
+
+   - Update a deep nested /value/ (/key/ should exist):
+     #+BEGIN_SRC elixir
+       report = %BugReport{ report | owner: %Customer{ report.owner | company: "PragProg" }}
+       # %BugReport{
+       #   details: "broken",
+       #   owner: %Customer{company: "PragProg", name: "Dave"},
+       #   severity: 1
+       # }
+     #+END_SRC
+
+     + Better way (this is actually a macro used to generate code like above):
+       ~put_in~ lets us *set a value* in a nested structure.
+       #+BEGIN_SRC elixir
+         put_in(report.owner.company, "PragProg-")
+         # %BugReport{
+         #   details: "broken",
+         #   owner: %Customer{company: "PragProg-", name: "Dave"},
+         #   severity: 1
+         # }
+       #+END_SRC
+
+     + ~update_in~ lets us apply a function to a value in a structure:
+       #+BEGIN_SRC elixir
+         update_in(report.owner.name, &("Mr. " <> &1))
+         # %BugReport{details: "broken",
+         #            owner: %Customer{company: "PragProg", name: "Mr. Dave"},
+         #            severity: 1}
+       #+END_SRC
+
+     + The other TWO _nested access functions_ are ~get_in~ and ~get_and_update_in~.
+       =TODO= Go to read documents!!!
+
+*** DONE Nested Accessors and Nonstructs - 91
+    CLOSED: [2018-12-16 Sun 20:15]
+    If you are using the nested accessor functions with /maps/ or /keyword lists/,
+    _you can supply the /keys/ AS /atoms/:_
+    #+BEGIN_SRC elixir
+      report = %{ owner: %{ name: "Dave", company: "Pragmatic" }, severity: 1}
+
+      put_in(report[:owner][:company], "PragProg")
+      # %{owner: %{company: "PragProg", name: "Dave"}, severity: 1}
+
+      update_in(report[:owner][:name], &("Mr. " <> &1))
+      # %{owner: %{company: "Pragmatic", name: "Mr. Dave"}, severity: 1}
+    #+END_SRC
+
+*** DONE Dynamic (Runtime) Nested Accessors - 91
+    CLOSED: [2018-12-16 Sun 20:44]
+    - The /nested accessors/ _we've seen SO FAR_ are /macros/ -- they operate at
+      /compile time/. As a result, they have some *limitations*:
+      + The *number* of /keys/ you pass a particular call is /static/.
+      + You *CANNOT* pass the set of keys as parameters between functions.
+
+      These are a natural consequence of the way the /macros/ bake their
+      parameters into code at /compile time/.
+
+    - *To overcome this*,
+      ~get_in~, ~put_in~, ~update_in~, and ~get_and_update_in~ can all take a
+      _LIST of keys_ as a separate parameter.
+
+      Adding this parameter changes them from /macros/ to /function calls/, so
+      they become *dynamic*:
+      |                     | Macro         | Function            |
+      |---------------------+---------------+---------------------|
+      | ~get_in~            | no            | (dict, keys)        |
+      | ~put_in~            | (path, value) | (dict, keys, value) |
+      | ~update_in~         | (path, fn)    | (dict, keys, fn)    |
+      | ~get_and_update_in~ | (path, fn)    | (dict, keys, fn)    |
+
+    - Example:
+      #+BEGIN_SRC elixir
+        nested = %{
+          buttercup: %{
+            actor: %{
+              first: "Robin",
+              last: "Wright"
+            },
+            role: "princess"
+          },
+          westley: %{
+            actor: %{
+              first: "Cary",
+              last: "Elwes"  # typo!
+            },
+            role: "farm boy"
+          }
+        }
+
+        IO.inspect get_in(nested, [:buttercup])
+        # => %{actor: %{first: "Robin", last: "Wright"}, role: "princess"}
+
+        IO.inspect get_in(nested, [:buttercup, :actor])
+        # => %{first: "Robin", last: "Wright"}
+
+        IO.inspect get_in(nested, [:buttercup, :actor, :first])
+        # => "Robin"
+
+        IO.inspect put_in(nested, [:westley, :actor, :last], "Elwes")
+        # => %{buttercup: %{actor: %{first: "Robin", last: "Wright"}, role: "princess"},
+        # =>     westley: %{actor: %{first: "Cary", last: "Elwes"}, role: "farm boy"}}
+      #+END_SRC
+
+    - There's a *cool trick* that *the dynamic versions* of both ~get_in~ and
+      ~get_and_update_in~ support:
+      if you PASS a _function_ as a /key/, that function is invoked to return
+      the corresponding values.
+      #+BEGIN_SRC elixir
+        authors = [
+          %{ name: "José", language: "Elixir" },
+          %{ name: "Matz", language: "Ruby" },
+          %{ name: "Larry", language: "Perl" }
+        ]
+
+        languages_with_an_r = fn (:get, collection, next_fn) ->
+          for row <- collection do
+            if String.contains?(row.language, "r") do
+              next_fn.(row)
+            end
+          end
+        end
+
+        IO.inspect get_in(authors, [languages_with_an_r, :name])
+        #=> [ "José", nil, "Larry" ]
+      #+END_SRC
+
+      =TODO=
+      =TODO= Review function definition!
+      =TODO=
+
+*** DONE The ~Access~ Module - 93
+    CLOSED: [2018-12-16 Sun 21:08]
+    The ~Access~ /module/ provides a number of predefined functions to use as
+    parameters to ~get~ and ~get_and_update_in~. These functions act as _simple
+    filters_ while traversing the structures.
+
+    - ~all~ and ~at~ only work on /lists/.
+      + ~all~ returns all elements in the list.
+      + ~at~ returns the nth element.
+      #+BEGIN_SRC elixir
+        cast = [
+          %{
+            character: "Buttercup",
+            actor: %{
+              first: "Robin",
+              last: "Wright"
+            },
+            role: "princess"
+          },
+          %{
+            character: "Westley",
+            actor: %{
+              first: "Cary",
+              last: "Elwes"
+            },
+            role: "farm boy"
+          }
+        ]
+
+        IO.inspect get_in(cast, [Access.all, :character])
+        #=> ["Buttercup", "Westley"]
+
+        IO.inspect get_in(cast, [Access.at(1), :role])
+        #=> "farm boy"
+
+        IO.inspect get_and_update_in(cast, [Access.all, :actor, :last],
+                                     fn (val) -> {val, String.upcase(val)} end)
+        #=> {["Wright", "Elwes"],
+        #    [%{actor: %{first: "Robin", last: "WRIGHT"}, character: "Buttercup",
+        #       role: "princess"},
+        #     %{actor: %{first: "Cary", last: "ELWES"}, character: "Westley",
+        #       role: "farm boy"}]}
+      #+END_SRC
+
+    - ~elem~ works on /tupels/:
+      #+BEGIN_SRC elixir
+        cast = [
+          %{
+            character: "Buttercup",
+            actor:
+            {"Robin", "Wright"},
+            role:
+            "princess"
+          },
+          %{
+            character: "Westley",
+            actor:
+            {"Carey", "Elwes"},
+            role:
+            "farm boy"
+          }
+        ]
+
+        IO.inspect get_in(cast, [Access.all, :actor, Access.elem(1)])
+        #=> ["Wright", "Elwes"]
+
+        IO.inspect get_and_update_in(cast, [Access.all, :actor, Access.elem(1)],
+                                     fn (val) -> {val, String.reverse(val)} end)
+        #=> {["Wright", "Elwes"],
+        #    [%{actor: {"Robin", "thgirW"}, character: "Buttercup", role: "princess"},
+        #     %{actor: {"Carey", "sewlE"}, character: "Westley", role: "farm boy"}]}
+      #+END_SRC
+
+    - ~key~ and ~key!~ functions work on dictionary types (/maps/ and /structs/):
+      #+BEGIN_SRC elixir
+        cast = %{
+          buttercup: %{
+            actor:
+            {"Robin", "Wright"},
+            role:
+            "princess"
+          },
+          westley: %{
+            actor:
+            {"Carey", "Elwes"},
+            role:
+            "farm boy"
+          }
+        }
+
+        IO.inspect get_in(cast, [Access.key(:westley), :actor, Access.elem(1)])
+        #=> "Elwes"
+
+        IO.inspect get_and_update_in(cast, [Access.key(:buttercup), :role],
+                                     fn (val) -> {val, "Queen"} end)
+        #=> {"princess",
+        #    %{buttercup: %{actor: {"Robin", "Wright"}, role: "Queen"},
+        #    westley: %{actor: {"Carey", "Elwes"}, role: "farm boy"}}}
+      #+END_SRC
+
+    - ~pop~ lets you *remove* the entry with a given /key/ from a /map/ or
+      /keyword list/. It *returns*
+      + a /tuple/ containing the /value/ associated with the /key/,
+        and the updated container.
+
+      + ~nil~ is returned for the /value/ if the /key/ isn't in the container.
+
+      #+BEGIN_SRC elixir
+        Access.pop(%{name: "Elixir", creator: "Valim"}, :name)
+        # {"Elixir", %{creator: "Valim"}}
+
+        Access.pop([name: "Elixir", creator: "Valim"], :name)
+        # {"Elixir", [creator: "Valim"]}
+
+        Access.pop(%{name: "Elixir", creator: "Valim"}, :year)
+        # {nil, %{creator: "Valim", name: "Elixir"}}
+      #+END_SRC
 
 ** DONE Sets - 95
    CLOSED: [2018-09-25 Tue 15:05]
