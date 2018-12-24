@@ -79,10 +79,58 @@
   - [[1.5 Case Study: Union-Find - 216][1.5 Case Study: Union-Find - 216]]
 - [[2 Sorting - 243][2 Sorting - 243]]
   - [[2.1 Elementary Sorts - 244][2.1 Elementary Sorts - 244]]
+    - [[Rules of the game - 244][Rules of the game - 244]]
+      - [[Certification - 246][Certification - 246]]
+      - [[Running time - 246][Running time - 246]]
+      - [[Extra memory - 246][Extra memory - 246]]
+      - [[Types of data - 246][Types of data - 246]]
+    - [[Selection sort - 248][Selection sort - 248]]
+      - [[Running time is insensitive to input - 248][Running time is insensitive to input - 248]]
+      - [[Data movement is minimal - 248][Data movement is minimal - 248]]
+    - [[Insertion sort - 250][Insertion sort - 250]]
+    - [[Visualizing sorting algorithms - 253][Visualizing sorting algorithms - 253]]
+    - [[Comparing two sorting algorithms - 254][Comparing two sorting algorithms - 254]]
+    - [[Shellsort - 258][Shellsort - 258]]
+    - [[Q&A - 263][Q&A - 263]]
+    - [[EXERCISES - 264][EXERCISES - 264]]
+    - [[CREATIVE PROBLEMS - 265][CREATIVE PROBLEMS - 265]]
+    - [[EXPERIMENTS - 267][EXPERIMENTS - 267]]
   - [[2.2 Mergesort - 270][2.2 Mergesort - 270]]
+    - [[Abstract in-place merge - 270][Abstract in-place merge - 270]]
+    - [[Top-down mergesort - 272][Top-down mergesort - 272]]
+    - [[Bottom-up mergesort - 277][Bottom-up mergesort - 277]]
+    - [[The complexity of sorting - 279][The complexity of sorting - 279]]
+    - [[Q&A - 283][Q&A - 283]]
+    - [[EXERCISES - 284][EXERCISES - 284]]
+    - [[CREATIVE PROBLEMS - 285][CREATIVE PROBLEMS - 285]]
+    - [[EXPERIMENTS - 287][EXPERIMENTS - 287]]
   - [[2.3 Quicksort - 288][2.3 Quicksort - 288]]
+    - [[The basic algorithm - 288][The basic algorithm - 288]]
+    - [[Performance characteristics - 293][Performance characteristics - 293]]
+    - [[Algorithmic improvements - 295][Algorithmic improvements - 295]]
+    - [[Q&A - 302][Q&A - 302]]
+    - [[EXERCISES - 303][EXERCISES - 303]]
+    - [[CREATIVE PROBLEMS - 305][CREATIVE PROBLEMS - 305]]
+    - [[EXPERIMENTS - 307][EXPERIMENTS - 307]]
   - [[2.4 Priority Queues - 308][2.4 Priority Queues - 308]]
+    - [[API - 309][API - 309]]
+    - [[Elementary implementations - 310][Elementary implementations - 310]]
+    - [[Heap definitions - 313][Heap definitions - 313]]
+    - [[Algorithms on heaps - 315][Algorithms on heaps - 315]]
+    - [[Heapsort - 323][Heapsort - 323]]
+    - [[Q&A - 328][Q&A - 328]]
+    - [[EXERCISES - 329][EXERCISES - 329]]
+    - [[CREATIVE PROBLEMS - 331][CREATIVE PROBLEMS - 331]]
+    - [[EXPERIMENTS - 335][EXPERIMENTS - 335]]
   - [[2.5 Applications - 336][2.5 Applications - 336]]
+    - [[Sorting various types of data - 337][Sorting various types of data - 337]]
+    - [[Which sorting algorithm should I use? - 342][Which sorting algorithm should I use? - 342]]
+    - [[Reductions - 344][Reductions - 344]]
+    - [[A brief survey of sorting applications - 348][A brief survey of sorting applications - 348]]
+    - [[Q&A - 352][Q&A - 352]]
+    - [[EXERCISES - 353][EXERCISES - 353]]
+    - [[CREATIVE PROBLEMS - 355][CREATIVE PROBLEMS - 355]]
+    - [[EXPERIMENTS - 358][EXPERIMENTS - 358]]
 - [[3 Searching - 361][3 Searching - 361]]
   - [[3.1 Symbol Tables - 362][3.1 Symbol Tables - 362]]
   - [[3.2 Binary Search Trees - 396][3.2 Binary Search Trees - 396]]
@@ -202,146 +250,229 @@
 **** Tilde approximations.
 ** TODO 1.5 Case Study: Union-Find - 216
 
-* 2 Sorting - 243
+* TODO 2 Sorting - 243
+  - There are _THREE practical reasons_ for you to study /sorting algorithms/,
+    even though you might just use a _system sort_:
+    + *Analyzing* /sorting algorithms/
+      is
+      a thorough _introduction to the approach_ that we use to compare algorithm
+      performance throughout the book.
+
+    + Similar techniques are _EFFECTIVE in addressing other problems_.
+
+    + We often use /sorting algorithms/ as a STARTING POINT to solve other
+      problems.
+
+  - More important than these PRACTICAL REASONS is that the algorithms are
+    + *elegant*
+    + *classic* (the techniques you will learn can be applied to other problems)
+    + *effective*
+
   - In this chapter,
     + we consider
       1. SEVERAL classical /sorting/ methods
 
-      2. an efficient implementation of a fundamental data type known as the
-         /priority queue/.
+      2. an efficient implementation of a fundamental /data structure/ known as
+         the /priority queue/.
 
     + we discuss
-      1. the theoretical basis for comparing sorting algorithms
+      1. the _theoretical basis_ for *comparing* sorting algorithms
 
-      2. conclude the chapter with a _survey_ of applications of /sorting/ and
+      2. conclude the chapter with a _survey_ of *applications* of /sorting/ and
          /priority queues/.
 
   - =EN=
-    excursion - 短途旅行
+    diminish
+    awash
 
-  - *Rules of the game*
+** TODO 2.1 Elementary Sorts - 244
+   - =EN=
+     excursion - 短途旅行
 
-  - Template for sort classes:
-    #+BEGIN_SRC java
-      public class Example
-      {
-          public static void sort(Comparable[] a)
-          { /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
-          }
+   - Template for sort classes:
+     #+BEGIN_SRC java
+       public class Example
+       {
+           public static void sort(Comparable[] a)
+           { /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
+           }
 
-          private static boolean less(Comparable v, Comparable w)
-          { return v.compareTo(w) < 0; }
+           private static boolean less(Comparable<T> v, Comparable<T> w)
+           {
+               return v.compareTo(w) < 0;
+           }
 
-          private static void exch(Comparable[] a, int i, int j)
-          { Comparable t = a[i]; a[i] = a[j]; a[j] = t; }
+           private static void exch(Comparable[] a, int i, int j)
+           {
+               Comparable t = a[i];
+               a[i] = a[j];
+               a[j] = t;
+           }
 
-          private static void show(Comparable[] a)
-          { // Print the array, on a single line.
-              for (int i = 0; i < a.length; i++)
-                  StdOut.print(a[i] + " ");
-              StdOut.println();
-          }
+           private static void show(Comparable[] a)
+           { // Print the array, on a single line.
+               String repr =
+                   Stream.of(a).
+                       map(Comparable::toString).
+                       collect(Collectors.joining(" "));
 
-          public static boolean isSorted(Comparable[] a)
-          { // Test whether the array entries are in order.
-              for (int i = 1; i < a.length; i++)
-                  if (less(a[i], a[i-1])) return false;
-              return true;
-          }
+               StdOut.println(repr);
+           }
 
-          public static void main(String[] args)
-          { // Read strings from standard input, sort them, and print.
-              String[] a = In.readStrings();
-              sort(a);
-              assert isSorted(a);
-              show(a);
-          }
-      }
-    #+END_SRC
+           public static boolean isSorted(Comparable[] a)
+           { // Test whether the array entries are in order.
+               return IntStream.
+                   range(0, a.length).
+                   skip(1).
+                   allMatch(i -> less(a[i - 1], a[i]));
+           }
 
-    + Scala version:
-      * Translation (imperative):
-        #+BEGIN_SRC scala
-          object SortingTemplate
-          {
-            def sort(a: Array[Comparable]): Unit =
-            { /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
-            }
+           public static void main(String[] args)
+           { // Read strings from standard input, sort them, and print.
+               String[] a = In.readStrings();
+               sort(a);
+               assert isSorted(a);
+               show(a);
+           }
+       }
+     #+END_SRC
+
+     + Scala version:
+       * Translation (imperative):
+         #+BEGIN_SRC scala
+           object SortingTemplate
+           {
+             def sort[T : Ordering](a: Array[T]): Unit =
+             { /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
+             }
   
-            private def less(v: Comparable, w: Comparable): Boolean =
-              v.compareTo(w) < 0
+             private def less[T : Ordering](v: T, w: T): Boolean =
+               implicitly[Ordering[T]].compare(v, w) < 0
   
-            private def exch(a: Array[Comparable], i: Int, j: Int): Unit =
-            {
-              val t = a(i)
-              a(i) = a(j)
-              a(j) = t
-            }
+             private def exch(a: Array[T], i: Int, j: Int): Unit =
+             {
+               val t = a(i)
+               a(i) = a(j)
+               a(j) = t
+             }
   
-            private def show(a: Array[Comparable]): Unit =
-            { // Print the array, on a single line.
-                println("Array(" + a.mkString(", ") + ")")
-            }
+             private def show(a: Array[T]): Unit =
+             { // Print the array, on a single line.
+                 println("Array(" + a.mkString(", ") + ")")
+             }
   
-            def isSortedAscending(a: Array[Comparable]): Boolean = 
-              a.indices.sliding(2) forall {
-                case Vector(a)    => true
-                case Vecoor(a, b) => less(a, b)
-              }
+             // [T : Ordering]
+             def isSortedAscending(a: Array[T]): Boolean = 
+               a.indices.sliding(2) forall {
+                 case Vector(a)    => true
+                 case Vecoor(a, b) => less(a, b)
+               }
   
+             def isSorted(a: Array[T]): Boolean =
+               isSortedAscending _
   
-            def isSorted(a: Array[Comparable]): Boolean =
-              isSortedAscending _
-  
-            def main(args: Array[String]): Unit =
-            { // Read strings from standard input, sort them, and print.
-                val a: Array[String] = In.readStrings()
-                sort(a)
-                assert(isSorted(a))
-                show(a)
-            }
-          }
-        #+END_SRC
+             def main(args: Array[String]): Unit =
+             { // Read strings from standard input, sort them, and print.
+                 val a: Array[String] = In.readStrings()
+                 sort(a)
+                 assert(isSorted(a))
+                 show(a)
+             }
+           }
+         #+END_SRC
 
-      * Translation:
-        #+BEGIN_SRC scala
-          object SortingTemplate {
-            /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
-            def sort[T](a: Vector[T])(implicit ord: Ordering[T]): Vector[T] =
-              ???
+       * Translation:
+         #+BEGIN_SRC scala
+           object SortingTemplate {
+             /* See Algorithms 2.1, 2.2, 2.3, 2.4, 2.5, or 2.7. */
+             def sort[T : Ordering](a: Vector[T]): Vector[T] =
+               ???
 
-            private def less[T](v: T, w: T)(implicit ord: Ordering[T]): Boolean =
-              v.compareTo(w) < 0
+             private def less[T : Ordering](v: T, w: T): Boolean =
+               (v compare w) < 0
 
-            private def exch[T](a: Vector[T], i: Int, j: Int): Vector[T] =
-              a.updated(i, a(j)).updated(j, a(i))
+             private def exch[T](a: Vector[T], i: Int, j: Int): Vector[T] =
+               a.updated(i, a(j)).updated(j, a(i))
 
-            private def show[T](a: Vector[T]): Unit =
-              println("Array(" + a.mkString(", ") + ")")
+             private def show[T](a: Vector[T]): Unit =
+               println("Array(" + a.mkString(", ") + ")")
 
-            def isSortedAscending[T](a: Vector[T]): Boolean =
-              a.indices.sliding(2) forall {
-                case Vector(a)    => true
-                case Vector(a, b) => less(a, b)
-              }
+             def isSortedAscending[T](a: Vector[T]): Boolean =
+               a.indices.sliding(2) forall {
+                 case Vector(a)    => true
+                 case Vector(a, b) => less(a, b)
+               }
 
-            def isSorted[T](a: Vector[T]): Boolean =
-              isSortedAscending _
+             def isSorted[T](a: Vector[T]): Boolean =
+               isSortedAscending _
 
-            def main(args: Array[String]): Unit = {
-              val a: Vector[String] = In.readStrings()
-              val sortedA = sort(a)
-              assert(isSorted(sortedA))
-              show(sortedA)
-            }
-          }
-        #+END_SRC
+             def main(args: Array[String]): Unit = {
+               val a: Vector[String] = In.readStrings()
+               val sortedA = sort(a)
+               assert(isSorted(sortedA))
+               show(sortedA)
+             }
+           }
+         #+END_SRC
 
-** 2.1 Elementary Sorts - 244
-** 2.2 Mergesort - 270
-** 2.3 Quicksort - 288
-** 2.4 Priority Queues - 308
-** 2.5 Applications - 336
+*** TODO Rules of the game - 244
+**** Certification - 246
+**** Running time - 246
+**** Extra memory - 246
+**** Types of data - 246
+
+*** TODO Selection sort - 248
+**** Running time is insensitive to input - 248
+**** Data movement is minimal - 248
+
+*** TODO Insertion sort - 250
+*** TODO Visualizing sorting algorithms - 253
+*** TODO Comparing two sorting algorithms - 254
+*** TODO Shellsort - 258
+*** TODO Q&A - 263
+*** TODO EXERCISES - 264
+*** TODO CREATIVE PROBLEMS - 265
+*** TODO EXPERIMENTS - 267
+
+** TODO 2.2 Mergesort - 270
+*** TODO Abstract in-place merge - 270
+*** TODO Top-down mergesort - 272
+*** TODO Bottom-up mergesort - 277
+*** TODO The complexity of sorting - 279
+*** TODO Q&A - 283
+*** TODO EXERCISES - 284
+*** TODO CREATIVE PROBLEMS - 285
+*** TODO EXPERIMENTS - 287
+
+** TODO 2.3 Quicksort - 288
+*** TODO The basic algorithm - 288
+*** TODO Performance characteristics - 293
+*** TODO Algorithmic improvements - 295
+*** TODO Q&A - 302
+*** TODO EXERCISES - 303
+*** TODO CREATIVE PROBLEMS - 305
+*** TODO EXPERIMENTS - 307
+
+** TODO 2.4 Priority Queues - 308
+*** TODO API - 309
+*** TODO Elementary implementations - 310
+*** TODO Heap definitions - 313
+*** TODO Algorithms on heaps - 315
+*** TODO Heapsort - 323
+*** TODO Q&A - 328
+*** TODO EXERCISES - 329
+*** TODO CREATIVE PROBLEMS - 331
+*** TODO EXPERIMENTS - 335
+
+** TODO 2.5 Applications - 336
+*** TODO Sorting various types of data - 337
+*** TODO Which sorting algorithm should I use? - 342
+*** TODO Reductions - 344
+*** TODO A brief survey of sorting applications - 348
+*** TODO Q&A - 352
+*** TODO EXERCISES - 353
+*** TODO CREATIVE PROBLEMS - 355
+*** TODO EXPERIMENTS - 358
 
 * 3 Searching - 361
 ** 3.1 Symbol Tables - 362
