@@ -1851,10 +1851,38 @@
 * TODO LEVEL 2. Cognition - 95
 ** DONE 9. Style - 95
    CLOSED: [2017-04-25 Tue 16:10]
-  - Rule 2.9.0.1 :: All C code must be readable.
-  - Rule 2.9.0.2 :: Short term memory and the field of vision are small.
-  - Rule 2.9.0.3 :: Coding style is not a question of taste but of culture.
-  - Rule 2.9.0.4 :: When you enter an established project you enter a new cultural space.
+  - Programs serve both sides:
+    + give instructions to the compiler and the final executable.
+    + document the intended behavior of a system for us people
+      that have to deal with it.
+
+  - Rule C :: All C code must be readable.
+
+    + =from Jian=
+      About the *readable*:
+      * Be readable in the details level for people who have domain knowledge.
+
+      * Be readable for all programmers in the outline level -- people can easily
+        understand the high level logic.
+
+    + Here the *readable* is mainly for human, whose condition is _constrained_
+      by _TWO major factors_:
+      * Physical ability;
+      * Cultural baggage.
+
+  - Rule 2.9.0.1 :: Short term memory and the field of vision are small.
+
+  - Try to read /the coding style for the Linux kernel/.
+
+  - Rule 2.9.0.2 :: Coding style is NOT a question of taste BUT of culture.
+
+    _Ignoring this, easily leads to endless and fruitless debates about not much
+    at all._
+
+  - Rule 2.9.0.3 :: When you enter an established project you enter a new cultural space.
+
+  - You can decide the style of your own project,
+    but be careful if you want others to adhere to it.
 
 *** 9.1. Formatting - 95
     - _The need for code formatting originates in human incapacity_.
@@ -1930,16 +1958,16 @@
       * ~struct timespec~ has ~tv_sec~ rather than ~sec~.
       * parameter names:
         #+BEGIN_SRC c
-       double p99_memory_sum(size_t p00_n, size_t p00_i,
-                             double p00_strip[p00_n][p00_i]); 
+          double p99_memory_sum(size_t p00_n, size_t p00_i,
+                                double p00_strip[p00_n][p00_i]); 
         #+END_SRC
 
     - This problem gets worse when we are also exposing program internals to the
       public view. This happens in two cases:
       * So-called ~inline~ functions, that are functions that have their definition
         (and not only declaration) visible in a header file.
-      * Functional macros.
-      =TODO ???=
+
+      * Functional macros. =TODO= =???=
 
     - Now that we have cleared the technical aspects of naming, we will look at
       the semantic aspect.
@@ -1951,6 +1979,7 @@
     - Rule 2.9.2.8 :: A global constant identifies an artifact.
     - Rule 2.9.2.9 :: A global variable identifies state.
     - Rule 2.9.2.10 :: A function or functional macro identifies an action.
+
 ** DONE 10. Organization and documentation - 99
    CLOSED: [2017-04-25 Tue 16:10]
    - Rule 2.10.0.1 (what) :: Function interfaces describe what is done.
@@ -2028,19 +2057,71 @@
 
 ** TODO 11. Pointers - 106 =RE-READ=
 *** 11.1. Address-of and object-of operators - 108
-    - Rule 2.11.1.1 :: Using ~*~ with an indeterminate or null pointer has un-
-                       defined behavior.
+    - Rule 2.11.1.1 :: Using ~*~ with an _indeterminate_ or /null pointer/ has
+                       /undefined behavior/.
+
+      + The _indeterminate_ case might access some random object in memory and
+        modify it. Often this leads to bugs that are difficult to trace.
+
+      + The /null pointer/ case will nicely crash your program -- consider this
+        to be a feature.
 
 *** 11.2. Pointer arithmetic - 109
-    - Rule 2.11.2.1 :: A valid pointer addresses the first element of an array of
-                       the base type.
+    - Rule 2.11.2.1 :: A VALID pointer addresses the _FIRST_ element of an ARRAY
+                       of the /base type/.
+
+    - Code in 3 ways:
+      #+BEGIN_SRC c
+        // #1
+        double sum0(size_t len, double const* a) {
+          double ret = 0.0;
+
+          for (size_t i = 0; i < len; ++i) {
+            ret += *(a + i);
+          }
+
+          return ret;
+        }
+
+        // #2
+        double sum1(size_t len, double const* a) {
+          double ret = 0.0;
+
+          for (double const* p = a; p < a+len; ++p) {
+            ret += *p;
+          }
+
+          return ret;
+        }
+
+        // #3
+        double sum2(size_t len, double const* a) {
+          double ret = 0.0;
+
+          for (double const*const aStop = a+len; a < aStop; ++a) {
+            ret += *a;
+          }
+
+          return ret;
+        }
+      #+END_SRC
 
     - Rule 2.11.2.2 :: The length an array object cannot be reconstructed from a
                        pointer.
 
     - =Comment= In this case ~sizeof~ doesn't work.
+      You must pass the length to functions.
 
-    - Rule 2.11.2.3 :: Pointers are not arrays.
+      For example,
+      #+BEGIN_SRC c
+        double A [7] = { 0, 1, 2, 3, 4, 5, 6, };
+
+        double s0_7 = sum0(7, &A[0]);  // for the whole
+        double s1_6 = sum0(6, &A[1]);  // for last 6
+        double s2_3 = sum0(3, &A[2]);  // for 3 in the middle
+      #+END_SRC
+
+    - Rule 2.11.2.3 :: Pointers are NOT arrays.
 
     - So if we pass arrays through pointers to a function, it is important to
       retain the real length that the array has.
@@ -2070,8 +2151,11 @@
 
     - Rule 2.11.2.5 :: A pointed-to object must be of the indicated type.
 
-    - Rule 2.11.2.6 :: A pointer must point to a valid object, one position
-                       beyond a valid object or be null.
+    - Rule 2.11.2.6 :: A pointer must point to
+      + a valid object,
+      + one position beyond a valid object
+        or 
+      + be /null/.
 
     - =COMMENT=:
       1. This usually works:
@@ -2096,9 +2180,13 @@
 
     - Rule 2.11.2.7 :: Only subtract pointers to elements of an array object.
 
+      + _It is *only allowed* if the two pointers refer to elements of the *same*
+        array object_.
+
     - Rule 2.11.2.8 :: All pointer differences have type ~ptrdiff_t~.
 
-    - Rule 2.11.2.9 :: Use ~ptrdiff_t~ to encode signed differences of positions or sizes.
+    - Rule 2.11.2.9 :: Use ~ptrdiff_t~ to encode
+                       SIGNED differences of _positions_ or _sizes_.
 
 *** 11.3. Pointers and ~struct~'s - 112
     - If ~a~ is a pointer, ~a->tv_sec~ is nothing but ~(*a).tv_sec~.
