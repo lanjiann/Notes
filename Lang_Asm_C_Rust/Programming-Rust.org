@@ -750,10 +750,103 @@
   CLOSED: [2018-05-22 Tue 09:03]
   - Rust's types serve several goals:
     + Safety
+
     + Efficiency
+
     + Concision
 
-  - =TODO= NOTE 
+  - As a /statically typed language/,
+    + Rust *forces* the users to take more planning from the up front.
+      The planning is materialized as consistent data types in your program.
+
+    + Rust compiler checks the consistency between data types, and
+      catch many mistakes earlier, before running.
+
+  - Rust has two features to facilitate your program:
+    + /type inference/
+
+    + /generics/
+
+  - The rest of this chapter covers Rust’s types from the bottom up, starting
+    with simple machine types like integers and floating-point values, and then
+    showing how to compose them into more complex structures. Where appropriate,
+    we’ll describe how Rust represents values of these types in memory, and
+    their performance characteristics.
+
+  - Here’s a summary of the sorts of types you’ll see in Rust. This table shows
+    Rust’s primitive types, some very common types from the standard library, and
+    some examples of user-defined types:
+    | Type                                 | Description                          | Values                               |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~i8~, ~i16~, ~i32~, ~i64~            | Signed and unsigned integers,        | ~42~, ~-5i8~, ~0x400u16~,            |
+    | ~u8~, ~u16~, ~u32~, ~u64~            | of given bit width                   | ~0o100i16~, ~20_922_789_888_000u64~, |
+    |                                      |                                      | ~b'*'~ (~u8~ byte literal)           |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~isize~, ~usize~                     | Signed and unsigned integers,        | ~137~,                               |
+    |                                      | the same size as an address on the   | ~-0b0101_0010isize~,                 |
+    |                                      | machine (32 or 64 bits)              | ~0xffff_fc00usize~                   |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~f32~, ~f64~                         | IEEE floating-point numbers,         | ~1.61803~, ~3.14f32~, ~6.0221e23f64~ |
+    |                                      | single and double precision          |                                      |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~bool~                               | Boolean                              | ~true~, ~false~                      |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~char~                               | Unicode character, 32 bits wide      | ~'*'~, ~'\n'~, ~'字'~,               |
+    |                                      |                                      | ~'\x7f'~, ~'\u{CA0}'~                |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~(char, u8, i32)~                    | Tuple: mixed types allowed           | ~('%', 0x7f, -1)~                    |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~()~                                 | “unit” (empty) tuple                 | ~()~                                 |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~struct S { x: f32, y: f32 }~        | Named-field struct                   | ~S { x: 120.0, y: 209.0 }~           |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~struct T(i32, char);~               | Tuple-like struct                    | ~T(120, 'X')~                        |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~struct E;~                          | Unit-like struct; has no fields      | ~E~                                  |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~enum Attend { OnTime, Late(u32) }~  | Enumeration, algebraic data type     | ~Attend::Late(5)~, ~Attend::OnTime~  |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~Box<Attend>~                        | Box: owning pointer to value in heap | ~Box::new(Late(15))~                 |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~&i32~, ~&mut i32~                   | Shared and mutable references:       | ~&s.y~, ~&mut v~                     |
+    |                                      | nonowning pointers that must not     |                                      |
+    |                                      | outlive their referent               |                                      |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~String~                             | UTF-8 string, dynamically sized      | ~"ラーメン: ramen".to_string()~       |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~&str~                               | Reference to str: nonowning pointer  | ~"そば: soba"~, ~&s[0..12]~          |
+    |                                      | to UTF-8 text                        |                                      |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~[f64; 4]~, ~[u8; 256]~              | Array, fixed length; elements all    | ~[1.0, 0.0, 0.0, 1.0]~,              |
+    |                                      | of same type                         | ~[b' '; 256]~                        |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~Vec<f64>~                           | Vector, varying length; elements     | ~vec![0.367, 2.718, 7.389]~          |
+    |                                      | all of same type                     |                                      |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~&[u8]~, ~&mut [u8]~                 | Reference to slice: reference to a   | ~&v[10..20]~, ~&mut a[..]~           |
+    |                                      | portion of an array or vector,       |                                      |
+    |                                      | comprising pointer and length        |                                      |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~&Any~, ~&mut Read~                  | Trait object: reference to any       | value as ~&Any~,                     |
+    |                                      | value that implements a given set    | ~&mut file~ as ~&mut Read~           |
+    |                                      | of methods                           |                                      |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | ~fn(&str, usize) -> isize~           | Pointer to function                  | ~i32::saturating_add~                |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+    | (Closure types have no written form) | Closure                              | ~\vert{}a, b\vert{} a*a + b*b~                   |
+    |--------------------------------------+--------------------------------------+--------------------------------------|
+
+  - Most of these /types/ are convered in this chapter, except for the following:
+    + We give /struct types/ their own chapter, _Chapter 9_.
+
+    + We give /enumerated types/ their own chapter, _Chapter 10_.
+
+    + We describe /trait objects/ in _Chapter 11_.
+
+    + We describe the essentials of ~String~ and ~&str~ here, but provide more
+      detail in _Chapter 17_.
+
+    + We cover /function and closure types/ in _Chapter 14_.
 
 ** DONE Machine Types - 46
    CLOSED: [2018-05-20 Sun 21:28]
