@@ -1,0 +1,343 @@
+#+TITLE: Java 9 with JShell
+#+YEAR: 2017
+#+AUTHOR: Gastón C. Hillar
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Preface][Preface]]
+  - [[What this book covers][What this book covers]]
+  - [[What you need for this book][What you need for this book]]
+  - [[Who this book is for][Who this book is for]]
+  - [[Conventions][Conventions]]
+  - [[Reader feedback][Reader feedback]]
+  - [[Customer support][Customer support]]
+    - [[Downloading the example code][Downloading the example code]]
+    - [[Downloading the color images of this book][Downloading the color images of this book]]
+    - [[Errata][Errata]]
+    - [[Piracy][Piracy]]
+    - [[Questions][Questions]]
+- [[1. JShell – A Read-Evaluate-Print-Loop for Java 9][1. JShell – A Read-Evaluate-Print-Loop for Java 9]]
+  - [[Getting ready for our journey toward OOP with Java 9][Getting ready for our journey toward OOP with Java 9]]
+  - [[Installing the required software on Windows, macOS, or Linux][Installing the required software on Windows, macOS, or Linux]]
+    - [[Understanding the benefits of working with a REPL][Understanding the benefits of working with a REPL]]
+    - [[Checking default imports and using auto-complete features][Checking default imports and using auto-complete features]]
+  - [[Running Java 9 code in JShell][Running Java 9 code in JShell]]
+    - [[Evaluating expressions][Evaluating expressions]]
+  - [[Working with variables, methods, and sources][Working with variables, methods, and sources]]
+  - [[Editing the source code in our favorite external code editor][Editing the source code in our favorite external code editor]]
+  - [[Loading source code][Loading source code]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[2. Real-World Objects to UML Diagrams and Java 9 via JShell][2. Real-World Objects to UML Diagrams and Java 9 via JShell]]
+  - [[Identifying objects from applications requirements][Identifying objects from applications requirements]]
+  - [[Capturing real-world objects][Capturing real-world objects]]
+  - [[Generating classes to create objects][Generating classes to create objects]]
+  - [[Recognizing variables and constants][Recognizing variables and constants]]
+  - [[Identifying actions to create methods][Identifying actions to create methods]]
+  - [[Organizing classes with UML diagrams][Organizing classes with UML diagrams]]
+  - [[Using feedback from domain experts][Using feedback from domain experts]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[3. Classes and Instances][3. Classes and Instances]]
+  - [[Understanding classes and instances in Java 9][Understanding classes and instances in Java 9]]
+  - [[Working with object initialization and its customization][Working with object initialization and its customization]]
+  - [[Introducing garbage collection][Introducing garbage collection]]
+  - [[Declaring classes][Declaring classes]]
+  - [[Customizing constructors and initialization][Customizing constructors and initialization]]
+  - [[Understanding how garbage collection works][Understanding how garbage collection works]]
+  - [[Creating instances of classes and understanding their scope][Creating instances of classes and understanding their scope]]
+  - [[Exercises][Exercises]]
+    - [[Exercise 1][Exercise 1]]
+    - [[Exercise 2][Exercise 2]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[4. Encapsulation of Data][4. Encapsulation of Data]]
+  - [[Understanding members composing a class][Understanding members composing a class]]
+  - [[Declaring immutable fields][Declaring immutable fields]]
+  - [[Working with setters and getters][Working with setters and getters]]
+    - [[Exploring access modifiers in Java 9][Exploring access modifiers in Java 9]]
+  - [[Combining setters, getters, and fields][Combining setters, getters, and fields]]
+  - [[Transforming values with setters and getters][Transforming values with setters and getters]]
+  - [[Using static fields to provide class-level values][Using static fields to provide class-level values]]
+  - [[Using static methods to provide overridable class-level values][Using static methods to provide overridable class-level values]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[5. Mutable and Immutable Classes][5. Mutable and Immutable Classes]]
+  - [[Creating mutable classes in Java 9][Creating mutable classes in Java 9]]
+  - [[Working with mutable objects in JShell][Working with mutable objects in JShell]]
+  - [[Building immutable classes in Java 9][Building immutable classes in Java 9]]
+  - [[Working with immutable objects in JShell][Working with immutable objects in JShell]]
+  - [[Understanding the differences between mutating and non-mutating objects][Understanding the differences between mutating and non-mutating objects]]
+  - [[Learning the advantages of non-mutating objects when writing concurrent code][Learning the advantages of non-mutating objects when writing concurrent code]]
+  - [[Working with instances of the immutable String class][Working with instances of the immutable String class]]
+  - [[Creating the immutable version of an existing mutable class][Creating the immutable version of an existing mutable class]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[6. Inheritance, Abstraction, Extension, and Specialization][6. Inheritance, Abstraction, Extension, and Specialization]]
+  - [[Creating class hierarchies to abstract and specialize behavior][Creating class hierarchies to abstract and specialize behavior]]
+  - [[Understanding inheritance][Understanding inheritance]]
+  - [[Creating an abstract base class][Creating an abstract base class]]
+  - [[Declaring classes that inherit from another class][Declaring classes that inherit from another class]]
+  - [[Overriding and overloading methods][Overriding and overloading methods]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[7. Members Inheritance and Polymorphism][7. Members Inheritance and Polymorphism]]
+  - [[Creating concrete classes that inherit from abstract superclasses][Creating concrete classes that inherit from abstract superclasses]]
+  - [[Understanding polymorphism][Understanding polymorphism]]
+  - [[Controlling overridability of members in subclasses][Controlling overridability of members in subclasses]]
+  - [[Controlling subclassing of classes][Controlling subclassing of classes]]
+  - [[Creating methods that work with instances of different subclasses][Creating methods that work with instances of different subclasses]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[8. Contract Programming with Interfaces][8. Contract Programming with Interfaces]]
+  - [[Understanding how interfaces work in combination with classes][Understanding how interfaces work in combination with classes]]
+  - [[Declaring interfaces][Declaring interfaces]]
+  - [[Declaring classes that implement interfaces][Declaring classes that implement interfaces]]
+  - [[Taking advantage of the multiple inheritance of interfaces][Taking advantage of the multiple inheritance of interfaces]]
+  - [[Combining class inheritance and interfaces][Combining class inheritance and interfaces]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[9. Advanced Contract Programming with Interfaces][9. Advanced Contract Programming with Interfaces]]
+  - [[Working with methods receiving interfaces as arguments][Working with methods receiving interfaces as arguments]]
+  - [[Downcasting with interfaces and classes][Downcasting with interfaces and classes]]
+  - [[Treating instances of an interface type as a different subclass][Treating instances of an interface type as a different subclass]]
+  - [[Taking advantage of default methods in interfaces in Java 9][Taking advantage of default methods in interfaces in Java 9]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[10. Maximization of Code Reuse with Generics][10. Maximization of Code Reuse with Generics]]
+  - [[Understanding parametric polymorphism, Java 9 generics, and generic code][Understanding parametric polymorphism, Java 9 generics, and generic code]]
+  - [[Declaring an interface to be used as a type constraint][Declaring an interface to be used as a type constraint]]
+  - [[Declaring a class that conforms to multiple interfaces][Declaring a class that conforms to multiple interfaces]]
+  - [[Declaring subclasses that inherit the implementation of interfaces][Declaring subclasses that inherit the implementation of interfaces]]
+  - [[Creating exception classes][Creating exception classes]]
+  - [[Declaring a class that works with a constrained generic type][Declaring a class that works with a constrained generic type]]
+  - [[Using a generic class for multiple compatible types][Using a generic class for multiple compatible types]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[11. Advanced Generics][11. Advanced Generics]]
+  - [[Creating a new interface to be used as a constraint for a second type parameter][Creating a new interface to be used as a constraint for a second type parameter]]
+  - [[Declaring two classes that implement an interface to work with two type parameters][Declaring two classes that implement an interface to work with two type parameters]]
+  - [[Declaring a class that works with two constrained generic types][Declaring a class that works with two constrained generic types]]
+  - [[Creating instances of a generic class with two generic type parameters][Creating instances of a generic class with two generic type parameters]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[12. Object-Oriented, Functional Programming, and Lambda Expressions][12. Object-Oriented, Functional Programming, and Lambda Expressions]]
+  - [[Understanding functions and methods as first-class citizens][Understanding functions and methods as first-class citizens]]
+  - [[Working with functional interfaces and lambda expressions][Working with functional interfaces and lambda expressions]]
+  - [[Creating a functional version of array filtering][Creating a functional version of array filtering]]
+  - [[Creating a data repository with generics and interfaces][Creating a data repository with generics and interfaces]]
+  - [[Filtering collections with complex conditions][Filtering collections with complex conditions]]
+  - [[Using a map operation to transform values][Using a map operation to transform values]]
+  - [[Combining a map operation with reduce][Combining a map operation with reduce]]
+  - [[Chaining many operations with map and reduce][Chaining many operations with map and reduce]]
+  - [[Working with different collectors][Working with different collectors]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[13. Modularity in Java 9][13. Modularity in Java 9]]
+  - [[Refactoring existing code to take advantage of object-oriented programming][Refactoring existing code to take advantage of object-oriented programming]]
+  - [[Organizing object-oriented code with the new modularity in Java 9][Organizing object-oriented code with the new modularity in Java 9]]
+  - [[Creating modular source code][Creating modular source code]]
+  - [[Compiling multiple modules with the Java 9 compiler][Compiling multiple modules with the Java 9 compiler]]
+  - [[Run modularized code with Java 9][Run modularized code with Java 9]]
+  - [[Test your knowledge][Test your knowledge]]
+  - [[Summary][Summary]]
+- [[A. Exercise Answers][A. Exercise Answers]]
+  - [[Chapter 1. JShell – A Read-Evaluate-Print-Loop for Java 9][Chapter 1. JShell – A Read-Evaluate-Print-Loop for Java 9]]
+  - [[Chapter 2. Real-World Objects to UML Diagrams and Java 9 via JShell][Chapter 2. Real-World Objects to UML Diagrams and Java 9 via JShell]]
+  - [[Chapter 3. Classes and Instances][Chapter 3. Classes and Instances]]
+  - [[Chapter 4. Encapsulation of Data][Chapter 4. Encapsulation of Data]]
+  - [[Chapter 5. Mutable and Immutable Classes][Chapter 5. Mutable and Immutable Classes]]
+  - [[Chapter 6. Inheritance, Abstraction, Extension, and Specialization][Chapter 6. Inheritance, Abstraction, Extension, and Specialization]]
+  - [[Chapter 7. Members Inheritance and Polymorphism][Chapter 7. Members Inheritance and Polymorphism]]
+  - [[Chapter 8. Contract Programming with Interfaces][Chapter 8. Contract Programming with Interfaces]]
+  - [[Chapter 9. Advanced Contract Programming with Interfaces][Chapter 9. Advanced Contract Programming with Interfaces]]
+  - [[Chapter 10. Maximization of Code Reuse with Generics][Chapter 10. Maximization of Code Reuse with Generics]]
+  - [[Chapter 11. Advanced Generics][Chapter 11. Advanced Generics]]
+  - [[Chapter 12. Object-Oriented, Functional Programming, and Lambda Expressions][Chapter 12. Object-Oriented, Functional Programming, and Lambda Expressions]]
+  - [[Chapter 13. Modularity in Java 9][Chapter 13. Modularity in Java 9]]
+- [[Index][Index]]
+
+* Preface
+** What this book covers
+** What you need for this book
+** Who this book is for
+** Conventions
+** Reader feedback
+** Customer support
+*** Downloading the example code
+*** Downloading the color images of this book
+*** Errata
+*** Piracy
+*** Questions
+
+* 1. JShell – A Read-Evaluate-Print-Loop for Java 9
+  We will do the following:
+  - *Check* /default imports/ and
+    *use* /auto-complete features/
+
+  - *Run* Java 9 code in JShell
+
+  - *Evaluate* expressions
+
+  - *Work with* variables, methods, and sources
+
+  - *Edit* the source code in our favorite external code editor
+
+  - *Load* source code
+
+** TODO Getting ready for our journey toward OOP with Java 9
+** TODO Installing the required software on Windows, macOS, or Linux
+*** Understanding the benefits of working with a REPL
+*** Checking default imports and using auto-complete features
+
+** TODO Running Java 9 code in JShell
+*** Evaluating expressions
+
+** TODO Working with variables, methods, and sources
+** TODO Editing the source code in our favorite external code editor
+** TODO Loading source code
+** TODO Test your knowledge
+** TODO Summary
+
+* 2. Real-World Objects to UML Diagrams and Java 9 via JShell
+** Identifying objects from applications requirements
+** Capturing real-world objects
+** Generating classes to create objects
+** Recognizing variables and constants
+** Identifying actions to create methods
+** Organizing classes with UML diagrams
+** Using feedback from domain experts
+** Test your knowledge
+** Summary
+
+* 3. Classes and Instances
+** Understanding classes and instances in Java 9
+** Working with object initialization and its customization
+** Introducing garbage collection
+** Declaring classes
+** Customizing constructors and initialization
+** Understanding how garbage collection works
+** Creating instances of classes and understanding their scope
+** Exercises
+*** Exercise 1
+*** Exercise 2
+
+** Test your knowledge
+** Summary
+
+* 4. Encapsulation of Data
+** Understanding members composing a class
+** Declaring immutable fields
+** Working with setters and getters
+*** Exploring access modifiers in Java 9
+
+** Combining setters, getters, and fields
+** Transforming values with setters and getters
+** Using static fields to provide class-level values
+** Using static methods to provide overridable class-level values
+** Test your knowledge
+** Summary
+
+* 5. Mutable and Immutable Classes
+** Creating mutable classes in Java 9
+** Working with mutable objects in JShell
+** Building immutable classes in Java 9
+** Working with immutable objects in JShell
+** Understanding the differences between mutating and non-mutating objects
+** Learning the advantages of non-mutating objects when writing concurrent code
+** Working with instances of the immutable String class
+** Creating the immutable version of an existing mutable class
+** Test your knowledge
+** Summary
+
+* 6. Inheritance, Abstraction, Extension, and Specialization
+** Creating class hierarchies to abstract and specialize behavior
+** Understanding inheritance
+** Creating an abstract base class
+** Declaring classes that inherit from another class
+** Overriding and overloading methods
+** Test your knowledge
+** Summary
+
+* 7. Members Inheritance and Polymorphism
+** Creating concrete classes that inherit from abstract superclasses
+** Understanding polymorphism
+** Controlling overridability of members in subclasses
+** Controlling subclassing of classes
+** Creating methods that work with instances of different subclasses
+** Test your knowledge
+** Summary
+
+* 8. Contract Programming with Interfaces
+** Understanding how interfaces work in combination with classes
+** Declaring interfaces
+** Declaring classes that implement interfaces
+** Taking advantage of the multiple inheritance of interfaces
+** Combining class inheritance and interfaces
+** Test your knowledge
+** Summary
+
+* 9. Advanced Contract Programming with Interfaces
+** Working with methods receiving interfaces as arguments
+** Downcasting with interfaces and classes
+** Treating instances of an interface type as a different subclass
+** Taking advantage of default methods in interfaces in Java 9
+** Test your knowledge
+** Summary
+
+* 10. Maximization of Code Reuse with Generics
+** Understanding parametric polymorphism, Java 9 generics, and generic code
+** Declaring an interface to be used as a type constraint
+** Declaring a class that conforms to multiple interfaces
+** Declaring subclasses that inherit the implementation of interfaces
+** Creating exception classes
+** Declaring a class that works with a constrained generic type
+** Using a generic class for multiple compatible types
+** Test your knowledge
+** Summary
+
+* 11. Advanced Generics
+** Creating a new interface to be used as a constraint for a second type parameter
+** Declaring two classes that implement an interface to work with two type parameters
+** Declaring a class that works with two constrained generic types
+** Creating instances of a generic class with two generic type parameters
+** Test your knowledge
+** Summary
+
+* 12. Object-Oriented, Functional Programming, and Lambda Expressions
+** Understanding functions and methods as first-class citizens
+** Working with functional interfaces and lambda expressions
+** Creating a functional version of array filtering
+** Creating a data repository with generics and interfaces
+** Filtering collections with complex conditions
+** Using a map operation to transform values
+** Combining a map operation with reduce
+** Chaining many operations with map and reduce
+** Working with different collectors
+** Test your knowledge
+** Summary
+
+* 13. Modularity in Java 9
+** Refactoring existing code to take advantage of object-oriented programming
+** Organizing object-oriented code with the new modularity in Java 9
+** Creating modular source code
+** Compiling multiple modules with the Java 9 compiler
+** Run modularized code with Java 9
+** Test your knowledge
+** Summary
+
+* A. Exercise Answers
+** Chapter 1. JShell – A Read-Evaluate-Print-Loop for Java 9
+** Chapter 2. Real-World Objects to UML Diagrams and Java 9 via JShell
+** Chapter 3. Classes and Instances
+** Chapter 4. Encapsulation of Data
+** Chapter 5. Mutable and Immutable Classes
+** Chapter 6. Inheritance, Abstraction, Extension, and Specialization
+** Chapter 7. Members Inheritance and Polymorphism
+** Chapter 8. Contract Programming with Interfaces
+** Chapter 9. Advanced Contract Programming with Interfaces
+** Chapter 10. Maximization of Code Reuse with Generics
+** Chapter 11. Advanced Generics
+** Chapter 12. Object-Oriented, Functional Programming, and Lambda Expressions
+** Chapter 13. Modularity in Java 9
+* Index

@@ -1,0 +1,185 @@
+#+TITLE: Dotty Documentation
+#+VERSION: 0.10.0-bin-SNAPSHOT
+#+AUTHOR: 
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Blog][Blog]]
+- [[Usage][Usage]]
+  - [[Getting Started][Getting Started]]
+  - [[sbt-projects][sbt-projects]]
+  - [[IDE support for Dotty][IDE support for Dotty]]
+  - [[cbt-projects][cbt-projects]]
+  - [[Dottydoc][Dottydoc]]
+- [[Reference][Reference]]
+  - [[Overview][Overview]]
+  - [[New Types][New Types]]
+    - [[Intersection types][Intersection types]]
+    - [[Union types][Union types]]
+    - [[Type lambdas][Type lambdas]]
+    - [[Implicit Function Types][Implicit Function Types]]
+    - [[Dependent Function Types][Dependent Function Types]]
+  - [[Enums][Enums]]
+    - [[Enumerations][Enumerations]]
+    - [[Algebraic Data Types][Algebraic Data Types]]
+    - [[Translation][Translation]]
+  - [[Other New Features][Other New Features]]
+    - [[Multiversal Equality][Multiversal Equality]]
+    - [[Trait Parameters][Trait Parameters]]
+    - [[Inlining with Transparent][Inlining with Transparent]]
+    - [[Meta Programming][Meta Programming]]
+    - [[By-Name Implicits][By-Name Implicits]]
+    - [[Auto Parameter Tupling][Auto Parameter Tupling]]
+    - [[Named Type Arguments][Named Type Arguments]]
+    - [[Erased Terms][Erased Terms]]
+    - [[Kind Polymorphism][Kind Polymorphism]]
+  - [[Changed Features][Changed Features]]
+    - [[Volatile Lazy Vals][Volatile Lazy Vals]]
+    - [[Structural Types][Structural Types]]
+    - [[Type Checking][Type Checking]]
+    - [[Type Inference][Type Inference]]
+    - [[Implicit Resolution][Implicit Resolution]]
+    - [[Implicit Conversions][Implicit Conversions]]
+    - [[Vararg Patterns][Vararg Patterns]]
+    - [[Pattern matching][Pattern matching]]
+    - [[Eta Expansion][Eta Expansion]]
+    - [[Compiler Plugins][Compiler Plugins]]
+  - [[Dropped Features][Dropped Features]]
+    - [[DelayedInit][DelayedInit]]
+    - [[Macros][Macros]]
+    - [[Existential Types][Existential Types]]
+    - [[Type Projection][Type Projection]]
+    - [[Procedure Syntax][Procedure Syntax]]
+    - [[Early Initializers][Early Initializers]]
+    - [[Class Shadowing][Class Shadowing]]
+    - [[Limit 22][Limit 22]]
+    - [[XML literals][XML literals]]
+    - [[Auto-Application][Auto-Application]]
+    - [[Weak Conformance][Weak Conformance]]
+  - [[Contributing][Contributing]]
+    - [[Getting Started][Getting Started]]
+    - [[Workflow][Workflow]]
+    - [[Eclipse][Eclipse]]
+    - [[IntelliJ IDEA][IntelliJ IDEA]]
+    - [[Testing][Testing]]
+    - [[Working with the Backend][Working with the Backend]]
+  - [[Internals][Internals]]
+    - [[Backend][Backend]]
+    - [[Classpaths][Classpaths]]
+    - [[Core Data Structrues][Core Data Structrues]]
+    - [[Contexts][Contexts]]
+    - [[Dotc vs Scalac][Dotc vs Scalac]]
+    - [[Higher-Kinded Types][Higher-Kinded Types]]
+    - [[Overall Structure][Overall Structure]]
+    - [[Periods][Periods]]
+    - [[Syntax][Syntax]]
+    - [[Type System][Type System]]
+    - [[Dotty Internals 1: Trees & Symbols (Meeting Notes)][Dotty Internals 1: Trees & Symbols (Meeting Notes)]]
+  - [[Resources][Resources]]
+    - [[Talks][Talks]]
+
+* Blog
+* Usage
+** Getting Started
+** sbt-projects
+** IDE support for Dotty
+** cbt-projects
+** Dottydoc
+
+* Reference
+** Overview
+** New Types
+*** Intersection types
+*** Union types
+*** Type lambdas
+*** Implicit Function Types
+*** Dependent Function Types
+
+** Enums
+*** Enumerations
+*** Algebraic Data Types
+*** Translation
+
+** Other New Features
+*** Multiversal Equality
+*** Trait Parameters
+*** Inlining with Transparent
+*** Meta Programming
+*** By-Name Implicits
+*** DONE Auto Parameter Tupling
+    CLOSED: [2018-08-18 Sat 22:08]
+    - For a list like ~val xs: List[(Int, Int)]~,
+      + In Scala 2.x,
+        we need use _EXPLICIT_ /pattern matching/ syntax help to transform its
+        elements like
+        #+BEGIN_SRC scala
+          xs map {
+            case (x, y) => x + y
+          }
+        #+END_SRC
+
+      + Dotty allows the syntax:
+        #+BEGIN_SRC scala
+          xs map {
+            (x, y) => x + y
+          }
+
+          // OR, EQUIVALENTLY:
+          xs.map(_ + _)
+        #+END_SRC
+
+    - Generally, a /function value/ with *n > 1 parameters* is _converted to_ a
+      /pattern-matching closure/ using ~case~ if the expected type is a /unary
+      function type/ of the form ~((T_1, ..., T_n)) => U~.
+
+*** Named Type Arguments
+*** Erased Terms
+*** Kind Polymorphism
+
+** Changed Features
+*** Volatile Lazy Vals
+*** Structural Types
+*** Type Checking
+*** Type Inference
+*** Implicit Resolution
+*** Implicit Conversions
+*** Vararg Patterns
+*** Pattern matching
+*** Eta Expansion
+*** Compiler Plugins
+
+** Dropped Features
+*** DelayedInit
+*** Macros
+*** Existential Types
+*** Type Projection
+*** Procedure Syntax
+*** Early Initializers
+*** Class Shadowing
+*** Limit 22
+*** XML literals
+*** Auto-Application
+*** Weak Conformance
+
+** Contributing
+*** Getting Started
+*** Workflow
+*** Eclipse
+*** IntelliJ IDEA
+*** Testing
+*** Working with the Backend
+
+** Internals
+*** Backend
+*** Classpaths
+*** Core Data Structrues
+*** Contexts
+*** Dotc vs Scalac
+*** Higher-Kinded Types
+*** Overall Structure
+*** Periods
+*** Syntax
+*** Type System
+*** Dotty Internals 1: Trees & Symbols (Meeting Notes)
+** Resources
+*** Talks

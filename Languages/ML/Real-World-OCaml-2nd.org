@@ -1,0 +1,791 @@
+#+TITLE: Real World OCaml (*in Progress*)
+#+SUBTITLE: FUNCTIONAL PROGRAMMING FOR THE MASSES
+#+VERSION: 2nd (in progress)
+#+AUTHOR: Yaron Minsky, Anil Madhavapeddy & Jason Hickey
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Prologue][Prologue]]
+  - [[Why OCaml?][Why OCaml?]]
+    - [[A Brief History][A Brief History]]
+    - [[The Base Standard Library][The Base Standard Library]]
+    - [[The OCaml Platform][The OCaml Platform]]
+  - [[About This Book][About This Book]]
+    - [[What to Expect][What to Expect]]
+    - [[Installation Instructions][Installation Instructions]]
+    - [[Code Examples][Code Examples]]
+  - [[Safari® Books Online][Safari® Books Online]]
+  - [[How to Contact Us][How to Contact Us]]
+  - [[Contributors][Contributors]]
+- [[Part 1. Language Concepts][Part 1. Language Concepts]]
+- [[1. A Guided Tour - 3][1. A Guided Tour - 3]]
+  - [[OCaml as a Calculator - 3][OCaml as a Calculator - 3]]
+  - [[Functions and Type Inference - 5][Functions and Type Inference - 5]]
+    - [[Type Inference - 7][Type Inference - 7]]
+    - [[Inferring Generic Types - 8][Inferring Generic Types - 8]]
+  - [[Tuples, Lists, Options, and Pattern Matching - 10][Tuples, Lists, Options, and Pattern Matching - 10]]
+    - [[Tuples - 10][Tuples - 10]]
+    - [[Lists - 11][Lists - 11]]
+      - [[The List module][The List module]]
+      - [[Constructing lists with ~::~][Constructing lists with ~::~]]
+      - [[List patterns using match][List patterns using match]]
+      - [[Recursive list functions][Recursive list functions]]
+    - [[Options - 16][Options - 16]]
+  - [[Records and Variants - 18][Records and Variants - 18]]
+  - [[Imperative Programming - 20][Imperative Programming - 20]]
+    - [[Arrays - 20][Arrays - 20]]
+    - [[Mutable Record Fields - 21][Mutable Record Fields - 21]]
+    - [[Refs - 22][Refs - 22]]
+    - [[For and While Loops - 23][For and While Loops - 23]]
+  - [[A Complete Program - 25][A Complete Program - 25]]
+    - [[Compiling and Running - 26][Compiling and Running - 26]]
+  - [[Where to Go from Here - 26][Where to Go from Here - 26]]
+- [[2. Variables and Functions - 27][2. Variables and Functions - 27]]
+  - [[Variables - 27][Variables - 27]]
+    - [[Pattern Matching and ~let~ - 30][Pattern Matching and ~let~ - 30]]
+  - [[Functions - 31][Functions - 31]]
+    - [[Anonymous Functions 31][Anonymous Functions 31]]
+    - [[Multiargument functions 33][Multiargument functions 33]]
+    - [[Recursive Functions 34][Recursive Functions 34]]
+    - [[Prefix and Infix Operators 35][Prefix and Infix Operators 35]]
+    - [[Declaring Functions with Function 39][Declaring Functions with Function 39]]
+    - [[Labeled Arguments 40][Labeled Arguments 40]]
+      - [[Higher-order functions and labels][Higher-order functions and labels]]
+    - [[Optional Arguments 43][Optional Arguments 43]]
+      - [[Explicit passing of an optional argument][Explicit passing of an optional argument]]
+      - [[Inference of labeled and optional arguments][Inference of labeled and optional arguments]]
+      - [[Optional arguments and partial application][Optional arguments and partial application]]
+- [[3. Lists and Patterns - 49][3. Lists and Patterns - 49]]
+  - [[List Basics 49][List Basics 49]]
+  - [[Using Patterns to Extract Data from a List 50][Using Patterns to Extract Data from a List 50]]
+  - [[Limitations (and Blessings) of Pattern Matching 52][Limitations (and Blessings) of Pattern Matching 52]]
+    - [[Performance 52][Performance 52]]
+    - [[Detecting Errors 54][Detecting Errors 54]]
+  - [[Using the List Module Effectively 55][Using the List Module Effectively 55]]
+    - [[More Useful List Functions 58][More Useful List Functions 58]]
+      - [[Combining list elements with List.reduce][Combining list elements with List.reduce]]
+      - [[Filtering with List.filter and List.filter_map][Filtering with List.filter and List.filter_map]]
+      - [[Partitioning with List.partition_tf][Partitioning with List.partition_tf]]
+      - [[Combining lists][Combining lists]]
+  - [[Tail Recursion 61][Tail Recursion 61]]
+  - [[Terser and Faster Patterns 63][Terser and Faster Patterns 63]]
+- [[4. Files, Modules, and Programs - 67][4. Files, Modules, and Programs - 67]]
+  - [[Single-File Programs 67][Single-File Programs 67]]
+  - [[Multifile Programs and Modules 70][Multifile Programs and Modules 70]]
+  - [[Signatures and Abstract Types 71][Signatures and Abstract Types 71]]
+  - [[Concrete Types in Signatures 74][Concrete Types in Signatures 74]]
+  - [[Nested Modules 75][Nested Modules 75]]
+  - [[Opening Modules 77][Opening Modules 77]]
+  - [[Including Modules 79][Including Modules 79]]
+  - [[Common Errors with Modules 81][Common Errors with Modules 81]]
+    - [[Type Mismatches][Type Mismatches]]
+    - [[Missing Definitions][Missing Definitions]]
+    - [[Type Definition Mismatches][Type Definition Mismatches]]
+    - [[Cyclic Dependencies][Cyclic Dependencies]]
+  - [[Designing with Modules 83][Designing with Modules 83]]
+    - [[Expose Concrete Types Rarely 83][Expose Concrete Types Rarely 83]]
+    - [[Design for the Call Site 84][Design for the Call Site 84]]
+    - [[Create Uniform Interfaces 84][Create Uniform Interfaces 84]]
+    - [[Interfaces before implementations 85][Interfaces before implementations 85]]
+- [[5. Records - 87][5. Records - 87]]
+  - [[Patterns and Exhaustiveness 88][Patterns and Exhaustiveness 88]]
+  - [[Field Punning 91][Field Punning 91]]
+  - [[Reusing Field Names 92][Reusing Field Names 92]]
+  - [[Functional Updates 96][Functional Updates 96]]
+  - [[Mutable Fields 97][Mutable Fields 97]]
+  - [[First-Class Fields 98][First-Class Fields 98]]
+- [[6. Variants - 103][6. Variants - 103]]
+  - [[Catch-All Cases and Refactoring 105][Catch-All Cases and Refactoring 105]]
+  - [[Combining Records and Variants 107][Combining Records and Variants 107]]
+    - [[Embedded records][Embedded records]]
+  - [[Variants and Recursive Data Structures 111][Variants and Recursive Data Structures 111]]
+  - [[Polymorphic Variants 114][Polymorphic Variants 114]]
+    - [[Example: Terminal Colors Redux 116][Example: Terminal Colors Redux 116]]
+    - [[When to Use Polymorphic Variants 121][When to Use Polymorphic Variants 121]]
+- [[7. Error Handling - 123][7. Error Handling - 123]]
+  - [[Error-Aware Return Types 123][Error-Aware Return Types 123]]
+    - [[Encoding Errors with Result 125][Encoding Errors with Result 125]]
+    - [[Error and Or\under{}error 125][Error and Or\under{}error 125]]
+    - [[bind and Other Error Handling Idioms 127][bind and Other Error Handling Idioms 127]]
+  - [[Exceptions 128][Exceptions 128]]
+    - [[Helper Functions for Throwing Exceptions 131][Helper Functions for Throwing Exceptions 131]]
+    - [[Exception Handlers 132][Exception Handlers 132]]
+    - [[Cleaning Up in the Presence of Exceptions 132][Cleaning Up in the Presence of Exceptions 132]]
+    - [[Catching Specific Exceptions 133][Catching Specific Exceptions 133]]
+    - [[Backtraces 135][Backtraces 135]]
+    - [[From Exceptions to Error-Aware Types and Back Again 137][From Exceptions to Error-Aware Types and Back Again 137]]
+  - [[Choosing an Error-Handling Strategy 138][Choosing an Error-Handling Strategy 138]]
+- [[8. Imperative Programming - 139][8. Imperative Programming - 139]]
+  - [[Example: Imperative Dictionaries 139][Example: Imperative Dictionaries 139]]
+  - [[Primitive Mutable Data 143][Primitive Mutable Data 143]]
+    - [[Array-Like Data 143][Array-Like Data 143]]
+      - [[Ordinary Arrays][Ordinary Arrays]]
+      - [[Strings][Strings]]
+      - [[Bigarrays][Bigarrays]]
+    - [[Mutable Record and Object Fields and Ref Cells 145][Mutable Record and Object Fields and Ref Cells 145]]
+      - [[Ref Cells][Ref Cells]]
+    - [[Foreign Functions 146][Foreign Functions 146]]
+  - [[~for~ and ~while~ Loops 146][~for~ and ~while~ Loops 146]]
+  - [[Example: Doubly Linked Lists 147][Example: Doubly Linked Lists 147]]
+    - [[Modifying the List 149][Modifying the List 149]]
+    - [[Iteration Functions 150][Iteration Functions 150]]
+  - [[Laziness and Other Benign Effects 151][Laziness and Other Benign Effects 151]]
+    - [[Memoization and Dynamic Programming 153][Memoization and Dynamic Programming 153]]
+  - [[Input and Output 159][Input and Output 159]]
+    - [[Terminal I/O 160][Terminal I/O 160]]
+    - [[Formatted Output with ~printf~ 161][Formatted Output with ~printf~ 161]]
+    - [[File I/O 163][File I/O 163]]
+  - [[Order of Evaluation 165][Order of Evaluation 165]]
+  - [[Side Effects and Weak Polymorphism 167][Side Effects and Weak Polymorphism 167]]
+    - [[The Value Restriction 168][The Value Restriction 168]]
+    - [[Partial Application and the Value Restriction 170][Partial Application and the Value Restriction 170]]
+    - [[Relaxing the Value Restriction 170][Relaxing the Value Restriction 170]]
+  - [[Summary 173][Summary 173]]
+- [[9. Functors - 175][9. Functors - 175]]
+  - [[A Trivial Example 176][A Trivial Example 176]]
+  - [[A Bigger Example: Computing with Intervals 177][A Bigger Example: Computing with Intervals 177]]
+    - [[Making the Functor Abstract 181][Making the Functor Abstract 181]]
+    - [[Sharing Constraints 182][Sharing Constraints 182]]
+    - [[Destructive Substitution 184][Destructive Substitution 184]]
+    - [[Using Multiple Interfaces 185][Using Multiple Interfaces 185]]
+  - [[Extending Modules 189][Extending Modules 189]]
+- [[10. First-Class Modules - 193][10. First-Class Modules - 193]]
+  - [[Working with First-Class Modules 193][Working with First-Class Modules 193]]
+  - [[Example: A Query-Handling Framework 199][Example: A Query-Handling Framework 199]]
+    - [[Implementing a Query Handler 200][Implementing a Query Handler 200]]
+    - [[Dispatching to Multiple Query Handlers 202][Dispatching to Multiple Query Handlers 202]]
+    - [[Loading and Unloading Query Handlers 205][Loading and Unloading Query Handlers 205]]
+  - [[Living Without First-Class Modules 208][Living Without First-Class Modules 208]]
+- [[11. Objects - 211][11. Objects - 211]]
+  - [[OCaml Objects 212][OCaml Objects 212]]
+  - [[Object Polymorphism 213][Object Polymorphism 213]]
+  - [[Immutable Objects 215][Immutable Objects 215]]
+  - [[When to Use Objects 216][When to Use Objects 216]]
+  - [[Subtyping 217][Subtyping 217]]
+    - [[Width Subtyping 217][Width Subtyping 217]]
+    - [[Depth Subtyping 218][Depth Subtyping 218]]
+    - [[Variance 219][Variance 219]]
+    - [[Narrowing 222][Narrowing 222]]
+    - [[Subtyping Versus Row Polymorphism 224][Subtyping Versus Row Polymorphism 224]]
+- [[12. Classes - 227][12. Classes - 227]]
+    - [[OCaml Classes 227][OCaml Classes 227]]
+    - [[Class Parameters and Polymorphism 228][Class Parameters and Polymorphism 228]]
+    - [[Object Types as Interfaces 230][Object Types as Interfaces 230]]
+      - [[Functional Iterators 232][Functional Iterators 232]]
+    - [[Inheritance 233][Inheritance 233]]
+    - [[Class Types 234][Class Types 234]]
+    - [[Open Recursion 235][Open Recursion 235]]
+    - [[Private Methods 237][Private Methods 237]]
+    - [[Binary Methods 239][Binary Methods 239]]
+    - [[Virtual Classes and Methods 242][Virtual Classes and Methods 242]]
+      - [[Create Some Simple Shapes 242][Create Some Simple Shapes 242]]
+    - [[Initializers 245][Initializers 245]]
+    - [[Multiple Inheritance 245][Multiple Inheritance 245]]
+      - [[How Names Are Resolved 245][How Names Are Resolved 245]]
+      - [[Mixins 246][Mixins 246]]
+      - [[Displaying the Animated Shapes 249][Displaying the Animated Shapes 249]]
+- [[Part II. Tools and Techniques][Part II. Tools and Techniques]]
+- [[13. Maps and Hash Tables - 253][13. Maps and Hash Tables - 253]]
+  - [[Maps 254][Maps 254]]
+    - [[Sets][Sets]]
+    - [[Modules and Comparators][Modules and Comparators]]
+    - [[Why do we need comparator witnesses?][Why do we need comparator witnesses?]]
+    - [[The Polymorphic Comparator][The Polymorphic Comparator]]
+    - [[Satisfying Comparator.S with [@@deriving]][Satisfying Comparator.S with [@@deriving]]]
+    - [[Applying [@@deriving] to maps and sets][Applying [@@deriving] to maps and sets]]
+    - [[Trees][Trees]]
+  - [[Hash Tables 264][Hash Tables 264]]
+  - [[Choosing Between Maps and Hash Tables 267][Choosing Between Maps and Hash Tables 267]]
+- [[14. Command-Line Parsing - 271][14. Command-Line Parsing - 271]]
+  - [[Basic Command-Line Parsing 272][Basic Command-Line Parsing 272]]
+    - [[Defining an Anonymous Argument][Defining an Anonymous Argument]]
+    - [[Defining Basic Commands 273][Defining Basic Commands 273]]
+    - [[Running Commands 273][Running Commands 273]]
+    - [[Multi-argument Commands 272][Multi-argument Commands 272]]
+  - [[Argument Types 275][Argument Types 275]]
+    - [[Defining Custom Argument Types 276][Defining Custom Argument Types 276]]
+    - [[Optional and Default Arguments 277][Optional and Default Arguments 277]]
+    - [[Sequences of Arguments 279][Sequences of Arguments 279]]
+  - [[Adding Labeled Flags][Adding Labeled Flags]]
+  - [[Grouping Subcommands Together 282][Grouping Subcommands Together 282]]
+  - [[Prompting for Interactive Input][Prompting for Interactive Input]]
+  - [[Command-Line Autocompletion with bash 290][Command-Line Autocompletion with bash 290]]
+    - [[Generating Completion Fragments from Command 290][Generating Completion Fragments from Command 290]]
+    - [[Installing the Completion Fragment 291][Installing the Completion Fragment 291]]
+  - [[Alternative Command-Line Parsers 292][Alternative Command-Line Parsers 292]]
+- [[15. Handling JSON Data - 293][15. Handling JSON Data - 293]]
+  - [[JSON Basics 293][JSON Basics 293]]
+  - [[Parsing JSON with Yojson 294][Parsing JSON with Yojson 294]]
+  - [[Selecting Values from JSON Structures 296][Selecting Values from JSON Structures 296]]
+  - [[Constructing JSON Values 300][Constructing JSON Values 300]]
+  - [[Using Nonstandard JSON Extensions 302][Using Nonstandard JSON Extensions 302]]
+  - [[Automatically Mapping JSON to OCaml Types 303][Automatically Mapping JSON to OCaml Types 303]]
+    - [[ATD Basics 304][ATD Basics 304]]
+    - [[ATD Annotations 305][ATD Annotations 305]]
+    - [[Compiling ATD Specifications to OCaml 305][Compiling ATD Specifications to OCaml 305]]
+    - [[Example: Querying GitHub Organization Information 307][Example: Querying GitHub Organization Information 307]]
+- [[16. Parsing with OCamllex and Menhir - 311][16. Parsing with OCamllex and Menhir - 311]]
+  - [[Lexing and Parsing 312][Lexing and Parsing 312]]
+  - [[Defining a Parser 314][Defining a Parser 314]]
+    - [[Describing the Grammar 314][Describing the Grammar 314]]
+    - [[Parsing Sequences 316][Parsing Sequences 316]]
+  - [[Defining a Lexer 318][Defining a Lexer 318]]
+    - [[OCaml Prelude 318][OCaml Prelude 318]]
+    - [[Regular Expressions 318][Regular Expressions 318]]
+    - [[Lexing Rules 319][Lexing Rules 319]]
+    - [[Recursive Rules 320][Recursive Rules 320]]
+  - [[Bringing It All Together 322][Bringing It All Together 322]]
+- [[17. Data Serialization with S-Expressions - 325][17. Data Serialization with S-Expressions - 325]]
+  - [[Basic Usage 326][Basic Usage 326]]
+    - [[Generating S-Expressions from OCaml Types 328][Generating S-Expressions from OCaml Types 328]]
+  - [[The Sexp Format 329][The Sexp Format 329]]
+  - [[Preserving Invariants 331][Preserving Invariants 331]]
+  - [[Getting Good Error Messages 334][Getting Good Error Messages 334]]
+  - [[Sexp-Conversion Directives 336][Sexp-Conversion Directives 336]]
+    - [[sexp\under{}opaque 336][sexp\under{}opaque 336]]
+    - [[sexp\under{}list 337][sexp\under{}list 337]]
+    - [[sexp\under{}option 338][sexp\under{}option 338]]
+    - [[Specifying Defaults 338][Specifying Defaults 338]]
+- [[18. Concurrent Programming with Async - 341][18. Concurrent Programming with Async - 341]]
+    - [[Async Basics 342][Async Basics 342]]
+      - [[Ivars and Upon 345][Ivars and Upon 345]]
+    - [[Examples: An Echo Server 347][Examples: An Echo Server 347]]
+      - [[Improving the Echo Server 350][Improving the Echo Server 350]]
+    - [[Example: Searching Definitions with DuckDuckGo 353][Example: Searching Definitions with DuckDuckGo 353]]
+      - [[URI Handling 353][URI Handling 353]]
+      - [[Parsing JSON Strings 354][Parsing JSON Strings 354]]
+      - [[Executing an HTTP Client Query 354][Executing an HTTP Client Query 354]]
+    - [[Exception Handling 357][Exception Handling 357]]
+      - [[Monitors 358][Monitors 358]]
+      - [[Example: Handling Exceptions with DuckDuckGo 361][Example: Handling Exceptions with DuckDuckGo 361]]
+    - [[Timeouts, Cancellation, and Choices 363][Timeouts, Cancellation, and Choices 363]]
+    - [[Working with System Threads 366][Working with System Threads 366]]
+      - [[Thread-Safety and Locking 369][Thread-Safety and Locking 369]]
+- [[Part III. The Runtime System][Part III. The Runtime System]]
+- [[19. Foreign Function Interface - 373][19. Foreign Function Interface - 373]]
+  - [[Example: A Terminal Interface 374][Example: A Terminal Interface 374]]
+  - [[Basic Scalar C Types 378][Basic Scalar C Types 378]]
+  - [[Pointers and Arrays 380][Pointers and Arrays 380]]
+    - [[Allocating Typed Memory for Pointers 381][Allocating Typed Memory for Pointers 381]]
+    - [[Using Views to Map Complex Values 382][Using Views to Map Complex Values 382]]
+  - [[Structs and Unions 383][Structs and Unions 383]]
+    - [[Defining a Structure 383][Defining a Structure 383]]
+    - [[Adding Fields to Structures 384][Adding Fields to Structures 384]]
+    - [[Incomplete Structure Definitions 384][Incomplete Structure Definitions 384]]
+      - [[RECAP: A TIME-PRINTING COMMAND][RECAP: A TIME-PRINTING COMMAND]]
+    - [[Defining Arrays 388][Defining Arrays 388]]
+  - [[Passing Functions to C 389][Passing Functions to C 389]]
+    - [[Example: A Command-Line Quicksort 390][Example: A Command-Line Quicksort 390]]
+  - [[Learning More About C Bindings 392][Learning More About C Bindings 392]]
+    - [[Struct Memory Layout 393][Struct Memory Layout 393]]
+- [[20. Memory Representation of Values - 395][20. Memory Representation of Values - 395]]
+  - [[OCaml Blocks and Values 396][OCaml Blocks and Values 396]]
+    - [[Distinguishing Integers and Pointers at Runtime 397][Distinguishing Integers and Pointers at Runtime 397]]
+  - [[Blocks and Values 398][Blocks and Values 398]]
+    - [[Integers, Characters, and Other Basic Types 399][Integers, Characters, and Other Basic Types 399]]
+  - [[Tuples, Records, and Arrays 400][Tuples, Records, and Arrays 400]]
+    - [[Floating-Point Numbers and Arrays 400][Floating-Point Numbers and Arrays 400]]
+  - [[Variants and Lists 401][Variants and Lists 401]]
+  - [[Polymorphic Variants 403][Polymorphic Variants 403]]
+  - [[String Values 404][String Values 404]]
+  - [[Custom Heap Blocks 405][Custom Heap Blocks 405]]
+    - [[Managing External Memory with Bigarray 405][Managing External Memory with Bigarray 405]]
+- [[21. Understanding the Garbage Collector - 407][21. Understanding the Garbage Collector - 407]]
+  - [[Mark and Sweep Garbage Collection 407][Mark and Sweep Garbage Collection 407]]
+  - [[Generational Garbage Collection 408][Generational Garbage Collection 408]]
+  - [[The Fast Minor Heap 408][The Fast Minor Heap 408]]
+    - [[Allocating on the Minor Heap 409][Allocating on the Minor Heap 409]]
+  - [[The Long-Lived Major Heap 410][The Long-Lived Major Heap 410]]
+    - [[Allocating on the Major Heap 411][Allocating on the Major Heap 411]]
+    - [[Memory Allocation Strategies 412][Memory Allocation Strategies 412]]
+      - [[NEXT-FIT ALLOCATION][NEXT-FIT ALLOCATION]]
+      - [[FIRST-FIT ALLOCATION][FIRST-FIT ALLOCATION]]
+    - [[Marking and Scanning the Heap 413][Marking and Scanning the Heap 413]]
+    - [[Heap Compaction 414][Heap Compaction 414]]
+    - [[Intergenerational Pointers 415][Intergenerational Pointers 415]]
+      - [[THE MUTABLE WRITE BARRIER][THE MUTABLE WRITE BARRIER]]
+    - [[Attaching Finalizer Functions to Values 418][Attaching Finalizer Functions to Values 418]]
+- [[22. The Compiler Frontend: Parsing and Type Checking - 421][22. The Compiler Frontend: Parsing and Type Checking - 421]]
+  - [[An Overview of the Toolchain 422][An Overview of the Toolchain 422]]
+  - [[Parsing Source Code 424][Parsing Source Code 424]]
+    - [[Syntax Errors 424][Syntax Errors 424]]
+    - [[Automatically Indenting Source Code 425][Automatically Indenting Source Code 425]]
+    - [[Generating Documentation from Interfaces 426][Generating Documentation from Interfaces 426]]
+  - [[Preprocessing Source Code 428][Preprocessing Source Code 428]]
+    - [[Using Camlp4 Interactively 430][Using Camlp4 Interactively 430]]
+    - [[Running Camlp4 from the Command Line 431][Running Camlp4 from the Command Line 431]]
+    - [[Preprocessing Module Signatures 433][Preprocessing Module Signatures 433]]
+    - [[Further Reading on Camlp4 434][Further Reading on Camlp4 434]]
+  - [[Static Type Checking 434][Static Type Checking 434]]
+    - [[Displaying Inferred Types from the Compiler 435][Displaying Inferred Types from the Compiler 435]]
+    - [[Type Inference 436][Type Inference 436]]
+      - [[Adding type annotations to find errors][Adding type annotations to find errors]]
+      - [[Enforcing principal typing][Enforcing principal typing]]
+    - [[Modules and Separate Compilation 440][Modules and Separate Compilation 440]]
+      - [[The mapping between files and modules][The mapping between files and modules]]
+      - [[Defining a module search path][Defining a module search path]]
+    - [[Packing Modules Together 443][Packing Modules Together 443]]
+    - [[Shorter Module Paths in Type Errors 444][Shorter Module Paths in Type Errors 444]]
+  - [[The Typed Syntax Tree 445][The Typed Syntax Tree 445]]
+    - [[Using ocp-index for Autocompletion 446][Using ocp-index for Autocompletion 446]]
+    - [[Examining the Typed Syntax Tree Directly 446][Examining the Typed Syntax Tree Directly 446]]
+- [[23. The Compiler Backend: Bytecode and Native code - 449][23. The Compiler Backend: Bytecode and Native code - 449]]
+  - [[The Untyped Lambda Form 449][The Untyped Lambda Form 449]]
+    - [[Pattern Matching Optimization 450][Pattern Matching Optimization 450]]
+    - [[Benchmarking Pattern Matching 452][Benchmarking Pattern Matching 452]]
+  - [[Generating Portable Bytecode 454][Generating Portable Bytecode 454]]
+    - [[Compiling and Linking Bytecode 455][Compiling and Linking Bytecode 455]]
+    - [[Executing Bytecode 456][Executing Bytecode 456]]
+    - [[Embedding OCaml Bytecode in C 456][Embedding OCaml Bytecode in C 456]]
+  - [[Compiling Fast Native Code 458][Compiling Fast Native Code 458]]
+    - [[Inspecting Assembly Output 459][Inspecting Assembly Output 459]]
+      - [[Inspecting Assembly Output 459][Inspecting Assembly Output 459]]
+      - [[Inspecting Assembly Output 459][Inspecting Assembly Output 459]]
+    - [[Debugging Native Code Binaries 462][Debugging Native Code Binaries 462]]
+      - [[Understanding name mangling][Understanding name mangling]]
+      - [[Interactive breakpoints with the GNU debugger][Interactive breakpoints with the GNU debugger]]
+    - [[Profiling Native Code 465][Profiling Native Code 465]]
+      - [[GPROF][GPROF]]
+      - [[PERF][PERF]]
+    - [[Embedding Native Code in C 467][Embedding Native Code in C 467]]
+  - [[Summarizing the File Extensions 468][Summarizing the File Extensions 468]]
+- [[Index - 471][Index - 471]]
+
+* TODO Prologue
+** Why OCaml?
+*** A Brief History
+*** The Base Standard Library
+*** The OCaml Platform
+
+** About This Book
+*** What to Expect
+*** Installation Instructions
+*** Code Examples
+
+** Safari® Books Online
+** How to Contact Us
+** Contributors
+
+* Part 1. Language Concepts
+* TODO 1. A Guided Tour - 3
+  Use ~Core~ instead of the standard library.
+  Use ~utop~ rather than the standard toplevel ~ocaml~.
+
+** TODO OCaml as a Calculator - 3
+** TODO Functions and Type Inference - 5
+*** Type Inference - 7
+*** Inferring Generic Types - 8
+
+** TODO Tuples, Lists, Options, and Pattern Matching - 10
+*** Tuples - 10
+*** Lists - 11
+**** The List module
+**** Constructing lists with ~::~
+**** List patterns using match
+**** Recursive list functions
+
+*** Options - 16
+
+** TODO Records and Variants - 18
+** TODO Imperative Programming - 20
+*** Arrays - 20
+*** Mutable Record Fields - 21
+*** Refs - 22
+*** For and While Loops - 23
+
+** TODO A Complete Program - 25
+*** Compiling and Running - 26
+
+** TODO Where to Go from Here - 26
+
+* TODO 2. Variables and Functions - 27
+** TODO Variables - 27
+*** Pattern Matching and ~let~ - 30
+
+** TODO Functions - 31
+*** Anonymous Functions 31
+*** Multiargument functions 33
+*** Recursive Functions 34
+*** Prefix and Infix Operators 35
+*** Declaring Functions with Function 39
+*** Labeled Arguments 40
+**** Higher-order functions and labels
+
+*** Optional Arguments 43
+**** Explicit passing of an optional argument
+**** Inference of labeled and optional arguments
+**** Optional arguments and partial application
+
+* TODO 3. Lists and Patterns - 49
+** TODO List Basics 49
+** TODO Using Patterns to Extract Data from a List 50
+** TODO Limitations (and Blessings) of Pattern Matching 52
+*** Performance 52
+*** Detecting Errors 54
+
+** TODO Using the List Module Effectively 55
+*** More Useful List Functions 58
+**** Combining list elements with List.reduce
+**** Filtering with List.filter and List.filter_map
+**** Partitioning with List.partition_tf
+**** Combining lists
+
+** TODO Tail Recursion 61
+** TODO Terser and Faster Patterns 63
+
+* TODO 4. Files, Modules, and Programs - 67
+  - So far we experienced OCaml largely through the toplevel.
+
+    To move to the real world we need to start building programs from files.
+
+  - /Files/ are _more than_ just a convenient way to store and manage your code;
+
+    They also correspond to /modules/, which act as boundaries that divide your
+    program into conceptual units.
+
+** TODO Single-File Programs 67
+** TODO Multifile Programs and Modules 70
+** TODO Signatures and Abstract Types 71
+** TODO Concrete Types in Signatures 74
+** TODO Nested Modules 75
+** TODO Opening Modules 77
+** TODO Including Modules 79
+** TODO Common Errors with Modules 81
+*** Type Mismatches
+*** Missing Definitions
+*** Type Definition Mismatches
+*** Cyclic Dependencies
+
+** TODO Designing with Modules 83
+*** Expose Concrete Types Rarely 83
+*** Design for the Call Site 84
+*** Create Uniform Interfaces 84
+*** Interfaces before implementations 85
+
+* TODO 5. Records - 87
+** TODO Patterns and Exhaustiveness 88
+** TODO Field Punning 91
+** TODO Reusing Field Names 92
+** TODO Functional Updates 96
+** TODO Mutable Fields 97
+** TODO First-Class Fields 98
+
+* TODO 6. Variants - 103
+** TODO Catch-All Cases and Refactoring 105
+** TODO Combining Records and Variants 107
+*** Embedded records
+
+** TODO Variants and Recursive Data Structures 111
+** TODO Polymorphic Variants 114
+*** Example: Terminal Colors Redux 116
+*** When to Use Polymorphic Variants 121
+
+* TODO 7. Error Handling - 123
+** TODO Error-Aware Return Types 123
+*** Encoding Errors with Result 125
+*** Error and Or\under{}error 125
+*** bind and Other Error Handling Idioms 127
+
+** TODO Exceptions 128
+*** Helper Functions for Throwing Exceptions 131
+*** Exception Handlers 132
+*** Cleaning Up in the Presence of Exceptions 132
+*** Catching Specific Exceptions 133
+*** Backtraces 135
+*** From Exceptions to Error-Aware Types and Back Again 137
+
+** TODO Choosing an Error-Handling Strategy 138
+
+* TODO 8. Imperative Programming - 139
+** TODO Example: Imperative Dictionaries 139
+** TODO Primitive Mutable Data 143
+*** Array-Like Data 143
+**** Ordinary Arrays
+**** Strings
+**** Bigarrays
+
+*** Mutable Record and Object Fields and Ref Cells 145
+**** Ref Cells
+
+*** Foreign Functions 146
+
+** TODO ~for~ and ~while~ Loops 146
+** TODO Example: Doubly Linked Lists 147
+*** Modifying the List 149
+*** Iteration Functions 150
+
+** TODO Laziness and Other Benign Effects 151
+*** Memoization and Dynamic Programming 153
+
+** TODO Input and Output 159
+*** Terminal I/O 160
+*** Formatted Output with ~printf~ 161
+*** File I/O 163
+
+** TODO Order of Evaluation 165
+** TODO Side Effects and Weak Polymorphism 167
+*** The Value Restriction 168
+*** Partial Application and the Value Restriction 170
+*** Relaxing the Value Restriction 170
+
+** TODO Summary 173
+
+* TODO 9. Functors - 175
+** TODO A Trivial Example 176
+** TODO A Bigger Example: Computing with Intervals 177
+*** Making the Functor Abstract 181
+*** Sharing Constraints 182
+*** Destructive Substitution 184
+*** Using Multiple Interfaces 185
+
+** TODO Extending Modules 189
+
+* TODO 10. First-Class Modules - 193
+** TODO Working with First-Class Modules 193
+** TODO Example: A Query-Handling Framework 199
+*** Implementing a Query Handler 200
+*** Dispatching to Multiple Query Handlers 202
+*** Loading and Unloading Query Handlers 205
+
+** TODO Living Without First-Class Modules 208
+
+* TODO 11. Objects - 211
+** TODO OCaml Objects 212
+** TODO Object Polymorphism 213
+** TODO Immutable Objects 215
+** TODO When to Use Objects 216
+** TODO Subtyping 217
+*** Width Subtyping 217
+*** Depth Subtyping 218
+*** Variance 219
+*** Narrowing 222
+*** Subtyping Versus Row Polymorphism 224
+
+* TODO 12. Classes - 227
+*** TODO OCaml Classes 227
+*** TODO Class Parameters and Polymorphism 228
+*** TODO Object Types as Interfaces 230
+**** Functional Iterators 232
+
+*** TODO Inheritance 233
+*** TODO Class Types 234
+*** TODO Open Recursion 235
+*** TODO Private Methods 237
+*** TODO Binary Methods 239
+*** TODO Virtual Classes and Methods 242
+**** Create Some Simple Shapes 242
+
+*** TODO Initializers 245
+*** TODO Multiple Inheritance 245
+**** How Names Are Resolved 245
+**** Mixins 246
+**** Displaying the Animated Shapes 249
+
+* Part II. Tools and Techniques
+* TODO 13. Maps and Hash Tables - 253
+** TODO Maps 254
+*** Sets
+*** Modules and Comparators
+*** Why do we need comparator witnesses?
+*** The Polymorphic Comparator
+*** Satisfying Comparator.S with [@@deriving]
+*** Applying [@@deriving] to maps and sets
+*** Trees
+
+** TODO Hash Tables 264
+** TODO Choosing Between Maps and Hash Tables 267
+* TODO 14. Command-Line Parsing - 271
+** TODO Basic Command-Line Parsing 272
+*** Defining an Anonymous Argument
+*** Defining Basic Commands 273
+*** Running Commands 273
+*** Multi-argument Commands 272
+
+** TODO Argument Types 275
+*** Defining Custom Argument Types 276
+*** Optional and Default Arguments 277
+*** Sequences of Arguments 279
+
+** TODO Adding Labeled Flags
+** TODO Grouping Subcommands Together 282
+** TODO Prompting for Interactive Input
+** TODO Command-Line Autocompletion with bash 290
+*** Generating Completion Fragments from Command 290
+*** Installing the Completion Fragment 291
+
+** TODO Alternative Command-Line Parsers 292
+
+* TODO 15. Handling JSON Data - 293
+** TODO JSON Basics 293
+** TODO Parsing JSON with Yojson 294
+** TODO Selecting Values from JSON Structures 296
+** TODO Constructing JSON Values 300
+** TODO Using Nonstandard JSON Extensions 302
+** TODO Automatically Mapping JSON to OCaml Types 303
+*** ATD Basics 304
+*** ATD Annotations 305
+*** Compiling ATD Specifications to OCaml 305
+*** Example: Querying GitHub Organization Information 307
+
+* TODO 16. Parsing with OCamllex and Menhir - 311
+** TODO Lexing and Parsing 312
+** TODO Defining a Parser 314
+*** Describing the Grammar 314
+*** Parsing Sequences 316
+
+** TODO Defining a Lexer 318
+*** OCaml Prelude 318
+*** Regular Expressions 318
+*** Lexing Rules 319
+*** Recursive Rules 320
+
+** TODO Bringing It All Together 322
+
+* TODO 17. Data Serialization with S-Expressions - 325
+** TODO Basic Usage 326
+*** Generating S-Expressions from OCaml Types 328
+
+** TODO The Sexp Format 329
+** TODO Preserving Invariants 331
+** TODO Getting Good Error Messages 334
+** TODO Sexp-Conversion Directives 336
+*** sexp\under{}opaque 336
+*** sexp\under{}list 337
+*** sexp\under{}option 338
+*** Specifying Defaults 338
+
+* TODO 18. Concurrent Programming with Async - 341
+*** TODO Async Basics 342
+**** Ivars and Upon 345
+
+*** TODO Examples: An Echo Server 347
+**** Improving the Echo Server 350
+
+*** TODO Example: Searching Definitions with DuckDuckGo 353
+**** URI Handling 353
+**** Parsing JSON Strings 354
+**** Executing an HTTP Client Query 354
+
+*** TODO Exception Handling 357
+**** Monitors 358
+**** Example: Handling Exceptions with DuckDuckGo 361
+
+*** TODO Timeouts, Cancellation, and Choices 363
+*** TODO Working with System Threads 366
+**** Thread-Safety and Locking 369
+
+* TODO Part III. The Runtime System
+* TODO 19. Foreign Function Interface - 373
+** Example: A Terminal Interface 374
+** Basic Scalar C Types 378
+** Pointers and Arrays 380
+*** Allocating Typed Memory for Pointers 381
+*** Using Views to Map Complex Values 382
+
+** Structs and Unions 383
+*** Defining a Structure 383
+*** Adding Fields to Structures 384
+*** Incomplete Structure Definitions 384
+**** RECAP: A TIME-PRINTING COMMAND
+
+*** Defining Arrays 388
+
+** Passing Functions to C 389
+*** Example: A Command-Line Quicksort 390
+
+** Learning More About C Bindings 392
+*** Struct Memory Layout 393
+
+* TODO 20. Memory Representation of Values - 395
+** OCaml Blocks and Values 396
+*** Distinguishing Integers and Pointers at Runtime 397
+
+** Blocks and Values 398
+*** Integers, Characters, and Other Basic Types 399
+
+** Tuples, Records, and Arrays 400
+*** Floating-Point Numbers and Arrays 400
+
+** Variants and Lists 401
+** Polymorphic Variants 403
+** String Values 404
+** Custom Heap Blocks 405
+*** Managing External Memory with Bigarray 405
+
+* TODO 21. Understanding the Garbage Collector - 407
+** Mark and Sweep Garbage Collection 407
+** Generational Garbage Collection 408
+** The Fast Minor Heap 408
+*** Allocating on the Minor Heap 409
+
+** The Long-Lived Major Heap 410
+*** Allocating on the Major Heap 411
+*** Memory Allocation Strategies 412
+**** NEXT-FIT ALLOCATION
+**** FIRST-FIT ALLOCATION
+
+*** Marking and Scanning the Heap 413
+*** Heap Compaction 414
+*** Intergenerational Pointers 415
+**** THE MUTABLE WRITE BARRIER
+
+*** Attaching Finalizer Functions to Values 418
+
+* TODO 22. The Compiler Frontend: Parsing and Type Checking - 421
+** An Overview of the Toolchain 422
+** Parsing Source Code 424
+*** Syntax Errors 424
+*** Automatically Indenting Source Code 425
+*** Generating Documentation from Interfaces 426
+
+** Preprocessing Source Code 428
+*** Using Camlp4 Interactively 430
+*** Running Camlp4 from the Command Line 431
+*** Preprocessing Module Signatures 433
+*** Further Reading on Camlp4 434
+
+** Static Type Checking 434
+*** Displaying Inferred Types from the Compiler 435
+*** Type Inference 436
+**** Adding type annotations to find errors
+**** Enforcing principal typing 
+
+*** Modules and Separate Compilation 440
+**** The mapping between files and modules
+**** Defining a module search path
+
+*** Packing Modules Together 443
+*** Shorter Module Paths in Type Errors 444
+
+** The Typed Syntax Tree 445
+*** Using ocp-index for Autocompletion 446
+*** Examining the Typed Syntax Tree Directly 446
+
+* TODO 23. The Compiler Backend: Bytecode and Native code - 449
+** The Untyped Lambda Form 449
+*** Pattern Matching Optimization 450
+*** Benchmarking Pattern Matching 452
+
+** Generating Portable Bytecode 454
+*** Compiling and Linking Bytecode 455
+*** Executing Bytecode 456
+*** Embedding OCaml Bytecode in C 456
+
+** Compiling Fast Native Code 458
+*** Inspecting Assembly Output 459
+**** Inspecting Assembly Output 459
+**** Inspecting Assembly Output 459
+
+*** Debugging Native Code Binaries 462
+**** Understanding name mangling
+**** Interactive breakpoints with the GNU debugger
+
+*** Profiling Native Code 465
+**** GPROF
+**** PERF
+
+*** Embedding Native Code in C 467
+
+** Summarizing the File Extensions 468
+
+* Index - 471

@@ -1,0 +1,1411 @@
+#+TITLE: Scala Standard Library API
+#+VERSION: 2.13.0-M5
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[annotation][annotation]]
+  - [[meta][meta]]
+    - [[(@) ~beanGetter~][(@) ~beanGetter~]]
+    - [[(@) ~beanSetter~][(@) ~beanSetter~]]
+    - [[(@) ~companionClass~][(@) ~companionClass~]]
+    - [[(@) ~companionMethod~][(@) ~companionMethod~]]
+    - [[(@) ~companionObject~][(@) ~companionObject~]]
+    - [[(@) ~field~][(@) ~field~]]
+    - [[(@) ~getter~][(@) ~getter~]]
+    - [[(@) ~languageFeature~][(@) ~languageFeature~]]
+    - [[(@) ~param~][(@) ~param~]]
+    - [[(@) ~setter~][(@) ~setter~]]
+  - [[unchecked][unchecked]]
+    - [[(@) ~uncheckedStable~][(@) ~uncheckedStable~]]
+    - [[(@) ~uncheckedVariance~][(@) ~uncheckedVariance~]]
+  -   [[(@) ~Annotation~][(@) ~Annotation~]]
+  -   [[(t) ~ClassfileAnnotation~][(t) ~ClassfileAnnotation~]]
+  -   [[(t) ~ConstantAnnotation~][(t) ~ConstantAnnotation~]]
+  -   [[(t) ~StaticAnnotation~][(t) ~StaticAnnotation~]]
+  -   [[(t) ~TypeConstraint~][(t) ~TypeConstraint~]]
+  -   [[(@) ~compileTimeOnly~][(@) ~compileTimeOnly~]]
+  - [[(O,@) ~elidable~][(O,@) ~elidable~]]
+  -   [[(@) ~implicitAmbiguous~][(@) ~implicitAmbiguous~]]
+  -   [[(@) ~implicitNotFound~][(@) ~implicitNotFound~]]
+  -   [[(@) ~showAsInfix~][(@) ~showAsInfix~]]
+  -   [[(@) ~strictfp~][(@) ~strictfp~]]
+  -   [[(@) ~switch~][(@) ~switch~]]
+  -   [[(@) ~tailrec~][(@) ~tailrec~]]
+  -   [[(@) ~unspecialized~][(@) ~unspecialized~]]
+  -   [[(@) ~varargs~][(@) ~varargs~]]
+- [[beans][beans]]
+  - [[(@) ~BeanProperty~][(@) ~BeanProperty~]]
+  - [[(@) ~BooleanBeanProperty~][(@) ~BooleanBeanProperty~]]
+- [[collection][collection]]
+  - [[concurrent][concurrent]]
+    -    [[(t) ~Map~][(t) ~Map~]]
+    - [[(O,FC) ~TrieMap~][(O,FC) ~TrieMap~]]
+  - [[convert][convert]]
+    -   [[(t) ~AsJavaConverters~][(t) ~AsJavaConverters~]]
+    -   [[(t) ~AsScalaConverters~][(t) ~AsScalaConverters~]]
+    -   [[(t) ~DecorateAsJava~][(t) ~DecorateAsJava~]]
+    -   [[(t) ~DecorateAsScala~][(t) ~DecorateAsScala~]]
+    - [[(O)   ~ImplicitConversions~][(O)   ~ImplicitConversions~]]
+    - [[(O)   ~ImplicitConversionsToJava~][(O)   ~ImplicitConversionsToJava~]]
+    - [[(O)   ~ImplicitConversionsToScala~][(O)   ~ImplicitConversionsToScala~]]
+    -   [[(t) ~ToJavaImplicits~][(t) ~ToJavaImplicits~]]
+    -   [[(t) ~ToScalaImplicits~][(t) ~ToScalaImplicits~]]
+    - [[(O,t) +WrapAsJava+][(O,t) +WrapAsJava+]]
+    - [[(O,t) +WrapAsScala+][(O,t) +WrapAsScala+]]
+    - [[(O)   ~Wrappers~][(O)   ~Wrappers~]]
+  - [[generic][generic]]
+    -  [[(fC) ~DefaultSerializationProxy~][(fC) ~DefaultSerializationProxy~]]
+    - [[(O,t) ~IsIterable~][(O,t) ~IsIterable~]]
+    -   [[(t) ~IsIterableLowPriority~][(t) ~IsIterableLowPriority~]]
+    - [[(O,t) ~IsIterableOnce~][(O,t) ~IsIterableOnce~]]
+    -   [[(t) ~IsIterableOnceLowPriority~][(t) ~IsIterableOnceLowPriority~]]
+    - [[(O,t) ~IsMap~][(O,t) ~IsMap~]]
+    - [[(O,t) ~IsSeq~][(O,t) ~IsSeq~]]
+  - [[immutable][immutable]]
+    -    [[(aC) ~AbstractMap~][(aC) ~AbstractMap~]]
+    -    [[(aC) ~AbstractSeq~][(aC) ~AbstractSeq~]]
+    -    [[(aC) ~AbstractSet~][(aC) ~AbstractSet~]]
+    - [[(O,saC) ~ArraySeq~][(O,saC) ~ArraySeq~]]
+    - [[(O,saC) ~BitSet~][(O,saC) ~BitSet~]]
+    - [[(O, fC) ~HashMap~][(O, fC) ~HashMap~]]
+    - [[(O, fC) ~HashSet~][(O, fC) ~HashSet~]]
+    - [[(O,  t) ~IndexedSeq~][(O,  t) ~IndexedSeq~]]
+    -     [[(t) ~IndexedSeqOps~][(t) ~IndexedSeqOps~]]
+    - [[(O,saC) ~IntMap~][(O,saC) ~IntMap~]]
+    - [[(O,  t) ~Iterable~][(O,  t) ~Iterable~]]
+    - [[(O, fC) ~LazyList~][(O, fC) ~LazyList~]]
+      - [[Companion object][Companion object]]
+      - [[final class][final class]]
+    - [[(O,  t) ~LinearSeq~][(O,  t) ~LinearSeq~]]
+    -     [[(t) ~LinearSeqOps~][(t) ~LinearSeqOps~]]
+    - [[(O,saC) ~List~][(O,saC) ~List~]]
+      - [[(fC) ~::~][(fC) ~::~]]
+      -  [[(O) ~Nil~][(O) ~Nil~]]
+      - [[~def corresponds[B](that: collection.Seq[B])(p: (A, B) => Boolean): Boolean~][~def corresponds[B](that: collection.Seq[B])(p: (A, B) => Boolean): Boolean~]]
+      - [[~def groupMap[K, B]()key: (A) => K)(f: (A) => B): Map[K, List[B]]~][~def groupMap[K, B]()key: (A) => K)(f: (A) => B): Map[K, List[B]]~]]
+      - [[~def groupMapReduce[K, B]()key: (A) => K)(f: (A) => B)(reduce: (B, B) => B): Map[K, B]~][~def groupMapReduce[K, B]()key: (A) => K)(f: (A) => B)(reduce: (B, B) => B): Map[K, B]~]]
+      - [[~def init: List[A]~][~def init: List[A]~]]
+      - [[~def inits: Iterator[List[A]]~][~def inits: Iterator[List[A]]~]]
+      - [[~def knownSize: Int~][~def knownSize: Int~]]
+      - [[~final def lengthCompare(len: Int): Int~][~final def lengthCompare(len: Int): Int~]]
+      - [[~def lift: (Int) => Option[A]~][~def lift: (Int) => Option[A]~]]
+      - [[~def mapConserve: (f: (A) => B) => List[B]~][~def mapConserve: (f: (A) => B) => List[B]~]]
+      - [[][]]
+    - [[(O, sC) ~ListMap~][(O, sC) ~ListMap~]]
+    - [[(O, sC) ~ListSet~][(O, sC) ~ListSet~]]
+    - [[(O,saC) ~LongMap~][(O,saC) ~LongMap~]]
+    - [[(O,  t) ~Map~][(O,  t) ~Map~]]
+    -     [[(t) ~MapOps~][(t) ~MapOps~]]
+    - [[(O, sC) ~NumericRange~][(O, sC) ~NumericRange~]]
+    - [[(O, sC) ~Queue~][(O, sC) ~Queue~]]
+    - [[(O,saC) ~Range~][(O,saC) ~Range~]]
+    - [[(O,  t) ~Seq~][(O,  t) ~Seq~]]
+    - [[(O,  t) ~SeqMap~][(O,  t) ~SeqMap~]]
+    -     [[(t) ~SeqOps~][(t) ~SeqOps~]]
+    - [[(O,  t) ~Set~][(O,  t) ~Set~]]
+    -     [[(t) ~SetOps~][(t) ~SetOps~]]
+    - [[(O,  t) ~SortedMap~][(O,  t) ~SortedMap~]]
+    -     [[(t) ~SortedMapOps~][(t) ~SortedMapOps~]]
+    - [[(O,  t) ~SortedSet~][(O,  t) ~SortedSet~]]
+    -     [[(t) ~SortedSetOps~][(t) ~SortedSetOps~]]
+    -     [[(t) ~StrictOptimizedSeqOps~][(t) ~StrictOptimizedSeqOps~]]
+    - [[(O, fC) ~TreeMap~][(O, fC) ~TreeMap~]]
+    - [[(O, fC) ~TreeSet~][(O, fC) ~TreeSet~]]
+    - [[(O, fC) ~Vector~][(O, fC) ~Vector~]]
+    -    [[(fC) ~VectorBuilder~][(fC) ~VectorBuilder~]]
+    -     [[(C) ~VectorIterator~][(C) ~VectorIterator~]]
+    - [[(O,  C) ~VectorMap~][(O,  C) ~VectorMap~]]
+    - [[(O, fC) ~WrappedString~][(O, fC) ~WrappedString~]]
+  - [[mutable][mutable]]
+    -    [[(aC) ~AbstractBuffer~][(aC) ~AbstractBuffer~]]
+    -    [[(aC) ~AbstractIterable~][(aC) ~AbstractIterable~]]
+    -    [[(aC) ~AbstractMap~][(aC) ~AbstractMap~]]
+    -    [[(aC) ~AbstractSeq~][(aC) ~AbstractSeq~]]
+    -    [[(aC) ~AbstractSet~][(aC) ~AbstractSet~]]
+    - [[(O,  C) ~AnyRefMap~][(O,  C) ~AnyRefMap~]]
+    - [[(O,  C) ~ArrayBuffer~][(O,  C) ~ArrayBuffer~]]
+    -    [[(fC) ~ArrayBufferView~][(fC) ~ArrayBufferView~]]
+    - [[(O,saC) ~ArrayBuilder~][(O,saC) ~ArrayBuilder~]]
+    - [[(O,  C) ~ArrayDeque~][(O,  C) ~ArrayDeque~]]
+    - [[(O,saC) ~ArraySeq~][(O,saC) ~ArraySeq~]]
+    - [[(O,  C) ~BitSet~][(O,  C) ~BitSet~]]
+    - [[(O,  t) ~Buffer~][(O,  t) ~Buffer~]]
+    -     [[(t) ~Builder~][(t) ~Builder~]]
+    -     [[(t) ~Clearable~][(t) ~Clearable~]]
+    -     [[(t) ~Cloneable~][(t) ~Cloneable~]]
+    - [[(O,  t) ~Growable~][(O,  t) ~Growable~]]
+    -     [[(C) ~GrowableBuilder~][(C) ~GrowableBuilder~]]
+    - [[(O,  C) ~HashMap~][(O,  C) ~HashMap~]]
+    - [[(O, fC) ~HashSet~][(O, fC) ~HashSet~]]
+    -    [[(aC) ~ImmutableBuilder~][(aC) ~ImmutableBuilder~]]
+    - [[(O,  t) ~IndexedBuffer~][(O,  t) ~IndexedBuffer~]]
+    - [[(O,  t) ~IndexedSeq~][(O,  t) ~IndexedSeq~]]
+    -     [[(t) ~IndexedSeqOps~][(t) ~IndexedSeqOps~]]
+    - [[(O,  t) ~Iterable~][(O,  t) ~Iterable~]]
+    - [[(O,  C) ~LinkedHashMap~][(O,  C) ~LinkedHashMap~]]
+    - [[(O,  C) ~LinkedHashSet~][(O,  C) ~LinkedHashSet~]]
+    - [[(O,  C) ~ListBuffer~][(O,  C) ~ListBuffer~]]
+    - [[(O,  C) ~ListMap~][(O,  C) ~ListMap~]]
+    - [[(O, fC) ~LongMap~][(O, fC) ~LongMap~]]
+    - [[(O,  t) ~Map~][(O,  t) ~Map~]]
+    -     [[(t) ~MapOps~][(t) ~MapOps~]]
+    -     [[(t) ~MultiMap~][(t) ~MultiMap~]]
+    - [[(O, sC) ~PriorityQueue~][(O, sC) ~PriorityQueue~]]
+    - [[(O,  C) ~Queue~][(O,  C) ~Queue~]]
+    -     [[(t) ~ReusableBuilder~][(t) ~ReusableBuilder~]]
+    - [[(O,  t) ~Seq~][(O,  t) ~Seq~]]
+    - [[(O,  t) ~SeqMap~][(O,  t) ~SeqMap~]]
+    -     [[(t) ~SeqOps~][(t) ~SeqOps~]]
+    - [[(O,  t) ~Set~][(O,  t) ~Set~]]
+    -     [[(t) ~SetOps~][(t) ~SetOps~]]
+    -     [[(t) ~Shrinkable~][(t) ~Shrinkable~]]
+    - [[(O,  t) ~SortedMap~][(O,  t) ~SortedMap~]]
+    - [[(O,  t) ~SortedMapOps~][(O,  t) ~SortedMapOps~]]
+    - [[(O,  t) ~SortedSet~][(O,  t) ~SortedSet~]]
+    -     [[(t) ~SortedSetOps~][(t) ~SortedSetOps~]]
+    - [[(O,  C) ~Stack~][(O,  C) ~Stack~]]
+    - [[(O, fC) ~StringBuilder~][(O, fC) ~StringBuilder~]]
+    - [[(O, sC) ~TreeMap~][(O, sC) ~TreeMap~]]
+    - [[(O, sC) ~TreeSet~][(O, sC) ~TreeSet~]]
+    - [[(O, sC) ~UnrolledBuffer~][(O, sC) ~UnrolledBuffer~]]
+    - [[(O,  C) ~WeakHashMap~][(O,  C) ~WeakHashMap~]]
+  - [[(O)    ~+:~][(O)    ~+:~]]
+  - [[(O)    ~:+~][(O)    ~:+~]]
+  -   [[(AC) ~AbstractIndexedSeqView~][(AC) ~AbstractIndexedSeqView~]]
+  -   [[(AC) ~AbstractIterable~][(AC) ~AbstractIterable~]]
+  -   [[(AC) ~AbstractIterator~][(AC) ~AbstractIterator~]]
+  -   [[(AC) ~AbstractMap~][(AC) ~AbstractMap~]]
+  -   [[(AC) ~AbstractMapView~][(AC) ~AbstractMapView~]]
+  -   [[(AC) ~AbstractSeq~][(AC) ~AbstractSeq~]]
+  -   [[(AC) ~AbstractSeqView~][(AC) ~AbstractSeqView~]]
+  -   [[(AC) ~AbstractSet~][(AC) ~AbstractSet~]]
+  -   [[(AC) ~AbstractView~][(AC) ~AbstractView~]]
+  - [[(O,FC) ~ArrayOps~][(O,FC) ~ArrayOps~]]
+  - [[(O, t) ~BitSet~][(O, t) ~BitSet~]]
+  - [[(O, t) ~BitSetOps~][(O, t) ~BitSetOps~]]
+  -    [[(t) ~BufferedIterator~][(t) ~BufferedIterator~]]
+  - [[(O, t) ~BuildFrom~][(O, t) ~BuildFrom~]]
+  -    [[(t) ~BuildFromLowPriority1~][(t) ~BuildFromLowPriority1~]]
+  -    [[(t) ~BuildFromLowPriority2~][(t) ~BuildFromLowPriority2~]]
+  - [[(O, t) ~ClassTagIterableFactory~][(O, t) ~ClassTagIterableFactory~]]
+  - [[(O, t) ~ClassTagSeqFactory~][(O, t) ~ClassTagSeqFactory~]]
+  -    [[(t) ~DefaultMap~][(t) ~DefaultMap~]]
+  - [[(O, t) ~EvidenceIterableFactory~][(O, t) ~EvidenceIterableFactory~]]
+  - [[(O, t) ~Factory~][(O, t) ~Factory~]]
+  - [[(O)    ~Hashing~][(O)    ~Hashing~]]
+  - [[(O, t) ~IndexedSeq~][(O, t) ~IndexedSeq~]]
+  -    [[(t) ~IndexedSeqOps~][(t) ~IndexedSeqOps~]]
+  - [[(O, t) ~IndexedSeqView~][(O, t) ~IndexedSeqView~]]
+  - [[(O, t) ~Iterable~][(O, t) ~Iterable~]]
+  - [[(O, t) ~IterableFactory~][(O, t) ~IterableFactory~]]
+  - [[(O, t) ~IterableOnce~][(O, t) ~IterableOnce~]]
+  -   [[(FC) ~IterableOnceExtensionMethods~][(FC) ~IterableOnceExtensionMethods~]]
+  -    [[(t) ~IterableOnceOps~][(t) ~IterableOnceOps~]]
+  - [[(O, t) ~IterableOps~][(O, t) ~IterableOps~]]
+  - [[(O, t) ~Iterator~][(O, t) ~Iterator~]]
+  - [[(O)    ~JavaConverters~][(O)    ~JavaConverters~]]
+  - [[(O,FC) ~LazyZip2~][(O,FC) ~LazyZip2~]]
+  - [[(O,FC) ~LazyZip3~][(O,FC) ~LazyZip3~]]
+  - [[(O,FC) ~LazyZip4~][(O,FC) ~LazyZip4~]]
+  - [[(O, t) ~LinearSeq~][(O, t) ~LinearSeq~]]
+  -    [[(t) ~LinearSeqOps~][(t) ~LinearSeqOps~]]
+  - [[(O, t) ~Map~][(O, t) ~Map~]]
+  - [[(O, t) ~MapFactory~][(O, t) ~MapFactory~]]
+  - [[(O, t) ~MapOps~][(O, t) ~MapOps~]]
+  - [[(O, t) ~MapView~][(O, t) ~MapView~]]
+  -    [[(O) ~Searching~][(O) ~Searching~]]
+  - [[(O, t) ~Seq~][(O, t) ~Seq~]]
+  - [[(O, t) ~SeqFactory~][(O, t) ~SeqFactory~]]
+  - [[(O, t) ~SeqOps~][(O, t) ~SeqOps~]]
+  - [[(O, t) ~SeqView~][(O, t) ~SeqView~]]
+  - [[(O, t) ~Set~][(O, t) ~Set~]]
+  -    [[(t) ~SetOps~][(t) ~SetOps~]]
+  - [[(O, t) ~SortedIterableFactory~][(O, t) ~SortedIterableFactory~]]
+  - [[(O, t) ~SortedMap~][(O, t) ~SortedMap~]]
+  - [[(O, t) ~SortedMapFactory~][(O, t) ~SortedMapFactory~]]
+  - [[(O, t) ~SortedMapOps~][(O, t) ~SortedMapOps~]]
+  -    [[(t) ~SortedOps~][(t) ~SortedOps~]]
+  - [[(O, t) ~SortedSet~][(O, t) ~SortedSet~]]
+  - [[(O, t) ~SortedSetOps~][(O, t) ~SortedSetOps~]]
+  -    [[(t) ~SpecificIterableFactory~][(t) ~SpecificIterableFactory~]]
+  -    [[(t) ~StrictOptimizedClassTagSeqFactory~][(t) ~StrictOptimizedClassTagSeqFactory~]]
+  -    [[(t) ~StrictOptimizedIterableOps~][(t) ~StrictOptimizedIterableOps~]]
+  -    [[(t) ~StrictOptimizedLinearSeqOps~][(t) ~StrictOptimizedLinearSeqOps~]]
+  -    [[(t) ~StrictOptimizedMapOps~][(t) ~StrictOptimizedMapOps~]]
+  -    [[(t) ~StrictOptimizedSeqFactory~][(t) ~StrictOptimizedSeqFactory~]]
+  -    [[(t) ~StrictOptimizedSeqOps~][(t) ~StrictOptimizedSeqOps~]]
+  -    [[(t) ~StrictOptimizedSetOps~][(t) ~StrictOptimizedSetOps~]]
+  -    [[(t) ~StrictOptimizedSortedMapOps~][(t) ~StrictOptimizedSortedMapOps~]]
+  -    [[(t) ~StrictOptimizedSortedSetOps~][(t) ~StrictOptimizedSortedSetOps~]]
+  - [[(O,FC) ~StringOps~][(O,FC) ~StringOps~]]
+  -   [[(CC) ~StringView~][(CC) ~StringView~]]
+  - [[(O, t) ~View~][(O, t) ~View~]]
+  -   [[(AC) ~WithFilter~][(AC) ~WithFilter~]]
+- [[compat][compat]]
+  - [[(O) ~Platform~][(O) ~Platform~]]
+    - [[Type Members][Type Members]]
+    - [[Value Members][Value Members]]
+- [[concurrent][concurrent]]
+  - [[duration][duration]]
+    - [[(O, cC) ~Deadline~][(O, cC) ~Deadline~]]
+    -   [[(ifC) ~DoubleMult~][(ifC) ~DoubleMult~]]
+    - [[(O,saC) ~Duration~][(O,saC) ~Duration~]]
+    - [[(O,  t) ~DurationConversions~][(O,  t) ~DurationConversions~]]
+    -   [[(ifC) ~DurationDouble~][(ifC) ~DurationDouble~]]
+    -   [[(ifC) ~DurationInt~][(ifC) ~DurationInt~]]
+    -   [[(ifC) ~DurationLong~][(ifC) ~DurationLong~]]
+    - [[(O, fC) ~FiniteDuration~][(O, fC) ~FiniteDuration~]]
+    -   [[(ifC) ~IntMult~][(ifC) ~IntMult~]]
+    -   [[(ifC) ~LongMult~][(ifC) ~LongMult~]]
+    - [[(O)     ~fromNow~][(O)     ~fromNow~]]
+    - [[(O)     ~span~][(O)     ~span~]]
+  - [[(O)    ~Await~][(O)    ~Await~]]
+  -    [[(t) ~Awaitable~][(t) ~Awaitable~]]
+  - [[(O, t) ~BlockContext~][(O, t) ~BlockContext~]]
+  -   [[(st) ~CanAwait~][(st) ~CanAwait~]]
+  -    [[(C) ~Channel~][(C) ~Channel~]]
+  -    [[(C) ~DelayedLazyVal~][(C) ~DelayedLazyVal~]]
+  - [[(O, t) ~ExecutionContext~][(O, t) ~ExecutionContext~]]
+  -    [[(t) ~ExecutionContextExecutor~][(t) ~ExecutionContextExecutor~]]
+  -    [[(t) ~ExecutionContextExecutorService~][(t) ~ExecutionContextExecutorService~]]
+  - [[(O, t) ~Future~][(O, t) ~Future~]]
+  - [[(O)    ~JavaConversions~][(O)    ~JavaConversions~]]
+  -    [[(t) ~OnCompleteRunnable~][(t) ~OnCompleteRunnable~]]
+  - [[(O, t) ~Promise~][(O, t) ~Promise~]]
+  -    [[(C) ~SyncChannel~][(C) ~SyncChannel~]]
+  -    [[(C) ~SyncVar~][(C) ~SyncVar~]]
+- [[io][io]]
+  - [[(O, t) ~AnsiColor~][(O, t) ~AnsiColor~]]
+  -    [[(C) ~BufferedSource~][(C) ~BufferedSource~]]
+  - [[(O, C) ~Codec~][(O, C) ~Codec~]]
+  -    [[(t) ~LowPriorityCodecImplicits~][(t) ~LowPriorityCodecImplicits~]]
+  - [[(O,AC) ~Source~][(O,AC) ~Source~]]
+  -    [[(O) ~StdIn~][(O) ~StdIn~]]
+- [[math][math]]
+  - [[(O,fC) ~BigDecimal~][(O,fC) ~BigDecimal~]]
+  - [[(O,fC) ~BigInt~][(O,fC) ~BigInt~]]
+  - [[(O, t) ~Equiv~][(O, t) ~Equiv~]]
+  - [[(O, t) ~Fractional~][(O, t) ~Fractional~]]
+  - [[(O, t) ~Integral~][(O, t) ~Integral~]]
+  -    [[(t) ~LowPriorityEquiv~][(t) ~LowPriorityEquiv~]]
+  -    [[(t) ~LowPriorityOrderingImplicits~][(t) ~LowPriorityOrderingImplicits~]]
+  - [[(O, t) ~Numeric~][(O, t) ~Numeric~]]
+  - [[(O, t) ~Ordered~][(O, t) ~Ordered~]]
+  - [[(O, t) ~Ordering~][(O, t) ~Ordering~]]
+  -    [[(t) ~PartialOrdering~][(t) ~PartialOrdering~]]
+  -    [[(t) ~PartiallyOrdered~][(t) ~PartiallyOrdered~]]
+  -    [[(t) ~ScalaNumericAnyConversions~][(t) ~ScalaNumericAnyConversions~]]
+  -    [[(t) ~ScalaNumericConversions~][(t) ~ScalaNumericConversions~]]
+- [[ref][ref]]
+  -   [[(C) ~PhantomReference~][(C) ~PhantomReference~]]
+  -   [[(t) ~Reference~][(t) ~Reference~]]
+  -   [[(C) ~ReferenceQueue~][(C) ~ReferenceQueue~]]
+  -   [[(t) ~ReferenceWrapper~][(t) ~ReferenceWrapper~]]
+  - [[(O,C) ~SoftReference~][(O,C) ~SoftReference~]]
+  - [[(O,C) ~WeakReference~][(O,C) ~WeakReference~]]
+- [[reflect][reflect]]
+  -   [[(aC) ~AnyValManifest~][(aC) ~AnyValManifest~]]
+  -    [[(t) ~ClassManifestDeprecatedApis~][(t) ~ClassManifestDeprecatedApis~]]
+  - [[(O)    ~ClassManifestFactory~][(O)    ~ClassManifestFactory~]]
+  - [[(O, t) ~ClassTag~][(O, t) ~ClassTag~]]
+  -    [[(t) ~Manifest~][(t) ~Manifest~]]
+  - [[(O)    ~ManifestFactory~][(O)    ~ManifestFactory~]]
+  - [[(O)    ~NameTransformer~][(O)    ~NameTransformer~]]
+  - [[(O)    ~NoManifest~][(O)    ~NoManifest~]]
+  -    [[(t) ~OptManifest~][(t) ~OptManifest~]]
+  - [[api][api]]
+  - [[macros][macros]]
+  - [[runtime][runtime]]
+- [[runtime][runtime]]
+  -   [[(aC) AbstractFunctionN -- N from 1 to 22][(aC) AbstractFunctionN -- N from 1 to 22]]
+    - [[~AbstractFunction1~][~AbstractFunction1~]]
+    - [[~AbstractFunction2~][~AbstractFunction2~]]
+    - [[~AbstractFunction3~][~AbstractFunction3~]]
+    - [[~AbstractFunction4~][~AbstractFunction4~]]
+    - [[~AbstractFunction5~][~AbstractFunction5~]]
+    - [[~AbstractFunction6~][~AbstractFunction6~]]
+    - [[~AbstractFunction7~][~AbstractFunction7~]]
+    - [[~AbstractFunction8~][~AbstractFunction8~]]
+    - [[~AbstractFunction9~][~AbstractFunction9~]]
+    - [[~AbstractFunction10~][~AbstractFunction10~]]
+    - [[~AbstractFunction11~][~AbstractFunction11~]]
+    - [[~AbstractFunction12~][~AbstractFunction12~]]
+    - [[~AbstractFunction13~][~AbstractFunction13~]]
+    - [[~AbstractFunction14~][~AbstractFunction14~]]
+    - [[~AbstractFunction15~][~AbstractFunction15~]]
+    - [[~AbstractFunction16~][~AbstractFunction16~]]
+    - [[~AbstractFunction17~][~AbstractFunction17~]]
+    - [[~AbstractFunction18~][~AbstractFunction18~]]
+    - [[~AbstractFunction19~][~AbstractFunction19~]]
+    - [[~AbstractFunction20~][~AbstractFunction20~]]
+    - [[~AbstractFunction21~][~AbstractFunction21~]]
+    - [[~AbstractFunction22~][~AbstractFunction22~]]
+  -   [[(aC) ~AbstractPartialFunction~][(aC) ~AbstractPartialFunction~]]
+  -   [[(fC) ~ArrayCharSequence~][(fC) ~ArrayCharSequence~]]
+  -    [[(t) ~FractionalProxy~][(t) ~FractionalProxy~]]
+  -    [[(t) ~IntegralProxy~][(t) ~IntegralProxy~]]
+  - [[(O)    ~LambdaDeserializer~][(O)    ~LambdaDeserializer~]]
+  -    [[(C) ~LazyBoolean~][(C) ~LazyBoolean~]]
+  -    [[(C) ~LazyByte~][(C) ~LazyByte~]]
+  -    [[(C) ~LazyChar~][(C) ~LazyChar~]]
+  -    [[(C) ~LazyDouble~][(C) ~LazyDouble~]]
+  -    [[(C) ~LazyFloat~][(C) ~LazyFloat~]]
+  -    [[(C) ~LazyInt~][(C) ~LazyInt~]]
+  -    [[(C) ~LazyLong~][(C) ~LazyLong~]]
+  -    [[(C) ~LazyRef~][(C) ~LazyRef~]]
+  -    [[(C) ~LazyShort~][(C) ~LazyShort~]]
+  -    [[(C) ~LazyUnit~][(C) ~LazyUnit~]]
+  -    [[(C) ~NonLocalReturnControl~][(C) ~NonLocalReturnControl~]]
+  -    [[(t) ~OrderedProxy~][(t) ~OrderedProxy~]]
+  -    [[(t) ~RangedProxy~][(t) ~RangedProxy~]]
+  -   [[(fC) ~RichBoolean~][(fC) ~RichBoolean~]]
+  -   [[(fC) ~RichByte~][(fC) ~RichByte~]]
+  -   [[(fC) ~RichChar~][(fC) ~RichChar~]]
+  -   [[(fC) ~RichDouble~][(fC) ~RichDouble~]]
+  -   [[(fC) ~RichFloat~][(fC) ~RichFloat~]]
+  -   [[(fC) ~RichInt~][(fC) ~RichInt~]]
+  -   [[(fC) ~RichLong~][(fC) ~RichLong~]]
+  -   [[(fC) ~RichShort~][(fC) ~RichShort~]]
+  -    [[(t) ~ScalaNumberProxy~][(t) ~ScalaNumberProxy~]]
+  -    [[(t) ~ScalaWholeNumberProxy~][(t) ~ScalaWholeNumberProxy~]]
+- [[sys][sys]]
+  - [[process][process]]
+    - [[(O)    ~BasicIO~][(O)    ~BasicIO~]]
+    -    [[(C) ~FileProcessLogger~][(C) ~FileProcessLogger~]]
+    - [[(O, t) ~Process~][(O, t) ~Process~]]
+    - [[(O, t) ~ProcessBuilder~][(O, t) ~ProcessBuilder~]]
+    -    [[(t) ~ProcessCreation~][(t) ~ProcessCreation~]]
+    -   [[(fC) ~ProcessIO~][(fC) ~ProcessIO~]]
+    -    [[(t) ~ProcessImplicits~][(t) ~ProcessImplicits~]]
+    - [[(O, t) ~ProcessLogger~][(O, t) ~ProcessLogger~]]
+  - [[(O,t) ~BooleanProp~][(O,t) ~BooleanProp~]]
+  - [[(O,t) ~Prop~][(O,t) ~Prop~]]
+  - [[(O,C) ~ShutdownHookThread~][(O,C) ~ShutdownHookThread~]]
+  - [[(O,C) ~SystemProperties~][(O,C) ~SystemProperties~]]
+- [[util][util]]
+  - [[control][control]]
+    - [[(O,C) ~Breaks~][(O,C) ~Breaks~]]
+    -   [[(t) ~ControlThrowable~][(t) ~ControlThrowable~]]
+    - [[(O)   ~Exception~][(O)   ~Exception~]]
+    - [[(O,t) ~NoStackTrace~][(O,t) ~NoStackTrace~]]
+    - [[(O)   ~NonFatal~][(O)   ~NonFatal~]]
+    - [[(O)   ~TailCalls~][(O)   ~TailCalls~]]
+  - [[hanshing][hanshing]]
+    - [[(O,fC) ~ByteswapHashing~][(O,fC) ~ByteswapHashing~]]
+    - [[(O, t) ~Hashing~][(O, t) ~Hashing~]]
+    - [[(O)    ~MurmurHash3~][(O)    ~MurmurHash3~]]
+  - [[matching][matching]]
+    - [[(O,C) Regex][(O,C) Regex]]
+    -   [[(t) UnanchoredRegex][(t) UnanchoredRegex]]
+  -    [[(fC) ~ChainingOps~][(fC) ~ChainingOps~]]
+  -     [[(t) ~ChainingSyntax~][(t) ~ChainingSyntax~]]
+  -     [[(C) ~DynamicVariable~][(C) ~DynamicVariable~]]
+  -   [[(saC) ~Either~][(saC) ~Either~]]
+    - [[(fcC) ~Left~][(fcC) ~Left~]]
+    - [[(fcC) ~Right~][(fcC) ~Right~]]
+  - [[(O)     ~Properties~][(O)     ~Properties~]]
+  - [[(O,  C) ~Random~][(O,  C) ~Random~]]
+  - [[(O)     ~Sorting~][(O)     ~Sorting~]]
+  -   [[(saC) ~Try~][(saC) ~Try~]]
+    - [[(fcC) ~Success~][(fcC) ~Success~]]
+    - [[(fcC) ~Failure~][(fcC) ~Failure~]]
+  - [[(O, fC) ~Using~][(O, fC) ~Using~]]
+  - [[(O)     ~chaining~][(O)     ~chaining~]]
+- [[(O)     ~#::~][(O)     ~#::~]]
+- [[(aC)    ~Any~][(aC)    ~Any~]]
+- [[(aC)    ~AnyVal~][(aC)    ~AnyVal~]]
+- [[(t)     ~App~][(t)     ~App~]]
+- [[(O,fC)  ~Array~][(O,fC)  ~Array~]]
+- [[(O,afC) ~Boolean~][(O,afC) ~Boolean~]]
+- [[(O,afC) ~Byte~][(O,afC) ~Byte~]]
+- [[(O,afC) ~Char~][(O,afC) ~Char~]]
+- [[(t)     ~Cloneable~][(t)     ~Cloneable~]]
+- [[(O)     ~Console~][(O)     ~Console~]]
+- [[(t)     ~DelayedInit~][(t)     ~DelayedInit~]]
+- [[(O,afC) ~Double~][(O,afC) ~Double~]]
+- [[(t)     ~Dynamic~][(t)     ~Dynamic~]]
+- [[(aC)    ~Enumeration~][(aC)    ~Enumeration~]]
+- [[(t)     ~Equals~][(t)     ~Equals~]]
+- [[(O,afC) ~Float~][(O,afC) ~Float~]]
+- [[N Function][N Function]]
+  - [[(O) Function][(O) Function]]
+  - [[(t) Function0][(t) Function0]]
+  - [[(t) Function1][(t) Function1]]
+  - [[(t) Function2][(t) Function2]]
+  - [[(t) Function3][(t) Function3]]
+  - [[(t) Function4][(t) Function4]]
+  - [[(t) Function5][(t) Function5]]
+  - [[(t) Function6][(t) Function6]]
+  - [[(t) Function7][(t) Function7]]
+  - [[(t) Function8][(t) Function8]]
+  - [[(t) Function9][(t) Function9]]
+  - [[(t) Function10][(t) Function10]]
+  - [[(t) Function11][(t) Function11]]
+  - [[(t) Function12][(t) Function12]]
+  - [[(t) Function13][(t) Function13]]
+  - [[(t) Function14][(t) Function14]]
+  - [[(t) Function15][(t) Function15]]
+  - [[(t) Function16][(t) Function16]]
+  - [[(t) Function17][(t) Function17]]
+  - [[(t) Function18][(t) Function18]]
+  - [[(t) Function19][(t) Function19]]
+  - [[(t) Function20][(t) Function20]]
+  - [[(t) Function21][(t) Function21]]
+  - [[(t) Function22][(t) Function22]]
+- [[(O,afC) ~Int~][(O,afC) ~Int~]]
+- [[(O,afC) ~Long~][(O,afC) ~Long~]]
+- [[(fC)    ~MatchError~][(fC)    ~MatchError~]]
+- [[(fC)    ~NotImplementedError~][(fC)    ~NotImplementedError~]]
+- [[(afC)   ~Nothing~][(afC)   ~Nothing~]]
+- [[(afC)   ~Null~][(afC)   ~Null~]]
+- [[(O,saC) ~Option~][(O,saC) ~Option~]]
+  - [[(O) ~None~][(O) ~None~]]
+  - [[(C) ~Some~][(C) ~Some~]]
+- [[(O,t)   ~PartialFunction~][(O,t)   ~PartialFunction~]]
+  - [[Companion Object][Companion Object]]
+    - [[Value Members][Value Members]]
+  - [[Trait][Trait]]
+    - [[Abstract Value Members][Abstract Value Members]]
+    - [[Concrete Value Members - =TODO= =one queston=][Concrete Value Members - =TODO= =one queston=]]
+- [[(O)     ~Predef~][(O)     ~Predef~]]
+- [[N Product][N Product]]
+  - [[(O,t) Product][(O,t) Product]]
+  - [[(O,t) Product1][(O,t) Product1]]
+  - [[(O,t) Product2][(O,t) Product2]]
+  - [[(O,t) Product3][(O,t) Product3]]
+  - [[(O,t) Product4][(O,t) Product4]]
+  - [[(O,t) Product5][(O,t) Product5]]
+  - [[(O,t) Product6][(O,t) Product6]]
+  - [[(O,t) Product7][(O,t) Product7]]
+  - [[(O,t) Product8][(O,t) Product8]]
+  - [[(O,t) Product9][(O,t) Product9]]
+  - [[(O,t) Product10][(O,t) Product10]]
+  - [[(O,t) Product11][(O,t) Product11]]
+  - [[(O,t) Product12][(O,t) Product12]]
+  - [[(O,t) Product13][(O,t) Product13]]
+  - [[(O,t) Product14][(O,t) Product14]]
+  - [[(O,t) Product15][(O,t) Product15]]
+  - [[(O,t) Product16][(O,t) Product16]]
+  - [[(O,t) Product17][(O,t) Product17]]
+  - [[(O,t) Product18][(O,t) Product18]]
+  - [[(O,t) Product19][(O,t) Product19]]
+  - [[(O,t) Product20][(O,t) Product20]]
+  - [[(O,t) Product21][(O,t) Product21]]
+  - [[(O,t) Product22][(O,t) Product22]]
+- [[(O,t)   ~Proxy~][(O,t)   ~Proxy~]]
+- [[(cC)    ~ScalaReflectionException~][(cC)    ~ScalaReflectionException~]]
+- [[(C)     ~SerialVersionUID~][(C)     ~SerialVersionUID~]]
+- [[(t)     ~Serializable~][(t)     ~Serializable~]]
+- [[(O,afC) ~Short~][(O,afC) ~Short~]]
+- [[(O,t)   ~Specializable~][(O,t)   ~Specializable~]]
+- [[(O,cC)  ~StringContext~][(O,cC)  ~StringContext~]]
+- [[(O,fC)  ~Symbol~][(O,fC)  ~Symbol~]]
+- [[N Tuple][N Tuple]]
+  - [[(C) Tuple1][(C) Tuple1]]
+  - [[(C) Tuple2][(C) Tuple2]]
+  - [[(C) Tuple3][(C) Tuple3]]
+  - [[(C) Tuple4][(C) Tuple4]]
+  - [[(C) Tuple5][(C) Tuple5]]
+  - [[(C) Tuple6][(C) Tuple6]]
+  - [[(C) Tuple7][(C) Tuple7]]
+  - [[(C) Tuple8][(C) Tuple8]]
+  - [[(C) Tuple9][(C) Tuple9]]
+  - [[(C) Tuple10][(C) Tuple10]]
+  - [[(C) Tuple11][(C) Tuple11]]
+  - [[(C) Tuple12][(C) Tuple12]]
+  - [[(C) Tuple13][(C) Tuple13]]
+  - [[(C) Tuple14][(C) Tuple14]]
+  - [[(C) Tuple15][(C) Tuple15]]
+  - [[(C) Tuple16][(C) Tuple16]]
+  - [[(C) Tuple17][(C) Tuple17]]
+  - [[(C) Tuple18][(C) Tuple18]]
+  - [[(C) Tuple19][(C) Tuple19]]
+  - [[(C) Tuple20][(C) Tuple20]]
+  - [[(C) Tuple21][(C) Tuple21]]
+  - [[(C) Tuple22][(C) Tuple22]]
+- [[(fC)    ~UninitializedError~][(fC)    ~UninitializedError~]]
+- [[(fcC)   ~UninitializedFieldError~][(fcC)   ~UninitializedFieldError~]]
+- [[(O,afC) ~Unit~][(O,afC) ~Unit~]]
+- [[(fC)    ~ValueOf~][(fC)    ~ValueOf~]]
+- [[(@)     ~deprecated~][(@)     ~deprecated~]]
+- [[(@)     ~deprecatedInheritance~][(@)     ~deprecatedInheritance~]]
+- [[(@)     ~deprecatedName~][(@)     ~deprecatedName~]]
+- [[(@)     ~deprecatedOverriding~][(@)     ~deprecatedOverriding~]]
+- [[(@)     ~inline~][(@)     ~inline~]]
+- [[(O)     ~language~][(O)     ~language~]]
+- [[(O)     ~languageFeature~][(O)     ~languageFeature~]]
+- [[(@)     ~native~][(@)     ~native~]]
+- [[(@)     ~noinline~][(@)     ~noinline~]]
+- [[(@)     ~specialized~][(@)     ~specialized~]]
+- [[(@)     ~throws~][(@)     ~throws~]]
+- [[(@)     ~transient~][(@)     ~transient~]]
+- [[(@)     ~unchecked~][(@)     ~unchecked~]]
+- [[(@)     ~volatile~][(@)     ~volatile~]]
+
+* TODO annotation
+** TODO meta
+*** (@) ~beanGetter~
+*** (@) ~beanSetter~
+*** (@) ~companionClass~
+*** (@) ~companionMethod~
+*** (@) ~companionObject~
+*** (@) ~field~
+*** (@) ~getter~
+*** (@) ~languageFeature~
+*** (@) ~param~
+*** (@) ~setter~
+
+** TODO unchecked
+*** (@) ~uncheckedStable~
+*** (@) ~uncheckedVariance~
+
+**   (@) ~Annotation~
+**   (t) ~ClassfileAnnotation~
+**   (t) ~ConstantAnnotation~
+**   (t) ~StaticAnnotation~
+**   (t) ~TypeConstraint~
+**   (@) ~compileTimeOnly~
+** (O,@) ~elidable~
+**   (@) ~implicitAmbiguous~
+**   (@) ~implicitNotFound~
+**   (@) ~showAsInfix~
+**   (@) ~strictfp~
+**   (@) ~switch~
+**   (@) ~tailrec~
+**   (@) ~unspecialized~
+**   (@) ~varargs~
+
+* DONE beans
+  CLOSED: [2018-09-03 Mon 14:08]
+  https://stackoverflow.com/questions/35038977/is-it-good-practice-to-use-beanproperty-in-scala-instead-of-defining-getter-set
+
+  - If you hope to create a /getter/ and a /setter/ for your Scala /property/,
+    and CURRENTLY there is NO costom logic you need to fit nto your gtter and
+    setter, the form like ~var foo: Int = _~ is a good enough start.
+    #+BEGIN_SRC scala
+      class Foo {
+        var foo: Int = _
+      }
+    #+END_SRC
+
+    Try ~javap -private Foo~, and you'll see
+    #+BEGIN_SRC java
+      public class Foo {
+          private int foo;
+          public int foo();
+          public void foo_$eq(int);
+          public Foo();
+      }
+    #+END_SRC
+
+  - The ~BeanProperty~ and ~BooleanBeanProperty~ are used to create Java-Bean-Style
+    /getters/ and /setters/. Add any of them to a Scala /property/, and you'll get
+    two aliases /method/: ~getFoo()~ to ~foo()~, and ~setFoo(int)~ to ~foo_$eq(int)~.
+
+  - The ONLY difference between ~BeanProperty~ and ~BooleanBeanProperty~ is
+    + A ~BeanProperty~ generated /getter/ is named in the form of ~getXXX~.
+    + A ~BooleanBeanProperty~ generated /getter/ is named in the form of ~isXXX~.
+
+** (@) ~BeanProperty~
+** (@) ~BooleanBeanProperty~
+
+* TODO collection
+** TODO concurrent
+***    (t) ~Map~
+*** (O,FC) ~TrieMap~
+
+** TODO convert
+***   (t) ~AsJavaConverters~
+***   (t) ~AsScalaConverters~
+***   (t) ~DecorateAsJava~
+***   (t) ~DecorateAsScala~
+*** (O)   ~ImplicitConversions~
+*** (O)   ~ImplicitConversionsToJava~
+*** (O)   ~ImplicitConversionsToScala~
+***   (t) ~ToJavaImplicits~
+***   (t) ~ToScalaImplicits~
+*** (O,t) +WrapAsJava+
+    Annotations: ~@deprecated~
+    Deprecated:  (Since version 2.12.0) use JavaConverters or consider ToJavaImplicits
+
+*** (O,t) +WrapAsScala+
+    Annotations: ~@deprecated~
+    Deprecated:  (Since version 2.12.0) use JavaConverters or consider ToScalaImplicits
+
+*** (O)   ~Wrappers~
+
+** TODO generic
+***  (fC) ~DefaultSerializationProxy~
+*** (O,t) ~IsIterable~
+***   (t) ~IsIterableLowPriority~
+*** (O,t) ~IsIterableOnce~
+***   (t) ~IsIterableOnceLowPriority~
+*** (O,t) ~IsMap~
+*** (O,t) ~IsSeq~
+
+** TODO immutable
+***    (aC) ~AbstractMap~
+***    (aC) ~AbstractSeq~
+***    (aC) ~AbstractSet~
+*** (O,saC) ~ArraySeq~
+*** (O,saC) ~BitSet~
+*** (O, fC) ~HashMap~
+*** (O, fC) ~HashSet~
+*** (O,  t) ~IndexedSeq~
+***     (t) ~IndexedSeqOps~
+*** (O,saC) ~IntMap~
+*** (O,  t) ~Iterable~
+*** (O, fC) ~LazyList~
+**** Companion object
+     - ~object LazyList extends SeqFactory[LazyList]~
+
+**** final class
+
+*** (O,  t) ~LinearSeq~
+***     (t) ~LinearSeqOps~
+*** (O,saC) ~List~
+**** (fC) ~::~
+****  (O) ~Nil~
+
+**** ~def corresponds[B](that: collection.Seq[B])(p: (A, B) => Boolean): Boolean~
+
+**** ~def groupMap[K, B]()key: (A) => K)(f: (A) => B): Map[K, List[B]]~
+
+**** ~def groupMapReduce[K, B]()key: (A) => K)(f: (A) => B)(reduce: (B, B) => B): Map[K, B]~
+
+**** ~def init: List[A]~
+     Return the longest prefix -- drop the last element.
+
+     When the ~this~ is empty, throw the exception:
+     ~java.lang.UnsupportedOperationException~.
+     
+
+**** ~def inits: Iterator[List[A]]~
+     + *TRAP*
+       The first element is the original list.
+       Even if ~this~ is empty, no exception!
+
+       This is wierd (=Jian= thinks this is conflict with the definition of the
+       ~init~ /method/) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+       =IMPORTANT=
+
+**** ~def knownSize: Int~
+
+**** ~final def lengthCompare(len: Int): Int~
+
+**** ~def lift: (Int) => Option[A]~
+
+**** ~def mapConserve: (f: (A) => B) => List[B]~
+
+
+**** 
+*** (O, sC) ~ListMap~
+*** (O, sC) ~ListSet~
+*** (O,saC) ~LongMap~
+*** (O,  t) ~Map~
+***     (t) ~MapOps~
+*** (O, sC) ~NumericRange~
+*** (O, sC) ~Queue~
+*** (O,saC) ~Range~
+*** (O,  t) ~Seq~
+*** (O,  t) ~SeqMap~
+***     (t) ~SeqOps~
+*** (O,  t) ~Set~
+***     (t) ~SetOps~
+*** (O,  t) ~SortedMap~
+***     (t) ~SortedMapOps~
+*** (O,  t) ~SortedSet~
+***     (t) ~SortedSetOps~
+***     (t) ~StrictOptimizedSeqOps~
+*** (O, fC) ~TreeMap~
+*** (O, fC) ~TreeSet~
+*** (O, fC) ~Vector~
+***    (fC) ~VectorBuilder~
+***     (C) ~VectorIterator~
+*** (O,  C) ~VectorMap~
+*** (O, fC) ~WrappedString~
+
+** TODO mutable
+***    (aC) ~AbstractBuffer~
+***    (aC) ~AbstractIterable~
+***    (aC) ~AbstractMap~
+***    (aC) ~AbstractSeq~
+***    (aC) ~AbstractSet~
+*** (O,  C) ~AnyRefMap~
+*** (O,  C) ~ArrayBuffer~
+***    (fC) ~ArrayBufferView~
+*** (O,saC) ~ArrayBuilder~
+*** (O,  C) ~ArrayDeque~
+*** (O,saC) ~ArraySeq~
+*** (O,  C) ~BitSet~
+*** (O,  t) ~Buffer~
+***     (t) ~Builder~
+***     (t) ~Clearable~
+***     (t) ~Cloneable~
+*** (O,  t) ~Growable~
+***     (C) ~GrowableBuilder~
+*** (O,  C) ~HashMap~
+*** (O, fC) ~HashSet~
+***    (aC) ~ImmutableBuilder~
+*** (O,  t) ~IndexedBuffer~
+*** (O,  t) ~IndexedSeq~
+***     (t) ~IndexedSeqOps~
+*** (O,  t) ~Iterable~
+*** (O,  C) ~LinkedHashMap~
+*** (O,  C) ~LinkedHashSet~
+*** (O,  C) ~ListBuffer~
+*** (O,  C) ~ListMap~
+*** (O, fC) ~LongMap~
+*** (O,  t) ~Map~
+***     (t) ~MapOps~
+***     (t) ~MultiMap~
+*** (O, sC) ~PriorityQueue~
+*** (O,  C) ~Queue~
+***     (t) ~ReusableBuilder~
+*** (O,  t) ~Seq~
+*** (O,  t) ~SeqMap~
+***     (t) ~SeqOps~
+*** (O,  t) ~Set~
+***     (t) ~SetOps~
+***     (t) ~Shrinkable~
+*** (O,  t) ~SortedMap~
+*** (O,  t) ~SortedMapOps~
+*** (O,  t) ~SortedSet~
+***     (t) ~SortedSetOps~
+*** (O,  C) ~Stack~
+*** (O, fC) ~StringBuilder~
+*** (O, sC) ~TreeMap~
+*** (O, sC) ~TreeSet~
+*** (O, sC) ~UnrolledBuffer~
+*** (O,  C) ~WeakHashMap~
+
+** (O)    ~+:~
+** (O)    ~:+~
+**   (AC) ~AbstractIndexedSeqView~
+**   (AC) ~AbstractIterable~
+**   (AC) ~AbstractIterator~
+**   (AC) ~AbstractMap~
+**   (AC) ~AbstractMapView~
+**   (AC) ~AbstractSeq~
+**   (AC) ~AbstractSeqView~
+**   (AC) ~AbstractSet~
+**   (AC) ~AbstractView~
+** (O,FC) ~ArrayOps~
+** (O, t) ~BitSet~
+** (O, t) ~BitSetOps~
+**    (t) ~BufferedIterator~
+** (O, t) ~BuildFrom~
+**    (t) ~BuildFromLowPriority1~
+**    (t) ~BuildFromLowPriority2~
+** (O, t) ~ClassTagIterableFactory~
+** (O, t) ~ClassTagSeqFactory~
+**    (t) ~DefaultMap~
+** (O, t) ~EvidenceIterableFactory~
+** (O, t) ~Factory~
+** (O)    ~Hashing~
+** (O, t) ~IndexedSeq~
+**    (t) ~IndexedSeqOps~
+** (O, t) ~IndexedSeqView~
+** (O, t) ~Iterable~
+** (O, t) ~IterableFactory~
+** (O, t) ~IterableOnce~
+**   (FC) ~IterableOnceExtensionMethods~
+**    (t) ~IterableOnceOps~
+** (O, t) ~IterableOps~
+** (O, t) ~Iterator~
+** (O)    ~JavaConverters~
+** (O,FC) ~LazyZip2~
+** (O,FC) ~LazyZip3~
+** (O,FC) ~LazyZip4~
+** (O, t) ~LinearSeq~
+**    (t) ~LinearSeqOps~
+** (O, t) ~Map~
+** (O, t) ~MapFactory~
+** (O, t) ~MapOps~
+** (O, t) ~MapView~
+**    (O) ~Searching~
+** (O, t) ~Seq~
+** (O, t) ~SeqFactory~
+** (O, t) ~SeqOps~
+** (O, t) ~SeqView~
+** (O, t) ~Set~
+**    (t) ~SetOps~
+** (O, t) ~SortedIterableFactory~
+** (O, t) ~SortedMap~
+** (O, t) ~SortedMapFactory~
+** (O, t) ~SortedMapOps~
+**    (t) ~SortedOps~
+** (O, t) ~SortedSet~
+** (O, t) ~SortedSetOps~
+**    (t) ~SpecificIterableFactory~
+**    (t) ~StrictOptimizedClassTagSeqFactory~
+**    (t) ~StrictOptimizedIterableOps~
+**    (t) ~StrictOptimizedLinearSeqOps~
+**    (t) ~StrictOptimizedMapOps~
+**    (t) ~StrictOptimizedSeqFactory~
+**    (t) ~StrictOptimizedSeqOps~
+**    (t) ~StrictOptimizedSetOps~
+**    (t) ~StrictOptimizedSortedMapOps~
+**    (t) ~StrictOptimizedSortedSetOps~
+** (O,FC) ~StringOps~
+**   (CC) ~StringView~
+** (O, t) ~View~
+**   (AC) ~WithFilter~
+
+* TODO compat
+** (O) ~Platform~
+*** DONE Type Members
+    CLOSED: [2018-09-03 Mon 13:36]
+    - ~ConcurrentModificationException~
+      #+BEGIN_SRC scala
+        type ConcurrentModificationException =
+          java.util.ConcurrentModificationException
+      #+END_SRC
+
+    - ~StackOverflowError~
+      #+BEGIN_SRC scala
+        type StackOverflowError = java.lang.StackOverflowError
+      #+END_SRC
+
+*** TODO Value Members
+
+* TODO concurrent
+** duration
+*** (O, cC) ~Deadline~
+***   (ifC) ~DoubleMult~
+*** (O,saC) ~Duration~
+*** (O,  t) ~DurationConversions~
+***   (ifC) ~DurationDouble~
+***   (ifC) ~DurationInt~
+***   (ifC) ~DurationLong~
+*** (O, fC) ~FiniteDuration~
+***   (ifC) ~IntMult~
+***   (ifC) ~LongMult~
+*** (O)     ~fromNow~
+*** (O)     ~span~
+
+** (O)    ~Await~
+**    (t) ~Awaitable~
+** (O, t) ~BlockContext~
+**   (st) ~CanAwait~
+**    (C) ~Channel~
+**    (C) ~DelayedLazyVal~
+** (O, t) ~ExecutionContext~
+**    (t) ~ExecutionContextExecutor~
+**    (t) ~ExecutionContextExecutorService~
+** (O, t) ~Future~
+** (O)    ~JavaConversions~
+**    (t) ~OnCompleteRunnable~
+** (O, t) ~Promise~
+**    (C) ~SyncChannel~
+**    (C) ~SyncVar~
+
+* TODO io
+** (O, t) ~AnsiColor~
+**    (C) ~BufferedSource~
+** (O, C) ~Codec~
+**    (t) ~LowPriorityCodecImplicits~
+** (O,AC) ~Source~
+**    (O) ~StdIn~
+
+* TODO math
+** (O,fC) ~BigDecimal~
+** (O,fC) ~BigInt~
+** (O, t) ~Equiv~
+** (O, t) ~Fractional~
+** (O, t) ~Integral~
+**    (t) ~LowPriorityEquiv~
+**    (t) ~LowPriorityOrderingImplicits~
+** (O, t) ~Numeric~
+** (O, t) ~Ordered~
+** (O, t) ~Ordering~
+**    (t) ~PartialOrdering~
+**    (t) ~PartiallyOrdered~
+**    (t) ~ScalaNumericAnyConversions~
+**    (t) ~ScalaNumericConversions~
+
+* TODO ref
+**   (C) ~PhantomReference~
+**   (t) ~Reference~
+**   (C) ~ReferenceQueue~
+**   (t) ~ReferenceWrapper~
+** (O,C) ~SoftReference~
+** (O,C) ~WeakReference~
+
+* TODO reflect
+**   (aC) ~AnyValManifest~
+**    (t) ~ClassManifestDeprecatedApis~
+** (O)    ~ClassManifestFactory~
+** (O, t) ~ClassTag~
+**    (t) ~Manifest~
+** (O)    ~ManifestFactory~
+** (O)    ~NameTransformer~
+** (O)    ~NoManifest~
+**    (t) ~OptManifest~
+
+** TODO api
+** TODO macros
+** TODO runtime
+
+* TODO runtime
+**   (aC) AbstractFunctionN -- N from 1 to 22
+*** ~AbstractFunction1~
+*** ~AbstractFunction2~
+*** ~AbstractFunction3~
+*** ~AbstractFunction4~
+*** ~AbstractFunction5~
+*** ~AbstractFunction6~
+*** ~AbstractFunction7~
+*** ~AbstractFunction8~
+*** ~AbstractFunction9~
+*** ~AbstractFunction10~
+*** ~AbstractFunction11~
+*** ~AbstractFunction12~
+*** ~AbstractFunction13~
+*** ~AbstractFunction14~
+*** ~AbstractFunction15~
+*** ~AbstractFunction16~
+*** ~AbstractFunction17~
+*** ~AbstractFunction18~
+*** ~AbstractFunction19~
+*** ~AbstractFunction20~
+*** ~AbstractFunction21~
+*** ~AbstractFunction22~
+
+**   (aC) ~AbstractPartialFunction~
+**   (fC) ~ArrayCharSequence~
+**    (t) ~FractionalProxy~
+**    (t) ~IntegralProxy~
+** (O)    ~LambdaDeserializer~
+**    (C) ~LazyBoolean~
+**    (C) ~LazyByte~
+**    (C) ~LazyChar~
+**    (C) ~LazyDouble~
+**    (C) ~LazyFloat~
+**    (C) ~LazyInt~
+**    (C) ~LazyLong~
+**    (C) ~LazyRef~
+**    (C) ~LazyShort~
+**    (C) ~LazyUnit~
+**    (C) ~NonLocalReturnControl~
+**    (t) ~OrderedProxy~
+**    (t) ~RangedProxy~
+**   (fC) ~RichBoolean~
+**   (fC) ~RichByte~
+**   (fC) ~RichChar~
+**   (fC) ~RichDouble~
+**   (fC) ~RichFloat~
+**   (fC) ~RichInt~
+**   (fC) ~RichLong~
+**   (fC) ~RichShort~
+**    (t) ~ScalaNumberProxy~
+**    (t) ~ScalaWholeNumberProxy~
+
+* TODO sys
+** process
+*** (O)    ~BasicIO~
+***    (C) ~FileProcessLogger~
+*** (O, t) ~Process~
+*** (O, t) ~ProcessBuilder~
+***    (t) ~ProcessCreation~
+***   (fC) ~ProcessIO~
+***    (t) ~ProcessImplicits~
+*** (O, t) ~ProcessLogger~
+
+** (O,t) ~BooleanProp~
+** (O,t) ~Prop~
+** (O,C) ~ShutdownHookThread~
+** (O,C) ~SystemProperties~
+* TODO util
+** TODO control
+*** (O,C) ~Breaks~
+***   (t) ~ControlThrowable~
+*** (O)   ~Exception~
+*** (O,t) ~NoStackTrace~
+*** (O)   ~NonFatal~
+*** (O)   ~TailCalls~
+** TODO hanshing
+*** (O,fC) ~ByteswapHashing~
+*** (O, t) ~Hashing~
+*** (O)    ~MurmurHash3~
+** TODO matching
+*** (O,C) Regex
+***   (t) UnanchoredRegex
+
+**    (fC) ~ChainingOps~
+**     (t) ~ChainingSyntax~
+**     (C) ~DynamicVariable~
+
+**   (saC) ~Either~
+*** (fcC) ~Left~
+*** (fcC) ~Right~
+
+** (O)     ~Properties~
+** (O,  C) ~Random~
+** (O)     ~Sorting~
+**   (saC) ~Try~
+*** (fcC) ~Success~
+*** (fcC) ~Failure~
+
+** (O, fC) ~Using~
+** (O)     ~chaining~
+
+* (O)     ~#::~
+* (aC)    ~Any~
+* (aC)    ~AnyVal~
+* (t)     ~App~
+* (O,fC)  ~Array~
+  - Signature:
+    + (C) ~final class Array[T] extends java.io.Serializable with java.lang.Cloneable~
+
+    + (O) ~object Array extends Serializable~ 
+
+  - Arrays are *mutable, indexed collections* of values.
+    ~Array[T]~ is Scala's representation for Java's ~T[]~.
+
+  - Two syntactic sugar:
+    + ~val first = array(0)~ uses ~apply(Int)~
+    + ~array(3) = 100~ uses ~update(Int, T)~, and here ~T~ is ~Int~
+
+  - See also
+    + ~collection.ArrayOps~:
+      *Temporary* -- ALL operations defined on ~ArrayOps~ return an ~Array~.
+
+    + ~collection.mutable.ArraySeq~:
+      *Permanent* -- ALL operations return a ~ArraySeq~.
+
+      =From Jian=
+      There are ~collection.immutable.ArraySeq~ and ~collection.mutable.ArraySeq~.
+      =TODO= Learn more details!!!
+
+  - There are /implicit conversions/ from ~Array~ to ~collection.ArrayOps~ or
+    ~collection.mutable.ArraySeq~ in ~Predef~.
+
+    The conversion to ~ArrayOps~ *takes priority over* the conversion to ~ArraySeq~.
+
+    + Proof
+      #+BEGIN_SRC scala
+        val arr = Array(1, 2, 3)
+        val arrReversed = arr.reverse
+        val seqReversed: Seq[Int] = arr.reverse
+      #+END_SRC
+
+  - 
+
+* (O,afC) ~Boolean~
+* (O,afC) ~Byte~
+* (O,afC) ~Char~
+* (t)     ~Cloneable~
+* (O)     ~Console~
+* (t)     ~DelayedInit~
+* (O,afC) ~Double~
+* (t)     ~Dynamic~
+* (aC)    ~Enumeration~
+* (t)     ~Equals~
+* (O,afC) ~Float~
+* N Function
+** (O) Function
+** (t) Function0
+** (t) Function1
+** (t) Function2
+** (t) Function3
+** (t) Function4
+** (t) Function5
+** (t) Function6
+** (t) Function7
+** (t) Function8
+** (t) Function9
+** (t) Function10
+** (t) Function11
+** (t) Function12
+** (t) Function13
+** (t) Function14
+** (t) Function15
+** (t) Function16
+** (t) Function17
+** (t) Function18
+** (t) Function19
+** (t) Function20
+** (t) Function21
+** (t) Function22
+
+* (O,afC) ~Int~
+* (O,afC) ~Long~
+* (fC)    ~MatchError~
+* (fC)    ~NotImplementedError~
+* TODO (afC)   ~Nothing~
+* TODO (afC)   ~Null~
+* TODO (O,saC) ~Option~
+** (O) ~None~
+** (C) ~Some~
+
+* DONE (O,t)   ~PartialFunction~
+  CLOSED: [2018-09-03 Mon 15:15]
+** DONE Companion Object
+   CLOSED: [2018-09-03 Mon 15:15]
+*** DONE Value Members
+    CLOSED: [2018-09-03 Mon 15:15]
+    #+BEGIN_SRC scala
+      val pfb: PartialFunction[List[Int], Boolean] = {
+        case List(_, _) => true
+      }
+
+      val pf: PartialFunction[List[Int], Int] = {
+        case List(_, _) => 0
+      }
+
+      // cond
+      PartialFunction.cond(List(1))(pfb)        // false
+      PartialFunction.cond(List(1, 2))(pfb)     // true
+      PartialFunction.cond(List(1, 2, 3))(pfb)  // false
+
+      // condOpt
+      PartialFunction.cond(List(1))(pf)        // None
+      PartialFunction.cond(List(1, 2))(pf)     // Some(0)
+      PartialFunction.cond(List(1, 2, 3))(pf)  // None
+
+      // empty
+      PartialFunction.empty(1)
+      // `MatchError` -- no matter what you pass to this method, it will result in an `MatchError`
+      // TODO: Why do we need this?
+
+      // fromFunction
+      // Range collect
+    #+END_SRC
+
+    + ~def cond[T](x: T)(pf: PartialFunction[T, Boolean]): Boolean~
+
+    + ~def condOpt[T](x: T)(pf: PartialFunction[T, U]): Option[U]~
+
+    + ~def empty[A, B]: PartialFunction[A, B]~
+      =TODO=
+
+    + ~def fromFunction[A, B](f: (A) => B): PartialFunction[A, B]~
+      * Q :: Why do we need this?
+
+      * A :: *Some functions, like the ~collect~ /method/ of ~Range~, ONLY accept
+             ~PartialFunction~.*
+        - Try to consider why.
+
+          ~Function1~ cannot satisfy the requirements together in on step:
+          - filter -- ~filter~ can filter but NO transformation.
+          - transfrom -- ~map~ can do transformation but NO filtering.
+
+        However, how can this passed in ~PartialFunction~ doesn't throw /exception/
+        when the vale passed to it is NOT IN DOMAIN?
+          The answer is simple, the ~collect~ calls the ~isDefinedAt~ /method/ to
+        check first, and ONLY run this ~PartialFunction~ when its argument is IN
+        DOMAIN.
+
+      * NOW we know that, for working with method like ~collect~, we can ONLY use
+        ~PartialFunction~. Even if we have a ~Function1~ (then this inovokation
+        to ~collect~ has no filter effect), we still need to use this ~fromFunction~
+        to convert this ~Function1~ to a ~PartialFunction~.
+
+** DONE Trait
+   CLOSED: [2018-09-03 Mon 15:15]
+   ~trait PartialFunction[-A, +B] extends (A) => B~
+
+   - The main _DISTINCTION_ between ~PartialFunction~ and ~scala.Function1~:
+     the user of a ~PartialFunction~ may choose to do something different with
+     input that is declared to be outside its domain (~PartialFunction~ provides
+     /methods/ to support this). For example:
+     #+BEGIN_SRC scala
+       val sample = 1 to 10
+       val isEven: PartialFunction[Int, String] = {
+         case x if x % 2 == 0 => x+" is even"
+       }
+
+       // the method `collect` can use `isDefinedAt` to select which members to collect
+       val evenNumbers = sample collect isEven
+
+       val isOdd: PartialFunction[Int, String] = {
+         case x if x % 2 == 1 => x+" is odd"
+       }
+
+       // the method `orElse` allows chaining another partial function to handle
+       // input outside the declared domain
+       val numbers = sample map (isEven orElse isOdd)
+     #+END_SRC
+
+*** DONE Abstract Value Members
+    CLOSED: [2018-09-03 Mon 15:00]
+    - ~abstract def apply(v1: A): B~
+
+    - ~abstract def isDefineAt(x: A): Boolean~
+
+*** DONE Concrete Value Members - =TODO= =one queston=
+    CLOSED: [2018-09-03 Mon 15:14]
+    - ~def andThen[C](k: (B) => C): PartialFunction[A, C]~
+
+    - ~def applyOrElse[A <: A, B1 >: B](x: A1, default: (A1) => B1): B1~
+      + =TODO=
+        How to use ~applyOrElse~ to implement ~runWith~???
+        Read the source code.
+
+    - ~def compose[A](g: (A) => A): (A) => B~
+
+    - ~def lift: (A) => Option[B]~
+
+    - ~def orElse[A1 <: A, B1 >: B](that: PartialFunction[A1,B1]): PartialFunction[A1, B1]~
+
+    - ~def runWith[U](action: (B) => U): (A) => Boolean~
+      + ~action~ here is used for side-effect ONLY, and its result will be _discarded_.
+
+    - ~def toString(): String~
+
+* TODO (O)     ~Predef~
+* TODO N Product
+** (O,t) Product
+** (O,t) Product1
+** (O,t) Product2
+** (O,t) Product3
+** (O,t) Product4
+** (O,t) Product5
+** (O,t) Product6
+** (O,t) Product7
+** (O,t) Product8
+** (O,t) Product9
+** (O,t) Product10
+** (O,t) Product11
+** (O,t) Product12
+** (O,t) Product13
+** (O,t) Product14
+** (O,t) Product15
+** (O,t) Product16
+** (O,t) Product17
+** (O,t) Product18
+** (O,t) Product19
+** (O,t) Product20
+** (O,t) Product21
+** (O,t) Product22
+
+* TODO (O,t)   ~Proxy~
+* TODO (cC)    ~ScalaReflectionException~
+* TODO (C)     ~SerialVersionUID~
+* TODO (t)     ~Serializable~
+* TODO (O,afC) ~Short~
+* TODO (O,t)   ~Specializable~
+* TODO (O,cC)  ~StringContext~
+* TODO (O,fC)  ~Symbol~
+* TODO N Tuple
+** (C) Tuple1
+** (C) Tuple2
+** (C) Tuple3
+** (C) Tuple4
+** (C) Tuple5
+** (C) Tuple6
+** (C) Tuple7
+** (C) Tuple8
+** (C) Tuple9
+** (C) Tuple10
+** (C) Tuple11
+** (C) Tuple12
+** (C) Tuple13
+** (C) Tuple14
+** (C) Tuple15
+** (C) Tuple16
+** (C) Tuple17
+** (C) Tuple18
+** (C) Tuple19
+** (C) Tuple20
+** (C) Tuple21
+** (C) Tuple22
+* TODO (fC)    ~UninitializedError~
+* TODO (fcC)   ~UninitializedFieldError~
+* DONE (O,afC) ~Unit~
+  CLOSED: [2018-08-13 Mon 21:09]
+  - (O) ~object Unit extends AnyValCompanion~
+    _3 methods_
+    + ~Unit.box(x: Unit): BoxedUnit~
+      =TODO= When should I use this???
+
+    + ~Unit.toString(): String~
+
+    + ~Unit.unbox(x: AnyRef): Unit~
+      =TODO= When should I use this???
+
+  - (C) ~abstract final class Unit extends AnyVal~
+    _1 methods_
+    + ~def getClass(): Class[Unit]~
+
+  - Skill Level:
+    Never used these /methods/ of ~Unit~.
+
+* DONE (fC)    ~ValueOf~
+  CLOSED: [2018-08-13 Mon 21:09]
+  - This /class/ is added Only after *SIP-23 - Literal-Based Singleton Types* was
+    merged since Scala 2.12.2.
+
+  - Example:
+    #+BEGIN_SRC scala
+      case class Residue[M <: Int](n: Int) extends AnyVal {
+        def +(rhs: Residue[M])(implicit m: ValueOf[M]): Residue[M] =
+          Residue((this.n + rhs.n) % valueOf[M])  // From Jian: `valueOf` comes from `Predef`
+      }
+
+      val fiveModTen = Residue[10](5)
+      val nineModTen = Residue[10](9)
+
+      fiveModTen + nineModTen    // OK == Residue[10](4)
+
+      val fourModEleven = Residue[11](4)
+
+      fiveModTen + fourModEleven // compiler error: type mismatch;
+                                 //   found   : Residue[11]
+                                 //   required: Residue[10]
+    #+END_SRC
+
+  - Instance Constructors:
+    + ~new ValueOf(value: T)~
+      =TODO= Where to use??
+
+  - Value Members:
+    + ~def getClass(): Class[_ <: AnyVal]~
+
+    + ~val value: T~
+
+* DONE (@)     ~deprecated~
+  CLOSED: [2018-08-13 Mon 21:09]
+  - Annotation
+
+  - Example:
+    #+BEGIN_SRC scala
+      @deprecated("this method will be removed", "FooLib 12.0")
+      def oldMethod(x: Int) = ...
+    #+END_SRC
+
+    + Instance Constructors:
+      ~new deprecated(message: String = "", since: String = "")~
+
+  - Skill Level:
+    Use
+
+* TODO (@)     ~deprecatedInheritance~
+* TODO (@)     ~deprecatedName~
+* TODO (@)     ~deprecatedOverriding~
+* TODO (@)     ~inline~
+* TODO (O)     ~language~
+* TODO (O)     ~languageFeature~
+* TODO (@)     ~native~
+* TODO (@)     ~noinline~
+* TODO (@)     ~specialized~
+* TODO (@)     ~throws~
+* TODO (@)     ~transient~
+* DONE (@)     ~unchecked~
+  CLOSED: [2018-08-13 Mon 16:01]
+  - Annotation
+    #+BEGIN_SRC scala
+      (x: @unchecked) match {
+        ...
+      }
+    #+END_SRC
+
+  - Since 2.4
+
+  - skill level:
+    Use
+
+* TODO (@)     ~volatile~
+

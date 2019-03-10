@@ -1,0 +1,429 @@
+#+TITLE: Scala Language Specification
+#+VERSION: 2.13 (upcoming)
+#+STARTUP: entitiespretty
+
+* Table of Contents                                      :TOC_4_org:noexport:
+- [[Authors and Contributors][Authors and Contributors]]
+- [[Preface][Preface]]
+- [[1. Lexical Syntax][1. Lexical Syntax]]
+  - [[1 Identifiers][1 Identifiers]]
+  - [[2 Newline Characters][2 Newline Characters]]
+  - [[3 Literals][3 Literals]]
+    - [[1 Integer Literals][1 Integer Literals]]
+    - [[2 Floating Point Literals][2 Floating Point Literals]]
+    - [[3 Boolean Literals][3 Boolean Literals]]
+    - [[4 Character Literals][4 Character Literals]]
+    - [[5 String Literals][5 String Literals]]
+    - [[6 Escape Sequences][6 Escape Sequences]]
+    - [[7 Symbol literals][7 Symbol literals]]
+  - [[4 Whitespace and Comments][4 Whitespace and Comments]]
+  - [[5 XML mode][5 XML mode]]
+- [[2. Identifiers, Names & Scopes][2. Identifiers, Names & Scopes]]
+- [[3. Types][3. Types]]
+  - [[1 Paths][1 Paths]]
+  - [[2 Value Types][2 Value Types]]
+    - [[1 Singleton Types][1 Singleton Types]]
+    - [[2 Type Projection][2 Type Projection]]
+    - [[3 Type Designators][3 Type Designators]]
+    - [[4 Parameterized Types][4 Parameterized Types]]
+    - [[5 Tuple Types][5 Tuple Types]]
+    - [[6 Annotated Types][6 Annotated Types]]
+    - [[7 Compound Types][7 Compound Types]]
+    - [[8 Infix Types][8 Infix Types]]
+    - [[9 Function Types][9 Function Types]]
+    - [[10 Existential Types][10 Existential Types]]
+  - [[3 Non-Value Types][3 Non-Value Types]]
+    - [[1 Method Types][1 Method Types]]
+    - [[2 Polymorphic Method Types][2 Polymorphic Method Types]]
+    - [[3 Type Constructors][3 Type Constructors]]
+  - [[4 Base Types and Member Definitions][4 Base Types and Member Definitions]]
+  - [[5 Relations between types][5 Relations between types]]
+    - [[1 Equivalence][1 Equivalence]]
+    - [[2 Conformance][2 Conformance]]
+    - [[3 Weak Conformance][3 Weak Conformance]]
+  - [[6 Volatile Types][6 Volatile Types]]
+  - [[7 Type Erasure][7 Type Erasure]]
+- [[4. Basic Declarations & Definitions][4. Basic Declarations & Definitions]]
+  - [[1 Value Declarations and Definitions][1 Value Declarations and Definitions]]
+  - [[2 Variable Declarations and Definitions][2 Variable Declarations and Definitions]]
+  - [[3 Type Declarations and Type Aliases][3 Type Declarations and Type Aliases]]
+  - [[4 Type Parameters][4 Type Parameters]]
+  - [[5 Variance Annotations][5 Variance Annotations]]
+  - [[6 Function Declarations and Definitions][6 Function Declarations and Definitions]]
+    - [[1 Default Arguments][1 Default Arguments]]
+    - [[2 By-Name Parameters][2 By-Name Parameters]]
+    - [[3 Repeated Parameters][3 Repeated Parameters]]
+    - [[4 Procedures][4 Procedures]]
+    - [[5 Method Return Type Inference][5 Method Return Type Inference]]
+  - [[7 Import Clauses][7 Import Clauses]]
+- [[5. Classes & Objects][5. Classes & Objects]]
+  - [[1 Templates][1 Templates]]
+    - [[1 Constructor Invocations][1 Constructor Invocations]]
+    - [[2 Class Linearization][2 Class Linearization]]
+    - [[3 Class Members][3 Class Members]]
+    - [[4 Overriding][4 Overriding]]
+    - [[5 Inheritance Closure][5 Inheritance Closure]]
+    - [[6 Early Definitions][6 Early Definitions]]
+  - [[2 Modifiers][2 Modifiers]]
+    - [[1 private][1 private]]
+    - [[2 protected][2 protected]]
+    - [[3 override][3 override]]
+    - [[4 abstract override][4 abstract override]]
+    - [[5 abstract][5 abstract]]
+    - [[6 final][6 final]]
+    - [[7 sealed][7 sealed]]
+    - [[8 lazy][8 lazy]]
+  - [[3 Class Definitions][3 Class Definitions]]
+    - [[1 Constructor Definitions][1 Constructor Definitions]]
+    - [[2 Case Classes][2 Case Classes]]
+  - [[4 Traits][4 Traits]]
+  - [[5 Object Definitions][5 Object Definitions]]
+- [[6. Expressions][6. Expressions]]
+  - [[1 Expression Typing][1 Expression Typing]]
+  - [[2 Literals][2 Literals]]
+  - [[3 The Null Value][3 The Null Value]]
+  - [[4 Designators][4 Designators]]
+  - [[5 This and Super][5 This and Super]]
+  - [[6 Function Applications][6 Function Applications]]
+    - [[1 Named and Default Arguments][1 Named and Default Arguments]]
+    - [[2 Signature Polymorphic Methods][2 Signature Polymorphic Methods]]
+  - [[7 Method Values][7 Method Values]]
+  - [[8 Type Applications][8 Type Applications]]
+  - [[9 Tuples][9 Tuples]]
+  - [[10 Instance Creation Expressions][10 Instance Creation Expressions]]
+  - [[11 Blocks][11 Blocks]]
+  - [[12 Prefix, Infix, and Postfix Operations][12 Prefix, Infix, and Postfix Operations]]
+    - [[1 Prefix Operations][1 Prefix Operations]]
+    - [[2 Postfix Operations][2 Postfix Operations]]
+    - [[3 Infix Operations][3 Infix Operations]]
+    - [[4 Assignment Operators][4 Assignment Operators]]
+  - [[13 Typed Expressions][13 Typed Expressions]]
+  - [[14 Annotated Expressions][14 Annotated Expressions]]
+  - [[15 Assignments][15 Assignments]]
+  - [[16 Conditional Expressions][16 Conditional Expressions]]
+  - [[17 While Loop Expressions][17 While Loop Expressions]]
+  - [[18 Do Loop Expressions][18 Do Loop Expressions]]
+  - [[19 For Comprehensions and For Loops][19 For Comprehensions and For Loops]]
+  - [[20 Return Expressions][20 Return Expressions]]
+  - [[21 Throw Expressions][21 Throw Expressions]]
+  - [[22 Try Expressions][22 Try Expressions]]
+  - [[23 Anonymous Functions][23 Anonymous Functions]]
+    - [[1 Placeholder Syntax for Anonymous Functions][1 Placeholder Syntax for Anonymous Functions]]
+  - [[24 Constant Expressions][24 Constant Expressions]]
+  - [[25 Statements][25 Statements]]
+  - [[26 Implicit Conversions][26 Implicit Conversions]]
+    - [[1 Value Conversions][1 Value Conversions]]
+    - [[2 Method Conversions][2 Method Conversions]]
+    - [[3 Overloading Resolution][3 Overloading Resolution]]
+    - [[4 Local Type Inference][4 Local Type Inference]]
+    - [[5 Eta Expansion][5 Eta Expansion]]
+    - [[6 Dynamic Member Selection][6 Dynamic Member Selection]]
+- [[7. Implicits][7. Implicits]]
+  - [[1 The Implicit Modifier][1 The Implicit Modifier]]
+  - [[2 Implicit Parameters][2 Implicit Parameters]]
+  - [[3 Views][3 Views]]
+  - [[4 Context Bounds and View Bounds][4 Context Bounds and View Bounds]]
+  - [[5 Manifests][5 Manifests]]
+- [[8. Pattern Matching][8. Pattern Matching]]
+  - [[1 Patterns][1 Patterns]]
+    - [[1 Variable Patterns][1 Variable Patterns]]
+    - [[2 Typed Patterns][2 Typed Patterns]]
+    - [[3 Pattern Binders][3 Pattern Binders]]
+    - [[4 Literal Patterns][4 Literal Patterns]]
+    - [[5 Stable Identifier Patterns][5 Stable Identifier Patterns]]
+    - [[6 Constructor Patterns][6 Constructor Patterns]]
+    - [[7 Tuple Patterns][7 Tuple Patterns]]
+    - [[8 Extractor Patterns][8 Extractor Patterns]]
+    - [[9 Pattern Sequences][9 Pattern Sequences]]
+    - [[10 Infix Operation Patterns][10 Infix Operation Patterns]]
+    - [[11 Pattern Alternatives][11 Pattern Alternatives]]
+    - [[12 XML Patterns][12 XML Patterns]]
+    - [[13 Regular Expression Patterns][13 Regular Expression Patterns]]
+    - [[14 Irrefutable Patterns][14 Irrefutable Patterns]]
+  - [[2 Type Patterns][2 Type Patterns]]
+  - [[3 Type Parameter Inference in Patterns][3 Type Parameter Inference in Patterns]]
+    - [[1 Type parameter inference for typed patterns][1 Type parameter inference for typed patterns]]
+    - [[2 Type parameter inference for constructor patterns][2 Type parameter inference for constructor patterns]]
+  - [[4 Pattern Matching Expressions][4 Pattern Matching Expressions]]
+  - [[5 Pattern Matching Anonymous Functions][5 Pattern Matching Anonymous Functions]]
+- [[9. Top-Level Definitions][9. Top-Level Definitions]]
+  - [[1 Compilation Units][1 Compilation Units]]
+  - [[2 Packagings][2 Packagings]]
+  - [[3 Package Objects][3 Package Objects]]
+  - [[4 Package References][4 Package References]]
+  - [[5 Programs][5 Programs]]
+- [[10. XML][10. XML]]
+  - [[1 XML expressions][1 XML expressions]]
+  - [[2 XML patterns][2 XML patterns]]
+- [[11. Annotations][11. Annotations]]
+  - [[1 Definition][1 Definition]]
+  - [[2 Predefined Annotations][2 Predefined Annotations]]
+    - [[1 Java Platform Annotations][1 Java Platform Annotations]]
+    - [[2 Java Beans Annotations][2 Java Beans Annotations]]
+    - [[3 Deprecation Annotations][3 Deprecation Annotations]]
+    - [[4 Scala Compiler Annotations][4 Scala Compiler Annotations]]
+  - [[3 User-defined Annotations][3 User-defined Annotations]]
+- [[12. Standard Library][12. Standard Library]]
+  - [[1 Root Classes][1 Root Classes]]
+  - [[2 Value Classes][2 Value Classes]]
+    - [[1 Numeric Value Types][1 Numeric Value Types]]
+    - [[2 Class Boolean][2 Class Boolean]]
+    - [[3 Class Unit][3 Class Unit]]
+  - [[3 Standard Reference Classes][3 Standard Reference Classes]]
+    - [[1 Class String][1 Class String]]
+    - [[2 The Tuple classes][2 The Tuple classes]]
+    - [[3 The Function Classes][3 The Function Classes]]
+    - [[4 Class Array][4 Class Array]]
+  - [[4 Class Node][4 Class Node]]
+  - [[5 The Predef Object][5 The Predef Object]]
+    - [[1 Predefined Implicit Definitions][1 Predefined Implicit Definitions]]
+- [[13. Syntax Summary][13. Syntax Summary]]
+  - [[1. Lexical Syntax][1. Lexical Syntax]]
+  - [[2. Context-free Syntax][2. Context-free Syntax]]
+- [[14. References][14. References]]
+- [[15. Changelog][15. Changelog]]
+  - [[1 Changes in Version 2.8.0][1 Changes in Version 2.8.0]]
+  - [[2 Changes in Version 2.8][2 Changes in Version 2.8]]
+  - [[3 Changes in Version 2.7.2][3 Changes in Version 2.7.2]]
+  - [[4 Changes in Version 2.7.1][4 Changes in Version 2.7.1]]
+  - [[5 Changes in Version 2.7.0][5 Changes in Version 2.7.0]]
+  - [[6 Changes in Version 2.6.1][6 Changes in Version 2.6.1]]
+  - [[7 Changes in Version 2.6][7 Changes in Version 2.6]]
+  - [[8 Changes in Version 2.5][8 Changes in Version 2.5]]
+  - [[9 Changes in Version 2.4][9 Changes in Version 2.4]]
+  - [[10 Changes in Version 2.3.2][10 Changes in Version 2.3.2]]
+  - [[11 Changes in Version 2.3][11 Changes in Version 2.3]]
+  - [[12 Changes in Version 2.1.8][12 Changes in Version 2.1.8]]
+  - [[13 Changes in Version 2.1.7][13 Changes in Version 2.1.7]]
+  - [[14 Changes in Version 2.1.5][14 Changes in Version 2.1.5]]
+  - [[15 Changes in Version 2.0][15 Changes in Version 2.0]]
+
+* Authors and Contributors
+  Martin Odersky, Philippe Altherr, Vincent Cremet, Gilles Dubochet, Burak Emir,
+  Philipp Haller, Stéphane Micheloud, Nikolay Mihaylov, Adriaan Moors, Lukas
+  Rytz, Michel Schinz, Erik Stenman, Matthias Zenger
+
+  - Markdown Conversion by Iain McGinniss.
+
+* Preface
+* TODO 1. Lexical Syntax
+** 1 Identifiers
+** 2 Newline Characters
+** 3 Literals
+*** 1 Integer Literals
+*** 2 Floating Point Literals
+*** 3 Boolean Literals
+*** 4 Character Literals
+*** 5 String Literals
+*** 6 Escape Sequences
+*** 7 Symbol literals
+
+** 4 Whitespace and Comments
+** 5 XML mode
+
+* TODO 2. Identifiers, Names & Scopes
+* TODO 3. Types
+** 1 Paths
+** 2 Value Types
+*** 1 Singleton Types
+*** 2 Type Projection
+*** 3 Type Designators
+*** 4 Parameterized Types
+*** 5 Tuple Types
+*** 6 Annotated Types
+*** 7 Compound Types
+*** 8 Infix Types
+*** 9 Function Types
+*** 10 Existential Types
+
+** 3 Non-Value Types
+*** 1 Method Types
+*** 2 Polymorphic Method Types
+*** 3 Type Constructors
+
+** 4 Base Types and Member Definitions
+** 5 Relations between types
+*** 1 Equivalence
+*** 2 Conformance
+*** 3 Weak Conformance
+
+** 6 Volatile Types
+** 7 Type Erasure
+
+* TODO 4. Basic Declarations & Definitions
+** 1 Value Declarations and Definitions
+** 2 Variable Declarations and Definitions
+** 3 Type Declarations and Type Aliases
+** 4 Type Parameters
+** 5 Variance Annotations
+** 6 Function Declarations and Definitions
+*** 1 Default Arguments
+*** 2 By-Name Parameters
+*** 3 Repeated Parameters
+*** 4 Procedures
+*** 5 Method Return Type Inference
+
+** 7 Import Clauses
+
+* TODO 5. Classes & Objects
+** 1 Templates
+*** 1 Constructor Invocations
+*** 2 Class Linearization
+*** 3 Class Members
+*** 4 Overriding
+*** 5 Inheritance Closure
+*** 6 Early Definitions
+
+** 2 Modifiers
+*** 1 private
+*** 2 protected
+*** 3 override
+*** 4 abstract override
+*** 5 abstract
+*** 6 final
+*** 7 sealed
+*** 8 lazy
+
+** 3 Class Definitions
+*** 1 Constructor Definitions
+*** 2 Case Classes
+
+** 4 Traits
+** 5 Object Definitions
+
+* TODO 6. Expressions
+** 1 Expression Typing
+** 2 Literals
+** 3 The Null Value
+** 4 Designators
+** 5 This and Super
+** 6 Function Applications
+*** 1 Named and Default Arguments
+*** 2 Signature Polymorphic Methods
+
+** 7 Method Values
+** 8 Type Applications
+** 9 Tuples
+** 10 Instance Creation Expressions
+** 11 Blocks
+** 12 Prefix, Infix, and Postfix Operations
+*** 1 Prefix Operations
+*** 2 Postfix Operations
+*** 3 Infix Operations
+*** 4 Assignment Operators
+
+** 13 Typed Expressions
+** 14 Annotated Expressions
+** 15 Assignments
+** 16 Conditional Expressions
+** 17 While Loop Expressions
+** 18 Do Loop Expressions
+** 19 For Comprehensions and For Loops
+** 20 Return Expressions
+** 21 Throw Expressions
+** 22 Try Expressions
+** 23 Anonymous Functions
+*** 1 Placeholder Syntax for Anonymous Functions
+
+** 24 Constant Expressions
+** 25 Statements
+** 26 Implicit Conversions
+*** 1 Value Conversions
+*** 2 Method Conversions
+*** 3 Overloading Resolution
+*** 4 Local Type Inference
+*** 5 Eta Expansion
+*** 6 Dynamic Member Selection
+
+* TODO 7. Implicits
+** 1 The Implicit Modifier
+** 2 Implicit Parameters
+** 3 Views
+** 4 Context Bounds and View Bounds
+** 5 Manifests 
+
+* TODO 8. Pattern Matching
+** 1 Patterns
+*** 1 Variable Patterns
+*** 2 Typed Patterns
+*** 3 Pattern Binders
+*** 4 Literal Patterns
+*** 5 Stable Identifier Patterns
+*** 6 Constructor Patterns
+*** 7 Tuple Patterns
+*** 8 Extractor Patterns
+*** 9 Pattern Sequences
+*** 10 Infix Operation Patterns
+*** 11 Pattern Alternatives
+*** 12 XML Patterns
+*** 13 Regular Expression Patterns
+*** 14 Irrefutable Patterns
+
+** 2 Type Patterns
+** 3 Type Parameter Inference in Patterns
+*** 1 Type parameter inference for typed patterns
+*** 2 Type parameter inference for constructor patterns
+
+** 4 Pattern Matching Expressions
+** 5 Pattern Matching Anonymous Functions
+
+* TODO 9. Top-Level Definitions
+** 1 Compilation Units
+** 2 Packagings
+** 3 Package Objects
+** 4 Package References
+** 5 Programs
+
+* TODO 10. XML
+** 1 XML expressions
+** 2 XML patterns
+
+* TODO 11. Annotations
+** 1 Definition
+** 2 Predefined Annotations
+*** 1 Java Platform Annotations
+*** 2 Java Beans Annotations
+*** 3 Deprecation Annotations
+*** 4 Scala Compiler Annotations
+
+** 3 User-defined Annotations
+
+* TODO 12. Standard Library
+** 1 Root Classes
+** 2 Value Classes
+*** 1 Numeric Value Types
+*** 2 Class Boolean
+*** 3 Class Unit
+
+** 3 Standard Reference Classes
+*** 1 Class String
+*** 2 The Tuple classes
+*** 3 The Function Classes
+*** 4 Class Array
+
+** 4 Class Node
+** 5 The Predef Object
+*** 1 Predefined Implicit Definitions
+
+* TODO 13. Syntax Summary
+** 1. Lexical Syntax
+** 2. Context-free Syntax
+
+* TODO 14. References
+  - TODO (see comments in markdown source)
+* TODO 15. Changelog 
+** 1 Changes in Version 2.8.0
+** 2 Changes in Version 2.8
+** 3 Changes in Version 2.7.2
+** 4 Changes in Version 2.7.1
+** 5 Changes in Version 2.7.0
+** 6 Changes in Version 2.6.1
+** 7 Changes in Version 2.6
+** 8 Changes in Version 2.5
+** 9 Changes in Version 2.4
+** 10 Changes in Version 2.3.2
+** 11 Changes in Version 2.3
+** 12 Changes in Version 2.1.8
+** 13 Changes in Version 2.1.7
+** 14 Changes in Version 2.1.5
+** 15 Changes in Version 2.0
