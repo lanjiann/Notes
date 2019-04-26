@@ -119,11 +119,11 @@
     - [[5 Eta Expansion][5 Eta Expansion]]
     - [[6 Dynamic Member Selection][6 Dynamic Member Selection]]
 - [[7. Implicits][7. Implicits]]
-  - [[1 The Implicit Modifier][1 The Implicit Modifier]]
-  - [[2 Implicit Parameters][2 Implicit Parameters]]
-  - [[3 Views][3 Views]]
-  - [[4 Context Bounds and View Bounds][4 Context Bounds and View Bounds]]
-  - [[5 Manifests][5 Manifests]]
+  - [[7.1 The Implicit Modifier][7.1 The Implicit Modifier]]
+  - [[7.2 Implicit Parameters][7.2 Implicit Parameters]]
+  - [[7.3 Views][7.3 Views]]
+  - [[7.4 Context Bounds and View Bounds][7.4 Context Bounds and View Bounds]]
+  - [[7.5 Manifests][7.5 Manifests]]
 - [[8. Pattern Matching][8. Pattern Matching]]
   - [[1 Patterns][1 Patterns]]
     - [[1 Variable Patterns][1 Variable Patterns]]
@@ -336,11 +336,57 @@
 *** 6 Dynamic Member Selection
 
 * TODO 7. Implicits
-** 1 The Implicit Modifier
-** 2 Implicit Parameters
-** 3 Views
-** 4 Context Bounds and View Bounds
-** 5 Manifests 
+** DONE 7.1 The Implicit Modifier
+   CLOSED: [2019-04-26 Fri 00:43]
+   #+begin_src python
+     LocalModifier ::= 'implicit'
+     ParamClauses  ::= {ParamClause} [nl] '(' 'implicit' Params ')'
+   #+end_src
+
+   - /Template members and parameters/ labeled with an ~implicit~ /modifier/
+     can be passed to /implicit parameters/
+     and
+     can be used as /implicit conversions/ called /views/.
+
+   - The ~implicit~ /modifier/ is *illegal* for _ALL_ /type members/,
+     as well as for /top-level objects/.
+
+   - Example ~Monoid~:
+     #+begin_src scala
+       abstract class Monoid[A] extends SemiGroup[A] {
+         def unit: A
+         def add(x: A, y: A): A
+       }
+
+       object Monoids {
+         implicit object stringMonoid extends Monoid[String] {
+           def add(x: String, y: String): String = x concat y
+           def unit: String = ""
+         }
+
+         implicit object intMonoid extends Monoid[Int] {
+           def add(x: Int, y: Int): Int = x + y
+           def unit: Int = 0
+         }
+       }
+     #+end_src
+
+** TODO 7.2 Implicit Parameters
+   - An /implicit parameter list/ (~implicit p1, ..., pn~) of a method marks the
+     parameters ~p1, ...,pn~ as /implicit/.
+
+     + Rules / Restrictions:
+       A /method/ or /constructor/ can have *only one* /implicit parameter list/,
+       and it *must be the last* /parameter list/ given.
+
+       =from Jian=
+       This implies only one /parameter list/ or the last one in /curring/ form
+
+   - 
+
+** 7.3 Views
+** 7.4 Context Bounds and View Bounds
+** 7.5 Manifests 
 
 * TODO 8. Pattern Matching
 ** 1 Patterns
