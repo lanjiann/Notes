@@ -4345,7 +4345,7 @@
    1. 
    2. 
 
-* TODO 10 Folding lists - 343 - ~Finish Reading~ ~TODO: NOTE~
+* TODO 10 Folding lists - 343 - =Re-Read * N= TODO: NOTE
 ** DONE 10.1 Folds - 344
    CLOSED: [2017-06-01 Thu 18:46]
    - /Folding/ is a concept that extends in _usefulness_ and _importance_ BEYOUND
@@ -4763,10 +4763,11 @@
         -- *** Exception: Prelude.undefined
       #+END_SRC
 
-** TODO 10.5 Fold left - 347
-   The definition of ~foldl~:
+** DONE 10.5 Fold left - 347
+   CLOSED: [2019-04-21 Sun 18:12]
+   The definition of ~foldl~ (simplified for ~List~ only):
    #+BEGIN_SRC haskell
-     foldl :: Foldable t => (b -> a -> b) -> b -> [a] -> b
+     foldl :: (b -> a -> b) -> b -> [a] -> b
      foldl f acc [] = acc
      foldl f acc (x:xs) = foldl f (f acc x) xs
 
@@ -4777,13 +4778,17 @@
      ((0 + 1) + 2) + 3
    #+END_SRC
 
-   - As we mentioned, /left folds/ traverse the /spine/ _in the same direction_
-     as /right folds/.
+   - Because of the way /lists/ work,
+     /folds/ MUST
+     1. recurse over the /spine/ of the /list/ from the beginning to the end
+        (consider the way /list/ is implemented in Haskell, this is left to
+        right).
 
-     BUT their folding process is
-     + *left associative*
-       and
-     + proceeds in the opposite direction as that of ~foldr~.
+     2. /Left folds/ traverse the /spine/ *in the _SAME direction_ as /right folds/,*
+        BUT their folding process is
+        + *left associative*
+          and
+        + proceeds in the opposite direction as that of ~foldr~.
 
    - Check the /associativity/ of ~foldl~ with the trick we metioned in the last
      section:
@@ -4791,15 +4796,6 @@
        let f = (\x y -> concat ["(", x, "+", y, ")"])
        foldl f "0" (map show [1..5])
        -- "(((((0+1)+2)+3)+4)+5)"
-     #+END_SRC
-
-   - =From Jian= =TODO= =RE-READ=
-     Due to the /associativity/, if a /right associative operator/ is used, ~flip~
-     is required.
-     For example,
-     #+BEGIN_SRC haskell
-       myReverse :: [a] -> [a]
-       myReverse = foldl (flip (:)) []
      #+END_SRC
 
    - /scan/'s are similar to /fold/'s
@@ -4813,10 +4809,8 @@
      #+END_SRC
 
    - The relationship between the /scan/'s and /fold/'s are as follows:
-     + ~head (scanr f z xs)~ = ~foldr f z xs~
-     + ~last (scanl f z xs)~ = ~foldl f z xs~
-
-     =TODO= =Re-Read=
+     + ~head (scanr f z xs)~ \equiv ~foldr f z xs~
+     + ~last (scanl f z xs)~ \equiv ~foldl f z xs~
 
 *** DONE Associativity and folding - 356
     CLOSED: [2017-06-03 Sat 22:47]
@@ -4848,6 +4842,15 @@
 
         Right folds have to traverse the list outside-in, but the folding itself
       starts from the end of the list.
+
+    - Due to the /associativity/, if a /right associative operator/ is used,
+      ~flip~ is required.
+      For example,
+      #+BEGIN_SRC haskell
+        myReverse :: [a] -> [a]
+        myReverse = foldl (flip (:)) []
+      #+END_SRC
+
 
     - The effect of associativity on argument order by folding the list into a
       new list.
@@ -4925,7 +4928,8 @@
          foldl (flip const) 0 [1..5]
        #+END_SRC
 
-*** TODO Unconditional spine recursion - 362
+*** DONE Unconditional spine recursion - 362
+    CLOSED: [2019-04-21 Sun 18:11]
     - An important difference between ~foldr~ and ~foldl~:
 
       ~foldl~: has the successive steps of the fold as its first argument.
@@ -4978,7 +4982,21 @@
         -- this is OK because here bottom is a value
       #+END_SRC
 
-** TODO 10.6 How to write fold functions - 355
+    - *In most cases*, when you need a left fold,
+      _you should use ~foldl'~ instead of ~fold~!_
+        It works the same as ~foldl~ except it is _strict_!!! 
+      In other words, it forces evaluation of the values inside /cons cells/ as
+      it traverses the /spine/, rather than accumulating unevaluated expressions
+      for each element of the list.
+        The *strict evaluation* here means it has less negative effect on
+      perfromance over long lists.
+
+    - =from Jian=
+      This section discusses the effect of /laziness/ to ~foldl~ a lot.
+      Without /laziness/ (in other languages), /fold left/ is mostly prefered
+      (if there is TCO).
+
+** TODO 10.6 How to write fold functions - 363
    - x
 
 *** TODO Exercises: Database Processing - 367
@@ -4986,27 +5004,43 @@
 ** TODO 10.7 Folding and evaluation - 368
    - x
 
-** TODO 10.8 Summary - 370
-   - x
+** DONE 10.8 Summary - 370 - =RE-READ=
+   CLOSED: [2019-04-22 Mon 01:28]
+   The executive summary:
+   =from Jian=
+   Because of /laziness/, this summary is *complete different* in other
+   strict/eager languages.
 
-*** ~foldr~ - 370
-    1. 
-    2. 
-    3. 
-    4. 
+   - ~foldr~ ::
+     1. =???= =???= =???=
+        =TODO= TODO =TODO=
 
-*** ~foldl~ - 370
-    1. 
-    2. 
-    3. 
-    4. 
+     2. Associates to the right.
+
+     3. Works with infinite lists (=from Jian= for "proper" first parameter).
+        For instance, the result of ~foldr const 0 [1..]~ is ~1~.
+
+     4. Is a good default choice _WHENEVER you want to *transform* data structures_,
+        _be they finite or infinite_.
+
+   - ~foldl~ ::
+    1. Self-calls (tail-call) through the list,
+       ONLY beginning to produce values after reaching the end of the list.
+
+    2. Associates to the left.
+
+    3. _CANNOT be used with infinite lists._
+
+    4. Is nearly useless and should almost always be replaced with ~foldl'~ for
+       reasons =TODO= we'll explain later when we talk about writing efficient
+       Haskell programs.
 
 ** TODO 10.9 Scans - 371
    - x
 
-*** Getting the fibonacci number we want - 373
+*** TODO Getting the fibonacci number we want - 373
 
-*** Scans Exercises - 374
+*** TODO Scans Exercises - 374
 
 ** DONE 10.10 Chapter Exercises - 374
    CLOSED: [2017-06-06 Tue 01:46]

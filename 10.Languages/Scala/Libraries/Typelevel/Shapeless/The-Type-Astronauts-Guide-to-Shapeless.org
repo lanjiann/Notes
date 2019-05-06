@@ -554,11 +554,15 @@
 
 ** DONE 3.1 Recap: type classes - 21
    CLOSED: [2018-10-31 Wed 02:37]
-   - In Haskell, /type class/ is a built-in syntax and feature.
-     In Scala, /type class/ is a pattern, which can do similar things as in Haskell.
+   - Quickly recap on /type classes/ before get into the depths of /instance
+     derivation/.
 
-   - Scala type class :: a /parameterised trait/ representing some sort of general
-        functionality that we would like to apply to _a wide range of_ /types/.
+     + In Haskell, /type class/ is a built-in syntax and feature.
+
+     + In Scala, there is no built-in syntax for /type class/.
+       Use /parameterised trait/ and /implicits/ to encode /type classes/.
+       * Here /parameterised trait/ representing some sort of general functionality
+         that we would like to apply to _a wide range of_ /types/.
 
    - For example,
      #+BEGIN_SRC scala
@@ -568,13 +572,13 @@
        }
      #+END_SRC
 
-   - Implement a /type class/ with /instances/ for EACH /type/ we care about.
+   - Implement a /type class/ with /instances/ for _EACH_ /type/ we care about.
 
      You usually have two ways to place these /type class instances/:
      + In the /type class/'s /companion object/:
-       Then the /instances/ are automatically be in scope.
+       Then the /instances/ are _automatically_ be in scope.
 
-     + In a separate library object for the user to *import manually*:
+     + In a separate library /object/ for the user to *import manually*:
        #+BEGIN_SRC scala
          // Custom data type:
          case class Employee(name: String, number: Int, manager: Boolean)
@@ -598,20 +602,59 @@
            enc.encode(value).mkString(",")
          }.mkString("\n")
      #+END_SRC
-
      ~writeCsv~ can be applied to any type ~A~, if ~A~ has a _implicit_
      /type class instance/ of ~CsvEncoder~.
-     For example, we can define a ~CsvEncoder[IceCream]~ instance, and then
-     ~writeCsv[A]~ function can work with ~IceCream~.
+
+   - Test the code above:
+     #+begin_src scala
+       val employees: List[Employee] = List(
+         Employee("Bill", 1, true),
+         Employee("Peter", 2, false),
+         Employee("Milton", 3, false),
+       )
+
+       writeCsv(employees)
+       // res4: String =
+       // Bill,1,yes
+       // Peter,2,no
+       // Milton,3,no
+     #+end_src
+
+   - Similarly, we can do
+     #+begin_src scala
+       case class IceCream(name: String, numCherries: Int, inCone: Boolean)
+
+       implicit val iceCreamEncoder: CsvEncoder[IceCream] =
+         new CsvEncoder[IceCream] {
+           def encode(i: IceCream): List[String] =
+             List(
+               i.name,
+               i.numCherries.toString,
+               if(i.inCone) "yes" else "no"
+             )
+         }
+
+       val iceCreams: List[IceCream] = List(
+         IceCream("Sundae", 1, false),
+         IceCream("Cornetto", 0, true),
+         IceCream("Banana Split", 0, false)
+       )
+
+       writeCsv(iceCreams)
+       // res7: String =
+       // Sundae,1,no
+       // Cornetto,0,yes
+       // Banana Split,0,no
+     #+end_src
 
 *** DONE 3.1.1 Resolving instances - 23
     CLOSED: [2018-10-31 Wed 01:56]
     /Type classes/ are very flexible
     BUT they REQUIRE us to define /instances/ for *EVERY* /type/ we care about.
 
-      Fortunately, the Scala compiler has a few tricks to *resolve* /instances/
-    for us given sets of _user-defined rules_, which means the _implicit_ building
-    blocks -- for example, if we know the ~CsvEncoder~'s for type ~A~ and ~B~,
+      _FORTUNATELY_, the Scala compiler has a few tricks to *resolve* /instances/
+    for us given sets of _user-defined rules_, which means *the _implicit_ building
+    blocks* -- for example, if we know the ~CsvEncoder~'s for type ~A~ and ~B~,
     it is easy to create ~CsvEncoder[(A, B)]~. The ~implicit CsvEncoder[A]~ and
     ~implicit CsvEncoder[B]~ are the *user-defined rules* above. Then the
     compiler can do the *implicit resolution*, which is the behaviour that makes
@@ -624,22 +667,30 @@
           bEncoder: CsvEncoder[B]
       ): CsvEncoder[(A, B)] =
         new CsvEncoder[(A, B)] {
-          def encode(pair: (A, B)): List[String] = {
-            val (a, b) = pair
-            aEncoder.encode(a) ++ bEncoder.encode(b)
-          }
+          def encode(pair: (A, B)): List[String] =
+            pair match {
+              case (a, b) => aEncoder.encode(a) ++ bEncoder.encode(b)
+            }
         }
+
+      write(employees zip iceCreams)
+      // res8: String =
+      // Bill,1,yes,Sundae,1,no
+      // Peter,2,no,Cornetto,0,yes
+      // Milton,3,no,Banana Split,0,no
     #+END_SRC
 
     - Until here, there is nothing about our /Shapeless/.
 
-      However, when using this /type class pattern/, we find we repeatedly
-      manually pull apart our /case classes/ and /sealed traits/.
-        We are required to define /instances for ADTs/ *by hand*.
+      + Q :: Still we feel some inconvenience. How can we resolve this:
+             when using this /type class pattern/, we find we repeatedly
+             manually pull apart our /case classes/ and /sealed traits/.
+             We are required to define /instances for ADTs/ *by hand*.
 
-      =TODO= =???= =TODO= =???=
-      _Shapeless' generic representations change all of this, allowing us to
-      *derive instances for any ADT FOR FREE*._
+      + A :: =TODO= =???= =TODO= =???=
+             _Shapeless' generic representations change all of this, allowing us
+             to *derive instances for any ADT FOR FREE*._
+
       =from Jian= This is one of the most important point of /Shapeless/!!!
 
 *** DONE 3.1.2 Idiomatic type class definitions - 24
@@ -650,7 +701,7 @@
     For example,
     #+BEGIN_SRC scala
       object CsvEncoder {
-        // "Summoner" method
+        // "Summoner" (or called "materializer") method
         def apply[A](implicit enc: CsvEncoder[A]): CsvEncoder[A] =
           enc
 
@@ -662,6 +713,7 @@
           }
 
         // Globally visible type class instances
+        // ...
       }
     #+END_SRC
 
@@ -669,16 +721,21 @@
       a /type class instance/ given a /target type/. For example,
       ~CsvEncoder[IceCream]~
 
-      You may this it is the same as the standard libary ~implicitly~ /method/.
-      In simple cases, you are right.
+      + Q :: WHY NOT use the standard libary ~implicitly~ /method/???
 
-      See Sectoin 4.2:
-      When working with /shapeless/ we encounter situations where ~implicitly~
-      *DOES NOT infer types correctly* (this is even bad than telling the user
-      it CANNOT infer).
-        However, *we can always define a /summoner/ method to do the right
-      thing*. _This is one of the most important reason why we think it's worth
-      writing one for *EVERY* /type class/ we create_
+      + A :: In simple cases, you can use it.
+             However,
+               When working with /shapeless/ we encounter situations where
+             ~implicitly~ *DOES NOT infer types correctly* (_However, see
+             Section 4.2_) (this is even bad than telling the user it CANNOT
+             infer).
+               This means we can't always use ~implicitly~ (=from Jian= for
+             current version Scala -- Hope it will be much better in the future
+             =from Jian=), *we can always define a /summoner/ method to do the
+             right thing*. _This is one of the most important reason why we
+             think it's worth writing one for *EVERY* /type class/ we create_
+
+    - =TODO=
 
     - ~the~ =TODO= =TODO= =TODO=
       We can also use a special method from /shapeless/ called ~the~ (more on
