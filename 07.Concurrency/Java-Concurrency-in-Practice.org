@@ -542,52 +542,61 @@
   - Writing /thread-safe/ code is, at its core, about *managing access to state*,
     and in particular to *shared, mutable state*.
 
-  - An /object's state/ encompasses
-    ANY data that can affect its *externally visible* behavior.
+    + (object's) state :: data that stored in /state variables/ such as /instance/
+         or /static fields/.
+      * An /object's state/ may include fields from other, dependent objects;
+          For instance, a ~HashMap~'s state is partially stored in the ~HashMap~
+        object itself, but also in many Map.Entry objects.
 
-  - We may talk about /thread safety/ as if it were about code,
-    BUT what we are really trying to do is _protect data from uncontrolled
+      * An /object's state/ encompasses ANY data that *can affect its _externally
+        visible_ behavior*.
+
+    + shared :: a variable could be _accessed by_ *multiple* /threads/.
+
+    + mutable :: the value of a variable could change during its lifetime.
+
+  - We may talk about /thread safety/ _AS IF_ it were about code,
+    BUT what we are _REALLY_ trying to do is _protect data from uncontrolled
     concurrent access_.
 
   - Whether an object needs to be /thread-safe/ depends on whether it will be
-    accessed from multiple threads -- =From Jian= NO need to do extra work for
-    the features you don't acutally use!!!
+    accessed from multiple threads --
+    =From Jian= NO need to do extra work for the features you don't acutally
+    use/need -- like "try to keep /thread-safe/ in single thread program"!!! --
+    this is not a joke, if you forget the motivation you WILL DO STUPID things.
 
     *This is a property of _HOW_ the object is used in a program*, NOT _WHAT_ it
     does.
 
-  - Making an object /thread-safe/ REQUIRES
-    using /synchronization/ to *coordinate* access to its /mutable state/;
+  - Making an object /thread-safe/
+    + REQUIRES using /synchronization/ to *coordinate _access_ to its /mutable
+      state/;*
 
-    failing to do so could RESULT IN
-    + data corruption
-      and
-    + other undesirable consequences.
+    + FAILING TO DO SO could RESULT IN
+      * data corruption
+        and
+      * other undesirable consequences.
 
-  - Whenever *more than one* /thread/ _accesses_ a given /state variable/, and
+  - =IMPORTANT=
+    Whenever *more than one* /thread/ _accesses_ a given /state variable/, and
     one of them might write to it, they all must *coordinate* their access to
     it using /synchronization/.
+    + the primary mechanism for /synchronization/ in Java is the ~synchronized~
+      /keyword/, which provides *exclusive locking*,
 
-    The primary mechanism for /synchronization/ in Java is the ~synchronized~
-    keyword, which provides /exclusive locking/,
-    _BUT_ the term "synchronization" also includes the use of /volatile
-    variables/, /explicit locks/, and /atomic variables/.
+    + there are other "synchronization" methods like the use of /volatile
+      variables/, /explicit locks/ =TODO= =???=, and /atomic variables/.
 
-  - You should *avoid* the temptation to think that there are “special” situations
+  - You should *avoid* the temptation to think that there are "special" situations
     in which this rule does not apply.
-      A program that _omits_ needed /synchronization/ might appear to work, passing
-    its tests and performing well for years, _but it is STILL *broken* and may
-    fail at any moment_.
 
   - If _multiple threads_ ACCESS the /same mutable state variable/ *without appro-
-    priate /synchronization/,* YOUR PROGRAM IS BROKEN.
+    priate /synchronization/,* _YOUR PROGRAM IS *BROKEN*._
 
     There are _three_ ways to fix it:
     + *Do NOT share* the /state variable/ *across* /threads/;
 
     + *Make* the /state variable/ *immutable*;
-
-      or
 
     + *Use* /synchronization/ *whenever accessing* the /state variable/.
 
@@ -598,8 +607,11 @@
     BUT _the BETTER *encapsulated* your program /state/, the EASIER it is to
     make your program thread-safe and to help maintainers keep it that way._
 
-  - *When designing /thread-safe classes/, /encapsulation/, /immutability/, and
-    /clear specification of invariants/ -- are your best friends.*
+  - _When designing /thread-safe classes/,_
+    your best friends are
+    + /encapsulation/
+    + /immutability/
+    + /clear specification of invariants/ =TODO= =???=
 
   - We've used the terms /thread-safe class/ and /thread-safe program/ nearly
     interchangeably thus far.
@@ -1250,6 +1262,7 @@
 *** 5.5.4 Barriers - 99
 
 ** TODO 5.6 Building an efficient, scalable result cache - 101
+
 * TODO Summary of Part I
 * II Structuring Concurrent Applications - 111
 * TODO 6 Task Execution - 113
