@@ -4,1897 +4,6 @@
 #+AUTHOR: Martin Odersky, Lex Spoon, Bill Venners
 #+STARTUP: entitiespretty
 
-* Table of Contents                                      :TOC_4_org:noexport:
-  - [[25.1 Builders - 597][25.1 Builders - 597]]
-  - [[25.2 Factoring out common operations - 599][25.2 Factoring out common operations - 599]]
-  - [[25.3 Integrating new collections - 604][25.3 Integrating new collections - 604]]
-    - [[Integrating sequences - 604][Integrating sequences - 604]]
-      - [[Adapting the _result type_ of ~RNA~ /methods/:][Adapting the _result type_ of ~RNA~ /methods/:]]
-      - [[Dealing with ~map~ and friends][Dealing with ~map~ and friends]]
-    - [[Integrating new sets and maps - 614][Integrating new sets and maps - 614]]
-    - [[Summary - 620][Summary - 620]]
-  - [[25.4 Conclusion - 620][25.4 Conclusion - 620]]
-- [[Contents][Contents]]
-- [[List of Figures][List of Figures]]
-- [[List of Tables][List of Tables]]
-- [[List of Listings][List of Listings]]
-- [[Foreword][Foreword]]
-- [[Acknowledgments][Acknowledgments]]
-- [[Introduction][Introduction]]
-- [[1 A Scalable Language][1 A Scalable Language]]
-  - [[1.1 A language that grows on you][1.1 A language that grows on you]]
-    - [[Growing new types][Growing new types]]
-    - [[Growing new control constructs][Growing new control constructs]]
-  - [[1.2 What makes Scala scalable?][1.2 What makes Scala scalable?]]
-    - [[Scala is object-oriented][Scala is object-oriented]]
-    - [[Scala is functional][Scala is functional]]
-  - [[1.3 Why Scala?][1.3 Why Scala?]]
-    - [[Scala is compatible][Scala is compatible]]
-    - [[Scala is concise][Scala is concise]]
-    - [[Scala is high-level][Scala is high-level]]
-    - [[Scala is statically typed][Scala is statically typed]]
-  - [[1.4 Scala's roots][1.4 Scala's roots]]
-  - [[1.5 Conclusion][1.5 Conclusion]]
-- [[2 First Steps in Scala - 64][2 First Steps in Scala - 64]]
-  - [[Step 1. Learn to use the Scala interpreter - 64][Step 1. Learn to use the Scala interpreter - 64]]
-  - [[Step 2. Define some variables - 66][Step 2. Define some variables - 66]]
-  - [[Step 3. Define some functions - 68][Step 3. Define some functions - 68]]
-  - [[Step 4. Write some Scala scripts - 70][Step 4. Write some Scala scripts - 70]]
-  - [[Step 5. Loop with ~while~; decide with ~if~ - 71][Step 5. Loop with ~while~; decide with ~if~ - 71]]
-  - [[Step 6. Iterate with ~foreach~ and ~for~ - 73][Step 6. Iterate with ~foreach~ and ~for~ - 73]]
-  - [[Conclusion - 76][Conclusion - 76]]
-- [[3 Next Steps in Scala - 77][3 Next Steps in Scala - 77]]
-  - [[Step 7. Parameterize arrays with types - 77][Step 7. Parameterize arrays with types - 77]]
-  - [[Step 8. Use lists - 81][Step 8. Use lists - 81]]
-  - [[Step 9. Use tuples - 86][Step 9. Use tuples - 86]]
-  - [[Step 10. Use sets and maps - 87][Step 10. Use sets and maps - 87]]
-  - [[Step 11. Learn to recognize the functional style - 92][Step 11. Learn to recognize the functional style - 92]]
-  - [[Step 12. Read lines from a file - 95][Step 12. Read lines from a file - 95]]
-  - [[Conclusion - 98][Conclusion - 98]]
-- [[4 Classes and Objects - 99][4 Classes and Objects - 99]]
-  - [[4.1 Classes, fields, and methods - 99][4.1 Classes, fields, and methods - 99]]
-  - [[4.2 Semicolon inference - 104][4.2 Semicolon inference - 104]]
-  - [[4.3 Singleton objects - 105][4.3 Singleton objects - 105]]
-  - [[4.4 A Scala application - 108][4.4 A Scala application - 108]]
-  - [[4.5 The ~App~ trait - 110][4.5 The ~App~ trait - 110]]
-  - [[4.6 Conclusion - 111][4.6 Conclusion - 111]]
-- [[5 Basic Types and Operations - 112][5 Basic Types and Operations - 112]]
-  - [[5.1 Some basic types - 112][5.1 Some basic types - 112]]
-  - [[5.2 Literals - 113][5.2 Literals - 113]]
-    - [[Integer literals][Integer literals]]
-    - [[Floating point literals][Floating point literals]]
-    - [[Character literals][Character literals]]
-    - [[String literals][String literals]]
-    - [[Symbol literals][Symbol literals]]
-    - [[Boolean literals][Boolean literals]]
-  - [[5.3 String interpolation - 119][5.3 String interpolation - 119]]
-  - [[5.4 Operators are methods - 121][5.4 Operators are methods - 121]]
-  - [[5.5 Arithmetic operations - 124][5.5 Arithmetic operations - 124]]
-  - [[5.6 Relational and logical operations - 125][5.6 Relational and logical operations - 125]]
-  - [[5.7 Bitwise operations - 127][5.7 Bitwise operations - 127]]
-  - [[5.8 Object equality - 128][5.8 Object equality - 128]]
-  - [[5.9 Operator precedence and associativity - 130][5.9 Operator precedence and associativity - 130]]
-  - [[5.10 Rich wrappers - 133][5.10 Rich wrappers - 133]]
-  - [[5.11 Conclusion - 133][5.11 Conclusion - 133]]
-- [[6 Functional Objects - 135][6 Functional Objects - 135]]
-  - [[6.1 A specification for class ~Rational~ - 135][6.1 A specification for class ~Rational~ - 135]]
-  - [[6.2 Constructing a ~Rational~ - 136][6.2 Constructing a ~Rational~ - 136]]
-  - [[6.3 Reimplementing the ~toString~ method - 138][6.3 Reimplementing the ~toString~ method - 138]]
-  - [[6.4 Checking preconditions - 139][6.4 Checking preconditions - 139]]
-  - [[6.5 Adding fields - 139][6.5 Adding fields - 139]]
-  - [[6.6 Self references - 141][6.6 Self references - 141]]
-  - [[6.7 Auxiliary constructors - 142][6.7 Auxiliary constructors - 142]]
-  - [[6.8 Private fields and methods - 144][6.8 Private fields and methods - 144]]
-  - [[6.9 Defining operators - 145][6.9 Defining operators - 145]]
-  - [[6.10 Identifiers in Scala - 147][6.10 Identifiers in Scala - 147]]
-  - [[6.11 Method overloading - 150][6.11 Method overloading - 150]]
-  - [[6.12 Implicit conversions - 152][6.12 Implicit conversions - 152]]
-  - [[6.13 A word of caution - 153][6.13 A word of caution - 153]]
-  - [[6.14 Conclusion - 153][6.14 Conclusion - 153]]
-- [[7 Built-in Control Structures - 155][7 Built-in Control Structures - 155]]
-  - [[7.1 If expressions - 156][7.1 If expressions - 156]]
-  - [[7.2 While loops - 157][7.2 While loops - 157]]
-  - [[7.3 For expressions - 160][7.3 For expressions - 160]]
-    - [[Iteration through collections][Iteration through collections]]
-    - [[Filtering][Filtering]]
-    - [[Nested iteration][Nested iteration]]
-    - [[Mid-stream variable bindings][Mid-stream variable bindings]]
-    - [[Producing a new collection][Producing a new collection]]
-  - [[7.4 Exception handling with ~try~ expressions - 165][7.4 Exception handling with ~try~ expressions - 165]]
-    - [[Throwing exceptions][Throwing exceptions]]
-    - [[Catching exceptions][Catching exceptions]]
-    - [[The ~finally~ clause][The ~finally~ clause]]
-    - [[Yielding a value][Yielding a value]]
-  - [[7.5 Match expressions - 169][7.5 Match expressions - 169]]
-  - [[7.6 Living without ~break~ and ~continue~ - 171][7.6 Living without ~break~ and ~continue~ - 171]]
-  - [[7.7 Variable scope - 173][7.7 Variable scope - 173]]
-  - [[7.8 Refactoring imperative-style code - 177][7.8 Refactoring imperative-style code - 177]]
-  - [[7.9 Conclusion - 179][7.9 Conclusion - 179]]
-- [[8 Functions and Closures - 180][8 Functions and Closures - 180]]
-  - [[8.1 Methods - 180][8.1 Methods - 180]]
-  - [[8.2 Local functions - 182][8.2 Local functions - 182]]
-  - [[8.3 First-class functions - 184][8.3 First-class functions - 184]]
-  - [[8.4 Short forms of function literals - 186][8.4 Short forms of function literals - 186]]
-  - [[8.5 Placeholder syntax - 187][8.5 Placeholder syntax - 187]]
-  - [[8.6 Partially applied functions - 188][8.6 Partially applied functions - 188]]
-  - [[8.7 Closures - 191][8.7 Closures - 191]]
-  - [[8.8 Special function call forms - 195][8.8 Special function call forms - 195]]
-    - [[Repeated parameters][Repeated parameters]]
-    - [[Named arguments][Named arguments]]
-    - [[Default parameter values][Default parameter values]]
-  - [[8.9 Tail recursion - 198][8.9 Tail recursion - 198]]
-    - [[Tracing tail-recursive functions][Tracing tail-recursive functions]]
-    - [[Limits of tail recursion][Limits of tail recursion]]
-  - [[8.10 Conclusion - 202][8.10 Conclusion - 202]]
-- [[9 Control Abstraction - 203][9 Control Abstraction - 203]]
-  - [[9.1 Reducing code duplication - 203][9.1 Reducing code duplication - 203]]
-  - [[9.2 Simplifying client code - 207][9.2 Simplifying client code - 207]]
-  - [[9.3 Currying - 209][9.3 Currying - 209]]
-  - [[9.4 Writing new control structures - 211][9.4 Writing new control structures - 211]]
-  - [[9.5 By-name parameters - 214][9.5 By-name parameters - 214]]
-  - [[9.6 Conclusion - 217][9.6 Conclusion - 217]]
-- [[10 Composition and Inheritance - 218][10 Composition and Inheritance - 218]]
-  - [[10.1 A two-dimensional layout library - 218][10.1 A two-dimensional layout library - 218]]
-  - [[10.2 Abstract classes - 219][10.2 Abstract classes - 219]]
-  - [[10.3 Defining parameterless methods - 220][10.3 Defining parameterless methods - 220]]
-  - [[10.4 Extending classes - 223][10.4 Extending classes - 223]]
-  - [[10.5 Overriding methods and fields - 225][10.5 Overriding methods and fields - 225]]
-  - [[10.6 Defining parametric fields - 226][10.6 Defining parametric fields - 226]]
-  - [[10.7 Invoking superclass constructors - 228][10.7 Invoking superclass constructors - 228]]
-  - [[10.8 Using ~override~ modifiers - 229 =Re-Write some Notes=][10.8 Using ~override~ modifiers - 229 =Re-Write some Notes=]]
-  - [[10.9 Polymorphism and dynamic binding - 231][10.9 Polymorphism and dynamic binding - 231]]
-  - [[10.10 Declaring ~final~ members - 233][10.10 Declaring ~final~ members - 233]]
-  - [[10.11 Using composition and inheritance - 235][10.11 Using composition and inheritance - 235]]
-  - [[10.12 Implementing ~above~, ~beside~, and ~toString~ - 236][10.12 Implementing ~above~, ~beside~, and ~toString~ - 236]]
-  - [[10.13 Defining a factory object - 238][10.13 Defining a factory object - 238]]
-  - [[10.14 Heighten and widen - 240][10.14 Heighten and widen - 240]]
-  - [[10.15 Putting it all together - 244 =Re-Read=][10.15 Putting it all together - 244 =Re-Read=]]
-  - [[10.16 Conclusion - 245][10.16 Conclusion - 245]]
-- [[11 Scala's Hierarchy - 246][11 Scala's Hierarchy - 246]]
-  - [[11.1 Scala's class hierarchy - 246][11.1 Scala's class hierarchy - 246]]
-  - [[11.2 How primitives are implemented - 250][11.2 How primitives are implemented - 250]]
-  - [[11.3 Bottom types - 252][11.3 Bottom types - 252]]
-  - [[11.4 Defining your own value classes - 253][11.4 Defining your own value classes - 253]]
-    - [[Avoiding a types monoculture][Avoiding a types monoculture]]
-  - [[11.5 Conclusion - 256][11.5 Conclusion - 256]]
-- [[12 Traits - 257][12 Traits - 257]]
-  - [[12.1 How traits work - 257][12.1 How traits work - 257]]
-  - [[12.2 Thin versus rich interfaces - 260][12.2 Thin versus rich interfaces - 260]]
-  - [[12.3 Example: Rectangular objects - 261][12.3 Example: Rectangular objects - 261]]
-  - [[12.4 The ~Ordered~ trait - 264][12.4 The ~Ordered~ trait - 264]]
-  - [[12.5 Traits as stackable modifications - 266 =Re-Read=][12.5 Traits as stackable modifications - 266 =Re-Read=]]
-  - [[12.6 Why not multiple inheritance? - 270][12.6 Why not multiple inheritance? - 270]]
-  - [[12.7 To trait or not to trait? - 274 =IMPORTANT=][12.7 To trait or not to trait? - 274 =IMPORTANT=]]
-  - [[12.8 Conclusion - 275][12.8 Conclusion - 275]]
-- [[13 Packages and Imports - 276 - _Re-READ_][13 Packages and Imports - 276 - _Re-READ_]]
-  - [[13.1 Putting code in packages - 277][13.1 Putting code in packages - 277]]
-  - [[13.2 Concise access to related code - 281 =RE-READ=][13.2 Concise access to related code - 281 =RE-READ=]]
-  - [[13.3 Imports - 285][13.3 Imports - 285]]
-  - [[13.4 Implicit imports - 285][13.4 Implicit imports - 285]]
-  - [[13.5 Access modifiers - 286][13.5 Access modifiers - 286]]
-    - [[Private members][Private members]]
-    - [[Protected members][Protected members]]
-    - [[Public members][Public members]]
-    - [[Scope of protection][Scope of protection]]
-    - [[Visibility and companion objects][Visibility and companion objects]]
-  - [[13.6 Package objects - 291][13.6 Package objects - 291]]
-  - [[13.7 Conclusion - 293][13.7 Conclusion - 293]]
-- [[14 Assertions and Tests - 294 - _No details in this book!!!_][14 Assertions and Tests - 294 - _No details in this book!!!_]]
-  - [[14.1 Assertions - 294][14.1 Assertions - 294]]
-  - [[14.2 Testing in Scala - 296][14.2 Testing in Scala - 296]]
-  - [[14.3 Informative failure reports - 297][14.3 Informative failure reports - 297]]
-  - [[14.4 Tests as specifications - 299][14.4 Tests as specifications - 299]]
-  - [[14.5 Property-based testing - 302][14.5 Property-based testing - 302]]
-  - [[14.6 Organizing and running tests - 304][14.6 Organizing and running tests - 304]]
-  - [[14.7 Conclusion - 305][14.7 Conclusion - 305]]
-- [[15 Case Classes and Pattern Matching - 306][15 Case Classes and Pattern Matching - 306]]
-  - [[15.1 A simple example - 306][15.1 A simple example - 306]]
-    - [[Case classes][Case classes]]
-    - [[Pattern matching][Pattern matching]]
-    - [[~match~ compared to ~switch~][~match~ compared to ~switch~]]
-  - [[15.2 Kinds of patterns - 311][15.2 Kinds of patterns - 311]]
-    - [[Wildcard patterns][Wildcard patterns]]
-    - [[Constant patterns][Constant patterns]]
-    - [[Variable patterns][Variable patterns]]
-    - [[Constructor patterns][Constructor patterns]]
-    - [[Sequence patterns][Sequence patterns]]
-    - [[Tuple patterns][Tuple patterns]]
-    - [[Typed patterns][Typed patterns]]
-    - [[Variable binding][Variable binding]]
-  - [[15.3 Pattern guards - 320][15.3 Pattern guards - 320]]
-  - [[15.4 Pattern overlaps - 321][15.4 Pattern overlaps - 321]]
-  - [[15.5 Sealed classes - 323][15.5 Sealed classes - 323]]
-  - [[15.6 The ~Option~ type - 325][15.6 The ~Option~ type - 325]]
-  - [[15.7 Patterns everywhere - 327][15.7 Patterns everywhere - 327]]
-    - [[Patterns in variable definitions][Patterns in variable definitions]]
-    - [[Case sequences as partial functions][Case sequences as partial functions]]
-    - [[Patterns in ~for~ expressions][Patterns in ~for~ expressions]]
-  - [[15.8 A larger example - 331][15.8 A larger example - 331]]
-  - [[15.9 Conclusion - 339][15.9 Conclusion - 339]]
-- [[16 Working with Lists - 340][16 Working with Lists - 340]]
-  - [[16.1 ~List~ literals - 340][16.1 ~List~ literals - 340]]
-  - [[16.2 The ~List~ type - 341][16.2 The ~List~ type - 341]]
-  - [[16.3 Constructing lists - 341][16.3 Constructing lists - 341]]
-  - [[16.4 Basic operations on lists - 342][16.4 Basic operations on lists - 342]]
-  - [[16.5 ~List~ patterns - 343][16.5 ~List~ patterns - 343]]
-  - [[16.6 First-order methods on class ~List~ - 345][16.6 First-order methods on class ~List~ - 345]]
-    - [[Concatenating two lists][Concatenating two lists]]
-    - [[The Divide and Conquer principle][The Divide and Conquer principle]]
-    - [[Taking the length of a list: ~length~][Taking the length of a list: ~length~]]
-    - [[Accessing the end of a list: ~init~ and ~last~][Accessing the end of a list: ~init~ and ~last~]]
-    - [[Reversing lists: ~reverse~][Reversing lists: ~reverse~]]
-    - [[Prefixes and suffixes: ~drop~, ~take~, and ~splitAt~][Prefixes and suffixes: ~drop~, ~take~, and ~splitAt~]]
-    - [[Element selection: ~apply~ and ~indices~][Element selection: ~apply~ and ~indices~]]
-    - [[Flattening a list of lists: ~flatten~][Flattening a list of lists: ~flatten~]]
-    - [[Zipping lists: ~zip~ and ~unzip~][Zipping lists: ~zip~ and ~unzip~]]
-    - [[Displaying lists: ~toString~ and ~mkString~][Displaying lists: ~toString~ and ~mkString~]]
-    - [[Converting lists: ~iterator~, ~toArray~, ~copyToArray~][Converting lists: ~iterator~, ~toArray~, ~copyToArray~]]
-    - [[Example: Merge sort - 355][Example: Merge sort - 355]]
-  - [[16.7 Higher-order methods on class ~List~ - 357][16.7 Higher-order methods on class ~List~ - 357]]
-    - [[Mapping over lists: ~map~, ~flatMap~ and ~foreach~][Mapping over lists: ~map~, ~flatMap~ and ~foreach~]]
-    - [[Filtering lists: ~filter~, ~partition~, ~find~, ~takeWhile~, ~dropWhile~, and ~span~][Filtering lists: ~filter~, ~partition~, ~find~, ~takeWhile~, ~dropWhile~, and ~span~]]
-    - [[Predicates over lists: ~forall~ and ~exists~][Predicates over lists: ~forall~ and ~exists~]]
-    - [[Folding lists: ~/:~ and ~:\~][Folding lists: ~/:~ and ~:\~]]
-    - [[Example: List reversal using fold][Example: List reversal using fold]]
-    - [[Sorting lists: ~sortWith~][Sorting lists: ~sortWith~]]
-  - [[16.8 Methods of the ~List~ object - 365][16.8 Methods of the ~List~ object - 365]]
-    - [[Creating lists from their elements: ~List.apply~][Creating lists from their elements: ~List.apply~]]
-    - [[Creating a range of numbers: ~List.range~][Creating a range of numbers: ~List.range~]]
-    - [[Creating uniform lists: ~List.fill~][Creating uniform lists: ~List.fill~]]
-    - [[Tabulating a function: ~List.tabulate~][Tabulating a function: ~List.tabulate~]]
-    - [[Concatenating multiple lists: ~List.concat~][Concatenating multiple lists: ~List.concat~]]
-  - [[16.9 Processing multiple lists together - 367][16.9 Processing multiple lists together - 367]]
-  - [[16.10 Understanding Scala's type inference algorithm - 368][16.10 Understanding Scala's type inference algorithm - 368]]
-  - [[16.11 Conclusion - 372][16.11 Conclusion - 372]]
-- [[17 Working with Other Collections - 373][17 Working with Other Collections - 373]]
-  - [[17.1 Sequences - 373][17.1 Sequences - 373]]
-    - [[Lists][Lists]]
-    - [[Arrays][Arrays]]
-    - [[List buffers][List buffers]]
-    - [[Array buffers][Array buffers]]
-    - [[Strings (via ~StringOps~)][Strings (via ~StringOps~)]]
-  - [[17.2 Sets and maps - 377][17.2 Sets and maps - 377]]
-    - [[Using sets][Using sets]]
-    - [[Using maps][Using maps]]
-    - [[Default sets and maps][Default sets and maps]]
-    - [[Sorted sets and maps][Sorted sets and maps]]
-  - [[17.3 Selecting mutable versus immutable collections - 385][17.3 Selecting mutable versus immutable collections - 385]]
-  - [[17.4 Initializing collections - 388][17.4 Initializing collections - 388]]
-    - [[Converting to array or list][Converting to array or list]]
-    - [[Converting between mutable and immutable sets and maps][Converting between mutable and immutable sets and maps]]
-  - [[17.5 Tuples - 392][17.5 Tuples - 392]]
-  - [[17.6 Conclusion - 394][17.6 Conclusion - 394]]
-- [[18 Mutable Objects - 395][18 Mutable Objects - 395]]
-  - [[18.1 What makes an object mutable? - 395][18.1 What makes an object mutable? - 395]]
-  - [[18.2 Reassignable variables and properties - 398][18.2 Reassignable variables and properties - 398]]
-  - [[18.3 Case study: Discrete event simulation - 401][18.3 Case study: Discrete event simulation - 401]]
-  - [[18.4 A language for digital circuits - 402][18.4 A language for digital circuits - 402]]
-  - [[18.5 The ~Simulation~ API - 405][18.5 The ~Simulation~ API - 405]]
-  - [[18.6 Circuit Simulation - 409][18.6 Circuit Simulation - 409]]
-    - [[The ~Wire~ class][The ~Wire~ class]]
-    - [[The ~inverter~ method][The ~inverter~ method]]
-    - [[The ~andGate~ and ~orGate~ methods][The ~andGate~ and ~orGate~ methods]]
-    - [[Simulation output][Simulation output]]
-    - [[Running the simulator][Running the simulator]]
-  - [[18.7 Conclusion - 417][18.7 Conclusion - 417]]
-- [[19 Type Parameterization - 418 - =RE-DO=][19 Type Parameterization - 418 - =RE-DO=]]
-  - [[19.1 Functional queues - 418][19.1 Functional queues - 418]]
-  - [[19.2 Information hiding - 422][19.2 Information hiding - 422]]
-    - [[Private constructors and factory methods - 422][Private constructors and factory methods - 422]]
-    - [[An alternative: private classes - 423][An alternative: private classes - 423]]
-  - [[19.3 Variance annotations - 425][19.3 Variance annotations - 425]]
-    - [[Variance and arrays][Variance and arrays]]
-  - [[19.4 Checking variance annotations - 429 - =Re-Read= =Re-Read=][19.4 Checking variance annotations - 429 - =Re-Read= =Re-Read=]]
-  - [[19.5 Lower bounds - 432][19.5 Lower bounds - 432]]
-  - [[19.6 Contravariance - 434][19.6 Contravariance - 434]]
-  - [[19.7 Object private data - 437][19.7 Object private data - 437]]
-  - [[19.8 Upper bounds - 439][19.8 Upper bounds - 439]]
-  - [[19.9 Conclusion - 442][19.9 Conclusion - 442]]
-- [[20 Abstract Members - 443][20 Abstract Members - 443]]
-  - [[20.1 A quick tour of abstract members - 443][20.1 A quick tour of abstract members - 443]]
-  - [[20.2 Type members - 444][20.2 Type members - 444]]
-  - [[20.3 Abstract ~val~'s - 445][20.3 Abstract ~val~'s - 445]]
-  - [[20.4 Abstract ~var~'s - 446][20.4 Abstract ~var~'s - 446]]
-  - [[20.5 Initializing abstract ~val~'s - 447][20.5 Initializing abstract ~val~'s - 447]]
-    - [[Pre-initialized fields][Pre-initialized fields]]
-    - [[Lazy ~val~'s][Lazy ~val~'s]]
-  - [[20.6 Abstract types - 455][20.6 Abstract types - 455]]
-  - [[20.7 Path-dependent types - 457][20.7 Path-dependent types - 457]]
-  - [[20.8 Refinement types - 460][20.8 Refinement types - 460]]
-  - [[20.9 Enumerations - 461][20.9 Enumerations - 461]]
-  - [[20.10 Case study: Currencies - 463 - =RE-READ=][20.10 Case study: Currencies - 463 - =RE-READ=]]
-  - [[20.11 Conclusion - 473][20.11 Conclusion - 473]]
-- [[21 Implicit Conversions and Parameters - 474][21 Implicit Conversions and Parameters - 474]]
-  - [[21.1 Implicit conversions - 474][21.1 Implicit conversions - 474]]
-  - [[21.2 Rules for implicits - 477][21.2 Rules for implicits - 477]]
-    - [[Naming an implicit conversion][Naming an implicit conversion]]
-    - [[Where implicits are tried][Where implicits are tried]]
-  - [[21.3 Implicit conversion to an expected type - 480][21.3 Implicit conversion to an expected type - 480]]
-  - [[21.4 Converting the receiver - 482][21.4 Converting the receiver - 482]]
-    - [[Interoperating with new types - 482][Interoperating with new types - 482]]
-    - [[Simulating new syntax - 483][Simulating new syntax - 483]]
-    - [[Implicit classes - 485][Implicit classes - 485]]
-  - [[21.5 Implicit parameters - 485][21.5 Implicit parameters - 485]]
-    - [[A style rule for implicit parameters][A style rule for implicit parameters]]
-  - [[21.6 Context bounds - 491][21.6 Context bounds - 491]]
-  - [[21.7 When multiple conversions apply - 494][21.7 When multiple conversions apply - 494]]
-  - [[21.8 Debugging implicits - 496][21.8 Debugging implicits - 496]]
-  - [[21.9 Conclusion - 497][21.9 Conclusion - 497]]
-- [[22 Implementing Lists - 499][22 Implementing Lists - 499]]
-  - [[22.1 The ~List~ class in principle - 499][22.1 The ~List~ class in principle - 499]]
-    - [[The ~Nil~ object - 500][The ~Nil~ object - 500]]
-    - [[The ~::~ class - 501][The ~::~ class - 501]]
-    - [[Some more methods - 502][Some more methods - 502]]
-    - [[List construction - 503][List construction - 503]]
-  - [[22.2 The ~ListBuffer~ class - 505][22.2 The ~ListBuffer~ class - 505]]
-  - [[22.3 The ~List~ class in practice - 507][22.3 The ~List~ class in practice - 507]]
-  - [[22.4 Functional on the outside - 509][22.4 Functional on the outside - 509]]
-  - [[22.5 Conclusion - 510][22.5 Conclusion - 510]]
-- [[23 For Expressions Revisited - 512][23 For Expressions Revisited - 512]]
-  - [[23.1 ~for~ expressions - 513][23.1 ~for~ expressions - 513]]
-  - [[23.2 The n-queens problem - 515][23.2 The n-queens problem - 515]]
-  - [[23.3 Querying with ~for~ expressions - 518][23.3 Querying with ~for~ expressions - 518]]
-  - [[23.4 Translation of ~for~ expressions - 520 =Re-READ=][23.4 Translation of ~for~ expressions - 520 =Re-READ=]]
-    - [[Translating ~for~ expressions with one generator][Translating ~for~ expressions with one generator]]
-    - [[Translating ~for~ expressions starting with a generator and a filter][Translating ~for~ expressions starting with a generator and a filter]]
-    - [[Translating ~for~ expressions starting with two generators][Translating ~for~ expressions starting with two generators]]
-    - [[Translating patterns in generators][Translating patterns in generators]]
-    - [[Translating definitions][Translating definitions]]
-    - [[Translating ~for~ loops][Translating ~for~ loops]]
-  - [[23.5 Going the other way - 524][23.5 Going the other way - 524]]
-  - [[23.6 Generalizing ~for~ - 525 =Re-Read the last some paragraph=][23.6 Generalizing ~for~ - 525 =Re-Read the last some paragraph=]]
-  - [[23.7 Conclusion][23.7 Conclusion]]
-- [[24 Collections in Depth - 528][24 Collections in Depth - 528]]
-  - [[24.1 Mutable and immutable collections - 529][24.1 Mutable and immutable collections - 529]]
-  - [[24.2 Collections consistency - 531][24.2 Collections consistency - 531]]
-  - [[24.3 Trait ~Traversable~ - 533][24.3 Trait ~Traversable~ - 533]]
-  - [[24.4 Trait ~Iterable~ - 538][24.4 Trait ~Iterable~ - 538]]
-    - [[Why have both ~Traversable~ and ~Iterable~? - 540  =RE-READ=][Why have both ~Traversable~ and ~Iterable~? - 540  =RE-READ=]]
-    - [[Subcategories of ~Iterable~ - 542][Subcategories of ~Iterable~ - 542]]
-  - [[24.5 The sequence traits ~Seq~, ~IndexedSeq~, and ~LinearSeq~ - 542][24.5 The sequence traits ~Seq~, ~IndexedSeq~, and ~LinearSeq~ - 542]]
-    - [[Buffers][Buffers]]
-  - [[24.6 Sets - 547][24.6 Sets - 547]]
-  - [[24.7 Maps - 552][24.7 Maps - 552]]
-  - [[24.8 Concrete immutable collection classes - 556][24.8 Concrete immutable collection classes - 556]]
-    - [[Lists - 556][Lists - 556]]
-    - [[Streams - 557][Streams - 557]]
-    - [[Vectors - 558 =Re-READ=][Vectors - 558 =Re-READ=]]
-    - [[Immutable stacks - 559][Immutable stacks - 559]]
-    - [[Immutable queues - 560][Immutable queues - 560]]
-    - [[Ranges - 561][Ranges - 561]]
-    - [[Hash tries - 561 =TOOD= =NOTE=][Hash tries - 561 =TOOD= =NOTE=]]
-    - [[Red-black trees - 562][Red-black trees - 562]]
-    - [[Immutable bit sets - 562 =TODO= =???=][Immutable bit sets - 562 =TODO= =???=]]
-    - [[List maps - 563][List maps - 563]]
-  - [[24.9 Concrete mutable collection classes - 563][24.9 Concrete mutable collection classes - 563]]
-    - [[Array buffers - 563][Array buffers - 563]]
-    - [[List buffers - 564][List buffers - 564]]
-    - [[String builders - 564][String builders - 564]]
-    - [[Linked lists - 565][Linked lists - 565]]
-    - [[Double linked lists - 565][Double linked lists - 565]]
-    - [[Mutable lists - 565][Mutable lists - 565]]
-    - [[Queues - 566][Queues - 566]]
-    - [[Array sequences - 566 =RE-READ=][Array sequences - 566 =RE-READ=]]
-    - [[Stacks - 566][Stacks - 566]]
-    - [[Array stacks - 567][Array stacks - 567]]
-    - [[Hash tables - 567][Hash tables - 567]]
-    - [[Weak hash maps - 568][Weak hash maps - 568]]
-    - [[Concurrent Maps - 569][Concurrent Maps - 569]]
-    - [[Mutable bit sets - 569][Mutable bit sets - 569]]
-  - [[24.10 Arrays - 570][24.10 Arrays - 570]]
-  - [[24.11 Strings - 575][24.11 Strings - 575]]
-  - [[24.12 Performance characteristics - 575 =Recite=][24.12 Performance characteristics - 575 =Recite=]]
-  - [[24.13 Equality - 578][24.13 Equality - 578]]
-  - [[24.14 Views - 579 =Re-READ=][24.14 Views - 579 =Re-READ=]]
-  - [[24.15 Iterators - 584][24.15 Iterators - 584]]
-    - [[Buffered iterators - 591][Buffered iterators - 591]]
-  - [[24.16 Creating collections from scratch - 592][24.16 Creating collections from scratch - 592]]
-  - [[24.17 Conversions between Java and Scala collections - 594 =Re-READ=][24.17 Conversions between Java and Scala collections - 594 =Re-READ=]]
-  - [[24.18 Conclusion - 596][24.18 Conclusion - 596]]
-- [[25 The Architecture of Scala Collections - 597][25 The Architecture of Scala Collections - 597]]
-  - [[25.1 Builders - 597][25.1 Builders - 597]]
-  - [[25.2 Factoring out common operations - 599][25.2 Factoring out common operations - 599]]
-  - [[25.3 Integrating new collections - 604][25.3 Integrating new collections - 604]]
-    - [[Integrating sequences - 604][Integrating sequences - 604]]
-      - [[Adapting the _result type_ of ~RNA~ /methods/:][Adapting the _result type_ of ~RNA~ /methods/:]]
-      - [[Dealing with ~map~ and friends][Dealing with ~map~ and friends]]
-    - [[Integrating new sets and maps - 614][Integrating new sets and maps - 614]]
-    - [[Summary - 620][Summary - 620]]
-  - [[25.4 Conclusion - 620][25.4 Conclusion - 620]]
-- [[26 Extractors - 621][26 Extractors - 621]]
-  - [[26.1 An example: extracting email addresses - 621][26.1 An example: extracting email addresses - 621]]
-  - [[26.2 Extractors - 622][26.2 Extractors - 622]]
-  - [[26.3 Patterns with zero or one variables - 625][26.3 Patterns with zero or one variables - 625]]
-  - [[26.4 Variable argument extractors - 627][26.4 Variable argument extractors - 627]]
-  - [[26.5 Extractors and sequence patterns - 630][26.5 Extractors and sequence patterns - 630]]
-  - [[26.6 Extractors versus case classes - 631][26.6 Extractors versus case classes - 631]]
-  - [[26.7 Regular expressions - 632][26.7 Regular expressions - 632]]
-    - [[Forming regular expressions][Forming regular expressions]]
-    - [[Searching for regular expressions][Searching for regular expressions]]
-    - [[Extracting with regular expressions][Extracting with regular expressions]]
-  - [[26.8 Conclusion - 636 =Re-Read=][26.8 Conclusion - 636 =Re-Read=]]
-- [[27 Annotations - 637 *Learn MORE*][27 Annotations - 637 *Learn MORE*]]
-  - [[27.1 Why have annotations? - 637][27.1 Why have annotations? - 637]]
-  - [[27.2 Syntax of annotations - 638][27.2 Syntax of annotations - 638]]
-  - [[27.3 Standard annotations - 640][27.3 Standard annotations - 640]]
-    - [[Deprecation][Deprecation]]
-    - [[Volatile fields][Volatile fields]]
-    - [[Binary serialization][Binary serialization]]
-    - [[Automatic ~get~ and ~set~ methods *RE-READ*][Automatic ~get~ and ~set~ methods *RE-READ*]]
-    - [[Tailrec][Tailrec]]
-    - [[Unchecked][Unchecked]]
-    - [[Native methods][Native methods]]
-  - [[27.4 Conclusion - 644][27.4 Conclusion - 644]]
-- [[28 Working with XML - 645][28 Working with XML - 645]]
-  - [[28.1 Semi-structured data - 645][28.1 Semi-structured data - 645]]
-  - [[28.2 XML overview - 646][28.2 XML overview - 646]]
-  - [[28.3 XML literals - 647][28.3 XML literals - 647]]
-  - [[28.4 Serialization - 649][28.4 Serialization - 649]]
-  - [[28.5 Taking XML apart - 651][28.5 Taking XML apart - 651]]
-  - [[28.6 Deserialization - 652][28.6 Deserialization - 652]]
-  - [[28.7 Loading and saving - 653][28.7 Loading and saving - 653]]
-  - [[28.8 Pattern matching on XML - 655][28.8 Pattern matching on XML - 655]]
-  - [[28.9 Conclusion - 658][28.9 Conclusion - 658]]
-- [[29 Modular Programming Using Objects - 659 - =Re-READ=][29 Modular Programming Using Objects - 659 - =Re-READ=]]
-  - [[29.1 The problem - 660 =Re-Read= =Review=][29.1 The problem - 660 =Re-Read= =Review=]]
-  - [[29.2 A recipe application - 661][29.2 A recipe application - 661]]
-  - [[29.3 Abstraction - 664][29.3 Abstraction - 664]]
-  - [[29.4 Splitting modules into traits - 667][29.4 Splitting modules into traits - 667]]
-  - [[29.5 Runtime linking - 670][29.5 Runtime linking - 670]]
-  - [[29.6 Tracking module instances - 671][29.6 Tracking module instances - 671]]
-  - [[29.7 Conclusion - 673][29.7 Conclusion - 673]]
-- [[30 Object Equality - 674][30 Object Equality - 674]]
-  - [[30.1 Equality in Scala - 674][30.1 Equality in Scala - 674]]
-  - [[30.2 Writing an equality method - 675][30.2 Writing an equality method - 675]]
-    - [[Pitfall #1: Defining ~equals~ with the wrong signature - 676][Pitfall #1: Defining ~equals~ with the wrong signature - 676]]
-    - [[Pitfall #2: Changing ~equals~ without also changing ~hashCode~ - 678][Pitfall #2: Changing ~equals~ without also changing ~hashCode~ - 678]]
-    - [[Pitfall #3: Defining ~equals~ in terms of mutable fields - 680][Pitfall #3: Defining ~equals~ in terms of mutable fields - 680]]
-    - [[Pitfall #4: Failing to define ~equals~ as an equivalence relation][Pitfall #4: Failing to define ~equals~ as an equivalence relation]]
-  - [[30.3 Defining equality for parameterized types - 688][30.3 Defining equality for parameterized types - 688]]
-  - [[30.4 Recipes for ~equals~ and ~hashCode~ - 692][30.4 Recipes for ~equals~ and ~hashCode~ - 692]]
-    - [[Recipe for ~equals~ - 693][Recipe for ~equals~ - 693]]
-    - [[Recipe for ~hashCode~ - 695][Recipe for ~hashCode~ - 695]]
-  - [[30.5 Conclusion - 697][30.5 Conclusion - 697]]
-- [[31 Combining Scala and Java - 698][31 Combining Scala and Java - 698]]
-  - [[31.1 Using Scala from Java - 698][31.1 Using Scala from Java - 698]]
-    - [[General rules - 698][General rules - 698]]
-    - [[Value types - 699][Value types - 699]]
-    - [[Singleton objects - 699 - =Outdated Info= =Re-Read=][Singleton objects - 699 - =Outdated Info= =Re-Read=]]
-    - [[Traits as interfaces - 701 =Learn MORE!=][Traits as interfaces - 701 =Learn MORE!=]]
-  - [[31.2 Annotations - 701][31.2 Annotations - 701]]
-    - [[Additional effects from standard annotations][Additional effects from standard annotations]]
-    - [[Exceptions thrown - 702][Exceptions thrown - 702]]
-    - [[Java annotations - 703][Java annotations - 703]]
-    - [[Writing your own annotations - 704][Writing your own annotations - 704]]
-  - [[31.3 Wildcard types - 706][31.3 Wildcard types - 706]]
-  - [[31.4 Compiling Scala and Java together - 709][31.4 Compiling Scala and Java together - 709]]
-  - [[31.5 Java 8 integration in Scala 2.12 - 709][31.5 Java 8 integration in Scala 2.12 - 709]]
-    - [[Lambda expressions and "SAM" types - 710][Lambda expressions and "SAM" types - 710]]
-    - [[Using Java 8 Streams from Scala 2.12 - 712][Using Java 8 Streams from Scala 2.12 - 712]]
-  - [[31.6 Conclusion - 713][31.6 Conclusion - 713]]
-- [[32 Futures and Concurrency - 714][32 Futures and Concurrency - 714]]
-  - [[32.1 Trouble in paradise - 714 =Re-Do=][32.1 Trouble in paradise - 714 =Re-Do=]]
-  - [[32.2 Asynchronous execution and ~Try~'s - 716][32.2 Asynchronous execution and ~Try~'s - 716]]
-  - [[32.3 Working with ~Future~'s - 718][32.3 Working with ~Future~'s - 718]]
-    - [[Transforming ~Futures~ with ~map~ - 719][Transforming ~Futures~ with ~map~ - 719]]
-    - [[Transforming ~Futures~ with ~for~ expressions - 719 =RE-READ=][Transforming ~Futures~ with ~for~ expressions - 719 =RE-READ=]]
-    - [[Creating the ~Future~: ~Future.failed~, ~Future.successful~, ~Future.fromTry~, and ~Promises~ - 721][Creating the ~Future~: ~Future.failed~, ~Future.successful~, ~Future.fromTry~, and ~Promises~ - 721]]
-    - [[Filtering: ~filter~ and ~collect~ - 721][Filtering: ~filter~ and ~collect~ - 721]]
-    - [[Dealing with failure: ~failed~, ~fallBackTo~, ~recover~, and ~recoverWith~ - 724][Dealing with failure: ~failed~, ~fallBackTo~, ~recover~, and ~recoverWith~ - 724]]
-    - [[Mapping both possibilities: ~transform~ - 726][Mapping both possibilities: ~transform~ - 726]]
-    - [[Combining futures: ~zip~, ~Future.fold~, ~Future.reduce~, ~Future.sequence~, and ~Future.traverse~ - 728 =Re-Do=][Combining futures: ~zip~, ~Future.fold~, ~Future.reduce~, ~Future.sequence~, and ~Future.traverse~ - 728 =Re-Do=]]
-    - [[Performing side-effects: ~foreach~, ~onComplete~, and ~andThen~ - 730][Performing side-effects: ~foreach~, ~onComplete~, and ~andThen~ - 730]]
-    - [[Other methods added in *2.12*: ~flatten~, ~zipWith~, and ~transformWith~ - 732][Other methods added in *2.12*: ~flatten~, ~zipWith~, and ~transformWith~ - 732]]
-  - [[32.4 Testing with ~Future~'s - 733][32.4 Testing with ~Future~'s - 733]]
-  - [[32.5 Conclusion - 735][32.5 Conclusion - 735]]
-- [[33 Combinator Parsing - 736][33 Combinator Parsing - 736]]
-  - [[33.1 Example: Arithmetic expressions - 737][33.1 Example: Arithmetic expressions - 737]]
-  - [[33.2 Running your parser - 739][33.2 Running your parser - 739]]
-  - [[33.3 Basic regular expression parsers - 740][33.3 Basic regular expression parsers - 740]]
-  - [[33.4 Another example: JSON - 741][33.4 Another example: JSON - 741]]
-  - [[33.5 Parser output - 743][33.5 Parser output - 743]]
-    - [[Symbolic versus alphanumeric names][Symbolic versus alphanumeric names]]
-  - [[33.6 Implementing combinator parsers - 749][33.6 Implementing combinator parsers - 749]]
-    - [[Parser input - 751][Parser input - 751]]
-    - [[Parser results - 751][Parser results - 751]]
-    - [[The ~Parser~ class - 752][The ~Parser~ class - 752]]
-    - [[Aliasing ~this~ - 753][Aliasing ~this~ - 753]]
-    - [[Single-token parsers - 754][Single-token parsers - 754]]
-    - [[Sequential composition - 754][Sequential composition - 754]]
-    - [[Alternative composition - 755][Alternative composition - 755]]
-    - [[Dealing with recursion - 756][Dealing with recursion - 756]]
-    - [[Result conversion - 756][Result conversion - 756]]
-    - [[Parsers that don't read any input - 757][Parsers that don't read any input - 757]]
-    - [[Option and repetition - 757][Option and repetition - 757]]
-  - [[33.7 String literals and regular expressions - 758][33.7 String literals and regular expressions - 758]]
-  - [[33.8 Lexing and parsing - 759][33.8 Lexing and parsing - 759]]
-  - [[33.9 Error reporting - 759][33.9 Error reporting - 759]]
-  - [[33.10 Backtracking versus LL(1) - 761][33.10 Backtracking versus LL(1) - 761]]
-  - [[33.11 Conclusion - 763 =Re-Read=][33.11 Conclusion - 763 =Re-Read=]]
-- [[34 GUI Programming - 765][34 GUI Programming - 765]]
-  - [[34.1 A first Swing application - 765][34.1 A first Swing application - 765]]
-  - [[34.2 Panels and layouts - 768][34.2 Panels and layouts - 768]]
-  - [[34.3 Handling events - 770][34.3 Handling events - 770]]
-  - [[34.4 Example: Celsius/Fahrenheit converter - 773][34.4 Example: Celsius/Fahrenheit converter - 773]]
-  - [[34.5 Conclusion - 775][34.5 Conclusion - 775]]
-- [[35 The SCells Spreadsheet - 777][35 The SCells Spreadsheet - 777]]
-  - [[35.1 The visual framework - 777][35.1 The visual framework - 777]]
-  - [[35.2 Disconnecting data entry and display - 780][35.2 Disconnecting data entry and display - 780]]
-  - [[35.3 Formulas - 783][35.3 Formulas - 783]]
-  - [[35.4 Parsing formulas - 785][35.4 Parsing formulas - 785]]
-  - [[35.5 Evaluation - 790][35.5 Evaluation - 790]]
-  - [[35.6 Operation libraries - 793][35.6 Operation libraries - 793]]
-  - [[35.7 Change propagation - 796][35.7 Change propagation - 796]]
-  - [[35.8 Conclusion - 800][35.8 Conclusion - 800]]
-- [[Appendix A. Scala Scripts on Unix and Windows - 802][Appendix A. Scala Scripts on Unix and Windows - 802]]
-- [[Glossary - 803][Glossary - 803]]
-- [[Bibliography - 819][Bibliography - 819]]
-- [[About the Authors - 822][About the Authors - 822]]
-- [[Index - 823][Index - 823]]
-- [[Tips (Added by Jian)][Tips (Added by Jian)]]
-- [[TodoList (Added by Jian)][TodoList (Added by Jian)]]
-
-** DONE 25.1 Builders - 597
-   CLOSED: [2018-03-30 Fri 05:04]
-   - _Almost all_ /collection/ _operations_ are implemented in terms of
-     *traversals* and *builders*.
-     + *Traversals* are handled _by ~Traversable~'s ~foreach~ /method/;_
-
-     + *Building* new collections is handled _by /instances/ of /class/
-       ~Builder~._
-
-       =From Jian= I review the source code and found that ~Builder~'s are only
-       used for ~scala.collection.mutable~ (and ~scala.collection.cocuncurrent~).
-
-       #+BEGIN_SRC scala
-         package scala
-         package collection
-         package mutable
-
-         import generic._
-
-
-         class Builder[-Elem, +To] {
-           def +=(elem: Elem): this.type
-
-           def result(): To
-
-           def clear()
-
-           def mapResult[NewTo](f: To => NewTo): Builder[Elem, NewTo] =
-             ...
-         }
-       #+END_SRC
-
-     + Add _one_ element ~x~ to a /builder/ ~b~ with ~b += x~.
-
-     + Add _more than one_ element at once: For instance, ~b += (x, y)~ and ~b
-       ++= xs~ work as for /buffers/ (In fact, /buffers/ are an _enriched version_
-       of /builders/).
-
-     + The ~result()~ /method/ returns a collection from a /builder/.
-
-       The state of the /builder/ is *undefined* _after taking its result_,
-       but it can be _reset into a new empty state_ using ~clear()~.
-
-     + /Builders/ are generic in both the element type, ~Elem~, and in the type,
-       ~To~, of collections they return.
-
-   - Use ~mapResult~ to set the ~result~ output of a /builder/:
-     #+BEGIN_SRC scala
-       val buf = new ArrayBuffer[Int]
-       // buf: scala.collection.mutable.ArrayBuffer[Int] = ArrayBuffer()
-
-       val bldr = buf mapResult (_.toArray)
-       // bldr: scala.collection.mutable.Builder[Int,Array[Int]] = ArrayBuffer()
-
-       bldr.result
-       // res0: Array[Int] = Array()
-
-       //// From Jian
-       // val bldr = buf mapResult (_.toList)
-       // bldr.result
-       //// res0: List[Int] = List()
-     #+END_SRC
-
-** DONE 25.2 Factoring out common operations - 599
-   CLOSED: [2018-03-30 Fri 21:28]
-   - The main design objectives of the collection library redesign (=From Jian=
-     Scala 2.8 ???) were to have, at the same time, natural types and maximal
-     sharing of implementation code.
-
-   - Scala's /collections/ follow the *"same-result-type"* principle:
-     Wherever possible, a /transformation method/ on a /collection/ will yield a
-     /collection/ of the *same type*. For instance, you filter a ~List~ instance
-     and then should always get a new ~List~ instance.
-
-   - *The fast track*
-     =TODO=
-
-   - The _Scala /collection/ library_ *avoids*
-     + code duplication and
-     + achieves the "same-result-type" principle
-
-     by using /generic builders/ (=TODO= =???=) and /traversals/ over
-     /collections/ in so-called /implementation traits/, and these /traits/ are
-     _named with a ~Like~ suffix._
-       For instance, ~IndexedSeqLike~ is the /implementation trait/ for
-     ~IndexedSeq~, and similarly, ~TraversableLike~ is the /implementation
-     trait/ for ~Traversable~. Collection classes such as ~Traversable~ or
-     ~IndexedSeq~ inherit all their *concrete method implementations* _from these
-     /traits/._
-
-   - /Implementation traits/ have *two type parameters* instead of _one_ for
-     normal /collections/.
-     + One is the collection's /element type/, which can be considered as a
-       common sense of the /generic collections/ design.
-
-     + the other one is over the collection's /representation type/ -- the /type/
-       of the /underlying collection/)
-
-     For instance, here is the header of trait ~TraversableLike~:
-     #+BEGIN_SRC scala
-       package scala
-       package collection
-
-       trait TraversableLike[+Elem, +Repr] {
-         def newBuilder: Builder[Elem, Repr]  // deferred
-         def foreach[U](f: Elem => U):        // deferred
-
-         // ...
-
-         def filter(p: Elem => Boolean): Repr = {
-           val b = newBuilder
-
-           this foreach {
-             elem => if (p(elem)) b+= elem
-           }
-
-           b.result
-         }
-       }
-     #+END_SRC
-     + No constraints on ~Repr~, this is *IMPORTANT*!
-       This means ~Repr~ might be instantiated to a type that is itself NOT a
-       /subtype/ of ~Traversable~.
-
-         That way, classes outside the collections hierarchy, such as ~String~
-       and ~Array~, can still make use of all operations defined in a collection
-       /implementation trait/.
-
-       =From Jian=
-       More concrete example: ~StringOps~ extends ~StringLike[String]~, and the
-       /type parameter/ ~String~ is NOT a /collection/!
-
-   - Taking ~filter~ as an exmaple, this operation is _defined once for all
-     collection classes_ in the trait ~TraversableLike~, and it depends on the
-     ~newBuilder~ and ~foreach~ /methods/, which are concrete only to a specific
-     /concrete collection/.
-
-   - The ~map~ operation on collections is a bit more complicated.
-     + The /element type/ of its result can be different from the input.
-
-     + The change of /element type/ can affect the /collection type/ -- change
-       the /element type/ can change the /collection type/.
-       #+BEGIN_SRC scala
-         import collection.immutable.BitSet
-
-         val bits = BitSet(1, 2, 3)
-
-         bits map (_ * 2)
-         // res0: scala.collection.immutable.BitSet = BitSet(2, 4, 6)
-
-         bits map (_.toFloat)
-         // res1: scala.collection.immutable.Set = Set(1.0, 2.0, 3.0)
-
-         Map("a" -> 1, "b" -> 2) map { case (x, y) => y }
-         // res2: scala.collection.immutable.Iterable[Int] = List(1, 2)
-       #+END_SRC
-       * Q: Can we make a new design to make some limitation to prevent the
-            change happend? For example, make the ~map~ of ~BitSet~ can only be
-            ~Int => Int~?
-
-         A: This would violate the /Liskov Substitution Principle/. For instance,
-            for the last example above, ~Map~ *is* an ~Iterable~, and every
-            operation that's legal on an ~Iterable~ must also be legal on a ~Map~.
-
-   - Scala solves this problem *insteand with overloading*:
-     + *Not* _the simple form of /overloading/ inherited by Java_ (that would not
-       be flexible enough),
-
-     + but _the more systematic form of /overloading/_ that's provided by
-       /implicit parameters/.
-
-     #+BEGIN_SRC scala
-       // Inside `TraversableLike`
-       def map[B, That](f: Elem => B)
-              (implicit bf: CanBuildFrom[Repr, B, That]): That = {
-         val b = bf(this)
-         for (x <- this) b += f(x)
-         b.result
-       }
-     #+END_SRC
-
-   - ~map~ and ~filter~ looks similar.
-     The principal difference is that
-     + ~filter~ uses the ~newBuilder~ /abstract method/.
-
-     + ~map~ uses a /builder factory/ that's passed as an additional implicit
-       parameter of type ~CanBuildFrom~.
-
-   - The definition of the /trait/ ~CanBuildFrom~
-     #+BEGIN_SRC scala
-       package scala.collection.generic
-
-       trait CanBuildFrom[-From, -Elem, +To] {
-         // Creates a new builder
-         def apply(from: From): Builder[Elem, To]
-       }
-     #+END_SRC
-     For example,
-     The ~BitSet~ /companion object/ contains a /builder factory/ of type
-     ~CanBuildFrom[BitSet, Int, BitSet]~.
-       This means that when operating on a ~BitSet~ you can construct another
-     ~BitSet~, _provided_ the type of the collection to build is ~Int~.
-
-       If this is Not the case, you can always fall back to a different
-     /implicit builder factory/, this time implemented in ~mutable.Set~'s
-     /companion object/ of type ~CanBuildFrom[Set[_], A, Set[A]]~.
-
-     *You can then rely on Scala's /rules for implicit resolution/ to pick the
-     one that's appropriate and maximally specific.* -- subtypes have high
-     priority.
-
-   - So /implicit resolution/ provides the correct /static types/ for tricky
-     collection operations, such as ~map~. But what about the /dynamic types/?
-
-     See an example,
-     #+BEGIN_SRC scala
-       val xs: Iterable[Int] = List(1, 2, 3)
-       // xs: Iterable[Int] = List(1, 2, 3)
-
-       val ys: Iterable[Int] = xs map (x => x * x)
-       // ys: Iterable[Int] = List(1, 4, 9)
-     #+END_SRC
-
-     + The /static type/ of ys above is ~Iterable~, as expected.
-       But its /dynamic type/ is (and _should be_) still ~List~!
-
-     + This behavior is achieved by one more indirection.
-
-       The ~apply~ /method/ in ~CanBuildFrom~ is passed the source collection
-       as argument. _Most_ /builder factories/ for /generic traversables/ (in
-       fact all *except* /builder factories/ for /leaf classes/) *forward* the
-       call to a /method/ ~genericBuilder~ of a /collection/. The ~genericBuilder~
-       /method/ in turn _calls the /builder/ that belongs to the /collection/ in
-       which it is defined_.
-
-     + summary: =TODO= =Try to understand=
-       So Scala uses /static implicit resolution/ to resolve constraints on the
-       types of ~map~, and /virtual dispatch/ to pick the *best* /dynamic type/
-       that corresponds to these constraints.
-
-
-** DONE 25.3 Integrating new collections - 604
-   CLOSED: [2018-04-02 Mon 02:43]
-   In this section we'll show you _two examples_ that
-   1. do integrate a new collection class
-   2. so that it can profit from all predefined operations at the right types.
-
-*** DONE Integrating sequences - 604
-    CLOSED: [2018-04-01 Sun 07:10]
-    Object: Create a new sequence type for RNA strands.
-    #+BEGIN_SRC scala
-      // building blocks and static methods
-
-      abstract class Base
-      case object A extends Base
-      case object T extends Base
-      case object G extends Base
-      case object U extends Base
-
-      object Base {
-        // Both `Array` and `Map` implement the `Function1` trait
-        val fromInt: Int => Base = Array(A, T, G, U)
-        val toInt: Base => Int = Map(A -> 0, T -> 1, G -> 2, U -> 3)
-      }
-    #+END_SRC
-
-    - *Representation* design:
-      + Conceptually, a strand of RNA is simply a ~Seq[Base]~.
-
-        However, RNA strands can get quite long,
-        so it makes sense to invest some work in a _compact representation_.
-
-      + There are _FOUR building blocks_, and we can use two bits as their
-        representation. Therefore, a ~Int~ (32-bit integer) can be used to store
-        *SIXTEEN* bases.
-
-      + The idea, then, is to construct a _specialized_ /subclass/ of
-        ~Seq[Base]~, which uses this *PACKED representation*.
-
-    - Implementation:
-      #+BEGIN_SRC scala
-        import collection.IndexedSeqLike
-        import collection.mutable.{Builder, ArrayBuffer}
-        import collection.generic.CanBuildFrom
-
-
-        final class RNA1 private (val groups: Array[Int],
-                                  val length: Int) extends IndexedSeq[Base] {
-          import RNA1._
-
-          def apply(idx: Int): Base = {
-            if (idx < 0 || length <= idx) throw new IndexOutOfBoundsException
-            Base.fromInt(groups(idx / N) >> (idx % N * S) & M)
-          }
-        }
-
-        object RNA1 {
-          // Number of bits necessary to represent group
-          private val S = 2
-          // Number of groups that fit in an `Int`
-          private val N = 32 / S
-          // Bitmask to isolate a group
-          private val M = (1 << S) - 1
-
-          def fromSeq(buf: Seq[Base]): RNA1 = {
-            @inline def requiredInt(nBase: Int) = (nBase + N - 1) / N
-            val groups = new Array[Int](requiredInt(buf.length))
-
-            for (i <- buf.indices)
-              groups(i / N) |= Base.toInt(buf(i)) << (i % N * S)
-
-            new RNA1(groups, buf.length)
-          }
-
-          def apply(bases: Base*) = fromSeq(bases)
-        }
-      #+END_SRC
-      + ONLY one /constructor/ exists, and it is /private/.
-        This design achieves a GOOD *decoupling* of the /interface/ of RNA
-        sequences and its /implementation/.
-
-      + Two /factory methods/: ~fromSeq~ and ~apply~.
-
-      + =From Jian=
-        I extract a ~requiredInt~ function from the original ~val groups~ line,
-        which promises the right and minimal capacity of the underlying
-        ~Array[Int]~, and the last ~Int~ might be partially filled.
-
-        The equivalence of the body of ~requiredInt~ is
-        #+BEGIN_SRC scala
-          implicit booleanToInt(b: Boolean): Int = if (b) 1 else 0
-
-          (nBase / n) + (nBase % n != 0)
-
-          // From Jian: I think I need Python's `divmod`
-        #+END_SRC
-
-**** DONE Adapting the _result type_ of ~RNA~ /methods/:
-     CLOSED: [2018-04-01 Sun 07:10]
-     - Read the example below and you know what kind of problem we need to deal with:
-       #+BEGIN_SRC scala
-         val rna1 = RNA1(A, U, G, G, T)
-
-         rna1.length
-         // res2: Int = 5
-
-         rna1.last
-         // res3: Base = T
-
-         rna1.take(3)  // !!! the result type, both static and dynamic are not what we want!
-         // res4: IndexedSeq[Base] = Vector(A, U, G)
-       #+END_SRC
-
-       =From Jian=
-       There is always a category of /methods/ of a /collection class/ that they
-       always return a subset of this /collction/, and we expect the results is
-       of the receiver's type, ~RNA1~ for here. Current version (~RNA1~) doesn't
-       fulfill this requirement. We need to solve this!!!
-
-       + ~take~ is inherited from ~IndexedSeq~, and this is why the /static type/
-         of the return value is ~IndexedSeq[Base]~.
-
-         The current default implementation of ~IndexedSeq~ is ~Vector~, and this
-         is why the /dynamic type/ is ~Vector[Base]~.
-
-     - We have multiple ways to fix this problem:
-       + The _most naive solution_:
-         ~def take(count: Int): RNA1 = RNA1.fromSeq(super.take(count))~
-
-         This works, but how about the other (*over fifty*) /methods/?
-         "Re-implement them" is _NOT_ an attractive option!!!
-
-       + A _sophisticated solution_:
-         Let ~RNA2~ /class/ (the version 2 of the RNA /class/) extends _not
-         only_ ~IndexedSeq[Base]~, _but also_ the /implementation trait/
-         ~IndexedSeqLike[Base, RNA2]~ (not the one of ~IndexedSeq[Base]~'s
-         /supertype/ -- ~IndexedSeqLike[Base, IndexedSeq[Base]]~).
-
-         #+BEGIN_SRC scala
-           // Code shown in Listing 25.7.
-           final class RNA2 private (val groups: Array[Int], val length: Int)
-               extends IndexedSeq[Base] with IndexedSeqLike[Base, RNA2] {
-             import RNA2._
-
-             override def newBuilder: Builder[Base, RNA2] =
-               new ArrayBuffer[Base] mapResult fromSeq
-
-             def apply(idx: Int): Base = // as before
-           }
-         #+END_SRC
-
-         * The definition of ~newBuilder~:
-           ~ArrayBuffer[Base]~ itself is a ~Builder[Base, ArrayBuffer]~.
-           To get the required /builder/ ~Builder[Base, RNA2]~, call the
-           ~mapResult~ /method/ of the ~Builder[Base, ArrayBuffer]~, namely
-           the ~ArrayBuffer[Base]~, with the parameter ~RNA2.fromSeq~.
-
-           - Q :: WHY ~RNA2.fromSeq~?
-
-           - A :: Because
-             + its /input parameter type/ is ~Seq[Base]~, and
-               ~ArrayBuffer[Base]~ is the /subtype/ of ~Seq[Base]~.
-
-             + its /result type/ is ~RNA2~.
-
-         * If you left out the ~newBuilder~ definition, you would have gotten
-           an error message like the following:
-           #+BEGIN_SRC text
-             RNA2.scala:5: error: overriding method newBuilder in trait
-             TraversableLike of type => scala.collection.mutable.Builder[Base,RNA2];
-              method newBuilder in trait GenericTraversableTemplate of type
-              => scala.collection.mutable.Builder[Base,IndexedSeq[Base]] has
-              incompatible type
-             class RNA2 private (val groups: Array[Int], val length: Int)
-                   ˆ
-             one error found
-           #+END_SRC
-           *This error message is complicated, which reflects the intricate way
-           the collection libraries are put together.*
-
-           Some info of the error message detracts more than it helps.
-
-           What remains is that a /method/ ~newBuilder~ with /result type/
-           ~Builder[Base, RNA2]~ needed to be defined, but a /method/ ~newBuilder~
-           with result type ~Builder[Base, IndexedSeq[Base]]~ was found. The
-           latter does _NOT override_ the former. =WHY= =TODO=
-
-     - The _new implementation_ (~RNA2~) DIFFERS from the previous one (~RNA1~)
-       in _only two aspects_:
-
-       1. class ~RNA2~ now ALSO _extends_ from ~IndexedSeqLike[Base, RNA2]~.
-          =From Jian=
-          If not, its still a subtype of ~IndexedSeqLike~, but it is NOT a
-          /subtype/ of ~IndexedSeqLike[Base, RNA2]~ -- it is a /subtype/ of
-          ~IndexedSeqLike[Base, IndexedSeq[Base]]~, which is the /supertrait/ of
-          ~IndexedSeq[Base]~.
-
-       2. The ~IndexedSeqLike~ /trait/ implements ALL /concrete methods/ of
-          ~IndexedSeq~ in an extensible way (=From Jian= by using
-          ~newBuilder~, which is inherited eventually from
-          ~TraversableLike~). =TODO= =???=
-
-     - =From Jian=
-       + Q :: Since ~IndexedSeq~ extends ~IndexedSeqLike~, WHY NOT only
-              extends ~IndexedSeq~ rather than BOTH ~IndexedSeq~ and
-              ~IndexedSeqLike~.
-
-       + A :: Firstly, as =Jian= mentioned,
-              ~A extends IndexedSeq[Base]~ also implies A is a /subtype/ of
-              ~IndexedSeqLike[Base, IndexedSeq[Base]]~, but we actually want
-              ~IndexedSeqLike[Base, RNA2]~ -- the /subtype/ (more specific) of
-              ~IndexedSeqLike[Base, IndexedSeq[Base]]~.
-
-              Secondly, even though, we still have multiple choices, among which
-              ~extends IndexedSeq[Base] with IndexedSeqLike[Base, RNA2]~ is
-              the only one which can take into account _both_ CORRECTNESS and
-              SAFTY (with the help of type checking from compiler):
-
-         1. Only ~extends IndexedSeqLike[Base, RNA2]~.
-
-            I think you won't do this -- this can be right, if you can
-            complete the code as re-do the work ~IndexedSeq[Base]~ already do --
-            which means you need to write more code but won't get more reward,
-            and if you made mistake more punishment will come.
-
-         2. Only ~extends IndexedSeq[Base]~.
-
-            This can also be right _IF YOU REMEMBER_ to *override* the
-            ~newBuilder~ -- we have ~newBuilder: Builder[Base, IndexedSeq[Base]]~,
-            but we want ~newBuilder: Builder[Base, RNA2]~).
-
-            If you _forget overriding it_, the compiler won't warn you --
-            actually you did nothing wrong from the perspective of the
-            compiler. Then when you call /methods/ like ~take~, you get a
-            ~Vector[Base]~ back, this is our starting point. We need a strong
-            constraint to help us stopping forgetting *override*.
-
-         3. ~extends IndexedSeq[Base] with IndexedSeqLike[Base, RNA2]~
-
-            This time if you forget to override ~newBuilder~, _the compiler
-            will trigger a *error report* (see back and you can find it) for
-            /type incompatibility/:_
-              The ~newBuilder: Builder[Base, RNA2]~ of ~IndexedSeqLike[Base]~
-            (which is eventually comes from ~TraversableLike[Base, RNA2]~) is
-            imcompatible with the ~newBuilder: Builder[Base, IndexedSeq[Base]]~
-            that comes from the ~GenericTraversableTemplate[Base, IndexedSeq]~.
-            * *COMMENT*:
-              #+BEGIN_SRC scala
-                IndexedSeq[+A] extends Seq[A]
-                              with scala.collection.IndexedSeq[A]
-                              with GenericTraversableTemplate[A, IndexedSeq]
-                              with IndexedSeqLike[A, IndexedSeq[A]]
-              #+END_SRC
-
-            =From Jian=
-            ( My guess ): =TODO= =???= =AM I right?=
-            /linearization rule/ can *resolve* the right ~super~, but, even
-            though, /conflict method types/ of different /supertypes/ is still a
-            compile error -- even if the /conflict method types/ have inheritance
-            relation -- like ~IndexedSeq[Base]~ and ~RNA2~ in our case.
-              To solve this, just /override/ the /method/, can manually choose
-            _the most specific type_ (for this case, it should be ~RNA2~, which
-            is the /subtype/ of ~IndexedSeq[Base]~) to fufill the /compitable/
-            requirement.
-
-       + =From Jian=
-         According to this new implementation, we know
-         * ~RNA2~ extends
-           1. ~IndexedSeq[Base]~;
-           2. and then ~IndexedSeqLike[Base, RNA2]~.
-
-         * ~IndexedSeq[Base]~ extends
-           - ~IndexedSeqLike[Base, IndexedSeq[Base]]~
-           - ~GenericTraversableTemplate[Base, IndexedSeq]~.
-
-         _My GUESS_:
-         because of the /linearization rule/, ~IndexedSeqLike[Base, RNA2]~ and
-         ~GenericTraversableTemplate[Base, IndexedSeq]~ show up in the
-         inheritance hierarchy, but ~IndexedSeqLike[Base, IndexedSeq[Base]]~
-         doesn't.
-           Then incompatibility happens because of the different second type
-         parameters!
-
-         Now we override the ~newBuilder~ with the type ~Builder[Base, RNA2]~,
-         then the compiler use this, rather than being confused by the
-         incompatible ~newBuilder~'s from different supertypes.
-
-         =Question=
-         Since I'm still now good at identifying the /variance/, whats the
-         relation between ~newBuilder: Builder[Base, RNA2]~ and ~newBuilder:
-         Builder[Base, IndexedSeq[Base]~ from the /variance/ point of view???
-
-         (Background Info: the second type parameter of ~Builder~ is defined
-         as /covariance/)
- 
-**** DONE Dealing with ~map~ and friends
-     CLOSED: [2018-04-01 Sun 07:10]
-     =From Jian=
-     - We have solved the "make /subset methods/ return type right" problem.
-
-       Now we need to solve a new problem: Some /methods/ potentially have the
-       capacity of changing the /element type of a collection/, and then what
-       should be the /result types/.
-
-       + The ideal case, for example:
-         #+BEGIN_SRC scala
-           val rna = RNA(A, U, G, G, T)
-           // rna: RNA = RNA(A, U, G, G, T)
-  
-           /** Element type does NOT change -- return the same type */
-           rna map { case A => T case b => b }
-           // res7: RNA = RNA(T, U, G, G, T)
-  
-           rna ++ rna
-           // res8: RNA = RNA(A, U, G, G, T, A, U, G, G, T)
-  
-           /** --------------------------------------------------- */
-  
-  
-           /** Element type does change -- return the a proper supertype */
-           rna map Base.toInt
-           // res2: IndexedSeq[Int] = Vector(0, 3, 2, 2, 1)
-  
-           rna ++ List("missing", "data")
-           // res3: IndexedSeq[java.lang.Object] = Vector(A, U, G, G, T, missing, data)
-         #+END_SRC
-
-       + Our ~RNA2~: 
-         Always return ~IndexedSeq[Base]~ and ~Vector[Base]~ as /static type/ and
-         /dynamic type/, respectively. No ~RNA2~ returned.
-
-     - *Solution*:
-       1. Take a close look at the signature of the ~map~ /method/ (or other
-          =From Jian= /transformation methods/ -- *transformation* here means
-          /aggregation/, /removal/, /change element type/ -- ~++~ is another
-          example).
-          #+BEGIN_SRC scala
-            def map[B, That](f: Elem => B)
-               (implicit cbf: CanBuildFrom[Repr, B, That]): That
-          #+END_SRC
-          + ~Elem~ is the /type of elements/ of the /collection/
-
-          + ~Repr~ is the /type of the collection/ ITSELF,
-            that is, the _second_ /type parameter/ that gets passed to
-            /implementation traits/ such as ~TraversableLike~ and
-            ~IndexedSeqLike~.
-
-          + The ~map~ /method/ takes _TWO more_ /type parameters/, ~B~ and ~That~.
-            * ~B~ stands for the /result type/ of the /mapping function/ ~f~.
-              It is also the /element type/ of the *new* /collection/.
-
-            * ~That~ appears as the /result type/ of ~map~, so it represents the
-              /type of the new collection/ that gets created.
-
-       2. How does ~That~ determined?
-
-          It is linked to the other types by an /implicit parameter/ ~cbf~ of
-          type ~CanBuildFrom[Repr, B, That]~. ~cbf~ is defined by the INDIVIDUAL
-          /collection class/ (usually in its /companion object/).
-
-          In essence, an /implicit value/ of type ~CanBuildFrom[From, Elem, To]~
-          says:
-          _"Here is a way, given a collection of type From, to build with
-          elements of type Elem a collection of type To."_
-
-       3. Now we know why in our example ~map~ and ~++~ cannot return the ideal
-          type -- no ~CanBuildFrom~ instance that creates ~RNA2~, and the next
-          best available ~CanBuildFrom~ was found in the companion object of the
-          inherited ~IndexedSeq~ (=From Jian= remember the /linearization
-          rule/!!!). That /implicit/ creates ~IndexedSeq~'s.
-
-       4. The final version of RNA /class/ -- now we can drop the version number
-          in the examples before:
-          #+BEGIN_SRC scala
-            final class RNA private (val groups: Array[Int], val length: Int)
-                extends IndexedSeq[Base] with IndexedSeqLike[Base, RNA] {
-              import RNA._
-
-              // Mandatory re-implementation of 'newBuilder' in ''IndexedSeq'
-              override protected[this] def newBuilder: Builder[Base, RNA] =
-                RNA.newBuilder
-
-              // Mandatory implementation of 'apply' in 'IndexedSeq'
-              def apply(idx: Int): Base = {
-                if (idx < 0 || length <= idx)
-                  throw new IndexOutOfBoundsException
-                Base.fromInt(groups(idx / N) >> (idx % N * S) & M)
-              }
-
-              // Optional re-implementation of` foreach`,
-              // to make it more efficient.
-              override def foreach[U](f: Base => U): Unit = {
-                var i = 0
-                var b = 0
-                while (i < length) {
-                  b = if (i % N == 0) groups(i / N) else b >>> S
-                  f(Base.fromInt(b & M))
-                  i += 1
-                }
-              }
-            }
-
-            object RNA {
-              private val S = 2             // number of bits in group
-              private val M = (1 << S) - 1  // bitmask to isolate a group
-              private val N = 32 / S        // number of groups in an Int
-
-              def fromSeq(buf: Seq[Base]): RNA = {
-                val groups = new Array[Int]((buf.length + N - 1) / N)
-
-                for (i <- buf.indices)
-                  groups(i / N) |= Base.toInt(buf(i)) << (i % N * S)
-
-                new RNA(groups, buf.length)
-              }
-
-              def apply(bases: Base*) = fromSeq(bases)
-
-              def newBuilder: Builder[Base, RNA] =
-                new ArrayBuffer mapResult fromSeq
-
-              implicit def canBuildFrom: CanBuildFrom[RNA, Base, RNA] =
-                new CanBuildFrom[RNA, Base, RNA] {
-                  def apply(): Builder[Base, RNA] = newBuilder
-                  def apply(from: RNA): Builder[Base, RNA] = newBuilder
-                }
-            }
-          #+END_SRC
-
-       5. Compared to /class/ ~RNA2~ there are _TWO important differences_:
-          + the ~newBuilder~ implementation has moved from the ~RNA~ class to its
-            /companion object/. =Why do we need to move it???= =TODO=
-
-            The ~newBuilder~ /method/ in /class/ ~RNA~ simply forwards to this
-            definition.
-
-          + Add an implicit ~CanBuildFrom~ value in ~object RNA~.
-            To create such an /object/ you need to define *two* ~apply~
-            /methods/ in the ~CanBuildFrom~ /trait/. Both create a NEW /builder/
-            for an ~RNA~ /collection/, but they _differ in their argument list_.
-            * The ~apply()~ /method/ simply creates a NEW /builder/ of the RIGHT
-              /type/.
-
-            * The ~apply(from)~ /method/ takes the /original collection/ as
-              argument.
-
-              =TODO= =???=
-              This can be useful to adapt the /dynamic type/ of /builder's return
-              type/ to be the *SAME as* the /dynamic type/ of the /receiver/.
-
-                In the case of ~RNA~ this does not come into play because RNA is a
-              /final class/, so any /receiver/ of /static type/ ~RNA~ also has
-              ~RNA~ as its /dynamic type/. That's why ~apply(from)~ also simply
-              calls ~newBuilder~, ignoring its argument.
-
-              =From Jian= I need a more complete example!!!!! =TODO= =TODO= =TODO=
-
-     - This how we can implement a complete version of RNA.
-
-       *It requires a little bit of protocol.*:
-       In essence, you need to know where to put the ~newBuilder~ /factories/ and
-       the ~canBuildFrom~ /implicits/.
-
-       On the plus side, with relatively little code you get a large number of
-       methods automatically defined.
-
-     - If you do *NOT* intend to do bulk operations like ~take~, ~drop~, ~map~,
-       or ~++~ on your /collection/, you can choose to use the first version,
-       ~RNA1~.
-
-*** DONE Integrating new sets and maps - 614
-    CLOSED: [2018-04-02 Mon 02:43]
-    - Patricia trie :: =TODO=
-
-    - We will implement a /map/ as a /Patricia trie/, and we call it ~PrefixMap~,
-      which means that it provides a /method/ ~withPrefix~ that _selects_ a
-      _submap_ of all keys starting with a given prefix.
-      #+BEGIN_SRC scala
-        val m = PrefixMap("abc" --> 0, "abd" -> 1, "al" -> 2, "all" -> 3, "xy" -> 4)
-        // m: PrefixMap[Int] = Map((abc,0), (abd,1), (al,2), (all,3), (xy,4))
-
-        m withPrefix "a"
-        // res14: PrefixMap[Int] = Map((bc,0), (bd,1), (l,2), (ll,3))
-      #+END_SRC
-
-    - Implementation (class):
-      #+BEGIN_SRC scala
-        import collection._
-
-
-        class PrefixMap[T] extends mutable.Map[String, T]
-                              with mutable.MapLike[String, T, PrefixMap[T]] {
-
-          var suffixes: immutable.Map[Char, PrefixMap[T]] = Map.empty
-          var value: Option[T] = None
-
-          def get(s: String): Option[T] =
-            if (s.isEmpty) value
-            else           suffixes get (s(0)) flatMap (_.get(s substring 1))
-
-          def withPrefix(s: String): PrefixMap[T] =
-            if (s.isEmpty) this
-            else {
-              val leading = s(0)
-              suffixes get leading match {
-                case None =>
-                  suffixes = suffixes + (leading -> empty)
-                case _ =>
-              }
-              suffixes(leading) withPrefix (s substring 1)
-            }
-
-          override def update(s: String, elem: T) =
-            withPrefix(s).value = Some(elem)
-
-          override def remove(s: String): Option[T] =
-            if (s.isEmpty) { val prev = value; value = None; prev }
-            else           suffixes get (s(0)) flatMap (_.remove(s substring 1))
-
-          def iterator: Iterator[(String, T)] =
-            (for (v <- value.iterator) yield ("", v)) ++
-              (for ((chr, m) <- suffixes.iterator;
-                    (s, v) <- m.iterator) yield (chr +: s, v))
-
-          def += (kv: (String, T)): this.type = { update(kv._1, kv._2); this }
-
-          def -= (s: String): this.type = { remove(s); this }
-
-          override def empty = new PrefixMap[T]
-        }
-      #+END_SRC
-      + You have seen the inheritance pattern (extends a /trait/ and /its
-        implementation trait/) in the RNA strand example.
-
-      + The /prefix map/ node has *two* /mutable fields/:
-        * ~suffixes~: A map from characters to ~PrefixMap~ value.
-                      It is initialized to an /empty map/.
-
-        * ~value~: An optional value associated with the node.
-                   Its initial value is ~None~.
-
-      + Question about the /type/ of ~suffixes~:
-        Why did we pick an /immutable map/ rather than /mutable map/, which is
-        more standard since ~PrefixMap~ as a whole is also /mutable/?
-
-        Answer:
-        /immutable maps/ that *contain only a few element* are _very efficient_
-        in both /space/ and /execution time/.
-
-          /Immutable maps/ that fewer than 5 elements are represented as a single
-        object. By contrast, as described in Section 17.2, the standard /mutable
-        map/ implementation ~HashMap~, even if it is empty, it occupies around
-        80 bytes.
-
-          If *small* /map/ are common, it is better to pick /immutable/ over
-        /mutable/. In the case of /Patricia tries/, we'd expect that _most
-        nodes, except the ones at the very top of the tree_, would contain only
-        a few successors.
-
-      + No ~newBuilder~ /method/, and with the help of ~empty~ /method/, the right
-        /type/ can be built.
-
-    - Implementation (companion object):
-      #+BEGIN_SRC scala
-        import scala.collection.mutable.{Builder, MapBuilder}
-        import scala.collection.generic.CanBuildFrom
-
-
-        object PrefixMap {
-          def empty[T] = new PrefixMap[T]
-
-          def apply[T](kvs: (String, T)*): PrefixMap[T] = {
-            val m: PrefixMap[T] = empty
-            for (kv <kvs)
-              m += kv
-            m
-          }
-
-          def newBuilder[T]: Builder[(String, T), PrefixMap[T]] =
-            new MapBuilder[String, T, PrefixMap[T]](empty)
-
-          implicit def canBuildFrom[T]
-              : CanBuildFrom[PrefixMap[_], (String, T), PrefixMap[T]] =
-            new CanBuildFrom[PrefixMap[_], (String, T), PrefixMap[T]] {
-              def apply(from: PrefixMap[_]) = newBuilder[T]
-              def apply() = newBuilder[T]
-            }
-        }
-      #+END_SRC
-
-      ~class PrefixMap[T]~ can work well without the companion object.
-      We create this /companion object/ to provide some /factory methods/ for
-      convenience.
-
-      + We said we don't need ~newBuilder~ to generate new ~PrefixMap~ instance,
-        and then why do we define it here in this /companion object/?
-
-        Answer:
-        Review the code of this /companion object/, and you'll find that the
-        new /implicit method/ ~canBuildFrom~ need it -- what we said before is
-        NOT wrong, if you don't need ~canBuildFrom~ to help you get the most
-        fittable type when calling /transformation methods/ -- yes! this is not
-        very important in some simple cases. ~canBuildFrom~ does NOT make things
-        right, it only make things better.
-
-*** DONE Summary - 620
-    CLOSED: [2018-04-01 Sun 07:15]
-    If you want to *FULLY integrate a NEW /collection class/ into the framework*,
-    you need to _pay attention to the following points_:
-
-    1. *Decide* whether the /collection/ should be /mutable/ or /immutable/.
-
-    2. *Pick the right* /base traits/ for the /collection/.
-
-    3. *Inherit from the right* /implementation trait/ to _implement_ most
-       /collection/ operations.
-
-    4. If you want ~map~ and similar operations to _return instances of your
-       /collection type/,_ provide an _implicit_ ~CanBuildFrom~ in your
-       /class/'s /companion object/.
-
-** DONE 25.4 Conclusion - 620
-   CLOSED: [2018-03-30 Fri 22:13]
-   You have now seen
-   - How Scala's /collections/ are built;
-
-   - How you can _build new kinds_ of /collections/.
-
-   - Because of Scala's rich support for abstraction,
-     each _new_ /collection/ type can have a large number of /methods/ *without*
-     having to reimplement them all over again.
-Conclusion - 76]]
-- [[3 Next Steps in Scala - 77][3 Next Steps in Scala - 77]]
-  - [[Step 7. Parameterize arrays with types - 77][Step 7. Parameterize arrays with types - 77]]
-  - [[Step 8. Use lists - 81][Step 8. Use lists - 81]]
-  - [[Step 9. Use tuples - 86][Step 9. Use tuples - 86]]
-  - [[Step 10. Use sets and maps - 87][Step 10. Use sets and maps - 87]]
-  - [[Step 11. Learn to recognize the functional style - 92][Step 11. Learn to recognize the functional style - 92]]
-  - [[Step 12. Read lines from a file - 95][Step 12. Read lines from a file - 95]]
-  - [[Conclusion - 98][Conclusion - 98]]
-- [[4 Classes and Objects - 99][4 Classes and Objects - 99]]
-  - [[4.1 Classes, fields, and methods - 99][4.1 Classes, fields, and methods - 99]]
-  - [[4.2 Semicolon inference - 104][4.2 Semicolon inference - 104]]
-  - [[4.3 Singleton objects - 105][4.3 Singleton objects - 105]]
-  - [[4.4 A Scala application - 108][4.4 A Scala application - 108]]
-  - [[4.5 The ~App~ trait - 110][4.5 The ~App~ trait - 110]]
-  - [[4.6 Conclusion - 111][4.6 Conclusion - 111]]
-- [[5 Basic Types and Operations - 112][5 Basic Types and Operations - 112]]
-  - [[5.1 Some basic types - 112][5.1 Some basic types - 112]]
-  - [[5.2 Literals - 113][5.2 Literals - 113]]
-    - [[Integer literals][Integer literals]]
-    - [[Floating point literals][Floating point literals]]
-    - [[Character literals][Character literals]]
-    - [[String literals][String literals]]
-    - [[Symbol literals][Symbol literals]]
-    - [[Boolean literals][Boolean literals]]
-  - [[5.3 String interpolation - 119][5.3 String interpolation - 119]]
-  - [[5.4 Operators are methods - 121][5.4 Operators are methods - 121]]
-  - [[5.5 Arithmetic operations - 124][5.5 Arithmetic operations - 124]]
-  - [[5.6 Relational and logical operations - 125][5.6 Relational and logical operations - 125]]
-  - [[5.7 Bitwise operations - 127][5.7 Bitwise operations - 127]]
-  - [[5.8 Object equality - 128][5.8 Object equality - 128]]
-  - [[5.9 Operator precedence and associativity - 130][5.9 Operator precedence and associativity - 130]]
-  - [[5.10 Rich wrappers - 133][5.10 Rich wrappers - 133]]
-  - [[5.11 Conclusion - 133][5.11 Conclusion - 133]]
-- [[6 Functional Objects - 135][6 Functional Objects - 135]]
-  - [[6.1 A specification for class ~Rational~ - 135][6.1 A specification for class ~Rational~ - 135]]
-  - [[6.2 Constructing a ~Rational~ - 136][6.2 Constructing a ~Rational~ - 136]]
-  - [[6.3 Reimplementing the ~toString~ method - 138][6.3 Reimplementing the ~toString~ method - 138]]
-  - [[6.4 Checking preconditions - 139][6.4 Checking preconditions - 139]]
-  - [[6.5 Adding fields - 139][6.5 Adding fields - 139]]
-  - [[6.6 Self references - 141][6.6 Self references - 141]]
-  - [[6.7 Auxiliary constructors - 142][6.7 Auxiliary constructors - 142]]
-  - [[6.8 Private fields and methods - 144][6.8 Private fields and methods - 144]]
-  - [[6.9 Defining operators - 145][6.9 Defining operators - 145]]
-  - [[6.10 Identifiers in Scala - 147][6.10 Identifiers in Scala - 147]]
-  - [[6.11 Method overloading - 150][6.11 Method overloading - 150]]
-  - [[6.12 Implicit conversions - 152][6.12 Implicit conversions - 152]]
-  - [[6.13 A word of caution - 153][6.13 A word of caution - 153]]
-  - [[6.14 Conclusion - 153][6.14 Conclusion - 153]]
-- [[7 Built-in Control Structures - 155][7 Built-in Control Structures - 155]]
-  - [[7.1 If expressions - 156][7.1 If expressions - 156]]
-  - [[7.2 While loops - 157][7.2 While loops - 157]]
-  - [[7.3 For expressions - 160][7.3 For expressions - 160]]
-    - [[Iteration through collections][Iteration through collections]]
-    - [[Filtering][Filtering]]
-    - [[Nested iteration][Nested iteration]]
-    - [[Mid-stream variable bindings][Mid-stream variable bindings]]
-    - [[Producing a new collection][Producing a new collection]]
-  - [[7.4 Exception handling with ~try~ expressions - 165][7.4 Exception handling with ~try~ expressions - 165]]
-    - [[Throwing exceptions][Throwing exceptions]]
-    - [[Catching exceptions][Catching exceptions]]
-    - [[The ~finally~ clause][The ~finally~ clause]]
-    - [[Yielding a value][Yielding a value]]
-  - [[7.5 Match expressions - 169][7.5 Match expressions - 169]]
-  - [[7.6 Living without ~break~ and ~continue~ - 171][7.6 Living without ~break~ and ~continue~ - 171]]
-  - [[7.7 Variable scope - 173][7.7 Variable scope - 173]]
-  - [[7.8 Refactoring imperative-style code - 177][7.8 Refactoring imperative-style code - 177]]
-  - [[7.9 Conclusion - 179][7.9 Conclusion - 179]]
-- [[8 Functions and Closures - 180][8 Functions and Closures - 180]]
-  - [[8.1 Methods - 180][8.1 Methods - 180]]
-  - [[8.2 Local functions - 182][8.2 Local functions - 182]]
-  - [[8.3 First-class functions - 184][8.3 First-class functions - 184]]
-  - [[8.4 Short forms of function literals - 186][8.4 Short forms of function literals - 186]]
-  - [[8.5 Placeholder syntax - 187][8.5 Placeholder syntax - 187]]
-  - [[8.6 Partially applied functions - 188][8.6 Partially applied functions - 188]]
-  - [[8.7 Closures - 191][8.7 Closures - 191]]
-  - [[8.8 Special function call forms - 195][8.8 Special function call forms - 195]]
-    - [[Repeated parameters][Repeated parameters]]
-    - [[Named arguments][Named arguments]]
-    - [[Default parameter values][Default parameter values]]
-  - [[8.9 Tail recursion - 198][8.9 Tail recursion - 198]]
-    - [[Tracing tail-recursive functions][Tracing tail-recursive functions]]
-    - [[Limits of tail recursion][Limits of tail recursion]]
-  - [[8.10 Conclusion - 202][8.10 Conclusion - 202]]
-- [[9 Control Abstraction - 203][9 Control Abstraction - 203]]
-  - [[9.1 Reducing code duplication - 203][9.1 Reducing code duplication - 203]]
-  - [[9.2 Simplifying client code - 207][9.2 Simplifying client code - 207]]
-  - [[9.3 Currying - 209][9.3 Currying - 209]]
-  - [[9.4 Writing new control structures - 211][9.4 Writing new control structures - 211]]
-  - [[9.5 By-name parameters - 214][9.5 By-name parameters - 214]]
-  - [[9.6 Conclusion - 217][9.6 Conclusion - 217]]
-- [[10 Composition and Inheritance - 218 _ALMOST DONE_][10 Composition and Inheritance - 218 _ALMOST DONE_]]
-  - [[10.1 A two-dimensional layout library - 218][10.1 A two-dimensional layout library - 218]]
-  - [[10.2 Abstract classes - 219][10.2 Abstract classes - 219]]
-  - [[10.3 Defining parameterless methods - 220][10.3 Defining parameterless methods - 220]]
-  - [[10.4 Extending classes - 223][10.4 Extending classes - 223]]
-  - [[10.5 Overriding methods and fields - 225][10.5 Overriding methods and fields - 225]]
-  - [[10.6 Defining parametric fields - 226][10.6 Defining parametric fields - 226]]
-  - [[10.7 Invoking superclass constructors - 228][10.7 Invoking superclass constructors - 228]]
-  - [[10.8 Using ~override~ modifiers - 229][10.8 Using ~override~ modifiers - 229]]
-  - [[10.9 Polymorphism and dynamic binding - 231][10.9 Polymorphism and dynamic binding - 231]]
-  - [[10.10 Declaring ~final~ members - 233][10.10 Declaring ~final~ members - 233]]
-  - [[10.11 Using composition and inheritance - 235][10.11 Using composition and inheritance - 235]]
-  - [[10.12 Implementing ~above~, ~beside~, and ~toString~ - 236][10.12 Implementing ~above~, ~beside~, and ~toString~ - 236]]
-  - [[10.13 Defining a factory object - 238][10.13 Defining a factory object - 238]]
-  - [[10.14 Heighten and widen - 240][10.14 Heighten and widen - 240]]
-  - [[10.15 Putting it all together - 244][10.15 Putting it all together - 244]]
-  - [[10.16 Conclusion - 245][10.16 Conclusion - 245]]
-- [[11 Scala's Hierarchy - 246][11 Scala's Hierarchy - 246]]
-  - [[11.1 Scala's class hierarchy - 246][11.1 Scala's class hierarchy - 246]]
-  - [[11.2 How primitives are implemented - 250][11.2 How primitives are implemented - 250]]
-  - [[11.3 Bottom types - 252][11.3 Bottom types - 252]]
-  - [[11.4 Defining your own value classes - 253][11.4 Defining your own value classes - 253]]
-    - [[Avoiding a types monoculture][Avoiding a types monoculture]]
-  - [[11.5 Conclusion - 256][11.5 Conclusion - 256]]
-- [[12 Traits - 257][12 Traits - 257]]
-  - [[12.1 How traits work - 257][12.1 How traits work - 257]]
-  - [[12.2 Thin versus rich interfaces - 260][12.2 Thin versus rich interfaces - 260]]
-  - [[12.3 Example: Rectangular objects - 261][12.3 Example: Rectangular objects - 261]]
-  - [[12.4 The ~Ordered~ trait - 264][12.4 The ~Ordered~ trait - 264]]
-  - [[12.5 Traits as stackable modifications - 266 =Re-Read=][12.5 Traits as stackable modifications - 266 =Re-Read=]]
-  - [[12.6 Why not multiple inheritance? - 270][12.6 Why not multiple inheritance? - 270]]
-  - [[12.7 To trait or not to trait? - 274 =IMPORTANT=][12.7 To trait or not to trait? - 274 =IMPORTANT=]]
-  - [[12.8 Conclusion - 275][12.8 Conclusion - 275]]
-- [[13 Packages and Imports - 276 _Re-READ_][13 Packages and Imports - 276 _Re-READ_]]
-  - [[13.1 Putting code in packages - 277][13.1 Putting code in packages - 277]]
-  - [[13.2 Concise access to related code - 281 =RE-READ=][13.2 Concise access to related code - 281 =RE-READ=]]
-  - [[13.3 Imports - 285][13.3 Imports - 285]]
-  - [[13.4 Implicit imports - 285][13.4 Implicit imports - 285]]
-  - [[13.5 Access modifiers - 286][13.5 Access modifiers - 286]]
-    - [[Private members][Private members]]
-    - [[Protected members][Protected members]]
-    - [[Public members][Public members]]
-    - [[Scope of protection][Scope of protection]]
-    - [[Visibility and companion objects][Visibility and companion objects]]
-  - [[13.6 Package objects - 291][13.6 Package objects - 291]]
-  - [[13.7 Conclusion - 293][13.7 Conclusion - 293]]
-- [[14 Assertions and Tests - 294][14 Assertions and Tests - 294]]
-  - [[14.1 Assertions - 294][14.1 Assertions - 294]]
-  - [[14.2 Testing in Scala - 296][14.2 Testing in Scala - 296]]
-  - [[14.3 Informative failure reports - 297][14.3 Informative failure reports - 297]]
-  - [[14.4 Tests as specifications - 299][14.4 Tests as specifications - 299]]
-  - [[14.5 Property-based testing - 302][14.5 Property-based testing - 302]]
-  - [[14.6 Organizing and running tests - 304][14.6 Organizing and running tests - 304]]
-  - [[14.7 Conclusion - 305][14.7 Conclusion - 305]]
-- [[15 Case Classes and Pattern Matching - 306][15 Case Classes and Pattern Matching - 306]]
-  - [[15.1 A simple example - 306][15.1 A simple example - 306]]
-    - [[Case classes][Case classes]]
-    - [[Pattern matching][Pattern matching]]
-    - [[~match~ compared to ~switch~][~match~ compared to ~switch~]]
-  - [[15.2 Kinds of patterns - 311][15.2 Kinds of patterns - 311]]
-    - [[Wildcard patterns][Wildcard patterns]]
-    - [[Constant patterns][Constant patterns]]
-    - [[Variable patterns][Variable patterns]]
-    - [[Constructor patterns][Constructor patterns]]
-    - [[Sequence patterns][Sequence patterns]]
-    - [[Tuple patterns][Tuple patterns]]
-    - [[Typed patterns][Typed patterns]]
-    - [[Variable binding][Variable binding]]
-  - [[15.3 Pattern guards - 320][15.3 Pattern guards - 320]]
-  - [[15.4 Pattern overlaps - 321][15.4 Pattern overlaps - 321]]
-  - [[15.5 Sealed classes - 323][15.5 Sealed classes - 323]]
-  - [[15.6 The ~Option~ type - 325][15.6 The ~Option~ type - 325]]
-  - [[15.7 Patterns everywhere - 327][15.7 Patterns everywhere - 327]]
-    - [[Patterns in variable definitions][Patterns in variable definitions]]
-    - [[Case sequences as partial functions][Case sequences as partial functions]]
-    - [[Patterns in ~for~ expressions][Patterns in ~for~ expressions]]
-  - [[15.8 A larger example - 331][15.8 A larger example - 331]]
-  - [[15.9 Conclusion - 339][15.9 Conclusion - 339]]
-- [[16 Working with Lists - 340][16 Working with Lists - 340]]
-  - [[16.1 ~List~ literals - 340][16.1 ~List~ literals - 340]]
-  - [[16.2 The ~List~ type - 341][16.2 The ~List~ type - 341]]
-  - [[16.3 Constructing lists - 341][16.3 Constructing lists - 341]]
-  - [[16.4 Basic operations on lists - 342][16.4 Basic operations on lists - 342]]
-  - [[16.5 ~List~ patterns - 343][16.5 ~List~ patterns - 343]]
-  - [[16.6 First-order methods on class ~List~ - 345][16.6 First-order methods on class ~List~ - 345]]
-    - [[Concatenating two lists][Concatenating two lists]]
-    - [[The Divide and Conquer principle][The Divide and Conquer principle]]
-    - [[Taking the length of a list: ~length~][Taking the length of a list: ~length~]]
-    - [[Accessing the end of a list: ~init~ and ~last~][Accessing the end of a list: ~init~ and ~last~]]
-    - [[Reversing lists: ~reverse~][Reversing lists: ~reverse~]]
-    - [[Prefixes and suffixes: ~drop~, ~take~, and ~splitAt~][Prefixes and suffixes: ~drop~, ~take~, and ~splitAt~]]
-    - [[Element selection: ~apply~ and ~indices~][Element selection: ~apply~ and ~indices~]]
-    - [[Flattening a list of lists: ~flatten~][Flattening a list of lists: ~flatten~]]
-    - [[Zipping lists: ~zip~ and ~unzip~][Zipping lists: ~zip~ and ~unzip~]]
-    - [[Displaying lists: ~toString~ and ~mkString~][Displaying lists: ~toString~ and ~mkString~]]
-    - [[Converting lists: ~iterator~, ~toArray~, ~copyToArray~][Converting lists: ~iterator~, ~toArray~, ~copyToArray~]]
-    - [[Example: Merge sort - 355][Example: Merge sort - 355]]
-  - [[16.7 Higher-order methods on class ~List~ - 357][16.7 Higher-order methods on class ~List~ - 357]]
-    - [[Mapping over lists: ~map~, ~flatMap~ and ~foreach~][Mapping over lists: ~map~, ~flatMap~ and ~foreach~]]
-    - [[Filtering lists: ~filter~, ~partition~, ~find~, ~takeWhile~, ~dropWhile~, and ~span~][Filtering lists: ~filter~, ~partition~, ~find~, ~takeWhile~, ~dropWhile~, and ~span~]]
-    - [[Predicates over lists: ~forall~ and ~exists~][Predicates over lists: ~forall~ and ~exists~]]
-    - [[Folding lists: ~/:~ and ~:\~][Folding lists: ~/:~ and ~:\~]]
-    - [[Example: List reversal using fold][Example: List reversal using fold]]
-    - [[Sorting lists: ~sortWith~][Sorting lists: ~sortWith~]]
-  - [[16.8 Methods of the ~List~ object - 365][16.8 Methods of the ~List~ object - 365]]
-    - [[Creating lists from their elements: ~List.apply~][Creating lists from their elements: ~List.apply~]]
-    - [[Creating a range of numbers: ~List.range~][Creating a range of numbers: ~List.range~]]
-    - [[Creating uniform lists: ~List.fill~][Creating uniform lists: ~List.fill~]]
-    - [[Tabulating a function: ~List.tabulate~][Tabulating a function: ~List.tabulate~]]
-    - [[Concatenating multiple lists: ~List.concat~][Concatenating multiple lists: ~List.concat~]]
-  - [[16.9 Processing multiple lists together - 367][16.9 Processing multiple lists together - 367]]
-  - [[16.10 Understanding Scala's type inference algorithm - 368][16.10 Understanding Scala's type inference algorithm - 368]]
-  - [[16.11 Conclusion - 372][16.11 Conclusion - 372]]
-- [[17 Working with Other Collections - 373][17 Working with Other Collections - 373]]
-  - [[17.1 Sequences - 373][17.1 Sequences - 373]]
-    - [[Lists][Lists]]
-    - [[Arrays][Arrays]]
-    - [[List buffers][List buffers]]
-    - [[Array buffers][Array buffers]]
-    - [[Strings (via ~StringOps~)][Strings (via ~StringOps~)]]
-  - [[17.2 Sets and maps - 377][17.2 Sets and maps - 377]]
-    - [[Using sets][Using sets]]
-    - [[Using maps][Using maps]]
-    - [[Default sets and maps][Default sets and maps]]
-    - [[Sorted sets and maps][Sorted sets and maps]]
-  - [[17.3 Selecting mutable versus immutable collections - 385][17.3 Selecting mutable versus immutable collections - 385]]
-  - [[17.4 Initializing collections - 388][17.4 Initializing collections - 388]]
-    - [[Converting to array or list][Converting to array or list]]
-    - [[Converting between mutable and immutable sets and maps][Converting between mutable and immutable sets and maps]]
-  - [[17.5 Tuples - 392][17.5 Tuples - 392]]
-  - [[17.6 Conclusion - 394][17.6 Conclusion - 394]]
-- [[18 Mutable Objects - 395][18 Mutable Objects - 395]]
-  - [[18.1 What makes an object mutable? - 395][18.1 What makes an object mutable? - 395]]
-  - [[18.2 Reassignable variables and properties - 398][18.2 Reassignable variables and properties - 398]]
-  - [[18.3 Case study: Discrete event simulation - 401][18.3 Case study: Discrete event simulation - 401]]
-  - [[18.4 A language for digital circuits - 402][18.4 A language for digital circuits - 402]]
-  - [[18.5 The ~Simulation~ API - 405][18.5 The ~Simulation~ API - 405]]
-  - [[18.6 Circuit Simulation - 409][18.6 Circuit Simulation - 409]]
-    - [[The ~Wire~ class][The ~Wire~ class]]
-    - [[The ~inverter~ method][The ~inverter~ method]]
-    - [[The ~andGate~ and ~orGate~ methods][The ~andGate~ and ~orGate~ methods]]
-    - [[Simulation output][Simulation output]]
-    - [[Running the simulator][Running the simulator]]
-  - [[18.7 Conclusion - 417][18.7 Conclusion - 417]]
-- [[19 Type Parameterization - 418 - =RE-DO=][19 Type Parameterization - 418 - =RE-DO=]]
-  - [[19.1 Functional queues - 418][19.1 Functional queues - 418]]
-  - [[19.2 Information hiding - 422][19.2 Information hiding - 422]]
-    - [[Private constructors and factory methods - 422][Private constructors and factory methods - 422]]
-    - [[An alternative: private classes - 423][An alternative: private classes - 423]]
-  - [[19.3 Variance annotations - 425][19.3 Variance annotations - 425]]
-    - [[Variance and arrays][Variance and arrays]]
-  - [[19.4 Checking variance annotations - 429 - =Re-Read= =Re-Read=][19.4 Checking variance annotations - 429 - =Re-Read= =Re-Read=]]
-  - [[19.5 Lower bounds - 432][19.5 Lower bounds - 432]]
-  - [[19.6 Contravariance - 434][19.6 Contravariance - 434]]
-  - [[19.7 Object private data - 437 - =Re-Read= =Take Notes=][19.7 Object private data - 437 - =Re-Read= =Take Notes=]]
-  - [[19.8 Upper bounds - 439][19.8 Upper bounds - 439]]
-  - [[19.9 Conclusion - 442][19.9 Conclusion - 442]]
-- [[20 Abstract Members - 443][20 Abstract Members - 443]]
-  - [[20.1 A quick tour of abstract members - 443][20.1 A quick tour of abstract members - 443]]
-  - [[20.2 Type members - 444][20.2 Type members - 444]]
-  - [[20.3 Abstract ~val~'s - 445][20.3 Abstract ~val~'s - 445]]
-  - [[20.4 Abstract ~var~'s - 446][20.4 Abstract ~var~'s - 446]]
-  - [[20.5 Initializing abstract ~val~'s - 447][20.5 Initializing abstract ~val~'s - 447]]
-    - [[Pre-initialized fields][Pre-initialized fields]]
-    - [[Lazy ~val~'s][Lazy ~val~'s]]
-  - [[20.6 Abstract types - 455][20.6 Abstract types - 455]]
-  - [[20.7 Path-dependent types - 457][20.7 Path-dependent types - 457]]
-  - [[20.8 Refinement types - 460][20.8 Refinement types - 460]]
-  - [[20.9 Enumerations - 461][20.9 Enumerations - 461]]
-  - [[20.10 Case study: Currencies - 463 - =RE-READ=][20.10 Case study: Currencies - 463 - =RE-READ=]]
-  - [[20.11 Conclusion - 473][20.11 Conclusion - 473]]
-- [[21 Implicit Conversions and Parameters - 474][21 Implicit Conversions and Parameters - 474]]
-  - [[21.1 Implicit conversions - 474][21.1 Implicit conversions - 474]]
-  - [[21.2 Rules for implicits - 477][21.2 Rules for implicits - 477]]
-    - [[Naming an implicit conversion][Naming an implicit conversion]]
-    - [[Where implicits are tried][Where implicits are tried]]
-  - [[21.3 Implicit conversion to an expected type - 480][21.3 Implicit conversion to an expected type - 480]]
-  - [[21.4 Converting the receiver - 482][21.4 Converting the receiver - 482]]
-    - [[Interoperating with new types - 482][Interoperating with new types - 482]]
-    - [[Simulating new syntax - 483][Simulating new syntax - 483]]
-    - [[Implicit classes - 485][Implicit classes - 485]]
-  - [[21.5 Implicit parameters - 485][21.5 Implicit parameters - 485]]
-    - [[A style rule for implicit parameters][A style rule for implicit parameters]]
-  - [[21.6 Context bounds - 491][21.6 Context bounds - 491]]
-  - [[21.7 When multiple conversions apply - 494][21.7 When multiple conversions apply - 494]]
-  - [[21.8 Debugging implicits - 496][21.8 Debugging implicits - 496]]
-  - [[21.9 Conclusion - 497][21.9 Conclusion - 497]]
-- [[22 Implementing Lists - 499][22 Implementing Lists - 499]]
-  - [[22.1 The ~List~ class in principle - 499][22.1 The ~List~ class in principle - 499]]
-    - [[The ~Nil~ object - 500][The ~Nil~ object - 500]]
-    - [[The ~::~ class - 501][The ~::~ class - 501]]
-    - [[Some more methods - 502][Some more methods - 502]]
-    - [[List construction - 503][List construction - 503]]
-  - [[22.2 The ~ListBuffer~ class - 505][22.2 The ~ListBuffer~ class - 505]]
-  - [[22.3 The ~List~ class in practice - 507][22.3 The ~List~ class in practice - 507]]
-  - [[22.4 Functional on the outside - 509][22.4 Functional on the outside - 509]]
-  - [[22.5 Conclusion - 510][22.5 Conclusion - 510]]
-- [[23 For Expressions Revisited - 512][23 For Expressions Revisited - 512]]
-  - [[23.1 ~for~ expressions - 513][23.1 ~for~ expressions - 513]]
-  - [[23.2 The n-queens problem - 515][23.2 The n-queens problem - 515]]
-  - [[23.3 Querying with ~for~ expressions - 518][23.3 Querying with ~for~ expressions - 518]]
-  - [[23.4 Translation of ~for~ expressions - 520 =Re-READ=][23.4 Translation of ~for~ expressions - 520 =Re-READ=]]
-    - [[Translating ~for~ expressions with one generator][Translating ~for~ expressions with one generator]]
-    - [[Translating ~for~ expressions starting with a generator and a filter][Translating ~for~ expressions starting with a generator and a filter]]
-    - [[Translating ~for~ expressions starting with two generators][Translating ~for~ expressions starting with two generators]]
-    - [[Translating patterns in generators][Translating patterns in generators]]
-    - [[Translating definitions][Translating definitions]]
-    - [[Translating ~for~ loops][Translating ~for~ loops]]
-  - [[23.5 Going the other way - 524][23.5 Going the other way - 524]]
-  - [[23.6 Generalizing ~for~ - 525 =Re-Read the last some paragraph=][23.6 Generalizing ~for~ - 525 =Re-Read the last some paragraph=]]
-  - [[23.7 Conclusion][23.7 Conclusion]]
-- [[24 Collections in Depth - 528][24 Collections in Depth - 528]]
-  - [[24.1 Mutable and immutable collections - 529][24.1 Mutable and immutable collections - 529]]
-  - [[24.2 Collections consistency - 531][24.2 Collections consistency - 531]]
-  - [[24.3 Trait ~Traversable~ - 533][24.3 Trait ~Traversable~ - 533]]
-  - [[24.4 Trait ~Iterable~ - 538][24.4 Trait ~Iterable~ - 538]]
-    - [[Why have both ~Traversable~ and ~Iterable~? - 540  =RE-READ=][Why have both ~Traversable~ and ~Iterable~? - 540  =RE-READ=]]
-    - [[Subcategories of ~Iterable~ - 542][Subcategories of ~Iterable~ - 542]]
-  - [[24.5 The sequence traits ~Seq~, ~IndexedSeq~, and ~LinearSeq~ - 542][24.5 The sequence traits ~Seq~, ~IndexedSeq~, and ~LinearSeq~ - 542]]
-    - [[Buffers][Buffers]]
-  - [[24.6 Sets - 547][24.6 Sets - 547]]
-  - [[24.7 Maps - 552][24.7 Maps - 552]]
-  - [[24.8 Concrete immutable collection classes - 556][24.8 Concrete immutable collection classes - 556]]
-    - [[Lists - 556][Lists - 556]]
-    - [[Streams - 557][Streams - 557]]
-    - [[Vectors - 558 =Re-READ=][Vectors - 558 =Re-READ=]]
-    - [[Immutable stacks - 559][Immutable stacks - 559]]
-    - [[Immutable queues - 560][Immutable queues - 560]]
-    - [[Ranges - 561][Ranges - 561]]
-    - [[Hash tries - 561 =TOOD= =NOTE=][Hash tries - 561 =TOOD= =NOTE=]]
-    - [[Red-black trees - 562][Red-black trees - 562]]
-    - [[Immutable bit sets - 562 =TODO= =???=][Immutable bit sets - 562 =TODO= =???=]]
-    - [[List maps - 563][List maps - 563]]
-  - [[24.9 Concrete mutable collection classes - 563][24.9 Concrete mutable collection classes - 563]]
-    - [[Array buffers - 563][Array buffers - 563]]
-    - [[List buffers - 564][List buffers - 564]]
-    - [[String builders - 564][String builders - 564]]
-    - [[Linked lists - 565][Linked lists - 565]]
-    - [[Double linked lists - 565][Double linked lists - 565]]
-    - [[Mutable lists - 565][Mutable lists - 565]]
-    - [[Queues - 566][Queues - 566]]
-    - [[Array sequences - 566 =RE-READ=][Array sequences - 566 =RE-READ=]]
-    - [[Stacks - 566][Stacks - 566]]
-    - [[Array stacks - 567][Array stacks - 567]]
-    - [[Hash tables - 567][Hash tables - 567]]
-    - [[Weak hash maps - 568][Weak hash maps - 568]]
-    - [[Concurrent Maps - 569][Concurrent Maps - 569]]
-    - [[Mutable bit sets - 569][Mutable bit sets - 569]]
-  - [[24.10 Arrays - 570][24.10 Arrays - 570]]
-  - [[24.11 Strings - 575][24.11 Strings - 575]]
-  - [[24.12 Performance characteristics - 575][24.12 Performance characteristics - 575]]
-  - [[24.13 Equality - 578][24.13 Equality - 578]]
-  - [[24.14 Views - 579 =Re-READ=][24.14 Views - 579 =Re-READ=]]
-  - [[24.15 Iterators - 584][24.15 Iterators - 584]]
-    - [[Buffered iterators - 591][Buffered iterators - 591]]
-  - [[24.16 Creating collections from scratch - 592][24.16 Creating collections from scratch - 592]]
-  - [[24.17 Conversions between Java and Scala collections - 594 =Re-READ=][24.17 Conversions between Java and Scala collections - 594 =Re-READ=]]
-  - [[24.18 Conclusion - 596][24.18 Conclusion - 596]]
-- [[25 The Architecture of Scala Collections - 597][25 The Architecture of Scala Collections - 597]]
-  - [[25.1 Builders - 597][25.1 Builders - 597]]
-  - [[25.2 Factoring out common operations - 599][25.2 Factoring out common operations - 599]]
-  - [[25.3 Integrating new collections - 604][25.3 Integrating new collections - 604]]
-    - [[Integrating sequences][Integrating sequences]]
-    - [[Integrating new sets and maps][Integrating new sets and maps]]
-    - [[Summary][Summary]]
-  - [[25.4 Conclusion - 620][25.4 Conclusion - 620]]
-- [[26 Extractors - 621][26 Extractors - 621]]
-  - [[26.1 An example: extracting email addresses - 621][26.1 An example: extracting email addresses - 621]]
-  - [[26.2 Extractors - 622][26.2 Extractors - 622]]
-  - [[26.3 Patterns with zero or one variables - 625][26.3 Patterns with zero or one variables - 625]]
-  - [[26.4 Variable argument extractors - 627][26.4 Variable argument extractors - 627]]
-  - [[26.5 Extractors and sequence patterns - 630][26.5 Extractors and sequence patterns - 630]]
-  - [[26.6 Extractors versus case classes - 631][26.6 Extractors versus case classes - 631]]
-  - [[26.7 Regular expressions - 632][26.7 Regular expressions - 632]]
-    - [[Forming regular expressions][Forming regular expressions]]
-    - [[Searching for regular expressions][Searching for regular expressions]]
-    - [[Extracting with regular expressions][Extracting with regular expressions]]
-  - [[26.8 Conclusion - 636 =Re-Read=][26.8 Conclusion - 636 =Re-Read=]]
-- [[27 Annotations - 637 *Learn MORE*][27 Annotations - 637 *Learn MORE*]]
-  - [[27.1 Why have annotations? - 637][27.1 Why have annotations? - 637]]
-  - [[27.2 Syntax of annotations - 638][27.2 Syntax of annotations - 638]]
-  - [[27.3 Standard annotations - 640][27.3 Standard annotations - 640]]
-    - [[Deprecation][Deprecation]]
-    - [[Volatile fields][Volatile fields]]
-    - [[Binary serialization][Binary serialization]]
-    - [[Automatic ~get~ and ~set~ methods *RE-READ*][Automatic ~get~ and ~set~ methods *RE-READ*]]
-    - [[Tailrec][Tailrec]]
-    - [[Unchecked][Unchecked]]
-    - [[Native methods][Native methods]]
-  - [[27.4 Conclusion - 644][27.4 Conclusion - 644]]
-- [[28 Working with XML - 645][28 Working with XML - 645]]
-  - [[28.1 Semi-structured data - 645][28.1 Semi-structured data - 645]]
-  - [[28.2 XML overview - 646][28.2 XML overview - 646]]
-  - [[28.3 XML literals - 647][28.3 XML literals - 647]]
-  - [[28.4 Serialization - 649][28.4 Serialization - 649]]
-  - [[28.5 Taking XML apart - 651][28.5 Taking XML apart - 651]]
-  - [[28.6 Deserialization - 652][28.6 Deserialization - 652]]
-  - [[28.7 Loading and saving - 653][28.7 Loading and saving - 653]]
-  - [[28.8 Pattern matching on XML - 655][28.8 Pattern matching on XML - 655]]
-  - [[28.9 Conclusion - 658][28.9 Conclusion - 658]]
-- [[29 Modular Programming Using Objects - 659 - =Re-READ=][29 Modular Programming Using Objects - 659 - =Re-READ=]]
-  - [[29.1 The problem - 660 =Re-Read= =Review=][29.1 The problem - 660 =Re-Read= =Review=]]
-  - [[29.2 A recipe application - 661][29.2 A recipe application - 661]]
-  - [[29.3 Abstraction - 664][29.3 Abstraction - 664]]
-  - [[29.4 Splitting modules into traits - 667][29.4 Splitting modules into traits - 667]]
-  - [[29.5 Runtime linking - 670][29.5 Runtime linking - 670]]
-  - [[29.6 Tracking module instances - 671][29.6 Tracking module instances - 671]]
-  - [[29.7 Conclusion - 673][29.7 Conclusion - 673]]
-- [[30 Object Equality - 674][30 Object Equality - 674]]
-  - [[30.1 Equality in Scala - 674][30.1 Equality in Scala - 674]]
-  - [[30.2 Writing an equality method - 675][30.2 Writing an equality method - 675]]
-    - [[Pitfall #1: Defining ~equals~ with the wrong signature][Pitfall #1: Defining ~equals~ with the wrong signature]]
-    - [[Pitfall #2: Changing ~equals~ without also changing ~hashCode~][Pitfall #2: Changing ~equals~ without also changing ~hashCode~]]
-    - [[Pitfall #3: Defining ~equals~ in terms of mutable fields][Pitfall #3: Defining ~equals~ in terms of mutable fields]]
-    - [[Pitfall #4: Failing to define ~equals~ as an equivalence relation][Pitfall #4: Failing to define ~equals~ as an equivalence relation]]
-  - [[30.3 Defining equality for parameterized types - 688][30.3 Defining equality for parameterized types - 688]]
-  - [[30.4 Recipes for ~equals~ and ~hashCode~ - 692][30.4 Recipes for ~equals~ and ~hashCode~ - 692]]
-    - [[Recipe for ~equals~][Recipe for ~equals~]]
-    - [[Recipe for ~hashCode~][Recipe for ~hashCode~]]
-  - [[30.5 Conclusion - 697][30.5 Conclusion - 697]]
-- [[31 Combining Scala and Java - 698][31 Combining Scala and Java - 698]]
-  - [[31.1 Using Scala from Java - 698][31.1 Using Scala from Java - 698]]
-    - [[General rules - 698][General rules - 698]]
-    - [[Value types - 699][Value types - 699]]
-    - [[Singleton objects - 699][Singleton objects - 699]]
-    - [[Traits as interfaces - 701 =Learn MORE!=][Traits as interfaces - 701 =Learn MORE!=]]
-  - [[31.2 Annotations - 701][31.2 Annotations - 701]]
-    - [[Additional effects from standard annotations][Additional effects from standard annotations]]
-    - [[Exceptions thrown - 702][Exceptions thrown - 702]]
-    - [[Java annotations - 703][Java annotations - 703]]
-    - [[Writing your own annotations - 704][Writing your own annotations - 704]]
-  - [[31.3 Wildcard types - 706][31.3 Wildcard types - 706]]
-  - [[31.4 Compiling Scala and Java together - 709][31.4 Compiling Scala and Java together - 709]]
-  - [[31.5 Java 8 integration in Scala 2.12 - 709][31.5 Java 8 integration in Scala 2.12 - 709]]
-    - [[Lambda expressions and "SAM" types - 710][Lambda expressions and "SAM" types - 710]]
-    - [[Using Java 8 Streams from Scala 2.12 - 712][Using Java 8 Streams from Scala 2.12 - 712]]
-  - [[31.6 Conclusion - 713][31.6 Conclusion - 713]]
-- [[32 Futures and Concurrency - 714][32 Futures and Concurrency - 714]]
-  - [[32.1 Trouble in paradise - 714 =Re-Do=][32.1 Trouble in paradise - 714 =Re-Do=]]
-  - [[32.2 Asynchronous execution and ~Try~'s - 716][32.2 Asynchronous execution and ~Try~'s - 716]]
-  - [[32.3 Working with ~Future~'s - 718][32.3 Working with ~Future~'s - 718]]
-    - [[Transforming ~Futures~ with ~map~][Transforming ~Futures~ with ~map~]]
-    - [[Transforming ~Futures~ with ~for~ expressions][Transforming ~Futures~ with ~for~ expressions]]
-    - [[Creating the ~Future~: ~Future.failed~, ~Future.successful~, ~Future.fromTry~, and ~Promises~][Creating the ~Future~: ~Future.failed~, ~Future.successful~, ~Future.fromTry~, and ~Promises~]]
-    - [[Filtering: ~filter~ and ~collect~][Filtering: ~filter~ and ~collect~]]
-    - [[Dealing with failure: ~failed~, ~fallBackTo~, ~recover~, and ~recoverWith~][Dealing with failure: ~failed~, ~fallBackTo~, ~recover~, and ~recoverWith~]]
-    - [[Mapping both possibilities: ~transform~][Mapping both possibilities: ~transform~]]
-    - [[Combining futures: ~zip~, ~Future.fold~, ~Future.reduce~, ~Future.sequence~, and ~Future.traverse~][Combining futures: ~zip~, ~Future.fold~, ~Future.reduce~, ~Future.sequence~, and ~Future.traverse~]]
-    - [[Performing side-effects: ~foreach~, ~onComplete~, and ~andThen~][Performing side-effects: ~foreach~, ~onComplete~, and ~andThen~]]
-    - [[Other methods added in 2.12: ~flatten~, ~zipWith~, and ~transformWith~][Other methods added in 2.12: ~flatten~, ~zipWith~, and ~transformWith~]]
-  - [[32.4 Testing with ~Future~'s - 733][32.4 Testing with ~Future~'s - 733]]
-  - [[32.5 Conclusion - 735][32.5 Conclusion - 735]]
-- [[33 Combinator Parsing - 736][33 Combinator Parsing - 736]]
-  - [[33.1 Example: Arithmetic expressions - 737][33.1 Example: Arithmetic expressions - 737]]
-  - [[33.2 Running your parser - 739][33.2 Running your parser - 739]]
-  - [[33.3 Basic regular expression parsers - 740][33.3 Basic regular expression parsers - 740]]
-  - [[33.4 Another example: JSON - 741][33.4 Another example: JSON - 741]]
-  - [[33.5 Parser output - 743][33.5 Parser output - 743]]
-    - [[Symbolic versus alphanumeric names][Symbolic versus alphanumeric names]]
-  - [[33.6 Implementing combinator parsers - 749][33.6 Implementing combinator parsers - 749]]
-    - [[Parser input - 751][Parser input - 751]]
-    - [[Parser results - 751][Parser results - 751]]
-    - [[The ~Parser~ class - 752][The ~Parser~ class - 752]]
-    - [[Aliasing ~this~ - 753][Aliasing ~this~ - 753]]
-    - [[Single-token parsers - 754][Single-token parsers - 754]]
-    - [[Sequential composition - 754][Sequential composition - 754]]
-    - [[Alternative composition - 755][Alternative composition - 755]]
-    - [[Dealing with recursion - 756][Dealing with recursion - 756]]
-    - [[Result conversion - 756][Result conversion - 756]]
-    - [[Parsers that don't read any input - 757][Parsers that don't read any input - 757]]
-    - [[Option and repetition - 757][Option and repetition - 757]]
-  - [[33.7 String literals and regular expressions - 758][33.7 String literals and regular expressions - 758]]
-  - [[33.8 Lexing and parsing - 759][33.8 Lexing and parsing - 759]]
-  - [[33.9 Error reporting - 759][33.9 Error reporting - 759]]
-  - [[33.10 Backtracking versus LL(1) - 761][33.10 Backtracking versus LL(1) - 761]]
-  - [[33.11 Conclusion - 763 =Re-Read=][33.11 Conclusion - 763 =Re-Read=]]
-- [[34 GUI Programming - 765][34 GUI Programming - 765]]
-  - [[34.1 A first Swing application - 765][34.1 A first Swing application - 765]]
-  - [[34.2 Panels and layouts - 768][34.2 Panels and layouts - 768]]
-  - [[34.3 Handling events - 770][34.3 Handling events - 770]]
-  - [[34.4 Example: Celsius/Fahrenheit converter - 773][34.4 Example: Celsius/Fahrenheit converter - 773]]
-  - [[34.5 Conclusion - 775][34.5 Conclusion - 775]]
-- [[35 The SCells Spreadsheet - 777][35 The SCells Spreadsheet - 777]]
-  - [[35.1 The visual framework - 777][35.1 The visual framework - 777]]
-  - [[35.2 Disconnecting data entry and display - 780][35.2 Disconnecting data entry and display - 780]]
-  - [[35.3 Formulas - 783][35.3 Formulas - 783]]
-  - [[35.4 Parsing formulas - 785][35.4 Parsing formulas - 785]]
-  - [[35.5 Evaluation - 790][35.5 Evaluation - 790]]
-  - [[35.6 Operation libraries - 793][35.6 Operation libraries - 793]]
-  - [[35.7 Change propagation - 796][35.7 Change propagation - 796]]
-  - [[35.8 Conclusion - 800][35.8 Conclusion - 800]]
-- [[Appendix A. Scala Scripts on Unix and Windows - 802][Appendix A. Scala Scripts on Unix and Windows - 802]]
-- [[Glossary - 803][Glossary - 803]]
-- [[Bibliography - 819][Bibliography - 819]]
-- [[About the Authors - 822][About the Authors - 822]]
-- [[Index - 823][Index - 823]]
-- [[Tips (Added by Jian)][Tips (Added by Jian)]]
-- [[TodoList (Added by Jian)][TodoList (Added by Jian)]]
-
 * Contents
 * List of Figures
 * List of Tables
@@ -5442,16 +3551,29 @@ Conclusion - 76]]
 
 * DONE 13 Packages and Imports - 276 - _Re-READ_
   CLOSED: [2017-10-21 Sat 17:53]
+  Write in a /modular style/ to *minimize coupling*.
+  - coupling :: the extent to which the various parts of the program rely on the
+                other parts
+    + *LOW* /coupling/ _reduces_ the risk that a SMALL, SEEMINGLY INNOCUOUS change
+      in one part of the program will have DEVASTATING consequences in another
+      part.
+
+  - modular style :: Divide the program into a number of SMALLER /modules/, each of
+                     which has an _inside_ and an _outside_.
+    + When working on the _inside_ of a /module/ - its _implementation_ - you need
+      ONLY coordinate with other programmers working on that very SAME /module/.
+
+    + Only when you must change the _outside_ of a module - its /interface/ - is
+      it necessary to coordinate with developers working on OTHER /modules/.
+
+  - =from Jian=
+    The ~module~ in Java 9 is a language built-in support for /modular style/.
+    However, even without the built-in ~module~ support, write in /modular
+    style/ is also possible -- though it may not be concise and clean.
+
+  - 
   This chapter shows several constructs that help you program in a /modular
-  style/.
-
-  =MORE DETAILS= about /modular style/.
-
-  =Comment from Jian=
-  The /modular/ above is *NOT* related to the ~module~ in Java 9 -- current
-  Scala (2.12.4) does NOT support Java 9 ~module~.
-
-  It shows
+  style/:
   - how to place things in /packages/
   - make names visible through /imports/
   - control the visibility of definitions through /access modifiers/
@@ -5462,8 +3584,8 @@ Conclusion - 76]]
      /unnamed package/.
 
    - Two ways to place code into named packages:
-     + place the contents of an ENTIRE FILE into a package: use the ~package~
-       clause at the top of the file.
+     + place the contents of an ENTIRE FILE into a /package/:
+       use the ~package~ clause at the top of the file.
        #+BEGIN_SRC scala
          package com.bobsrockets.navigation
 
@@ -5472,22 +3594,33 @@ Conclusion - 76]]
        From the outside you can reference ~Navigator~ through
        ~com.bobsrockets.navigation.Navigator~
 
-     + Not ENTIRE FILE packages, more like C# namespaces -- the /packaging/
-       syntax:
+     + Not ENTIRE FILE packages, more like /C# namespaces/ --
+       the /packaging syntax/:
        #+BEGIN_SRC scala
          package com.bobsrockets.navigation {
            class Navigator
          }
        #+END_SRC
 
-   - For simple cases, you usually choose the entire file package syntax.
+   - *Note*
+     Follow Java's reverse-domain-name
+
+   - For simple cases, you usually choose the /entire file package syntax/.
      In general use the /packaging/ syntax, you have more control.
 
-** DONE 13.2 Concise access to related code - 281 =RE-READ=
+** DONE 13.2 Concise access to related code - 281
    CLOSED: [2017-10-21 Sat 15:50]
-   - Want to use the including package members?
-     The nested structure must be explicit:
-     + Compilable
+   - When code is divided into a package hierarchy, it
+     + does NOT ONLY help _PEOPLE_ browse through the code
+     + BUT ALSO tells the _COMPILER_ that code in the SAME /package/ is related
+       in some way to each other.
+         Scala takes advantage of this relatedness by _allowing short,
+       unqualified names_ when accessing code that is in the *SAME* /package/.
+
+   - Q :: How to use the /including package/ members with a SHORTER UNQUALIFIED names?
+
+   - A :: Use the nested structure *explicitly*:
+     + use nested package syntax ==> Compilable
        #+BEGIN_SRC scala
          package bobsrockets {
            class Ship
@@ -5495,21 +3628,23 @@ Conclusion - 76]]
            package fleets {
              class Fleet {
                // Compilable! Ship is in scope.
-               def addShip() = { new Ship }
+               def addShip = new Ship 
              }
            }
          }
        #+END_SRC
 
-     + Does NOT compile
+     + NOT use nested package syntax ==> NOT compilable --
+       same as Java if we put them in separate files (what Java must do):
        #+BEGIN_SRC scala
          package bobsrockets {
            class Ship
          }
+
          package bobsrockets.fleets {
            class Fleet {
              // Doesn't compile! Ship is not in scope.
-             def addShip() = { new Ship }
+             def addShip = new Ship
            }
          }
        #+END_SRC
@@ -5540,23 +3675,37 @@ Conclusion - 76]]
          }
        }
      #+END_SRC
+     + Q :: Access ~Booster1~ and ~Booster2~ are not tricky, but how about the
+            third one ~Booster3~?
+
+     + A :: To help in this situation, Scala provides a /package/ named ~_root_~.
+       * ~_root_~ :: a /package/ *outside any package a user can write*.
+
+       * Put another way, *every /top-level package/ you can write is treated as a
+         member of /package/ ~_root_~.* For example, both ~launch~ and ~bobsrockets~
+         of Listing 13.6 are members of package ~_root_~.
+           As a result, ~_root_.launch~ gives you the _top-level_ ~launch~
+         /package/, and ~_root_.launch.Booster3~ designates the _outermost_
+         ~booster~ /class/.
 
    - Use /chained packages clauses/ to avoid the right shift of code of the
      /packaging/ syntax.
      #+BEGIN_SRC scala
        package bobsrockets
 
+       class Ship {}
+
        package fleets
 
        class Fleet {
          // No need to say bobsrockets.Ship
-         def addShip() = { new Ship }
+         def addShip = new Ship
        }
      #+END_SRC
 
 ** DONE 13.3 Imports - 285
    CLOSED: [2017-10-21 Sat 16:21]
-   - =TODO=
+   - Simple Example:
      #+BEGIN_SRC scala
        package bobsdelights
 
@@ -5572,57 +3721,79 @@ Conclusion - 76]]
          val menu = List(Apple, Orange, Pear)
        }
      #+END_SRC
-     + This corresponds to Java's single type import.
-       ~import bobsdelights.Fruit~
+     + ~import bobsdelights.Fruit~
+       corresponds to _Java's single type import_.
 
-     + This corresponds to Java's on-demand import.
+     + ~import bobsdelights._~
+       corresponds to _Java's on-demand import_.
        The only difference is that Scala's on-demand imports are written with a
        trailing underscore (~_~) instead of an asterisk (~*~).
        (After all, * is a valid identifier in Scala!)
-       ~import bobsdelights._~
 
-     + This corresponds to Java's import of static class fields.
-       ~import bobsdelights.Fruits._~
+     + ~import bobsdelights.Fruits._~
+       This corresponds to _Java's import of /static class/ /fields/._
 
-   - Scala imports are actually much more general than Java.
+   - Scala imports are actually _much more general_ than Java.
      + imports in Scala can appear _anywhere_, not just at the beginning of a
        compilation unit.
 
-     + they can refer to arbitrary values. =???=
+     + they can refer to arbitrary values.
+       For example,
+       #+BEGIN_SRC scala
+         def showFruit(fruit: Fruit) = {
+           import fruit._
+           println(name + "s are" + color)
+         }
+       #+END_SRC
+       The ~name~ and ~color~ above are ~fruit.name~ and ~fruit.color~.
+       =TODO= =TODO=
+       This syntax is particularly useful when you use objects as modules =Chapter 29=
 
-     For example,
-     #+BEGIN_SRC scala
-       def showFruit(fruit: Fruit) = {
-         import fruit._
-         println(name + "s are" + color)
-       }
-     #+END_SRC
-     The ~name~ and ~color~ above are ~fruit.name~ and ~fruit.color~.
-     =TODO=
-     This syntax is particularly useful when you use objects as modules =Chapter 29=
+       * =from Jian=
+         I didn't notice this before!
+         ~import~ can be applied to any /object/, not only the /companion object/!!!
+         The code above is a good example!
 
-   - Scala's flexible imports
+   - *Scala's flexible imports*
      Scala's import clauses are quite a bit more flexible than Java's.
-     There are three principal differences. In Scala, imports:
-     + may appear anywhere
-     + may refer to objects (singleton or regular) in addition to packages
+     There are _3_ principal differences. In Scala, imports:
+     + may appear ANYWHERE
+     + may refer to /objects (singleton or regular)/ in addition to /packages/
      + let you _rename_ and _hide_ some of the imported members
 
-   - xxx
+   - Import /package/ themselves, not just their _non-package members_:
+     #+begin_src scala
+       import java.util.regex
+
+       class AStarB {
+         // Access java.util.regex.Pattern
+         val pat = regex.Pattern.compile("a*b")
+       }
+     #+end_src
+     + This is only natural
+       _if you think of /nested packages/ being contained in their /surrounding
+       package/._
 
    - /import selector clause/
      + ~import Fruits.{Apple, Orange}~
+
      + ~import Fruits.{Apple => McIntosh, Orange}~
-     + ~import java.sql.{Date => SDate}~
-     + ~import Fruits.{_}~ is the same as ~import Fruits._~
-     + ~import Fruits.{Apple => McIntosh, _}~
+       ~import Fruits.Apple => McIntosh=>~ is a /renaming clause/.
+
+     + ~import Fruits.{Apple}~ is the same as ~import Fruits.Apple~
+       The latter can be seen as a special abbreviations of /import clauses/
+       with a /selector clause/.
+
+     + ~import Fruits._~.
+       Here is a catch-all ~_~
+
      + ~import Fruits.{Pear => _, _}~
-       Hide ~Pear~ and import all the other things
+       *Hide* ~Pear~ and import all the other things
 
 ** DONE 13.4 Implicit imports - 285
    CLOSED: [2017-10-21 Sat 16:22]
    Scala adds some imports implicitly to every program.
-   This is equivalent to do
+   This is equivalent to add
    #+BEGIN_SRC scala
      import java.lang._ // everything in the java.lang package
      import scala._ // everything in the scala package
@@ -5631,8 +3802,9 @@ Conclusion - 76]]
    on the top of every source file with extension =.scala=
 
    The order above is important, it implies that the latter can overshadow the
-   former. For example, ~scala.StringBuilder~ overshadows
-   ~java.lang.StringBuilder~.
+   former. For example, ~scala.StringBuilder~ overshadows ~java.lang.StringBuilder~.
+   =from Jian= The example itself is important, you'll notice this when you use
+   unqualified name ~StringBuilder~ in Scala.
 
 ** DONE 13.5 Access modifiers - 286
    CLOSED: [2017-10-21 Sat 17:40]
@@ -5640,13 +3812,15 @@ Conclusion - 76]]
    /access modifiers/ ~private~ and ~protected~.
 
 *** DONE Private members
-    CLOSED: [2017-10-21 Sat 16:54]
-    A member labeled private is visible ONLY inside the /class/ or /object/ that
-    contains the member definition.
+    CLOSED: [2019-05-27 Mon 01:24]
+    *More _restrictive_ and _consistent_ than in Java!*
+
+    A member labeled ~private~ is visible ONLY inside the /class/ or /object/
+    that _DIRECTLY contains_ the member definition.
     #+BEGIN_SRC scala
       class Outer {
         class Inner {
-          private def f() = { println("f") }
+          private def f(): Unit = { println("f") }
 
           class InnerMost {
             f() // OK
@@ -5655,15 +3829,17 @@ Conclusion - 76]]
           (new Inner).f() // error: f is not accessible
       }
     #+END_SRC
-    _MORE restrictive than in Java_
 
-    By contrast, in Java, both of the two accesses to the ~f~ method above are
-    legal.
-
-    =From Jian= the Scala way is more reasonable for me.
+    - By contrast, in Java, both of the two accesses to the ~f~ /method/ above
+      are legal.
 
 *** DONE Protected members
-    CLOSED: [2017-10-21 Sat 16:54]
+    CLOSED: [2019-05-27 Mon 01:24]
+    *More _restrictive_ than in Java!*
+
+    =from Jian= More like all the other languages that have the ~protected~
+    modifier.
+
     #+BEGIN_SRC scala
       package p {
         class Super {
@@ -5679,71 +3855,154 @@ Conclusion - 76]]
         }
       }
     #+END_SRC
-    _MORE restrictive than in Java_
-    - In Scala, a protected member is ONLY accessible from /subclasses/ of the
+    - In Scala, a ~protected~ member is ONLY accessible from /subclasses/ of the
       class in which the member is defined.
 
-    - In Java such accesses are also possible from other classes _in the same
-      package_. Both of the accesses above can succeed in Java.
+    - In Java such accesses are also possible from other classes _in the SAME
+      /package/._ Both of the accesses above can succeed in Java.
       
-    =TODO= =???=
-    In Scala, there is another way to achieve this effect so ~protected~ is free
-    to be left as is. 
-
-    footnote: Using /qualifiers/, described in “Scope of protection” on page 288.
-
 *** DONE Public members
-    CLOSED: [2017-10-21 Sat 16:53]
-    Any member with no ~private~ and ~protected~ modifier are /public/.
+    CLOSED: [2019-05-27 Mon 01:24]
+    Any member with no ~private~ and ~protected~ /modifier/ are /public/.
+    There is no ~public~ keyword in Scala.
 
 *** DONE Scope of protection
-    CLOSED: [2017-10-21 Sat 17:26]
-    #+BEGIN_SRC scala
-      package bobsrockets
+    CLOSED: [2019-05-27 Mon 02:18]
+    =from Jian= Is this title misleading???
 
-      package navigation {
-        private[bobsrockets] class Navigator {
-          protected[navigation] def useStarChart() = {}
+    - Q :: How to get a very fine-grained CONTROL over /visibility/?
 
-          class LegOfJourney {
-            private[Navigator] val distance = 100
+    - A :: Use /qualified access modifiers/.
+
+    - /Access modifiers/ in Scala can be *AUGMENTED* with /qualifiers/.
+
+    - SYNTAX of /modifier qualifiers/: ~private[X]~ and ~protected[X]~
+      + The *X* here means *up to X*,
+        where *X* designates some *enclosing* /package/, /class/ or /singleton
+        object/.
+
+    - /Access modifiers/ *ONLY* can't express some accessibility
+      in Java. For example, =IN JAVA=
+      + _package private_: ~protected~
+      + _package protected_: default
+      + _private up to outermost class_: ~private~
+
+    - Use /qualified access modifiers/ *WITH* /qualifiers/
+      =IN SCALA=
+      + _package private_: ~private[packageName]~
+      + _package protected_: ~protected[packageName]~
+      + _private up to outermost class_: ~private[OutermostClass]~
+    
+    - /Qualified access modifiers/ can express *more* accessibility than
+      in Java.
+      =from Jian= TODO: list them all!!!
+
+    - The same technique is *NOT possible* in Java.
+
+      _There, once a definition escapes its IMMEDIATE /package/ BOUNDARY,
+      it is visible to the world at large._
+      + =from Jian= This is why Java 9 introduces a built-in /module system/.
+      + =from Jian= However, comparing to the formal Java 9+ the built-in /module
+                    systems/, what does Scala need to _complete_ a full /module
+                    system/?? I remember Scala 3 has ~export~??
+                    =TODO= =TODO= =TODO=
+
+    - Example:
+      #+BEGIN_SRC scala
+        package bobsrockets
+
+        package navigation {
+          private[bobsrockets] class Navigator {
+            protected[navigation] def useStarChart() = {}
+
+            class LegOfJourney {
+              private[Navigator] val distance = 100
+            }
+
+            private[this] var speed = 200
           }
-
-          private[this] var speed = 200
         }
-      }
 
-      package launch {
-        import navigation._
-        object Vehicle {
-          private[launch] val guide = new Navigator
+        package launch {
+          import navigation._
+          object Vehicle {
+            private[launch] val guide = new Navigator
+          }
         }
-      }
-    #+END_SRC
+      #+END_SRC
+      Table 13.1 - Effects of ~private~ qualifiers on ~LegOfJourney.distance~
+      + no access modifier:      public access
+      + ~private[bobsrockets]~:  access within outer package
+      + ~private[navigation]~:   same as package visibility in Java
+      + ~private[Navigator]~:    same as ~private~ in Java
+      + ~private[LegOfJourney]~: same as ~private~ in Scala
+      + ~private[this]~:         access only from same object
 
-    - /Access modifiers/ in Scala can be _AUGMENTED with qualifiers_.
+    - ALL /qualifiers/ can also be applied to ~protected~, with the same meaning
+      as ~private~.
+      + ~protected[X]~ in a /class/ _C_ allows
+        * access to the labeled definition in ALL /subclasses/ of _C_
+          and
+        * also within the *enclosing* /package/, /class/, or /object/ _X_.
 
-      A modifier of the form ~private[X]~ or ~protected[X]~ means that access is
-      _private_ or _protected_ *UP TO* X, where X designates some enclosing
-      package, class or singleton object.
+        =from Jian= Yes! The augmentation of the scope (the 2nd point above) is
+        not along the inheritance chain only.
+          Actually, the /qualifier/ is only about the enclosing structures,
+        only the the /modifier/ can represent other meanings -- like ~protected~
+        itself is related to inheritance only, but ~protected[X]~ is related to
+        inheritance, but not "ONLY".
+
+          For instance, the ~useStarChart~ /method/ in Listing 13.12 is accessible
+        in ALL /subclasses/ of ~Navigator~ and also in ALL code contained in the
+        *enclosing* /package/ ~navigation~ -- it thus corresponds exactly to the
+        _meaning of ~protected~ in Java_.
 
     - ~private[this]~ is called /object-private/.
 
 *** DONE Visibility and companion objects
-    CLOSED: [2017-10-21 Sat 17:39]
-    - In Java, /static members/ and /instance members/ belong to the same class,
-      so /access modifiers/ apply _uniformly_ to them.
+    CLOSED: [2019-05-27 Mon 02:01]
+    - In Java, /static members/ and /instance members/ belong to the SAME /class/,
+      so /access modifiers/ apply *uniformly* to them.
 
       In Scala there are no /static members/; instead you can have a /companion
       object/ that contains members that exist only once.
+      #+begin_src scala
+        class Rocket {
+          import Rocket.fuel
+          private def canGoHomeAgain = fuel > 20
+        }
 
-    - One exception where the similarity between Scala and Java _breaks down_
+        object Rocket {
+          private def fuel = 10
+
+          def chooseStrategy(rocket: Rocket): Unit = {
+            if (rocket.canGoHomeAgain)
+              goHome()
+            else
+              pickAStar()
+          }
+
+          def goHome(): Unit = {}
+
+          def pickAStar(): Unit = {}
+        }
+      #+end_src
+
+    - Scala's access rules *privilege* /companion objects and classes/ when it
+      comes to ~private~ or ~protected~ accesses.
+        A /class/ *shares* ALL its ACCESS RIGHTS with its /companion object/ and
+      _vice versa_.
+        In particular, an /object/ can access *ALL* ~private~ members of its
+      /companion class/, just as a /class/ can access *ALL* ~private~ members of
+      its /companion object/.
+
+    - One *exception* where the similarity between Scala and Java _breaks down_
       concerns ~protected static~ members.
-      + In Java A protected static member of a class C can be accessed in all
-        subclasses of C.
+      + In Java A ~protected static~ member of a /class/ C can be accessed in ALL
+        /subclasses/ of C.
 
       + In Scala, a /protected member/ in a /companion object/ _makes no sense_,
-        as singleton objects don't have any subclasses.
+        as /singleton objects/ do *NOT have any* /subclasses/.
 
 ** DONE 13.6 Package objects - 291 
    CLOSED: [2017-10-21 Sat 17:50]
@@ -7406,11 +5665,11 @@ Conclusion - 76]]
 ** TODO 18.4 A language for digital circuits - 402
 ** TODO 18.5 The ~Simulation~ API - 405
 ** TODO 18.6 Circuit Simulation - 409
-*** The ~Wire~ class
-*** The ~inverter~ method
-*** The ~andGate~ and ~orGate~ methods
-*** Simulation output
-*** Running the simulator
+*** TODO The ~Wire~ class
+*** TODO The ~inverter~ method
+*** TODO The ~andGate~ and ~orGate~ methods
+*** TODO Simulation output
+*** TODO Running the simulator
 
 ** TODO 18.7 Conclusion - 417
 * DONE 19 Type Parameterization - 418 - =RE-DO=
