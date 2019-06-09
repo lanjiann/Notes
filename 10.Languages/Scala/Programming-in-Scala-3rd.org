@@ -3026,19 +3026,29 @@
 ** DONE 10.16 Conclusion - 245
    CLOSED: [2017-10-11 Wed 18:03]
 
-* DONE 11 Scala's Hierarchy - 246
+* DONE 11 Scala's Hierarchy - 246 - TODO
   CLOSED: [2017-10-12 Thu 00:16]
-  In Scala, every class inherits from a common superclass named ~Any~.
+  - In Scala, every class inherits from a common superclass named ~Any~.
+    Thus, the /methods/ _defined in_ ~Any~ are "universal" /methods/:
+    they may be invoked on *any* /object/.
 
-  Scala also defines some interesting classes at the _bottom_ of the hierarchy,
-  ~Null~ and ~Nothing~, which essentially act as common subclasses.
+  - Scala also defines some interesting classes at the /bottom/ of the hierarchy,
+    ~Null~ and ~Nothing~, which essentially act as COMMON /subclasses/.
 
-  ~Nothing~ is a subclass of ~Null~.
+  - =from Jian=
+    ~Nothing~ is a subclass of ~Null~.
 
 ** DONE 11.1 Scala's class hierarchy - 246
    CLOSED: [2017-10-11 Wed 18:39]
-   - The ~hashCode~ method has an alias ~##~
-
+   - ~Any~ defines:
+     #+begin_src scala
+       final def ==(that: Any): Boolean
+       final def !=(that: Any): Boolean
+       def equals(that: Any): Boolean
+       def ##: Int
+       def hashCode: Int
+       def toString: String
+     #+end_src
    - The ~==~ method is essentially the same as ~equals~ and ~!=~ is _ALWAYS_ the
      negation of ~equals~.
 
@@ -3164,7 +3174,7 @@
             throw new RuntimeException(message)
         #+END_SRC
 
-** DONE 11.4 Defining your own value classes - 253
+** DONE 11.4 Defining your own value classes - 253 - TODO
    CLOSED: [2017-10-12 Thu 00:15]
    - For a class to be a /value class/,
      + it must have exactly ONE parameter
@@ -3179,7 +3189,7 @@
        }
      #+END_SRC
 
-*** DONE Avoiding a types monoculture
+*** DONE Avoiding a types monoculture - TODO
     CLOSED: [2017-10-12 Thu 00:15]
     To get the most benefit from the Scala class hierarchy,
     _try to define a new class for each domain concept_,
@@ -3549,7 +3559,7 @@
      and
    + _ALLOW_ you to stack behaviors.
 
-* DONE 13 Packages and Imports - 276 - _Re-READ_
+* DONE 13 Packages and Imports - 276
   CLOSED: [2017-10-21 Sat 17:53]
   Write in a /modular style/ to *minimize coupling*.
   - coupling :: the extent to which the various parts of the program rely on the
@@ -4009,11 +4019,11 @@
    - *ANY* kind of definition that you can put inside a /class/ can also be at
      the top level of a /package/.
 
-     + Q: How to do it?
+     + Q :: How to do it?
 
-     + A: put the definitions in a /package object/.
+     + A :: put the definitions in a /package object/.
 
-   - Each /package/ is allowed to have one /package object/.
+   - *Each* /package/ is allowed to have *one* /package object/.
      Any definitions placed in a /package object/ are considered members of the
      /package/ itself.
 
@@ -4044,18 +4054,16 @@
        #+END_SRC
 
    - /Package objects/ are frequently used to hold
-
      + package-wide /type aliases/ (Chapter 20)
+
      + /implicit conversions/ (Chapter 21).
 
-     =Comment From Jian=
-     =TODO= Read the other people's /package objects/ to learn
+   - Example:
+     the top-level ~scala~ package has a /package object/, and its definitions
+     are available to ALL Scala code.
 
-     The top-level ~scala~ package has a /package object/, and its definitions
-     are available to all Scala code.
-
-   - /Package objects/ are compiled to /class files/ named ~package.class~ that are
-     the located in the directory of the /package/ that they augment.
+   - /Package objects/ are _compiled to_ /class files/ named ~package.class~ that
+     are located in the directory of the /package/ that they augment.
 
      It's useful to _keep the same convention_ for source files.
      So you would typically put the source file of the /package object/
@@ -4067,12 +4075,22 @@
      =<package>.scala=, rather than =package.scala=.
 
 ** DONE 13.7 Conclusion - 293
-   CLOSED: [2017-10-21 Sat 17:53]
+   CLOSED: [2019-05-27 Mon 04:20]
+   - Scala's system is the same in spirit as Java's /packages/,
+     but there are some differences where Scala chooses to be more consistent or
+     more general.
+
+   - =TODO= =TODO= =TODO=
+     Looking ahead,
+     _Chapter 29_ describes a _MORE flexible /module system/ THAN_ division into
+     /packages/. In addition to letting you separate code into several
+     /namespaces/, that approach allows /modules/ to be *parameterized* and
+     *inherit* from each other.
 
 * DONE 14 Assertions and Tests - 294 - _No details in this book!!!_
   CLOSED: [2018-04-10 Tue 22:20]
-  /Assertions/ and /tests/ are *two* important ways you can check that the software
-  you write behaves as you expect.
+  /Assertions/ and /tests/ are *two* important ways you can check that the
+  software you write behaves as you expect.
 
 ** DONE 14.1 Assertions - 294
    CLOSED: [2017-10-23 Mon 12:52]
@@ -10497,7 +10515,7 @@
 
 ** DONE 26.8 Conclusion - 636 =Re-Read=
    CLOSED: [2017-12-02 Sat 23:27]
-* DONE 27 Annotations - 637 *Learn MORE*
+* DONE 27 Annotations - 637 TODO *Learn MORE*
   CLOSED: [2017-10-21 Sat 19:01]
   - annotations :: structured information added to program source code.
 
@@ -11138,7 +11156,7 @@
 
      + how to *access* /semi-structured data/ via Scala's XML support
 
-* DONE 29 Modular Programming Using Objects - 659 - =Re-READ=
+* DONE 29 Modular Programming Using Objects - 659 - TODO =Re-READ=
   CLOSED: [2018-03-19 Mon 19:04]
   - 
   - In this chapter, we’ll discuss how you can use Scala's object-oriented
