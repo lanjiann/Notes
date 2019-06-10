@@ -3038,8 +3038,12 @@
   - =from Jian=
     ~Nothing~ is a subclass of ~Null~.
 
+  - ~Any~ is a /superclass/ of EVERY other /class/;
+
+  - ~Nothing~ is a /subclass/ of EVERY other /class/.
+
 ** DONE 11.1 Scala's class hierarchy - 246
-   CLOSED: [2017-10-11 Wed 18:39]
+   CLOSED: [2019-06-09 Sun 02:26]
    - ~Any~ defines:
      #+begin_src scala
        final def ==(that: Any): Boolean
@@ -3049,28 +3053,40 @@
        def hashCode: Int
        def toString: String
      #+end_src
-   - The ~==~ method is essentially the same as ~equals~ and ~!=~ is _ALWAYS_ the
-     negation of ~equals~.
+
+   - The ~==~ /method/ is essentially the same as ~equals~
+     and
+     the ~!=~ /method/ is _ALWAYS_ the negation of ~equals~.
 
      footnote 1:
-     The only case where ~==~ does not directly call ~equals~ is for Java's boxed
-     numeric classes, such as ~Integer~ or ~Long~. In Java, a ~new Integer(1)~
-     does NOT equal a ~new Long(1)~ even though for /primitive values/ ~1 == 1L~.
-       Since Scala is a more regular language than Java, it was necessary to
-     correct this discrepancy by special-casing the ~==~ method for these classes.
-     Likewise, the ~##~ method provides a Scala version of hashing that is the
-     same as Java’s ~hashCode~, except for boxed numeric types, where it works
-     consistently with ~==~. For instance ~new Integer(1)~ and ~new Long(1)~
-     hash the same with ~##~ even though their Java ~hashCodes~ are different.
+     + The only case where ~==~ does _NOT directly call_ ~equals~ is for Java's
+       /boxed numeric classes/, such as ~Integer~ or ~java.lang.Long~ (must prefix
+       ~java.lang~, or ~Long~ is the Scala built-in, not the Java one).
+       * In Java, a ~new Integer(1)~ does NOT equal a ~new java.lang.Long(1)~ even
+         though for /primitive values/ ~1 == 1L~ is true.
 
-     =From Jian= this is NOT always the case if in Java due to its /boxed type/
-     and /reference equality/.
+     + Since _Scala is a *more regular* language than Java,_ it was necessary to
+       correct this discrepancy by special-casing the ~==~ method for these
+       classes. Likewise, the ~##~ method provides a Scala version of hashing
+       that is the same as Java's ~hashCode~, _EXCEPT for /boxed numeric types/,_
+       where it works consistently with ~==~. For instance ~new Integer(1)~ and
+       ~new Long(1)~ hash the same with ~##~ even though their Java ~hashCodes~
+       are different.
+       =IMPORTANT= =!!!=
+
+   - =from Jian=
+     As a summary of the note above,
+     in Scala, if you are _NOT implementing_ the /methods/ originate from ~Any~,
+     you should keep using ~==~ and ~##~, rather than ~equals~ and ~hashCode~.
+
+     + You can get the hash of ~null~ by calling ~##~,
+       but if you use ~hashCode~, a ~NullPointerException~ will be thrown!
 
    - ~Any~ has two direct subclasses:
      + ~AnyVal~ :: the parent class of /value classes/.
                    
-       There are _NINE_ /value classes/ built into Scala, they are subtypes of
-       ~scala.AnyVal~, but they do NOT subclass each other:
+       There are _NINE_ /value classes/ built into Scala, they are /subtypes/ of
+       ~scala.AnyVal~, but *they do NOT /subclass/ each other*:
        * ~Byte~
        * ~Short~
        * ~Char~
@@ -3081,20 +3097,30 @@
        * ~Boolean~
        * ~Unit~
 
-       The instances of /these classes/ are all written as /literals/ in Scala.
-       You cannot create instances of these classes using ~new~. This is enforced
-       by the "trick" that value classes are all defined to be both ~abstract~
-       and ~final~.
+     + The instances of /these classes/ are all written as /literals/ in Scala.
+       You _CANNOT_ create instances of these classes using ~new~.
+         This is enforced by the "trick" that /value classes/ are all defined to
+       be both ~abstract~ and ~final~.
 
-     + ~AnyRef~ :: the base class of all /reference classes/ in Scala.
+     + =from Jian=
+       Currently, JVM only support /single-value value class/ (Java, till Java
+       12, does NOT support /value class/).
+       _JVM will support /mult-value value class/ in the future._
+       Java will support /value class/ (single/multiple-value) in the future.
 
-       This is just an alias for class ~java.lang.Object~. So classes written in
-       Java, as well as classes written in Scala, all inherit from ~AnyRef~.
+     + ~AnyRef~ :: the /base class/ of all /reference classes/ in Scala.
 
-       One way to think of ~java.lang.Object~, therefore, is as the way ~AnyRef~
-       is implemented on the Java platform. Thus, although you can use ~Object~
-       and ~AnyRef~ interchangeably in Scala programs on the Java platform,
-       _the recommended style is to use ~AnyRef~ everywhere_.
+       * This is just an _alias_ for class ~java.lang.Object~. So /classes/ written
+         in Java, as well as /reference classes/ written in Scala, all inherit
+         from ~AnyRef~.
+           One way to think of ~java.lang.Object~, therefore, is as the way
+         ~AnyRef~ is implemented on the Java platform.
+
+       * Thus, although you CAN use ~Object~ and ~AnyRef~ INTERCHANGEABLY in
+         Scala programs on the Java platform,
+         _the recommended style is to use ~AnyRef~ everywhere_.
+
+   - Figure 11.1 . Class hierarchy of Scala
 
 ** DONE 11.2 How primitives are implemented - 250
    CLOSED: [2017-10-11 Wed 19:01]
@@ -3125,7 +3151,7 @@
        isEqualObj(42, 42);  // false
      #+END_SRC
 
-   - For /reference types/ other than Java's boxed numeric types, ~==~ is treated
+   - For /reference types/ _other than_ Java's /boxed numeric types/, ~==~ is treated
      as an alias of the ~equals~ method inherited from ~Object~.
 
      One example that the result is
@@ -3140,9 +3166,9 @@
 
    - =TODO= /hash cons/
 
-   - Class ~AnyRef~ defines an additional ~eq~ method, which _CANNOT be
-     overridden_ and is implemented as /reference equality/ (behaves like ~==~ in
-     Java for /reference types/). It has a negation ~ne~.
+   - Class ~AnyRef~ defines an additional ~eq~ /method/, which _CANNOT be overridden_
+     and is implemented as /reference equality/ (behaves like ~==~ in Java for
+     /reference types/). It has a negation ~ne~.
      #+BEGIN_SRC scala
        val x = new String("abc")
        val y = new String("abc")
@@ -3155,8 +3181,7 @@
    - =TODO=
      Equality in Scala is discussed further in Chapter 30.
 
-** DONE 11.3 Bottom types - 252
-   CLOSED: [2017-10-12 Thu 00:03]
+** TODO 11.3 Bottom types - 252
    - Class ~Null~ is the type of the ~null~ reference; it is a subclass of every
      reference class (i.e., every class that itself inherits from ~AnyRef~).
 
@@ -3175,32 +3200,105 @@
         #+END_SRC
 
 ** DONE 11.4 Defining your own value classes - 253 - TODO
-   CLOSED: [2017-10-12 Thu 00:15]
+   CLOSED: [2019-06-09 Sun 03:39]
    - For a class to be a /value class/,
      + it must have exactly ONE parameter
      + it must have NOTHING inside it except ~def~'s.
      + NO other class can extend a /value class/
      + cannot redefine ~equals~ or ~hashCode~.
+     + https://docs.scala-lang.org/overviews/core/value-classes.html
+       Can't be used in pattern matching
 
-   - Example:
+   - To define a /value class/, make it a /subclass/ of ~AnyVal~ , and put ~val~
+     before the _one parameter_. Here is an EXAMPLE /value class/:
      #+BEGIN_SRC scala
        class Dollars(val amount: Int) extends AnyVal {
-         override def toString() = "$" + amount
+         override def toString = "$" + amount
        }
      #+END_SRC
 
 *** DONE Avoiding a types monoculture - TODO
     CLOSED: [2017-10-12 Thu 00:15]
-    To get the most benefit from the Scala class hierarchy,
-    _try to define a new class for each domain concept_,
+    =from Jian= The example here we use to illustrate this topic uses /value
+    classes/. However, *avoiding a types monoculture* is a more general
+    guideline.
+
+    To get *the most benefit* from the /Scala class hierarchy/,
+    _try to define a *new* /class/ for *each* domain concept_,
     even when it would be possible to reuse the same class for different
-    purposes. Even if such a class is a so-called /tiny type/ with no methods or
-    fields,
-    _defining the additional class is a way to help the compiler be helpful to
-    you._
+    purposes. Even if such a /class/ is a so-called /tiny type/ with _NO
+    /methods/ or /fields/,_
+    *defining the additional /class/ is a way to help the compiler be helpful to
+    you.*
+
+    - Without /domain concept types/, even if you write in Scala, a _statically
+      typed and strong typed language_, the compiler can't help -- often you use
+      same types for diferent /domain concept/ if you don't try to define new
+      /doamin concept types/.
+
+    - Example:
+      =TODO=
+      The expected output is
+      _<a id='chap:vcls'><h1 class='bold'>Value Classes</h1></a>_
+
+      + without domain concept types:
+        #+begin_src scala
+          def title(text: String, anchor: String, style: String): String =
+            s"<a id='$anchor'><h1 class='$style'>$text</h1></a>"
+
+          // Wrong input, but not detected
+          title("chap:vcls", "bold", "Value Classes")
+          // res17: String = <a id='bold'><h1 class='Value Classes'>chap:vcls</h1></a>
+        #+end_src
+
+      + with domain concept types:
+        #+begin_src scala
+          sealed trait HtmlElement extends Any {
+            def value: String
+            override def toString = value
+          }
+          class Anchor(val value: String) extends HtmlElement
+          class Style(val value: String)  extends HtmlElement
+          class Text(val value: String)   extends HtmlElement
+          class Html(val value: String)   extends HtmlElement
+
+          def title(text: Text, anchor: Anchor, style: Style): Html =
+            new Html(
+              s"<a id='$anchor'>" +
+                s"<h1 class='$style'>" +
+                text +
+                "</h1></a>"
+            )
+
+          // Wrong input, but not detected
+          title(new Anchor("chap:vcls"), new Style("bold"),
+                new Text("Value Classes"))
+          // <console>:18: error: type mismatch;
+          //  found   : Anchor
+          //  required: Text
+          //                 new Anchor("chap:vcls"),
+          //                 ˆ
+          // <console>:19: error: type mismatch;
+          //  found   : Style
+          //  required: Anchor
+          //                 new Style("bold"),
+          //                 ˆ
+          // <console>:20: error: type mismatch;
+          //  found   : Text
+          //  required: Style
+          //                 new Text("Value Classes"))
+          //                 ˆ
+        #+end_src
+
+    - =from Jian=
+      The code above is still not concise!
+      See /opaque type/ in Scala 3.
+      Similar things are supported in Go.
 
 ** DONE 11.5 Conclusion - 256
-   CLOSED: [2017-10-12 Thu 00:15]
+   CLOSED: [2019-06-09 Sun 03:02]
+   In this chapter we showed you the /classes/ at the *top* and *bottom* of
+   _Scala's class hierarchy_.
 
 * DONE 12 Traits - 257
   CLOSED: [2018-03-21 Wed 23:51]
