@@ -189,16 +189,128 @@
 **** Implementation Status and Timeline
 
 ** METAPROGRAMMING
-*** Overview
-*** Inline
+*** DONE Overview
+    CLOSED: [2019-06-24 Mon 02:35]
+    The following fundamental facilities:
+    1. /Inline/
+       /inline/ is a new _modifier_ that guarantees that a definition will be
+       inlined at the point of use.
+
+       - The primary motivation:
+         _reduce the overhead_ behind function calls and access to values.
+
+       - The expansion will be performed by the Scala compiler during the /Typer/
+         /compiler phase/.
+
+       - As opposed to /inlining/ in some other ecosystems, /inlining/ in Scala
+         is _not merely_ a request to the compiler but is a command.
+
+       - The reason is that /inlining/ in Scala can drive other _compile-time
+         operations_, like
+         + /inline/ /pattern matching/ (enabling type-level programming)
+         + /macros/ (enabling compile-time, generative, metaprogramming)
+         + /runtime code generation/ (multi-stage programming)
+
+    2. /Macros/ construct code at /compile-time/
+       - /Macros/ are built on two well-known fundamental operations:
+         + quotation ::
+           *converts program code to data*, specifically, a (tree-like)
+           representation of this code. It is expressed as
+           * ~'{...}~ for /expressions/
+           * ~'[...]~ for /types/
+
+         + splicing :: *converts a program's representation to program code*
+           * expressed as ~${ ... }~.
+
+       - The /inline/ and /splicing/ abstractions allow to construct program
+         code programmatically.
+
+    3. /Staging/ construct new code at /runtime/.
+       That way, code generation can depend not only on static data but also on
+       data available at runtime. This splits the evaluation of the program in
+       two or more phases or ... /stages/.
+         Consequently, this method generative programming is called /"Multi-Stage
+       Programming"/. /Staging/ is built on the _SAME_ foundations as /macros/.
+       It uses /quotes/ and /splices/, but _LEAVES OUT_ /inline/.
+
+    4. /Erased Terms/ =???= TODO
+       Erased terms are used to enforce guarantees about program constraints.
+       As erased terms are guaranteed not to be used in computations, they will
+       not appear at the generated code.
+
+    5. /TASTy Reflection/
+       + /Quotations/ are a "black-box" representation of code.
+         They can be parameterized and composed using /splices/ but their
+         structure cannot be analyzed from the outside.
+       + /Tasty reflection/ gives a way to analyze code structure by partly
+         revealing the representation type of a piece of code in a standard API.
+         TODO
+         The _representation type_ is a form of /typed abstract syntax tree/,
+         which gives rise to the "TASTy` moniker.
+
+    6. /TASTy Inspection/
+       /Typed abstract syntax trees/ are serialized in a custom compressed
+       binary format in =.tasty= files. /TASTy inspection/ allows to _load_
+       these files and _analyze_ their content's tree structure.
+
+*** TODO Inline
 **** Inline Definitions
 **** Recursive Inline Methods
 **** Relationship to ~@inline~
 ***** The definition of constant expression
 
 **** Specializing Inline (Whitebox)
-**** Inline Conditionals
+**** DONE Inline Conditionals
+     CLOSED: [2019-06-24 Mon 03:05]
+     #+begin_src scala
+       inline def update(delta: Int) =
+         inline if (delta >= 0) increaseBy(delta)
+                else            decreaseBy(-delta)
+     #+end_src
+     + Use ~inline~ means in the call site ~delta~ _MUST be_ a /compile-time
+       constant/.
+
+     + A call ~update(22)~ would re-write to ~increaseBy(22)~.
+
+     + A call with a value of not compile-time constant will trigger a compile
+       error:
+       #+begin_src text
+            |  inline if (delta >= 0) ???
+            |  ^
+            |  cannot reduce inline if
+            |   its condition
+            |     delta >= 0
+            |   is not a constant value
+            | This location is in code that was inlined at ...
+       #+end_src
+
 **** Inline Matches
+     - TODO
+       #+begin_src scala
+         inline def g(x: Any) <: Any = inline x match {
+           case x: String => (x, x)  // Tuple2[String, String](x, x)
+           case x: Double => x
+         }
+
+         g(1.0d)  // Has type 1.0d which is a subtype of Double
+           g("test")  // Has type (String, String)
+       #+end_src
+
+     - TODO
+       #+begin_src scala
+         trait Nat
+         case object Zero extends Nat
+         final case class Succ[N <: Nat](n: N) extends Nat
+
+         inline def toInt(n: Nat) <: Int = inline n match {
+           case Zero     => 0
+           case Succ(n1) => toInt(n1) + 1
+         }
+
+         final val natTwo = toInt(Succ(Succ(Zero)))
+         val intTwo: 2 = natTwo
+       #+end_src
+
 **** The ~scala.compiletime~ Package
 ***** ~constValue~, ~constValueOpt~, and the ~S~ combinator
 ***** ~erasedValue~
