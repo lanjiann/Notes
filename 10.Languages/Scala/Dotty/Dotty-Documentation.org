@@ -1,6 +1,6 @@
 #+TITLE: Dotty Documentation
 #+VERSION: 0.17.0-bin-SNAPSHOT
-#+AUTHOR: 
+#+AUTHOR:
 #+STARTUP: entitiespretty
 
 * BLOG
@@ -311,18 +311,253 @@
          val intTwo: 2 = natTwo
        #+end_src
 
-**** The ~scala.compiletime~ Package
+**** DONE The ~scala.compiletime~ Package
+     CLOSED: [2019-06-24 Mon 16:36]
+     The ~scala.compiletime~ package contains _helper definitions_ that provide
+     support for /compile time/ OPERATIONS over _values_. They are described in the
+     following.
 ***** ~constValue~, ~constValueOpt~, and the ~S~ combinator
-***** ~erasedValue~
+      - ~constValue[T]~ generate a constant value of type ~T~
+
+      -                0.200.13@25.3.1 (spacema~constValueOpt[T]~ generate a constant value of type ~Option[T]~
+
+      - ~S~ is the type of the successor of some singleton type.
+        For example, ~S[1]~ is the /singleton type/ ~2~.
+
+***** ~eraseValue~
+      - The ~erasedValue[T]~ function in ~scala.comiletime.erasedValue~ is not
+        implemented -- it would always raise a ~NotImplementedError~ exception
+        when called.
+          _However, it can in fact never be called, since it is declared ~erased~ --
+        it is only used at /compile-time/ during type checking._
+
+      - Example:
+        #+begin_src scala
+          import scala.comiletime.erasedValue
+          // erased def erasedValue[T]: T = ???
+
+          inline def defaultValue[T] = inline erasedValue[T] match {
+            case _: Byte    => Some(0: Byte)
+            case _: Char    => Some(0: Char)
+            case _: Short   => Some(0: Short)
+            case _: Int     => Some(0)
+            case _: Long    => Some(0L)
+            case _: Float   => Some(0.0f)
+            case _: Double  => Some(0.0d)
+            case _: Boolean => Some(false)
+            case _: Unit    => Some(())
+            case _          => None
+          }
+
+          val dInt:     Some[Int]     = defaultValue[Int]
+          val dDouble:  Some[Double]  = defaultValue[Double]
+          val dBoolean: Some[Boolean] = defaultValue[Boolean]
+          val dAny:     Any.type      = defaultValue[Any]
+        #+end_src
+
+      - Another example:
+        #+begin_src scala
+          inline def toIntT[N <: Nat] <: Int = inline erasedValue[N] match {
+            case _: Zero.type => 0
+            case _: Succ[n]   => toIntT[n] + 1
+          }
+
+          final val two = toIntT[Succ[Succ[Zero.type]]]
+        #+end_src
+
+      - TODO
+        Last paragraph???
+
 ***** ~error~
+      The ~error~ /method/ is used to produce _user-defined_ /compile errors/
+      *DURING /inline expansion/.* It has the following signature:
+      #+begin_src scala
+        inline def error(inline msg: String): Nothing
+      #+end_src
 
-**** Implicit Matches
-**** Reference
+      - If an /inline expansion/ results in a call ~error(msgStr)~ the compiler produces
+        an _error message_ containing the given ~msgStr~.
+        + Example 1
+          #+begin_src scala
+            inline def fail() = {
+              error("failed for a reason")
+            }
 
-*** Macros
-**** Macros: Quotes and Splices
-**** Types for Quotations
-**** The Phase Consistency Principle
+            fail()  // error: failed for a reason
+          #+end_src
+
+          OR
+
+        + Example 2
+          #+begin_src scala
+            inline def fail(p1: => Any) = {
+              error(code"failed on: $p1")
+            }
+
+            fail(indentity("foo"))  // error: failed on: indentity("foo")
+          #+end_src
+
+**** DONE Implicit Matches
+     CLOSED: [2019-06-24 Mon 16:46]
+     TODO NOTE
+     TODO NOTE
+     TODO NOTE
+     #+begin_src scala
+       inline def setFor[T]: Set[T] = implicit match {
+         case _: Ordering[T] => new TreeSet[T]
+         case _              => new HashSet[T]
+       }
+     #+end_src
+
+     + The old way is full of boilterplate:
+       #+begin_src scala
+         trait SetFor[T, S <: Set[T]]
+
+         class LowPriority {
+           implicit def hashSetFor[T]: SetFor[T, HashSet[T]] = ...
+         }
+
+         object SetFor extends LowPriority {
+           implicit def treeSetFor[T: Ordering]: SetFor[T, TreeSet[T]] = ...
+         }
+       #+end_src
+
+**** DONE Reference
+     CLOSED: [2019-06-24 Mon 16:55]
+
+*** TODO Macros
+**** DONE Macros: Quotes and Splices
+     CLOSED: [2019-06-26 Wed 15:36]
+     - Macros are built on two well-known fundamental operations:
+       + quotation :: ~'{...}~ for /expressions/ (both forms are equivalent);
+                      ~'[...]~ for /types/.
+
+       + splicing :: ~${ ... }~
+
+     - Additionally, _within_ a /quote/ or a /splice/ we can /quote/ or /splice/
+       _identifiers_ directly (i.e. ~'e~ and ~$e~).
+
+     - Readers may notice the _RESEMBLANCE_ of the two aforementioned syntactic
+       schemes with the familiar /string interpolation syntax/. /Quotes/ and
+       /splices/ in this section allow us to treat code in a similar way,
+       effectively supporting /macros/.
+       #+begin_src scala
+         println(s"Hello, $name, here is the result of 1 + 1 = ${1 + 1}")
+       #+end_src
+       In string interpolation we /quoted/ a string and then we /spliced/ into it,
+       two others.
+       1. ~name~, is a reference to a value of type string,
+       2. an _arithmetic expression_ that will be evaluated followed by the /splicing/
+          of its string representation.
+
+     - The entry point for /macros/ is an /inline method/ with a *top-level* /splice/.
+       We call it a top-level because it is the *only occasion* where we encounter a
+       /splice/ *outside* a /quote/ (consider as a /quote/ the compilation-unit at the
+       call-site).
+
+       For example, the code below presents an ~inline~ /method/ ~assert~ which
+       calls at compile-time a method ~assertImpl~ with a /boolean expression
+       tree/ as argument. ~assertImpl~ evaluates the expression and prints it again
+       in an error message if it evaluates to ~false~.
+       #+begin_src scala
+         import sala.quoted._
+
+         inline def assert(expr: => Boolean): Unit =
+           ${ assertImpl('expr) }
+
+         def assertImpl(expr: Expr[Boolean]) = '{
+           if (!$expr)
+             throw new AssertionError(s"failed assertion: ${${ showExpr(expr) }}")
+         }
+
+         def showExpr(expr: Expr[Boolean]): Expr[String] =
+           '{ "<some source code>" }  // Better implementation later in this document
+       #+end_src
+
+     - /Quotations/ can have _spliced_ parts in them; in this case the embedded /splices/
+       _are evaluated and embedded as part of_ the formation of the /quotation/.
+
+     - /Quotes/ and /splices/ can also be applied *DIRECTLY* to _identifiers_.
+       + An /identifier/ ~$x~ starting with a ~$~ that appears _INSIDE_ a /quoted
+         expression or type/ is _treated as_ a /splice/ ~${x}~.
+
+       + Analogously, an /quoted identifier/ ~'x~ that appears _INSIDE_ a /splice/
+         is _treated as_ a /quote/ ~'{x}~.
+
+     - /Quotes/ and /splices/ are *DUALS of each other*.
+       For arbitrary /expressions/ ~e~ and /types/ ~T~ we have:
+       #+begin_src scala
+         ${'{e}} = e
+         '{${e}} = e
+         ${'[T]} = T
+         '{$[T]} = T
+       #+end_src
+
+**** DONE Types for Quotations
+     CLOSED: [2019-06-26 Wed 15:44]
+     - The /type signatures/ of /quotes/ and /splices/ can be described using
+       _TWO_ _FUNDAMENTAL /types/:_
+       + ~Expr[T]~: /abstract syntax trees/ representing /expressions/ of /type/ ~T~
+
+       + ~Type[T]~: /type structures/ representing /type/ ~T~.
+
+     - /Quoting/ takes
+       + /expressions/ of /type/ ~T~ to /expressions/ of /type/ ~Expr[T]~
+       + /types/ ~T~ to /expressions/ of /type/ ~Type[T]~.
+
+     - /Splicing/ takes
+       + expressions of /type/ ~Expr[T]~ to /expressions/ of /type/ ~T~
+       + expressions of /type/ ~Type[T]~ to /types/ ~T~.
+
+     - The two types can be defined in package ~scala.quoted~ as follows:
+       #+begin_src scala
+         package scala.quoted
+
+         sealed abstract calss Expr[+T]
+         sealed abstract calss Type[T]
+       #+end_src
+       All constructors for these types are provided by the system, which is the
+       reason why they are defined as ~sealed~.
+
+     - One way to construct values of type ~Expr[T]~ or ~Type[T]~ is by /quoting/,
+       TODO ???
+       the other is by /type-specific lifting operations/ that will be discussed later on.
+
+**** TODO The Phase Consistency Principle
+     - A fundamental /phase consistency principle (PCP)/ regulates accesses to /free
+       variables/ in /quoted/ and /spliced/ code:
+       + For any /free variable reference/ ~x~,
+         the _number_ of /quoted scopes/ and the _number_ of /spliced scopes/
+         between the reference to ~x~ and the definition of ~x~ *must be equal*.
+
+     - Here, ~this~-reference count as /free variables/.
+       TODO
+
+     - We assume all imports are fully expanded and that ~_root_~ is *NOT* a /free
+       variable/. So /references/ _to global definitions_ are allowed everywhere.
+       TODO
+
+     - The /phase consistency principle/ can _be motivated as follows_:
+       1. Suppose the result of a program _P_ is some /quoted text/ ~'{ ... x ... }~
+          that refers to a /free variable/ ~x~ in _P_. This can be represented only
+          by referring to the original variable ~x~.
+
+       2. Hence, the result of the program will need to persist the program state
+          itself as one of its parts. We don't want to do this, hence this situation
+          should be made illegal.
+
+          Dually, suppose a top-level part of a program is a /spliced text/ ~${
+          ... x ... }~ that refers to a /free variable/ ~x~ in _P_. This would
+          mean that we refer during construction of _P_ to a value that is
+          _available ONLY during execution of P._
+          *This is of course impossible and therefore needs to be ruled out.*
+
+       Now, the small-step evaluation of a program will reduce /quotes/ and
+       /splices/ in equal measure using the cancellation rules above. But it will
+       neither create nor remove /quotes/ or /splices/ individually. So the PCP
+       ensures that program elaboration will lead to neither of the two unwanted
+       situations described above.
+
 **** From ~Expr~'s to Functions and Back
 **** Types and the PCP
 **** Lifting Expressions
@@ -332,17 +567,17 @@
 **** Example Expansion
 **** Relationship with Whitebox Inline
 
-*** Staging
+*** TODO Staging
 **** API
 **** Example
 
-*** Erased Terms
+*** TODO Erased Terms
 **** Why erased terms?
 **** How to define erased terms?
 **** What happens with erased values at runtime?
 **** State machine with erased evidence example
 
-*** TASTy Reflection
+*** TODO TASTy Reflection
 **** API: From quotes and splices to TASTy reflect trees and back
 ***** Sealing and Unsealing
 ***** Obtaining and underlying argument
@@ -353,7 +588,7 @@
 **** TASTy Reflect API
 **** More Examples
 
-*** TASTy Inspection
+*** TODO TASTy Inspection
 **** Inspecting TASTy files
 
 ** OTHER NEW FEATURES
