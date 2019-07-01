@@ -67,7 +67,60 @@
 
 ** NEW TYPES
 *** Intersection types
+    The ~&~ operator creates an /intersection type/.
+
 **** Type Checking
+     The type ~S & T~ represents values that are of the type ~S~ and ~T~ at the
+     same time.
+
+     - Example:
+       #+begin_src scala
+         trait Resettable {
+           def reset(): Unit
+         }
+
+         trait Growable[T] {
+           def add(x: T): this.type
+         }
+
+         def f(x: Resettable & Growable[String]) = {
+           x.reset()
+           x.add("first")
+         }
+       #+end_src
+
+     - If a /member/ appears in both ~A~ and ~B~, its type in ~A & B~ is the
+       /intersection of its type/ in ~A~ and its type in ~B~.
+       For instance, assume the definitions:
+       #+begin_src scala
+         trait A {
+           def children: List[A]
+         }
+
+         trait B {
+           def children: List[B]
+         }
+
+         val x: A & B = new C
+         val ys: List[A & B] = x.children
+       #+end_src
+       ~ys~ is of type ~List[A] & List[B]~, which can be further simplified
+       to ~List[A & B]~ because ~List~ is /convariant/.
+
+     - TODO
+       One might wonder how the compiler could come up with a definition for
+       children of type List[A & B] since all its is given are children
+       definitions of type List[A] and List[B]. The answer is it does not need
+       to. A & B is just a type that represents a set of requirements for values
+       of the type. At the point where a value is constructed, one must make
+       sure that all inherited members are correctly defined. So if one defines
+       a class C that inherits A and B, one needs to give at that point a
+       definition of a children method with the required type.
+       #+begin_src scala
+         class C extends A with B {
+           def children: List[A & B] = ???
+         }
+       #+end_src
 
 *** Union types
 *** Type lambdas
@@ -284,7 +337,7 @@
             | This location is in code that was inlined at ...
        #+end_src
 
-**** Inline Matches
+**** TODO Inline Matches
      - TODO
        #+begin_src scala
          inline def g(x: Any) <: Any = inline x match {
@@ -558,14 +611,222 @@
        ensures that program elaboration will lead to neither of the two unwanted
        situations described above.
 
-**** From ~Expr~'s to Functions and Back
-**** Types and the PCP
-**** Lifting Expressions
+**** TODO From ~Expr~'s to Functions and Back
+     - The ~Expr~ /companion object/ contains an _implicit ~AsFunction~ conversion_
+       that TURNS a /tree describing a function/ INTO a function _mapping trees to
+       trees_.
+       #+begin_src scala
+         object Expr {
+           // ...
+           implicit class AsFunction[...](...) {
+             // ...
+           }
+         }
+       #+end_src
+       This decorator gives ~Expr~ the ~apply~ operation of an /applicative functor/,
+       where ~Expr~'s over /function types/ can be applied to ~Expr~ _arguments_.
+       The definition of ~AsFunction(f).apply(x)~ is assumed to be functionally
+       the same as ~'{($f)($x)}~, however it should *optimize* this call by
+       returning the result of /beta-reducing/ ~f(x)~ if ~f~ is a known lambda
+       expression.
+
+     - The ~AsFunction~ decorator distributes applications of ~Expr~ over /function
+       arrows/:
+       #+begin_src scala
+         AsFunction(_).apply: Expr[S => T] => (Expr[S] => Expr[T])
+       #+end_src
+       Its _dual_, let's call it ~reflect~, can be defined as follows:
+       #+begin_src scala
+         def reflect[T, U](f: Expr[T] => Expr[U]): Expr[T => U] = '{
+           (x: T) => ${ f('x) }
+         }
+       #+end_src
+
+     - Note how the FUNDAMENTAL /phase consistency principle/ works in _two different
+       directions_ here for ~f~ and ~x~.
+       The reference to ~f~ is legal because it is _quoted, then spliced_,
+       whereas the reference to ~x~ is legal because it is _spliced, then quoted_.
+
+**** TODO Types and the PCP
+     - In principle, The /phase consistency principle/ applies to /types/ as well
+       as for /expressions/.
+       This might seem too restrictive. Indeed, the definition of ~reflect~
+       above is _NOT phase correct_ since there is a /quote/ but no /splice/
+       between the parameter binding of ~T~ and its usage. But the code _can be
+       made phase correct_ *by adding a binding of a ~Type[T]~ tag*:
+       #+begin_src scala
+         def reflect[T, U](f: Expr[T] => Expr[U]) given (t: Type[T]): Expr[T => U] =
+           '{ (x: $t) => ${ f('x) } }
+       #+end_src
+
+     - In this version of ~reflect~, the type of ~x~ is now the result of /splicing/
+       the ~Type~ value ~t~. This operation is /splice/ correct -- there is one
+       /quote/ and one /splice/ between the use of ~t~ and its definition.
+
+     - To avoid clutter, the Scala implementation tries to convert ANY
+       /phase-incorrect reference/ to a type ~T~ to a /type-splice/, by
+       rewriting ~T~ to ~${ the[Type[T]]}~. For instance, the user-level
+       definition of ~reflect~:
+       #+begin_src scala
+         def reflect[T: Type, U: Type](f: Expr[T] => Expr[U]): Expr[T => U] =
+           '{ (x: T) => ${ f('x) } }
+       #+end_src
+       would be rewritten to
+       #+begin_src scala
+         def reflect[T: Type, U: Type](f: Expr[T] => Expr[U]): Expr[T => U] =
+           '{ (x: ${ the[Type[T]] }) => ${ f('x) } }
+       #+end_src
+
+     - The ~the~ query succeeds because there is a /delegate/ of type ~Type[T]~
+       available (namely the given parameter corresponding to the /context
+       bound/ ~: Type~), and the reference to that value is phase-correct.
+         If that was not the case, the phase inconsistency for ~T~ would be
+       reported as an error.
+
+**** TODO Lifting Expressions
+     - Consider the following implementation of a staged interpreter that implements
+       a compiler through staging.
+       #+begin_src scala
+         import scala.quoted._
+
+         enum Exp {
+           case Num(n: Int)
+           case Plus(e1: Exp, e2: Exp)
+           case Var(x: String)
+           case Let(x: String, e: Exp, in: Exp)
+         }
+       #+end_src
+
+     - The interpreted language consists of numbers ~Num~, addition ~Plus~, and
+       variables ~Var~ which are bound by ~Let~. Here are two sample expressions
+       in the language:
+       #+begin_src scala
+         val exp    = Plus(Plus(Num(2), Var("x")), Num(4))
+         val letExp = Let("x", Num(3), exp)
+       #+end_src
+
+     - Here's a compiler that maps an expression given in the interpreted language
+       to /quoted/ Scala code of type ~Expr[Int]~. The compiler takes an environment
+       that maps variable names to Scala ~Expr~'s.
+       #+begin_src scala
+         import delegate scala.quoted._
+
+         def compile(e: Exp, env: Map[String, Expr[Int]]): Expr[Int] = e match {
+           case Num(n)          => n.toExpr
+           case Plus(e1, e2)    => '{ ${ compile(e1, env) } + ${ compile(e2, env) } }
+           case Var(x)          => env(x)
+           case Let(x, e, body) => '{ val y = ${ compile(e, env) }; ${ compile(body, env + (x -> 'y)) } }
+         }
+       #+end_src
+
+     - Running compile(letExp, Map()) would yield the following Scala code:
+       #+begin_src scala
+         '{ val y = 3; (2 + y) + 4 }
+       #+end_src
+
+     - The body of the first clause, ~case Num(n) => n.toExpr~, looks suspicious.
+       ~n~ is declared as an ~Int~, yet it is converted to an ~Expr[Int]~ with
+       ~toExpr~. Shouldn't ~n~ be /quoted/? In fact this would _NOT_ work since
+       replacing ~n~ by ~'n~ in the clause _would NOT be phase correct_.
+
+     - The ~toExpr~ extension method is defined in package ~quoted~:
+       #+begin_src scala
+         package quoted
+
+         delegate LiftingOps {
+           def (x: T) toExpr[T] given (ev: Liftable[T]): Expr[T] = ev.toExpr(x)
+         }
+       #+end_src
+
+     - The extension says that values of types implementing the ~Liftable~ /type
+       class/ can be converted ("lifted") to ~Expr~ values using ~toExpr~,
+       provided a /delegate import/ of ~scala.quoted._~ is in scope.
+
+     - Dotty comes with /delegate definitions/ of ~Liftable~ for several types
+       including ~Boolean~, ~String~, and /ALL primitive number types/.
+         For example, ~Int~ values can be converted to ~Expr[Int]~ values by
+       wrapping the value in a ~Literal~ /tree node/. This makes use of the
+       underlying tree representation in the compiler for efficiency. But the
+       ~Liftable~ instances are nevertheless not magic in the sense that they
+       could all be defined in a user program without knowing anything about the
+       representation of ~Expr~ trees. For instance, here is a possible instance
+       of ~Liftable[Boolean]~:
+       #+begin_src scala
+         delegate for Liftable[Boolean] {
+           def toExpr(b: Boolean) = if (b) '{ true } else '{ false }
+         }
+       #+end_src
+
+     - Once we can lift bits, we can work our way up. For instance, here is a
+       possible implementation of ~Liftable[Int]~ that does not use the
+       underlying tree machinery:
+       #+begin_src scala
+         delegate for Liftable[Int] {
+           def toExpr(n: Int): Expr[Int] = n match {
+             case Int.MinValue    => '{ Int.MinValue }
+             case _ if n < 0      => '{ - ${ toExpr(-n) } }
+             case 0               => '{ 0 }
+             case _ if n % 2 == 0 => '{ ${ toExpr(n / 2) } * 2 }
+             case _               => '{ ${ toExpr(n / 2) } * 2 + 1 }
+           }
+         }
+       #+end_src
+
+     - Since Liftable is a type class, its instances can be conditional.
+       For example, a List is liftable if its element type is:
+       #+begin_src scala
+         delegate [T: Liftable] for Liftable[List[T]] {
+           def toExpr(xs: List[T]): Expr[List[T]] = xs match {
+             case head :: tail => '{ ${ toExpr(head) } :: ${ toExpr(tail) } }
+             case Nil          => '{ Nil: List[T] }
+           }
+         }
+       #+end_src
+
+     - In the end, Liftable resembles very much a serialization framework.
+       Like the latter it can be derived systematically for all collections,
+       case classes and enums. Note also that the synthesis of type-tag values
+       of type Type[T] is essentially the type-level analogue of lifting.
+
+     - Using /lifting/, we can now give the missing definition of ~showExpr~ in
+       the introductory example:
+       #+begin_src scala
+         def showExpr[T](expr: Expr[T]): Expr[String] = {
+           val code: String = expr.show
+           code.toExpr
+         }
+       #+end_src
+       That is, the ~showExpr~ /method/ _converts_ its ~Expr~ argument to a
+       string (~code~), and *lifts* the result back to an ~Expr[String]~ using
+       the ~toExpr~ method.
+
+     - Note:
+       the ~toExpr~ extension /method/ can be ommited by importing an /implicit
+       conversion/ with ~import scala.quoted.autolift._~. The programmer is able
+       to declutter slightly the code at the cost of readable phase distinction
+       between stages.
+
 **** Lifting Types
 **** Relationship with Inline
 **** Scope Extrusion
 **** Example Expansion
-**** Relationship with Whitebox Inline
+**** TODO Relationship with Whitebox Inline
+     ~Inline~ documents inlining.
+     The code below introduces a /whitebox inline method/ that can calculate
+     either a value of /type/ ~Int~ or a value of /type/ ~String~.
+     #+begin_src scala
+       inline def defaultOf(inline str: String) <: Any =
+         ${ defaultOfImpl(str) }
+
+       def defaultOfImpl(str: String): Expr[Any] = str match {
+         case "int"    => '{1}
+         case "string" => '{"a"}
+       }
+
+       // in a separate file
+       val a: Int    = defaultOf("int")
+       val b: String = defaultOf("string")
+     #+end_src
 
 *** TODO Staging
 **** API
