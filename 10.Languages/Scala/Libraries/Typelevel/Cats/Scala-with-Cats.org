@@ -3149,16 +3149,166 @@
   /Monads/ can potentially bloat the code base through nested
   for-comprehensions.
 
-** TODO 5.1 Exercise: Composing Monads - 130
+  - Example:
+    Look up a user record in a database. The return type should be something like
+    ~Either[Error, Option[User]]~.
+    #+begin_src scala
+      def lookupUserName(id: Long): Either[Error, Option[String]] =
+        for (optUser <- lookupUser(id))
+          yield for (user <- optUser) yield user.name
+    #+end_src
+    + The user may or may not be present, so we return an ~Option[User]~.
+
+    + Communication with the database could fail for many reasons, this result is
+      wrapped up in an ~Either~.
+
+  - The code like the one in the code, which process nested /monad values/, will
+    quickly becomes very tedious.
+
+** DONE 5.1 Exercise: Composing Monads - 130
+   CLOSED: [2019-07-10 Wed 22:36]
+   - Q :: Are /monads/ composable?
+
+   - Let's have a try:
+     #+begin_src scala
+       import cats.Monad
+       import cats.syntax.applicative._ // for pure
+       import cats.syntax.flatMap._     // for flatMap
+       import scala.language.higherKinds
+
+       // Hypothetical example. This won't actually compile:
+       def compose[M1[_]: Monad, M2[_]: Monad] = {
+         type Composed[A] = M1[M2[A]]
+
+         new Monad[Composed] {
+           def pure[A](a: A): Composed[A] =
+             a.pure[M2].pure[M1]
+
+           def flatMap[A, B](fa: Composed[A])(f: A => Composed[B]): Composed[B] =
+             // Problem! How do we write flatMap?
+             ???
+         }
+       }
+     #+end_src
+     The ~flatMap~ here can't be finished if we don't know some something about
+     ~M1~ or ~M2~ -- one is enough, no need for both.
+     + For example, if we fix ~M2~ to be ~Option~:
+       #+begin_src scala
+         def flatMap[A, B](fa: Composed[A])(f: A => Composed[B]): Composed[B] =
+           fa.flatMap(_.fold[Composed[B]](None.pure[M1])(f))
+       #+end_src
+       You may notice the ~None~ above.
+
+   - This is the idea behind /monad transformers/:
+     Cats defines /transformers/ for a variety of /monads/, each _providing the
+     extra knowledge_ we need to *compose* that /monad/ with others.
+
+   - A :: /Monads/ are composable, but we need to know some extra info.
+
 ** TODO 5.2 A Transformative Example - 131
+   - /Monad transformer/ name convention ~KnowMonadNameT~.
+     For instance,
+     + ~EitherT~ composes ~Either~ with other /monads/.
+     + ~OptionT~ composes ~Option~ with other /monads/.
+
+   - Example:
+     Use ~OptionT~ to Compose ~List~ and ~Option~.
+     Use ~OptionT[List, A]~, aliased to ~ListOption[A]~ for convenience, to
+     transform a ~List[Option[A]]~ into a _SINGLE_ /monad/:
+     #+begin_src scala
+       import cats.data.OptionT
+
+       type ListOption[A] = OptionT[List, A]
+     #+end_src
+     Note how we build ListOption from the inside out: we pass List , the type
+     of the outer monad, as a parameter to OptionT , the transformer for the
+     inner monad.
+
+   - We can creates /instances/ of ~ListOption~ using the ~OptionT~ /constructor/,
+     or more conveniently using ~pure~:
+     #+begin_src scala
+       import cats.Monad
+       import cats.instances.list._      // for Monad
+       import cats.syntax.applicative._  // for pure
+
+       val result1: ListOption[Int] = OptionT(List(Option(10)))
+       val result2: ListOption[Int] = 32.pure[ListOption]
+
+       result1.flatMap { (x: Int) =>
+         result2.map { (y: Int) =>
+           x + y
+         }
+       }
+       // res1: cats.data.OptionT[List, Int] = OptionT(List(Some(42)))
+     #+end_src
+
+   - *Complexity of Imports*
+     The /imports/ in the code samples above hint at how everything bolts
+     together.
+       We import ~cats.syntax.applicative~ to get the ~pure~ syntax. ~pure~
+     requires an /implicit parameter/ of type ~Applicative[ListOption]~.
+     We haven't met ~Applicative~'s yet, but all /Monads/ are also
+     /Applicatives/ so we can ignore that difference for now.
+       In order to *generate* our ~Applicative[ListOption]~ we need /instances/
+     of ~Applicative~ for ~List~ and ~OptionT~. ~OptionT~ is a /Cats data
+     type/ so _its /instance/ is provided by its /companion object/._ The
+     instance for ~List~ comes from ~cats.instances.list~..
+       Notice we're _NOT_ importing ~cats.syntax.functor~ or ~cats.syntax.flatMap~.
+     This is because ~OptionT~ is a /concrete data type/ with its own explicit
+     ~map~ and ~flatMap~ /methods/. It _wouldn't_ cause problems if we imported
+     the syntax -- _the compiler would ignore it in favour of the EXPLICIT
+     /methods/._
+       Remember that we're subjecting ourselves to these shenanigans because
+     we're stubbornly refusing to use the universal Cats import, ~cats.implicits~.
+     If we did use that import, *ALL* of the /instances/ and /syntax/ we needed
+     would be in scope and everything would just work.
+
 ** TODO 5.3 Monad Transformers in Cats - 133
-*** TODO 5.3.1 The Monad Transformer Classes - 133
+   - EACH /monad transformer/ is a /data type/, defined in ~cats.data~, that allows
+     us to _wrap stacks_ of /monads/ to produce new /monads/.
+
+   - The _main concepts_ we have to cover to understand /monad transformers/ are:
+     + the available /transformer classes/;
+     + HOW TO *build* stacks of monads using transformers;
+     + HOW TO *construct* /instances/ of a monad stack; and
+     + HOW TO *pull apart* a stack to *access* the _WRAPPED_ /monads/.
+
+*** DONE 5.3.1 The Monad Transformer Classes - 133
+    CLOSED: [2019-07-11 Thu 21:41]
+    - BY CONVENTION,
+      in Cats a /monad/ ~Foo~ will have a /transformer class/ called ~FooT~ .
+
+    - IN FACT,
+      many /monads/ in Cats are defined by combining a /monad transformer/ with
+      the ~Id~ /monad/.
+
+    - Some of the available instances:
+      + ~cats.data.OptionT~ for ~Option~;
+      + ~cats.data.EitherT~ for ~Either~;
+      + ~cats.data.ReaderT~ for ~Reader~;
+      + ~cats.data.WriterT~ for ~Writer~;
+      + ~cats.data.StateT~ for ~State~;
+      + ~cats.data.IdT~ for the ~Id~ /monad/.
+
+    - *Kleisli Arrows*
+      + In Section 4.8 we mentioned that
+        the ~Reader~ /monad/ was a specialisation of a more general concept called
+        a /kleisli arrow/, represented in Cats as ~cats.data.Kleisli~.
+
+      + We can now reveal that ~Kleisli~ and ~ReaderT~ are, in fact, the same
+        thing! ~ReaderT~ is actually a /type alias/ for ~Kleisli~.
+
+      Hence, we were creating ~Reader~'s last chapter and seeing ~Kleisli~'s on
+      the console.
+
 *** TODO 5.3.2 Building Monad Stacks - 134
 *** TODO 5.3.3 Constructing and Unpacking Instances - 136
 *** TODO 5.3.4 Default Instances - 137
 *** TODO 5.3.5 Usage Patterns - 138
 
 ** TODO 5.4 Exercise: Monads: Transform and Roll Out - 140
+   xxx
+
 ** TODO 5.5 Summary - 141
 
 * DONE 6 ~Semigroupal~ and ~Applicative~ - 143 - =NOTE=
