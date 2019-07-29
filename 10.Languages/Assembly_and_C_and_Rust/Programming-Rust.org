@@ -5392,7 +5392,8 @@
    CLOSED: [2018-06-06 Wed 20:03]
    TODO: NOTES
 
-* TODO 11. Traits and Generics - 235 - =Reading=
+* DONE 11. Traits and Generics - 235
+  CLOSED: [2019-07-29 Mon 01:30]
   - Rust supports /polymorphism/ with two related features:
     + /generics/ -- =From Jian= /parametric polymorphism/.
       For instance, ~Vec<T>~
@@ -6197,9 +6198,34 @@
      /generic function/.
        We could also have written ~StringSet::new()~ or ~<S as StringSet>::new()~.
 
-** TODO Traits That Define Relationships Between Types - 253
+** DONE Traits That Define Relationships Between Types - 253
+   CLOSED: [2019-07-28 Sun 17:04]
+   We have looked /traits/ that _stands alone_.
+   /Traits/ can also *describe relationships BETWEEN types*.
+   For example,
+
+   - /Trait/ ~std::iter::Iterator~
+     *relates* _each iterator type_ *with* _the type of value it produces_.
+     =from Jian= Dependent type???
+
+   - /Trait/ ~std::ops::Mul~
+     *relates* types that can be multiplied -- the LHS and RHS of ~*~ doesn't
+     need to be the same type, the result type is also need to be decided when
+     LHS and RHS have different types.
+
+   - The ~rand~ /crate/ includes both
+     + a /trait/ for /random number generators (~rand::Rng~)/
+     + a /trait/ for /types/ that _can be randomly generated (~rand::Rand~)_.
+     *The /traits/ themselves define exactly how these types work together.*
+
+   - The key skill here is
+     the ability to
+     + _read traits and method signatures_
+       AND
+     + _figure out what they say about the types involved_.
+
 *** DONE Associated Types (or How Iterators Work) - 254
-    CLOSED: [2018-06-23 Sat 01:50]
+    CLOSED: [2019-07-28 Sun 16:21]
     Example:
     #+BEGIN_SRC rust
       pub trait Iterator {
@@ -6212,9 +6238,9 @@
     #+END_SRC
     - The ~Item~ is called /associated type/.
 
-    - We write ~Self::Item~, not just plain ~Item~,
-      BECAUSE ~Item~ is a feature of _EACH_ type of /iterator/, *NOT a
-      standalone type*.
+    - In the signature of ~next(&mut self) -> Option<Self::Item>~, we use
+      ~Self::Item~, not just plain ~Item~, BECAUSE ~Item~ is a feature of _EACH_
+      type of /iterator/, *NOT a standalone type*.
 
     - Implement ~Iterator~ for a type:
       #+BEGIN_SRC rust
@@ -6242,6 +6268,7 @@
         }
       #+END_SRC
       + this is actually the ~.collect()~ /method/ in the standard library.
+        TODO See Chapter 15!
         =From Jian= I don't know if the details are same.
 
     - Another example:
@@ -6268,7 +6295,8 @@
         //             `where <I as std::iter::Iterator>::Item: std::fmt::Debug` bound
         //     = note: required by `std::fmt::Debug::fmt`
       #+END_SRC
-      What you need to do to eliminate this error:
+      The compiler has already tell you how to eliminate this error.
+      However, you don't need to write it in such a long form:
       + ~use std::fmt::Debug;~
         and
       + re-write the ~where~ line to ~where I: Iterator, I::Item: Debug~
@@ -6285,21 +6313,11 @@
             }
           #+END_SRC
 
-          This syntax can be used anywhere the name of a /trait/ can be used,
-          including /trait object/ types:
-          #+BEGIN_SRC rust
-            fn dump(iter: &mut Iterator<Item=String>) {
-                for (index, s) in iter.enumerate() {
-                    println!("{}: {:?}", index, s);
-                }
-            }
-          #+END_SRC
-
     - /Associated types/ are generally useful WHENEVER a /trait/ needs to cover
       _more than just /methods/._
       + In a /thread pool library/, a ~Task~ /trait/,
         _REPRESENTING_ a unit of work, could have an /associated ~Output~ type/.
-        =TODO= =???=
+        TODO ???
 
       + A ~Pattern~ trait, representing a way of searching a string, could have
         an /associated ~Match~ type/,
@@ -6325,19 +6343,19 @@
         #+END_SRC
 
       + A library for working with relational databases might have a /Database
-        Connection trait/ with /associated types/ _REPRESENTING_ transactions,
-        cursors, prepared statements, and so on.
+        Connection trait/ with /associated types/ _REPRESENTING_ /transactions/,
+        /cursors/, /prepared statements/, and so on.
 
     - /Associated types/ are perfect for cases where each implementation has one
       specific related type:
       each type of ~Task~ produces a particular type of ~Output~;
       each type of ~Pattern~ looks for a particular type of ~Match~.
 
-      =TODO= =???=
+      TODO ???
       However, as we'll see, some relationships among types are not like this.
 
 *** DONE Generic Traits (or How Operator Overloading Works) - 257
-    CLOSED: [2018-06-23 Sat 02:00]
+    CLOSED: [2019-07-28 Sun 16:21]
     #+BEGIN_SRC rust
       /// std::ops::Mul, the trait for types that support `*`.
       pub trait Mul<RHS> {
@@ -6355,13 +6373,99 @@
           // ...
       }
     #+END_SRC
+    - The syntax ~RHS=Self~ means that ~RHS~ defaults to ~Self~.
+      + If I write ~impl Mul for Complex~, without specifying ~Mul~'s type parameter,
+        it means ~impl Mul<Complex> for Complex~.
 
-*** TODO Buddy Traits (or How ~rand::random()~ Works) - 258
+      + If I write ~where T: Mul~, it means ~where T: Mul<T>~.
+
+    - In Rust, you can overload ~*~ by implementing the ~Mul~ /trait/.
+
+*** DONE Buddy Traits (or How ~rand::random()~ Works) - 258 - TODO =RE-READ=
+    CLOSED: [2019-07-28 Sun 17:04]
+    There's one more way to _use /traits/ to EXPRESS RELATIONSHIPS BETWEEN /types/._
+
+    - buddy traits :: simple traits that designed to work together.
+
+    - The ~rand~ crate for generating random numbers.
+      The main feature of ~rand~ is the ~random()~ function.
+      + Example:
+        #+begin_src rust
+          use rand::random;
+
+          let x = random::<f64>();   // a number, 0.0 <= x < 1.0
+          let b = random::<bool>();  // true or false
+        #+end_src
+
+    - For many programs, the code above is enough.
+      But the ~rand~ /crate/ also offers several different, but *interoperable*,
+      /random number generators/.
+
+    - All the /random number generators/ in the library implement a common /trait/:
+      #+begin_src rust
+        /// A random number generator.
+        pub trait Rng {
+            fn next_u32(&mut self) -> u32;
+            // ...
+        }
+      #+end_src
+      + An ~Rng~ is simply a value that can spit out integers on demand.
+
+      + The ~rand~ library provides a few different implementations, including
+        * ~XorShiftRng~: a fast pseudorandom number generator;
+        * ~OsRng~: much slower, but truly unpredicatable, for use in cryptography.
+
+    - The /buddy trait/ is called ~Rand~:
+      #+begin_src rust
+        /// A type that can be randomly generated using an `Rng`.
+        pub trait Rand: Sized {
+            fn rand<R: Rng>(rng: &mut R) -> Self;
+        }
+      #+end_src
+      + Types like ~f64~ and ~bool~ implement this /trait/.
+        _Pass_ any /random number generator/ to their ~::rand()~ /method/, and it
+        _returns_ a random value:
+        #+begin_src rust
+          let x = f64::rand(rng);
+          let b = bool::rand(rng);
+        #+end_src
+
+    - In fact the ~random()~ we see in the beginning of this section is nothing
+      but a thin wrapper that passes a globally allocated ~Rng~ to this ~rand~
+      /method/. One way to implement it is like this:
+      #+begin_src rust
+        pub fn random<T: Rand>() -> T {
+            T::rand(&mut global_rng())
+        }
+      #+end_src
+
+    - TODO ???
+      When you see /traits/ that use OTHER /traits/ as /bounds/ (the way ~Rand::rand()~
+      uses ~Rng~), you know that those two (=from Jian= or more??) /traits/ are
+      mix-and-match: _any_ ~Rng~ can generate values of _every_ ~Rand~ type.
+      + Since the /methods/ involved are /generic/, Rust generates optimized
+        machine code for each combination of ~Rng~ and ~Rand~ that your program
+        actually uses.
+
+    - TODO =IMPORTANT=
+    - TODO =IMPORTANT=
+    - TODO =IMPORTANT=
+    - TODO =IMPORTANT=
+
+    - SUMMARY:
+      In the last three sections, we've shown *three ways* /traits/ can _describe
+      relationships between types_.
+        *All of these can also be seen as ways of _avoiding_ virtual method
+      /overhead/ and /downcasts/,* since _they allow Rust to know MORE /concrete
+      types/ at /compile time/._
 
 ** DONE Reverse-Engineering Bounds - 260
-   CLOSED: [2018-06-24 Sun 23:00]
-   Sometimes you don't what /traits/ you need to implements some generics, and
-   you can use the compiler error messages as a guide to complete your code.
+   CLOSED: [2019-07-29 Mon 01:19]
+   Sometimes you don't have one single /trait/ you need to implements some generics,
+   and you can use the compiler error messages as a guide to complete your code.
+
+   =from Jian= At the end of this section, we will see how does our code can be
+   simplified when there is a proper single trait covers all what we want.
 
    Suppose we have:
    #+BEGIN_SRC rust
@@ -6374,7 +6478,8 @@
      }
    #+END_SRC
    You want a generics version to support some other numeric types.
-   - Step 1: Replace the type with type parameters (non-compilable)
+
+   - Step 1: Replace the type with type parameters (*non-compilable*)
      #+BEGIN_SRC rust
        fn dot<N>(v1: &[N], v2: &[N]) -> N {
            let mut total = 0;
@@ -6388,7 +6493,7 @@
      type of ~0~. These problem can be solve by using ~Add~, ~Mul~, and
      ~Default~ as bounds of ~N~.
 
-   - Step 2: Add bounds
+   - Step 2: Add /bounds/ (*non-compilable*)
      #+BEGIN_SRC rust
        use std::ops::{Add, Mul};
 
@@ -6400,15 +6505,15 @@
            total
        }
      #+END_SRC
-     ~Add~ and ~Mul~ has no promise about the output type.
+     ~Add~ and ~Mul~ has no promise about the output type, and the compiler will
+     complain again.
 
-   - Step 3: Add constraint to the output types.
+   - Step 3: Add /constraint/ to the _output types_. (*non-compilable*)
      #+BEGIN_SRC rust
        use std::ops::{Add, Mul};
 
        fn dot<N>(v1: &[N], v2: &[N]) -> N
-           where N: Add<Output=N> + Mul<Output=N> + Default
-       {
+           where N: Add<Output=N> + Mul<Output=N> + Default {
            let mut total = N::default();
            for i in 0 .. v1.len() {
                total = total + v1[i] * v2[i];
@@ -6416,15 +6521,22 @@
            total
        }
      #+END_SRC
-     Try to compile, and the error message is =cannot move out of there=
+     Try to compile, and the error message is like:
+     #+begin_src text
+       error[E0508]: cannot move out of type `[N]`, a non-copy array
+        --> traits_generic_dot_3.rs:7:25
+         |
+       7 | total = total + v1[i] * v2[i];
+         |                 ^^^^^ cannot move out of here
+     #+end_src
+     The compiler doesn't know ~v1[i]~ is a copiable value.
 
-   - Step 4: Add ~Copy~ as a bound
+   - Step 4: Add ~Copy~ as a /bound/
      #+BEGIN_SRC rust
        use std::ops::{Add, Mul};
 
        fn dot<N>(v1: &[N], v2: &[N]) -> N
-           where N: Add<Output=N> + Mul<Output=N> + Default + Copy
-       {
+           where N: Add<Output=N> + Mul<Output=N> + Default + Copy {
            let mut total = N::default();
            for i in 0 .. v1.len() {
                total = total + v1[i] * v2[i];
@@ -6443,6 +6555,8 @@
        use num::Num;
 
        fn dot<N: Num + Copy>(v1: &[N], v2: &[N]) -> N {
+           // Since now we use `Num` instead of `Default`, the default value
+           // becomes `N::zero()`
            let mut total = N::zero();
            for i in 0 .. v1.len() {
                total = total + v1[i] * v2[i];
@@ -6450,14 +6564,54 @@
            total
        }
      #+END_SRC
+     + Just as in /object-oriented programming/,
+       the _right_ /interface/ makes everything nice,
+       in /generic programming/, the _right_ /trait/ makes everything nice.
 
-     + Still, why go to all this trouble?
-       Why didn’t Rust’s designers make the generics more like C++ templates,
-       where the constraints are left implicit in the code, à la “duck typing?”
-       =Re-Read= =Page 263=
+
+     + Q :: Why go to all this trouble?
+            Why didn't Rust's designers make the /generics/ more like /C++
+            templates/, where the /constraints/ are left /implicit/ in the code,
+            à la /duck typing/?
+
+     + A :: Advantages:
+       * /forward compatibility/ of generic code.
+         You _can_ change the implementation of a /public generic function or
+         method/, and
+         *IF* you did *not change* the /signature/, you have *not broken* any of
+         its users.
+
+       * /bounds/ is that when you do get a compiler error, at least the compiler
+         can tell you where the trouble is.
+           This sounds simple, but C++ compiler error messages involving templates
+         can't do as good as Rust compiler. The error messages can come from the
+         template -- or its caller, which might also be a template -- or that
+         template's caller...
+
+       * *Perhaps the most important advantage* of writing out the /bounds/ explicitly
+         is simply that *THEY ARE THERE*, in the code and in the documentation.
+         - You can look at the /signature/ of a /generic function/ in Rust and
+           see exactly what kind of arguments it accepts.
+           The same can't be said for templates.
+
+         - The work that goes into fully documenting argument types in C++ libraries
+           like Boost is even more arduous than what we went through here. The
+           Boost developers don't have a compiler that checks their work.
 
 ** DONE Conclusion - 263
    CLOSED: [2018-06-22 Fri 03:41]
+   - /Traits/ are one of the *main organizing features* in Rust, and with good
+     reason.
+       There's nothing better to design a program or library around than a good
+     /interface/.
+
+   - Now that we've laid a foundation, we can start talking about the many ways
+     /traits/ and /generics/ are used in Rust code.
+     _The fact is, we've only begun to scratch the surface._
+     _The next two chapters cover common traits provided by the standard library._
+     Upcoming chapters cover /closures/, /iterators/, _input/output_, and
+     /concurrency/. /Traits/ and /generics/ play a central role in all of these
+     topics.
 
 * DONE 12. Operator Overloading - 265
   CLOSED: [2018-06-25 Mon 18:06]
@@ -11899,3 +12053,4 @@
 
 * Index - 585
   
+ 
