@@ -352,36 +352,39 @@
 *** TODO Running the Mandelbrot Plotter - 40
 *** TODO Safety Is Invisible - 41
 
-* DONE 3. Basic types - 43
-  CLOSED: [2018-05-22 Tue 09:03]
+* 3. Basic types - 43
   - Rust's types serve several goals:
     + Safety
 
-    + Efficiency
+    + Efficiency:
+        Programmers have fine-grained control over how Rust programs represent
+      values in memory, and can choose types they know the processor will
+      handle efficiently.
+      *Programs needn't pay for generality or flexibility they don't use.*
 
-    + Concision
+    + Concision:
+      Rust manages all of this without requiring too much guidance from the
+      programmer in the form of types written out in the code -- usually much
+      less cluttered with types than the analogous C++ program would be.
 
-  - As a /statically typed language/,
-    + Rust *forces* the users to take more planning from the up front.
-      The planning is materialized as consistent data types in your program.
+  - Types can help Rust compiler to choose _GOOD machine-level_ /representations/
+    for values your program operate on: /representations/ whose _performance_ you
+    *can predict*, and which give you full access to the machine's capabilities.
 
-    + Rust compiler checks the consistency between data types, and
-      catch many mistakes earlier, before running.
+  - As a /statically typed language/, Rust
+    + *forces* the users to take more planning from the up front.
+      The planning is materialized as _consistent_ data types in your program.
+
+    + compiler checks the _consistency_ between data types, and catch many
+      mistakes earlier, before running.
 
   - Rust has two features to facilitate your program:
     + /type inference/
-
     + /generics/
 
-  - The rest of this chapter covers Rust’s types from the bottom up, starting
-    with simple machine types like integers and floating-point values, and then
-    showing how to compose them into more complex structures. Where appropriate,
-    we’ll describe how Rust represents values of these types in memory, and
-    their performance characteristics.
-
-  - Here’s a summary of the sorts of types you’ll see in Rust. This table shows
-    Rust’s primitive types, some very common types from the standard library, and
-    some examples of user-defined types:
+  - Here's a summary of the sorts of /types/ you'll see in Rust.
+    This table shows Rust's /primitive types/, some very /common types/ from the
+    standard library, and some examples of /user-defined types/:
     | Type                                 | Description                          | Values                               |
     |--------------------------------------+--------------------------------------+--------------------------------------|
     | ~i8~, ~i16~, ~i32~, ~i64~            | Signed and unsigned integers,        | ~42~, ~-5i8~, ~0x400u16~,            |
@@ -402,7 +405,7 @@
     |--------------------------------------+--------------------------------------+--------------------------------------|
     | ~(char, u8, i32)~                    | Tuple: mixed types allowed           | ~('%', 0x7f, -1)~                    |
     |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~()~                                 | “unit” (empty) tuple                 | ~()~                                 |
+    | ~()~                                 | "unit" (empty) tuple                 | ~()~                                 |
     |--------------------------------------+--------------------------------------+--------------------------------------|
     | ~struct S { x: f32, y: f32 }~        | Named-field struct                   | ~S { x: 120.0, y: 209.0 }~           |
     |--------------------------------------+--------------------------------------+--------------------------------------|
@@ -706,8 +709,12 @@
      techniques, and not redundant!
 
 ** DONE Pointer types - 55
-   CLOSED: [2018-05-19 Sat 13:26]
+   CLOSED: [2019-08-01 Thu 22:24]
    - Rust has _SEVERAL_ /types/ that represent memory addresses.
+
+   - TODO NOTE
+     + Languages like Java:
+     + Rust:
 
    - We'll discuss *three* /pointer types/ here:
      + /references/
@@ -715,41 +722,44 @@
      + /unsafe pointers/
 
 *** DONE References - 56
-    CLOSED: [2018-05-19 Sat 13:18]
-    - For instance, ~&String~ (pronounced "ref String") and ~&i32~ (pronounced
-      "ref 32 bit int(eger)").
+    CLOSED: [2019-08-01 Thu 22:16]
+    - Examples of reference,
+      + ~&String~ (pronounced "ref String")
+      + ~&i32~ (pronounced "ref 32 bit int(eger)").
 
     - It's easiest to get started by thinking of /references/ as Rust's _BASIC
       pointer type_ -- A /reference/ can point to ANY /value/ ANYWHERE, /stack/
       or /heap/.
 
     - Rust has ~&~ and ~*~ for /reference/ related operations.
-      They are very much like the ~&~ and ~*~ operators in C and C++.
+      They are _very much like_ the ~&~ and ~*~ operators in C and C++.
 
-      + The expression ~&x~ produces a reference to ~x~; in Rust terminology, we
-        say that it /borrows/ a reference to ~x~.
+      + ~&x~ produces a /reference/ to ~x~;
+        in Rust terminology, we say that it /borrows/ a /reference/ to ~x~.
 
-      + Given a reference ~r~, the expression ~*r~ refers to the value ~r~ points
-        to.
+      + Given a /reference/ ~r~, the expression ~*r~ refers to the value ~r~
+        points to.
 
-    - *LIKE* the ~&~ and ~*~ operators in C and C++, a /reference/ does *NOT*
-      automatically free any resources when it goes out of scope.
+    - Immutable reference :: ~&T~, like ~const T*~ in C.
 
-    - *UNLIKE* the /pointers/ in C/C++, Rust references are *NEVER null*:
-      there is simply *no way* to produce a /null reference/ in /safe Rust/.
+    - Mutable reference :: ~&mut T~, like ~T*~ in C.
 
-    - Immutable reference :: ~&T~, like ~const *T~ in C.
+    - *LIKE* the ~&~ and ~*~ operators in C and C++,
+      a /reference/ does *NOT automatically* free any resources when it goes out
+      of scope.
 
-    - Mutable reference :: ~&mut T~, like ~*T~ in C.
+    - *UNLIKE* the /pointers/ in C/C++,
+      + Rust /references/ are *NEVER null*:
+        there is simply *no way* to produce a /null reference/ in /safe Rust/.
 
-    - Another major difference is that Rust tracks the /ownership/ and
-      /lifetimes/ of values, so mistakes like /dangling pointers/, /double
-      frees/, and /pointer invalidation/ are *ruled out at compile time*.
-      =TODO=
-      Chapter 5 explains Rust’s rules for safe reference use.
+      + Rust tracks the /ownership/ and /lifetimes/ of values, so mistakes like
+        /dangling pointers/, /double frees/, and /pointer invalidation/ are
+        *ruled out at compile time*.
+        TODO
+        Chapter 5 explains Rust's rules for _safe reference use_.
 
 *** DONE Boxes - 56
-    CLOSED: [2018-05-19 Sat 13:21]
+    CLOSED: [2019-08-01 Thu 22:21]
     The simplest way to *allocate* a value in the /heap/ is to use ~Box::new~:
     #+BEGIN_SRC rust
       let t = (12, "eggs");  // (i32, &str)
@@ -761,29 +771,29 @@
     =TODO= Chpater 4
 
 *** DONE Raw Pointers - 57
-    CLOSED: [2018-05-19 Sat 13:26]
+    CLOSED: [2019-08-01 Thu 22:24]
     - Rust also has the /raw pointer types/ ~*mut T~ and ~*const T~.
       /Raw pointers/ really are just *LIKE* pointers in C++.
 
     - Using a /raw pointer/ is *UNSAFE*, because Rust makes no effort to track
-      what it points to. For example,
-      + /raw pointers/ may be null
-        OR
-      + they may point to memory that has been freed
-        OR
-      + they may point to memory that now contains a value of a different type.
+      what it points to. For example, /raw pointers/
+      + may be /null/
+      + may point to memory that
+        * _has been freed_
+        * now _contains a value of a DIFFERENT type._
 
-       All the classic pointer mistakes of C++ are offered for your enjoyment.
+      *All the classic pointer mistakes of C++ are offered for your enjoyment.*
 
-      However, you may *ONLY* _dereference_ /raw pointers/ within an ~unsafe~
+      However, you may *ONLY* _dereference_ /raw pointers/ *within* an ~unsafe~
       block.
 
     - ~unsafe~ block :: is Rust's opt-in mechanism for advanced language features
                         whose safety is up to you.
 
     - If your code has _NO_ ~unsafe~ blocks (or if those it does have are written
-      correctly), then the safety guarantees we emphasize throughout this book still hold.
-      =TODO=
+      correctly), then the safety guarantees we emphasize throughout this book
+      still hold.
+      TODO
       For details, see Chapter 21.
 
 ** DONE Arrays, Vectors, and Slices - 57
@@ -1304,15 +1314,15 @@
 ** DONE Beyond the basics - 69
    CLOSED: [2018-05-20 Sun 21:30]
    - There are *three* kinds of /user-defined types/, and we'll cover them in
-     three successive chapters:
+     *three* successive chapters:
      + ~struct~'s in Chapter 9;
      + ~enum~'s in Chapter 10;
      + ~trait~'s in Chapter 11.
 
-   - /Functions/ and /closures/ have their own types, covered in Chapter 14.
+   - /Functions/ and /closures/ have their own types, TODO covered in Chapter 14.
 
    - The types that make up the standard library are covered throughout the book.
-     For example, Chapter 16 presents _the standard collection types_.
+     For example, Chapter 16 presents _the standard collection types_. TODO
 
 * DONE 4. Ownership - 71
   CLOSED: [2018-05-22 Tue 14:50]
