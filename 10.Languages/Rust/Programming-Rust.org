@@ -707,7 +707,7 @@
      =From Jian= Why do we need /single element tuple/??? Scala has proved that
      /single element tuple/ is NOT useful -- there are always ways to use other
      techniques, and not redundant!
-
+~s/~
 ** DONE Pointer types - 55
    CLOSED: [2019-08-01 Thu 22:24]
    - Rust has _SEVERAL_ /types/ that represent memory addresses.
@@ -797,23 +797,23 @@
       For details, see Chapter 21.
 
 ** DONE Arrays, Vectors, and Slices - 57
-   CLOSED: [2018-05-20 Sun 21:05]
+   CLOSED: [2019-08-07 Wed 01:52]
    - Rust has *three* types for representing a _sequence of values_ in memory:
      + ~[T; N]~ 
        An /array/ of ~N~ values, each of type ~T~.
-       ~N~ must be known at compile time, which cannot be modified.
+       * The array size ~N~ is a _CONSTANT determined at /compile time/._ 
+         It CANNOT be modified.
 
      + ~Vec<T>~
        A /vector/ of ~T~'s, which is a _dynamically allocated_, _growable_
        sequence of values of type ~T~. Since its elements live on the /heap/, so
        you can _resize_ /vectors/ at will.
 
-     + ~&[T]~ and ~&mut [T]~, called a /shared slice of ~T~'s/ and /mutable slice
-       of ~T~'s/.
-
-       You can think of a /slice/ as a /pointer/ to its first element, together
+     + ~&[T]~: a /shared slice of ~T~'s/
+       ~&mut [T]~: a /mutable slice of ~T~'s/.
+         You can think of a /slice/ as a /pointer/ to its first element, together
        with a _count_ of the number of elements you can access starting at that
-       point.
+       point. (=from Jian= this is a /fat pointer/?)
 
        * A /mutable slice/ ~&mut [T]~ lets you read and modify elements, but
          *CANNOT be shared*;
@@ -821,39 +821,44 @@
        * a /shared slice/ ~&[T]~ lets you *share access* among several readers,
          but does *NOT let you MODIFY elements*.
 
-   - These types all have the ~len~ /method/.
-     They all use the SYNTAX ~v[i]~ to index elements.
-     ~i~ must be ~usize~.
-     Out of bound indexing will lead to a /panic/.
+   - All these _three_ types:
+     + have the ~len~ /method/.
+     + use the SYNTAX ~v[i]~ to index elements.
+     + /index/ (~i~ above) must be ~usize~.
+     + out of bound indexing will lead to a /panic/.
 
 *** DONE Arrays - 58
-    CLOSED: [2018-05-19 Sat 13:48]
+    CLOSED: [2019-08-07 Wed 00:34]
     - SYNTAX:
       + Basic: ~let lazy_caterer: [u32; 6] = [1, 2, 4, 7, 11, 16];~
-      + Fill in N same values: ~[true; 10000]~ creates an array of 10000 ~bool~'s
+      + Fill in N same values: ~[true; 10000]~ creates an array of 10000 ~true~'s
 
     - Rust has *NO* notation for an /uninitialized array/. (In general, Rust
       _ensures_ that code can _NEVER_ access any sort of /uninitialized value/.)
 
-    - Rust /arrays/ doesn't have /methods/ like iterating over elements,
-      searching, sorting, filling, filtering ,and so on. They are /methods/ of
-      /slices/.
+    - Rust /arrays/ does *NOT* have /methods/ like
+      + iterating over elements,
+      + searching,
+      + sorting,
+      + filling,
+      + filtering, and so on.
 
-      However, Rust implicitly coverts a /reference/ to an array to a /slice/
-      when searching for /methods/, so _you can call any /slice/ /method/ on an
-      /array/ DIRECTLY._ For example,
-      #+BEGIN_SRC rust
+    - The methods above are */methods/ of /slices/.*
+      In fact, even the ~len~ /method/ is a /slice/ only /method/.
+        However, Rust *implicitly coverts* a /reference/ to an /array/ to a
+      /slice/ when searching for /methods/, so _you can call any /slice/
+      /method/ on an /array/ DIRECTLY._ For example,
+      #+begin_src rust
         let mut chaos = [3, 5, 4, 1, 2];
         chaos.sort();
         assert_eq!(chaos, [1, 2, 3, 4, 5]);
-      #+END_SRC
+      #+end_src
+      This is because the operand of ~sort~ is a /reference/.
 
-    - In fact, even the ~len~ /method/ is a /slice/ only /method/.
-
-    - =TODO= "Slices" on page 62.
+    - TODO "Slices" on page 62.
 
 *** DONE Vectors - 59
-    CLOSED: [2018-05-20 Sun 20:25]
+    CLOSED: [2019-08-07 Wed 00:42]
     - SYNTAX (Type):
       ~Vec<T>~
 
@@ -887,8 +892,8 @@
         let v: Vec<i32> = (0..5).collect();
         assert_eq!(v, [0, 1, 2, 3, 4]);
       #+END_SRC
-      The type ~Vec<i32>~ here is required, or the ~collect~ method doesn't know
-      the type of the value it will generate.
+      The type ~Vec<i32>~ here is *required*, or the ~collect~ method doesn't
+      know the type of the value it will generate.
 
     - As with /arrays/, you can use /slice methods/ on /vectors/:
       #+BEGIN_SRC rust
@@ -911,7 +916,7 @@
       + the /number it actually contains now/ (in other words, its length).
         =From Jian= the ~len~ /method/
 
-    - When the buffer has reached its capacity, adding another element to the
+    - When the buffer has reached its /capacity/, adding another element to the
       /vector/ entails
       1. *allocating* a larger buffer
 
@@ -923,7 +928,7 @@
 
       4. finally *freeing* the old one.
 
-    - Create a vector with specified /capacity/, and observe its change after
+    - Create a /vector/ with specified /capacity/, and observe its change after
       pushing some elements into it:
       #+BEGIN_SRC rust
         let mut v = Vec::with_capacity(2);
@@ -980,26 +985,36 @@
 
       =TODO= Chapter 21 covers how to implement such types
 
-*** TODO Building Vectors Element by Element - 62
-    - =TODO= NOTE
-      Reasoning and Justify!
-      =TODO=
+*** DONE Building Vectors Element by Element - 62
+    CLOSED: [2019-08-07 Wed 01:46]
+    - Building a vector one element at a time
+      is *not*
+      _as bad as it might sound_.
 
-    - If you can estimate the size of your /vector/, use the /method/
-      ~Vec::with_capacity~ instead of ~Vec::new~.
+    - Whenever a vector outgrows its buffer's /capacity/, it chooses a new buffer
+      *twice* as large as the old one.
+        The total size of all the previous, smaller buffers put together is _2n – 1_,
+      very close to the final buffer size. Since the number of actual elements
+      is at least half the buffer size, *the /vector/ has always performed _LESS
+      THAN two copies_ per element!*
+        What this means is that using ~Vec::with_capacity~ instead of ~Vec::new~
+      is a way to gain a *constant factor improvement* in speed, _RATHER THAN an
+      algorithmic improvement._
 
-      Of course, if you know the content of your /vector/, use ~vec!~.
+    - For *small* /vectors/, avoiding a few calls to the /heap allocator/ can make
+      an observable difference in performance.
 
 *** DONE Slices - 62
-    CLOSED: [2018-05-20 Sun 21:05]
-    - /slice/ (~[T]~) :: a region of an array or vector.
+    CLOSED: [2019-08-07 Wed 01:51]
+    - /slice/ (~[T]~) :: a region of an /array/ OR /vector/.
       + Since a /slice/ can be any length, /slices/ *CANNOT* be stored directly
         in variables or passed as function arguments.
 
       + /Slices/ are _ALWAYS passed by /reference/._
           This is why we often call ~&[T]~'s or ~&str~'s a /slices/, but it is
-        acutally /references to a slices/ -- /slices/ almost always appear
-        behind /references/!
+        acutally /references to a slices/ -- /slices/ *almost always appear
+        behind /references/!*
+        TODO HOW TO not behind /references/??? TODO
 
     - A /reference/ to a /slice/ is /a *fat* pointer/:
       a two-word value comprising
@@ -1020,9 +1035,13 @@
 
     - An ORDINARY /reference/ is a non-owning pointer to _a single value_;
       An /reference/ to a /slice/ is a non-owning pointer to _several values_;
+        =from Jian= I think the _several_ about is the because /reference to
+      slices/ includes length.
 
-    - You can get a reference to a slice of an array or vector, or _a slice of an
-      existing slice_, by indexing it with a range:
+    - You can get /a reference to a slice/ by indexing it with a range of:
+      + an /array/ or /vector/,
+        OR
+      + _a /slice/ of an EXISTING /slice/,_
       #+BEGIN_SRC rust
         print(&v[0..2]);  // print the first two elements of v
         print(&a[2..]);   // print elements of a starting with a[2]
@@ -1031,10 +1050,12 @@
 
 ** DONE String Types - 64 - =TODO= =Re-Read=
    CLOSED: [2018-05-22 Tue 09:03]
-   - C++ has *two* string types ~const char *~ and ~std::string~.
-     Rust has a similar design as C++.
+   - C++ has *two* /string types/:
+     + ~const char *~: /String literals/
+     + ~std::string~: Dynamically creating strings at runtime
+     _Rust has a similar design as C++._
 
-   - More details in Chapter 17.
+   - TODO More details in Chapter 17.
 
 *** DONE String Literals - 64
     CLOSED: [2018-05-21 Mon 18:44]
@@ -1051,9 +1072,11 @@
       The /newline character/, as well as the /spaces/ _at the begining of the
       second line_ are included in this /string literal/.
 
-    - If one line of a string ends with a _backslash_,
-      then the /newline character/ and the _leading whitespace_ on the next line
-      are dropped:
+    - Q :: How about if we want to remove the /newline/ and the leading whitespaces
+           of the next line?
+
+    - A :: Add a _backslash_, then the /newline/ and the _leading whitespace_
+           on the next line are dropped:
       #+BEGIN_SRC rust
         println!("It was a bright, cold day in April, and \
                   there were four of us-\
@@ -1062,11 +1085,11 @@
         // It was a bright, cold day in April, and there were four of us-more or less.
       #+END_SRC
 
-    - /Raw string/ can reduce the double backslashes in some strings (e.g. Windows
-      pathes and regular expressions):
+    - /Raw string/ can _REDUCE_ the _double backslashes_ in some strings (e.g.
+      _Windows pathes_ and _regular expressions_):
 
-      All backslashes and whitespace characters inside a /raw string/ are included
-      _verbatim_ in the string. *No escape sequences are reconized.*
+        All backslashes and whitespace characters inside a /raw string/ are
+      included _verbatim_ in the string. *No escape sequences are reconized.*
       #+BEGIN_SRC rust
         let default_win_install_path = r"C:\Program Files\Gorillas";
         let pattern = Regex::new(r"\d+(\.\d+)*");
@@ -1087,16 +1110,14 @@
           /raw string/ ends.
 
 *** DONE Byte Strings - 65
-    CLOSED: [2018-05-21 Mon 21:45]
+    CLOSED: [2019-08-07 Wed 02:11]
     - byte string :: a /string literal/ with the ~b~ prefix.
 
     - Such a /byte string/ is a /slice of ~u8~ (byte) values/ --
-      rather than Unicode text.
+      RATHER THAN Unicode text.
 
-    - It does NOT have any of the string methods we'll discuss in a minute.
-
-      The most string-like thing about /byte strings/ is the syntax we used to
-      write it.
+    - /Byte strings/ *do NOT have any of the string methods.* The most string-like
+      thing about /byte strings/ is the syntax we used to write it.
 
     - Example,
       #+BEGIN_SRC rust
@@ -1115,24 +1136,10 @@
     - /raw byte string/ starts with ~br"~
 
     - /byte strings/ can only contains ASCII and =\xHH= escape sequences.
-
-      You *CANNOT* save other Unicode characters in bytes to form /byte
+        You *CANNOT* save other Unicode characters in bytes to form /byte
       strings/.
 
-    - ~&[u8; 3]~
-
-    - Example:
-      #+BEGIN_SRC rust
-        let method = b"GET";  // &[u8; 3]
-        assert_eq!(method, &[b'G', b'E', b'T']);
-      #+END_SRC
-      The type of ~method~ shown here is ~&[u8; 3]~:
-      it's a reference to an /array/ of three bytes.
-      =TODO= =???=
-      It DOESN'T have any of the /string methods/ we'll discuss in a minute.
-      The most string-like thing about it is the syntax we used to write it.
-
-*** DONE Strings in Memory - 65
+*** DONE Strings in Memory - 65 TODO =RE-READ=
     CLOSED: [2018-05-21 Mon 23:10]
     - Rust /strings/ are sequences of Unicode characters,
       but they are NOT stored in memory as array of ~char~'s (UTF-16 in Rust).
@@ -1192,7 +1199,7 @@
       and ~make_ascii_lowercase~ , which modify the text in place and affect only
       /single-byte character/'s, by definition.
 
-*** DONE String - 67
+*** DONE String - 67 TODO =RE-READ=
     CLOSED: [2018-05-21 Mon 23:23]
     - ~&str~ is very much like ~&[T]~: a /fat pointer/ to some data.
 
@@ -1246,7 +1253,7 @@
         This means that ~&str~ is more appropriate for /function arguments/ when
       the caller should be allowed to pass either kind of string.
 
-*** DONE Using Strings - 68
+*** DONE Using Strings - 68 TODO =RE-READ=
     CLOSED: [2018-05-22 Tue 09:03]
     - /Strings/ support the ~==~ and ~!=~ operators.
       They are used to _compare their values_, rather than /address/ as in Java.
@@ -1282,7 +1289,7 @@
       =TODO=
       We discuss these issues in more detail in Chapter 17.
 
-*** DONE Other String-Like Types - 68
+*** DONE Other String-Like Types - 68 TODO =RE-READ=
     CLOSED: [2018-05-22 Tue 08:59]
     - Rust guarantees that strings are valid UTF-8.
 
@@ -1315,9 +1322,9 @@
    CLOSED: [2018-05-20 Sun 21:30]
    - There are *three* kinds of /user-defined types/, and we'll cover them in
      *three* successive chapters:
-     + ~struct~'s in Chapter 9;
-     + ~enum~'s in Chapter 10;
-     + ~trait~'s in Chapter 11.
+     + ~struct~'s in Chapter 9; TODO
+     + ~enum~'s in Chapter 10;  TODO
+     + ~trait~'s in Chapter 11. TODO
 
    - /Functions/ and /closures/ have their own types, TODO covered in Chapter 14.
 
