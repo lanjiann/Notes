@@ -1,440 +1,10 @@
-#+TITLE: Core Java for The Impatient
-#+VERSION: 2nd, 2017
+#+TITLE: Core Java SE 9 for The Impatient
+#+VERSION: 2nd, 2018
 #+INFO: Covers Java SE 9
-#+AUTHOR: Cay Horstmann
+#+AUTHOR: Cay S. Horstmann
 #+STARTUP: entitiespretty
 
-* Table of Contents                                      :TOC_4_org:noexport:
-- [[Preface - xvii][Preface - xvii]]
-- [[Acknowledgments][Acknowledgments]]
-- [[About the Author][About the Author]]
-- [[1. FUNDAMENTAL PROGRAMMING STRUCTURES - 1][1. FUNDAMENTAL PROGRAMMING STRUCTURES - 1]]
-  - [[1.1 Our First Program][1.1 Our First Program]]
-    - [[1.1.1 Dissecting the "Hello, World" Program][1.1.1 Dissecting the "Hello, World" Program]]
-    - [[1.1.2 Compiling and Running a Java Program][1.1.2 Compiling and Running a Java Program]]
-    - [[1.1.3 Method Calls][1.1.3 Method Calls]]
-  - [[1.2 Primitive Types][1.2 Primitive Types]]
-    - [[1.2.1 Integer Types][1.2.1 Integer Types]]
-    - [[1.2.2 Floating-Point Types][1.2.2 Floating-Point Types]]
-    - [[1.2.3 The ~char~ Type][1.2.3 The ~char~ Type]]
-    - [[1.2.4 The ~boolean~ Type][1.2.4 The ~boolean~ Type]]
-  - [[1.3 Variables][1.3 Variables]]
-    - [[1.3.1 Variable Declarations][1.3.1 Variable Declarations]]
-    - [[1.3.2 Names][1.3.2 Names]]
-    - [[1.3.3 Initialization][1.3.3 Initialization]]
-    - [[1.3.4 Constants][1.3.4 Constants]]
-  - [[1.4 Arithmetic Operations][1.4 Arithmetic Operations]]
-    - [[1.4.1 Assignment][1.4.1 Assignment]]
-    - [[1.4.2 Basic Arithmetic][1.4.2 Basic Arithmetic]]
-    - [[1.4.3 Mathematical Methods][1.4.3 Mathematical Methods]]
-    - [[1.4.4 Number Type Conversions][1.4.4 Number Type Conversions]]
-    - [[1.4.5 Relational and Logical Operators][1.4.5 Relational and Logical Operators]]
-    - [[1.4.6 Big Numbers][1.4.6 Big Numbers]]
-  - [[1.5 Strings][1.5 Strings]]
-    - [[1.5.1 Concatenation][1.5.1 Concatenation]]
-    - [[1.5.2 Substrings][1.5.2 Substrings]]
-    - [[1.5.3 String Comparison][1.5.3 String Comparison]]
-    - [[1.5.4 Converting Between Numbers and Strings Variables][1.5.4 Converting Between Numbers and Strings Variables]]
-    - [[1.5.5 The String API][1.5.5 The String API]]
-    - [[1.5.6 Code Points and Code Units][1.5.6 Code Points and Code Units]]
-  - [[1.6 Input and Output][1.6 Input and Output]]
-    - [[1.6.1 Reading Input][1.6.1 Reading Input]]
-    - [[1.6.2 Formatted Output][1.6.2 Formatted Output]]
-  - [[1.7 Control Flow][1.7 Control Flow]]
-    - [[1.7.1 Branches][1.7.1 Branches]]
-    - [[1.7.2 Loops][1.7.2 Loops]]
-    - [[1.7.3 Breaking and Continuing][1.7.3 Breaking and Continuing]]
-    - [[1.7.4 Local Variable Scope][1.7.4 Local Variable Scope]]
-  - [[1.8 Arrays and Array Lists][1.8 Arrays and Array Lists]]
-    - [[1.8.1 Working with Arrays][1.8.1 Working with Arrays]]
-    - [[1.8.2 Array Construction][1.8.2 Array Construction]]
-    - [[1.8.3 Array Lists][1.8.3 Array Lists]]
-    - [[1.8.4 Wrapper Classes for Primitive Types][1.8.4 Wrapper Classes for Primitive Types]]
-    - [[1.8.5 The Enhanced for Loop][1.8.5 The Enhanced for Loop]]
-    - [[1.8.6 Copying Arrays and Array Lists][1.8.6 Copying Arrays and Array Lists]]
-    - [[1.8.7 Array Algorithms][1.8.7 Array Algorithms]]
-    - [[1.8.8 Command-Line Arguments][1.8.8 Command-Line Arguments]]
-    - [[1.8.9 Multidimensional Arrays][1.8.9 Multidimensional Arrays]]
-  - [[1.9 Functional Decomposition][1.9 Functional Decomposition]]
-    - [[1.9.1 Declaring and Calling Static Methods][1.9.1 Declaring and Calling Static Methods]]
-    - [[1.9.2 Array Parameters and Return Values][1.9.2 Array Parameters and Return Values]]
-    - [[1.9.3 Variable Arguments][1.9.3 Variable Arguments]]
-    - [[Exercises][Exercises]]
-- [[2. OBJECT-ORIENTED PROGRAMMING - 59][2. OBJECT-ORIENTED PROGRAMMING - 59]]
-  - [[2.1 Working with Objects][2.1 Working with Objects]]
-    - [[2.1.1 Accessor and Mutator Methods][2.1.1 Accessor and Mutator Methods]]
-    - [[2.1.2 Object References][2.1.2 Object References]]
-  - [[2.2 Implementing Classes][2.2 Implementing Classes]]
-    - [[2.2.1 Instance Variables][2.2.1 Instance Variables]]
-    - [[2.2.2 Method Headers][2.2.2 Method Headers]]
-    - [[2.2.3 Method Bodies][2.2.3 Method Bodies]]
-    - [[2.2.4 Instance Method Invocations][2.2.4 Instance Method Invocations]]
-    - [[2.2.5 The ~this~ Reference][2.2.5 The ~this~ Reference]]
-    - [[2.2.6 Call by Value][2.2.6 Call by Value]]
-  - [[2.3 Object Construction][2.3 Object Construction]]
-    - [[2.3.1 Implementing Constructors][2.3.1 Implementing Constructors]]
-    - [[2.3.2 Overloading][2.3.2 Overloading]]
-    - [[2.3.3 Calling One Constructor from Another][2.3.3 Calling One Constructor from Another]]
-    - [[2.3.4 Default Initialization][2.3.4 Default Initialization]]
-    - [[2.3.5 Instance Variable Initialization][2.3.5 Instance Variable Initialization]]
-    - [[2.3.6 Final Instance Variables][2.3.6 Final Instance Variables]]
-    - [[2.3.7 The Constructor with No Arguments][2.3.7 The Constructor with No Arguments]]
-  - [[2.4 Static Variables and Methods][2.4 Static Variables and Methods]]
-    - [[2.4.1 Static Variables][2.4.1 Static Variables]]
-    - [[2.4.2 Static Constants][2.4.2 Static Constants]]
-    - [[2.4.3 Static Initialization Blocks][2.4.3 Static Initialization Blocks]]
-    - [[2.4.4 Static Methods][2.4.4 Static Methods]]
-    - [[2.4.5 Factory Methods][2.4.5 Factory Methods]]
-  - [[2.5 Packages][2.5 Packages]]
-    - [[2.5.1 Package Declarations][2.5.1 Package Declarations]]
-    - [[2.5.2 The Class Path][2.5.2 The Class Path]]
-    - [[2.5.3 Package Scope][2.5.3 Package Scope]]
-    - [[2.5.4 Importing Classes][2.5.4 Importing Classes]]
-    - [[2.5.5 Static Imports][2.5.5 Static Imports]]
-  - [[2.6 Nested Classes][2.6 Nested Classes]]
-    - [[2.6.1 *Static* Nested Classes][2.6.1 *Static* Nested Classes]]
-    - [[2.6.2 Inner Classes][2.6.2 Inner Classes]]
-    - [[2.6.3 Special Syntax Rules for Inner Classes][2.6.3 Special Syntax Rules for Inner Classes]]
-  - [[2.7 Documentation Comments][2.7 Documentation Comments]]
-    - [[2.7.1 Comment Insertion][2.7.1 Comment Insertion]]
-    - [[2.7.2 Class Comments][2.7.2 Class Comments]]
-    - [[2.7.3 Method Comments][2.7.3 Method Comments]]
-    - [[2.7.4 Variable Comments][2.7.4 Variable Comments]]
-    - [[2.7.5 General Comments][2.7.5 General Comments]]
-    - [[2.7.6 Links][2.7.6 Links]]
-    - [[2.7.7 Package and Overview Comments][2.7.7 Package and Overview Comments]]
-    - [[2.7.8 Comment Extraction][2.7.8 Comment Extraction]]
-  - [[Exercises][Exercises]]
-- [[3. INTERFACES AND LAMBDA EXPRESSIONS - 99][3. INTERFACES AND LAMBDA EXPRESSIONS - 99]]
-  - [[3.1 Interfaces][3.1 Interfaces]]
-    - [[3.1.1 Declaring an Interface][3.1.1 Declaring an Interface]]
-    - [[3.1.2 Implementing an Interface][3.1.2 Implementing an Interface]]
-    - [[3.1.3 Converting to an Interface Type][3.1.3 Converting to an Interface Type]]
-    - [[3.1.4 Casts and the instanceof Operator][3.1.4 Casts and the instanceof Operator]]
-    - [[3.1.5 Extending Interfaces][3.1.5 Extending Interfaces]]
-    - [[3.1.6 Implementing Multiple Interfaces][3.1.6 Implementing Multiple Interfaces]]
-    - [[3.1.7 Constants][3.1.7 Constants]]
-  - [[3.2 Static and Default Methods][3.2 Static and Default Methods]]
-    - [[3.2.1 Static Methods][3.2.1 Static Methods]]
-    - [[3.2.2 Default Methods][3.2.2 Default Methods]]
-    - [[3.2.3 Resolving Default Method Conflicts][3.2.3 Resolving Default Method Conflicts]]
-  - [[3.3 Examples of Interfaces][3.3 Examples of Interfaces]]
-    - [[3.3.1 The ~Comparable~ Interface][3.3.1 The ~Comparable~ Interface]]
-    - [[3.3.2 The ~Comparator~ Interface][3.3.2 The ~Comparator~ Interface]]
-    - [[3.3.3 The ~Runnable~ Interface][3.3.3 The ~Runnable~ Interface]]
-    - [[3.3.4 User Interface Callbacks][3.3.4 User Interface Callbacks]]
-  - [[3.4 Lambda Expressions][3.4 Lambda Expressions]]
-    - [[3.4.1 The Syntax of Lambda Expressions][3.4.1 The Syntax of Lambda Expressions]]
-    - [[3.4.2 Functional Interfaces][3.4.2 Functional Interfaces]]
-  - [[3.5 Method and Constructor References][3.5 Method and Constructor References]]
-    - [[3.5.1 Method References][3.5.1 Method References]]
-    - [[3.5.2 Constructor References][3.5.2 Constructor References]]
-  - [[3.6 Processing Lambda Expressions][3.6 Processing Lambda Expressions]]
-    - [[3.6.1 Implementing Deferred Execution][3.6.1 Implementing Deferred Execution]]
-    - [[3.6.2 Choosing a Functional Interface][3.6.2 Choosing a Functional Interface]]
-    - [[3.6.3 Implementing Your Own Functional Interfaces][3.6.3 Implementing Your Own Functional Interfaces]]
-  - [[3.7 Lambda Expressions and Variable Scope][3.7 Lambda Expressions and Variable Scope]]
-    - [[3.7.1 Scope of a Lambda Expression][3.7.1 Scope of a Lambda Expression]]
-    - [[3.7.2 Accessing Variables from the Enclosing Scope][3.7.2 Accessing Variables from the Enclosing Scope]]
-  - [[3.8 Higher-Order Functions][3.8 Higher-Order Functions]]
-    - [[3.8.1 Methods that Return Functions][3.8.1 Methods that Return Functions]]
-    - [[3.8.2 Methods That Modify Functions][3.8.2 Methods That Modify Functions]]
-    - [[3.8.3 Comparator Methods][3.8.3 Comparator Methods]]
-  - [[3.9 Local Inner Classes][3.9 Local Inner Classes]]
-    - [[3.9.1 Local Classes][3.9.1 Local Classes]]
-    - [[3.9.2 Anonymous Classes][3.9.2 Anonymous Classes]]
-  - [[Exercises][Exercises]]
-- [[4. INHERITANCE AND REFLECTION - 135][4. INHERITANCE AND REFLECTION - 135]]
-  - [[4.1 Extending a Class][4.1 Extending a Class]]
-    - [[4.1.1 Super- and Subclasses][4.1.1 Super- and Subclasses]]
-    - [[4.1.2 Defining and Inheriting Subclass Methods][4.1.2 Defining and Inheriting Subclass Methods]]
-    - [[4.1.3 Method Overriding][4.1.3 Method Overriding]]
-    - [[4.1.4 Subclass Construction][4.1.4 Subclass Construction]]
-    - [[4.1.5 Superclass Assignments][4.1.5 Superclass Assignments]]
-    - [[4.1.6 Casts][4.1.6 Casts]]
-    - [[4.1.7 Final Methods and Classes][4.1.7 Final Methods and Classes]]
-    - [[4.1.8 Abstract Methods and Classes][4.1.8 Abstract Methods and Classes]]
-    - [[4.1.9 Protected Access][4.1.9 Protected Access]]
-    - [[4.1.10 Anonymous Subclasses][4.1.10 Anonymous Subclasses]]
-    - [[4.1.11 Inheritance and Default Methods][4.1.11 Inheritance and Default Methods]]
-    - [[4.1.12 Method Expressions with ~super~][4.1.12 Method Expressions with ~super~]]
-  - [[4.2 ~Object~: The Cosmic Superclass][4.2 ~Object~: The Cosmic Superclass]]
-    - [[4.2.1 The ~toString~ Method][4.2.1 The ~toString~ Method]]
-    - [[4.2.2 The ~equals~ Method =RE-READ= =IMPORTANT TIPS=][4.2.2 The ~equals~ Method =RE-READ= =IMPORTANT TIPS=]]
-    - [[4.2.3 The ~hashCode~ Method =RE-READ= =IMPORTANT TIPS=][4.2.3 The ~hashCode~ Method =RE-READ= =IMPORTANT TIPS=]]
-    - [[4.2.4 Cloning Objects =RE-READ= =IMPORTANT TIPS=][4.2.4 Cloning Objects =RE-READ= =IMPORTANT TIPS=]]
-  - [[4.3 Enumerations =RE-READ=][4.3 Enumerations =RE-READ=]]
-    - [[4.3.1 Methods of Enumerations - 155][4.3.1 Methods of Enumerations - 155]]
-    - [[4.3.2 Constructors, Methods, and Fields - 156][4.3.2 Constructors, Methods, and Fields - 156]]
-    - [[4.3.3 Bodies of Instances - 157][4.3.3 Bodies of Instances - 157]]
-    - [[4.3.4 Static Members - 157][4.3.4 Static Members - 157]]
-    - [[4.3.5 Switching on an Enumeration - 158][4.3.5 Switching on an Enumeration - 158]]
-  - [[4.4 Runtime Type Information and Resources][4.4 Runtime Type Information and Resources]]
-    - [[4.4.1 The Class Class - 159][4.4.1 The Class Class - 159]]
-    - [[4.4.2 Loading Resources - 162][4.4.2 Loading Resources - 162]]
-    - [[4.4.3 Class Loaders - 163][4.4.3 Class Loaders - 163]]
-    - [[4.4.4 The Context Class Loader - 164][4.4.4 The Context Class Loader - 164]]
-    - [[4.4.5 Service Loaders - 166][4.4.5 Service Loaders - 166]]
-  - [[4.5 Reflection - 168][4.5 Reflection - 168]]
-    - [[4.5.1 Enumerating Class Members - 168][4.5.1 Enumerating Class Members - 168]]
-    - [[4.5.2 Inspecting Objects - 170][4.5.2 Inspecting Objects - 170]]
-    - [[4.5.3 Invoking Methods - 171][4.5.3 Invoking Methods - 171]]
-    - [[4.5.4 Constructing Objects - 171][4.5.4 Constructing Objects - 171]]
-    - [[4.5.5 JavaBeans - 172][4.5.5 JavaBeans - 172]]
-    - [[4.5.6 Working with Arrays - 174][4.5.6 Working with Arrays - 174]]
-    - [[4.5.7 Proxies - 175][4.5.7 Proxies - 175]]
-  - [[Exercises - 177][Exercises - 177]]
-- [[5. EXCEPTIONS, ASSERTIONS, AND LOGGING - 180][5. EXCEPTIONS, ASSERTIONS, AND LOGGING - 180]]
-  - [[5.1 Exception Handling - 182][5.1 Exception Handling - 182]]
-    - [[5.1.1 Throwing Exceptions - 182][5.1.1 Throwing Exceptions - 182]]
-    - [[5.1.2 The Exception Hierarchy - 183][5.1.2 The Exception Hierarchy - 183]]
-    - [[5.1.3 Declaring Checked Exceptions - 185][5.1.3 Declaring Checked Exceptions - 185]]
-    - [[5.1.4 Catching Exceptions - 186][5.1.4 Catching Exceptions - 186]]
-    - [[5.1.5 The Try-with-Resources Statement - 187][5.1.5 The Try-with-Resources Statement - 187]]
-    - [[5.1.6 The ~finally~ Clause - 189][5.1.6 The ~finally~ Clause - 189]]
-    - [[5.1.7 Rethrowing and Chaining Exceptions - 190][5.1.7 Rethrowing and Chaining Exceptions - 190]]
-    - [[5.1.8 Uncaught Exceptions and the Stack Trace - 192][5.1.8 Uncaught Exceptions and the Stack Trace - 192]]
-    - [[5.1.9 The ~Objects.requireNonNull~ Method - 193][5.1.9 The ~Objects.requireNonNull~ Method - 193]]
-  - [[5.2 Assertions - 193][5.2 Assertions - 193]]
-    - [[5.2.1 Using Assertions - 194][5.2.1 Using Assertions - 194]]
-    - [[5.2.2 Enabling and Disabling Assertions - 194][5.2.2 Enabling and Disabling Assertions - 194]]
-  - [[5.3 Logging - 195][5.3 Logging - 195]]
-    - [[5.3.1 Using Loggers - 195][5.3.1 Using Loggers - 195]]
-    - [[5.3.2 Loggers - 196][5.3.2 Loggers - 196]]
-    - [[5.3.3 Logging Levels - 197][5.3.3 Logging Levels - 197]]
-    - [[5.3.4 Other Logging Methods - 197][5.3.4 Other Logging Methods - 197]]
-    - [[5.3.5 Logging Configuration - 199][5.3.5 Logging Configuration - 199]]
-    - [[5.3.6 Log Handlers - 200][5.3.6 Log Handlers - 200]]
-    - [[5.3.7 Filters and Formatters - 202][5.3.7 Filters and Formatters - 202]]
-  - [[Exercises][Exercises]]
-- [[6. GENERIC PROGRAMMING - 206][6. GENERIC PROGRAMMING - 206]]
-  - [[6.1 Generic Classes - 208][6.1 Generic Classes - 208]]
-  - [[6.2 Generic Methods - 209][6.2 Generic Methods - 209]]
-  - [[6.3 Type Bounds - 210][6.3 Type Bounds - 210]]
-  - [[6.4 Type Variance and Wildcards - 211][6.4 Type Variance and Wildcards - 211]]
-    - [[6.4.1 Subtype Wildcards - 212][6.4.1 Subtype Wildcards - 212]]
-    - [[6.4.2 Supertype Wildcards - 213][6.4.2 Supertype Wildcards - 213]]
-    - [[6.4.3 Wildcards with Type Variables - 214][6.4.3 Wildcards with Type Variables - 214]]
-    - [[6.4.4 Unbounded Wildcards - 215][6.4.4 Unbounded Wildcards - 215]]
-    - [[6.4.5 Wildcard Capture - 216][6.4.5 Wildcard Capture - 216]]
-  - [[6.5 Generics in the Java Virtual Machine - 216][6.5 Generics in the Java Virtual Machine - 216]]
-    - [[6.5.1 Type Erasure - 217][6.5.1 Type Erasure - 217]]
-    - [[6.5.2 Cast Insertion - 217][6.5.2 Cast Insertion - 217]]
-    - [[6.5.3 Bridge Methods - 218][6.5.3 Bridge Methods - 218]]
-  - [[6.6 Restrictions on Generics - 220][6.6 Restrictions on Generics - 220]]
-    - [[6.6.1 No Primitive Type Arguments - 220][6.6.1 No Primitive Type Arguments - 220]]
-    - [[6.6.2 At Runtime, All Types Are Raw - 220][6.6.2 At Runtime, All Types Are Raw - 220]]
-    - [[6.6.3 You Cannot Instantiate Type Variables - 221][6.6.3 You Cannot Instantiate Type Variables - 221]]
-    - [[6.6.4 You Cannot Construct Arrays of Parameterized Types - 223][6.6.4 You Cannot Construct Arrays of Parameterized Types - 223]]
-    - [[6.6.5 Class Type Variables Are Not Valid in Static Contexts - 224][6.6.5 Class Type Variables Are Not Valid in Static Contexts - 224]]
-    - [[6.6.6 Methods May Not Clash after Erasure - 224][6.6.6 Methods May Not Clash after Erasure - 224]]
-    - [[6.6.7 Exceptions and Generics - 225][6.6.7 Exceptions and Generics - 225]]
-  - [[6.7 Reflection and Generics - 226][6.7 Reflection and Generics - 226]]
-    - [[6.7.1 The Class<T> Class - 227][6.7.1 The Class<T> Class - 227]]
-    - [[6.7.2 Generic Type Information in the Virtual Machine - 227][6.7.2 Generic Type Information in the Virtual Machine - 227]]
-  - [[Exercises - 229][Exercises - 229]]
-- [[7. COLLECTIONS - 234][7. COLLECTIONS - 234]]
-  - [[7.1 An Overview of the Collections Framework - 236][7.1 An Overview of the Collections Framework - 236]]
-  - [[7.2 Iterators - 240][7.2 Iterators - 240]]
-  - [[7.3 Sets - 242][7.3 Sets - 242]]
-  - [[7.4 Maps - 243][7.4 Maps - 243]]
-  - [[7.5 Other Collections - 247][7.5 Other Collections - 247]]
-    - [[7.5.1 Properties - 247][7.5.1 Properties - 247]]
-    - [[7.5.2 Bit Sets - 248][7.5.2 Bit Sets - 248]]
-    - [[7.5.3 Enumeration Sets and Maps - 250][7.5.3 Enumeration Sets and Maps - 250]]
-    - [[7.5.4 Stacks, Queues, Deques, and Priority Queues - 250][7.5.4 Stacks, Queues, Deques, and Priority Queues - 250]]
-    - [[7.5.5 Weak Hash Maps - 251][7.5.5 Weak Hash Maps - 251]]
-  - [[7.6 Views - 252][7.6 Views - 252]]
-    - [[7.6.1 Ranges - 252][7.6.1 Ranges - 252]]
-    - [[7.6.2 Empty and Singleton Views - 253][7.6.2 Empty and Singleton Views - 253]]
-    - [[7.6.3 Unmodifiable Views - 254][7.6.3 Unmodifiable Views - 254]]
-  - [[Exercises - 255][Exercises - 255]]
-- [[8. STREAMS - PAGE 247 ~ 260][8. STREAMS - PAGE 247 ~ 260]]
-  - [[8.1 From Iterating to Stream Operations][8.1 From Iterating to Stream Operations]]
-  - [[8.2 Stream Creation][8.2 Stream Creation]]
-  - [[8.3 The ~filter~, ~map~, and ~flatMap~ Methods][8.3 The ~filter~, ~map~, and ~flatMap~ Methods]]
-  - [[8.4 Extracting Substreams and Combining Streams][8.4 Extracting Substreams and Combining Streams]]
-  - [[8.5 Other Stream Transformations][8.5 Other Stream Transformations]]
-  - [[8.6 Simple Reductions][8.6 Simple Reductions]]
-  - [[8.7 The Optional Type][8.7 The Optional Type]]
-    - [[8.7.1 How to Work with Optional Values][8.7.1 How to Work with Optional Values]]
-    - [[8.7.2 How Not to Work with Optional Values][8.7.2 How Not to Work with Optional Values]]
-    - [[8.7.3 Creating Optional Values][8.7.3 Creating Optional Values]]
-    - [[8.7.4 Composing Optional Value Functions with flatMap][8.7.4 Composing Optional Value Functions with flatMap]]
-  - [[8.8 Collecting Results][8.8 Collecting Results]]
-  - [[8.9 Collecting into Maps][8.9 Collecting into Maps]]
-  - [[8.10 Grouping and Partitioning][8.10 Grouping and Partitioning]]
-  - [[8.11 Downstream Collectors][8.11 Downstream Collectors]]
-  - [[8.12 Reduction Operations][8.12 Reduction Operations]]
-  - [[8.13 Primitive Type Streams][8.13 Primitive Type Streams]]
-  - [[8.14 Parallel Streams][8.14 Parallel Streams]]
-  - [[Exercises][Exercises]]
-- [[9. PROCESSING INPUT AND OUTPUT - PAGE 270 ~ 303][9. PROCESSING INPUT AND OUTPUT - PAGE 270 ~ 303]]
-  - [[9.1 Input/Output Streams, Readers, and Writers - 288][9.1 Input/Output Streams, Readers, and Writers - 288]]
-    - [[9.1.1 Obtaining Streams - 288][9.1.1 Obtaining Streams - 288]]
-    - [[9.1.2 Reading Bytes - 289][9.1.2 Reading Bytes - 289]]
-    - [[9.1.3 Writing Bytes - 290][9.1.3 Writing Bytes - 290]]
-    - [[9.1.4 Character Encodings - 290][9.1.4 Character Encodings - 290]]
-    - [[9.1.5 Text Input - 293][9.1.5 Text Input - 293]]
-    - [[9.1.6 Text Output - 294][9.1.6 Text Output - 294]]
-    - [[9.1.7 Reading and Writing Binary Data - 295][9.1.7 Reading and Writing Binary Data - 295]]
-    - [[9.1.8 Random-Access Files - 296][9.1.8 Random-Access Files - 296]]
-    - [[9.1.9 Memory-Mapped Files - 297][9.1.9 Memory-Mapped Files - 297]]
-    - [[9.1.10 File Locking - 297 =re-read=][9.1.10 File Locking - 297 =re-read=]]
-  - [[9.2 Paths, Files, and Directories - 298][9.2 Paths, Files, and Directories - 298]]
-    - [[9.2.1 Paths - 298][9.2.1 Paths - 298]]
-    - [[9.2.2 Creating Files and Directories - 300][9.2.2 Creating Files and Directories - 300]]
-    - [[9.2.3 Copying, Moving, and Deleting Files - 301][9.2.3 Copying, Moving, and Deleting Files - 301]]
-    - [[9.2.4 Visiting Directory Entries - 302][9.2.4 Visiting Directory Entries - 302]]
-    - [[9.2.5 ZIP File Systems - 305][9.2.5 ZIP File Systems - 305]]
-  - [[9.3 URL Connections - 306][9.3 URL Connections - 306]]
-    - [[9.3.1 The ~URLConnection~ and ~HttpURLConnection~ Classes - 306][9.3.1 The ~URLConnection~ and ~HttpURLConnection~ Classes - 306]]
-    - [[9.3.2 The HTTP Client API - 307][9.3.2 The HTTP Client API - 307]]
-  - [[9.4 Regular Expressions - 310][9.4 Regular Expressions - 310]]
-    - [[9.4.1 The Regular Expression Syntax - 310][9.4.1 The Regular Expression Syntax - 310]]
-    - [[9.4.2 Finding One Match - 314][9.4.2 Finding One Match - 314]]
-    - [[9.4.3 Finding All Matches - 315][9.4.3 Finding All Matches - 315]]
-    - [[9.4.4 Groups - 316][9.4.4 Groups - 316]]
-    - [[9.4.5 Splitting along Delimiters - 317][9.4.5 Splitting along Delimiters - 317]]
-    - [[9.4.6 Replacing Matches - 317][9.4.6 Replacing Matches - 317]]
-    - [[9.4.7 Flags - 318][9.4.7 Flags - 318]]
-  - [[9.5 Serialization - 319][9.5 Serialization - 319]]
-    - [[9.5.1 The ~Serializable~ Interface - 319][9.5.1 The ~Serializable~ Interface - 319]]
-    - [[9.5.2 Transient Instance Variables - 321][9.5.2 Transient Instance Variables - 321]]
-    - [[9.5.3 The ~readObject~ and ~writeObject~ Methods - 321][9.5.3 The ~readObject~ and ~writeObject~ Methods - 321]]
-    - [[9.5.4 The ~readResolve~ and ~writeReplace~ Methods - 322][9.5.4 The ~readResolve~ and ~writeReplace~ Methods - 322]]
-    - [[9.5.5 Versioning - 324][9.5.5 Versioning - 324]]
-  - [[Exercises - 325][Exercises - 325]]
-- [[10. CONCURRENT PROGRAMMING - PAGE 304 ~ 343][10. CONCURRENT PROGRAMMING - PAGE 304 ~ 343]]
-  - [[10.1 Concurrent Tasks][10.1 Concurrent Tasks]]
-    - [[10.1.1 Running Tasks][10.1.1 Running Tasks]]
-    - [[10.1.2 Futures and Executor Services][10.1.2 Futures and Executor Services]]
-  - [[10.2 Thread Safety][10.2 Thread Safety]]
-    - [[10.2.1 Visibility][10.2.1 Visibility]]
-    - [[10.2.2 Race Conditions][10.2.2 Race Conditions]]
-    - [[10.2.3 Strategies for Safe Concurrency][10.2.3 Strategies for Safe Concurrency]]
-    - [[10.2.4 Immutable Classes][10.2.4 Immutable Classes]]
-  - [[10.3 Parallel Algorithms][10.3 Parallel Algorithms]]
-    - [[10.3.1 Parallel Streams][10.3.1 Parallel Streams]]
-    - [[10.3.2 Parallel Array Operations][10.3.2 Parallel Array Operations]]
-  - [[10.4 Threadsafe Data Structures][10.4 Threadsafe Data Structures]]
-    - [[10.4.1 Concurrent Hash Maps][10.4.1 Concurrent Hash Maps]]
-    - [[10.4.2 Blocking Queues][10.4.2 Blocking Queues]]
-    - [[10.4.3 Other Threadsafe Data Structures][10.4.3 Other Threadsafe Data Structures]]
-  - [[10.5 Atomic Values][10.5 Atomic Values]]
-  - [[10.6 Locks][10.6 Locks]]
-    - [[10.6.1 Reentrant Locks][10.6.1 Reentrant Locks]]
-    - [[10.6.2 The synchronized Keyword][10.6.2 The synchronized Keyword]]
-    - [[10.6.3 Waiting on Conditions][10.6.3 Waiting on Conditions]]
-  - [[10.7 Threads][10.7 Threads]]
-    - [[10.7.1 Starting a Thread][10.7.1 Starting a Thread]]
-    - [[10.7.2 Thread Interruption][10.7.2 Thread Interruption]]
-    - [[10.7.3 Thread-Local Variables][10.7.3 Thread-Local Variables]]
-    - [[10.7.4 Miscellaneous Thread Properties][10.7.4 Miscellaneous Thread Properties]]
-  - [[10.8 Asynchronous Computations][10.8 Asynchronous Computations]]
-    - [[10.8.1 Long-Running Tasks in User Interface Callbacks][10.8.1 Long-Running Tasks in User Interface Callbacks]]
-    - [[10.8.2 Completable Futures][10.8.2 Completable Futures]]
-  - [[10.9 Processes][10.9 Processes]]
-    - [[10.9.1 Building a Process][10.9.1 Building a Process]]
-    - [[10.9.2 Running a Process][10.9.2 Running a Process]]
-  - [[Exercises][Exercises]]
-- [[11. ANNOTATIONS - PAGE 344 ~ 364][11. ANNOTATIONS - PAGE 344 ~ 364]]
-  - [[11.1 Using Annotations][11.1 Using Annotations]]
-    - [[11.1.1 Annotation Elements][11.1.1 Annotation Elements]]
-    - [[11.1.2 Multiple and Repeated Annotations][11.1.2 Multiple and Repeated Annotations]]
-    - [[11.1.3 Annotating Declarations][11.1.3 Annotating Declarations]]
-    - [[11.1.4 Annotating Type Uses][11.1.4 Annotating Type Uses]]
-    - [[11.1.5 Making Receivers Explicit][11.1.5 Making Receivers Explicit]]
-  - [[11.2 Defining Annotations][11.2 Defining Annotations]]
-  - [[11.3 Standard Annotations][11.3 Standard Annotations]]
-    - [[11.3.1 Annotations for Compilation][11.3.1 Annotations for Compilation]]
-    - [[11.3.2 Annotations for Managing Resources][11.3.2 Annotations for Managing Resources]]
-    - [[11.3.3 Meta-Annotations][11.3.3 Meta-Annotations]]
-  - [[11.4 Processing Annotations at Runtime][11.4 Processing Annotations at Runtime]]
-  - [[11.5 Source-Level Annotation Processing][11.5 Source-Level Annotation Processing]]
-    - [[11.5.1 Annotation Processors][11.5.1 Annotation Processors]]
-    - [[11.5.2 The Language Model API][11.5.2 The Language Model API]]
-    - [[11.5.3 Using Annotations to Generate Source Code][11.5.3 Using Annotations to Generate Source Code]]
-  - [[Exercises][Exercises]]
-- [[12. THE DATE AND TIME API - 400][12. THE DATE AND TIME API - 400]]
-  - [[12.1 The Time Line - 402][12.1 The Time Line - 402]]
-  - [[12.2 Local Dates - 404][12.2 Local Dates - 404]]
-  - [[12.3 Date Adjusters - 407][12.3 Date Adjusters - 407]]
-  - [[12.4 Local Time - 409][12.4 Local Time - 409]]
-  - [[12.5 Zoned Time - 410][12.5 Zoned Time - 410]]
-  - [[12.6 Formatting and Parsing - 413 =Read When Use=][12.6 Formatting and Parsing - 413 =Read When Use=]]
-  - [[12.7 Interoperating with Legacy Code - 416 =Try to Re-Read multiple times=][12.7 Interoperating with Legacy Code - 416 =Try to Re-Read multiple times=]]
-  - [[Exercises - 417][Exercises - 417]]
-- [[13. INTERNATIONALIZATION - 420][13. INTERNATIONALIZATION - 420]]
-  - [[13.1 Locales - 422][13.1 Locales - 422]]
-    - [[13.1.1 Specifying a Locale - 423][13.1.1 Specifying a Locale - 423]]
-    - [[13.1.2 The Default Locale - 426][13.1.2 The Default Locale - 426]]
-    - [[13.1.3 Display Names - 426][13.1.3 Display Names - 426]]
-  - [[13.2 Number Formats - 427][13.2 Number Formats - 427]]
-  - [[13.3 Currencies - 428][13.3 Currencies - 428]]
-  - [[13.4 Date and Time Formatting - 429][13.4 Date and Time Formatting - 429]]
-  - [[13.5 Collation and Normalization - 431][13.5 Collation and Normalization - 431]]
-  - [[13.6 Message Formatting - 433][13.6 Message Formatting - 433]]
-  - [[13.7 Resource Bundles - 435][13.7 Resource Bundles - 435]]
-    - [[13.7.1 Organizing Resource Bundles - 435][13.7.1 Organizing Resource Bundles - 435]]
-    - [[13.7.2 Bundle Classes - 437][13.7.2 Bundle Classes - 437]]
-  - [[13.8 Character Encodings - 438][13.8 Character Encodings - 438]]
-  - [[13.9 Preferences - 439][13.9 Preferences - 439]]
-  - [[Exercises - 441][Exercises - 441]]
-- [[14. COMPILING AND SCRIPTING - 442][14. COMPILING AND SCRIPTING - 442]]
-  - [[14.1 The Compiler API - 444][14.1 The Compiler API - 444]]
-    - [[14.1.1 Invoking the Compiler - 444][14.1.1 Invoking the Compiler - 444]]
-    - [[14.1.2 Launching a Compilation Task - 444][14.1.2 Launching a Compilation Task - 444]]
-    - [[14.1.3 Reading Source Files from Memory - 445][14.1.3 Reading Source Files from Memory - 445]]
-    - [[14.1.4 Writing Byte Codes to Memory - 446][14.1.4 Writing Byte Codes to Memory - 446]]
-    - [[14.1.5 Capturing Diagnostics - 447][14.1.5 Capturing Diagnostics - 447]]
-  - [[14.2 The Scripting API - 448][14.2 The Scripting API - 448]]
-    - [[14.2.1 Getting a Scripting Engine - 448][14.2.1 Getting a Scripting Engine - 448]]
-    - [[14.2.2 Bindings - 449][14.2.2 Bindings - 449]]
-    - [[14.2.3 Redirecting Input and Output - 449][14.2.3 Redirecting Input and Output - 449]]
-    - [[14.2.4 Calling Scripting Functions and Methods - 450][14.2.4 Calling Scripting Functions and Methods - 450]]
-    - [[14.2.5 Compiling a Script - 452][14.2.5 Compiling a Script - 452]]
-  - [[14.3 The Nashorn Scripting Engine - 452][14.3 The Nashorn Scripting Engine - 452]]
-    - [[14.3.1 Running Nashorn from the Command Line - 452][14.3.1 Running Nashorn from the Command Line - 452]]
-    - [[14.3.2 Invoking Getters, Setters, and Overloaded Methods - 453][14.3.2 Invoking Getters, Setters, and Overloaded Methods - 453]]
-    - [[14.3.3 Constructing Java Objects - 454][14.3.3 Constructing Java Objects - 454]]
-    - [[14.3.4 Strings in JavaScript and Java - 455][14.3.4 Strings in JavaScript and Java - 455]]
-    - [[14.3.5 Numbers - 456][14.3.5 Numbers - 456]]
-    - [[14.3.6 Working with Arrays - 457][14.3.6 Working with Arrays - 457]]
-    - [[14.3.7 Lists and Maps - 458][14.3.7 Lists and Maps - 458]]
-    - [[14.3.8 Lambdas - 458][14.3.8 Lambdas - 458]]
-    - [[14.3.9 Extending Java Classes and Implementing Java Interfaces - 459][14.3.9 Extending Java Classes and Implementing Java Interfaces - 459]]
-    - [[14.3.10 Exceptions - 461][14.3.10 Exceptions - 461]]
-  - [[14.4 Shell Scripting with Nashorn - 461][14.4 Shell Scripting with Nashorn - 461]]
-    - [[14.4.1 Executing Shell Commands - 462][14.4.1 Executing Shell Commands - 462]]
-    - [[14.4.2 String Interpolation - 462][14.4.2 String Interpolation - 462]]
-    - [[14.4.3 Script Inputs - 463][14.4.3 Script Inputs - 463]]
-  - [[Exercises - 464][Exercises - 464]]
-- [[15. Java Platform Module System - 469][15. Java Platform Module System - 469]]
-  - [[15.1 The Module Concept - 470][15.1 The Module Concept - 470]]
-  - [[15.2 Naming Modules - 472][15.2 Naming Modules - 472]]
-  - [[15.3 The Modular “Hello, World!” Program - 472][15.3 The Modular “Hello, World!” Program - 472]]
-    - [[15.3.1 Use IntelliJ IDEA to run the example above - *From Jian*][15.3.1 Use IntelliJ IDEA to run the example above - *From Jian*]]
-    - [[15.3.2 Use IntelliJ IDEA re-create the example of this section - *From Jian*][15.3.2 Use IntelliJ IDEA re-create the example of this section - *From Jian*]]
-  - [[15.4 Requiring Modules - 474][15.4 Requiring Modules - 474]]
-  - [[15.5 Exporting Packages - 476][15.5 Exporting Packages - 476]]
-    - [[15.5.1 Use IntelliJ IDEA to implement this example - *From Jian*][15.5.1 Use IntelliJ IDEA to implement this example - *From Jian*]]
-  - [[15.6 Modules and Reflective Access - 479 =Read after learning Reflection=][15.6 Modules and Reflective Access - 479 =Read after learning Reflection=]]
-  - [[15.7 Modular JARs - 482][15.7 Modular JARs - 482]]
-  - [[15.8 Automatic Modules and the Unnamed Module - 484][15.8 Automatic Modules and the Unnamed Module - 484]]
-  - [[15.9 Command-Line Flags for Migration - 485][15.9 Command-Line Flags for Migration - 485]]
-  - [[15.10 Transitive and Static Requirements - 487][15.10 Transitive and Static Requirements - 487]]
-  - [[15.11 Qualified Exporting and Opening - 489][15.11 Qualified Exporting and Opening - 489]]
-  - [[15.12 Service Loading - 490][15.12 Service Loading - 490]]
-  - [[15.13 Tools for Working with Modules - 491][15.13 Tools for Working with Modules - 491]]
-    - [[15.13.1 ~jdeps~ - =From Jian=][15.13.1 ~jdeps~ - =From Jian=]]
-    - [[15.13.2 ~jlink~ - =From Jian=][15.13.2 ~jlink~ - =From Jian=]]
-      - [[IntelliJ IDEA - =From Jian=][IntelliJ IDEA - =From Jian=]]
-    - [[15.13.3 ~jmod~ - =From Jian=][15.13.3 ~jmod~ - =From Jian=]]
-  - [[Exercises - 494][Exercises - 494]]
-- [[Tips][Tips]]
-
-* TODO Preface - xvii
+* TODO Preface - xxi
   - Difference between this book and the classic *Core Java* book:
 
     + NO words about the Java history
@@ -459,8 +29,8 @@
 
     + does *NOT* cover how to write a web server
 
-* Acknowledgments
-* About the Author
+* Acknowledgments - xxiii
+* About the Author - xxv
 * DONE 1. FUNDAMENTAL PROGRAMMING STRUCTURES - 1
   CLOSED: [2017-06-06 Tue 21:12]
   The key points of this chapter are:
@@ -491,8 +61,8 @@
 
   8. Arrays and collections can be used to collect elements of the same type.
 
-** 1.1 Our First Program
-*** 1.1.1 Dissecting the "Hello, World" Program
+** 1.1 Our First Program - 2
+*** 1.1.1 Dissecting the "Hello, World" Program - 2
     #+BEGIN_SRC java
     package ch01.sec01;
     
@@ -515,7 +85,7 @@
 
     - ~System.out~, ~System.out.println~
 
-*** 1.1.2 Compiling and Running a Java Program
+*** 1.1.2 Compiling and Running a Java Program - 3
     #+BEGIN_SRC bash
     # 1. compiles the Java source code into Java byte codes;
     # 2. saves the byte codes into class files.
@@ -526,7 +96,7 @@
     java ch01.sec01.HelloWorld
     #+END_SRC
 
-*** 1.1.3 Method Calls
+*** 1.1.3 Method Calls - 6
     - ~System.out~ is an object, and it is an /instance/ of a class called
       ~PrintStream~ (has method ~println~, ~print~, etc.).
 
@@ -538,8 +108,10 @@
     - ~Random~ class is declared in the ~java.util~ package. To use it in your
       program, add an ~import~ statement: ~import java.util.Random;~.
 
-** 1.2 Primitive Types
-*** 1.2.1 Integer Types
+*** 1.1.4 JShell - 7
+
+** 1.2 Primitive Types - 10
+*** 1.2.1 Signed Integer Types - 10
     - Table 1-1 Java Integer Types
       | Type    | Storage requirement | Range(inclusive)                                        |
       |---------+---------------------+---------------------------------------------------------|
@@ -583,7 +155,7 @@
         For other operations, call ~Byte.toUnsignedInt(b)~, and get an ~int~
         value between 0 and 255.
 
-*** 1.2.2 Floating-Point Types
+*** 1.2.2 Floating-Point Types - 12
     - Table 1-2 Java Integer Types
       | Type     | Storage requirement | Range(inclusive)                                                        |
       |----------+---------------------+-------------------------------------------------------------------------|
@@ -613,7 +185,7 @@
       ~BigDecimal~ class, introduced in Section 1.4.6, “Big Numbers,” on p. 19.
       =TODO=
 
-*** 1.2.3 The ~char~ Type
+*** 1.2.3 The ~char~ Type - 13
     - The char type describes "code units” in the _UTF-16 character_ encoding
       used by Java.
 
@@ -621,18 +193,18 @@
 
     - _You probably won't use the ~char~ type very much._
 
-*** 1.2.4 The ~boolean~ Type
+*** 1.2.4 The ~boolean~ Type - 14
     ~boolean~ type is not a number type.
     There is _NO_ replationship between ~boolean~ values and the integers 0 and
     1. 
 
-** 1.3 Variables
+** 1.3 Variables - 14
    _LEARN_
    how to _declare_ and _initialize_
    + variables
    + constants
 
-*** DONE 1.3.1 Variable Declarations
+*** DONE 1.3.1 Variable Declarations - 14
     CLOSED: [2017-04-23 Sun 01:48]
     - Prefer to use separate declarations for _each_ variable.
 
@@ -640,7 +212,7 @@
       the name of the object's class occurs _TWICE_:
       ~Random generator = new Random();~
 
-*** DONE 1.3.2 Names
+*** DONE 1.3.2 Names - 14
     CLOSED: [2017-04-23 Sun 01:49]
     - Java identifier rules:
       + MUST _begin_ with a letter.
@@ -656,9 +228,10 @@
         and
         you _should NOT_ use it.
 
-*** DONE 1.3.3 Initialization
+*** DONE 1.3.3 Initialization - 15
     CLOSED: [2017-04-23 Sun 01:50]
-*** DONE 1.3.4 Constants
+
+*** DONE 1.3.4 Constants - 15
     CLOSED: [2017-04-23 Sun 15:39]
     - ~final~
 
@@ -695,14 +268,14 @@
     - _Note_:
       + ~enum~ =TODO= Chapter 4
 
-** 1.4 Arithmetic Operations
+** 1.4 Arithmetic Operations - 17
    - Table 1-3 Java Operators =IMPORTANT=
 
    - _Note_:
      In this table, operators are listed by _decreasing_ precedence.
 
-*** 1.4.1 Assignment
-*** 1.4.2 Basic Arithmetic
+*** 1.4.1 Assignment - 18
+*** 1.4.2 Basic Arithmetic - 18
     - Always be careful using ~%~ with potentially _negative_ operands.
 
     - ~X % 12~ returns
@@ -739,7 +312,7 @@
         When added (this modifier) to a method, all floating-point operations in
         the method are strictly portable.
 
-*** 1.4.3 Mathematical Methods
+*** 1.4.3 Mathematical Methods - 19
     - ~Math.pow(x, y)~ (yields x^y),
       ~Math.sqrt(x)~,
       ~Math.min(x, y)~,
@@ -770,7 +343,7 @@
       The ~StrictMath~ class provides strict implementations of mathematical
       methods.
 
-*** TODO 1.4.4 Number Type Conversions
+*** TODO 1.4.4 Number Type Conversions - 20
     - important and details
       =TODO= =PAGE 37= 
 
@@ -781,7 +354,7 @@
       silently throw away important parts of a number if the number cannot
       convert a ~long~ to an ~int~.
 
-*** 1.4.5 Relational and Logical Operators
+*** 1.4.5 Relational and Logical Operators - 22
     - _Caution_: =This help to avoid to shift to far away=
       The right-hand side argument of the shift operators is reduced
       + modulo 32 if the left hand side is an ~int~,
@@ -804,7 +377,7 @@
          =if not this method, it might be multiple side effects. It depends on=
          =how many times the rhs is used.=
 
-*** 1.4.6 Big Numbers
+*** 1.4.6 Big Numbers - 23
     - ~BigInteger~ and ~BigDecimal~ classes in the ~java.math~ package.
       _ARBITRARILY LONG SEQUENCE OF DIGITS_
 
@@ -834,10 +407,10 @@
         // is exactly 0.9 in value.
       #+END_SRC
 
-** 1.5 Strings 
+** 1.5 Strings - 24
    A string is a sequence of characters.
    In Java, a string can contain any Unicode characters (UTF-16).
-*** DONE 1.5.1 Concatenation
+*** DONE 1.5.1 Concatenation - 24
     CLOSED: [2017-04-24 Mon 02:20]
     - When you concatenate a string with another value, that value is converted
       to a string. (=From Jian=: like scala implicit conversion?)
@@ -862,7 +435,7 @@
            or
          * you can supply an array of strings.
 
-*** DONE 1.5.2 Substrings
+*** DONE 1.5.2 Substrings - 25
     CLOSED: [2017-04-24 Mon 02:24]
     - ~substring~
       #+BEGIN_SRC java
@@ -880,7 +453,7 @@
       input.split("\\s+");
       #+END_SRC
 
-*** DONE 1.5.3 String Comparison
+*** DONE 1.5.3 String Comparison - 25
     CLOSED: [2017-04-24 Mon 02:35]
     - ~equals~
 
@@ -909,7 +482,7 @@
       use a ~Collator~ object that knows about language-specific sorting rules.
       =TOD0= See Chapter 13 for more information.
 
-*** DONE 1.5.4 Converting Between Numbers and Strings Variables
+*** DONE 1.5.4 Converting Between Numbers and Strings - 27
     CLOSED: [2017-04-24 Mon 14:42]
     - integer -> string. use static methods:
       + ~Integer.toString(n)~ (~\quot\quot + n~ can do the same thing, but it is ugly and
@@ -922,7 +495,7 @@
 
     - For floating-point numbers, use ~Double.toString~ and ~Double.parseDouble~
 
-*** DONE 1.5.5 The String API
+*** DONE 1.5.5 The String API - 28
     CLOSED: [2017-04-24 Mon 14:51]
     - Table 1-4
       * group 1
@@ -949,7 +522,7 @@
       + ~String~
       + ~StringBuilder~
 
-*** DONE 1.5.6 Code Points and Code Units
+*** DONE 1.5.6 Code Points and Code Units - 30
     CLOSED: [2017-04-24 Mon 15:20]
     - Nowadays, Unicode requires 21 bits.
 
@@ -980,8 +553,8 @@
       + _FOR NOW_, just convert it to an array
         ~int[] codePoints = str.codePoints().toArray();~
 
-** 1.6 Input and Output
-*** 1.6.1 Reading Input
+** 1.6 Input and Output - 32
+*** 1.6.1 Reading Input - 32
     - ~System.in~ object only has methods to read individual bytes.
 
     - To read strings and numbers, construct a ~Scanner~ that is attached to
@@ -1023,7 +596,7 @@
       ~char[]~ can be overwrite when you are done, while ~String~ (immutable) can
       be.
 
-*** 1.6.2 Formatted Output
+*** 1.6.2 Formatted Output - 33
     - ~System.out.print(oneArg)~;
 
     - ~System.out.printf(formatString, ...);~
@@ -1034,8 +607,8 @@
 
     - static method ~String.format(formatString, ...)~
 
-** 1.7 Control Flow
-*** 1.7.1 Branches
+** 1.7 Control Flow - 36
+*** 1.7.1 Branches - 36
     - _Caution_:
       + -Xlint:fallthrough
         With the option ~-Xlint:fallthrough~, the compiler will issue a warning
@@ -1055,8 +628,8 @@
 
       + A value of an enumeration.
 
-*** 1.7.2 Loops
-*** 1.7.3 Breaking and Continuing
+*** 1.7.2 Loops - 38
+*** 1.7.3 Breaking and Continuing - 39
     - If you want to ~break~ to jump to the end of another enclosing statement
       (not the immediate one), use a _labeled_ ~break~ statement.
       Label the statement that should be exited, and provide the label with the
@@ -1099,14 +672,14 @@
       ~break~ and ~continue~ statems are confusing in some cases.
       _We won't use them in this book._
 
-*** 1.7.4 Local Variable Scope
+*** 1.7.4 Local Variable Scope - 41
     - In Java, you cannot have local variables with the same name in overlapping
       scopes.
-** 1.8 Arrays and Array Lists
+** 1.8 Arrays and Array Lists - 43
    - Built-in type: ~int[]~, ~String[]~, ...
    - ~ArrayList~ class for arrays that grow and shrink on demand.
    - =TODO=
-*** 1.8.1 Working with Arrays
+*** 1.8.1 Working with Arrays - 43
     - Declaration and initialization:
       #+BEGIN_SRC java
       String[] names1 = new String[100];
@@ -1120,7 +693,7 @@
 
     - C style syntax is available, but FEW Java programmers use it.
       ~int numbers[];~
-*** 1.8.2 Array Construction
+*** 1.8.2 Array Construction - 44
     - When you construct an array with the ~new~ operator, it is
       _filled with a default value_.
       + Arrays of _numeric_ type
@@ -1140,7 +713,7 @@
     - _Note_:
       0 length array: ~int[0]~ or ~new int[] {}~
 
-*** 1.8.3 Array Lists
+*** 1.8.3 Array Lists - 45
     - ~ArrayList~ class is in the ~java.util~ package.
 
     - An ~ArrayList~ object manages an array internally:
@@ -1183,7 +756,7 @@
     - ~size~ method of the array lists.
       =COMMENT= ~length~ is a property/field, _NOT_ a method.
 
-*** 1.8.4 Wrapper Classes for Primitive Types
+*** 1.8.4 Wrapper Classes for Primitive Types - 46
     - Java generic classes can't use /primitive types/ as type parameters.
       The remedy is to use /wrapper class/:
       + ~Integer~
@@ -1217,7 +790,7 @@
       ~numbers.get(i) == numbers.get(j)~ doesn't NOT test whether the numbers at
       index =i= and =j= are the same. Should use ~equals~.
 
-*** 1.8.5 The Enhanced for Loop
+*** 1.8.5 The Enhanced ~for~ Loop - 47
     - C style ~for~ loop
 
     - /enhanced/ ~for~ loop:
@@ -1230,7 +803,7 @@
       }
       #+END_SRC
 
-*** 1.8.6 Copying Arrays and Array Lists
+*** 1.8.6 Copying Arrays and Array Lists - 47
     - For an /array/, use static method of copy ~Arrays.copyOf~:
       ~int[] copiedPrimes = Arrays.copyOf(primes, primes.length);~
  
@@ -1256,7 +829,7 @@
         For example, to convert between an ~int[]~ and an ~ArrayList<Integer>~,
       you need an _explicit loop_ or an ~IntStream~ (see Chapter 8). =TODO=
 
-*** 1.8.7 Array Algorithms
+*** 1.8.7 Array Algorithms - 49
     - /array/ realted:
       ~Arrays.fill(numbers, 0); // int[] array~
       ~Array.sort(names);~
@@ -1275,14 +848,14 @@
       ~Collections.shuffle(friends);~
 
     - 
-*** 1.8.8 Command-Line Arguments
+*** 1.8.8 Command-Line Arguments - 49
     - Example: ~java Greeting -g cruel world~
       Here,
       + ~args[0]~ is "-g"
       + ~args[1]~ is "cruel"
       + ~args[2]~ is "world"
 
-*** 1.8.9 Multidimensional Arrays
+*** 1.8.9 Multidimensional Arrays - 50
     - No true multidimensional arrays in Java, only arrays of arrays.
       #+BEGIN_SRC java
       int[][] square = {
@@ -1307,8 +880,8 @@
       1. you can delcare a variable of type ~ArrayList<ArrayList<Integer>>~
       2. build up the rows youself. ==
 
-** 1.9 Functional Decomposition
-*** 1.9.1 Declaring and Calling Static Methods
+** 1.9 Functional Decomposition - 52
+*** 1.9.1 Declaring and Calling Static Methods - 53
     #+BEGIN_SRC java
     class AverageOfTwoNumbers {
         public static double average(double x, double y) {
@@ -1325,7 +898,7 @@
     }
     #+END_SRC
 
-*** 1.9.2 Array Parameters and Return Values
+*** 1.9.2 Array Parameters and Return Values - 53
     #+BEGIN_SRC java
     class XXX {
         // in place change
@@ -1345,7 +918,7 @@
     }
     #+END_SRC
 
-*** 1.9.3 Variable Arguments
+*** 1.9.3 Variable Arguments - 53
     - Declare a "varargs" parameter with ~...~ after the type:
       ~public static double average(double... values)~
 
@@ -1359,7 +932,7 @@
     - The variable parameter must be the last parameter of the method.
       =From Jian= This implies that only one variable parameter cant exist.
 
-*** Exercises
+** Exercises - 54
     
 * DONE 2. OBJECT-ORIENTED PROGRAMMING - 59
   CLOSED: [2017-06-06 Tue 21:12]
@@ -1394,7 +967,7 @@
   10. The ~javadoc~ utility processes source files, producing HTML files with de-
       clarations and programmer-supplied comments.
       
-** DONE 2.1 Working with Objects
+** DONE 2.1 Working with Objects - 60
    CLOSED: [2017-05-05 Fri 23:38]
    - ~LocalDate date = LocalDate.of(year, month, 1);~
 
@@ -1407,12 +980,12 @@
    - ~weekday.getValue();  // it returns an integer~
      1 for Monday, ..., and 7 for Sunday.
 
-*** 2.1.1 Accessor and Mutator Methods
+*** 2.1.1 Accessor and Mutator Methods - 62
     - /mutator/ and /accessor/
 
     - all methods of the ~LocalDate~ class are /accessors/.
 
-*** 2.1.2 Object References
+*** 2.1.2 Object References - 63
     - In Java, a variable can ONLY hold a _reference_ to an object.
 
     - _Note_: =TODO= =???=
@@ -1431,15 +1004,15 @@
 
       For optional values, use ~Optional~ type.
 
-** DONE 2.2 Implementing Classes
+** DONE 2.2 Implementing Classes - 65
    CLOSED: [2017-05-06 Sat 10:01]
-*** 2.2.1 Instance Variables
+*** 2.2.1 Instance Variables - 65
     - ~private~ variables: only methods of the same class can access them.
-*** 2.2.2 Method Headers
+*** 2.2.2 Method Headers - 65
     - ~private~ methods: only the other methods of the same class can access them
-*** 2.2.3 Method Bodies
-*** 2.2.4 Instance Method Invocations
-*** 2.2.5 The ~this~ Reference
+*** 2.2.3 Method Bodies - 66
+*** 2.2.4 Instance Method Invocations - 66
+*** 2.2.5 The ~this~ Reference - 67
     - _Note_: =TODO=
       In some programming languages, instance variables are decorated in some
       way, for example ~\under{}name~ and ~\under{}salary~. This is legal in Java but is not
@@ -1456,10 +1029,10 @@
       =TODO= However, this syntax is very rarely used. It exists so that you can
       annotate the receiver of the method -- _See Chapter 11_. =TODO=
 
-*** 2.2.6 Call by Value
-** DONE 2.3 Object Construction
+*** 2.2.6 Call by Value - 68
+** DONE 2.3 Object Construction - 69
    CLOSED: [2017-05-07 Sun 00:39]
-*** 2.3.1 Implementing Constructors
+*** 2.3.1 Implementing Constructors - 69
     - Declaring a constructor is similar to declaring a method.
       Same name as the class name.
       No return type.
@@ -1485,9 +1058,10 @@
       + save that reference in a variable.
       + pass it to a method.
 
-*** 2.3.2 Overloading
+*** 2.3.2 Overloading - 70
     There can be more than one version of a constructor.
-*** 2.3.3 Calling One Constructor from Another
+
+*** 2.3.3 Calling One Constructor from Another - 71
     #+BEGIN_SRC java
     public class Empoyee {
         public Employee(String name, double salary) {
@@ -1505,7 +1079,7 @@
     Instead, it is a _special syntax_ that is only used for invoking another
     constructor of the same class.
 
-*** 2.3.4 Default Initialization
+*** 2.3.4 Default Initialization - 71
     - If you don't set an instance variable explicitly in a constructor, it is
       automatically set to a _default value_:
       + numbers to ~0~
@@ -1543,7 +1117,7 @@
       pointer exception will be raised.
       _SOLUTION_: The example of section 2.3.3
 
-*** 2.3.5 Instance Variable Initialization
+*** 2.3.5 Instance Variable Initialization - 72
     - This initialization occurs
       + _AFTER_ the object has been allocated
       + _BEFORE_ a constructor runs.
@@ -1580,10 +1154,11 @@
       + _in the order in which they appear_ in the class declaration
       + _BEFORE_ the body of the constructor.
 
-*** 2.3.6 Final Instance Variables
+*** 2.3.6 Final Instance Variables - 73
     A ~final~ can't change the object it reference, though it can change the
     content of the object it points to.
-*** 2.3.7 The Constructor with No Arguments
+
+*** 2.3.7 The Constructor with No Arguments - 73
     - _Note_:
       If a class already has a constructor,
       it does NOT automatically get another constructor with no arguments.
@@ -1595,9 +1170,9 @@
       Java has NO mechanism for "finalizing" an object when you don't need it
       (C++ has NO GC, and it requires this mechanism).
 
-** DONE 2.4 Static Variables and Methods
+** DONE 2.4 Static Variables and Methods - 74
    CLOSED: [2017-05-07 Sun 02:10]
-*** DONE 2.4.1 Static Variables
+*** DONE 2.4.1 Static Variables - 74
     CLOSED: [2017-05-07 Sun 01:24]
     - A ~static~ variable means there is only one such variable per class.
 
@@ -1625,7 +1200,7 @@
       concurrently in multiple threads.
       _remedy this_: Chapter 10 =TODO=
 
-*** DONE 2.4.2 Static Constants
+*** DONE 2.4.2 Static Constants - 75
     CLOSED: [2017-05-07 Sun 01:41]
     - _Mutable_ static variables are rare (but we have an example in the last
       section).
@@ -1657,7 +1232,7 @@
       This is a very unusual situation from the early days of Java, and not
       something you are likely to encounter elsewhere.
 
-*** DONE 2.4.3 Static Initialization Blocks
+*** DONE 2.4.3 Static Initialization Blocks - 76
     CLOSED: [2017-05-07 Sun 01:24]
     #+BEGIN_SRC java
     public class CreditCardForm {
@@ -1681,7 +1256,7 @@
     - All /static variable initializations/ and /static initialization blocks/
       are executed _in the order in which they occur_ in the class declaration.
 
-*** DONE 2.4.4 Static Methods
+*** DONE 2.4.4 Static Methods - 77
     CLOSED: [2017-05-07 Sun 02:01]
     - It is legal to invoke a static method on an object,
       but most java programmers would consider this poor style.
@@ -1691,7 +1266,7 @@
 
       However, /static methods/ can access the /static variables/ in their class.
 
-*** DONE 2.4.5 Factory Methods
+*** DONE 2.4.5 Factory Methods - 78
     CLOSED: [2017-05-07 Sun 02:10]
     - A common use for static methods is a factory method.
 
@@ -1721,9 +1296,9 @@
         For example, the call ~Collections.emptyList()~ returns a shared
       immutable empty list.
 
-** DONE 2.5 Packages
+** DONE 2.5 Packages - 78
    CLOSED: [2017-05-08 Mon 15:09]
-*** 2.5.1 Package Declarations
+*** 2.5.1 Package Declarations - 79
     - A package name: a dot-separated list of identifiers (e.g.
       ~java.util.regex~).
 
@@ -1791,7 +1366,8 @@
       cluttering up the source tree, and they have the correct subdirectory
       structure.
 
-*** 2.5.2 The Class Path
+*** 2.5.2 The =jar= Command - 80
+*** 2.5.3 The Class Path - 81
     - Place class files into a JAR files, rather than scattering and storing them
       in the file system.
 
@@ -1860,7 +1436,7 @@
 
       + Foroget there are libraries in the ~jre/lib/ext~ directory.
 
-*** 2.5.3 Package Scope
+*** 2.5.4 Package Access - 83
     - If you don't specify either ~public~ or ~private~, the feature (that is,
       the /class/, /method/, or /variable/)
       _can be accessed by all methods in the SAME package._
@@ -1887,7 +1463,7 @@
     - /sealed JAR/: provide a /manifest/ and run the ~jar~ command like this:
       ~jar cvfm library.jar manifest.txt com/mycompany/*/*.class~
 
-*** 2.5.4 Importing Classes
+*** 2.5.5 Importing Classes - 83
     - Import all classes from a package with a wildcard:
       ~import java.util.*;~
 
@@ -1917,7 +1493,7 @@
 
       It doesn't like the ~#include~ in C,
 
-*** 2.5.5 Static Imports
+*** 2.5.6 Static Imports - 85
     - Only _import_ /static methods and variables/:
       + All: ~import static java.lang.Math.*;~
       + A specific: ~import static java.lang.Math.PI;~
@@ -1928,7 +1504,8 @@
     - _Caution_:
       You CANNOT import static methods of fields from a class in the default
       package.
-** TODO 2.6 Nested Classes
+
+** TODO 2.6 Nested Classes - 85
    - /nested class/: a /class/ _inside_ another /class/.
 
    - WHY Useful:
@@ -1940,7 +1517,7 @@
    - Java has _TWO_ kinds of nested classes, with somewhat different behavior.
      =TODO= =???= 
 
-*** DONE 2.6.1 *Static* Nested Classes
+*** DONE 2.6.1 Static Nested Classes - 85
     CLOSED: [2018-01-15 Mon 23:07]
     - *private* static /nested class/
       #+BEGIN_SRC java
@@ -2015,7 +1592,7 @@
           _Nesting the class_ just makes it obvious that *the ~Item~ class
         represents items in an ~Invoice~.*
 
-*** TODO 2.6.2 Inner Classes
+*** TODO 2.6.2 Inner Classes - 87
     - /inner classes/: non-static nested classes.
 
     - Example:
@@ -2102,7 +1679,7 @@
         ~unenroll(this);~ in this case is actually means
         ~outer.unenroll(this);~ (not a legal syntax, just illustration).
 
-*** TODO 2.6.3 Special Syntax Rules for Inner Classes
+*** TODO 2.6.3 Special Syntax Rules for Inner Classes - 89
     - ~OuterClass.this~ denotes the outer class reference.
 
     - For example,
@@ -2166,7 +1743,7 @@
       /Local classes/ are another variant of inner classes that we will discuss
       in Chapter 3.
 
-** DONE 2.7 Documentation Comments
+** DONE 2.7 Documentation Comments - 90
    CLOSED: [2017-05-12 Fri 15:55]
    - ~javadoc~: a tool from JDK used to generates HTML documentation from your
      source files.
@@ -2176,7 +1753,7 @@
 
    - ~javadoc~ realted comments start with the special delimiter ~/**~.
 
-*** 2.7.1 Comment Insertion
+*** 2.7.1 Comment Insertion - 90
     - The ~javadoc~ utility extracts information for the following items:
       + Packages
       + Public classes and interfaces
@@ -2208,7 +1785,7 @@
       specify the =doc-files= directory in your link, for example
       ~<img src="doc-files/uml.png" alt="UML diagram"/>~.
 
-*** 2.7.2 Class Comments
+*** 2.7.2 Class Comments - 91
     - The class comment _MUST_ be placed directly _before_ the class declaration.
 
     - Exmaple:
@@ -2230,7 +1807,7 @@
       supply the asterisks automatically, and some even rearrange them when the
       line breaks change.
 
-*** 2.7.3 Method Comments
+*** 2.7.3 Method Comments - 92
     - Place each method comment immediately before its method.
       Document the following features:
       + Each parameter, with a comment =@param= /variable description/.
@@ -2253,7 +1830,7 @@
       }
       #+END_SRC
 
-*** 2.7.4 Variable Comments
+*** 2.7.4 Variable Comments - 92
     - You only need to document public variables -- generally that means
       /static constants/. For example,
       #+BEGIN_SRC java
@@ -2262,7 +1839,7 @@
        */
       public static final int DAYS_PER_YEAR = 365;
       #+END_SRC
-*** 2.7.5 General Comments
+*** 2.7.5 General Comments - 92
     - =@since=: describe the version in which this feature became available.
       ~@since version 1.7.1~
 
@@ -2278,7 +1855,7 @@
       so you _should supply both the annotation and the Javadoc comment for
       deprecated items_.
 
-*** 2.7.6 Links
+*** 2.7.6 Links - 93
     - Add hyperlinks or external documents with =@see= and =@link= tags.
 
     - =@see=:
@@ -2308,7 +1885,7 @@
       ~{@link package.class#feature label}~ anywhere in a comment.
       The feature description follows the same rules as for the =@see= tag.
 
-*** 2.7.7 Package and Overview Comments
+*** 2.7.7 Package, Module, and Overview Comments - 94
     - To generate package comments, a separate file in each package directory
       should be added.
 
@@ -2327,7 +1904,7 @@
         This comment is displayed when the user select "Overview" from the
         navigation bar.
 
-*** 2.7.8 Comment Extraction
+*** 2.7.8 Comment Extraction - 94
     - Suppose =docDirectory= is where you want the HTML files to go.
       For these steps:
       1. go to the directory the same as that of =overview.html=, if you supplied
@@ -2347,7 +1924,8 @@
     - Use ~-linksource~ option, each source file is converted to HTML, and each
       class and method name turns into a hyperlink to the source.
 
-** TODO Exercises
+** TODO Exercises - 95
+
 * TODO 3. INTERFACES AND LAMBDA EXPRESSIONS - 99
   The key points of this chapter are:
   - An interface specifies a set of methods that an implementing class must
@@ -2375,13 +1953,13 @@
   - Lambda expressions and local inner classes can access effectively final
     variables from the enclosing scope
 
-** DONE 3.1 Interfaces
+** DONE 3.1 Interfaces - 100
    CLOSED: [2017-05-11 Thu 15:07]
    An /interface/ is a mechanism for spelling out a contract between two parties:
    the supplier of a service and the classes that want their objects to be
    usable with the service.
 
-*** 3.1.1 Declaring an Interface
+*** 3.1.1 Declaring an Interface - 100
     - Consider a service that works on sequences of integers, reporting the
       _average_ of the first ~n~ values:
       ~public static double average(IntSequence seq, int n)~
@@ -2430,7 +2008,7 @@
       }
       #+END_SRC
 
-*** 3.1.2 Implementing an Interface
+*** 3.1.2 Implementing an Interface - 101
     - The classes want to be usable with the ~average~ method need to implement
       the ~IntSequence~ interface. Here is a example of a infinitely many
       squares:
@@ -2486,7 +2064,7 @@
       it must be declared with the /abstract/ modifier.
       See Chapter 4. =TODO=
 
-*** 3.1.3 Converting to an Interface Type
+*** 3.1.3 Converting to an Interface Type - 103
     - /subtype/ and /supertype/
 
     - _Note_:
@@ -2494,7 +2072,7 @@
       + you can never have an object whose type is an interface.
         All objects are instances of classes.
 
-*** 3.1.4 Casts and the instanceof Operator
+*** 3.1.4 Casts and the ~instanceof~ Operator - 103
     - /cast/
 
     - Example of cast:
@@ -2510,11 +2088,13 @@
 
     - 
 
-*** 3.1.5 Extending Interfaces
+*** 3.1.5 Extending Interfaces - 104
     - An instance can /extend/ another.
-*** 3.1.6 Implementing Multiple Interfaces
+
+*** 3.1.6 Implementing Multiple Interfaces - 105
     - A class can implement any number of interfaces.
-*** 3.1.7 Constants
+
+*** 3.1.7 Constants - 105
     - Any variable defined in an interface is automatically
       ~public static final~.
 
@@ -2522,7 +2102,7 @@
       You cannot have instance variables in an interface.
       _An interface specifies behavior, not object state._
 
-** DONE 3.2 Static and Default Methods
+** DONE 3.2 Static, Default, and Private Methods - 105
    CLOSED: [2017-05-11 Thu 15:07]
    In earlier versions of Java, _ALL methods of an interface_ had to be
    /abstract/
@@ -2530,7 +2110,7 @@
    Nowadays you can add two kinds of methods with a concrete implementation:
    + static methods
    + default methods
-*** 3.2.1 Static Methods
+*** 3.2.1 Static Methods - 105
     - (In earlier version of Java)
       There was never a technical reason why an interface could not have static
       methods,
@@ -2556,7 +2136,7 @@
 
       _This split is no longer necessary._
 
-*** 3.2.2 Default Methods
+*** 3.2.2 Default Methods - 106
     - Example:
       #+BEGIN_SRC java
       public interface IntSequence {
@@ -2590,7 +2170,7 @@
                   ~Bag.stream~ method can be found, but ~Collection.stream~ now
                   can be used. 
 
-*** 3.2.3 Resolving Default Method Conflicts
+*** 3.2.3 Resolving Default Method Conflicts - 107
     - Example:
       #+BEGIN_SRC java
       public interface Person {
@@ -2625,9 +2205,11 @@
       + only use the superclass method, and
       + any default method from the interface is simply ignored.
 
-** DONE 3.3 Examples of Interfaces
+*** 3.2.4 Private Methods - 109
+
+** DONE 3.3 Examples of Interfaces - 109
    CLOSED: [2017-05-12 Fri 00:41]
-*** DONE 3.3.1 The ~Comparable~ Interface
+*** DONE 3.3.1 The ~Comparable~ Interface - 109
     CLOSED: [2017-09-21 Thu 22:33]
     - If a class wants to enable sorting for its objects, it should implement the
       ~Comparable~ interface.
@@ -2692,7 +2274,7 @@
       Instead, it throws an exception if it encounters an element of a class
       that doesn't implement the ~Comparable~ interface.
 
-*** DONE 3.3.2 The ~Comparator~ Interface
+*** DONE 3.3.2 The ~Comparator~ Interface - 111
     CLOSED: [2017-09-21 Thu 22:33]
     - A second version of the ~Arrays.sort~ method whose parameters are an array
       and a /comparator/.
@@ -2733,7 +2315,7 @@
       Arrays.sort(friends, new LengthComparator());
       #+END_SRC
 
-*** DONE 3.3.3 The ~Runnable~ Interface
+*** DONE 3.3.3 The ~Runnable~ Interface - 112
     CLOSED: [2017-09-21 Thu 22:37]
     - You may want to run certain tasks in a separate thread, or give them to a
       thread pool for execution.
@@ -2762,7 +2344,7 @@
     - There is also a ~Callable<T>~ interface for tasks that return a result of
       type ~T~.
 
-*** DONE 3.3.4 User Interface Callbacks
+*** DONE 3.3.4 User Interface Callbacks - 112
     CLOSED: [2017-09-21 Thu 22:40]
     - call back :: some code gets called back when a user action occurs.
 
@@ -2789,7 +2371,7 @@
       and instantiating it. =TODO= The next section shows how you can do the same
       in Java.
 
-** DONE 3.4 Lambda Expressions
+** DONE 3.4 Lambda Expressions - 113
    CLOSED: [2017-05-11 Thu 15:50]
    - /lambda expression/: a block of code that you can pass around so it can be
      executed later.
@@ -2803,7 +2385,7 @@
                   Lambda expressions give you a convenient syntax for creating
                 such instances. =TODO=
 
-*** DONE 3.4.1 The Syntax of Lambda Expressions
+*** DONE 3.4.1 The Syntax of Lambda Expressions - 114
     CLOSED: [2017-05-11 Thu 15:35]
     - Lambda expressions:
       #+BEGIN_SRC java
@@ -2838,7 +2420,7 @@
       However, the compiler infers it from the body and checks that it matches
       the expected type.
 
-*** DONE 3.4.2 Functional Interfaces
+*** DONE 3.4.2 Functional Interfaces - 115
     CLOSED: [2017-05-11 Thu 15:50]
     - In Java there are many interfaces, such as ~Runnable~ or ~Comparator~, that
       express actions. Lambda expressions are compatible with these interfaces.
@@ -2883,9 +2465,9 @@
       list.removeIf(e -> e == null);
       #+END_SRC
 
-** DONE 3.5 Method and Constructor References
+** DONE 3.5 Method and Constructor References - 116
    CLOSED: [2017-05-12 Fri 12:29]
-*** DONE 3.5.1 Method References
+*** DONE 3.5.1 Method References - 117
     CLOSED: [2017-09-15 Fri 14:40]
     - Introduce /method reference/ by examples:
       #+BEGIN_SRC java
@@ -2939,7 +2521,7 @@
 
       You can also capture ~super~ - See Chapter 4   =TODO=
       
-*** DONE 3.5.2 Constructor References
+*** DONE 3.5.2 Constructor References - 118
     CLOSED: [2017-09-18 Mon 23:37]
     - ~ClassName::new~
       If the class has more than one constructor, then which one is called
@@ -2970,11 +2552,11 @@
       Employee[] buttons = stream.toArray(Employee[]::new);
       #+END_SRC
 
-** DONE 3.6 Processing Lambda Expressions
+** DONE 3.6 Processing Lambda Expressions - 119
    CLOSED: [2017-05-14 Sun 20:02]
    Topic: how to write your own methods that can consume lambda expressions.
 
-*** DONE 3.6.1 Implementing Deferred Execution
+*** DONE 3.6.1 Implementing Deferred Execution - 119
     CLOSED: [2017-09-18 Mon 22:15]
     - The point of using lambdas is /deferred execution/.
 
@@ -3014,7 +2596,7 @@
         repeat(10, i -> System.out.println("Countdown: " + (9 - i)));
       #+END_SRC
 
-*** DONE 3.6.2 Choosing a Functional Interface
+*** DONE 3.6.2 Choosing a Functional Interface - 120
     CLOSED: [2017-09-18 Mon 23:30]
     - In most functional programming languages, function types are /structural/.
       They are in the form of (input: two strings input; output: int)
@@ -3058,7 +2640,7 @@
       Functional Interfaces for Primitive Types ~p~, ~q~ is ~int~, ~long~,
       ~double~; ~P~, ~Q~ is ~Int~, ~Long~, ~Double~.
 
-*** DONE 3.6.3 Implementing Your Own Functional Interfaces
+*** DONE 3.6.3 Implementing Your Own Functional Interfaces - 123
     CLOSED: [2017-09-18 Mon 23:30]
     Exaplain through an example:
       There is no standard type for a mapping ~(int, int) -> Color~. Of course,
@@ -3098,10 +2680,10 @@
             (x, y) -> x < 50 ? Color.BLUE : x < 100 ? Color.WHITE : Color.RED);
       #+END_SRC
 
-** DONE 3.7 Lambda Expressions and Variable Scope
+** DONE 3.7 Lambda Expressions and Variable Scope - 124
    CLOSED: [2017-05-14 Sun 21:05]
    TOPIC: How variables work inside lambda expressions.
-*** DONE 3.7.1 Scope of a Lambda Expression
+*** DONE 3.7.1 Scope of a Lambda Expression - 124
     CLOSED: [2017-09-19 Tue 00:19]
     - It is _illegal_ to
       + declare a parameter or a local variable in the lambda that has the same
@@ -3138,7 +2720,7 @@
       The scope of the lambda expression is nested inside the ~doWork~ method,
       and ~this~ has the same meaning anywhere in that method.
 
-*** DONE 3.7.2 Accessing Variables from the Enclosing Scope
+*** DONE 3.7.2 Accessing Variables from the Enclosing Scope - 124
     CLOSED: [2017-09-19 Tue 00:33]
     - A lambda expression has THREE ingredients:
       1. A block of code
@@ -3230,9 +2812,9 @@
       =TODO= You will see how to implement a threadsafe shared counter in
       Chapter 10.
 
-** DONE 3.8 Higher-Order Functions
+** DONE 3.8 Higher-Order Functions - 127
    CLOSED: [2017-09-21 Thu 23:20]
-*** DONE 3.8.1 Methods that Return Functions
+*** DONE 3.8.1 Methods that Return Functions - 127
     CLOSED: [2017-09-21 Thu 22:44]
     - Example
       #+BEGIN_SRC java
@@ -3246,7 +2828,7 @@
     - Application
       ~Arrays.sort(friends, compareInDirection(-1));~
          
-*** DONE 3.8.2 Methods That Modify Functions
+*** DONE 3.8.2 Methods That Modify Functions - 128
     CLOSED: [2017-09-21 Thu 22:47]
     Generalize the idea from the last section: Reverse any comparator.
     #+BEGIN_SRC java
@@ -3266,7 +2848,7 @@
     The ~Comparator~ interface has default method ~reversed~ that produces the
     reverse of a given comparator in just this way.
 
-*** DONE 3.8.3 Comparator Methods
+*** DONE 3.8.3 ~Comparator~ Methods - 128
     CLOSED: [2017-09-21 Thu 23:20]
     - The ~Comparator~ interface has a number of useful static methods that are
       higher-order functions generating comparators.
@@ -3313,7 +2895,7 @@
       + ~naturalOrder~: make a comparator for any class implementing ~Comparable~
       + ~reverseOrder~: give the reverse of the natural order.
 
-** DONE 3.9 Local Inner Classes
+** DONE 3.9 Local Inner Classes - 129
    CLOSED: [2017-05-14 Sun 22:41]
    _Long before there were lambda expressions_
    Java had a mechanism for concisely defining classes that implement a interface
@@ -3322,7 +2904,7 @@
    + For functional interfaces, use lambda expressions.
    + For non-functional, use /local inner classes/.
 
-*** DONE 3.9.1 Local Classes
+*** DONE 3.9.1 Local Classes - 129
     CLOSED: [2017-09-19 Tue 00:10]
    - /local class/: a /class/ inside a /method/.
 
@@ -3359,7 +2941,7 @@
      * The method of the /local class/ can access variables from the enclosing
        scope, just like the variables of a lambda expression.
 
-*** DONE 3.9.2 Anonymous Classes
+*** DONE 3.9.2 Anonymous Classes - 130
     CLOSED: [2017-09-19 Tue 00:15]
     The /local class/ ~RandomSequence~ in the preceding section was used only
     once, it can be made _anonymous_:
@@ -3404,7 +2986,7 @@
         }
       #+END_SRC
 
-** TODO Exercises
+** TODO Exercises - 131
    1. 
    2. 
    3. ~String~ has (directly) supertypes ~Object~, ~Serializable~,
@@ -3461,9 +3043,9 @@
     9. Proxy objects dynamically implement arbitrary interfaces, routing all
        method invocations to a handler. TODO =???=
 
-** DONE 4.1 Extending a Class
+** DONE 4.1 Extending a Class - 136
    CLOSED: [2017-05-15 Mon 20:53]
-*** DONE 4.1.1 Super- and Subclasses
+*** DONE 4.1.1 Super- and Subclasses - 136
     CLOSED: [2018-01-05 Fri 14:40]
     #+BEGIN_SRC java
       public class Manager extends Employee {
@@ -3480,7 +3062,7 @@
          |            |
        subset      superset
 
-*** DONE 4.1.2 Defining and Inheriting Subclass Methods
+*** DONE 4.1.2 Defining and Inheriting Subclass Methods - 137
     CLOSED: [2018-01-05 Fri 14:46]
     #+BEGIN_SRC java
       public class Manager extends Employee {
@@ -3497,7 +3079,7 @@
 
     - /overriding/ =NEXT SECTION=
 
-*** 4.1.3 Method Overriding
+*** 4.1.3 Method Overriding - 137
     - Example:
       #+BEGIN_SRC java
         public class Manager extends Employee {
@@ -3526,7 +3108,7 @@
       the /subclass method/ MUST be _at least as visible_ as the /superclass
       method/.
 
-*** 4.1.4 Subclass Construction
+*** 4.1.4 Subclass Construction - 139
     - Subclass cannot access the private instance variables of the superclass,
       it must initialize them through a super class constructor. For example,
       #+BEGIN_SRC java
@@ -3542,7 +3124,7 @@
     - If omit the superclass constructor call, the superclass must have a
       no-argument constructor which is implicitly called.
 
-*** 4.1.5 Superclass Assignments
+*** 4.1.5 Superclass Assignments - 139
     - /covariant/
 
     - /dynamic method lookup/
@@ -3566,7 +3148,7 @@
         hold a lowly ~Employee~
       + runtime exception ~ArrayStoreException~.
 
-*** 4.1.6 Casts
+*** 4.1.6 Casts - 140
     One drawback from the preceding section:
     You can only invoke methods that belong to the superclass.
 
@@ -3586,7 +3168,7 @@
       }
     #+END_SRC
 
-*** 4.1.7 Final Methods and Classes
+*** 4.1.7 Final Methods and Classes - 141
     - A good example: the ~getClass~ method of the ~Object~ class.
       It does not allow objects to lie about the class to which they belong.
 
@@ -3597,7 +3179,7 @@
 
       When overriding happens, such inlining is undone.
 
-*** 4.1.8 Abstract Methods and Classes
+*** 4.1.8 Abstract Methods and Classes - 141
     - It is not possible to construct an instance of an abstract class.
 
     - There can be a variable whose type is an abstract class,
@@ -3618,7 +3200,7 @@
 
         Person p = new Student(“Fred”, 1729);
       #+END_SRC
-*** TODO 4.1.9 Protected Access
+*** TODO 4.1.9 Protected Access - 142
     - *CAUTION*:
       In Java,
       + ~protected~ grants package-level access
@@ -3681,9 +3263,9 @@
       since it is somewhat tricky to use (see Section 4.2.4, “Cloning Objects,”
       page 151). =TODO=
 
-*** TODO 4.1.10 Anonymous Subclasses
+*** TODO 4.1.10 Anonymous Subclasses - 143
     - 
-*** DONE 4.1.11 Inheritance and Default Methods
+*** DONE 4.1.11 Inheritance and Default Methods - 144
     CLOSED: [2018-01-23 Tue 23:25]
     - In this situation, _class wins_
       #+BEGIN_SRC java
@@ -3708,7 +3290,7 @@
       If you add /default methods/ to an /interface/, for compatibility, it has
       _no effect_ on code that worked *BEFORE* there were /default methods/.
 
-*** 4.1.12 Method Expressions with ~super~
+*** 4.1.12 Method Expressions with ~super~ - 145
     - ~super::instanceMethod~
       Exmaple:
       #+BEGIN_SRC java
@@ -3726,7 +3308,7 @@
         }
       #+END_SRC
 
-** DONE 4.2 ~Object~: The Cosmic Superclass
+** DONE 4.2 ~Object~: The Cosmic Superclass - 145
    CLOSED: [2018-01-10 Wed 00:50]
    - Every class in Java directly or indirectly extends the class Object.
      It is the default, and no need to explicitly extend it.
@@ -3782,7 +3364,7 @@
        See Chapter 10.
        =TODO= =TODO= =TODO=
 
-*** DONE 4.2.1 The ~toString~ Method
+*** DONE 4.2.1 The ~toString~ Method - 146
     CLOSED: [2017-05-16 Tue 16:00]
     - Many ~toString~ methods follow a format: ~className[field1, field2, ...]~.
 
@@ -3827,7 +3409,7 @@
       #+END_SRC
       + Multidimensional arrays should use the ~Arrays.deepToString~ method.
 
-*** DONE 4.2.2 The ~equals~ Method =RE-READ= =IMPORTANT TIPS=
+*** DONE 4.2.2 The ~equals~ Method - 148 =RE-READ= =IMPORTANT TIPS=
     CLOSED: [2018-01-09 Tue 21:50]
     - Override the ~equals~ method _ONLY_ for *state-based equality testing*, in
       which two objects are considered equal when they have the same contents.
@@ -3907,7 +3489,7 @@
           }
         #+END_SRC
 
-*** DONE 4.2.3 The ~hashCode~ Method =RE-READ= =IMPORTANT TIPS=
+*** DONE 4.2.3 The ~hashCode~ Method - 150 =RE-READ= =IMPORTANT TIPS=
     CLOSED: [2018-01-09 Tue 22:30]
     - Two UNEQUAL objects should be a *high probability* that their /hashcode/
       are *DIFFERENT*.
@@ -3949,7 +3531,7 @@
       never win against ~Object.toString~, ~Object.equals~, or ~Object.hashCode~.
       =TODO= =IMPORTANT=
 
-*** DONE 4.2.4 Cloning Objects =RE-READ= =IMPORTANT TIPS=
+*** DONE 4.2.4 Cloning Objects - 151 =RE-READ= =IMPORTANT TIPS=
     CLOSED: [2018-01-10 Wed 00:50]
     In this section, you will learn how to override the ~clone~ method.
 
@@ -4073,7 +3655,7 @@
       /Arrays/ have a public ~clone~ method whose return type is the same as the
       type of the array. *NO cast required*.
 
-** DONE 4.3 Enumerations =RE-READ=
+** DONE 4.3 Enumerations - 154 =RE-READ=
    CLOSED: [2017-05-16 Tue 17:43]
    - Example:
      #+BEGIN_SRC java
@@ -4267,7 +3849,7 @@
       names, you can use a _static import declaration_ like
       ~import static com.horstmann.corejava.Size.*;~.
 
-** TODO 4.4 Runtime Type Information and Resources
+** TODO 4.4 Runtime Type Information and Resources - 159
    In Java,
    + you can find out at /runtime/ to which /class/ a given /object/ belongs.
 
@@ -4275,7 +3857,7 @@
      and
      *load* its /resources/ (associated data).
 
-*** DONE 4.4.1 The Class Class - 159
+*** DONE 4.4.1 The Class ~Class~ - 159
     CLOSED: [2018-01-10 Wed 01:22]
     =From Jian=
     Remember all the results of the /methods/ we talk about in this section can
@@ -4807,7 +4389,7 @@
       This is BAD design. Do NOT design like this in your code!
 ** TODO Exercises - 177
 
-* TODO 5. EXCEPTIONS, ASSERTIONS, AND LOGGING - 180
+* TODO 5. EXCEPTIONS, ASSERTIONS, AND LOGGING - 181
   - Exception-handling
 
   - ~assert~ statement: provides a structured and efficient way of expressing
@@ -5451,9 +5033,9 @@
 *** TODO 5.3.7 Filters and Formatters - 202
     - x
 
-** TODO Exercises
-   
-* TODO 6. GENERIC PROGRAMMING - 206
+** TODO Exercises - 203
+
+* TODO 6. GENERIC PROGRAMMING - 207
   - =TODO=
 ** DONE 6.1 Generic Classes - 208
    CLOSED: [2018-01-15 Mon 23:24]
@@ -5881,12 +5463,12 @@
 *** TODO 6.6.7 Exceptions and Generics - 225
 
 ** TODO 6.7 Reflection and Generics - 226
-*** TODO 6.7.1 The Class<T> Class - 227
+*** TODO 6.7.1 The ~Class<T>~ Class - 227
 *** TODO 6.7.2 Generic Type Information in the Virtual Machine - 227
 
 ** TODO Exercises - 229
 
-* TODO 7. COLLECTIONS - 234
+* TODO 7. COLLECTIONS - 235
 ** TODO 7.1 An Overview of the Collections Framework - 236
 ** TODO 7.2 Iterators - 240
 ** TODO 7.3 Sets - 242
@@ -5899,50 +5481,53 @@
 *** TODO 7.5.5 Weak Hash Maps - 251
 
 ** TODO 7.6 Views - 252
-*** TODO 7.6.1 Ranges - 252
-*** TODO 7.6.2 Empty and Singleton Views - 253
+*** TODO 7.6.1 Small Collections - 252
+*** TODO 7.6.2 Ranges - 253
 *** TODO 7.6.3 Unmodifiable Views - 254
 
 ** TODO Exercises - 255
 
-* TODO 8. STREAMS - PAGE 247 ~ 260
-** TODO 8.1 From Iterating to Stream Operations
-** TODO 8.2 Stream Creation
-** TODO 8.3 The ~filter~, ~map~, and ~flatMap~ Methods
+* TODO 8. STREAMS - 259
+** TODO 8.1 From Iterating to Stream Operations - 260
+** TODO 8.2 Stream Creation - 261
+** TODO 8.3 The ~filter~, ~map~, and ~flatMap~ Methods - 263
    - NOTE
    - NOTE
-** TODO 8.4 Extracting Substreams and Combining Streams
-** TODO 8.5 Other Stream Transformations
-** TODO 8.6 Simple Reductions
-** TODO 8.7 The Optional Type
-*** 8.7.1 How to Work with Optional Values
+** TODO 8.4 Extracting Substreams and Combining Streams - 264
+** TODO 8.5 Other Stream Transformations - 265
+** TODO 8.6 Simple Reductions - 266
+** TODO 8.7 The Optional Type - 267
+*** 8.7.1 How to Work with Optional Values - 267
    - NOTE
-*** 8.7.2 How Not to Work with Optional Values
-*** 8.7.3 Creating Optional Values
-*** 8.7.4 Composing Optional Value Functions with flatMap
+*** 8.7.2 How Not to Work with Optional Values - 269
+*** 8.7.3 Creating Optional Values - 269
+*** 8.7.4 Composing Optional Value Functions with ~flatMap~ - 269
    - NOTE
-** TODO 8.8 Collecting Results
-** TODO 8.9 Collecting into Maps
-   - NOTE
-   - NOTE
-** TODO 8.10 Grouping and Partitioning
-   - NOTE
-   - NOTE
-** TODO 8.11 Downstream Collectors
+
+*** 8.7.5 Turning an Optional Into a Stream - 270
+
+** TODO 8.8 Collecting Results - 271
+** TODO 8.9 Collecting into Maps - 273
    - NOTE
    - NOTE
-** TODO 8.12 Reduction Operations
+** TODO 8.10 Grouping and Partitioning - 274
+   - NOTE
+   - NOTE
+** TODO 8.11 Downstream Collectors - 275
+   - NOTE
+   - NOTE
+** TODO 8.12 Reduction Operations - 277
    - NOTE
    - NOTE
    - NOTE
-** TODO 8.13 Primitive Type Streams
+** TODO 8.13 Primitive Type Streams - 279
    - NOTE
-** TODO 8.14 Parallel Streams
+** TODO 8.14 Parallel Streams - 280
    - *CAUTION*
 
-** TODO Exercises
+** TODO Exercises - 283
 
-* TODO 9. PROCESSING INPUT AND OUTPUT - PAGE 270 ~ 303
+* TODO 9. PROCESSING INPUT AND OUTPUT - 287
   The key points of this chapter are:
   1. Input streams are a source of bytes, and output streams are a destination
      for bytes.
@@ -6721,96 +6306,138 @@
 
 ** TODO Exercises - 325
    
-* TODO 10. CONCURRENT PROGRAMMING - PAGE 304 ~ 343
-** TODO 10.1 Concurrent Tasks
-*** TODO 10.1.1 Running Tasks
+* TODO 10. CONCURRENT PROGRAMMING - 329
+** TODO 10.1 Concurrent Tasks - 330
+*** TODO 10.1.1 Running Tasks - 330
     - _NOTE_
-*** TODO 10.1.2 Futures and Executor Services
+
+*** TODO 10.1.2 Futures - 333
     - _NOTE_
+
     - _NOTE_
-** TODO 10.2 Thread Safety
-*** TODO 10.2.1 Visibility
+
+** TODO 10.2 Asynchronous Computations - 335
+*** TODO 10.2.1 Completable Futures - 335
+    - _NOTE_
+
+*** TODO 10.2.2 Composing Completable Futures - 337
+
+*** TODO 10.2.3 Long-Running Tasks in User-Interface Callbacks - 340
+    - _NOTE_
+
+** TODO 10.3 Thread Safety - 341
+*** TODO 10.3.1 Visibility - 342
     - _TIP_
-*** TODO 10.2.2 Race Conditions
-*** TODO 10.2.3 Strategies for Safe Concurrency
-*** TODO 10.2.4 Immutable Classes
+
+*** TODO 10.3.2 Race Conditions - 344
+*** TODO 10.3.3 Strategies for Safe Concurrency - 346
+*** TODO 10.3.4 Immutable Classes - 347
     - _NOTE_
-** TODO 10.3 Parallel Algorithms
-*** TODO 10.3.1 Parallel Streams
+
+** TODO 10.4 Parallel Algorithms - 348
+*** TODO 10.4.1 Parallel Streams - 348
     - _CAUTION_
-*** TODO 10.3.2 Parallel Array Operations
+
+*** TODO 10.4.2 Parallel Array Operations - 349
     - _NOTE_
-** TODO 10.4 Threadsafe Data Structures
+
+** TODO 10.5 Threadsafe Data Structures - 350
    - _NOTE_
-*** TODO 10.4.1 Concurrent Hash Maps
+
+*** TODO 10.5.1 Concurrent Hash Maps - 350
     - _NOTE_
+
     - _NOTE_
-*** TODO 10.4.2 Blocking Queues
+
+*** TODO 10.5.2 Blocking Queues - 352
     - _NOTE_
-*** TODO 10.4.3 Other Threadsafe Data Structures
-** TODO 10.5 Atomic Values
+
+*** TODO 10.5.3 Other Threadsafe Data Structures - 354
+
+** TODO 10.6 Atomic Counters and Accumulators - 354
    - _NOTE_
    - _NOTE_
    - _TIP_
-** TODO 10.6 Locks
-*** TODO 10.6.1 Reentrant Locks
-    - _NOTE_
-*** TODO 10.6.2 The synchronized Keyword
-    - _NOTE_
-*** TODO 10.6.3 Waiting on Conditions
-    - _CAUTION_
-    - _NOTE_
-** TODO 10.7 Threads
-*** TODO 10.7.1 Starting a Thread
-    - _NOTE_
-*** TODO 10.7.2 Thread Interruption
-    - _NOTE_
-    - _TIP_
-*** TODO 10.7.3 Thread-Local Variables
-*** TODO 10.7.4 Miscellaneous Thread Properties
-** TODO 10.8 Asynchronous Computations
-*** TODO 10.8.1 Long-Running Tasks in User Interface Callbacks
-    - _NOTE_
-*** TODO 10.8.2 Completable Futures
-    - _NOTE_
-** TODO 10.9 Processes
-   - _NOTE_
-*** TODO 10.9.1 Building a Process
-    - _CAUTION_
-    - _NOTE_
-*** TODO 10.9.2 Running a Process
-    - _CAUTION_
-** TODO Exercises
 
-* TODO 11. ANNOTATIONS - PAGE 344 ~ 364
-** TODO 11.1 Using Annotations
-*** TODO 11.1.1 Annotation Elements
+** TODO 10.7 Locks and Conditions - 357
+*** TODO 10.7.1 Locks - 357
+    - _NOTE_
+
+*** TODO 10.7.2 The ~synchronized~ Keyword - 358
+    - _NOTE_
+
+*** TODO 10.7.3 Waiting on Conditions - 360
     - _CAUTION_
+
+    - _NOTE_
+
+** TODO 10.8 Threads - 362
+*** TODO 10.8.1 Starting a Thread - 363
+    - _NOTE_
+
+*** TODO 10.8.2 Thread Interruption - 364
+    - _NOTE_
+
+    - _TIP_
+
+*** TODO 10.8.3 Thread-Local Variables - 365
+*** TODO 10.8.4 Miscellaneous Thread Properties - 366
+
+** TODO 10.9 Processes - 366
+   - _NOTE_
+
+*** TODO 10.9.1 Building a Process - 367
+    - _CAUTION_
+
+    - _NOTE_
+
+*** TODO 10.9.2 Running a Process - 368
+    - _CAUTION_
+
+*** 10.9.3 Process Handles - 370
+
+** TODO Exercises - 371
+
+* TODO 11. ANNOTATIONS - 377
+** TODO 11.1 Using Annotations - 378
+*** TODO 11.1.1 Annotation Elements - 378
+    - _CAUTION_
+
     - NOTE
-*** TODO 11.1.2 Multiple and Repeated Annotations
-*** TODO 11.1.3 Annotating Declarations
+
+*** TODO 11.1.2 Multiple and Repeated Annotations - 380
+*** TODO 11.1.3 Annotating Declarations - 380
     - NOTE
-*** TODO 11.1.4 Annotating Type Uses
+
+*** TODO 11.1.4 Annotating Type Uses - 381
     - NOTE
+
     - NOTE
-*** TODO 11.1.5 Making Receivers Explicit
+
+*** TODO 11.1.5 Making Receivers Explicit - 382
     - NOTE
-** TODO 11.2 Defining Annotations
+
+** TODO 11.2 Defining Annotations - 383
    - NOTE
    - _CAUTION_
-** TODO 11.3 Standard Annotations
-*** TODO 11.3.1 Annotations for Compilation
-*** TODO 11.3.2 Annotations for Managing Resources
-*** TODO 11.3.3 Meta-Annotations
-** TODO 11.4 Processing Annotations at Runtime
-** TODO 11.5 Source-Level Annotation Processing
-*** TODO 11.5.1 Annotation Processors
+
+** TODO 11.3 Standard Annotations - 386
+*** TODO 11.3.1 Annotations for Compilation - 387
+*** TODO 11.3.2 Annotations for Managing Resources - 388
+*** TODO 11.3.3 Meta-Annotations - 389
+
+** TODO 11.4 Processing Annotations at Runtime - 391
+** TODO 11.5 Source-Level Annotation Processing - 394
+*** TODO 11.5.1 Annotation Processors - 394
     - NOTE
-*** TODO 11.5.2 The Language Model API
-*** TODO 11.5.3 Using Annotations to Generate Source Code
+
+*** TODO 11.5.2 The Language Model API - 395
+*** TODO 11.5.3 Using Annotations to Generate Source Code - 395
     - _TIP_
+
     - NOTE
-** TODO Exercises
+
+** TODO Exercises - 398
 
 * TODO 12. THE DATE AND TIME API - 400
   - History:
@@ -7152,7 +6779,7 @@
 ** TODO 12.7 Interoperating with Legacy Code - 416 =Try to Re-Read multiple times=
 ** TODO Exercises - 417
 
-* TODO 13. INTERNATIONALIZATION - 420
+* TODO 13. INTERNATIONALIZATION - 421
 ** TODO 13.1 Locales - 422
 *** TODO 13.1.1 Specifying a Locale - 423
     - NOTE
@@ -7204,7 +6831,7 @@
 
 ** TODO Exercises - 441
 
-* TODO 14. COMPILING AND SCRIPTING - 442
+* TODO 14. COMPILING AND SCRIPTING - 443
   The key points of this chapter are:
   1. With the compiler API, you can generate Java code on the fly and compile it.
 
@@ -7239,7 +6866,6 @@
     - NOTE
 
 *** TODO 14.2.2 Bindings - 449
-
 *** TODO 14.2.3 Redirecting Input and Output - 449
     - NOTE
 
@@ -7295,7 +6921,7 @@
 
 ** TODO Exercises - 464
 
-* TODO 15. Java Platform Module System - 469
+* TODO 15. THE JAVA PLATFORM MODULE SYSTEM - 469
   - A /module/ can make /classes/ and /packages/ selectively available so that
     its *evolution can be controlled*.
     =TODO= =???=
