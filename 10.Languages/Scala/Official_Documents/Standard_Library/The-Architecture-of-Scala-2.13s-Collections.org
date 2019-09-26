@@ -1,14 +1,60 @@
 #+TITLE: The Architecture of Scala 2.13's Collections
 #+AUTHOR: Julien Richard-Foy
+#+OTHER CONTRIBUTORS: Yasuhiro Horimoto (komainu8)
 #+STARTUP: entitiespretty
 
+* Overview (title added by Me to better fit doc format)
 * Factoring out common operations
-* Abstracting over collection types
+* DONE Abstracting over collection types
+  CLOSED: [2019-09-26 Thu 00:24]
+  Example:
+  #+begin_src scala
+    trait IterableOps[+A, +CC[_], +C] {
+      def filter(p: A => Boolean): C = ...
+      def map[B](p: A => B): CC[B] = ...
+    }
+  #+end_src
+
+  Then leaf collection type appropriately instantiate the /type parameters/.
+  For instance, in the case of ~List[A]~ we want ~CC~ to be ~List~ and ~C~ to be
+  ~List[A]~:
+  #+begin_src scala
+    trait List[+A] extends Iterable[A]
+                   with    IterableOps[A, List, List[A]]
+  #+end_src
+
 * Four branches of templates traits
 * Strict and non-strict collections
 * Operations implementation
 * When a strict evaluation is preferable (or unavoidable)
-* Summary
+* TODO Summary
+  This document explains that:
+  - _collection operations_ are implemented in /template traits/ suffixed with
+    ~Ops~ (e.g. ~IterableOps[A, CC[_], C]~).
+    + ~A~ :: collection element type 
+    + ~CC~ :: collection type constructor
+    + ~C~ :: collection type
+
+  - =Comment from Jian=:
+    If we can write ~IterableOps[C @ CC[A]]~ instead of ~IterableOps[A, CC[_], C]~,
+    the meaning of them can be self-explained.
+
+  - There are *FOUR* branches of /template traits/:
+    + ~IterableOps~
+    + ~MapOps~
+    + ~SortedSetOps~
+    + ~SortedMapOps~
+
+  - Some transformation operations (e.g. map) are overloaded to return different
+    result types according to their arguments type,
+    TODO
+
+  - the logic of _transformation operations_ is primarily implemented in views TODO ???
+    but there are *SPECIALIZED VERSIONS of template traits* (prefixed with
+    ~StrictOptimized~) that override these operations to use a /builder based
+    approach/.
+    TODO
+
 ** Acknowledgement
 
 
