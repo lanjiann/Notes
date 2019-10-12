@@ -641,6 +641,37 @@
       often makes for more readable code than the alternatives.
 
 ** TODO 2.13 Follow-up resources - 64
+*** TODO 1.Haskell wiki article on "Let vs. Where"
+    https://wiki.haskell.org/Let_vs._Where
+    xxx
+**** Advantages of ~let~
+**** Advantages of ~where~
+**** Lambda Lifting
+**** Problems with where
+
+*** TODO 2. How to desugar Haskell code; Gabriel Gonzalez
+**** ~if~
+**** Multi-argument lambdas
+**** Functions
+**** Infix functions
+**** Operators
+**** Operator parameters
+**** Operator sections
+**** Pattern matching
+**** Non-recursive ~let~ / ~where~
+**** Top-level functions
+**** Imports
+**** Type-classes
+**** Two-line ~do~ notation
+**** One-line ~do~ notation
+**** Multi-line ~do~ notation
+**** ~let~ in ~do~ notation
+**** ghci
+**** List comprehensions
+**** Numeric literals
+**** IO
+**** Conclusion
+
 * DONE 3 Strings - 66
   CLOSED: [2017-05-19 Fri 20:12]
 ** DONE 3.1 [ =NEW= ] Printing strings - 67
@@ -11846,7 +11877,50 @@
 
 * TODO 22 ~Reader~ - 843
 ** TODO 22.1 ~Reader~ - 844
+   - _Requirement_:
+     When writing applications, programmers often need to pass around some
+     information that may be needed intermittently or universally throughout an
+     entire application.
+     + _Extra consideration_:
+       We don't want to simply pass this information as arguments because it
+       would be present in the type of almost every function. This can make the
+       code harder to read and harder to maintain.
+       =from Jian= /Dependency Injection/
+
+   - _Solution_: ~Reader~.
+
+   - In this chapter, we will:
+     + examine the ~Functor~, ~Applicative~, and ~Monad~ instances for functions;
+     + learn about the ~Reader~ newtype;
+     + see some examples of using ~Reader~.
+
 ** TODO 22.2 A new beginning - 844
+   #+begin_src haskell
+     import Control.Applicative
+
+     boop = (*2)
+     doop = (+10)
+
+     bip :: Integer -> Integer
+     bip = boop . doop
+   #+end_src
+
+   - We can also write the /function composition/ this way:
+     #+begin_src haskell
+       bloop :: Integer -> Integer
+       bloop = fmap boop doop
+     #+end_src
+     _The ~Functor~ of functions_.
+
+   - Put functions below in the same file of ~boop~ and ~doop~:
+     #+begin_src haskell
+       bbop :: Integer -> Integer
+       bbop = (+) <$> boop <*> doop
+
+       duwop :: Integer -> Integer
+       duwop = liftA2 (+) boop doop
+     #+end_src
+
 *** TODO Short Exercise: Warming Up - 850
 
 ** TODO 22.3 This is Reader - 851
@@ -11956,12 +12030,21 @@
 ** TODO 24.13 Follow-up resources - 960
 
 * TODO 25 Composing types - 962
-** DONE 25.1 Composing types - ~More Notes~ - 963
-   CLOSED: [2018-09-09 Sun 03:20]
-   - There are times when *composing monads* is desirable:
-     1. Different monads allow us to work with different effects.
+** DONE 25.1 Composing types - 963
+   CLOSED: [2019-10-09 Wed 22:00]
+   This chapter and the next are about /monad transformers/, both the
+   principles behind them and the practicalities of using them.
 
-     2. Composing monads allows you to build up computations with multiple effects.
+   - /Functors/ and /applicatives/ are both closed under composition:
+     Compose two /functors/ (or two /applicatives/) and return another /functor/
+     (or /applicative/, as the case may be).
+       _However, compose /monads/ is not that simple, and the result is *not
+     necessarily* another /monad/._
+
+   - There are times when *composing monads* is desirable:
+     1. Different /monads/ allow us to work with different _effects_.
+
+     2. Composing monads allows you to build up computations with *MULTIPLE* /effects/.
         For example,
         By stacking, for example, a ~Maybe~ /monad/ with an ~IO~, you can
         + be performing /IO actions/
@@ -11969,18 +12052,30 @@
         + building up computations that have a possibility of failure, handled by
           the ~Maybe~ /monad/.
 
-   - =TODO= NOTE
+   - A /monad transformer/ is _a VARIANT of an ORDINARY TYPE that takes an *additional
+     type argument* which is assumed to have a ~Monad~ /instance/._
+     + Example:
+       ~MaybeT~ is the transformer variant of the ~Maybe~ type.
+
+     + The transformer variant of a type gives us /a ~Monad~ instance/ that binds
+       over both bits of structure. This allows us to *COMPOSE* /monads/ and
+       *COMBINE* their /effects/.
 
    - In this chapter, we will
-     + demonstrate why composing _TWO_ /monads/ *does not* give you another /monad/;
+     + DEMONSTRATE
+       why composing _TWO_ /monads/ *does not* give you another /monad/;
 
-     + examine the ~Identity~ and ~Compose~ types;
+     + EXAMINE
+       the ~Identity~ and ~Compose~ types;
 
-     + manipulate types until we can *make monads compose*;
+     + MANIPULATE types UNTIL
+       we can *make monads compose*;
 
-     + meet some _common monad transformers_;
+     + MEET
+       some _common monad transformers_;
 
-     + work through an ~Identity~ crisis.
+     + WORK THROUGH
+       an ~Identity~ crisis.
 
 ** TODO 25.2 Common functions as types - 964
 *** TODO ~Identity~ is boring - 964
