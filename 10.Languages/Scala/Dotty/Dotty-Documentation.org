@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.17.0-bin-SNAPSHOT
+#+VERSION: 0.20.0-bin-SNAPSHOT
 #+AUTHOR:
 #+STARTUP: entitiespretty
 
@@ -30,6 +30,8 @@
 *** Implementation details
 
 ** cbt-projects
+   *Using Dotty with cbt*
+
 ** Dottydoc
 *** Using existing Templates and Layouts
 *** Blog
@@ -65,8 +67,8 @@
 *** Meta Programming
 *** See Also
 
-** NEW TYPES
-*** Intersection types
+** TODO NEW TYPES
+*** TODO Intersection types
     The ~&~ operator creates an /intersection type/.
 
 **** Type Checking
@@ -108,6 +110,8 @@
        to ~List[A & B]~ because ~List~ is /convariant/.
 
      - TODO
+       TODO
+       TODO
        One might wonder how the compiler could come up with a definition for
        children of type List[A & B] since all its is given are children
        definitions of type List[A] and List[B]. The answer is it does not need
@@ -122,10 +126,120 @@
          }
        #+end_src
 
-*** Union types
-*** Type lambdas
-*** Match types
-**** Representation of Match Types
+*** DONE Union types
+    CLOSED: [2019-07-01 Mon 15:49]
+    The ~|~ operator creates an /union type/.
+
+    - A ~A | B~ value can be any value of type ~A~ and also any value of type ~B~.
+
+    - Example:
+      #+begin_src scala
+        final case class UserName(name: String)
+        final case class Password(hash: Hash)
+
+        def help(id: UserName | Password) = {
+          val user = id match {
+            case UserName(name) => lookupName(name)
+            case Password(hash) => lookupPassword(hash)
+          }
+
+          // ...
+        }
+      #+end_src
+
+    - /Union types/ are _DUALS of /intersection types/.
+      ~|~ is *commutative*: ~A | B~ is the _SAME type_ as ~B | A~.
+
+    - The compiler will assign a /union type/ to an expression *only if such                                               [S P A C E M A C S]
+
+ a
+      type is _EXPLICITLY given_.*
+      #+begin_src scala
+        val password = Password(123)
+        // val password: Password = Password(123)
+
+        val name = UserName("Eve")
+        // val name: UserName = UserName(Eve)
+
+        if (true) name else password
+        // val res2: Object & Product = UserName(Eve)
+
+        val either: Password | UserName = if (true) name else password
+          // val res2: Password | UserName = UserName(Eve)
+      #+end_src
+      + ~Object & Product~ is a /supertype/ of ~UserName~ and ~Product~,
+        BUT NOT the /least supertype/ ~Password | UserName~
+
+*** DONE Type lambdas
+    CLOSED: [2019-07-01 Mon 15:55]
+    A /type lambda/ lets one express a /higher-kinded type/ directly, *WITHOUT*
+    a /type definition/.
+
+    - =from Jian=
+      Scala 2 can do this with /type definition/ and /type projection/.
+
+    - Example:
+      ~[+X, Y] =>> Map[Y, X]~
+
+    - /Type parameters/ of /type lambdas/ can have /variances/ and /bounds/.
+
+    - A /parameterized type definition or declaration/ such as ~type T[X] = (X, X)~
+      is a shorthand for a PLAIN /type definition/ with a /type lambda/ as its RHS:
+      ~type T = [X] =>> (X, X)~
+
+    - TODO
+      _More details_ link
+
+*** TODO Match types
+    - A /match type/ reduces to one of a number of right hand sides, depending on
+      a /scrutinee type/. Example:
+      #+begin_src scala
+        type Elem[X] = X match {
+          case String      => Char
+          case Array[t]    => t
+          case Iterable[t] => t
+        }
+      #+end_src
+      + An ~Elem~ with /CONCRETE type parameter/ ~X~ can be reduced _as_ (NOT legal
+        code you want to write out explicitly):
+        #+begin_src scala
+          Elem[String]      =:= Char
+          Elem[Array[Int]]  =:= Int
+          Elem[List[Float]] =:= Float
+          Elem[Nil.type]    =:= Nothing
+        #+end_src
+        Here ~=:=~ is understood to mean that left and right hand sides are
+        *mutually subtypes* of each other.
+
+    - Syntax in general: ~S match { P1 => T1 .... Pn => Tn }~, where
+      + ~S~, ~T1~, ..., ~Tn~ are types.
+      + ~P1~, ..., ~Pn~ are patterns.
+        * /Type variables/ in patterns start as usual with a lower case letter.
+
+    - Match types can form part of recursive type definitions. Example:
+      #+begin_src scala
+        type LeafElem[X] = X match {
+          case String      => Char
+          case Array[t]    => LeafElem[t]
+          case Iterable[t] => LeafElem[t]
+          case AnyVal      => X
+        }
+      #+end_src
+
+    - _Recursive match type definitions_ can also be given an /upper bound/, like this:
+      #+begin_src scala
+        type Concat[+Xs <: Tuple, +Ys <: Tuple] <: Tuple = Xs match {
+          case Unit    => Ys
+          case x *: xs => x *: Concat[xs, Ys]
+        }
+      #+end_src
+      + In this definition, every instance of ~Concat[A, B]~, whether reducible
+        or not, is known to be a /subtype/ of ~Tuple~.
+
+      + This is necessary to _make the recursive invocation ~x *: Concat[xs, Ys]~
+        type check_, since ~*:~ demands a ~Tuple~ as its right operand.
+
+**** TODO Representation of Match Types
 **** Match type reduction
 **** Subtyping Rules for Match Types
 **** Variance Laws for Match Types
@@ -134,59 +248,362 @@
 **** Handling Termination
 **** Related Work
 
-*** Dependent Function Types
+*** DONE Dependent Function Types
+    CLOSED: [2019-07-01 Mon 16:10]
+    - A /dependent function type/ describes functions where the _result type_ may
+      DEPEND ON the _function's parameter values_. Example:
+      #+begin_src scala
+        trait Entry {
+          type Key
+          val key: Key
+        }
 
-** ENUMS
-*** Enumerations
-**** Parameterized enums
-**** Methods defined for enums
-**** User-defined members of enums
-**** Compatibility with Java Enums
-**** Implementation
-**** Reference
+        def extractKey(e: Entry): e.Key = e.key          // a dependent method
+        val extractor: (e: Entry) => e.Key = extractKey  // a dependent function value
+        //           ||                   ||
+        //           ||     Dependent     ||
+        //           ||   Function Type   ||
+        //           =======================
+      #+end_src
 
-*** Algebraic Data Types
-**** Syntax of Enums
-**** Reference
+      - Scala _ALREADY_ has /dependent methods/.
+        BUT so far (in Scala 2) it was _NOT possible_ to turn such /methods/ into
+        /function values/, so that they can be passed as /parameters/ to other
+        functions, or returned as results.
+        + /Dependent methods/ COULD NOT be turned into /functions/ simply because
+          there was no type that could describe them.
 
-*** Translation
+      - In dotty the /type/ of the ~extractor~ value above is ~(e: Entry) => e.Key~
+
+    - The /dependent function type/ above is just /syntactic sugar/ for
+      #+begin_src scala
+        Function1[Entry, Entry#Key] {
+          def apply(e: Entry): e.Key
+        }
+      #+end_src
+
+** TODO ENUMS
+*** DONE Enumerations
+    CLOSED: [2019-07-02 Tue 13:11]
+    An /enumeration/ is used to define a /type/ consisting of _a set of NAMED values._
+
+    - Example:
+      #+begin_src scala
+        enum Color {
+          case Red, Green, Blue
+        }
+      #+end_src
+      + This defined a new ~sealed~ /class/ ~Color~ with 3 values: ~Color.Red~,
+        ~Color.Green~, ~Color.Blue~.
+
+      + The _color values_ are members of ~Color~'s /companion object/.
+
+**** DONE Parameterized enums
+     CLOSED: [2019-07-01 Mon 17:01]
+     /Enums/ CAN BE _parameterized_:
+     #+begin_src scala
+       enum Color(val rgb: Int) {
+         case Red   extends Color(0xFF0000)
+         case Green extends Color(0x00FF00)
+         case Blue  extends Color(0x0000FF)
+       }
+     #+end_src
+     As the example shows, you can _DEFINE_ the parameter value BY using an
+     _EXPLICIT_ ~extends~ /clause/.
+
+**** DONE Methods defined for enums
+     CLOSED: [2019-07-01 Mon 17:07]
+     The values of an /enum/ correspond to _UNIQUE integers_.
+     The _integer_ associated with an /enum value/ is returned by its ~ordinal~
+     /method/.
+
+     - Example:
+       #+begin_src scala
+         val red = Color.Red
+         // val red: Color = Red
+
+         red.ordinal
+         // val res0: Int = 0
+       #+end_src
+
+     - The /companion object/ of an /enum/ also defines *TWO* utility /methods/.
+       + ~valueOf~: obtain an /enum value/ by its _name_.
+       + ~values~: returns _ALL_ /enum values/ defined in an enumeration in an ~Array~.
+       #+begin_src scala
+         Color.valueOf("Blue")
+         // val res0: Color = Blue
+
+         Color.values
+         // val res1: Array[Color] = Array(Red, Green, Blue)
+       #+end_src
+
+**** DONE User-defined members of enums
+     CLOSED: [2019-07-01 Mon 17:11]
+     It is _possible_ to add your own definitions to an /enum/.
+
+     - Example:
+       #+begin_src scala
+         enum Planet(mass: Double, radius: Double) {
+           private final val G = 6.67300E-11
+           def surfaceGravity = G * mass / (radius * radius)
+           def surfaceWeight(otherMass: Double) =  otherMass * surfaceGravity
+
+           case Mercury extends Planet(3.303e+23, 2.4397e6)
+           case Venus   extends Planet(4.869e+24, 6.0518e6)
+           case Earth   extends Planet(5.976e+24, 6.37814e6)
+           case Mars    extends Planet(6.421e+23, 3.3972e6)
+           case Jupiter extends Planet(1.9e+27,   7.1492e7)
+           case Saturn  extends Planet(5.688e+26, 6.0268e7)
+           case Uranus  extends Planet(8.686e+25, 2.5559e7)
+           case Neptune extends Planet(1.024e+26, 2.4746e7)
+         }
+       #+end_src
+
+     - It is also possible to define an explicit /companion object/ for an /enum/:
+       #+begin_src scala
+         object Planet {
+           def main(args: Array[String]) = {
+             val earthWeight = args(0).toDouble
+             val mass = earthWeight / Earth.surfaceGravity
+             values map { p =>
+               println(s"Your weight on $p is ${p.surfaceWeight(mass)}")
+             }
+           }
+         }
+       #+end_src
+
+**** DONE Compatibility with Java Enums
+     CLOSED: [2019-07-02 Tue 10:37]
+     If you want to use a enum in Scala in Java, you need to extends
+     ~java.lang.Enum[T]~, where ~T~ is your _enum type name_.
+     - Example
+       #+begin_src scala
+         enum Color extends java.lang.Enum[Color] { case Red, Green, Blue }
+       #+end_src
+
+     - Example
+       #+begin_src scala
+         Color.Red.compareTo(Color.Green)
+         // val res15: Int = -1
+       #+end_src
+
+     - For a more in-depth example of using Scala 3 /enums/ from Java, see this
+       test (in GITHUB dotty project repo). In the test, the /enums/ are defined
+       in the ~MainScala.scala~ file and used from a Java source, ~Test.java~.
+
+**** DONE Implementation
+     CLOSED: [2019-07-02 Tue 13:11]
+     /Enums/ are represented as ~sealed~ /classes/ that extend the ~scala.Enum~
+     /trait/.
+
+     - ~scala.Enum~ defines a _SINGLE_ /public method/, ~ordinal~:
+       #+begin_src scala
+         package scala
+
+         /** A base trait of all enum classes */
+         trait Enum {
+           /** A number uniquely identifying a case of an enum */
+           def ordinal: Int
+         }
+       #+end_src
+
+     - /Enum values/ *WITH* ~extends~ /clauses/ get *expanded* to /anonymous class
+       instances/.
+         For instance, the ~Venus~ value above (=from Jian= in Section _User-defined
+       members of enums_) would be defined like this:
+       #+begin_src scala
+         val Venus: Planet = new Planet(4.869e24, 6.0518e6) {
+           def ordinal: Int = 1
+           override def toString: String = "Venus"
+           // internal code to register value
+         }
+       #+end_src
+
+     - /Enum values/ *WITHOUT* ~extends~ /clauses/ all share a single implementation
+       that can be instantiated using a /private method/ that takes a tag and a name
+       as arguments.
+         For instance, ~Color.Red~ would expand to
+         #+begin_src scala
+           val Red: Color = $new(0, "Red")
+         #+end_src
+
+**** TODO Reference
+
+*** DONE Algebraic Data Types
+    CLOSED: [2019-07-02 Tue 13:35]
+    The ~enum~ concept is general enough to ALSO support ADTs and GADTs. =TODO=
+
+    - Example:
+      #+begin_src scala
+        enum Option[+T] {
+          case Some(x: T)
+          case None
+        }
+      #+end_src
+      + The ~extends~ clauses can be given explicitly:
+        #+begin_src scala
+          enum Option[+T] {
+            case Some(x: T) extends Option[T]
+            case None       extends Option[Nothing]
+          }
+        #+end_src
+
+      + If ~Option~ was /non-variant/, you'd need to give the ~extends~ /clause/
+        of None *EXPLICITLY*.
+
+    - Generally, for /enum classes/
+      + all /covariant type parameters/  are *minimized* in a compiler-generated
+        ~extends~ /clause/
+
+      + all /contravariant type parameters/ are *maximized*.
+
+    - If not directly ~new~ a enumeration, a type is always its parent.
+      For example,
+      #+begin_src scala
+        Option.Some("hello")
+        // val res1: t2.Option[String] = Some(hello)
+
+        Option.None
+        // val res2: t2.Option[Nothing] = None
+
+        new Option.Some(2)
+        // res3: t2.Option.Some[Int] = Some(2)
+      #+end_src
+
+    - /Enumerations/ and /ADTs/ have been presented as two *different concepts*.
+      _BUT_
+      since they share the same syntactic construct, they can be seen simply as
+      two ends of a spectrum and it is perfectly possible to construct hybrids.
+      For instance, the code below gives an implementation of Color either with
+      three enum values or with a parameterized case that takes an RGB value.
+      TODO TODO TODO
+      TODO TODO TODO
+      TODO TODO TODO
+      #+begin_src scala
+        enum Color(val rgb: Int) {
+          case Red           extends Color(0xFF0000)
+          case Green         extends Color(0x00FF00)
+          case Blue          extends Color(0x0000FF)
+          case Mix(mix: int) extends Color(mix)
+        }
+      #+end_src
+
+**** DONE Syntax of Enums
+     CLOSED: [2019-07-02 Tue 13:27]
+     - TODO NOTE
+
+**** TODO Reference
+
+*** TODO Translation
+    *Translation of Enum and ADTs*
+    1.
+    2.
+    3.
+    4.
+    5.
+    6.
+    7.
+    8.
+    9.
+
 **** Translation of Enumerations
 **** Scopes for Enum Cases
 **** Translation of Java-compatible enums
 **** Other Rules
 
-** CONTEXTUAL ABSTRACTIONS
+** TODO CONTEXTUAL ABSTRACTIONS
 *** Overview
-**** Critique of the Status Quo
-**** The New Design
+**** TODO Critique of the Status Quo
+     TODO
+     TODO
+     TODO
 
-*** Delegates
-**** Anonymous Delegates
-**** Alias Delegates
-**** Delegate Instantiation
+**** TODO The New Design
+     - The following pages introduce a *REDESIGN* of /contextual abstractions/ in
+       Scala. They introduce four fundamental changes:
+       1. /Delegates/:
+          a new way to define basic terms that can be synthesized.
+          + _They replace /implicit definitions/._
+
+          + The core principle of the proposal:
+            rather than mixing the ~implicit~ /modifier/ with a large number of
+            features, we have a single way to define terms that can be
+            synthesized for types.
+
+       2. /Given Clauses/:
+          a new syntax for /implicit parameters and their arguments/.
+          + Both are introduced with the same keyword, ~given~.
+
+          + TODO This unambiguously aligns parameters and arguments, solving a
+            number of language warts.
+
+          + TODO It also allows us to have _SEVERAL /implicit parameter/ sections_,
+            and to have /implicit parameters/ followed by normal ones.
+
+       3. /Delegate Imports/:
+          a new class of /imports/ that _SPECIFICALLY import delegates_ and nothing
+          else.
+            /Delegates/ *must be* imported with ~import delegate~, a plain ~import~
+          will no longer bring them into scope.
+
+       4. /Implicit Conversions/:
+          now expressed as /delegates/ of a standard ~Conversion~ class.
+          All other forms of /implicit conversions/ will _be phased out_.
+
+     - This section also contains pages describing other language features that
+       are _related to_ /context abstraction/. These are: TODO TODO TODO
+       + Context Bounds, which carry over unchanged.
+
+       + Extension Methods replace implicit classes in a way that integrates better
+         with typeclasses.
+
+       + Implementing Typeclasses demonstrates how some common typeclasses can be
+         implemented using the new constructs.
+
+       + Typeclass Derivation introduces constructs to automatically derive typeclass
+         delegates for ADTs.
+
+       + Multiversal Equality introduces a special typeclass to support type safe
+         equality.
+
+       + Implicit Function Types provide a way to abstract over given clauses.
+
+       + Implicit By-Name Parameters are an essential tool to define recursive
+         synthesized values without looping.
+
+       + Relationship with Scala 2 Implicits discusses the relationship between
+         old-style implicits and new-style delegates and given clauses and how
+         to migrate from one to the other.
+
+*** Given Instances
+**** Anonymous Given Instances
+**** Alias Givens
+**** Given Instance Initialization
 **** Syntax
 
 *** Given Clauses
+   *Given Parameters*
 **** Anonymous Given Clauses
 **** Inferring Complex Arguments
 **** Multiple Given Clauses
-**** Summoning Delegates
+**** Summoning Instances
 **** Syntax
 
 *** Context Bounds
 **** Context Bounds
 **** Syntax
 
-*** Delegate Imports
+*** Given Imports
 **** Importing By Type
 **** Migration
 
 *** Extension Methods
 **** Translation of Extension Methods
 **** Translation of Calls to Extension Methods
-**** Delegates for Extension Methods
+**** Given Instances for Extension Methods
+**** Given Instances with Collective Parameters
 **** Operators
-**** Generic Example
+**** Generic Extensions
 **** Syntax
 
 *** Implementing Typeclasses
@@ -194,21 +611,19 @@
 **** Functors and monads
 
 *** Typeclass Derivation
-**** Deriving Types
-**** Derivable Types
-**** The Shape Type
-**** The Generic Typeclass
-**** Mirrors
-**** GenericClass
-**** How to Write Generic Typeclasses
-**** Deriving Delegates Elsewhere
+    *Type class Derivation*
+**** Types supporting ~derives~ clauses
+**** Type classes supporting automatic deriving
+***** How to write a type class ~derived~ method using low level mechanisms
+
+**** Deriving instances elsewhere
 **** Syntax
 **** Discussion
 
 *** Multiversal Equality
-**** Deriving ~Eql~ Delegates
+**** Deriving ~Eql~ Instances
 **** Precise Rules for Equality Checking
-**** Predefined ~Eql~ Delegates
+**** Predefined ~Eql~ Instances
 **** Why Two Type Parameters?
 
 *** Implicit Function Types
@@ -224,8 +639,8 @@
 
 *** Relationship with Scala 2 Implicits
 **** Simulating Contextual Abstraction with Implicits
-***** Delegates
-***** Anonymous Delegates
+***** Given Intances
+***** Anonymous Given Intances
 ***** Given Clauses
 ***** Context Bounds
 ***** Extension Methods
@@ -237,7 +652,7 @@
 ***** Implicit Conversions
 ***** Implicit Classes
 ***** Implicit Values
-***** Abstract Implicit
+***** Abstract Implicits
 
 **** Implementation Status and Timeline
 
@@ -810,6 +1225,7 @@
 **** Relationship with Inline
 **** Scope Extrusion
 **** Example Expansion
+**** Find implicits within a macro
 **** TODO Relationship with Whitebox Inline
      ~Inline~ documents inlining.
      The code below introduces a /whitebox inline method/ that can calculate
@@ -830,6 +1246,7 @@
 
 *** TODO Staging
 **** API
+**** Create a new Dotty project with staging enabled
 **** Example
 
 *** TODO Erased Terms
@@ -844,9 +1261,8 @@
 ***** Obtaining and underlying argument
 ***** Positions
 ***** Tree Utilities
-***** Let
+****** Let
 
-**** TASTy Reflect API
 **** More Examples
 
 *** TODO TASTy Inspection
@@ -861,12 +1277,202 @@
 **** Discussion
 
 *** Export Clauses
+    *An ~export~ clause defines aliases for selected members of an object.*
+    - Example:
+      #+begin_src scala
+        class BitMap
+        class InkJet
+
+        class Printer {
+          type PrinterType
+          def print(bits: BitMap): Unit = ???
+          def status: List[String] = ???
+        }
+
+        class Scanner {
+          def scan(): BitMap = ???
+          def status: List[String] = ???
+        }
+
+        class Copier {
+          private val printUnit = new Printer { type PrinterType = InkJet }
+          private val scanUnit = new Scanner
+
+          export scanUnit.scan
+          export printUnit.{status => _, _}
+
+          def status: List[String] = printUnit.status ++ scanUnit.status
+        }
+      #+end_src
+      - Here the two ~export~ clauses define the following /export aliases/ in
+        class ~Copier~:
+        #+begin_src scala
+          final def scan(): BitMap            = scanUnit.scan()
+          final def print(bits: BitMap): Unit = printUnit.print(bits)
+          final type PrinterType              = printUnit.PrinterType
+        #+end_src
+
+      - The exported members can be accessed inside ~Copier~ as well as from
+        outside:
+        #+begin_src scala
+          val copier = new Copier
+          copier.print(copier.scan())
+        #+end_src
+
+      - Syntax (similar to ~import~):
+        TODO
+        TODO
+        TODO
+        TODO
+
 **** Motivation
+     - It is a standard recommendation to *prefer composition over inheritance*.
+       + This is really an application of /the principle of least power/:
+         * Composition treats components as blackboxes
+           _WHEREAS_
+         * inheritance can affect the internal workings of components through overriding
+
+       + Sometimes the close coupling implied by /inheritance/ is the best solution
+         for a problem, but hwere this is not necessary the looser coupling of
+         composition is better.
+
+     - So far, OO Language including Scala made it much easier to use /inheritance/
+       than /composition/, which pushing programmers to a solution that is often
+       too powerful as well as complicated (=from Jian= hard to verify in the concept of math).
+       + For example, in Scala,
+         * /inheritance/: Use ~extends~ clause
+         * /composition/: Require a verbose elaboration of a sequence of forwarders. TODO ???
+
+       + ~export~ clauses redress the balance, and
+         make /composition relationships/ *as CONCISE and EASY to* express as
+         /inheritance relationships/.
+         * Actually, ~export~ clauses is MORE FLEXIBLE than ~extends~ clauses --
+           members can be _renamed_ or _ommited_.
+
+     - /Export clauses/ also fill a gap opened by the shift from /package objects/
+       (DEPRECATED in Scala 3) to /toplevel definitions/.
+       + In Scala 2, sometimes /package objects/ is created also with ~extends~ clauses.
+
+       + /Toplevel definitions/ doesn't reside in semantics in a user-defined object,
+         so they _can't inherit anyting_. However, ~export~ can be applied in
+         toplevel, and make a similar result to the /package object/ _inheritance_ way.
+
+
 **** Syntax changes
 **** Elaboration of Export Clauses
+     TODO ???
+     TODO ???
+     TODO ???
+     TODO ???
 
-*** Opaque Type Alias
+*** DONE Opaque Type Alias
+    CLOSED: [2019-09-13 Fri 02:50]
+    /Opaque types aliases/ provide type abstraction without any runtime overhead.
+
+    - Example:
+      #+begin_src scala
+        object Logarithms {
+
+          opaque type Logarithm = Double
+
+          object Logarithm {
+
+            // These are the ways to lift to the logarithm type
+            def apply(d: Double): Logarithm = math.log(d)
+
+            def safe(d: Double): Option[Logarithm] =
+              if (d > 0.0) Some(math.log(d)) else None
+          }
+
+          // Extension methods define opaque types' public APIs
+          given LogarithmOps {
+            def (x: Logarithm) toDouble: Double = math.exp(x)
+            def (x: Logarithm) + (y: Logarithm): Logarithm = Logarithm(math.exp(x) + math.exp(y))
+            def (x: Logarithm) * (y: Logarithm): Logarithm = Logarithm(x + y)
+          }
+        }
+      #+end_src
+      + ~Logarithm~ is the same as ~Double~ is *only known in the scope where
+        ~Logarithm~ is defined* which in this case is object ~Logarithms~.
+        * This in scope knowledge of their equivalence is very important!
+            Without this knowledge, type-check will say functions ~apply~, ~safe~,
+          ~toDouble~, ~+~, and ~*~ have wrong type signature, there there will
+          be no simple way to override it.
+
+      + Outside ~Logarithms~, ~Logarithm~ is treated as a _NEW abstract type_.
+        * Legal operations example:
+          #+begin_src scala
+            import Logarithms._
+            import Predef.{any2stringadd => _, _}
+
+            val l1 = Logarithm(1.0)
+            val l2 = Logarithm(2.0)
+            val l3 = l1 * l2
+            val l4 = l1 + l2
+          #+end_src
+          - =IMPORTANT=
+            The ~import Predef.{any2stringadd => _}~ is necessary!!!
+              Without this import clause, the universal ~+~ in ~Predef~ would
+            take precedence over the ~+~ extension method in ~LogarithmOps~.
+            + Solution: eliminate ~any2stringadd~ -- this is already in DEPRECATED
+                        status.
+
+        * Illegal operations example:
+          #+begin_src scala
+            val d: Double = l1       // error: found: Logarithm, required: Double
+            val l2: Logarithm = 1.0  // error: found: Double, required: Logarithm
+            l1 * 2                   // error: found: Int(2), required: Logarithm
+            l2 / l2                  // error: `/` is not a member fo Logarithm
+          #+end_src
+
 **** Bounds For Opaque Type Alias
+     /Opaque type aliases/ can also come with /bounds/.
+     Example:
+     #+begin_src scala
+       object Access {
+
+         opaque type Permissions = Int
+         opaque type PermissionChoice = Int
+         opaque type Permission <: Permissions & PermissionChoice = Int
+
+         def (x: Permissions) & (y: Permissions): Permissions = x & y
+         def (x: PermissionChoice) | (y: PermissionChoice): PermissionChoice = x | y
+         def (x: Permissions) is (y: Permissions): Boolean = (x & y) == y
+         def (x: Permissions) isOneOf (y: PermissionChoice): Boolean = (x & y) != 0
+
+         val NoPermission: Permission = 0
+         val ReadOnly: Permission = 1
+         val WriteOnly: Permission = 2
+         val ReadWrite: Permissions = ReadOnly & WriteOnly
+         val ReadOrWrite: PermissionChoice = ReadOnly | WriteOnly
+       }
+     #+end_src
+     - In conepts, the ~Access~ object defines THREE /opaque types/:
+       + ~Permission~,       representing a single permission,
+       + ~Permissions~,      representing a conjunction (logical "and") of permissions,
+       + ~PermissionChoice~, representing a disjunction (logical "or") of permissions.
+
+     - /Type bound/ of ~Permission~ makes it known outside the ~Access~ object that
+       ~Permission~ is a /subtype/ of the other two types. Hence, the following
+       usage scenario type-checks:
+       #+begin_src scala
+         object User {
+           import Access._
+
+           case class Item(rights: Permissions)
+
+           val x = Item(ReadOnly)  // OK, since Permission <: Permissions
+
+           assert(!x.rights.is(ReadWrite))
+           assert(x.rights.isOneOf(ReadOrWrite))
+         }
+       #+end_src
+       + On the other hand, ~x.rights.isOneOf(ReadWrite)~ can't pass the type check.
+
+**** TODO More details
+***** Syntax
+***** Type Checking
+***** Realtionship to SIP 35
 
 *** Parameter Untupling
     For data like ~val xs: List[(Int, Int)]~,
@@ -902,13 +1508,66 @@
 *** ~threadUnsafe~ Annotation
 **** Examples
 
+*** DONE New Control Syntax
+    CLOSED: [2019-09-09 Mon 18:32]
+    #+begin_src scala
+      if x < 0 then -x else x
+
+      while x >= 0 do x = f(x)
+
+      for x <- xs if x > 0
+      yield x * x
+
+      for
+        x <- xs
+        y <- ys
+      do
+        println(x + y)
+    #+end_src
+    - The rules in details:
+      TODO
+      - TODO * 4
+
+      - For ~if~ or ~while~, in their condition,
+        _newline characters_ are *NOT* _statement separators_.
+          So the meaning of newlines is the _SAME_ no matter whether parentheses
+        are present or absent.
+
+      - For the enumerators of ~for~-expression,
+        newline characters are *potential* _statement separators_.
+        TODO ??? ??? ???
+
+**** Rewrites
+     The Dotty compiler _can rewrite_ source code from old syntax and new syntax
+     and back.
+     - With option ~-rewrite -new-syntax~, rewrite old with new
+     - With option ~-rewrite -old-syntax~, rewrite new with old
+
+*** Significant Indentation
+**** Spaces vs Tabs
+**** Indentation and Braces
+**** Indentation Marker ~:~
+**** Special Treatment of Case Clauses
+**** The End Marker
+**** Example
+**** Settings and Rewrites
+
 ** OTHER CHANGED FEATURES
-*** Programmatic Structural Types
+*** Numeric Literals
+**** Meaning of Numeric Literals
+**** The FromDigits Class
+**** Error Handling
+**** Example
+**** Compile-Time Errors
+
+*** Structural Types
+    *Programmatic Structural Types*
 **** Example
 **** Extensibility
 **** Relation with ~scala.Dynamic~
 
-*** Rules for Operators
+*** Operators
+    *Rules for Operators*
 **** The ~@alpha~ Annotation
 ***** Motivation
 ***** Details
@@ -917,17 +1576,29 @@
 ***** Motivation
 ***** Details
 
-*** Wildcard Arguments in Types
+**** Syntax Change
+
+*** Wildcard Types
+    *Wildcard Arguments in Types*
 **** Motivation
 **** Migration Strategy
 
-*** Changes in Type Checking
-*** Changes in Type Inference
-*** Changes in Implicit Resolution
+*** Type Checking
+    *Type Checking*
+    - [//]:# todo: fill in
+
+*** Type Inference
+    *Changes in Type Inference*
+    - [//]:# todo: fill in
+
+*** Implicit Resolution
+    *Changes in Implicit Resolution*
+
 *** Implicit Conversions
 **** Examples
 
-*** Changes in Overload Resolution
+*** Overload Resolution
+    *Changes in Overload Resolution*
 **** Looking Beyond the First Argument List
 **** Parameter Types of Function Values
 
@@ -940,7 +1611,8 @@
 **** Syntax Changes
 **** Migration
 
-*** Option-less pattern matching
+*** Pattern Matching
+    *Option-less pattern matching*
 **** Extractors
 ***** Fixed-Arity Extractors
 ***** Variadic Extractors
@@ -952,10 +1624,12 @@
 **** Sequence Match
 **** Product-Sequence Match
 
-*** Automatic Eta Expansion
+*** Eta Expansion
+    *Automatic Eta Expansion*
 **** Automatic eta-expansion and nullary methods
 
-*** Changes in Compiler Plugins
+*** Compiler Plugins
+    *Changes in Compiler Plugins*
 **** Using Compiler Plugins
 **** Writing a Standard Compiler Plugin
 **** Writing a Research Compiler Plugin
@@ -966,11 +1640,14 @@
 **** Note on recursive lazy vals
 **** Reference
 
+*** Main Functions
+
 ** DROPPED FEATURES
 *** Dropped: DelayedInit
 *** Dropped: Scala 2 Macros
 *** Dropped: Existential Types
 *** Dropped: General Type Projection
+*** Dropped: Do-While
 *** Dropped: Procedure Syntax
 *** Dropped: Package Objects
 *** Dropped: Early Initializers
@@ -986,6 +1663,9 @@
 *** Dropped: Nonlocal Returns
 
 * CONTRIBUTING
+** Contribute Knowledge
+*** Contribute Internals-related Knowledge
+
 ** Getting Started
 *** Requirements
 *** Compiling and Running
@@ -996,19 +1676,9 @@
 *** Compiling files with dotc
 *** Inspecting Trees with Type Stealer
 *** Pretty-printing
-
-** Eclipse
-*** Setup
-*** Import to Eclipse
-*** Running/Debugging
-
-** IntelliJ IDEA
-   Building Dotty with IntelliJ IDEA
-*** Setup
-*** Running/Debugging
+*** SBT Commands Cheat Sheet
 
 ** Testing
-   Testing in Dotty
 *** Unit tests
 **** Testing with checkfiles
 
@@ -1016,20 +1686,45 @@
 **** Bootstrapped-only tests
 **** From TASTy tests
 
-** Release Model
-*** Model
-*** Example
-**** At the Dotty Repo
-**** At the CI
-***** Canceling CI builds
+** Debugging
+*** Setting up the playground
+*** Show for human readable output
+*** How to disable color
+*** Reporting as a non-intrusive println
+*** Printing out trees after phases
+*** Printing out stack traces of compile time errors
+*** Configuring the printer output
+*** Figuring out an object creation site
+**** Via ID
+**** Via tracer
 
-**** Documentation
-***** Release Procedure Checklist
-***** GitHub Releases and Blog Post
+*** Built-in Logging Architecture
+**** Printers
+**** Tracing
+**** Reporter
 
-**** Ecosystem
+** IDEs and Tools
+*** Mill
+*** Scalafix
 
-*** Procedure in Bash Scripts
+** Procedures
+*** Release Model
+**** Model
+**** Example
+***** At the Dotty Repo
+***** At the CI
+****** Canceling CI builds
+
+***** Documentation
+****** Release Procedure Checklist
+****** GitHub Releases and Blog Post
+
+***** Ecosystem
+
+**** Procedure in Bash Scripts
+
+*** Modifying the Test framework
+    *Test Vulpix Framework*
 
 * INTERNALS
 ** Backend
@@ -1054,7 +1749,7 @@
 *** In other phases
 *** Using contexts
 
-** Differences between scalac and dotc
+** Dotc vs Scalac
 *** Denotation
 **** Denotation vs. SymDenotation
 **** Implicit Conversion
@@ -1086,7 +1781,9 @@
 *** Contexts
 *** Compiler Phases
 
-** Dotc's concept of time
+** Periods
+   *Dotc's concept of time*
+
 ** Syntax
    *Scala Syntax Summary*
 *** Lexical Syntax
