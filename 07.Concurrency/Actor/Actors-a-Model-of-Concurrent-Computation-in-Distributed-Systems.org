@@ -1,260 +1,49 @@
-#+TITLE: ACTORS: A Model of Concurrent Computation in Distributed Systems
+#+TITLE: ACTORS
+#+SUBTITLE: A Model of Concurrent Computation in Distributed Systems
 #+VERSION: 1986
-#+AUTHOR: Gul A. Agha
+#+AUTHOR: Gul Agha
 #+STARTUP: entitiespretty
 
-* Table of Contents                                      :TOC_4_org:noexport:
-- [[List of Figures - xi][List of Figures - xi]]
-- [[Series Foreword - xiii][Series Foreword - xiii]]
-- [[Preface - xv][Preface - xv]]
-- [[1 Introduction - 1][1 Introduction - 1]]
-  - [[Overview - 3][Overview - 3]]
-- [[2 General Design Decisions - 5][2 General Design Decisions - 5]]
-  - [[2.1 The Nature of Computing Elements - 6][2.1 The Nature of Computing Elements - 6]]
-    - [[2.1.1 Sequential Processes - 6][2.1.1 Sequential Processes - 6]]
-    - [[2.1.2 Functions Transforming Data Values - 6][2.1.2 Functions Transforming Data Values - 6]]
-    - [[2.1.3 Actors - 8][2.1.3 Actors - 8]]
-  - [[2.2 Global Synchrony and Asynchrony - 9][2.2 Global Synchrony and Asynchrony - 9]]
-  - [[2.3 Interaction Between Agents - 11][2.3 Interaction Between Agents - 11]]
-    - [[2.3.1 Shared Variables - 12][2.3.1 Shared Variables - 12]]
-    - [[2.3.2 Communication - 12][2.3.2 Communication - 12]]
-    - [[2.3.3 The Need for Buffering - 13][2.3.3 The Need for Buffering - 13]]
-  - [[2.4 Nondeterminism and Fairness - 15][2.4 Nondeterminism and Fairness - 15]]
-    - [[2.4.1 The Guarantee of Delivery - 15][2.4.1 The Guarantee of Delivery - 15]]
-    - [[2.4.2 Fairness and the Mail System - 16][2.4.2 Fairness and the Mail System - 16]]
-  - [[2.5 Reconfigurability and Extensibility - 17][2.5 Reconfigurability and Extensibility - 17]]
-    - [[2.5.1 A Resource Manager - 17][2.5.1 A Resource Manager - 17]]
-    - [[2.5.2 The Dynamic Allocation of Resources - 19][2.5.2 The Dynamic Allocation of Resources - 19]]
-- [[3 Computation In Actor Systems - 21][3 Computation In Actor Systems - 21]]
-  - [[3.1 Defining an Actor System - 21][3.1 Defining an Actor System - 21]]
-    - [[3.1.1 Tasks - 22][3.1.1 Tasks - 22]]
-    - [[3.1.2 The Behavior of an Actor - 23][3.1.2 The Behavior of an Actor - 23]]
-  - [[3.2 Programming With Actors - 27][3.2 Programming With Actors - 27]]
-    - [[3.2.1 The Basic Constructs - 29][3.2.1 The Basic Constructs - 29]]
-    - [[3.2.2 Examples - 34][3.2.2 Examples - 34]]
-  - [[3.3 Minimal Actor Languages - 38][3.3 Minimal Actor Languages - 38]]
-    - [[3.3.1 A Simple Actor Language - 39][3.3.1 A Simple Actor Language - 39]]
-    - [[3.3.2 Act - 42][3.3.2 Act - 42]]
-- [[4 A More Expressive Language - 45][4 A More Expressive Language - 45]]
-  - [[4.1 Several Incoming Communications - 45][4.1 Several Incoming Communications - 45]]
-    - [[4.1.1 A Static Topology - 46][4.1.1 A Static Topology - 46]]
-    - [[4.1.2 A Dynamic Topology - 48][4.1.2 A Dynamic Topology - 48]]
-  - [[4.2 Insensitive Actors - 52][4.2 Insensitive Actors - 52]]
-  - [[4.3 Sequential Composition 56][4.3 Sequential Composition 56]]
-  - [[4.4 Delayed and Eager Evaluation - 57][4.4 Delayed and Eager Evaluation - 57]]
-    - [[4.4.1 Built-in actors - 58][4.4.1 Built-in actors - 58]]
-    - [[4.4.2 Delayed Evaluation - 60][4.4.2 Delayed Evaluation - 60]]
-    - [[4.4.3 Representing Infinite Structures - 61][4.4.3 Representing Infinite Structures - 61]]
-    - [[4.4.4 Eager Evaluation - 66][4.4.4 Eager Evaluation - 66]]
-- [[5 A Model For Actor Systems - 69][5 A Model For Actor Systems - 69]]
-  - [[5.1 Describing Actor Systems - 70][5.1 Describing Actor Systems - 70]]
-    - [[5.1.1 Configurations - 70][5.1.1 Configurations - 70]]
-    - [[5.1.2 Requirements for a Transition Relation - 70][5.1.2 Requirements for a Transition Relation - 70]]
-  - [[5.2 Initial Configurations - 72][5.2 Initial Configurations - 72]]
-    - [[5.2.1 Formalizing Actor Behaviors - 73][5.2.1 Formalizing Actor Behaviors - 73]]
-    - [[5.2.2 The Meaning of Behavior Definitions - 75][5.2.2 The Meaning of Behavior Definitions - 75]]
-    - [[5.2.3 Mapping Actor Programs - 80][5.2.3 Mapping Actor Programs - 80]]
-  - [[5.3 Transitions Between Configurations - 81][5.3 Transitions Between Configurations - 81]]
-    - [[5.3.1 Possible Transitions - 83][5.3.1 Possible Transitions - 83]]
-    - [[5.3.2 Subsequent Transitions 85][5.3.2 Subsequent Transitions 85]]
-- [[6 Concurrency Issues - 89][6 Concurrency Issues - 89]]
-  - [[6.1 Problems in Distributed Computing - 89][6.1 Problems in Distributed Computing - 89]]
-    - [[6.1.1 Divergence - 90][6.1.1 Divergence - 90]]
-    - [[6.1.2 Deadlock - 92][6.1.2 Deadlock - 92]]
-    - [[6.1.3 Mutual Exclusion - 95][6.1.3 Mutual Exclusion - 95]]
-  - [[6.2 Streams - 96][6.2 Streams - 96]]
-  - [[6.3 Message Channels - 98][6.3 Message Channels - 98]]
-- [[7 Abstraction And Comp08itionality - 101][7 Abstraction And Comp08itionality - 101]]
-  - [[7.1 Abstraction - 101][7.1 Abstraction - 101]]
-    - [[7.1.1 Atomicity - 102][7.1.1 Atomicity - 102]]
-    - [[7.1.2 Receptionists - 103][7.1.2 Receptionists - 103]]
-  - [[7.2 Composition of Concurrent Systems - 104][7.2 Composition of Concurrent Systems - 104]]
-    - [[7.2.1 Actors and Ports - 105][7.2.1 Actors and Ports - 105]]
-    - [[7.2.2 Encapsulation in Actors - 106][7.2.2 Encapsulation in Actors - 106]]
-    - [[7.2.3 Composition Using Message-Passing - 107][7.2.3 Composition Using Message-Passing - 107]]
-    - [[7.2.4 Rules for Composition - 108][7.2.4 Rules for Composition - 108]]
-  - [[7.3 The Brock-Ackerman Anomaly - 112][7.3 The Brock-Ackerman Anomaly - 112]]
-  - [[7.4 Observation Equivalence - 116][7.4 Observation Equivalence - 116]]
-- [[8 Conclusions - 119][8 Conclusions - 119]]
-- [[A Asynchronous Communication Trees - 123][A Asynchronous Communication Trees - 123]]
-- [[B A Glossary Of Actor Terms - 131][B A Glossary Of Actor Terms - 131]]
-- [[References - 137][References - 137]]
-- [[Index - 141][Index - 141]]
+* Chapter 1 Introduction
+* Chapter 2 General Design Decisions
+  - The FUNDAMENTAL _design decisions_ includes:
+    (This list is by no means exhaustive but represents the aspects of a model
+    of concurrent computation that we think are the most significant.)
+    + the nature of the computing elements
+    + global synchrony versus asynchronuous elements
+    + the mode of interaction between computing elements
+    + the degree of fairness
+    + reconfigurability and extensibility
 
-* List of Figures - xi
-* Series Foreword - xiii
-* Preface - xv
-* 1 Introduction - 1
-** Overview - 3
-   1. The rest of this chapter gives an overview of the book.
-
-   2. Chapter 2
-      reviews the general _design decisions_ that MUST BE MADE in _ANY model_ of
-      _concurrent computation_.
-
-   3. Chapter 3
-      + describe the behavior of an /actor/
-
-      + define a SIMPLE /actor language/ which is used to show some specific
-        examples of /actors/.
-
-   4. Chapter 4
-      + defines several higher level constructs which make the /actor language/
-        more expressive
-
-      + provides a mechanism for abstraction in /actor systems/.
-
-      These constructs are definable in terms of the /primitive actor constructs/
-      and are _NOT_ considered as part of /the actor formalism/.
-
-      The chapter
-      + defines an /expressional language/,
-
-      + discusses _DIFFERENT strategies for the *evaluation* of expressions_.
-
-   5. Chapter 5
-      defines an /operational semantics/ for /actors/ by specifying a
-      *transition relation* on configurations of /actor systems/.
-
-      =IMPORTANT=
-      The guarantee of mail delivery is formalized by defining a second
-      transition system which expresses this property.
-
-      We take the primitive constructs of an actor language and show how one can
-      provide an operational definition for them.
-
-   6. In Chapter 6,
-      we are concerned with issues raised in /related models/.
-
-      There are some significant difficulties in exploiting concurrency:
-      distributed systems often exhibit pathological behavior such as /divergence/
-      and /deadlock/.
-
-      The actor model addresses these problems at a variety of levels.
-
-      + /divergence/ can be a useful property because of the guarantee of delivery;
-
-      + /deadlock/ in a strict sense *does not exist* in an /actor system/.
-        =IMPORTANT= =TODO=
-        Besides, the asynchronous, buffered nature of communication in actors
-        provides mechanisms to detect deadlock in a semantic sense of the term.
-
-      Chapter 6 also explores the relation between some aspects of /dataflow/ and
-      /actors/; in particular, the similarity between replacement in actors and
-      what has been claimed to be the "side-effect free" nature of computation
-      in both systems.
-
-   7. Chapter 7
-      tackles the issue of abstraction in /actor systems/.
-
-      In particular, we discuss the nature of open systems and relate it to the
-      insufficiency of the history relation observed in [Brock and Ackerman
-      1981].
-
-      The right level of abstraction would permit us to treat equivalent systems
-      as semantically identical and yet differentiate systems between which an
-      external observer can distinguish.
-
-      We discuss the nature of composition in /actors/ and show how we can model
-      composition based on message-passing.
-      =IMPORTANT=
-      =from Jian: Composition is always one of the most important thing!!!=
-
-   8. Chapter 8
-      The final chapter summarizes some of the implications of the work in this
-      book.
-
-   9. Appendix A
-      uses tools from Milner's work to define an abstract representation for
-      actor systems in terms of what we call /Asynchronous Communication Trees/.
-      This representation provides a suitable way of visualizing computations
-      in actors.
-
-* 2 General Design Decisions - 5
 ** 2.1 The Nature of Computing Elements - 6
+   - The elements performing computations are, in an _abstract denotational sense_,
+     some kind of _function_.
+
+     + However, the domain and range of the functions defining the behavior of the
+       elements is quite different in each of the models.
+
+     + Ignoring some significant details, we identify _three_ distinct kinds of
+       computational elements:
+       1. Sequential Processes.
+       2. Functions transforming data values.
+       3. Actors.
+
 *** 2.1.1 Sequential Processes - 6
 *** 2.1.2 Functions Transforming Data Values - 6
-*** 2.1.3 Actors - 8
+*** 2.1.3 Actors - 7
 
-** 2.2 Global Synchrony and Asynchrony - 9
-** 2.3 Interaction Between Agents - 11
-*** 2.3.1 Shared Variables - 12
-*** 2.3.2 Communication - 12
-*** 2.3.3 The Need for Buffering - 13
+** 2.2 Global Synchrony and Asynchrony
+** 2.3 Interaction Between Agents
+*** 2.3.1 Shared Variables
+*** 2.3.2 Communication
+*** 2.3.3 The Need for Buffering
 
-** 2.4 Nondeterminism and Fairness - 15
-*** 2.4.1 The Guarantee of Delivery - 15
-*** 2.4.2 Fairness and the Mail System - 16
+** 2.4 Nondeterminism and Fairness
+*** 2.4.1 The Guarantee of Delivery
+*** 2.4.2 Faireness and the Mail System
 
-** 2.5 Reconfigurability and Extensibility - 17
-*** 2.5.1 A Resource Manager - 17
-*** 2.5.2 The Dynamic Allocation of Resources - 19
+** 2.5 Reconfigurability and Extensibility
+*** 2.5.1 A Resource Manager
+*** 2.5.2 The Dynamic Allocation of Resources
 
-* 3 Computation In Actor Systems - 21
-** 3.1 Defining an Actor System - 21
-*** 3.1.1 Tasks - 22
-*** 3.1.2 The Behavior of an Actor - 23
-
-** 3.2 Programming With Actors - 27
-*** 3.2.1 The Basic Constructs - 29
-*** 3.2.2 Examples - 34
-
-** 3.3 Minimal Actor Languages - 38
-*** 3.3.1 A Simple Actor Language - 39
-*** 3.3.2 Act - 42
-
-* 4 A More Expressive Language - 45
-** 4.1 Several Incoming Communications - 45
-*** 4.1.1 A Static Topology - 46
-*** 4.1.2 A Dynamic Topology - 48
-
-** 4.2 Insensitive Actors - 52
-** 4.3 Sequential Composition 56
-** 4.4 Delayed and Eager Evaluation - 57
-*** 4.4.1 Built-in actors - 58
-*** 4.4.2 Delayed Evaluation - 60
-*** 4.4.3 Representing Infinite Structures - 61
-*** 4.4.4 Eager Evaluation - 66
-
-* 5 A Model For Actor Systems - 69
-** 5.1 Describing Actor Systems - 70
-*** 5.1.1 Configurations - 70
-*** 5.1.2 Requirements for a Transition Relation - 70
-
-** 5.2 Initial Configurations - 72
-*** 5.2.1 Formalizing Actor Behaviors - 73
-*** 5.2.2 The Meaning of Behavior Definitions - 75
-*** 5.2.3 Mapping Actor Programs - 80
-
-** 5.3 Transitions Between Configurations - 81
-*** 5.3.1 Possible Transitions - 83
-*** 5.3.2 Subsequent Transitions 85
-
-* 6 Concurrency Issues - 89
-** 6.1 Problems in Distributed Computing - 89
-*** 6.1.1 Divergence - 90
-*** 6.1.2 Deadlock - 92
-*** 6.1.3 Mutual Exclusion - 95
-
-** 6.2 Streams - 96
-** 6.3 Message Channels - 98
-
-* 7 Abstraction And Comp08itionality - 101
-** 7.1 Abstraction - 101
-*** 7.1.1 Atomicity - 102
-*** 7.1.2 Receptionists - 103
-
-** 7.2 Composition of Concurrent Systems - 104
-*** 7.2.1 Actors and Ports - 105
-*** 7.2.2 Encapsulation in Actors - 106
-*** 7.2.3 Composition Using Message-Passing - 107
-*** 7.2.4 Rules for Composition - 108
-
-** 7.3 The Brock-Ackerman Anomaly - 112
-** 7.4 Observation Equivalence - 116
-
-* 8 Conclusions - 119
-* A Asynchronous Communication Trees - 123
-* B A Glossary Of Actor Terms - 131
-* References - 137
-* Index - 141
+* Chapter 3 Computation In Actor Systems
