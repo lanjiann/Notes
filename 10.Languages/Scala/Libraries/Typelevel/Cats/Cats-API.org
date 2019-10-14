@@ -1,617 +1,6 @@
 #+TITLE: Cats API
-#+VERSION: Cats 1.6.0 - available for Scala 2.10 (up to 1.2.x), 2.11, 2.12, 2.13.0-M4, and Scala.js
+#+VERSION: Cats 2.0.0 - available for Scala 2.11, 2.12, 2.13, and Scala.js 0.6
 #+STARTUP: entitiespretty
-
-* Table of Contents                                      :TOC_4_org:noexport:
-- [[cats][cats]]
-  - [[arrow][arrow]]
-    - [[(o, t) ~Arrow~][(o, t) ~Arrow~]]
-    - [[(o, t) ~ArrowChoice~][(o, t) ~ArrowChoice~]]
-    - [[(o, t) ~Category~][(o, t) ~Category~]]
-    - [[(o, t) ~Choice~][(o, t) ~Choice~]]
-    - [[(o, t) ~CommutativeArrow~][(o, t) ~CommutativeArrow~]]
-    - [[(o, t) ~Compose~][(o, t) ~Compose~]]
-    - [[(o, t) ~FunctionK~][(o, t) ~FunctionK~]]
-    - [[(o, t) ~Profunctor~][(o, t) ~Profunctor~]]
-    - [[(o, t) ~Strong~][(o, t) ~Strong~]]
-  - [[data][data]]
-    - [[(o, c) ~AndThen~][(o, c) ~AndThen~]]
-    - [[(o, c) ~AppFunc~][(o, c) ~AppFunc~]]
-    - [[(o, c) ~Binested~][(o, c) ~Binested~]]
-    - [[(c) ~BinestedBifoldable~][(c) ~BinestedBifoldable~]]
-    - [[(c) ~BinestedBitraverse~][(c) ~BinestedBitraverse~]]
-    - [[(t) ~BinestedInstances~][(t) ~BinestedInstances~]]
-    - [[(t) ~BinestedInstances0~][(t) ~BinestedInstances0~]]
-    - [[(o, c) ~Chain~][(o, c) ~Chain~]]
-    - [[(o, c) ~Cokleisli~][(o, c) ~Cokleisli~]]
-    - [[(o, c) ~Const~][(o, c) ~Const~]]
-    - [[(o, c) ~ContT~][(o, c) ~ContT~]]
-    - [[(o, c) ~EitherK~][(o, c) ~EitherK~]]
-    - [[(o, c) ~EitherT~][(o, c) ~EitherT~]]
-    - [[(o, c) ~Func~][(o, c) ~Func~]]
-    - [[(o, c) ~IdT~][(o, c) ~IdT~]]
-    - [[(o, c) ~IndexedReaderWriterStateT~][(o, c) ~IndexedReaderWriterStateT~]]
-    - [[(o) ~IndexedState~][(o) ~IndexedState~]]
-    - [[(o, c) ~IndexedStateT~][(o, c) ~IndexedStateT~]]
-    - [[(o, c) ~Ior~][(o, c) ~Ior~]]
-    - [[(o, c) ~IorT~][(o, c) ~IorT~]]
-    - [[(o, c) ~Kleisli~][(o, c) ~Kleisli~]]
-    - [[(o, c) ~Nested~][(o, c) ~Nested~]]
-    - [[(c) ~NonEmptyChainOps~][(c) ~NonEmptyChainOps~]]
-    - [[(o, c) ~NonEmptyList~][(o, c) ~NonEmptyList~]]
-    - [[(c) ~NonEmptyMapOps~][(c) ~NonEmptyMapOps~]]
-    - [[(c) ~NonEmptySetOps~][(c) ~NonEmptySetOps~]]
-    - [[(o, c) ~NonEmptyVector~][(o, c) ~NonEmptyVector~]]
-    - [[(o, c) ~OneAnd~][(o, c) ~OneAnd~]]
-    - [[(o, c) ~Op~][(o, c) ~Op~]]
-    - [[(o, c) ~OptionT~][(o, c) ~OptionT~]]
-    - [[(o) ~Reader~][(o) ~Reader~]]
-    - [[(o) ~ReaderWriterState~][(o) ~ReaderWriterState~]]
-    - [[(o) ~ReaderWriterStateT~][(o) ~ReaderWriterStateT~]]
-    - [[(o, c) ~RepresentableStore~][(o, c) ~RepresentableStore~]]
-    - [[(o) ~State~][(o) ~State~]]
-    - [[(o) ~StateT~][(o) ~StateT~]]
-    - [[(o) ~Store~][(o) ~Store~]]
-    - [[(o, c) ~Tuple2K~][(o, c) ~Tuple2K~]]
-    - [[(o, c) ~Validated~][(o, c) ~Validated~]]
-    - [[(o) ~Writer~][(o) ~Writer~]]
-    - [[(o, c) ~WriterT~][(o, c) ~WriterT~]]
-    - [[(o, c) ~ZipList~][(o, c) ~ZipList~]]
-    - [[(o, c) ~ZipStream~][(o, c) ~ZipStream~]]
-    - [[(o, c) ~ZipVector~][(o, c) ~ZipVector~]]
-  - [[evidence][evidence]]
-    - [[(o, c) ~As~][(o, c) ~As~]]
-    - [[(c) ~AsInstances~][(c) ~AsInstances~]]
-    - [[(o, c) ~Is~][(o, c) ~Is~]]
-  - [[free][free]]
-    - [[(o, c) Cofree][(o, c) Cofree]]
-    - [[(o, c) ContravariantCoyoneda][(o, c) ContravariantCoyoneda]]
-    - [[(o, c) Coyoneda][(o, c) Coyoneda]]
-    - [[(o, c) Free][(o, c) Free]]
-    - [[(o, c) FreeApplicative][(o, c) FreeApplicative]]
-    - [[(o, c) FreeInvariantMonoidal][(o, c) FreeInvariantMonoidal]]
-    - [[(o, c) FreeT][(o, c) FreeT]]
-    - [[(o) Trampoline][(o) Trampoline]]
-    - [[(o, c) Yoneda][(o, c) Yoneda]]
-  - [[instances][instances]]
-    - [[(t) ~AllInstances~][(t) ~AllInstances~]]
-    - [[(t) ~AllInstancesBinCompat0~][(t) ~AllInstancesBinCompat0~]]
-    - [[(t) ~AllInstancesBinCompat1~][(t) ~AllInstancesBinCompat1~]]
-    - [[(t) ~AllInstancesBinCompat2~][(t) ~AllInstancesBinCompat2~]]
-    - [[(t) ~AllInstancesBinCompat3~][(t) ~AllInstancesBinCompat3~]]
-    - [[(t) ~AllInstancesBinCompat4~][(t) ~AllInstancesBinCompat4~]]
-    - [[(t) ~AnyValInstances~][(t) ~AnyValInstances~]]
-    - [[(t) ~BigDecimalInstances~][(t) ~BigDecimalInstances~]]
-    - [[(t) ~BigIntInstances~][(t) ~BigIntInstances~]]
-    - [[(t) ~BitSetInstances~][(t) ~BitSetInstances~]]
-    - [[(t) ~BooleanInstances~][(t) ~BooleanInstances~]]
-    - [[(t) ~ByteInstances~][(t) ~ByteInstances~]]
-    - [[(t) ~CharInstances~][(t) ~CharInstances~]]
-    - [[(t) ~DoubleInstances~][(t) ~DoubleInstances~]]
-    - [[(t) ~DurationInstances~][(t) ~DurationInstances~]]
-    - [[(t) ~EitherInstances~][(t) ~EitherInstances~]]
-    - [[(t) ~EqInstances~][(t) ~EqInstances~]]
-    - [[(t) ~EquivInstances~][(t) ~EquivInstances~]]
-    - [[(t) ~FiniteDurationInstances~][(t) ~FiniteDurationInstances~]]
-    - [[(t) ~FloatInstances~][(t) ~FloatInstances~]]
-    - [[(t) ~FunctionInstances~][(t) ~FunctionInstances~]]
-    - [[(t) ~FunctionInstancesBinCompat0~][(t) ~FunctionInstancesBinCompat0~]]
-    - [[(t) ~FutureInstances~][(t) ~FutureInstances~]]
-    - [[(t) ~HashInstances~][(t) ~HashInstances~]]
-    - [[(t) ~IntInstances~][(t) ~IntInstances~]]
-    - [[(t) ~InvariantMonoidalInstances~][(t) ~InvariantMonoidalInstances~]]
-    - [[(t) ~ListInstances~][(t) ~ListInstances~]]
-    - [[(t) ~ListInstancesBinCompat0~][(t) ~ListInstancesBinCompat0~]]
-    - [[(t) ~LongInstances~][(t) ~LongInstances~]]
-    - [[(t) ~MapInstances~][(t) ~MapInstances~]]
-    - [[(t) ~MapInstancesBinCompat0~][(t) ~MapInstancesBinCompat0~]]
-    - [[(t) ~MapInstancesBinCompat1~][(t) ~MapInstancesBinCompat1~]]
-    - [[(t) ~OptionInstances~][(t) ~OptionInstances~]]
-    - [[(t) ~OptionInstancesBinCompat0~][(t) ~OptionInstancesBinCompat0~]]
-    - [[(t) ~OrderInstances~][(t) ~OrderInstances~]]
-    - [[(t) ~OrderingInstances~][(t) ~OrderingInstances~]]
-    - [[(t) ~ParallelInstances~][(t) ~ParallelInstances~]]
-    - [[(t) ~PartialOrderInstances~][(t) ~PartialOrderInstances~]]
-    - [[(t) ~PartialOrderingInstances~][(t) ~PartialOrderingInstances~]]
-    - [[(t) ~QueueInstances~][(t) ~QueueInstances~]]
-    - [[(t) ~SetInstances~][(t) ~SetInstances~]]
-    - [[(t) ~ShortInstances~][(t) ~ShortInstances~]]
-    - [[(c) ~SortedMapCommutativeMonoid~][(c) ~SortedMapCommutativeMonoid~]]
-    - [[(c) ~SortedMapEq~][(c) ~SortedMapEq~]]
-    - [[(c) ~SortedMapHash~][(c) ~SortedMapHash~]]
-    - [[(t) ~SortedMapInstances~][(t) ~SortedMapInstances~]]
-    - [[(t) ~SortedMapInstances1~][(t) ~SortedMapInstances1~]]
-    - [[(t) ~SortedMapInstances2~][(t) ~SortedMapInstances2~]]
-    - [[(t) ~SortedMapInstancesBinCompat0~][(t) ~SortedMapInstancesBinCompat0~]]
-    - [[(t) ~SortedMapInstancesBinCompat1~][(t) ~SortedMapInstancesBinCompat1~]]
-    - [[(t) ~SortedMapMonoid~][(t) ~SortedMapMonoid~]]
-    - [[(t) ~SortedSetHash~][(t) ~SortedSetHash~]]
-    - [[(t) ~SortedSetInstances~][(t) ~SortedSetInstances~]]
-    - [[(t) ~SortedSetInstances1~][(t) ~SortedSetInstances1~]]
-    - [[(c) ~SortedSetOrder~][(c) ~SortedSetOrder~]]
-    - [[(c) ~SortedSetSemilattice~][(c) ~SortedSetSemilattice~]]
-    - [[(t) ~StreamInstances~][(t) ~StreamInstances~]]
-    - [[(t) ~StreamInstancesBinCompat0~][(t) ~StreamInstancesBinCompat0~]]
-    - [[(t) ~StringInstances~][(t) ~StringInstances~]]
-    - [[(t) ~SymbolInstances~][(t) ~SymbolInstances~]]
-    - [[(t) ~TryInstances~][(t) ~TryInstances~]]
-    - [[(t) ~Tuple2Instances~][(t) ~Tuple2Instances~]]
-    - [[(t) ~Tuple2Instances1~][(t) ~Tuple2Instances1~]]
-    - [[(t) ~Tuple2Instances2~][(t) ~Tuple2Instances2~]]
-    - [[(t) ~Tuple2Instances3~][(t) ~Tuple2Instances3~]]
-    - [[(t) ~Tuple2Instances4~][(t) ~Tuple2Instances4~]]
-    - [[(t) ~Tuple2InstancesBinCompat0~][(t) ~Tuple2InstancesBinCompat0~]]
-    - [[(t) ~TupleInstances~][(t) ~TupleInstances~]]
-    - [[(t) ~UUIDInstances~][(t) ~UUIDInstances~]]
-    - [[(t) ~UnitInstances~][(t) ~UnitInstances~]]
-    - [[(t) ~VectorInstances~][(t) ~VectorInstances~]]
-    - [[(t) ~VectorInstancesBinCompat0~][(t) ~VectorInstancesBinCompat0~]]
-    - [[(o) ~all~][(o) ~all~]]
-    - [[(o) ~bigDecimal~][(o) ~bigDecimal~]]
-    - [[(o) ~bigInt~][(o) ~bigInt~]]
-    - [[(o) ~bitSet~][(o) ~bitSet~]]
-    - [[(o) ~boolean~][(o) ~boolean~]]
-    - [[(o) ~byte~][(o) ~byte~]]
-    - [[(o) ~char~][(o) ~char~]]
-    - [[(o) ~double~][(o) ~double~]]
-    - [[(o) ~duration~][(o) ~duration~]]
-    - [[(o) ~either~][(o) ~either~]]
-    - [[(o) ~eq~][(o) ~eq~]]
-    - [[(o) ~equiv~][(o) ~equiv~]]
-    - [[(o) ~finiteDuration~][(o) ~finiteDuration~]]
-    - [[(o) ~float~][(o) ~float~]]
-    - [[(o) ~function~][(o) ~function~]]
-    - [[(o) ~future~][(o) ~future~]]
-    - [[(o) ~int~][(o) ~int~]]
-    - [[(o) ~invariant~][(o) ~invariant~]]
-    - [[(o) ~list~][(o) ~list~]]
-    - [[(o) ~long~][(o) ~long~]]
-    - [[(o) ~map~][(o) ~map~]]
-    - [[(o) ~option~][(o) ~option~]]
-    - [[(o) ~order~][(o) ~order~]]
-    - [[(o) ~ordering~][(o) ~ordering~]]
-    - [[(o) ~parallel~][(o) ~parallel~]]
-    - [[(o) ~partialOrder~][(o) ~partialOrder~]]
-    - [[(o) ~partialOrdering~][(o) ~partialOrdering~]]
-    - [[(o) ~queue~][(o) ~queue~]]
-    - [[(o) ~set~][(o) ~set~]]
-    - [[(o) ~short~][(o) ~short~]]
-    - [[(o) ~sortedMap~][(o) ~sortedMap~]]
-    - [[(o) ~sortedSet~][(o) ~sortedSet~]]
-    - [[(o) ~stream~][(o) ~stream~]]
-    - [[(o) ~string~][(o) ~string~]]
-    - [[(o) ~try_~][(o) ~try_~]]
-    - [[(o) ~tuple~][(o) ~tuple~]]
-    - [[(o) ~unit~][(o) ~unit~]]
-    - [[(o) ~uuid~][(o) ~uuid~]]
-    - [[(o) ~vector~][(o) ~vector~]]
-  - [[kernel][kernel]]
-    - [[instances][instances]]
-      - [[(t) ~AllInstances~][(t) ~AllInstances~]]
-      - [[(t) ~AllInstancesBinCompat0~][(t) ~AllInstancesBinCompat0~]]
-      - [[(c) ~BigDecimalGroup~][(c) ~BigDecimalGroup~]]
-      - [[(t) ~BigDecimalInstances~][(t) ~BigDecimalInstances~]]
-      - [[(c) ~BigDecimalOrder~][(c) ~BigDecimalOrder~]]
-      - [[(c) ~BigIntGroup~][(c) ~BigIntGroup~]]
-      - [[(t) ~BigIntInstances~][(t) ~BigIntInstances~]]
-      - [[(c) ~BigIntOrder~][(c) ~BigIntOrder~]]
-      - [[(t) ~BitSetInstances~][(t) ~BitSetInstances~]]
-      - [[(c) ~BitSetPartialOrder~][(c) ~BitSetPartialOrder~]]
-      - [[(c) ~BitSetSemilattice~][(c) ~BitSetSemilattice~]]
-      - [[(t) ~BooleanInstances~][(t) ~BooleanInstances~]]
-      - [[(c) ~BooleanOrder~][(c) ~BooleanOrder~]]
-      - [[(c) ~ByteGroup~][(c) ~ByteGroup~]]
-      - [[(t) ~ByteInstances~][(t) ~ByteInstances~]]
-      - [[(c) ~ByteOrder~][(c) ~ByteOrder~]]
-      - [[(t) ~CharInstances~][(t) ~CharInstances~]]
-      - [[(c) ~CharOrder~][(c) ~CharOrder~]]
-      - [[(c) ~DoubleGroup~][(c) ~DoubleGroup~]]
-      - [[(t) ~DoubleInstances~][(t) ~DoubleInstances~]]
-      - [[(c) ~DoubleOrder~][(c) ~DoubleOrder~]]
-      - [[(c) ~DurationGroup~][(c) ~DurationGroup~]]
-      - [[(t) ~DurationInstances~][(t) ~DurationInstances~]]
-      - [[(c) ~DurationOrder~][(c) ~DurationOrder~]]
-      - [[(c) ~EitherEq~][(c) ~EitherEq~]]
-      - [[(c) ~EitherHash~][(c) ~EitherHash~]]
-      - [[(t) ~EitherInstances~][(t) ~EitherInstances~]]
-      - [[(t) ~EitherInstances0~][(t) ~EitherInstances0~]]
-      - [[(t) ~EitherInstances1~][(t) ~EitherInstances1~]]
-      - [[(t) ~EqInstances~][(t) ~EqInstances~]]
-      - [[(c) ~FiniteDurationGroup~][(c) ~FiniteDurationGroup~]]
-      - [[(t) ~FiniteDurationInstances~][(t) ~FiniteDurationInstances~]]
-      - [[(c) ~FiniteDurationOrder~][(c) ~FiniteDurationOrder~]]
-      - [[(c) ~FloatGroup~][(c) ~FloatGroup~]]
-      - [[(t) ~FloatInstances~][(t) ~FloatInstances~]]
-      - [[(c) ~FloatOrder~][(c) ~FloatOrder~]]
-      - [[(t) ~Function0Group~][(t) ~Function0Group~]]
-      - [[(t) ~Function0Monoid~][(t) ~Function0Monoid~]]
-      - [[(t) ~Function0Semigroup~][(t) ~Function0Semigroup~]]
-      - [[(t) ~Function1Group~][(t) ~Function1Group~]]
-      - [[(t) ~Function1Monoid~][(t) ~Function1Monoid~]]
-      - [[(t) ~Function1Semigroup~][(t) ~Function1Semigroup~]]
-      - [[(t) ~FunctionInstances~][(t) ~FunctionInstances~]]
-      - [[(t) ~FunctionInstances0~][(t) ~FunctionInstances0~]]
-      - [[(t) ~FunctionInstances1~][(t) ~FunctionInstances1~]]
-      - [[(t) ~FunctionInstances2~][(t) ~FunctionInstances2~]]
-      - [[(t) ~FunctionInstances3~][(t) ~FunctionInstances3~]]
-      - [[(t) ~FunctionInstances4~][(t) ~FunctionInstances4~]]
-      - [[(t) ~HashInstances~][(t) ~HashInstances~]]
-      - [[(c) ~IntGroup~][(c) ~IntGroup~]]
-      - [[(t) ~IntInstances~][(t) ~IntInstances~]]
-      - [[(c) ~IntOrder~][(c) ~IntOrder~]]
-      - [[(c) ~ListEq~][(c) ~ListEq~]]
-      - [[(c) ~ListHash~][(c) ~ListHash~]]
-      - [[(t) ~ListInstances~][(t) ~ListInstances~]]
-      - [[(t) ~ListInstances1~][(t) ~ListInstances1~]]
-      - [[(t) ~ListInstances2~][(t) ~ListInstances2~]]
-      - [[(c) ~ListMonoid~][(c) ~ListMonoid~]]
-      - [[(c) ~ListOrder~][(c) ~ListOrder~]]
-      - [[(c) ~ListPartialOrder~][(c) ~ListPartialOrder~]]
-      - [[(c) ~LongGroup~][(c) ~LongGroup~]]
-      - [[(t) ~LongInstances~][(t) ~LongInstances~]]
-      - [[(c) ~LongOrder~][(c) ~LongOrder~]]
-      - [[(c) ~MapEq~][(c) ~MapEq~]]
-      - [[(c) ~MapHash~][(c) ~MapHash~]]
-      - [[(t) ~MapInstances~][(t) ~MapInstances~]]
-      - [[(t) ~MapInstances1~][(t) ~MapInstances1~]]
-      - [[(c) ~MapMonoid~][(c) ~MapMonoid~]]
-      - [[(c) ~OptionEq~][(c) ~OptionEq~]]
-      - [[(c) ~OptionHash~][(c) ~OptionHash~]]
-      - [[(t) ~OptionInstances~][(t) ~OptionInstances~]]
-      - [[(t) ~OptionInstances0~][(t) ~OptionInstances0~]]
-      - [[(t) ~OptionInstances1~][(t) ~OptionInstances1~]]
-      - [[(t) ~OptionInstances2~][(t) ~OptionInstances2~]]
-      - [[(c) ~OptionMonoid~][(c) ~OptionMonoid~]]
-      - [[(c) ~OptionOrder~][(c) ~OptionOrder~]]
-      - [[(c) ~OptionPartialOrder~][(c) ~OptionPartialOrder~]]
-      - [[(t) ~OrderInstances~][(t) ~OrderInstances~]]
-      - [[(t) ~PartialOrderInstances~][(t) ~PartialOrderInstances~]]
-      - [[(c) ~QueueEq~][(c) ~QueueEq~]]
-      - [[(c) ~QueueHash~][(c) ~QueueHash~]]
-      - [[(t) ~QueueInstances~][(t) ~QueueInstances~]]
-      - [[(t) ~QueueInstances1~][(t) ~QueueInstances1~]]
-      - [[(t) ~QueueInstances2~][(t) ~QueueInstances2~]]
-      - [[(c) ~QueueMonoid~][(c) ~QueueMonoid~]]
-      - [[(c) ~QueueOrder~][(c) ~QueueOrder~]]
-      - [[(c) ~QueuePartialOrder~][(c) ~QueuePartialOrder~]]
-      - [[(c) ~SetHash~][(c) ~SetHash~]]
-      - [[(t) ~SetInstances~][(t) ~SetInstances~]]
-      - [[(t) ~SetInstances1~][(t) ~SetInstances1~]]
-      - [[(c) ~SetPartialOrder~][(c) ~SetPartialOrder~]]
-      - [[(c) ~SetSemilattice~][(c) ~SetSemilattice~]]
-      - [[(c) ~ShortGroup~][(c) ~ShortGroup~]]
-      - [[(t) ~ShortInstances~][(t) ~ShortInstances~]]
-      - [[(c) ~ShortOrder~][(c) ~ShortOrder~]]
-      - [[(o) ~StaticMethods~][(o) ~StaticMethods~]]
-      - [[(c) ~StreamEq~][(c) ~StreamEq~]]
-      - [[(c) ~StreamHash~][(c) ~StreamHash~]]
-      - [[(t) ~StreamInstances~][(t) ~StreamInstances~]]
-      - [[(t) ~StreamInstances1~][(t) ~StreamInstances1~]]
-      - [[(t) ~StreamInstances2~][(t) ~StreamInstances2~]]
-      - [[(c) ~StreamMonoid~][(c) ~StreamMonoid~]]
-      - [[(c) ~StreamOrder~][(c) ~StreamOrder~]]
-      - [[(c) ~StreamPartialOrder~][(c) ~StreamPartialOrder~]]
-      - [[(t) ~StringInstances~][(t) ~StringInstances~]]
-      - [[(c) ~StringMonoid~][(c) ~StringMonoid~]]
-      - [[(c) ~StringOrder~][(c) ~StringOrder~]]
-      - [[(t) ~SymbolInstances~][(t) ~SymbolInstances~]]
-      - [[(c) ~SymbolOrder~][(c) ~SymbolOrder~]]
-      - [[(t) ~TupleInstances~][(t) ~TupleInstances~]]
-      - [[(t) ~TupleInstances1~][(t) ~TupleInstances1~]]
-      - [[(t) ~TupleInstances2~][(t) ~TupleInstances2~]]
-      - [[(t) ~TupleInstances3~][(t) ~TupleInstances3~]]
-      - [[(t) ~UUIDInstances~][(t) ~UUIDInstances~]]
-      - [[(c) ~UnitAlgebra~][(c) ~UnitAlgebra~]]
-      - [[(t) ~UnitInstances~][(t) ~UnitInstances~]]
-      - [[(c) ~UnitOrder~][(c) ~UnitOrder~]]
-      - [[(c) ~VectorEq~][(c) ~VectorEq~]]
-      - [[(c) ~VectorHash~][(c) ~VectorHash~]]
-      - [[(t) ~VectorInstances~][(t) ~VectorInstances~]]
-      - [[(t) ~VectorInstances1~][(t) ~VectorInstances1~]]
-      - [[(t) ~VectorInstances2~][(t) ~VectorInstances2~]]
-      - [[(c) ~VectorMonoid~][(c) ~VectorMonoid~]]
-      - [[(c) ~VectorOrder~][(c) ~VectorOrder~]]
-      - [[(c) ~VectorPartialOrder~][(c) ~VectorPartialOrder~]]
-      - [[(o) ~eq~][(o) ~eq~]]
-      - [[(o) ~hash~][(o) ~hash~]]
-      - [[(o) ~order~][(o) ~order~]]
-      - [[(o) ~partialOrder~][(o) ~partialOrder~]]
-    - [[(o, t) ~Band~][(o, t) ~Band~]]
-    - [[(o, t) ~BoundedSemilattice~][(o, t) ~BoundedSemilattice~]]
-    - [[(o, t) ~CommutativeGroup~][(o, t) ~CommutativeGroup~]]
-    - [[(o, t) ~CommutativeMonoid~][(o, t) ~CommutativeMonoid~]]
-    - [[(o, t) ~CommutativeSemigroup~][(o, t) ~CommutativeSemigroup~]]
-    - [[(o, c) ~Comparison~][(o, c) ~Comparison~]]
-    - [[(o, t) ~Eq~][(o, t) ~Eq~]]
-    - [[(c) ~EqFunctions~][(c) ~EqFunctions~]]
-    - [[(t) ~EqToEquivConversion~][(t) ~EqToEquivConversion~]]
-    - [[(o, t) ~Group~][(o, t) ~Group~]]
-    - [[(c) ~GroupFunctions~][(c) ~GroupFunctions~]]
-    - [[(o, t) ~Hash~][(o, t) ~Hash~]]
-    - [[(c) ~HashFunctions~][(c) ~HashFunctions~]]
-    - [[(t) ~HashToHashingConversion~][(t) ~HashToHashingConversion~]]
-    - [[(o, t) ~Monoid~][(o, t) ~Monoid~]]
-    - [[(c) ~MonoidFunctions~][(c) ~MonoidFunctions~]]
-    - [[(o, t) ~Order~][(o, t) ~Order~]]
-    - [[(c) ~OrderFunctions~][(c) ~OrderFunctions~]]
-    - [[(t) ~OrderToOrderingConversion~][(t) ~OrderToOrderingConversion~]]
-    - [[(o, t) ~PartialOrder~][(o, t) ~PartialOrder~]]
-    - [[(c) ~PartialOrderFunctions~][(c) ~PartialOrderFunctions~]]
-    - [[(t) ~PartialOrderToPartialOrderingConversion~][(t) ~PartialOrderToPartialOrderingConversion~]]
-    - [[(o, t) ~Semigroup~][(o, t) ~Semigroup~]]
-    - [[(c) ~SemigroupFunctions~][(c) ~SemigroupFunctions~]]
-    - [[(o, t) ~Semilattice~][(o, t) ~Semilattice~]]
-    - [[(c) ~SemilatticeFunctions~][(c) ~SemilatticeFunctions~]]
-  - [[syntax][syntax]]
-    - [[(t) ~AllSyntax~][(t) ~AllSyntax~]]
-    - [[(c) ~AllSyntaxBinCompat~][(c) ~AllSyntaxBinCompat~]]
-    - [[(t) ~AllSyntaxBinCompat0~][(t) ~AllSyntaxBinCompat0~]]
-    - [[(t) ~AllSyntaxBinCompat1~][(t) ~AllSyntaxBinCompat1~]]
-    - [[(t) ~AllSyntaxBinCompat2~][(t) ~AllSyntaxBinCompat2~]]
-    - [[(t) ~AllSyntaxBinCompat3~][(t) ~AllSyntaxBinCompat3~]]
-    - [[(t) ~AllSyntaxBinCompat4~][(t) ~AllSyntaxBinCompat4~]]
-    - [[(t) ~AlternativeSyntax~][(t) ~AlternativeSyntax~]]
-    - [[(t) ~ApplicativeErrorExtension~][(t) ~ApplicativeErrorExtension~]]
-    - [[(c) ~ApplicativeErrorExtensionOps~][(c) ~ApplicativeErrorExtensionOps~]]
-    - [[(c) ~ApplicativeErrorIdOps~][(c) ~ApplicativeErrorIdOps~]]
-    - [[(c) ~ApplicativeErrorOps~][(c) ~ApplicativeErrorOps~]]
-    - [[(t) ~ApplicativeErrorSyntax~][(t) ~ApplicativeErrorSyntax~]]
-    - [[(c) ~ApplicativeIdOps~][(c) ~ApplicativeIdOps~]]
-    - [[(c) ~ApplicativeOps~][(c) ~ApplicativeOps~]]
-    - [[(t) ~ApplicativeSyntax~][(t) ~ApplicativeSyntax~]]
-    - [[(c) ~ApplyOps~][(c) ~ApplyOps~]]
-    - [[(t) ~ApplySyntax~][(t) ~ApplySyntax~]]
-    - [[(t) ~ApplySyntaxBinCompat0~][(t) ~ApplySyntaxBinCompat0~]]
-    - [[(t) ~ArrowChoiceSyntax~][(t) ~ArrowChoiceSyntax~]]
-    - [[(t) ~ArrowSyntax~][(t) ~ArrowSyntax~]]
-    - [[(t) ~BifoldableSyntax~][(t) ~BifoldableSyntax~]]
-    - [[(t) ~BifunctorSyntax~][(t) ~BifunctorSyntax~]]
-    - [[(c) ~BinestedIdOps~][(c) ~BinestedIdOps~]]
-    - [[(t) ~BinestedSyntax~][(t) ~BinestedSyntax~]]
-    - [[(c) ~BitraverseOps~][(c) ~BitraverseOps~]]
-    - [[(c) ~BitraverseOpsBinCompat0~][(c) ~BitraverseOpsBinCompat0~]]
-    - [[(t) ~BitraverseSyntax~][(t) ~BitraverseSyntax~]]
-    - [[(t) ~BitraverseSyntaxBinCompat0~][(t) ~BitraverseSyntaxBinCompat0~]]
-    - [[(t) ~ChoiceSyntax~][(t) ~ChoiceSyntax~]]
-    - [[(t) ~CoflatMapSyntax~][(t) ~CoflatMapSyntax~]]
-    - [[(t) ~ComonadSyntax~][(t) ~ComonadSyntax~]]
-    - [[(t) ~ComposeSyntax~][(t) ~ComposeSyntax~]]
-    - [[(c) ~ContravariantMonoidalOps~][(c) ~ContravariantMonoidalOps~]]
-    - [[(t) ~ContravariantMonoidalSyntax~][(t) ~ContravariantMonoidalSyntax~]]
-    - [[(t) ~ContravariantSemigroupalSyntax~][(t) ~ContravariantSemigroupalSyntax~]]
-    - [[(t) ~ContravariantSyntax~][(t) ~ContravariantSyntax~]]
-    - [[~DistributiveOps~][~DistributiveOps~]]
-    - [[~DistributiveSyntax~][~DistributiveSyntax~]]
-    - [[~EitherIdOps~][~EitherIdOps~]]
-    - [[~EitherIdOpsBinCompat0~][~EitherIdOpsBinCompat0~]]
-    - [[~EitherKOps~][~EitherKOps~]]
-    - [[~EitherKSyntax~][~EitherKSyntax~]]
-    - [[~EitherObjectOps~][~EitherObjectOps~]]
-    - [[~EitherOps~][~EitherOps~]]
-    - [[~EitherOpsBinCompat0~][~EitherOpsBinCompat0~]]
-    - [[~EitherSyntax~][~EitherSyntax~]]
-    - [[~EitherSyntaxBinCompat0~][~EitherSyntaxBinCompat0~]]
-    - [[~EqOps~][~EqOps~]]
-    - [[~EqSyntax~][~EqSyntax~]]
-    - [[~FlatMapIdOps~][~FlatMapIdOps~]]
-    - [[~FlatMapOps~][~FlatMapOps~]]
-    - [[~FlatMapOptionOps~][~FlatMapOptionOps~]]
-    - [[~FlatMapOptionSyntax~][~FlatMapOptionSyntax~]]
-    - [[~FlatMapSyntax~][~FlatMapSyntax~]]
-    - [[~FlattenOps~][~FlattenOps~]]
-    - [[~FoldableOps~][~FoldableOps~]]
-    - [[~FoldableOps0~][~FoldableOps0~]]
-    - [[~FoldableOps1~][~FoldableOps1~]]
-    - [[~FoldableSyntax~][~FoldableSyntax~]]
-    - [[~FoldableSyntaxBinCompat0~][~FoldableSyntaxBinCompat0~]]
-    - [[~FoldableSyntaxBinCompat1~][~FoldableSyntaxBinCompat1~]]
-    - [[~Function1Syntax~][~Function1Syntax~]]
-    - [[~FunctorFilterSyntax~][~FunctorFilterSyntax~]]
-    - [[~FunctorSyntax~][~FunctorSyntax~]]
-    - [[~GroupOps~][~GroupOps~]]
-    - [[~GroupSyntax~][~GroupSyntax~]]
-    - [[~GuardOps~][~GuardOps~]]
-    - [[~HashOps~][~HashOps~]]
-    - [[~HashSyntax~][~HashSyntax~]]
-    - [[~IfApplyOps~][~IfApplyOps~]]
-    - [[~IfMOps~][~IfMOps~]]
-    - [[~IndexOps~][~IndexOps~]]
-    - [[~InvariantSyntax~][~InvariantSyntax~]]
-    - [[~IorIdOps~][~IorIdOps~]]
-    - [[~IorSyntax~][~IorSyntax~]]
-    - [[~LeftNestedBitraverseOps~][~LeftNestedBitraverseOps~]]
-    - [[~LeftOps~][~LeftOps~]]
-    - [[~ListOps~][~ListOps~]]
-    - [[~ListOpsBinCompat0~][~ListOpsBinCompat0~]]
-    - [[~ListSyntax~][~ListSyntax~]]
-    - [[~ListSyntaxBinCompat0~][~ListSyntaxBinCompat0~]]
-    - [[~MonadErrorOps~][~MonadErrorOps~]]
-    - [[~MonadErrorRethrowOps~][~MonadErrorRethrowOps~]]
-    - [[~MonadErrorSyntax~][~MonadErrorSyntax~]]
-    - [[~MonadIdOps~][~MonadIdOps~]]
-    - [[~MonadOps~][~MonadOps~]]
-    - [[~MonadSyntax~][~MonadSyntax~]]
-    - [[~MonoidOps~][~MonoidOps~]]
-    - [[~MonoidSyntax~][~MonoidSyntax~]]
-    - [[~NestedBitraverseOps~][~NestedBitraverseOps~]]
-    - [[~NestedFoldableOps~][~NestedFoldableOps~]]
-    - [[~NestedIdOps~][~NestedIdOps~]]
-    - [[~NestedReducibleOps~][~NestedReducibleOps~]]
-    - [[~NestedSyntax~][~NestedSyntax~]]
-    - [[~NonEmptyTraverseSyntax~][~NonEmptyTraverseSyntax~]]
-    - [[~OptionIdOps~][~OptionIdOps~]]
-    - [[~OptionOps~][~OptionOps~]]
-    - [[~OptionSyntax~][~OptionSyntax~]]
-    - [[~OrderOps~][~OrderOps~]]
-    - [[~OrderSyntax~][~OrderSyntax~]]
-    - [[~ParallelApOps~][~ParallelApOps~]]
-    - [[~ParallelApplyOps~][~ParallelApplyOps~]]
-    - [[~ParallelApplySyntax~][~ParallelApplySyntax~]]
-    - [[~ParallelFlatSequenceOps~][~ParallelFlatSequenceOps~]]
-    - [[~ParallelFlatSyntax~][~ParallelFlatSyntax~]]
-    - [[~ParallelFlatTraversableOps~][~ParallelFlatTraversableOps~]]
-    - [[~ParallelSequenceOps~][~ParallelSequenceOps~]]
-    - [[~ParallelSequence_Ops~][~ParallelSequence_Ops~]]
-    - [[~ParallelSyntax~][~ParallelSyntax~]]
-    - [[~ParallelTraversableOps~][~ParallelTraversableOps~]]
-    - [[~ParallelTraversable_Ops~][~ParallelTraversable_Ops~]]
-    - [[~ParallelTraverseSyntax~][~ParallelTraverseSyntax~]]
-    - [[~PartialOrderOps~][~PartialOrderOps~]]
-    - [[~PartialOrderSyntax~][~PartialOrderSyntax~]]
-    - [[~ProfunctorSyntax~][~ProfunctorSyntax~]]
-    - [[~ReducibleOps0~][~ReducibleOps0~]]
-    - [[~ReducibleSyntax~][~ReducibleSyntax~]]
-    - [[~ReducibleSyntaxBinCompat0~][~ReducibleSyntaxBinCompat0~]]
-    - [[~RepresentableSyntax~][~RepresentableSyntax~]]
-    - [[~RightOps~][~RightOps~]]
-    - [[~SemigroupKSyntax~][~SemigroupKSyntax~]]
-    - [[~SemigroupOps~][~SemigroupOps~]]
-    - [[~SemigroupSyntax~][~SemigroupSyntax~]]
-    - [[~SemigroupalOps~][~SemigroupalOps~]]
-    - [[~SemigroupalSyntax~][~SemigroupalSyntax~]]
-    - [[~SeparateOps~][~SeparateOps~]]
-    - [[~SequenceFilterOps~][~SequenceFilterOps~]]
-    - [[~SetOps~][~SetOps~]]
-    - [[~SetSyntax~][~SetSyntax~]]
-    - [[~ShowSyntax~][~ShowSyntax~]]
-    - [[~StrongSyntax~][~StrongSyntax~]]
-    - [[~TabulateOps~][~TabulateOps~]]
-    - [[~TraverseFilterSyntax~][~TraverseFilterSyntax~]]
-    - [[~TraverseFilterSyntaxBinCompat0~][~TraverseFilterSyntaxBinCompat0~]]
-    - [[~TraverseSyntax~][~TraverseSyntax~]]
-    - [[~TryOps~][~TryOps~]]
-    - [[~TrySyntax~][~TrySyntax~]]
-    - [[~TupleParallelSyntax~][~TupleParallelSyntax~]]
-    - [[~TupleSemigroupalSyntax~][~TupleSemigroupalSyntax~]]
-    - [[~UniteOps~][~UniteOps~]]
-    - [[~UnorderedFoldableOps~][~UnorderedFoldableOps~]]
-    - [[~UnorderedFoldableSyntax~][~UnorderedFoldableSyntax~]]
-    - [[~UnorderedTraverseSyntax~][~UnorderedTraverseSyntax~]]
-    - [[~ValidatedExtension~][~ValidatedExtension~]]
-    - [[~ValidatedExtensionSyntax~][~ValidatedExtensionSyntax~]]
-    - [[~ValidatedIdOpsBinCompat0~][~ValidatedIdOpsBinCompat0~]]
-    - [[~ValidatedIdSyntax~][~ValidatedIdSyntax~]]
-    - [[~ValidatedSyntax~][~ValidatedSyntax~]]
-    - [[~ValidatedSyntaxBincompat0~][~ValidatedSyntaxBincompat0~]]
-    - [[~VectorOps~][~VectorOps~]]
-    - [[~VectorSyntax~][~VectorSyntax~]]
-    - [[~WriterIdSyntax~][~WriterIdSyntax~]]
-    - [[~WriterSyntax~][~WriterSyntax~]]
-    - [[(o) ~all~][(o) ~all~]]
-    - [[(o) ~alternative~][(o) ~alternative~]]
-    - [[(o) ~applicative~][(o) ~applicative~]]
-    - [[(o) ~applicativeError~][(o) ~applicativeError~]]
-    - [[(o) ~apply~][(o) ~apply~]]
-    - [[(o) ~arrow~][(o) ~arrow~]]
-    - [[(o) ~arrowChoice~][(o) ~arrowChoice~]]
-    - [[(o) ~bifoldable~][(o) ~bifoldable~]]
-    - [[(o) ~bifunctor~][(o) ~bifunctor~]]
-    - [[(o) ~binested~][(o) ~binested~]]
-    - [[(o) ~bitraverse~][(o) ~bitraverse~]]
-    - [[(o) ~cartesian~][(o) ~cartesian~]]
-    - [[(o) ~choice~][(o) ~choice~]]
-    - [[(o) ~coflatMap~][(o) ~coflatMap~]]
-    - [[(o) ~comonad~][(o) ~comonad~]]
-    - [[(o) ~compose~][(o) ~compose~]]
-    - [[(o) ~contravariant~][(o) ~contravariant~]]
-    - [[(o) ~contravariantMonoidal~][(o) ~contravariantMonoidal~]]
-    - [[(o) ~contravariantSemigroupal~][(o) ~contravariantSemigroupal~]]
-    - [[(o) ~distributive~][(o) ~distributive~]]
-    - [[(o) ~either~][(o) ~either~]]
-    - [[(o) ~eitherK~][(o) ~eitherK~]]
-    - [[(o) ~eq~][(o) ~eq~]]
-    - [[(o) ~flatMap~][(o) ~flatMap~]]
-    - [[(o) ~foldable~][(o) ~foldable~]]
-    - [[(o) ~functor~][(o) ~functor~]]
-    - [[(o) ~functorFilter~][(o) ~functorFilter~]]
-    - [[(o) ~group~][(o) ~group~]]
-    - [[(o) ~invariant~][(o) ~invariant~]]
-    - [[(o) ~ior~][(o) ~ior~]]
-    - [[(o) ~list~][(o) ~list~]]
-    - [[(o) ~monad~][(o) ~monad~]]
-    - [[(o) ~monadError~][(o) ~monadError~]]
-    - [[(o) ~monoid~][(o) ~monoid~]]
-    - [[(o) ~nested~][(o) ~nested~]]
-    - [[(o) ~nonEmptyTraverse~][(o) ~nonEmptyTraverse~]]
-    - [[(o) ~option~][(o) ~option~]]
-    - [[(o) ~order~][(o) ~order~]]
-    - [[(o) ~parallel~][(o) ~parallel~]]
-    - [[(o) ~partialOrder~][(o) ~partialOrder~]]
-    - [[(o) ~profunctor~][(o) ~profunctor~]]
-    - [[(o) ~reducible~][(o) ~reducible~]]
-    - [[(o) ~representable~][(o) ~representable~]]
-    - [[(o) ~semigroup~][(o) ~semigroup~]]
-    - [[(o) ~semigroupal~][(o) ~semigroupal~]]
-    - [[(o) ~semigroupk~][(o) ~semigroupk~]]
-    - [[(o) ~set~][(o) ~set~]]
-    - [[(o) ~show~][(o) ~show~]]
-    - [[(o) ~strong~][(o) ~strong~]]
-    - [[(o) ~traverse~][(o) ~traverse~]]
-    - [[(o) ~traverseFilter~][(o) ~traverseFilter~]]
-    - [[(o) ~try_~][(o) ~try_~]]
-    - [[(o) ~unorderedFoldable~][(o) ~unorderedFoldable~]]
-    - [[(o) ~unorderedTraverse~][(o) ~unorderedTraverse~]]
-    - [[(o) ~validated~][(o) ~validated~]]
-    - [[(o) ~vector~][(o) ~vector~]]
-    - [[(o) ~writer~][(o) ~writer~]]
-  - [[(o, t) ~Alternative~][(o, t) ~Alternative~]]
-  - [[(o, c) ~Always~][(o, c) ~Always~]]
-  - [[(o, t) ~Applicative~][(o, t) ~Applicative~]]
-  - [[(o, t) ~ApplicativeError~][(o, t) ~ApplicativeError~]]
-  - [[(o, t) ~Apply~][(o, t) ~Apply~]]
-  - [[(t) ~ApplyArityFunctions~][(t) ~ApplyArityFunctions~]]
-  - [[(o, t) ~Bifoldable~][(o, t) ~Bifoldable~]]
-  - [[(o, t) ~Bifunctor~][(o, t) ~Bifunctor~]]
-  - [[(o, t) ~Bimonad~][(o, t) ~Bimonad~]]
-  - [[(o, t) ~Bitraverse~][(o, t) ~Bitraverse~]]
-  - [[(o, t) ~CoflatMap~][(o, t) ~CoflatMap~]]
-  - [[(o, t) ~CommutativeApplicative~][(o, t) ~CommutativeApplicative~]]
-  - [[(o, t) ~CommutativeApply~][(o, t) ~CommutativeApply~]]
-  - [[(o, t) ~CommutativeFlatMap~][(o, t) ~CommutativeFlatMap~]]
-  - [[(o, t) ~CommutativeMonad~][(o, t) ~CommutativeMonad~]]
-  - [[(o, t) ~Comonad~][(o, t) ~Comonad~]]
-  - [[(o, t) ~Contravariant~][(o, t) ~Contravariant~]]
-  - [[(o, t) ~ContravariantMonoidal~][(o, t) ~ContravariantMonoidal~]]
-  - [[(o, t) ~ContravariantSemigroupal~][(o, t) ~ContravariantSemigroupal~]]
-  - [[(o, t) ~Defer~][(o, t) ~Defer~]]
-  - [[(o, t) ~Distributive~][(o, t) ~Distributive~]]
-  - [[(o, c) ~Eval~][(o, c) ~Eval~]]
-  - [[(t) ~EvalGroup~][(t) ~EvalGroup~]]
-  - [[(t) ~EvalMonoid~][(t) ~EvalMonoid~]]
-  - [[(t) ~EvalSemigroup~][(t) ~EvalSemigroup~]]
-  - [[(o, t) ~FlatMap~][(o, t) ~FlatMap~]]
-  - [[(o, t) ~Foldable~][(o, t) ~Foldable~]]
-  - [[(o, t) ~Functor~][(o, t) ~Functor~]]
-  - [[(o, t) ~FunctorFilter~][(o, t) ~FunctorFilter~]]
-  - [[(o, c) ~Inject~][(o, c) ~Inject~]]
-  - [[(o, c) ~InjectK~][(o, c) ~InjectK~]]
-  - [[(o, t) ~Invariant~][(o, t) ~Invariant~]]
-  - [[(o, t) ~InvariantMonoidal~][(o, t) ~InvariantMonoidal~]]
-  - [[(o, t) ~InvariantSemigroupal~][(o, t) ~InvariantSemigroupal~]]
-  - [[(o, c) ~Later~][(o, c) ~Later~]]
-  - [[(o, t) ~Monad~][(o, t) ~Monad~]]
-  - [[(o, t) ~MonadError~][(o, t) ~MonadError~]]
-  - [[(o, t) ~MonoidK~][(o, t) ~MonoidK~]]
-  - [[(o, t) ~NonEmptyParallel~][(o, t) ~NonEmptyParallel~]]
-  - [[(c) ~NonEmptyReducible~][(c) ~NonEmptyReducible~]]
-  - [[(o, t) ~NonEmptyTraverse~][(o, t) ~NonEmptyTraverse~]]
-  - [[(o, t) ~NotNull~][(o, t) ~NotNull~]]
-  - [[(c) ~Now~][(c) ~Now~]]
-  - [[(o, t) ~Parallel~][(o, t) ~Parallel~]]
-  - [[(t) ~ParallelArityFunctions~][(t) ~ParallelArityFunctions~]]
-  - [[(c) ~ParallelArityFunctions2~][(c) ~ParallelArityFunctions2~]]
-  - [[(o, t) ~Reducible~][(o, t) ~Reducible~]]
-  - [[(o, t) ~Representable~][(o, t) ~Representable~]]
-  - [[(o, t) ~SemigroupK~][(o, t) ~SemigroupK~]]
-  - [[(o, t) ~Semigroupal~][(o, t) ~Semigroupal~]]
-  - [[(t) ~SemigroupalArityFunctions~][(t) ~SemigroupalArityFunctions~]]
-  - [[(o, t) ~Show~][(o, t) ~Show~]]
-  - [[(t) ~StackSafeMonad~][(t) ~StackSafeMonad~]]
-  - [[(o, t) ~Traverse~][(o, t) ~Traverse~]]
-  - [[(o, t) ~TraverseFilter~][(o, t) ~TraverseFilter~]]
-  - [[(o, t) ~UnorderedFoldable~][(o, t) ~UnorderedFoldable~]]
-  - [[(o, t) ~UnorderedTraverse~][(o, t) ~UnorderedTraverse~]]
-  - [[(o) ~implicits~][(o) ~implicits~]]
 
 * cats
 ** arrow
@@ -632,7 +21,6 @@
 *** (c) ~BinestedBifoldable~
 *** (c) ~BinestedBitraverse~
 *** (t) ~BinestedInstances~
-*** (t) ~BinestedInstances0~
 *** (o, c) ~Chain~
 *** (o, c) ~Cokleisli~
 *** (o, c) ~Const~
@@ -675,6 +63,7 @@
 *** (o, c) ~As~
 *** (c) ~AsInstances~
 *** (o, c) ~Is~
+*** (c) ~IsInstances~
 
 ** free
 *** (o, c) Cofree
@@ -694,6 +83,8 @@
 *** (t) ~AllInstancesBinCompat2~
 *** (t) ~AllInstancesBinCompat3~
 *** (t) ~AllInstancesBinCompat4~
+*** (t) ~AllInstancesBinCompat5~
+*** (t) ~AllInstancesBinCompat6~
 *** (t) ~AnyValInstances~
 *** (t) ~BigDecimalInstances~
 *** (t) ~BigIntInstances~
@@ -709,7 +100,6 @@
 *** (t) ~FiniteDurationInstances~
 *** (t) ~FloatInstances~
 *** (t) ~FunctionInstances~
-*** (t) ~FunctionInstancesBinCompat0~
 *** (t) ~FutureInstances~
 *** (t) ~HashInstances~
 *** (t) ~IntInstances~
@@ -718,10 +108,7 @@
 *** (t) ~ListInstancesBinCompat0~
 *** (t) ~LongInstances~
 *** (t) ~MapInstances~
-*** (t) ~MapInstancesBinCompat0~
-*** (t) ~MapInstancesBinCompat1~
 *** (t) ~OptionInstances~
-*** (t) ~OptionInstancesBinCompat0~
 *** (t) ~OrderInstances~
 *** (t) ~OrderingInstances~
 *** (t) ~ParallelInstances~
@@ -734,32 +121,19 @@
 *** (c) ~SortedMapEq~
 *** (c) ~SortedMapHash~
 *** (t) ~SortedMapInstances~
-*** (t) ~SortedMapInstances1~
-*** (t) ~SortedMapInstances2~
-*** (t) ~SortedMapInstancesBinCompat0~
-*** (t) ~SortedMapInstancesBinCompat1~
 *** (t) ~SortedMapMonoid~
 *** (t) ~SortedSetHash~
 *** (t) ~SortedSetInstances~
-*** (t) ~SortedSetInstances1~
 *** (c) ~SortedSetOrder~
 *** (c) ~SortedSetSemilattice~
 *** (t) ~StreamInstances~
-*** (t) ~StreamInstancesBinCompat0~
 *** (t) ~StringInstances~
 *** (t) ~SymbolInstances~
 *** (t) ~TryInstances~
-*** (t) ~Tuple2Instances~
-*** (t) ~Tuple2Instances1~
-*** (t) ~Tuple2Instances2~
-*** (t) ~Tuple2Instances3~
-*** (t) ~Tuple2Instances4~
-*** (t) ~Tuple2InstancesBinCompat0~
 *** (t) ~TupleInstances~
 *** (t) ~UUIDInstances~
 *** (t) ~UnitInstances~
 *** (t) ~VectorInstances~
-*** (t) ~VectorInstancesBinCompat0~
 *** (o) ~all~
 *** (o) ~bigDecimal~
 *** (o) ~bigInt~
@@ -803,7 +177,6 @@
 ** kernel
 *** instances
 **** (t) ~AllInstances~
-**** (t) ~AllInstancesBinCompat0~
 **** (c) ~BigDecimalGroup~
 **** (t) ~BigDecimalInstances~
 **** (c) ~BigDecimalOrder~
@@ -813,8 +186,10 @@
 **** (t) ~BitSetInstances~
 **** (c) ~BitSetPartialOrder~
 **** (c) ~BitSetSemilattice~
+**** (t) ~BooleanBounded~
 **** (t) ~BooleanInstances~
 **** (c) ~BooleanOrder~
+**** (t) ~ByteBounded~
 **** (c) ~ByteGroup~
 **** (t) ~ByteInstances~
 **** (c) ~ByteOrder~
@@ -823,15 +198,15 @@
 **** (c) ~DoubleGroup~
 **** (t) ~DoubleInstances~
 **** (c) ~DoubleOrder~
+**** (c) ~DurationBounded~
 **** (c) ~DurationGroup~
 **** (t) ~DurationInstances~
 **** (c) ~DurationOrder~
 **** (c) ~EitherEq~
 **** (c) ~EitherHash~
 **** (t) ~EitherInstances~
-**** (t) ~EitherInstances0~
-**** (t) ~EitherInstances1~
 **** (t) ~EqInstances~
+**** (c) ~FiniteDurationBounded~
 **** (c) ~FiniteDurationGroup~
 **** (t) ~FiniteDurationInstances~
 **** (c) ~FiniteDurationOrder~
@@ -845,11 +220,6 @@
 **** (t) ~Function1Monoid~
 **** (t) ~Function1Semigroup~
 **** (t) ~FunctionInstances~
-**** (t) ~FunctionInstances0~
-**** (t) ~FunctionInstances1~
-**** (t) ~FunctionInstances2~
-**** (t) ~FunctionInstances3~
-**** (t) ~FunctionInstances4~
 **** (t) ~HashInstances~
 **** (c) ~IntGroup~
 **** (t) ~IntInstances~
@@ -857,25 +227,20 @@
 **** (c) ~ListEq~
 **** (c) ~ListHash~
 **** (t) ~ListInstances~
-**** (t) ~ListInstances1~
-**** (t) ~ListInstances2~
 **** (c) ~ListMonoid~
 **** (c) ~ListOrder~
 **** (c) ~ListPartialOrder~
+**** (c) ~LongBounded~
 **** (c) ~LongGroup~
 **** (t) ~LongInstances~
 **** (c) ~LongOrder~
 **** (c) ~MapEq~
 **** (c) ~MapHash~
 **** (t) ~MapInstances~
-**** (t) ~MapInstances1~
 **** (c) ~MapMonoid~
 **** (c) ~OptionEq~
 **** (c) ~OptionHash~
 **** (t) ~OptionInstances~
-**** (t) ~OptionInstances0~
-**** (t) ~OptionInstances1~
-**** (t) ~OptionInstances2~
 **** (c) ~OptionMonoid~
 **** (c) ~OptionOrder~
 **** (c) ~OptionPartialOrder~
@@ -884,46 +249,50 @@
 **** (c) ~QueueEq~
 **** (c) ~QueueHash~
 **** (t) ~QueueInstances~
-**** (t) ~QueueInstances1~
-**** (t) ~QueueInstances2~
 **** (c) ~QueueMonoid~
 **** (c) ~QueueOrder~
 **** (c) ~QueuePartialOrder~
 **** (c) ~SetHash~
 **** (t) ~SetInstances~
-**** (t) ~SetInstances1~
 **** (c) ~SetPartialOrder~
 **** (c) ~SetSemilattice~
+**** (c) ~ShortBounded~
 **** (c) ~ShortGroup~
 **** (t) ~ShortInstances~
 **** (c) ~ShortOrder~
+**** (c) ~SortedMapCommutativeMonoid~
+**** (c) ~SortedMapEq~
+**** (c) ~SortedMapHash~
+**** (t) ~SortedMapInstances~
+**** (c) ~SortedMapMonoid~
+**** (c) ~SortedSetHash~
+**** (t) ~SortedSetInstances~
+**** (c) ~SortedSetOrder~
+**** (c) ~SortedSetSemilattice~
 **** (o) ~StaticMethods~
 **** (c) ~StreamEq~
 **** (c) ~StreamHash~
 **** (t) ~StreamInstances~
-**** (t) ~StreamInstances1~
-**** (t) ~StreamInstances2~
 **** (c) ~StreamMonoid~
 **** (c) ~StreamOrder~
 **** (c) ~StreamPartialOrder~
 **** (t) ~StringInstances~
+**** (t) ~StringLowerBounded~
 **** (c) ~StringMonoid~
 **** (c) ~StringOrder~
 **** (t) ~SymbolInstances~
+**** (t) ~SymbolLowerBounded~
 **** (c) ~SymbolOrder~
 **** (t) ~TupleInstances~
-**** (t) ~TupleInstances1~
-**** (t) ~TupleInstances2~
-**** (t) ~TupleInstances3~
+**** (t) ~UUIDBounded~
 **** (t) ~UUIDInstances~
 **** (c) ~UnitAlgebra~
+**** (t) ~UnitBounded~
 **** (t) ~UnitInstances~
 **** (c) ~UnitOrder~
 **** (c) ~VectorEq~
 **** (c) ~VectorHash~
 **** (t) ~VectorInstances~
-**** (t) ~VectorInstances1~
-**** (t) ~VectorInstances2~
 **** (c) ~VectorMonoid~
 **** (c) ~VectorOrder~
 **** (c) ~VectorPartialOrder~
@@ -946,6 +315,8 @@
 *** (o, t) ~Hash~
 *** (c) ~HashFunctions~
 *** (t) ~HashToHashingConversion~
+*** (o, t) ~LowerBounded~
+*** (t) ~LowerBoundedFunctions~
 *** (o, t) ~Monoid~
 *** (c) ~MonoidFunctions~
 *** (o, t) ~Order~
@@ -958,8 +329,10 @@
 *** (c) ~SemigroupFunctions~
 *** (o, t) ~Semilattice~
 *** (c) ~SemilatticeFunctions~
+*** (o, t) ~UpperBounded~
+*** (t) ~UpperBoundedFunctions~
 
-** TODO syntax
+** syntax
 *** (t) ~AllSyntax~
 *** (c) ~AllSyntaxBinCompat~
 *** (t) ~AllSyntaxBinCompat0~
@@ -967,6 +340,8 @@
 *** (t) ~AllSyntaxBinCompat2~
 *** (t) ~AllSyntaxBinCompat3~
 *** (t) ~AllSyntaxBinCompat4~
+*** (t) ~AllSyntaxBinCompat5~
+*** (t) ~AllSyntaxBinCompat6~
 *** (t) ~AlternativeSyntax~
 *** (t) ~ApplicativeErrorExtension~
 *** (c) ~ApplicativeErrorExtensionOps~
@@ -978,7 +353,6 @@
 *** (t) ~ApplicativeSyntax~
 *** (c) ~ApplyOps~
 *** (t) ~ApplySyntax~
-*** (t) ~ApplySyntaxBinCompat0~
 *** (t) ~ArrowChoiceSyntax~
 *** (t) ~ArrowSyntax~
 *** (t) ~BifoldableSyntax~
@@ -986,9 +360,7 @@
 *** (c) ~BinestedIdOps~
 *** (t) ~BinestedSyntax~
 *** (c) ~BitraverseOps~
-*** (c) ~BitraverseOpsBinCompat0~
 *** (t) ~BitraverseSyntax~
-*** (t) ~BitraverseSyntaxBinCompat0~
 *** (t) ~ChoiceSyntax~
 *** (t) ~CoflatMapSyntax~
 *** (t) ~ComonadSyntax~
@@ -997,123 +369,120 @@
 *** (t) ~ContravariantMonoidalSyntax~
 *** (t) ~ContravariantSemigroupalSyntax~
 *** (t) ~ContravariantSyntax~
-*** ~DistributiveOps~
-*** ~DistributiveSyntax~
-*** ~EitherIdOps~
-*** ~EitherIdOpsBinCompat0~
-*** ~EitherKOps~
-*** ~EitherKSyntax~
-*** ~EitherObjectOps~
-*** ~EitherOps~
-*** ~EitherOpsBinCompat0~
-*** ~EitherSyntax~
-*** ~EitherSyntaxBinCompat0~
-*** ~EqOps~
-*** ~EqSyntax~
-*** ~FlatMapIdOps~
-*** ~FlatMapOps~
-*** ~FlatMapOptionOps~
-*** ~FlatMapOptionSyntax~
-*** ~FlatMapSyntax~
-*** ~FlattenOps~
-*** ~FoldableOps~
-*** ~FoldableOps0~
-*** ~FoldableOps1~
-*** ~FoldableSyntax~
-*** ~FoldableSyntaxBinCompat0~
-*** ~FoldableSyntaxBinCompat1~
-*** ~Function1Syntax~
-*** ~FunctorFilterSyntax~
-*** ~FunctorSyntax~
-*** ~GroupOps~
-*** ~GroupSyntax~
-*** ~GuardOps~
-*** ~HashOps~
-*** ~HashSyntax~
-*** ~IfApplyOps~
-*** ~IfMOps~
-*** ~IndexOps~
-*** ~InvariantSyntax~
-*** ~IorIdOps~
-*** ~IorSyntax~
-*** ~LeftNestedBitraverseOps~
-*** ~LeftOps~
-*** ~ListOps~
-*** ~ListOpsBinCompat0~
-*** ~ListSyntax~
-*** ~ListSyntaxBinCompat0~
-*** ~MonadErrorOps~
-*** ~MonadErrorRethrowOps~
-*** ~MonadErrorSyntax~
-*** ~MonadIdOps~
-*** ~MonadOps~
-*** ~MonadSyntax~
-*** ~MonoidOps~
-*** ~MonoidSyntax~
-*** ~NestedBitraverseOps~
-*** ~NestedFoldableOps~
-*** ~NestedIdOps~
-*** ~NestedReducibleOps~
-*** ~NestedSyntax~
-*** ~NonEmptyTraverseSyntax~
-*** ~OptionIdOps~
-*** ~OptionOps~
-*** ~OptionSyntax~
-*** ~OrderOps~
-*** ~OrderSyntax~
-*** ~ParallelApOps~
-*** ~ParallelApplyOps~
-*** ~ParallelApplySyntax~
-*** ~ParallelFlatSequenceOps~
-*** ~ParallelFlatSyntax~
-*** ~ParallelFlatTraversableOps~
-*** ~ParallelSequenceOps~
-*** ~ParallelSequence_Ops~
-*** ~ParallelSyntax~
-*** ~ParallelTraversableOps~
-*** ~ParallelTraversable_Ops~
-*** ~ParallelTraverseSyntax~
-*** ~PartialOrderOps~
-*** ~PartialOrderSyntax~
-*** ~ProfunctorSyntax~
-*** ~ReducibleOps0~
-*** ~ReducibleSyntax~
-*** ~ReducibleSyntaxBinCompat0~
-*** ~RepresentableSyntax~
-*** ~RightOps~
-*** ~SemigroupKSyntax~
-*** ~SemigroupOps~
-*** ~SemigroupSyntax~
-*** ~SemigroupalOps~
-*** ~SemigroupalSyntax~
-*** ~SeparateOps~
-*** ~SequenceFilterOps~
-*** ~SetOps~
-*** ~SetSyntax~
-*** ~ShowSyntax~
-*** ~StrongSyntax~
-*** ~TabulateOps~
-*** ~TraverseFilterSyntax~
-*** ~TraverseFilterSyntaxBinCompat0~
-*** ~TraverseSyntax~
-*** ~TryOps~
-*** ~TrySyntax~
-*** ~TupleParallelSyntax~
-*** ~TupleSemigroupalSyntax~
-*** ~UniteOps~
-*** ~UnorderedFoldableOps~
-*** ~UnorderedFoldableSyntax~
-*** ~UnorderedTraverseSyntax~
-*** ~ValidatedExtension~
-*** ~ValidatedExtensionSyntax~
-*** ~ValidatedIdOpsBinCompat0~
-*** ~ValidatedIdSyntax~
-*** ~ValidatedSyntax~
-*** ~ValidatedSyntaxBincompat0~
-*** ~VectorOps~
-*** ~VectorSyntax~
-*** ~WriterIdSyntax~
-*** ~WriterSyntax~
+*** (c) ~DistributiveOps~
+*** (t) ~DistributiveSyntax~
+*** (c) ~EitherIdOps~
+*** (c) ~EitherKOps~
+*** (t) ~EitherKSyntax~
+*** (c) ~EitherObjectOps~
+*** (c) ~EitherOps~
+*** (o, t) ~EitherSyntax~
+*** (c) ~EqOps~
+*** (t) ~EqSyntax~
+*** (c) ~FlatMapIdOps~
+*** (c) ~FlatMapOps~
+*** (c) ~FlatMapOptionOps~
+*** (t) ~FlatMapOptionSyntax~
+*** (t) ~FlatMapSyntax~
+*** (c) ~FlattenOps~
+*** (c) ~FoldableOps~
+*** (c) ~FoldableOps0~
+*** (t) ~FoldableSyntax~
+*** (t) ~Function1Syntax~
+*** (t) ~FunctorFilterSyntax~
+*** (t) ~FunctorSyntax~
+*** (c) ~GroupOps~
+*** (t) ~GroupSyntax~
+*** (c) ~GuardOps~
+*** (c) ~HashOps~
+*** (t) ~HashSyntax~
+*** (c) ~IfApplyOps~
+*** (c) ~IfMOps~
+*** (c) ~IndexOps~
+*** (t) ~InvariantSyntax~
+*** (c) ~IorIdOps~
+*** (t) ~IorSyntax~
+*** (c) ~LeftNestedBitraverseOps~
+*** (c) ~LeftOps~
+*** (c) ~ListOps~
+*** (t) ~ListSyntax~
+*** (c) ~MonadErrorOps~
+*** (c) ~MonadErrorRethrowOps~
+*** (t) ~MonadErrorSyntax~
+*** (c) ~MonadIdOps~
+*** (c) ~MonadOps~
+*** (t) ~MonadSyntax~
+*** (c) ~MonoidOps~
+*** (t) ~MonoidSyntax~
+*** (c) ~NestedBitraverseOps~
+*** (c) ~NestedFoldableOps~
+*** (c) ~NestedIdOps~
+*** (c) ~NestedReducibleOps~
+*** (t) ~NestedSyntax~
+*** (t) ~NonEmptyTraverseSyntax~
+*** (c) ~OptionIdOps~
+*** (o, c) ~OptionOps~
+*** (t) ~OptionSyntax~
+*** (c) ~OrderOps~
+*** (t) ~OrderSyntax~
+*** (c) ~ParallelApOps~
+*** (c) ~ParallelApplyOps~
+*** (t) ~ParallelApplySyntax~
+*** (c) ~ParallelBisequenceOps~
+*** (c) ~ParallelBitraverseOps~
+*** (t) ~ParallelBitraverseSyntax~
+*** (c) ~ParallelFlatSequenceOps~
+*** (t) ~ParallelFlatSyntax~
+*** (c) ~ParallelFlatTraversableOps~
+*** (c) ~ParallelLeftSequenceOps~
+*** (c) ~ParallelLeftTraverseOps~
+*** (c) ~ParallelSequenceOps~
+*** (c) ~ParallelSequence_Ops~
+*** (t) ~ParallelSyntax~
+*** (c) ~ParallelTraversableOps~
+*** (c) ~ParallelTraversable_Ops~
+*** (t) ~ParallelTraverseSyntax~
+*** (c) ~ParallelUnorderedFlatSequenceOps~
+*** (c) ~ParallelUnorderedSequenceOps~
+*** (c) ~ParallelUnorderedTraverseOps~
+*** (t) ~ParallelUnorderedTraverseSyntax~
+*** (c) ~PartialOrderOps~
+*** (t) ~PartialOrderSyntax~
+*** (t) ~ProfunctorSyntax~
+*** (c) ~ReducibleOps0~
+*** (t) ~ReducibleSyntax~
+*** (t) ~RepresentableSyntax~
+*** (c) ~RightOps~
+*** (t) ~SemigroupKSyntax~
+*** (c) ~SemigroupOps~
+*** (t) ~SemigroupSyntax~
+*** (c) ~SemigroupalOps~
+*** (t) ~SemigroupalSyntax~
+*** (c) ~SeparateOps~
+*** (c) ~SequenceFilterOps~
+*** (c) ~SetOps~
+*** (t) ~SetSyntax~
+*** (t) ~ShowSyntax~
+*** (t) ~StrongSyntax~
+*** (c) ~TabulateOps~
+*** (t) ~TraverseFilterSyntax~
+*** (t) ~TraverseSyntax~
+*** (c) ~TryOps~
+*** (t) ~TrySyntax~
+*** (t) ~TupleParallelSyntax~
+*** (t) ~TupleSemigroupalSyntax~
+*** (c) ~UniteOps~
+*** (c) ~UnorderedFoldableOps~
+*** (t) ~UnorderedFoldableSyntax~
+*** (t) ~UnorderedTraverseSyntax~
+*** (c) ~ValidatedExtension~
+*** (t) ~ValidatedExtensionSyntax~
+*** (c) ~ValidatedIdSyntax~
+*** (t) ~ValidatedSyntax~
+*** (c) ~VectorOps~
+*** (t) ~VectorSyntax~
+*** (c) ~WriterIdSyntax~
+*** (t) ~WriterSyntax~
 *** (o) ~all~
 *** (o) ~alternative~
 *** (o) ~applicative~

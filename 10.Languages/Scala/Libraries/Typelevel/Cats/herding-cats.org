@@ -1,6 +1,5 @@
 #+TITLE: herding cats
-#+AUTHOR: Noel Welsh and Dave Gurnell
-#+Date: November 2017
+#+AUTHOR: Eugene Yokota (eed3si9n)
 #+STARTUP: entitiespretty
 
 * Table of Contents                                      :TOC_4_org:noexport:
@@ -54,7 +53,7 @@
       - [[standard datatype syntax][standard datatype syntax]]
       - [[all syntax][all syntax]]
 - [[4. day 3][4. day 3]]
-  - [[a. Kinds and some type - foo][a. Kinds and some type - foo]]
+  - [[a. Kinds and some type-foo][a. Kinds and some type-foo]]
   - [[b. Semigroupal][b. Semigroupal]]
   - [[c. Apply][c. Apply]]
   - [[d. Applicative][d. Applicative]]
@@ -133,14 +132,64 @@
   - Cats consists of two parts:
     + NEW datatypes (~Validated~, ~State~, etc)
 
-    + Implementation of many general functions you need (ad-hoc polymorphism,
-      ~trait~'s + ~implicit~'s) 
+    + Implementation of many general functions you need (/ad-hoc polymorphism/,
+      /traits/ + /implicits/)
 
 ** DONE a. What is polymorphism?
-   CLOSED: [2018-11-28 Wed 00:57]
+   CLOSED: [2019-06-07 Fri 16:18]
 *** Parametric polymorphism
+    #+begin_src scala
+      def head[A](xs: List[A]): A =
+        xs(0)
+
+      head(1 :: 2 :: Nil)
+      // 1
+
+      final case class Car(make: String)
+
+      head(Car("Civic") :: Car("CR-V") :: Nil)
+      // Car(Civic)
+    #+end_src
+
+    =from Jian= with /parametric polymorhpism/, you don't try to use the
+    functionality of values of the /type parameter/.
+
+    - quote from _Haskell wiki_:
+      #+begin_quote
+      Parametric polymorphism refers to when the type of a value contains one or
+      more (unconstrained) type variables, so that the value may adopt any type
+      that results from substituting those variables with concrete types.
+      #+end_quote
+
 *** Subtype polymorphism
-*** Ad-hoc polymorphism
+    We want for type ~A~, we can do some operation like:
+    ~def plus[A](a1: A, a2: A): A = ???~
+
+    - _Depending on the type ~A~,_ we need to provide different definition for what
+      it means to add them.
+
+      One way to achieve this is through /subtyping/.
+      #+begin_src scala
+        trait PlusIntf[A] {
+          def plus(a2: A): A
+        }
+
+        def plusBySubtype[A <: PlusIntf[A]](a1: A, a2: A): A =
+          a1.plus(a2)
+      #+end_src
+      + To directly operate on values typed ~A~, we must know some info about ~A~
+        If ~A~ is a ~subtype~ of another type (here ~PlusIntf[A]~), we know all
+        the functionalities ~PlusIntf[A]~ promise can be invoked.
+          However, this means when ~A~ is defined, it need to extends ~PlusIntf[A]~,
+        which is not applicable for built-in types when you want more functionalities
+        form them.
+
+*** TODO Ad-hoc polymorphism
+    /Ad-hoc polymorphism/ solves the problem /subtype polymorphism/ try to solve
+    in a different way: /ad-hoc polymorphism/ do _NOT NEED_ /subtyping relation/,
+    it just guarantees type ~A~ values can be converted to some other types that
+    have the required functionalities you want!
+
     - This is *truely* ad-hoc in the sense that
       + we can
         _provide_
@@ -151,18 +200,17 @@
       + we can provide function definitions to types (like ~Int~) *without access
         to its source code*
 
-      + the function definitions can *be enabled or disabled in different scopes* 
+      + the function definitions can *be enabled or disabled in different scopes*
 
-        * Comment:
-          The last point makes Scala's /ad-hoc polymorphism/ MORE POWERFUL than
-          that of Haskell.
-
-          - TODO
-            More on this topic can be found at _Debasish Ghosh @debasishg_'s /Scala
-            Implicits/: _Type Classes Here I Come_.
+    - Comment:
+      The last point above makes Scala's /ad-hoc polymorphism/ MORE POWERFUL than
+      that of Haskell.
+      * TODO
+        More on this topic can be found at _Debasish Ghosh @debasishg_'s /Scala
+        Implicits/: _Type Classes Here I Come_.
 
     - NEXT SECTION
-      Let's look into ~plus~ function in more detail. 
+      Let's look into ~plus~ function in more detail.
 
 ** TODO b. sum function
 *** ~Monoid~
@@ -294,7 +342,7 @@
     - For CanTruthy the injected operator happened to be unary, and it matched the name of the function on the typeclass contract.
 
     - ~simulacrum~ can also *define* _operator with symbolic names_ using ~@op~
-      /annotation/: 
+      /annotation/:
       #+BEGIN_SRC scala
         @typeclass trait CanAppend[A] {
           @op("|+|") def append(a1: A, a2: A): A
@@ -350,7 +398,7 @@
 
       =TODO= I don't know what does ~CanBuildFrom~ do?!?!?!
 
-**** DONE ~Either~ as a functor 
+**** DONE ~Either~ as a functor
      CLOSED: [2018-11-28 Wed 21:06]
      #+BEGIN_SRC scala
        (Right(1): Either[String, Int]) map { _ + 1 }
@@ -375,7 +423,7 @@
        =IMPORTANT=
        If you still want to use your version of ~map~, one workaround is to opt for
        the /function syntax/.
-     
+
 **** TODO Function as a functor
 
 **** TODO Lifting a function
@@ -415,7 +463,7 @@
 
       3. To *declare* /type constraints/.
 
-      4. To *retrieve* /type information/ from compiler. 
+      4. To *retrieve* /type information/ from compiler.
 
     - ~implicit~'s are selected in the following precedence:
       =from Jian= it seem's these two points have overlap!
@@ -526,7 +574,7 @@
        #+END_SRC
 **** DONE all syntax
      CLOSED: [2018-11-29 Thu 13:37]
-     Here's how to load *ALL* /syntax/ and *ALL* /instances/. 
+     Here's how to load *ALL* /syntax/ and *ALL* /instances/.
      #+BEGIN_SRC scala
        // {
          import cats.syntax.all._
@@ -549,13 +597,34 @@
        #+END_SRC
 
 * TODO 4. day 3
-** a. Kinds and some type - foo
-** b. Semigroupal
-** c. Apply
-** d. Applicative
+** TODO a. Kinds and some type-foo
+** TODO b. Semigroupal
+** TODO c. Apply
+** TODO d. Applicative
 
 * 5. day 4
+  - Yesterday (day 3),
+    we reviewed kinds and types, explored ~Apply~, /applicative style/, and
+    ended with ~sequenceA~.
+
+  - Let's move on to ~Semigroup~ and ~Monoid~ today.
+
 ** a. ~Semigroup~
+   - LYHGG
+     + Chapter :: Functors, Applicative Functors and Monoids.
+       * Section :: Monids
+
+   - Cats is missing ~newtype~ taged type facility.
+     We'll implement our own later. TODO TODO TODO TODO TODO
+
+   - /Haskell's Monoid/ is split into ~Semigroup~ and ~Monoid~ in Cats.
+     They are also /type aliases/ of ~algebra.Semigroup~ and ~algebra.Monoid~.
+
+       As with ~Apply~ and ~Applicative~, ~Semigroup~ is a _weaker version of_
+     ~Monoid~.
+
+   - *When solving the same problem, weaker is cooler -- fewer assumptions are made.*
+
 ** b. ~Monoid~
 ** c. About Laws
 ** d. Using monoids to fold data structures

@@ -67,18 +67,20 @@
 ** DONE 1.1 Anatomy of a Type Class - 10
    CLOSED: [2019-03-17 Sun 00:46]
    There are *THREE* important _components_ to the /type class pattern/:
-   1. the type class itself
-   2. instances for particular types
-   3. the interface methods that we expose to users. =TODO=
+   1. the /type class/ itself
+
+   2. /instances/ for particular types
+
+   3. the /interface methods/ that we expose to users.
 
 *** DONE 1.1.1 The Type Class - 10
     CLOSED: [2019-03-16 Sat 23:32]
-    A /type class/ is an /interface/ OR /API/ that
-    REPRESENTS some functionality we want to implement.
+    A /type class/ is an /interface/ OR /API/
+    that REPRESENTS some functionality we want to implement.
 
-    - In Cats
-      a /type class/ is represented by a *trait* with AT LEAST _ONE_ /type
-      parameter/.
+    - In Cats a /type class/
+      + is represented by a *trait*
+        * with AT LEAST _ONE_ /type parameter/.
 
     - For example,
       represent generic "serialize to JSON" behaviour as follows:
@@ -86,26 +88,25 @@
         // Define a very simple JSON AST
         sealed trait Json
         final case class JsObject(get: Map[String, Json]) extends Json
-        final case class JsString(get: String) extends Json
-        final case class JsNumber(get: Double) extends Json
-        case object JsNull extends Json
+        final case class JsString(get: String)            extends Json
+        final case class JsNumber(get: Double)            extends Json
+        case object JsNull                                extends Json
 
         // The "serialize to JSON" behaviour is encoded in this trait
-        // This is our "type class"
         trait JsonWriter[A] {
           def write(value: A): Json
         }
       #+end_src
+      ~JsonWriter~ is our "type class"
 
 *** DONE 1.1.2 Type Class Instances - 10
     CLOSED: [2019-03-16 Sat 23:49]
     The /instances/ of a /type class/ provide *implementations for the types* we
-    care about, including types from the Scala standard library and types from
-    our domain model.
+    care about.
 
     - In Scala
       we define /instances/ by
-      + creating concrete implementations of the type class
+      + creating *concrete implementations* of the /type class/
         AND
       + tagging them with the ~implicit~ keyword:
 
@@ -123,10 +124,8 @@
           implicit val personWriter: JsonWriter[Person] =
             new JsonWriter[Person] {
               def write(value: Person): Json =
-                JsObject(Map(
-                           "name" -> JsString(value.name),
-                           "email" -> JsString(value.email)
-                         ))
+                JsObject(Map("name"  -> JsString(value.name),
+                             "email" -> JsString(value.email)))
             }
           // etc...
         }
@@ -145,14 +144,14 @@
 
 **** DONE Interface Objects - 11
      CLOSED: [2019-03-17 Sun 00:33]
-     - The SIMPLEST way of creating an /interface/ is to place /methods/ in a
-       /singleton object/:
-       #+begin_src scala
-         object Json {
-           def toJson[A](value: A)(implicit w: JsonWriter[A]): Json =
-             w.write(value)
-         }
-       #+end_src
+     The SIMPLEST way of creating an /interface/ is to place /methods/ in a
+     /singleton object/:
+     #+begin_src scala
+       object Json {
+         def toJson[A](value: A)(implicit w: JsonWriter[A]): Json =
+           w.write(value)
+       }
+     #+end_src
 
      - Use case:
        #+begin_src scala
@@ -191,6 +190,15 @@
 
        The compiler inserts the required /implicit parameters/:
        ~Person("Dave", "dave@example.com").toJson(personWriter)~
+
+     - =TODO=
+       + Q :: What is the process of
+              expanding ~Person("Dave", "dave@example.com").toJson~
+              to
+              ~JsonWriterOps(Person("Dave", "dave@example.com")).toJson(personWriter)~?
+
+       + A :: TODO ???
+
 
 **** DONE The _implicitly_ Method - 13
      CLOSED: [2019-03-17 Sun 00:16]
@@ -1335,7 +1343,7 @@
        ~scalacOptions += "-language:higherKinds~
        More concise, and you may prefer this in your projects.
 
-** DONE 3.5 Functors in Cats - 57 - =Re-Read=
+** DONE 3.5 Functors in Cats - 57
    CLOSED: [2019-03-26 Tue 00:02]
    Examine the aspects we did for /monoids/:
    1. the /type class/
@@ -1391,22 +1399,41 @@
         // res0: Option[Int] = Some(2)
       #+END_SRC
 
-*** DONE 3.5.2 ~Functor~ Syntax - 58 - =TODO=
+*** DONE 3.5.2 ~Functor~ Syntax - 58
     CLOSED: [2018-11-26 Mon 01:37]
-    #+begin_src scala
-      def doMath[F[_]](start: F[Int])
-                (implicit functor: Functor[F]): F[Int] =
-        start.map(_ + 1 * 2)
+    Use examples other than ~Option~ and ~List~ as illustration.
+    (Rationale: Compiler _always prefer a built-in_ method _over_ an extension
+    method).
 
-      import cats.instances.option._
-      import cats.instances.list._
+    - ~Function1~ example:
+      #+begin_src scala
+        import cats.instances.function._ // for Functor
+        import cats.syntax.functor._ // for map
 
-      doMath(Option(20))
-      // res3: Option[Int] = Some(22)
+        val func1 = (a: Int) => a + 1
+        val func2 = (a: Int) => a * 2
+        val func3 = (a: Int) => a + "!"
+        val func4 = func1.map(func2).map(func3)
 
-      doMath(List(1, 2, 3))
-      // res4: List[Int] = List(3, 4, 5)
-    #+end_src
+        func4(123)
+        // res1: String = 248!
+      #+end_src
+
+    - A method for general /functors/:
+      #+begin_src scala
+        def doMath[F[_]](start: F[Int])
+                  (implicit functor: Functor[F]): F[Int] =
+          start.map(_ + 2)
+
+        import cats.instances.option._
+        import cats.instances.list._
+
+        doMath(Option(20))
+        // res3: Option[Int] = Some(22)
+
+        doMath(List(1, 2, 3))
+        // res4: List[Int] = List(3, 4, 5)
+      #+end_src
 
     - To illustrate how this works, let's take a look at the definition of the
       ~map~ /method/ in ~cats.syntax.functor~. Here is a simplified version:
@@ -1432,7 +1459,7 @@
 
       #+end_src
 
-      + Example: =TODO= =???= =???=
+      + Example: =from Jian= The procesure of /implicit search/.
         We have a expression ~foo.map(_ + 1)~.
         * Assuming ~foo~ has no built-in ~map~ /method/,
           the compiler detects the potential error and wraps the expression in a
@@ -1509,6 +1536,27 @@
           }
       }
     #+END_SRC
+    This is right, but not complete:
+    #+begin_src scala
+      Branch(Leaf(10), Leaf(20)).map(_ * 2)
+      // <console>: 42: error: value map is not a member of wrapper.Branch[Int]
+      //        Branch(Leaf(10), Leaf(20)).map(_ * 2)
+      //
+    #+end_src
+    =from Jian= Can dotty resolve this???
+    Let's add some smart constructors to compensate:
+    #+begin_src scala
+      object Tree {
+        def branch[A](left: Tree[A], right: Tree[A]): Tree[A] =
+          Branch(left, right)
+
+        def leaf[A](value: A): Tree[A] =
+          Leaf(value)
+      }
+
+      Tree.leaf(100).map(_ * 2)
+      Tree.branch(Tree.leaf(10), Tree.leaf(20)).map(_ * 2)
+    #+end_src
 
 ** DONE 3.6 Contravariant and Invariant Functors - 61
    CLOSED: [2019-03-31 Sun 01:56]
@@ -1554,8 +1602,6 @@
         #+begin_src scala
           trait Printable[A] { self =>
             def format(value: A): String
-
-            // TODO: See 3.6.1.1
             def contramap[B](func: B => A): Printable[B] = ???
           }
         #+end_src
@@ -1575,6 +1621,9 @@
          // def contramap[B](func: B => A): Printable[B] =
          //   value => self.format(func(value))
        }
+
+       def format[A](value: A)(implicit p: Printable[A]): String =
+         p.format(value)
      #+END_SRC
 
      - Exercise:
@@ -1641,7 +1690,7 @@
           stringCodec.imap(_.toBoolean, _.toString)
       #+end_src
 
-    - *Coping with Failure*
+    - *Coping with Failure* TODO TODO TODO
       + Our ~Codec~ /type class/ does NOT account for failures.
 
       + If we want to model more sophisticated relationships we can move beyond
@@ -1649,7 +1698,8 @@
 
         _This beyond this book (See Julien Truffaut's /Monocle/)._
 
-**** TODO 3.6.2.1 Transformative Thinking with ~imap~ - 66
+**** DONE 3.6.2.1 Transformative Thinking with ~imap~ - 66
+     CLOSED: [2019-10-09 Wed 18:20]
      - Exercise:
        Implement ~Codec[A]~
        #+begin_src scala
@@ -1727,20 +1777,61 @@
     #+end_src
 
 ** TODO 3.8 Aside: Partial Unification - 70
+   - SI-2712, which is identified as a bug, is a type inference limitation. It is
+     already fixed.
+     + Before Scala 2.13,
+       Use the compiler option =-Ypartial-unification=;
+
+     + From Scala 2.13 on, partial-unification is there by default, and no option
+       for it.
+
+   - Example:
+     + With =-Ypartial-unification= set in =build.sbt=
+       #+begin_src scala
+         import cats.Functor
+         import cats.instances.function._ // for Functor
+         import cats.syntax.functor._     // for map
+
+         val func1 = (x: Int) => x.toDouble
+         val func2 = (y: Double) => y * 2
+
+         val func3 = func1.map(func2)
+         // func3: Int => Double = scala.runtime.AbstractFunction1$$Lambda$7404/290370740@246b5bc6
+       #+end_src
+
+     + Without =-Ypartial-unification=, you can see
+       #+begin_src scala
+         val func3 = func1.map(func2)
+         // <console>: error: value map is not a member of Int => Double
+         //        val func3 = func1.map(func2)
+         //                          ^
+       #+end_src
+
 *** TODO 3.8.1 Unifying Type Constructors - 70
+    In order to compile an expression like ~func1.map(func2)~ above, the compiler
+    has to search for a ~Functor~ for ~Function1~.
+
+    - During the search, however, ~Functor~ accepts a /type constructor/ with *ONE*
+      /type parameter/:
+      #+begin_src scala
+        trait Functor[F[_]] {
+          def map[A, B](fa: F[A])(func: A => B): F[B]
+        }
+      #+end_src
+
 *** TODO 3.8.2 Left-to-Right Elimination - 71
 
 ** DONE 3.9 Summary - 74
-   CLOSED: [2019-03-31 Sun 02:19]
+   CLOSED: [2019-10-10 Thu 14:16]
    Functors represent sequencing behaviours.
 
    - We covered three types of functor in this chapter:
-     - /Regular covariant Functors/,
+     - /Covariant Functors/,
+       represent the ability to _apply functions to a value in some context_
        with their ~map~ /method/,
-       represent the ability to _apply functions to a value in some context_.
 
-       Successive calls to ~map~ apply these functions in sequence, each
-       accepting the result of its predecessor as a parameter.
+       Successive calls to ~map~ apply these functions _in sequence_, each
+       accepting the result of its PREdecessor as a parameter.
 
      - /Contravariant functors/,
        with their ~contramap~ /method/,
@@ -1750,13 +1841,13 @@
        order to_ ~map~.
 
      - /Invariant functors/,
-       with their imap method,
-       represent _bidirectional transformations_.
+       represent _bidirectional transformations_. It has the ~imap~ method.
 
-     - The ~Contravariant~ and ~Invariant~ /type classes/ are less widely applicable
-       but are still useful for building data types that _represent *transformations*._
-       =TODO= =TODO= =TODO=
-       We will revisit them to discuss the ~Semigroupal~ /type class/ later in Chapter 6.
+   - The ~Contravariant~ and ~Invariant~ /type classes/ are less widely applicable
+     but are still useful for building data types that _represent *transformations*._
+
+     TODO TODO TODO
+     We will revisit them to discuss the ~Semigroupal~ /type class/ later in Chapter 6.
 
 * TODO 4 Monads - 77
   - Informally,
@@ -3149,176 +3240,32 @@
   /Monads/ can potentially bloat the code base through nested
   for-comprehensions.
 
-  - Example:
-    Look up a user record in a database. The return type should be something like
-    ~Either[Error, Option[User]]~.
-    #+begin_src scala
-      def lookupUserName(id: Long): Either[Error, Option[String]] =
-        for (optUser <- lookupUser(id))
-          yield for (user <- optUser) yield user.name
-    #+end_src
-    + The user may or may not be present, so we return an ~Option[User]~.
-
-    + Communication with the database could fail for many reasons, this result is
-      wrapped up in an ~Either~.
-
-  - The code like the one in the code, which process nested /monad values/, will
-    quickly becomes very tedious.
-
-** DONE 5.1 Exercise: Composing Monads - 130
-   CLOSED: [2019-07-10 Wed 22:36]
-   - Q :: Are /monads/ composable?
-
-   - Let's have a try:
-     #+begin_src scala
-       import cats.Monad
-       import cats.syntax.applicative._ // for pure
-       import cats.syntax.flatMap._     // for flatMap
-       import scala.language.higherKinds
-
-       // Hypothetical example. This won't actually compile:
-       def compose[M1[_]: Monad, M2[_]: Monad] = {
-         type Composed[A] = M1[M2[A]]
-
-         new Monad[Composed] {
-           def pure[A](a: A): Composed[A] =
-             a.pure[M2].pure[M1]
-
-           def flatMap[A, B](fa: Composed[A])(f: A => Composed[B]): Composed[B] =
-             // Problem! How do we write flatMap?
-             ???
-         }
-       }
-     #+end_src
-     The ~flatMap~ here can't be finished if we don't know some something about
-     ~M1~ or ~M2~ -- one is enough, no need for both.
-     + For example, if we fix ~M2~ to be ~Option~:
-       #+begin_src scala
-         def flatMap[A, B](fa: Composed[A])(f: A => Composed[B]): Composed[B] =
-           fa.flatMap(_.fold[Composed[B]](None.pure[M1])(f))
-       #+end_src
-       You may notice the ~None~ above.
-
-   - This is the idea behind /monad transformers/:
-     Cats defines /transformers/ for a variety of /monads/, each _providing the
-     extra knowledge_ we need to *compose* that /monad/ with others.
-
-   - A :: /Monads/ are composable, but we need to know some extra info.
-
+** TODO 5.1 Exercise: Composing Monads - 130
 ** TODO 5.2 A Transformative Example - 131
-   - /Monad transformer/ name convention ~KnowMonadNameT~.
-     For instance,
-     + ~EitherT~ composes ~Either~ with other /monads/.
-     + ~OptionT~ composes ~Option~ with other /monads/.
-
-   - Example:
-     Use ~OptionT~ to Compose ~List~ and ~Option~.
-     Use ~OptionT[List, A]~, aliased to ~ListOption[A]~ for convenience, to
-     transform a ~List[Option[A]]~ into a _SINGLE_ /monad/:
-     #+begin_src scala
-       import cats.data.OptionT
-
-       type ListOption[A] = OptionT[List, A]
-     #+end_src
-     Note how we build ListOption from the inside out: we pass List , the type
-     of the outer monad, as a parameter to OptionT , the transformer for the
-     inner monad.
-
-   - We can creates /instances/ of ~ListOption~ using the ~OptionT~ /constructor/,
-     or more conveniently using ~pure~:
-     #+begin_src scala
-       import cats.Monad
-       import cats.instances.list._      // for Monad
-       import cats.syntax.applicative._  // for pure
-
-       val result1: ListOption[Int] = OptionT(List(Option(10)))
-       val result2: ListOption[Int] = 32.pure[ListOption]
-
-       result1.flatMap { (x: Int) =>
-         result2.map { (y: Int) =>
-           x + y
-         }
-       }
-       // res1: cats.data.OptionT[List, Int] = OptionT(List(Some(42)))
-     #+end_src
-
-   - *Complexity of Imports*
-     The /imports/ in the code samples above hint at how everything bolts
-     together.
-       We import ~cats.syntax.applicative~ to get the ~pure~ syntax. ~pure~
-     requires an /implicit parameter/ of type ~Applicative[ListOption]~.
-     We haven't met ~Applicative~'s yet, but all /Monads/ are also
-     /Applicatives/ so we can ignore that difference for now.
-       In order to *generate* our ~Applicative[ListOption]~ we need /instances/
-     of ~Applicative~ for ~List~ and ~OptionT~. ~OptionT~ is a /Cats data
-     type/ so _its /instance/ is provided by its /companion object/._ The
-     instance for ~List~ comes from ~cats.instances.list~..
-       Notice we're _NOT_ importing ~cats.syntax.functor~ or ~cats.syntax.flatMap~.
-     This is because ~OptionT~ is a /concrete data type/ with its own explicit
-     ~map~ and ~flatMap~ /methods/. It _wouldn't_ cause problems if we imported
-     the syntax -- _the compiler would ignore it in favour of the EXPLICIT
-     /methods/._
-       Remember that we're subjecting ourselves to these shenanigans because
-     we're stubbornly refusing to use the universal Cats import, ~cats.implicits~.
-     If we did use that import, *ALL* of the /instances/ and /syntax/ we needed
-     would be in scope and everything would just work.
-
 ** TODO 5.3 Monad Transformers in Cats - 133
-   - EACH /monad transformer/ is a /data type/, defined in ~cats.data~, that allows
-     us to _wrap stacks_ of /monads/ to produce new /monads/.
-
-   - The _main concepts_ we have to cover to understand /monad transformers/ are:
-     + the available /transformer classes/;
-     + HOW TO *build* stacks of monads using transformers;
-     + HOW TO *construct* /instances/ of a monad stack; and
-     + HOW TO *pull apart* a stack to *access* the _WRAPPED_ /monads/.
-
-*** DONE 5.3.1 The Monad Transformer Classes - 133
-    CLOSED: [2019-07-11 Thu 21:41]
-    - BY CONVENTION,
-      in Cats a /monad/ ~Foo~ will have a /transformer class/ called ~FooT~ .
-
-    - IN FACT,
-      many /monads/ in Cats are defined by combining a /monad transformer/ with
-      the ~Id~ /monad/.
-
-    - Some of the available instances:
-      + ~cats.data.OptionT~ for ~Option~;
-      + ~cats.data.EitherT~ for ~Either~;
-      + ~cats.data.ReaderT~ for ~Reader~;
-      + ~cats.data.WriterT~ for ~Writer~;
-      + ~cats.data.StateT~ for ~State~;
-      + ~cats.data.IdT~ for the ~Id~ /monad/.
-
-    - *Kleisli Arrows*
-      + In Section 4.8 we mentioned that
-        the ~Reader~ /monad/ was a specialisation of a more general concept called
-        a /kleisli arrow/, represented in Cats as ~cats.data.Kleisli~.
-
-      + We can now reveal that ~Kleisli~ and ~ReaderT~ are, in fact, the same
-        thing! ~ReaderT~ is actually a /type alias/ for ~Kleisli~.
-
-      Hence, we were creating ~Reader~'s last chapter and seeing ~Kleisli~'s on
-      the console.
-
+*** TODO 5.3.1 The Monad Transformer Classes - 133
 *** TODO 5.3.2 Building Monad Stacks - 134
 *** TODO 5.3.3 Constructing and Unpacking Instances - 136
 *** TODO 5.3.4 Default Instances - 137
 *** TODO 5.3.5 Usage Patterns - 138
 
 ** TODO 5.4 Exercise: Monads: Transform and Roll Out - 140
-   xxx
-
 ** TODO 5.5 Summary - 141
 
 * DONE 6 ~Semigroupal~ and ~Applicative~ - 143 - =NOTE=
   CLOSED: [2019-04-08 Mon 00:25]
-  - =TODO= =TODO= =TODO=
+  - We'll explore certain types of program flow that they cannot represent.
+    + For example, _form validation_:
+      When we validate a form we want to return all the errors to the user, *not
+      stop* on the first error we encounter.
+        _If we model this with a /monad/ like ~Either~, we fail fast and lose
+      errors. This is because one depends on the previous one._
 
   - We need a weaker construct -- one that does _NOT guarantee_ sequencing -- to
     achieve the result we want.
-    In this chapter we will look at two type classes that support this pattern:
-    + ~Semigroupal~ encompasses the notion of _composing pairs of contexts_.
+      In this chapter we will look at TWO /type classes/ that support this
+    pattern:
+    + ~Semigroupal~ encompasses the notion of *composing pairs of contexts*.
 
       Cats provides a ~cats.syntax.apply~ module that makes use of ~Semigroupal~
       and ~Functor~ to allow users to _sequence functions with multiple
@@ -3338,11 +3285,12 @@
     We'll take a look at different formulations of ~Applicative~, as well as the
     relationships between ~Semigroupal~, ~Functor~, ~Applicative~, and ~Monad~,
     towards the end of the chapter.
+    =IMPORTANT=
 
 ** DONE 6.1 ~Semigroupal~ - 144
    CLOSED: [2019-04-03 Wed 18:17]
-   ~cat.Semigroupal~ is a /type class/ that allows us to *combine contexts* --
-     If we have two objects of type ~F[A]~ and ~F[B]~, a ~Semigroupal[F]~ allows
+   ~cat.Semigroupal~ is a /type class/ that allows us to *combine contexts*:
+   If we have two objects of type ~F[A]~ and ~F[B]~, a ~Semigroupal[F]~ allows
    us to combine them to form an ~F[(A, B)]~.
 
    - Definition in Cats:
@@ -3403,10 +3351,9 @@
         // res6: Option[Int] = None
       #+end_src
 
-    - =TODO=
-      There are also methods ~contramap2~ through ~contramap22~ and ~imap2~
-      through ~imap22~, that require instances of ~Contravariant~ and ~Invariant~
-      respectively.
+    - There are also: TODO TODO TODO
+      ~contramap2~ to ~contramap22~ for ~Contravariant~;
+      ~impa2~ to ~imap22~ for ~Invariant~.
 
 ** DONE 6.2 Apply Syntax - 146
    CLOSED: [2019-04-04 Thu 13:18]
@@ -3772,7 +3719,7 @@
   - ~Foldable~ abstracts the familiar ~foldLeft~ and ~foldRight~ operations;
 
   - ~Traverse~ is a higher-level abstraction that uses ~Applicative~'s to *iterate*
-    _with LESS pain than folding_.
+    _with LESS pain than folding_. =TODO=
 
   We'll start by looking at ~Foldable~, and then _examine cases where folding
   becomes complex and ~Traverse~ becomes convenient._ =TODO= =IMPORTANT=
@@ -3796,16 +3743,17 @@
 *** DONE 7.1.1 Folds and Folding - 166
     CLOSED: [2019-03-31 Sun 02:40]
     - Depending on the operation we're performing, the order in which we fold may
-      be important. Thus there are _TWO_ standard variants of /fold/: ~foldLeft~
-      and ~foldRight~.
+      be important. Thus there are _TWO_ standard variants of /fold/:
+      + ~foldLeft~ traverses from "left" to "right" (start to finish)
+      + ~foldRight~ traverses from "right" to "left" (finish to start)
 
     - ~foldLeft~ and ~foldRight~ are equivalent if our binary operation is
       /associative/.
 
 *** DONE 7.1.2 Exercise: Reflecting on Folds - 167
     CLOSED: [2019-03-31 Sun 02:44]
-    Try using ~foldLeft~ and ~foldRight~ with _empty lists_ as accumulator and ~::~
-    as the binary operator. See the result.
+    Try using ~foldLeft~ and ~foldRight~ with _empty lists_ as accumulator and
+    ~::~ as the binary operator. See the result.
     #+begin_src scala
       val list: List[Int] = List(1, 2, 3)
 
@@ -3819,6 +3767,9 @@
       }
       // List(1, 2, 3)
     #+end_src
+    + We are carefully specify the type of the accumulator to avoid a type error.
+      If we use ~Nil~, Scala will think we use ~List.empty[Nothing]~ as an
+      accumulator, which will lead to a type error.
 
 *** DONE 7.1.3 Exercise: Scaf-fold-ing Other Methods - 167
     CLOSED: [2019-03-31 Sun 03:03]
@@ -3844,7 +3795,7 @@
             if (p(e)) e :: acc else acc
           }
 
-        def sum[A : Monoid](implicit m: Monoid[A]): A =
+        def sum[A](implicit m: Monoid[A]): A =
           this.foldRight(m.empty)(m.combine)
       }
     #+end_src
@@ -3886,7 +3837,7 @@
         // res3: Int = 1230
       #+end_src
 
-**** DONE 7.1.4.1 Folding Right - 168
+**** DONE 7.1.4.1 Folding Right - 168 - ???
      CLOSED: [2019-04-08 Mon 00:56]
      ~Foldable~ defines ~foldRight~ differently to ~foldLeft~, in terms of the
      ~Eval~ /monad/:
@@ -3935,11 +3886,53 @@
 
        We use ~Stream~ here is just because ~Stream~ is an exception.
 
-**** TODO 7.1.4.2 Folding with Monoids - 170 - =TODO= =RE-READ= =NOTE=
+**** DONE 7.1.4.2 Folding with Monoids - 170 - ???
+     CLOSED: [2019-09-16 Mon 00:16]
+     - ~Foldable~ provides us with a host of useful /methods/ defined on top of
+       ~foldLeft~. Many of these are facsimilies of familiar methods from the
+       standard library:
+       + ~find~
+       + ~exists~
+       + ~forall~
+       + ~toList~
+       + ~isEmpty~
+       + ~nonEmpty~, and so on.
+
+     - In addition to these familiar methods, Cats provides two /methods/ that
+       make use of ~Monoid~'s:
+       + ~combineAll~ (and its alias ~fold~) combines all elements in the sequence
+         using their ~Monoid~;
+         #+begin_src scala
+           import cats.instances.int._  // for Monoid
+
+           Foldable[List].combineAll(List(1, 2, 3))
+           // res12: Int = 6
+         #+end_src
+
+       + ~foldMap~ maps a user-supplied function over the sequence and combines
+         the results using a ~Monoid~.
+         #+begin_src scala
+           import cats.instances.string._  // for Monoid
+
+           Foldable[List].combineAll(List(1, 2, 3))(_.toString)
+           // res12: Int = 123
+         #+end_src
+
+     - Finally, we can compose ~Foldable~'s to support deep traversal of nested
+       sequences: TODO ??? ??? ???
+       #+begin_src scala
+         import cats.instance.vector._  // for Monoid
+
+         val ints = List(Vector(1, 2, 3), Vector(4, 5, 6))
+
+         (Foldable[List] compose Foldable[Vector]).combineAll(ints)
+         // res15: Int = 21
+       #+end_src
+
 **** DONE 7.1.4.3 Syntax for Foldable - 171
      CLOSED: [2019-04-08 Mon 01:02]
      With syntax imported, the first argument to the /static method/ becomes
-     the receiver of the /method/ call:
+     the /receiver/ of the /method/ call:
      #+begin_src scala
        import cats.syntax.foldable._  // for combineAll and foldMap
 
@@ -3950,23 +3943,223 @@
        // res17: String = 123
      #+end_src
 
-     - *Explicits over Implicits* =RE-READ= =TODO= =RE-READ=
+     - *Explicits over Implicits*
+       + Scala feature: Use the _explicit available_ on the /receiver/ if it exists.
+         For example,
+         * Use the ~foldLeft~ defined on ~List~:
+           #+begin_src scala
+             List(1, 2, 3).foldLeft(0)(_ + _)  // res18: Int = 6
+           #+end_src
+
+         * The following generic code will use ~Foldbale~:
+           #+begin_src scala
+             import scala.language.higherKinds
+
+             def sum[F[_]: Foldable](values: F[Int]): Int =
+               values.foldLeft(0)(_ + _)
+             // sum: [F[_]](values: F[Int])(implicit evidence$1: cats.Foldable[F])Int
+           #+end_src
+
        + If we need a *stack-safe implementation* of ~foldRight~, using ~Eval~ as
          the accumulator is enough to force the compiler to select the method
          from Cats -- from the type the compiler knows the right one!
+         TODO TODO TODO -- =REVIEW ~Eval~=
 
 ** TODO 7.2 ~Traverse~ - 172
    ~foldLeft~ and ~foldRight~ are flexible iteration methods but they require us
-   to do a lot of work to define accumulators and combinator functions.
+   to do a lot of work to define _accumulators_ and _combinator functions_.
      The ~Traverse~ /type class/ is a higher level tool that leverages
    ~Applicative~'s to provide a more convenient, more lawful, pattern for
    iteration.
 
-*** TODO 7.2.1 Traversing with ~Future~'s - 172
+*** DONE 7.2.1 Traversing with ~Future~'s - 172
+    CLOSED: [2019-07-14 Sun 13:41]
+    - Question:
+      A list of server hostnames and method to poll a host for its uptime:
+      #+begin_src scala
+        import scala.concurrent._
+        import scala.concurrent.duration._
+        import scala.concurrent.ExecutionContext.Implicits.global
+
+        val hostnames = List(
+          "alpha.example.com",
+          "beta.example.com",
+          "gamma.demo.com"
+        )
+
+        def getUptime(hostname: String): Future[Int] =
+          Future(hostname.length * 60)  // just for demonstration
+      #+end_src
+
+    - We can't simply map over ~hostnames~ because the result -- a ~List[Future[Int]]~
+      -- would contain more than one ~Future~.
+        We need to reduce the results to a single ~Future~ to get something we can
+      block on. Let's start by doing this manually using a ~fold~:
+      #+begin_src scala
+        val allUptimes: Future[List[Int]] =
+          hostnames.foldLeft(Future(List.empty[Int])) { (accum, host) =>
+            val uptime = getUptime(host)
+            for {
+              acc <- accum
+              ut  <- uptime
+            } yield acc :+ ut
+          }
+
+        Await.result(allUptimes, 1.second)
+        //res2: List[Int] = List(1020, 960, 840)
+      #+end_src
+
+    - Expected when simplified:
+      #+begin_src scala
+        val allUptimes: Future[List[Int]] =
+          Future.traverse(hostname)(getUptime)
+
+        Await.result(allUptimes, 1.second)
+        // res3: List[Int] = List(1020, 960, 840)
+      #+end_src
+      + How does this implementated?
+        If we ignore distractions like ~CanBuildFrom~ and ~ExecutionContext~,
+        #+begin_src scala
+          def traverse[A, B](values: List[A])
+                            (func: A => Future[B]): Future[List[B]] =
+            values.foldLeft(Future(List.empty[A])) { (accum, host) =>
+              val item = func(host)
+              for {
+                acc <- accum
+                e   <- item
+              } yield acc :+ e
+            }
+        #+end_src
+
+      + This is essentially the same as our example code above.
+        It gives us a clean high-level interface to do what we want:
+        * start with a ~List[A]~
+        * provide a function ~A => Future[B]~
+        * end up with a ~Future[List[B]]~
+
+    - There is also a ~Future.sequence~ method defined as
+      #+begin_src scala
+        object Future {
+          def sequence[B](futures: List[Future[B]]): Future[List[B]] =
+            traverse(futures)(identity)
+
+          // etc...
+        }
+      #+end_src
+      + start with a ~List[Future[A]]~
+      + end up with a ~Future[List[A]]~
+
+    - The simplified examples above only work with ~List~'s, but the real
+      ~Future.traverse~ and ~Future.sequence~ work with *any* standard Scala
+      collection.
+
+    - Cats' ~Traverse~ /type class/ generalises these patterns to work with any
+      type of ~Applicative~: ~Future~, ~Option~, ~Validated~, and so on.
+
+    - We'll approach ~Traverse~ in the next sections in two steps:
+      1. We'll generalise over the ~Applicative~, then we'll generalise over the
+         /sequence type/.
+
+      2. We'll end up with an extremely valuable tool that trivialises many
+         operations involving sequences and other data types.
+
 *** TODO 7.2.2 Traversing with ~Applicative~'s - 175
-**** TODO 7.2.2.1 Exercise: Traversing with ~Vector~'s - 177
-**** TODO 7.2.2.2 Exercise: Traversing with ~Option~'s - 177
+    - If we squint, we'll see that we can _rewrite_ ~traverse~ in terms of an
+      ~Applicative~. Our accumulator from the example above:
+      ~Future(List.empty[Int])~ is equivalent to ~Applicative.pure~:
+      #+begin_src scala
+        import cats.Applicative
+        import cats.instances.future._    // for Applicative
+        import cats.syntax.applicative._  // for pure
+
+        List.empty[Int].pure[Future]
+
+        def oldCombine(
+          accum: Future[List[Int]],
+          host : String
+        ): Future[List[Int]] = {
+          val uptime = getUptime(host)
+          for {
+            acc <- accum
+            ut  <- uptime
+          } yield acc :+ ut
+        }
+      #+end_src
+      is now equivalent to ~Semigroupal.combine~:
+      #+begin_src scala
+        import cats.syntax.apply._ // for mapN
+
+        // Combining accumulator and hostname using an Applicative:
+        def newCombine(accum: Future[List[Int]],
+                       host: String): Future[List[Int]] =
+          (accum, getUptime(host)).mapN(_ :+ _)
+      #+end_src
+
+    - By substituting these snippets back into the definition of ~traverse~ we can
+      generalise it to to work with any ~Applicative~:
+      #+begin_src scala
+        import scala.language.higherKinds
+
+        def listTraverse[F[_]: Applicative, A, B](list: List[A])(func: A => F[B]): F[List[B]] =
+          list.foldLeft(List.empty[B].pure[F]) { (accum, item) =>
+            (accum, func(item)).mapN(_ :+ _)
+          }
+
+        def listSequence[F[_]: Applicative, B](list: List[F[B]]): F[List[B]] =
+          listTraverse(list)(identity)
+      #+end_src
+      + Use ~listTraverse~ to re-implement our uptime example:
+        #+begin_src scala
+          val totalUptime = listTraverse(hostname)(getUptime)
+          Await.result(totalUptime, 1.second)
+          // res11: List[Int] = List(1020, 960, 840)
+        #+end_src
+
+**** DONE 7.2.2.1 Exercise: Traversing with ~Vector~'s - 177
+     CLOSED: [2019-07-14 Sun 13:58]
+     #+begin_src scala
+       import cats.instances.vector._  // for Applicative
+
+       listSequence(List(Vector(1, 2), Vector(3, 4)))
+     #+end_src
+     - Solution:
+       ~Vector(List(1, 3), List(1, 4), List(2, 3), List(2, 4))~
+
+**** DONE 7.2.2.2 Exercise: Traversing with ~Option~'s - 177
+     CLOSED: [2019-07-14 Sun 14:04]
+     #+begin_src scala
+       import cats.instances.option._  // for Applicative
+
+       def process(inputs: List[Int]) =
+         listTraverse(inputs)(n => if (n % 2 == 0) Some(n) else None)
+     #+end_src
+     - What is the _return type_ of this method?
+       ~Option[List[Int]]~
+
+     - What does it produce for the following inputs?
+       #+begin_src scala
+         process(List(2, 4, 6))
+         // Some(List(2, 4, 6))
+
+         process(List(1, 2, 3))
+         // None
+       #+end_src
+
 **** TODO 7.2.2.3 Exercise: Traversing with ~Validated~ - 177
+     #+begin_src scala
+       import cats.data.Validated
+       import cats.instances.list._ // for Monoid
+
+       type ErrorsOr[A] = Validated[List[String], A]
+
+       def process(inputs: List[Int]): ErrorsOr[List[Int]] =
+         listTraverse(inputs) { n =>
+           n % 2 match {
+             case 0 => Validated.valid(n)
+             case _ => Validated.invalid(List(s"$n is not even"))
+           }
+         }
+     #+end_src
 
 *** TODO 7.2.3 ~Traverse~ in Cats - 178
 
