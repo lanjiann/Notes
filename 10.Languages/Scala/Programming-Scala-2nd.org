@@ -1,0 +1,631 @@
+#+TITLE: Programming Scala
+#+SUBTITLE: Scalability = Functional Programming + Objects
+#+VERSION: 2nd, 2014
+#+AUTHOR: Dean Wampler, Alex Payne
+#+STARTUP: entitiespretty
+
+* Foreword - xv
+* Preface - xvii
+* 1. Zero to Sixty: Introducing Scala - 1
+** Why Scala? - 1
+*** The Seductions of Scala - 2
+*** What About Java 8? - 3
+
+** Installing Scala - 3
+*** Using SBT - 5
+*** Running the Scala Command-Line Tools - 7
+*** Running the Scala REPL in IDEs - 9
+
+** A Taste of Scala - 9
+** A Taste of Concurrency - 19
+** Recap and What's Next - 30
+
+* 2. Type Less, Do More - 31
+** Semicolons - 31
+** Variable Declarations - 32
+** Ranges - 34
+** Partial Functions - 35
+** Method Declarations - 36
+*** Method Default and Named Arguments - 36
+*** Methods with Multiple Argument Lists - 37
+*** A Taste of Futures - 39
+*** Nesting Method Definitions and Recursion - 41
+
+** Inferring Type Information - 44
+** Reserved Words - 49
+** Literal Values - 51
+*** Integer Literals 52
+*** Floating-Point Literals - 53
+*** Boolean Literals - 53
+*** Character Literals - 54
+*** String Literals - 54
+*** Symbol Literals - 56
+*** Function Literals - 56
+*** Tuple Literals - 57
+
+** Option, Some, and None: Avoiding nulls - 58
+** Sealed Class Hierarchies - 60
+** Organizing Code in Files and Namespaces - 61
+** Importing Types and Their Members - 63
+*** Imports Are Relative - 64
+*** Package Objects - 64
+
+** Abstract Types Versus Parameterized Types - 65
+** Recap and What's Next - 68
+
+* 3. Rounding Out the Basics - 69
+** Operator Overloading? - 69
+*** Syntactic Sugar - 72
+
+** Methods with Empty Argument Lists - 72
+** Precedence Rules - 73
+** Domain-Specific Languages - 74
+** Scala if Statements - 75
+** Scala for Comprehensions - 76
+*** for Loops - 76
+*** Generator Expressions - 77
+*** Guards: Filtering Values - 77
+*** Yielding - 78
+*** Expanded Scope and Value Definitions - 79
+
+** Other Looping Constructs - 81
+*** Scala while Loops - 81
+*** Scala do-while Loops - 81
+
+** Conditional Operators - 82
+** Using try, catch, and finally Clauses - 82
+** Call by Name, Call by Value - 85
+** lazy val - 89
+** Enumerations - 90
+** Interpolated Strings - 92
+** Traits: Interfaces and “Mixins” in Scala - 94
+** Recap and What's Next - 97
+
+* 4. Pattern Matching - 99
+** A Simple Match - 99
+** Values, Variables, and Types in Matches - 100
+** Matching on Sequences - 104
+** Matching on Tuples - 108
+** Guards in case Clauses - 108
+** Matching on case Classes - 109
+*** unapply Method - 110
+*** unapplySeq Method - 114
+
+** Matching on Variable Argument Lists - 116
+** Matching on Regular Expressions - 117
+** More on Binding Variables in case Clauses - 119
+** More on Type Matching - 119
+** Sealed Hierarchies and Exhaustive Matches - 121
+** Other Uses of Pattern Matching - 123
+** Concluding Remarks on Pattern Matching - 127
+** Recap and What's Next - 128
+
+* 5. Implicits - 129
+** Implicit Arguments - 129
+*** Using implicitly - 131
+
+** Scenarios for Implicit Arguments - 132
+*** Execution Contexts - 132
+*** Capabilities - 132
+*** Constraining Allowed Instances - 133
+*** Implicit Evidence - 138
+*** Working Around Erasure - 139
+*** Improving Error Messages - 142
+*** Phantom Types - 142
+*** Rules for Implicit Arguments - 146
+
+** Implicit Conversions - 147
+*** Build Your Own String Interpolator - 151
+*** The Expression Problem - 153
+
+** Type Class Pattern - 154
+** Technical Issues with Implicits - 156
+** Implicit Resolution Rules - 158
+** Scala’s Built-in Implicits - 159
+** Wise Use of Implicits - 165
+** Recap and What's Next - 166
+
+* 6. Functional Programming in Scala - 167
+** What Is Functional Programming? - 168
+*** Functions in Mathematics - 168
+*** Variables That Aren’t - 169
+
+** Functional Programming in Scala - 172
+*** Anonymous Functions, Lambdas, and Closures - 173
+*** Purity Inside Versus Outside - 176
+
+** Recursion - 176
+** Tail Calls and Tail-Call Optimization - 177
+*** Trampoline for Tail Calls - 178
+
+** Partially Applied Functions Versus Partial Functions - 179
+** Currying and Other Transformations on Functions - 181
+** Functional Data Structures - 185
+*** Sequences - 185
+*** Maps - 190
+*** Sets - 192
+
+** Traversing, Mapping, Filtering, Folding, and Reducing - 192
+*** Traversal - 192
+*** Mapping - 194
+*** Flat Mapping - 196
+*** Filtering - 197
+*** Folding and Reducing - 199
+
+** Left Versus Right Traversals - 203
+*** Tail Recursion Versus Traversals of Infinite Collections - 206
+
+** Combinators: Software’s Best Component Abstractions - 210
+** What About Making Copies? - 213
+** Recap and What’s Next - 216
+
+* 7. for Comprehensions in Depth - 217
+** Recap: The Elements of for Comprehensions - 217
+** for Comprehensions: Under the Hood - 220
+** Translation Rules of for Comprehensions - 222
+** Options and Other Container Types - 226
+*** Option as a Container - 226
+*** Either: A Logical Extension to Option - 230
+*** Try: When There Is No Do - 234
+*** Scalaz Validation - 236
+
+** Recap and What’s Next - 239
+
+* 8. Object-Oriented Programming in Scala - 241
+** Class and Object Basics - 242
+** Reference Versus Value Types - 244
+** Value Classes - 246
+** Parent Types - 249
+** Constructors in Scala - 250
+** Fields in Classes - 254
+*** The Uniform Access Principle - 256
+*** Unary Methods - 257
+
+** Validating Input - 257
+** Calling Parent Class Constructors (and Good Object-Oriented Design) - 259
+*** Good Object-Oriented Design: A Digression - 260
+
+** Nested Types - 265
+** Recap and What’s Next - 266
+
+* 9. Traits - 267
+** Interfaces in Java 8 - 267
+** Traits as Mixins - 268
+** Stackable Traits - 273
+** Constructing Traits - 278
+** Class or Trait? - 279
+** Recap and What’s Next - 280
+
+* 10. The Scala Object System, Part I - 281
+** Parameterized Types: Variance Under Inheritance - 281
+*** Functions Under the Hood - 282
+*** Variance of Mutable Types - 286
+*** Variance in Scala Versus Java - 288
+
+** The Scala Type Hierarchy - 289
+** Much Ado About Nothing (and Null) - 291
+** Products, Case Classes, and Tuples - 295
+** The Predef Object - 297
+*** Implicit Conversions - 297
+*** Type Definitions - 299
+*** Condition Checking Methods - 300
+*** Input and Output Methods - 301
+*** Miscellaneous Methods - 303
+
+** Equality of Objects - 303
+*** The equals Method - 304
+*** The \equal\equal{} and !\equal{} Methods - 304
+*** The eq and ne Methods - 305
+*** Array Equality and the sameElements Method - 305
+
+** Recap and What's Next - 306
+
+* 11. The Scala Object System, Part II - 307
+** Overriding Members of Classes and Traits - 307
+*** Avoid Overriding Concrete Members - 308
+*** Attempting to Override final Declarations - 310
+*** Overriding Abstract and Concrete Methods - 311
+*** Overriding Abstract and Concrete Fields - 313
+*** Overriding Abstract Types - 319
+*** When Accessor Methods and Fields Are Indistinguishable: The Uniform Access Principle - 320
+
+** Linearization of an Object’s Hierarchy - 322
+** Recap and What’s Next - 327
+
+* 12. The Scala Collections Library - 329
+** Generic, Mutable, Immutable, Concurrent, and Parallel Collections, Oh My! - 329
+*** The scala.collection Package - 330
+*** The collection.concurrent Package - 331
+*** The collection.convert Package - 332
+*** The collection.generic Package - 332
+*** The collection.immutable Package - 332
+*** The scala.collection.mutable Package - 333
+*** The scala.collection.parallel Package - 335
+
+** Choosing a Collection - 336
+** Design Idioms in the Collections Library - 337
+*** Builder - 337
+*** CanBuildFrom - 338
+*** Like Traits - 339
+
+** Specialization for Value Types - 340
+*** Miniboxing - 341
+
+** Recap and What's Next - 342
+
+* 13. Visibility Rules - 343
+** Public Visibility: The Default - 343
+** Visibility Keywords - 344
+** Public Visibility - 345
+** Protected Visibility - 346
+** Private Visibility - 347
+** Scoped Private and Protected Visibility - 349
+** Final Thoughts on Visibility - 355
+** Recap and What's Next - 356
+
+* 14. Scala's Type System, Part I - 357
+** Parameterized Types - 358
+*** Variance Annotations - 358
+*** Type Constructors - 358
+*** Type Parameter Names - 358
+
+** Type Bounds - 359
+*** Upper Type Bounds - 359
+*** Lower Type Bounds - 360
+
+** Context Bounds - 364
+** View Bounds - 365
+** Understanding Abstract Types - 367
+*** Comparing Abstract Types and Parameterized Types - 368
+
+** Self-Type Annotations - 370
+** Structural Types - 375
+** Compound Types - 379
+*** Type Refinements - 379
+
+** Existential Types - 380
+** Recap and What's Next - 382
+
+* 15. Scala’s Type System, Part II - 383
+** Path-Dependent Types - 383
+*** C.this - 384
+*** C.super - 384
+*** path.x - 385
+
+** Dependent Method Types - 386
+** Type Projections - 387
+*** Singleton Types - 389
+
+** Types for Values - 390
+*** Tuple Types - 390
+*** Function Types - 390
+*** Infix Types - 391
+
+** Higher-Kinded Types - 392
+** Type Lambdas - 396
+** Self-Recursive Types: F-Bounded Polymorphism - 398
+** Recap and What’s Next - 399
+
+* 16. Advanced Functional Programming - 401
+** Algebraic Data Types - 401
+*** Sum Types Versus Product Types - 401
+*** Properties of Algebraic Data Types - 403
+*** Final Thought on Algebraic Data Types - 404
+
+** Category Theory - 404
+*** About Categories - 405
+*** The Functor Category - 406
+*** The Monad Category - 410
+*** The Importance of Monad - 412
+
+** Recap and What’s Next - 414
+
+* 17. Tools for Concurrency - 417
+** The scala.sys.process Package - 417
+** Futures - 419
+*** Async - 422
+
+** Robust, Scalable Concurrency with Actors - 423
+** Akka: Actors for Scala - 424
+*** Actors: Final Thoughts - 435
+
+** Pickling and Spores - 436
+** Reactive Programming - 436
+** Recap and What's Next - 438
+
+* 18. Scala for Big Data - 439
+** Big Data: A Brief History - 439
+** Improving MapReduce with Scala - 441
+** Moving Beyond MapReduce - 446
+** Categories for Mathematics - 447
+** A List of Scala-Based Data Tools - 448
+** Recap and What's Next - 449
+
+* 19. Dynamic Invocation in Scala - 451
+** A Motivating Example: ActiveRecord in Ruby on Rails - 451
+** Dynamic Invocation in Scala with the Dynamic Trait - 452
+** DSL Considerations - 457
+** Recap and What's Next - 457
+
+* 20. Domain-Specific Languages in Scala - 459
+** Examples: XML and JSON DSLs for Scala - 460
+** Internal DSLs - 462
+** External DSLs with Parser Combinators - 467
+*** About Parser Combinators - 467
+*** A Payroll External DSL - 467
+
+** Internal Versus External DSLs: Final Thoughts - 470
+** Recap and What’s Next - 470
+
+* 21. Scala Tools and Libraries - 473
+** Command-Line Tools - 473
+*** scalac Command-Line Tool - 473
+*** The scala Command-Line Tool - 477
+*** The scalap and javap Command-Line Tools - 481
+*** The scaladoc Command-Line Tool - 482
+*** The fsc Command-Line Tool - 482
+
+** Build Tools - 482
+*** SBT, the Standard Build Tool for Scala - 482
+*** Other Build Tools - 484
+
+** Integration with IDEs and Text Editors - 485
+*** Text Editors - 486
+
+** Test-Driven Development in Scala - 486
+** Third-Party Libraries - 487
+** Recap and What’s Next - 489
+
+* 22. Java Interoperability - 491
+** Using Java Names in Scala Code - 491
+** Java and Scala Generics - 491
+** JavaBean Properties - 493
+** AnyVal Types and Java Primitives - 495
+** Scala Names in Java Code - 495
+** Recap and What's Next - 495
+
+* 23. Application Design - 497
+** Recap of What We Already Know - 497
+** Annotations - 498
+** Traits as Modules - 502
+** Design Patterns - 503
+*** Creational Patterns - 504
+*** Structural Patterns - 505
+*** Behavioral Patterns - 506
+
+** Better Design with Design by Contract - 508
+** The Parthenon Architecture - 510
+** Recap and What's Next - 515
+
+* TODO 24. Metaprogramming: Macros and Reflection - 517
+** TODO Tools for Understanding Types - 518
+   #+begin_src scala
+     // REPL
+
+     // scala> if (true) false else 11.1
+     // res0: AnyVal = false
+
+     // scala> :type if (true) false else 11.1
+     // AnyVal
+
+     // scala> :type -v if (true) false else 11.1
+     //// Type signature
+     // AnyVal
+     //
+     //// Internal Type structure
+     // TypeRef(TypeSymbol(abstract class AnyVal extends Any))
+   #+end_src
+   - The ~scala.reflect.api.Types.TypeRef~ and ~scala.reflect.api.Symbols.TypeSymbol~
+     types are defined in the _reflection API_, which is _NOW a separate library
+     from the core standard library_.
+
+** DONE Runtime Reflection - 518
+   CLOSED: [2019-05-24 Fri 14:33]
+   - Whereas compile-time reflection is used for manipulating code
+
+   - /Runtime reflection/ is often called /extreme late binding/.
+     It is used primarily to
+     + *"tweak"* language /semantics/ (within limits)
+       and
+     + *load code* that is NOT KNOWN at /compile time/,
+
+   - Examples: =TODO=
+     which instance to use for a particular feature might be specified dynamically
+     through properties or command-line arguments. The reflection API is used to
+     locate the corresponding types in the available byte code found on the
+     CLASSPATH, and if found, construct instances. Tools like IDEs can use
+     reflection to discover and load plug-ins. IDEs often use reflection to
+     learn about code in projects and libraries, to support code completion,
+     type checking, etc. Byte-code tools might use reflection to look for
+     security vulnerabilities and other problems.
+
+*** DONE Reflecting on Types - 519 - =re-do=
+    CLOSED: [2019-05-24 Fri 14:05]
+    - Java ways
+
+    - =TODO= NOTE
+
+    - =TODO= NOTE
+
+*** DONE Class Tags, Type Tags, and Manifests - 520
+    CLOSED: [2019-05-24 Fri 14:33]
+    - =TODO= NOTE
+    - =TODO= NOTE
+    - =TODO= NOTE
+
+    - ~ClassTag~ is a weaker version of ~scala.reflect.api.TypeTags#TypeTag~,
+      _found in the separate API_.
+      + ~TypeTag~ retains the FULL /compile-time/ info (=TODO= we'll use it shortly)
+
+      + ~ClassTag~ only retains the /runtime/ info.
+
+      + Finally, there is a ~scala.reflect.api.TypeTags#WeakTypeTag~ for /abstract
+        types/. =TODO= See the detailed description in the Scala docs.
+
+    - *Note*
+      there are OLDER types in the /reflect package/ called ~Manifests~ that were used
+      for the same purpose *before Scala 2.10 introduced ~TypeTag~, ~ClassTag~, etc.*
+      *These types are being deprecated.* Don't use them in your new code!
+
+    - =IMPORTANT= =IMPORTANT= =IMPOTANT==
+      Another important usage for ~ClassTag~ is to _construct Java Arrays of the
+      correct ~AnyRef~ /subtype/._
+
+      Here is an example adapted from the Scaladoc page for ClassTag:
+      #+begin_src scala
+        // src/main/scala/progscala2/metaprogramming/mkArray.sc
+        import scala.reflect.ClassTag
+
+        def mkArray[T : ClassTag](elems: T*) =
+          Array[T](elems: _*)
+        // mkArray: [T](elems: T*)(implicit evidence$1: scala.reflect.ClassTag[T])Array[T]
+
+        mkArray(1, 2, 3)
+        // res0: Array[Int] = Array(1, 2, 3)
+
+        mkArray("one", "two", "three")
+        // res1: Array[String] = Array(one, two, three)
+
+        mkArray(1, "two", 3.14)
+        // <console>:10: warning: a type was inferred to be `Any`;
+        //   this may indicate a programming error.
+        //               mkArray(1, "two", 3.14)
+        //                       ^
+        // res2: Array[Any] = Array(1, two, 3.14)
+      #+end_src
+It uses the Array.apply method for AnyRefs, which has a second argument list with a
+single implicit ClassTag argument.
+
+** DONE Scala's Advanced Runtime Reflection API - 522
+   CLOSED: [2019-05-24 Fri 15:41]
+   Require ~import scala.reflect.runtime.universe._~
+
+   - Get ~Type~:
+     #+begin_src scala
+       import scala.reflect.runtime.universe._
+
+       def toType[T : TypeTag](t: T): Type = typeOf[T]
+     #+end_src
+     + the ~universe~ is of type ~scala.reflect.api.JavaUniverse~
+
+     + ~typeOf[T]~ is a shortcut for ~implicitly[TypeTag[T]].tpe~
+
+   - Use cases:
+     #+begin_src scala
+       toType(1)
+       // res1: reflect.runtime.universe.Type = Int
+
+       toType(true)
+       // res2: reflect.runtime.universe.Type = Boolean
+
+       toType(Seq(1, true, 3.14))
+       // <console>:12: warning: a type was inferred to be `AnyVal`;
+       //   this may indicate a programming error.
+       //               toType(Seq(1, true, 3.14))
+       //                         ^
+       // res3: reflect.runtime.universe.Type = Seq[AnyVal]
+
+       toType((i: Int) => i.toString)
+       // res4: reflect.runtime.universe.Type = Int => java.lang.String
+     #+end_src
+     + In this way, the types for the /parameterized type parameters/ are correctly
+       determined -- fixing the bug we had in ~useClassTag~.
+       _We'll omit the ~AnyVal~ warnings from now on._
+
+   - Compare types for equality or parent-child relationships:
+     #+begin_src scala
+       toType(1) =:= typeOf[AnyVal] // false
+       toType(1) =:= toType(1) // true
+       toType(1) =:= toType(true) // false
+
+       toType(1) <:< typeOf[AnyVal] // true
+       toType(1) <:< toType(1) // true
+       toType(1) <:< toType(true) // false
+
+       typeOf[Seq[Int]] =:= typeOf[Seq[Any]] // false
+       typeOf[Seq[Int]] <:< typeOf[Seq[Any]] // true
+     #+end_src
+
+   - Covariance and contravariance of functions:
+     #+begin_src scala
+       // src/main/scala/progscala2/metaprogramming/func.sc
+
+       class CSuper              { def msuper() = println("CSuper") }
+       class C    extends CSuper { def m() = println("C") }
+       class CSub extends C      { def msub() = println("CSub") }
+
+       typeOf[C      => C     ] =:= typeOf[C => C]  // true
+       typeOf[CSuper => CSub  ] =:= typeOf[C => C]  // false
+       typeOf[CSub   => CSuper] =:= typeOf[C => C]  // false
+
+       typeOf[C      => C     ] <:< typeOf[C => C]  // true
+       typeOf[CSuper => CSub  ] <:< typeOf[C => C]  // true
+       typeOf[CSub   => CSuper] <:< typeOf[C => C]  // false
+     #+end_src
+     + When you can't remember the /variance/ relationships between /function
+       types/, try to use this way to figure it out.
+
+   - ~toType~ function return values of type ~TypeRef~, and we use pattern matching
+     to extract its info (~TypeRef~ is NOT a case class! It just has an /extractor/).
+     #+begin_src scala
+       def toTypeRefInfo[T : TypeTag](x: T): (Type, Symbol, Seq[Type]) = {
+         val TypeRef(pre, typName, parems) = toType(x)
+         (pre, typName, parems)
+       }
+     #+end_src
+     + Both the ~Type~ and ~Symbol~ here defined in ~reflect.runtime.universe~,
+       *NOT to be confused with ~scala.Symbol~.*
+       =from Jian= How they can pick a different name for one of them.
+
+     + Example:
+       #+begin_src scala
+         toTypeRefInfo(1)                       // (scala.type, class Int, List())
+         toTypeRefInfo(true)                    // (scala.type, class Boolean, List())
+         toTypeRefInfo(Seq(1, true, 3.14))      // (scala.collection.type, trait Seq, List(AnyVal))
+         toTypeRefInfo((i: Int) => i.toString)  // (scala.type, trait Function1, List(Int, java.lang.String))
+       #+end_src
+
+   - We get even more information with TypeApi.
+     Let's try it with Seq in the REPL, to see the types returned. We’ll elide long output:
+     #+begin_src scala
+       val ts = toType(Seq(1, true, 3.14))
+       // ts: reflect.runtime.universe.Type = Seq[AnyVal]
+
+       ts.typeSymbol
+       // res0: reflect.runtime.universe.Symbol = trait Seq
+
+       ts.erasure
+       // res1: reflect.runtime.universe.Type = Seq[Any]
+
+       ts.typeArgs
+       // res2: List[reflect.runtime.universe.Type] = List(AnyVal)
+
+       ts.baseClasses
+       // res4: List[reflect.runtime.universe.Symbol] =
+       //   List(trait Seq, trait SeqLike, trait GenSeq, trait GenSeqLike, ...)
+
+       ts.companion
+       // res5: reflect.runtime.universe.Type = scala.collection.Seq.type
+
+       ts.decls
+       // res6: reflect.runtime.universe.MemberScope = SynchronizedOps(
+       //   method $init$, method companion, method seq)
+
+       ts.members
+       // res7: reflect.runtime.universe.MemberScope = Scopes(
+       //   method seq, method companion, method $init$, method toString, ...)
+     #+end_src
+     + ~members~ returns ALL /declarations/ that are /inherited/, too.
+       =TODO=
+
+   - =TODO=
+     You'll find more examples in the _overview_ and the reflection _Scaladocs_.
+
+** TODO Macros - 525
+*** A Macro Example: Enforcing Invariants - 528
+*** Final Thoughts on Macros - 531
+
+** TODO Wrapping Up and Looking Ahead - 531
+
+* A. References - 533
+* Index - 539

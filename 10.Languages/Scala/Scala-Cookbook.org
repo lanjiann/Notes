@@ -263,7 +263,6 @@
     - [[Solution - 119][Solution - 119]]
     - [[Discussion - 119][Discussion - 119]]
       - [[Object-private fields - 120][Object-private fields - 120]]
-    - [[See Also - 115][See Also - 115]]
   - [[4.8. Assigning a Field to a Block or Function - 121][4.8. Assigning a Field to a Block or Function - 121]]
     - [[Problem - 121][Problem - 121]]
     - [[Solution - 121][Solution - 121]]
@@ -281,11 +280,11 @@
     - [[Problem - 127][Problem - 127]]
     - [[Solution - 127][Solution - 127]]
       - [[Auxiliary constructors - 128][Auxiliary constructors - 128]]
-  - [[4.12. When to Use an Abstract Class - 129][4.12. When to Use an Abstract Class - 129]]
+  - [[4.12. When to Use an Abstract Class - 129 - TODO =IMPORTANT=][4.12. When to Use an Abstract Class - 129 - TODO =IMPORTANT=]]
     - [[Problem - 129][Problem - 129]]
     - [[Solution - 129][Solution - 129]]
     - [[Discussion - 129][Discussion - 129]]
-  - [[4.13. Defining Properties in an Abstract Base Class (or Trait) - 131][4.13. Defining Properties in an Abstract Base Class (or Trait) - 131]]
+  - [[4.13. Defining Properties in an Abstract Base Class (or Trait) - 131 - TODO =RE-READ=][4.13. Defining Properties in an Abstract Base Class (or Trait) - 131 - TODO =RE-READ=]]
     - [[Problem - 131][Problem - 131]]
     - [[Solution - 131][Solution - 131]]
       - [[Abstract ~val~ and ~var~ fields - 131][Abstract ~val~ and ~var~ fields - 131]]
@@ -1307,7 +1306,7 @@
          s"foo\nbar"
          // foo
          // bar
-  
+
          raw"foo\nbar"
          // foo\nbar
        #+END_SRC
@@ -1470,7 +1469,7 @@
         // result: String = IBM
       #+END_SRC
 
-    - In real-world code, this is just *slightly more complicated*. 
+    - In real-world code, this is just *slightly more complicated*.
       =From Jian= for safety!
 
       =IMPORTANT=
@@ -1505,7 +1504,7 @@
            println("HAL".increment)
          }
        #+END_SRC
-       
+
 **** DONE Put the ~implicit class~ in a package object - 26
      CLOSED: [2018-05-20 Sun 22:25]
      - Define
@@ -1681,7 +1680,7 @@
       used by Java, you'd better take care of the ~NumberFormatException~ with
       the ~@throws~ annotation.
 
-    - For scala itself, you can use ~Option~ or ~Try~ (since Scala 2.10). 
+    - For scala itself, you can use ~Option~ or ~Try~ (since Scala 2.10).
       =From Jian= For dealing with exceptions, I think ~Try~ is better.
       #+BEGIN_SRC scala
         def toIntOpt(s: String): Option[Int] =
@@ -1813,7 +1812,7 @@
       floating numbers, and use ~+=~ as an infix-operator-like /method/.
 
 *** TODO See Also - 43
-   
+
 ** DONE 2.6. Handling Very Large Numbers - 43
    CLOSED: [2018-02-28 Wed 17:25]
 *** DONE Problem - 43
@@ -2025,7 +2024,7 @@
        * ~flatMap~, and more
 
    - This section concentrate on ~for~ loop and ~foreach~ method.
-     
+
 **** DONE Returning values from a for loop
      CLOSED: [2017-07-18 Tue 12:04]
      ~yield~
@@ -2187,7 +2186,7 @@
 
 **** DONE The *break* example
      CLOSED: [2017-07-18 Tue 23:37]
-     - ~break~ will throw a ~BreakControl~ exception when it's called. 
+     - ~break~ will throw a ~BreakControl~ exception when it's called.
        #+BEGIN_SRC scala
          private val breakException = new BreakControl
          def break(): Nothing = { throw breakException }
@@ -2747,24 +2746,31 @@
      + class constructors
      + the control of field visibility
 
-** DONE 4.1. Creating a Primary Constructor - 100
-   CLOSED: [2018-11-22 Thu 23:27]
-*** DONE Problem - 100
-    CLOSED: [2018-11-22 Thu 22:26]
-    This is different from Java
+   - TODO NOTE
 
-*** DONE Solution - 100
-    CLOSED: [2018-11-22 Thu 22:40]
+   - In Java, it seems correct to refer to /accessor/ and /mutator/ /methods/ as
+     "getter" and "setter" methods, primarily because of the /JavaBeans standard/.
+     In this chapter, I use the terms interchangeably, but to be clear,
+       _Scala does *NOT follow* the JavaBeans NAMING CONVENTION for /accessor/ and
+     /mutator/ methods._
+
+** DONE 4.1. Creating a Primary Constructor - 100
+   CLOSED: [2019-05-28 Tue 11:25]
+*** Problem - 100
+    How to create a /primary constructor/ for a /class/ (this is different from
+    Java)?
+
+*** Solution - 100
     - The /primary constructor/ of a /Scala class/ is a combination of:
       + The _constructor parameters_
 
-      + /Methods/ that are called _IN THE BODY OF the class_
+      + /Methods/ that are *called* _IN THE BODY OF the class_
 
-      + /Statements/ and /expressions/ that are executed _IN THE BODY OF the class_
+      + /Statements/ and /expressions/ that are *executed* _IN THE BODY OF the class_
 
     - /Fields/ declared _in the body of a Scala class_ are handled in a manner
       *similar to Java*;
-      _they are assigned when the class is first instantiated._
+      _they are assigned when the class is FIRST instantiated._
 
     - Example:
       #+BEGIN_SRC scala
@@ -2772,12 +2778,13 @@
           println("the constructor begins")
 
           // some class fields
-          private val Home = System.getProperty("use.home")
-          var age = 0
+          private val HOME = System.getProperty("use.home")
+          var age: Int = 0
 
-          override def toString = s"$firstName $lastName is $age years old"
-          def printHome { println(s"HOME = $HOME") }
-          def printFullName { println(this) }  // uses `toString`
+          // some methods
+          override def toString: String = s"$firstName $lastName is $age years old"
+          def printHome(): Unit = { println(s"HOME = $HOME") }
+          def printFullName(): Unit = { println(this) }  // uses `toString`
 
           printHome
           printFullName
@@ -2792,25 +2799,24 @@
         If you write
         #+BEGIN_SRC scala
           def printHome { println(s"HOME = $home") }
-          private val home = System.getProperty("use.home")
+          private val HOME = System.getProperty("use.home")
         #+END_SRC
         The ~printHome~ will use the uninitialized ~Home~, which is ~null~.
+        See above, this book mentioned when Scala initialize the /field/.
 
-        The *order* here is IMPORTANT!
+        _The *order* is IMPORTANT!_
 
-*** DONE Discussion - 101
-    CLOSED: [2018-11-22 Thu 23:27]
+*** Discussion - 101
     - *Tips*
       Anything defined within the body of the class
-      _OTHER THAN method declarations_
+      _OTHER THAN /method declarations/_
       is a part of the /primary class constructor/.
 
       Because /auxiliary constructors/ *must always call* a previously defined
       constructor in the same class, /auxiliary constructors/ will also execute
       the same code.
 
-**** DONE A comparison with Java - 102
-     CLOSED: [2018-11-22 Thu 23:27]
+**** A comparison with Java - 102
      Translate the code into Java:
      #+BEGIN_SRC java
        // java
@@ -2865,7 +2871,7 @@
        However, you don't have to reason much about waht the compiler is doing
        for you.
 
-     - Here you can see the /getter/ and /setter/, which in Scala are generated 
+     - Here you can see the /getter/ and /setter/, which in Scala are generated
        automatically according to how you declare a /field/ -- ~var~ or ~val~.
        #+BEGIN_SRC scala
          p.name = "Ron Artest"
@@ -2873,42 +2879,227 @@
          p.name_$eq("Ron Artest")
        #+END_SRC
 
-**** DONE Those ~_$eq~ methods - 103
-     CLOSED: [2018-11-22 Thu 23:25]
+**** Those ~_$eq~ methods - 103
+     - The ~firstName_$eq~, ~lastName_$eq~ and ~age_$eq~ are part of the /Scala
+       syntactic sugar/ for mutating ~var~ fields -- /mutators/.
 
-**** DONE Summary - 104
-     CLOSED: [2018-11-22 Thu 23:25]
-     Java is verbose but straightforward.
+       Because ~firstName~, ~lastName~, and ~age~ are declared with ~var~, Scala
+       generates /accessor methods/ and /mutator methods/ for them.
 
-     =from Jian= I'm very confused when I learn the /primary constructor/ Scala.
+     - When you mutate a ~var~ in Scala with code like ~p.name = "Ron Artest"~,
+       Scala converts this code to ~p.name_$eq("Ron Artest")~.
 
-     Scala is more concise, but you need to know more compiler behaviors to
-     understand it.
+     - Even if you can't see the generated mutators (~_$eq~ suffixed /methods/),
+       you can use them in your code, though there is no reason at all to use
+       them manually.
+       #+begin_src scala
+         object Test extends App {
+           val p = new Person
 
-** TODO 4.2. Controlling the Visibility of Constructor Fields - 104
+           // the 'normal' mutator approach
+           p.name = "Ron Artest"
+           println(p)
+           //// name = Ron Artest
+
+           // the 'hidden' mutator method
+           p.name_$eq("Metta World Peace")
+           println(p)
+           //// name = Metta World Peace
+         }
+       #+end_src
+
+**** Summary - 104
+     - Java is verbose but straightforward.
+
+       Scala is more concise, but you need to know more compiler behaviors to
+       understand it.
+
+     - =from Jian=
+       When you write ~var~ in Scala, it's like you write declare a non-~final~
+       variable in Java with ~@Getter~ and ~@Setter~ /annotations/.
+
+** DONE 4.2. Controlling the Visibility of Constructor Fields - 104
+   CLOSED: [2019-05-28 Tue 14:01]
 *** Problem - 104
+    How to control the visibility of /fields/ that are used as /constructor
+    parameters/ in a Scala /class/?
+
+    =from Jian=
+    CAUTION: here we ONLY talk about /constructor parameter/!!
+
 *** Solution - 105
+    Summary:
+    Here's the short version of the solution:
+    - ~var~ /fields/:
+      Scala generates
+      + /getter methods/
+      + /setter methods/
+
+    - ~val~ /fields/.
+      Scala generates
+      + /getter/
+
+    - NO ~var~ or ~val~ /modifier/
+      NO /getter/ or /setter/ generated.
+
+    - The code generation behavior can be modified if a ~var~ or ~val~ has a
+      ~private~ modifier. ~private~ prevents /getters/ and /setters/ from being
+      generated.
+
 **** ~var~ fields - 105
 **** ~val~ fields - 106
 **** Fields without ~val~ or ~var~ - 106
 **** Adding ~private~ to ~val~ or ~var~ - 106
+     #+begin_src scala
+       class Person(private var name: String) { def getName {println(name)} }
+
+       val p = new Person("Alvin Alexander")
+       // p: Person = Person@3cb7cee4
+
+       p.name
+       // <console>:10: error: variable name in class Person cannot be accessed in Person
+       //               p.name
+       //                 ^
+
+       p.getName
+       // Alvin Alexander
+     #+end_src
 
 *** Discussion - 107
 **** Case classes - 107
+     For /case classes/, ~val~ is the default.
 
-** TODO 4.3. Defining Auxiliary Constructors - 108
+** DONE 4.3. Defining Auxiliary Constructors - 108
+   CLOSED: [2019-05-29 Wed 14:55]
 *** Problem - 108
+    How to define _ONE or MORE_ /auxiliary constructors/ for a /class/?
+
 *** Solution - 108
+    - Define the /auxiliary constructors/ as /methods/ in the /class/ with the
+      *name* ~this~.
+
+    - You can define _MULTIPLE_ /auxiliary constructors/, but they *must*
+      + have *different* /signatures/ (parameter lists).
+      + call one of the *previously* defined /constructors/.
+
+    - Example:
+      #+begin_src scala
+        // primary constructor
+        class Pizza (var crustSize: Int, var crustType: String) {
+
+          // one-arg auxiliary constructor
+          def this(crustSize: Int) {
+            this(crustSize, Pizza.DEFAULT_CRUST_TYPE)
+          }
+
+          // one-arg auxiliary constructor
+          def this(crustType: String) {
+            this(Pizza.DEFAULT_CRUST_SIZE, crustType)
+          }
+
+          // zero-arg auxiliary constructor
+          def this() {
+            this(Pizza.DEFAULT_CRUST_SIZE, Pizza.DEFAULT_CRUST_TYPE)
+          }
+
+          override def toString = s"A $crustSize inch pizza with a $crustType crust"
+        }
+
+        object Pizza {
+          val DEFAULT_CRUST_SIZE = 12
+          val DEFAULT_CRUST_TYPE = "THIN"
+        }
+      #+end_src
+
 *** Discussion - 109
+    - There are several important points to this recipe:
+      + /Auxiliary constructors/ are defined by creating methods named ~this~.
+
+      + EACH /auxiliary constructor/ *must begin with* a call to a *previously
+        defined* /constructor/.
+
+      + EACH /constructor/ *must* have a *different* /signature/.
+
+      + One /constructor/ calls another /constructor/ with the name ~this~.
+
+    - An /auxiliary constructor/ needs to call one of the previously defined
+      /constructors/.
+
+    - *NOTE*
+      Read Recipe 4.5, "Providing Default Values for Constructor Parameters", and
+      it will be clear why, NOT like Java, you usually do *NOT* need to create
+      _MULTIPLE_ /constructors/ in Scala even though you can do it with the
+      recipe of this section.
+
 **** Generating auxiliary constructors for case classes - 110
+     Because of the way /case classes/ work (generates a lot of boilerplate code
+     for you),
+     adding what appears to be an /auxiliary constructor/ to a case
+     class is *DIFFERENT* than adding an auxiliary constructor to a “regular”
+     class.
+
+     - This is because they're _NOT really /constructors/:_ they're ~apply~ /methods/
+       in the /companion object/ of the /class/.
+
+     - If you want to add new "constructors" to your case class,
+       you write new ~apply~ /methods/.
 
 *** See Also - 112
+    - Recipe 6.8, "Creating Object Instances Without Using the ~new~ Keyword"
+    - Recipe 4.5, "Providing Default Values for Constructor Parameters"
+    - Recipe 4.14, "Generating Boilerplate Code with Case Classes"
 
-** TODO 4.4. Defining a Private Primary Constructor - 112
+** DONE 4.4. Defining a Private Primary Constructor - 112
+   CLOSED: [2019-05-29 Wed 15:13]
 *** Problem - 112
+    How to make the /primary constructor/ of a /class/ *private*, such as to
+    enforce the /Singleton pattern/?
+
 *** Solution - 112
+    #+begin_src scala
+      // a private no-args primary constructor
+      class Order private {
+        // ...
+      }
+
+      // a private one-arg primary constructor
+      class Person private (name: String) {
+          //...
+      }
+    #+end_src
+
 *** Discussion - 112
+    Example of the /Singleton pattern/ in Scala
+    #+begin_src scala
+      class Brain private {
+        override def toString = "This is the brain."
+      }
+
+      object Brain {
+        val brain = new Brain
+        def getInstance = brain
+      }
+
+      object SingletonTest extends App {
+        // this won't compile
+        // val brain = new Brain
+
+        // this works
+        val brain = Brain.getInstance
+        println(brain)
+      }
+    #+end_src
+
 **** Utility classes - 113
+     Java has some /utility classes/, which only contain definitions of /static
+     methods/.
+
+     Scala doesn't need this, it can define a /singleton object/ DIRECTLY with ~object~.
+
+
+     =from Jian=
+     =IMPORTANT= =TODO=
+     Find out the use cases of /private constructors/ in Scala!!!!!!!!!!!!!!!
 
 ** TODO 4.5. Providing Default Values for Constructor Parameters - 114
 *** Problem - 114
@@ -2925,17 +3116,82 @@
 *** Discussion - 117
 **** Summary - 118
 
-** TODO 4.7. Preventing Getter and Setter Methods from Being Generated - 119
-*** Problem - 119
-*** Solution - 119
-*** Discussion - 119
-**** Object-private fields - 120
+** DONE 4.7. Preventing Getter and Setter Methods from Being Generated - 119
+   CLOSED: [2019-07-23 Tue 15:03]
+*** DONE Problem - 119
+    CLOSED: [2019-07-23 Tue 14:33]
+    - We know
+      + when we define a class field as a ~var~, a /getter/ and a /setter/ will be generated.
+      + when we define a class field as a ~val~, a /getter/ will be generated.
 
-*** See Also - 115
-** TODO 4.8. Assigning a Field to a Block or Function - 121
+    - Q :: How about if we don't want generate both /getter/ and /setter/?
+
+*** DONE Solution - 119
+    CLOSED: [2019-07-23 Tue 14:33]
+    - A :: Use /modifier/ ~private~ or ~private[this]~.
+
+    - Example:
+      #+begin_src scala
+        class Stock {
+          // getter and setter methods are generated
+          var delayedPrice: Double = _
+
+          // keep this field hidden from other classes
+          private var currentPrice: Double = _
+        }
+      #+end_src
+      + Disassemble it with =javap=, and you'll see this interface (=from Jian= here,
+        interface in concept, not ~interface~ in Java):
+        #+begin_src java
+          // Compiled from "Stock.scala"
+          public class Stock extends java.lang.Object implements scala.ScalaObject{
+              public double delayedPrice();
+              public void delayedPrice_$eq(double);
+              public Stock();
+          }
+        #+end_src
+        * TODO
+          ??? Use what command line options of =javap= can show the /superclass/ part ???
+          =from Jian=
+          The super class part might not be the same for current version of
+          Scala (2.11, 2.12, and 2.13).
+
+*** DONE Discussion - 119
+    CLOSED: [2019-07-23 Tue 15:03]
+    ~private~ is for the class scope -- for example, in our example, _ANY_
+    /instance/ of a ~Stock~ /class/ can access a /private field/ of _ANY
+    OTHER_ ~Stock~ /instance/.
+    #+begin_src scala
+      class Stock {
+        // a private field can be seen by any Stock instance
+        private var price: Double = _
+
+        def setPrice(p: Double) { price = p }
+
+        def isHigherThan(that: Stock): Boolean = this.price > that.price
+      }
+
+      object Driver extends App {
+        val s1 = new Stock
+        s1.setPrice(20)
+        val s2 = new Stock
+        s2.setPrice(100)
+
+        println(s2.isHigherThan(s1))
+      }
+    #+end_src
+
+**** Object-private fields - 120
+     Defining a field as ~private[this]~ takes this privacy a step further, and
+     makes the /field/ /object-private/ -- it can only be accessed from the
+     /object/ that _contins_ it.
+
+** DONE 4.8. Assigning a Field to a Block or Function - 121
+   CLOSED: [2019-07-23 Tue 15:27]
 *** Problem - 121
 *** Solution - 121
 *** Discussion - 121
+    When it makes sense, define a field like this to be ~lazy~.
 
 ** TODO 4.9. Setting Uninitialized var Field Types - 122
 *** Problem - 122
@@ -2953,12 +3209,56 @@
 *** Solution - 127
 **** Auxiliary constructors - 128
 
-** TODO 4.12. When to Use an Abstract Class - 129
+** DONE 4.12. When to Use an Abstract Class - 129 - TODO =IMPORTANT=
+   CLOSED: [2019-07-23 Tue 16:00]
 *** Problem - 129
-*** Solution - 129
-*** Discussion - 129
+    - The reason why we have this question:
+        In most cases, _a Scala /trait/ is *more flexible* than an /abstract
+      class/._
+      There must be some exceptions, or why does the /abstract class/ exists?
 
-** TODO 4.13. Defining Properties in an Abstract Base Class (or Trait) - 131
+    - Q :: When should I use an /abstract class/?
+
+*** TODO Solution - 129
+    - There are _TWO main reasons_ to use an /abstract class/ in Scala:
+      + You want to create a /base class/ that requires /constructor arguments/.
+        =from Jian= This reason will be disappear in Scala 3.
+
+      + The code will be *called FROM Java code*.
+
+    - Use an /abstract class/ whenever a base behavior *must* have /constructor parameters/.
+      + =from Jian= TODO TODO TODO
+        How can we define "MUST"? For instance, I'm not sure which is better in
+        the cases below
+        #+begin_src scala
+        abstract class Animal(name: String)
+        #+end_src
+
+        Can be defined as
+
+        #+begin_src scala
+        trait Animal{
+          val name: String
+        }
+        #+end_src
+
+    - TODO
+      Regarding the SECOND reason, if you're writing code that needs to be
+      accessed from Java, you'll find that /Scala traits/ WITH /implemented methods/
+      can't be called from Java code.
+      TODO
+      TODO
+      TODO
+      If you run into this situation, see
+      _Recipe 17.7, “Wrapping Traits with Implementations”_, for solutions to that problem.
+
+*** TODO Discussion - 129
+    Because a /class/ can extend *only one* /abstract class/,
+    _WHEN_ you're trying to decide whether to use a /trait/ or /abstract class/,
+    _ALWAYS_ use a /trait/, _UNLESS_ you have this /specific need/ (???) to have
+    /constructor arguments/ in your base implementation.
+
+** TODO 4.13. Defining Properties in an Abstract Base Class (or Trait) - 131 - TODO =RE-READ=
 *** Problem - 131
 *** Solution - 131
 **** Abstract ~val~ and ~var~ fields - 131
@@ -3097,7 +3397,7 @@
            }
 
            class Dog extends Animal {
-             def heartBeat {}  
+             def heartBeat {}
            }
          #+END_SRC
 
@@ -3233,7 +3533,7 @@
 *** DONE Solution - 155
     CLOSED: [2018-05-20 Sun 23:17]
     - =IMPORTANT=
-      When you call a method with _all parameters have default values_, 
+      When you call a method with _all parameters have default values_,
       even if your /method/ is _side-effect free_,
       you _MUST_ call it with ~()~ when you use all its defaluts parameter values.
 
@@ -3318,7 +3618,7 @@
         * Throwing an exception, or stopping the application when an error occurs.
 
         * Calling other functions that have side effects.
-      
+
 
 *** TODO See Also - 162
 
@@ -3555,7 +3855,7 @@
 *** DONE Solution - 174
     CLOSED: [2018-05-23 Wed 13:11]
     Use the ~classOf~ /method/ that is defined in the ~Predef~.
-    
+
     - Example:
       (Scala) ~val info = new DataLine.Info(classOf[TargetDataLine], null)~
 
@@ -3626,7 +3926,7 @@
               println("Hello, world")
             }
 
-            /** command line */ 
+            /** command line */
             // scalac Hello.scala
             // scala Hello
             //// Hello, world
@@ -3892,48 +4192,125 @@
 
 *** TODO See Also - 190
 
-* TODO 7. Packaging and Imports - 191
-** TODO Introduction - 191
-** TODO 7.1. Packaging with the Curly Braces Style Notation - 192
+* DONE 7. Packaging and Imports - 191
+  CLOSED: [2019-07-23 Tue 18:26]
+** DONE Introduction - 191
+   CLOSED: [2019-07-23 Tue 17:38]
+   - Instead of Java way, you can also use a /curly brace packaging style/,
+     _similar to C++ and C# /namespaces/._
+
+   - It’s helpful to know that in Scala, two packages are implicitly imported for you:
+     + ~java.lang._~
+     + ~scala._~
+
+   - In addition to those /packages/, all members from the ~scala.Predef~ /object/ are
+     imported into your applications _implicitly_ (???). =TODO=
+
+   - A great suggestion from the book _Beginning Scala by David Pollak (Apress)_, is to
+     *dig into the source code of the ~Predef~ /object/.*
+     TODO TODO TODO
+
+** DONE 7.1. Packaging with the Curly Braces Style Notation - 192
+   CLOSED: [2019-07-23 Tue 17:42]
 *** Problem - 192
 *** Solution - 192
 *** Discussion - 193
 
-** TODO 7.2. Importing One or More Members - 193
+** DONE 7.2. Importing One or More Members - 193
+   CLOSED: [2019-07-23 Tue 17:49]
 *** Problem - 193
 *** Solution - 193
 *** Discussion - 194
+    - /import selector clause/, for instance,
+      ~import java.io.{File, IOException, FileNotFoundException}~
+      This is NOT supported by Java.
+
 **** Placing import statements anywhere - 194
 
-** TODO 7.3. Renaming Members on Import - 195
+** DONE 7.3. Renaming Members on Import - 195
+   CLOSED: [2019-07-23 Tue 18:02]
 *** Problem - 195
 *** Solution - 195
 *** Discussion - 195
+    - /renaming clause/, for instance,
+      ~import java.util.{ArrayList => JavaList}~
 
-** TODO 7.4. Hiding a Class During the Import Process - 196
+    - You can even rename /object members/
+      (=from Jian= The book use /class members/, which is not exact! Only
+                   /package members/ and /object members/ can be imported):
+      #+begin_src scala
+        import System.out.{println => p}
+      #+end_src
+
+** DONE 7.4. Hiding a Class During the Import Process - 196
+   CLOSED: [2019-07-23 Tue 18:12]
 *** Problem - 196
 *** Solution - 196
+    For example,
+    #+begin_src scala
+      import java.util.{Random => _, _}
+    #+end_src
 
-** TODO 7.5. Using Static Imports - 197
+    - Since you can hide multiple members during the import process,
+      then you should put them first, and ~_~ can only show up at the end.
+      For instance,
+      #+begin_src scala
+        // Legal
+        import java.util.{Random => _, _}
+
+        // Illegal
+        import java.util.{_, Random => _}
+        // From Jian:
+        // The semantics of this line is not clear.
+        // People can give it a clear meaning, but why should the designer of Scala do that?
+        // This looks awkard, right? "Import all and then hide Random" is not very
+        // meaningful in logic.
+      #+end_src
+
+** DONE 7.5. Using Static Imports - 197
+   CLOSED: [2019-07-23 Tue 18:24]
 *** Problem - 197
 *** Solution - 197
 *** Discussion - 198
 
-** TODO 7.6. Using Import Statements Anywhere - 199
+** DONE 7.6. Using Import Statements Anywhere - 199
+   CLOSED: [2019-07-23 Tue 18:26]
 *** Problem - 199
 *** Solution - 199
 *** Discussion - 200
 
 * TODO 8. Traits - 203
-** TODO 8.1. Using a Trait as an Interface - 203
+** DONE 8.1. Using a Trait as an Interface - 203
+   CLOSED: [2019-07-25 Thu 14:46]
 *** Problem - 203
 *** Solution - 203
 *** Discussion - 205
+    - How to use ~extends~ and ~with~:
+      + If extend *one* /trait/, use the ~extends~ keyword.
 
-** TODO 8.2. Using Abstract and Concrete Fields in Traits - 206
+      + If extend MULTIPLE /traits/, use
+        * ~extends~ for the *first* /trait/
+        * ~with~ to extend (/mix in/) the other /traits/.
+
+      + If extends a /class/ (or /abstract class/) and a /trait/, _ALWAYS_ use
+        ~extends~ before the /class/ name, and use ~with~ before the trait name(s).
+
+    - When a /class/ has *multiple* /traits/, *those /traits/ are said to _be mixed
+      in to_ the class.* The term *mixed in* is also used when _extending_ a
+      /single object instance/ _with_ a /trait/, like this: ~val f = new Foo with Trait1~
+      TODO See Recipe 8.8, "Adding a Trait to an Object Instance".
+
+** DONE 8.2. Using Abstract and Concrete Fields in Traits - 206
+   CLOSED: [2019-07-25 Thu 14:50]
 *** Problem - 206
 *** Solution - 206
 *** Discussion - 206
+    - /Fields/ of a /trait/ can be declared as either ~var~ or ~val~.
+      You don't need to use the ~override~ keyword to _override_ a ~var~ /field/
+      in a /subclass/ (or /trait/), but you DO NEED to use it to _override_ a
+      ~val~ /field/.
+
+      TODO =REDO= Recipie 4.13, "Defining Properties in an Abstract Base Class (or Trait)"
 
 ** TODO 8.3. Using a Trait Like an Abstract Class - 207
 *** Problem - 207
@@ -4141,7 +4518,7 @@
 
 ** 11.8. Creating an Array Whose Size Can Change (~ArrayBuffer~) - 335
 *** Problem - 335
-*** Solution - 335 
+*** Solution - 335
 
 ** 11.9. Deleting ~Array~ and ~ArrayBuffer~ Elements - 335
 *** Problem - 335
@@ -4418,7 +4795,7 @@
       3. _write it to the disk_.
 
     - ~PrintWriter~ & ~FileWriter~.
-      + SIMILARITIES 
+      + SIMILARITIES
         * Both extend from ~Writer~.
 
         * Both are /character representation/ classes, that means they work with
@@ -4439,7 +4816,7 @@
           invoker as to take care of invoking /flush/.
 
     - Difference between ~PrintStream~ and ~OutputStream~: Similar to above
-      explanation, just replace /character/ with /byte/. 
+      explanation, just replace /character/ with /byte/.
 
 *** TODO See Also - 381
 
@@ -4783,13 +5160,13 @@
     - *ActorSystem*
     - *ActorRef*
 *** See Aslo - 417
-   
+
 ** TODO 13.2. Creating an Actor Whose Class Constructor Requires Arguments - 418
 *** Problem - 418
 *** Solution - 418
 *** Discussion - 418
 *** See Aslo - 419
-   
+
 ** TODO 13.3. How to Communicate Between Actors - 419
 *** Problem - 419
 *** Solution - 419
@@ -5120,9 +5497,9 @@
 *** DONE Type Constraints - 613
     CLOSED: [2019-03-07 Thu 15:17]
     Type constraints (NOT covered in this book):
-    + ~A \equal{}:\equal{} B~: ~A~ must be equal to ~B~ 
+    + ~A \equal{}:\equal{} B~: ~A~ must be equal to ~B~
 
-    + ~A <:< B~: ~A~ must be a subtype of ~B~ 
+    + ~A <:< B~: ~A~ must be a subtype of ~B~
 
     + ~A <%< B~: ~A~ must be /viewable/ as ~B~
       *DEPRECATED*
@@ -5154,7 +5531,7 @@
                   -> *Type Parameter Naming Conventions*
 
        + It is obvious that this naming convention attatch meanings to /type
-         parameter/ names, and it use ~T~ instead of ~A~ if there is a single 
+         parameter/ names, and it use ~T~ instead of ~A~ if there is a single
          /type parameter/.
 
        + Nameing Convetion:
@@ -5320,7 +5697,7 @@
          #+begin_src scala
            // Animal.scala
            package typeclassdemo
-  
+
            trait Animal
            final case class Dog(name: String) extends Animal
            final case class Cat(name: String) extends Animal
@@ -5444,7 +5821,7 @@
      #+BEGIN_QUOTE
      I wanted to write code that “makes it look like the language was made for
      the problem.
-                                               -- Ward Cunningham (Clean Code) 
+                                               -- Ward Cunningham (Clean Code)
      #+END_QUOTE
 
    - Scala's best practices:
@@ -5531,7 +5908,7 @@
 **** TODO In actors - 653
      =From Jian= I think this an outdated example. Now people use Akka rather than Actor.
                  However, I'm not sure.
-     
+
      #+BEGIN_SRC scala
        class SarahsBrain extends Actor {
          def receive = {
@@ -5768,7 +6145,7 @@
          }
        }
      #+END_SRC
-     
+
 **** DONE Getting the value from an ~Option~ - 659
      CLOSED: [2018-02-18 Sun 22:50]
      Many ways:
@@ -5781,7 +6158,7 @@
 
      - Use a ~match~ expression
        pattern matching
-     
+
 **** DONE Using ~Option~ with Scala collections - 660
      CLOSED: [2018-02-18 Sun 23:09]
      Two ways:
@@ -5897,7 +6274,7 @@
          }
        #+END_SRC
 
-     - =TODO= =TODO= =TODO= 
+     - =TODO= =TODO= =TODO=
        The Try class includes a nice collection of methods that let you handle
        situations in many ways, including:
        + Collection-like implementations of ~filter~, ~flatMap~, ~flatten~,

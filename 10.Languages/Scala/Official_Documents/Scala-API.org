@@ -1,6 +1,8 @@
 #+TITLE: Scala Standard Library API
-#+VERSION: 2.13.0-M5
+#+VERSION: 2.13.1
 #+STARTUP: entitiespretty
+
+* TODO: _from Jian_ Also List Value Members
 
 * TODO annotation
 ** TODO meta
@@ -19,21 +21,22 @@
 *** (@) ~uncheckedStable~
 *** (@) ~uncheckedVariance~
 
-**   (@) ~Annotation~
-**   (t) ~ClassfileAnnotation~
-**   (t) ~ConstantAnnotation~
-**   (t) ~StaticAnnotation~
-**   (t) ~TypeConstraint~
-**   (@) ~compileTimeOnly~
-** (O,@) ~elidable~
-**   (@) ~implicitAmbiguous~
-**   (@) ~implicitNotFound~
-**   (@) ~showAsInfix~
-**   (@) ~strictfp~
-**   (@) ~switch~
-**   (@) ~tailrec~
-**   (@) ~unspecialized~
-**   (@) ~varargs~
+**    (@) ~Annotation~
+**    (t) ~ClassfileAnnotation~
+**    (t) ~ConstantAnnotation~
+**    (t) ~StaticAnnotation~
+**    (t) ~TypeConstraint~
+**    (@) ~compileTimeOnly~
+** (O, @) ~elidable~
+**    (@) ~implicitAmbiguous~
+**    (@) ~implicitNotFound~
+**    (@) ~showAsInfix~
+**    (@) ~strictfp~
+**    (@) ~switch~
+**    (@) ~tailrec~
+**    (@) ~unspecialized~
+**    (@) ~unused~
+**    (@) ~varargs~
 
 * DONE beans
   CLOSED: [2018-09-03 Mon 14:08]
@@ -69,61 +72,57 @@
 ** (@) ~BeanProperty~
 ** (@) ~BooleanBeanProperty~
 
-* TODO collection
+* TODO collection - TODO
 ** TODO concurrent
-***    (t) ~Map~
-*** (O,FC) ~TrieMap~
+***     (t) ~Map~
+*** (O, fC) ~TrieMap~
 
 ** TODO convert
-***   (t) ~AsJavaConverters~
-***   (t) ~AsScalaConverters~
-***   (t) ~DecorateAsJava~
-***   (t) ~DecorateAsScala~
-*** (O)   ~ImplicitConversions~
-*** (O)   ~ImplicitConversionsToJava~
-*** (O)   ~ImplicitConversionsToScala~
-***   (t) ~ToJavaImplicits~
-***   (t) ~ToScalaImplicits~
-*** (O,t) +WrapAsJava+
-    Annotations: ~@deprecated~
-    Deprecated:  (Since version 2.12.0) use JavaConverters or consider ToJavaImplicits
-
-*** (O,t) +WrapAsScala+
-    Annotations: ~@deprecated~
-    Deprecated:  (Since version 2.12.0) use JavaConverters or consider ToScalaImplicits
-
-*** (O)   ~Wrappers~
+***    (t) ~AsJavaConverters~
+***    (t) ~AsJavaExtensions~
+***    (t) ~AsScalaConverters~
+***    (t) ~AsScalaExtensions~
+*** (O)    ~ImplicitConversions~
+*** (O)    ~ImplicitConversionsToJava~
+*** (O)    ~ImplicitConversionsToScala~
+*** (O, t) ~StreamExtensions~
+***    (t) ~ToJavaImplicits~
+***    (t) ~ToScalaImplicits~
 
 ** TODO generic
-***  (fC) ~DefaultSerializationProxy~
-*** (O,t) ~IsIterable~
-***   (t) ~IsIterableLowPriority~
-*** (O,t) ~IsIterableOnce~
-***   (t) ~IsIterableOnceLowPriority~
-*** (O,t) ~IsMap~
-*** (O,t) ~IsSeq~
+***    (t) ~DefaultSerializable~
+***   (fC) ~DefaultSerializationProxy~
+*** (O, t) ~IsIterable~
+***    (t) ~IsIterableLowPriority~
+*** (O, t) ~IsIterableOnce~
+***    (t) ~IsIterableOnceLowPriority~
+*** (O, t) ~IsMap~
+*** (O, t) ~IsSeq~
+***    (t) ~Subtractable~
 
 ** TODO immutable
-***    (aC) ~AbstractMap~
-***    (aC) ~AbstractSeq~
-***    (aC) ~AbstractSet~
-*** (O,saC) ~ArraySeq~
-*** (O,saC) ~BitSet~
-*** (O, fC) ~HashMap~
-*** (O, fC) ~HashSet~
-*** (O,  t) ~IndexedSeq~
-***     (t) ~IndexedSeqOps~
-*** (O,saC) ~IntMap~
-*** (O,  t) ~Iterable~
-*** (O, fC) ~LazyList~
+***    (fcC) ~::~
+***     (aC) ~AbstractMap~
+***     (aC) ~AbstractSeq~
+***     (aC) ~AbstractSet~
+*** (O, saC) ~ArraySeq~
+*** (O, saC) ~BitSet~
+*** (O,  fC) ~HashMap~
+*** (O,  fC) ~HashSet~
+*** (O,   t) ~IndexedSeq~
+***      (o) ~IndexedSeqDefaults~
+***      (t) ~IndexedSeqOps~
+*** (O, saC) ~IntMap~
+*** (O,   t) ~Iterable~
+*** (O,  fC) ~LazyList~
 **** Companion object
      - ~object LazyList extends SeqFactory[LazyList]~
 
 **** final class
 
-*** (O,  t) ~LinearSeq~
-***     (t) ~LinearSeqOps~
-*** (O,saC) ~List~
+*** (O,   t) ~LinearSeq~
+***      (t) ~LinearSeqOps~
+*** (O, saC) ~List~
 **** (fC) ~::~
 ****  (O) ~Nil~
 
@@ -138,7 +137,7 @@
 
      When the ~this~ is empty, throw the exception:
      ~java.lang.UnsupportedOperationException~.
-     
+
 
 **** ~def inits: Iterator[List[A]]~
      + *TRAP*
@@ -159,32 +158,38 @@
 **** ~def mapConserve: (f: (A) => B) => List[B]~
 
 
-**** 
-*** (O, sC) ~ListMap~
-*** (O, sC) ~ListSet~
-*** (O,saC) ~LongMap~
-*** (O,  t) ~Map~
-***     (t) ~MapOps~
-*** (O, sC) ~NumericRange~
-*** (O, sC) ~Queue~
-*** (O,saC) ~Range~
-*** (O,  t) ~Seq~
-*** (O,  t) ~SeqMap~
-***     (t) ~SeqOps~
-*** (O,  t) ~Set~
-***     (t) ~SetOps~
-*** (O,  t) ~SortedMap~
-***     (t) ~SortedMapOps~
-*** (O,  t) ~SortedSet~
-***     (t) ~SortedSetOps~
-***     (t) ~StrictOptimizedSeqOps~
-*** (O, fC) ~TreeMap~
-*** (O, fC) ~TreeSet~
-*** (O, fC) ~Vector~
-***    (fC) ~VectorBuilder~
-***     (C) ~VectorIterator~
-*** (O,  C) ~VectorMap~
-*** (O, fC) ~WrappedString~
+****
+*** (O,  sC) ~ListMap~
+*** (O,  sC) ~ListSet~
+*** (O, saC) ~LongMap~
+*** (O,   t) ~Map~
+***      (t) ~MapOps~
+*** (O,  sC) ~NumericRange~
+*** (O,  sC) ~Queue~
+*** (O, saC) ~Range~
+*** (O,   t) ~Seq~
+*** (O,   t) ~SeqMap~
+***      (t) ~SeqOps~
+*** (O,   t) ~Set~
+***      (t) ~SetOps~
+*** (O,   t) ~SortedMap~
+***      (t) ~SortedMapOps~
+*** (O,   t) ~SortedSet~
+***      (t) ~SortedSetOps~
+*** (O, saC) ~Stream~
+***      (t) ~StrictOptimizedMapOps~
+***      (t) ~StrictOptimizedSeqOps~
+***      (t) ~StrictOptimizedSetOps~
+***      (t) ~StrictOptimizedSortedMapOps~
+***      (t) ~StrictOptimizedSortedSetOps~
+*** (O,  fC) ~TreeMap~
+*** (O,  fC) ~TreeSeqMap~
+*** (O,  fC) ~TreeSet~
+*** (O,  fC) ~Vector~
+***     (fC) ~VectorBuilder~
+***      (C) ~VectorIterator~
+*** (O,   C) ~VectorMap~
+*** (O,  fC) ~WrappedString~
 
 ** TODO mutable
 ***    (aC) ~AbstractBuffer~
@@ -197,12 +202,14 @@
 ***    (fC) ~ArrayBufferView~
 *** (O,saC) ~ArrayBuilder~
 *** (O,  C) ~ArrayDeque~
+*** (O,  C) ~ArrayDequeOps~
 *** (O,saC) ~ArraySeq~
 *** (O,  C) ~BitSet~
 *** (O,  t) ~Buffer~
 ***     (t) ~Builder~
 ***     (t) ~Clearable~
 ***     (t) ~Cloneable~
+*** (O,  C) ~CollisionProofHashMap~
 *** (O,  t) ~Growable~
 ***     (C) ~GrowableBuilder~
 *** (O,  C) ~HashMap~
@@ -251,6 +258,7 @@
 **   (AC) ~AbstractSeqView~
 **   (AC) ~AbstractSet~
 **   (AC) ~AbstractView~
+** (O, t) ~AnyStepper~
 ** (O,FC) ~ArrayOps~
 ** (O, t) ~BitSet~
 ** (O, t) ~BitSetOps~
@@ -261,12 +269,14 @@
 ** (O, t) ~ClassTagIterableFactory~
 ** (O, t) ~ClassTagSeqFactory~
 **    (t) ~DefaultMap~
+** (O, t) ~DefaultStepper~
 ** (O, t) ~EvidenceIterableFactory~
 ** (O, t) ~Factory~
 ** (O)    ~Hashing~
 ** (O, t) ~IndexedSeq~
 **    (t) ~IndexedSeqOps~
 ** (O, t) ~IndexedSeqView~
+** (O, t) ~IntStepper~
 ** (O, t) ~Iterable~
 ** (O, t) ~IterableFactory~
 ** (O, t) ~IterableOnce~
@@ -282,11 +292,14 @@
 **    (t) ~LinearSeqOps~
 ** (O, t) ~Map~
 ** (O, t) ~MapFactory~
+**    (t) ~MapFactoryDefaults~
 ** (O, t) ~MapOps~
 ** (O, t) ~MapView~
+**    (t) ~MapViewFactory~
 **    (O) ~Searching~
 ** (O, t) ~Seq~
 ** (O, t) ~SeqFactory~
+** (O, t) ~SeqMap~
 ** (O, t) ~SeqOps~
 ** (O, t) ~SeqView~
 ** (O, t) ~Set~
@@ -294,11 +307,17 @@
 ** (O, t) ~SortedIterableFactory~
 ** (O, t) ~SortedMap~
 ** (O, t) ~SortedMapFactory~
+** (O, t) ~SortedMapFactoryDefaults~
 ** (O, t) ~SortedMapOps~
 **    (t) ~SortedOps~
 ** (O, t) ~SortedSet~
+**    (t) ~SortedSetFactoryDefaults~
 ** (O, t) ~SortedSetOps~
 **    (t) ~SpecificIterableFactory~
+** (O, t) ~Stepper~
+** (O, t) ~StepperShape~
+**    (t) ~StepperShapeLowPriority1~
+**    (t) ~StepperShapeLowPriority2~
 **    (t) ~StrictOptimizedClassTagSeqFactory~
 **    (t) ~StrictOptimizedIterableOps~
 **    (t) ~StrictOptimizedLinearSeqOps~
@@ -314,7 +333,7 @@
 **   (AC) ~WithFilter~
 
 * TODO compat
-** (O) ~Platform~
+** (O) ~Platform~ - Deprecated
 *** DONE Type Members
     CLOSED: [2018-09-03 Mon 13:36]
     - ~ConcurrentModificationException~
@@ -332,21 +351,22 @@
 
 * TODO concurrent
 ** duration
-*** (O, cC) ~Deadline~
-***   (ifC) ~DoubleMult~
-*** (O,saC) ~Duration~
-*** (O,  t) ~DurationConversions~
-***   (ifC) ~DurationDouble~
-***   (ifC) ~DurationInt~
-***   (ifC) ~DurationLong~
-*** (O, fC) ~FiniteDuration~
-***   (ifC) ~IntMult~
-***   (ifC) ~LongMult~
-*** (O)     ~fromNow~
-*** (O)     ~span~
+*** (O,  cC) ~Deadline~
+***    (ifC) ~DoubleMult~
+*** (O, saC) ~Duration~
+*** (O,   t) ~DurationConversions~
+***    (ifC) ~DurationDouble~
+***    (ifC) ~DurationInt~
+***    (ifC) ~DurationLong~
+*** (O,  fC) ~FiniteDuration~
+***    (ifC) ~IntMult~
+***    (ifC) ~LongMult~
+*** (O)      ~fromNow~
+*** (O)      ~span~
 
 ** (O)    ~Await~
 **    (t) ~Awaitable~
+**    (t) ~Batchable~
 ** (O, t) ~BlockContext~
 **   (st) ~CanAwait~
 **    (C) ~Channel~
@@ -362,12 +382,12 @@
 **    (C) ~SyncVar~
 
 * TODO io
-** (O, t) ~AnsiColor~
-**    (C) ~BufferedSource~
-** (O, C) ~Codec~
-**    (t) ~LowPriorityCodecImplicits~
-** (O,AC) ~Source~
-**    (O) ~StdIn~
+** (O,  t) ~AnsiColor~
+**     (C) ~BufferedSource~
+** (O,  C) ~Codec~
+**     (t) ~LowPriorityCodecImplicits~
+** (O, aC) ~Source~
+**     (O) ~StdIn~
 
 * TODO math
 ** (O,fC) ~BigDecimal~
@@ -385,6 +405,33 @@
 **    (t) ~ScalaNumericAnyConversions~
 **    (t) ~ScalaNumericConversions~
 
+* TODO jdk
+** TODO javaapi
+*** (O) ~CollectionConverters~
+*** (O) ~DurationConverters~
+*** (O) ~FunctionConverters~
+*** (O) ~FutureConverters~
+*** (O) ~OptionConverters~
+*** (O) ~StreamConverters~
+
+** (O, aC)  ~Accumulator~
+** (O, fC)  ~AnyAccumulator~
+** (O)      ~CollectionConverters~
+** (O, fC)  ~DoubleAccumulator~
+** (O)      ~DurationConverters~
+** (O)      ~FunctionConverters~
+** (O)      ~FunctionWrappers~
+** (O)      ~FutureConverters~
+** (O,  fC) ~IntAccumulator~
+** (O,  fC) ~LongAccumulator~
+** (O)      ~OptionConverters~
+** (O, saC) ~OptionShape~
+**      (t) ~Priority0FunctionExtensions~
+**      (t) ~Priority1FunctionExtensions~
+**      (t) ~Priority2FunctionExtensions~
+**      (t) ~Priority3FunctionExtensions~
+** (O)      ~StreamConverters~
+
 * TODO ref
 **   (C) ~PhantomReference~
 **   (t) ~Reference~
@@ -393,74 +440,20 @@
 ** (O,C) ~SoftReference~
 ** (O,C) ~WeakReference~
 
-* TODO reflect
+* TODO reflect - TODO
 **   (aC) ~AnyValManifest~
-**    (t) ~ClassManifestDeprecatedApis~
+**    (T) ~ClassManifestDeprecatedApis~ - DEPRECATED
 ** (O)    ~ClassManifestFactory~
-** (O, t) ~ClassTag~
-**    (t) ~Manifest~
+** (O, T) ~ClassTag~
+** (O, T) ~Manifest~
 ** (O)    ~ManifestFactory~
 ** (O)    ~NameTransformer~
 ** (O)    ~NoManifest~
-**    (t) ~OptManifest~
+**    (T) ~OptManifest~
 
 ** TODO api
 ** TODO macros
 ** TODO runtime
-
-* TODO runtime
-**   (aC) AbstractFunctionN -- N from 1 to 22
-*** ~AbstractFunction1~
-*** ~AbstractFunction2~
-*** ~AbstractFunction3~
-*** ~AbstractFunction4~
-*** ~AbstractFunction5~
-*** ~AbstractFunction6~
-*** ~AbstractFunction7~
-*** ~AbstractFunction8~
-*** ~AbstractFunction9~
-*** ~AbstractFunction10~
-*** ~AbstractFunction11~
-*** ~AbstractFunction12~
-*** ~AbstractFunction13~
-*** ~AbstractFunction14~
-*** ~AbstractFunction15~
-*** ~AbstractFunction16~
-*** ~AbstractFunction17~
-*** ~AbstractFunction18~
-*** ~AbstractFunction19~
-*** ~AbstractFunction20~
-*** ~AbstractFunction21~
-*** ~AbstractFunction22~
-
-**   (aC) ~AbstractPartialFunction~
-**   (fC) ~ArrayCharSequence~
-**    (t) ~FractionalProxy~
-**    (t) ~IntegralProxy~
-** (O)    ~LambdaDeserializer~
-**    (C) ~LazyBoolean~
-**    (C) ~LazyByte~
-**    (C) ~LazyChar~
-**    (C) ~LazyDouble~
-**    (C) ~LazyFloat~
-**    (C) ~LazyInt~
-**    (C) ~LazyLong~
-**    (C) ~LazyRef~
-**    (C) ~LazyShort~
-**    (C) ~LazyUnit~
-**    (C) ~NonLocalReturnControl~
-**    (t) ~OrderedProxy~
-**    (t) ~RangedProxy~
-**   (fC) ~RichBoolean~
-**   (fC) ~RichByte~
-**   (fC) ~RichChar~
-**   (fC) ~RichDouble~
-**   (fC) ~RichFloat~
-**   (fC) ~RichInt~
-**   (fC) ~RichLong~
-**   (fC) ~RichShort~
-**    (t) ~ScalaNumberProxy~
-**    (t) ~ScalaWholeNumberProxy~
 
 * TODO sys
 ** process
@@ -473,53 +466,54 @@
 ***    (t) ~ProcessImplicits~
 *** (O, t) ~ProcessLogger~
 
-** (O,t) ~BooleanProp~
-** (O,t) ~Prop~
-** (O,C) ~ShutdownHookThread~
-** (O,C) ~SystemProperties~
+** (O, T) ~BooleanProp~
+** (O, T) ~Prop~
+** (O, C) ~ShutdownHookThread~
+** (O, C) ~SystemProperties~
 * TODO util
 ** TODO control
-*** (O,C) ~Breaks~
-***   (t) ~ControlThrowable~
-*** (O)   ~Exception~
-*** (O,t) ~NoStackTrace~
-*** (O)   ~NonFatal~
-*** (O)   ~TailCalls~
+*** (O, C) ~Breaks~
+***   (aC) ~ControlThrowable~
+*** (O)    ~Exception~
+*** (O, T) ~NoStackTrace~
+*** (O)    ~NonFatal~
+*** (O)    ~TailCalls~
+
 ** TODO hanshing
-*** (O,fC) ~ByteswapHashing~
-*** (O, t) ~Hashing~
+*** (O, fC) ~ByteswapHashing~
+*** (O,  T) ~Hashing~
 *** (O)    ~MurmurHash3~
+
 ** TODO matching
-*** (O,C) Regex
-***   (t) UnanchoredRegex
+*** (O, C) Regex
+***    (T) UnanchoredRegex
 
-**    (fC) ~ChainingOps~
-**     (t) ~ChainingSyntax~
-**     (C) ~DynamicVariable~
+**     (fC) ~ChainingOps~
+**      (T) ~ChainingSyntax~
+**      (C) ~DynamicVariable~
+** (O, saC) ~Either~
+**    (fcC) ~Failure~
+**    (fcC) ~Left~
+** (O)      ~Properties~
+** (O,   C) ~Random~
+**    (fcC) ~Right~
+** (O)      ~Sorting~
+**    (fcC) ~Success~
+**    (saC) ~Try~
+** (O)      ~Using~
+** (O)      ~chaining~
 
-**   (saC) ~Either~
-*** (fcC) ~Left~
-*** (fcC) ~Right~
-
-** (O)     ~Properties~
-** (O,  C) ~Random~
-** (O)     ~Sorting~
-**   (saC) ~Try~
-*** (fcC) ~Success~
-*** (fcC) ~Failure~
-
-** (O, fC) ~Using~
-** (O)     ~chaining~
-
-* (O)     ~#::~
-* (aC)    ~Any~
-* (aC)    ~AnyVal~
-* (t)     ~App~
-* (O,fC)  ~Array~
+* (O)      ~#::~
+* (O, saC) ~<:<~
+*    (saC) ~=:=~
+*     (aC) ~Any~
+*     (aC) ~AnyVal~
+*      (T) ~App~
+* (O,  fC) ~Array~
   - Signature:
     + (C) ~final class Array[T] extends java.io.Serializable with java.lang.Cloneable~
 
-    + (O) ~object Array extends Serializable~ 
+    + (O) ~object Array extends Serializable~
 
   - Arrays are *mutable, indexed collections* of values.
     ~Array[T]~ is Scala's representation for Java's ~T[]~.
@@ -551,57 +545,52 @@
         val seqReversed: Seq[Int] = arr.reverse
       #+END_SRC
 
-  - 
+  -
 
-* (O,afC) ~Boolean~
-* (O,afC) ~Byte~
-* (O,afC) ~Char~
-* (t)     ~Cloneable~
-* (O)     ~Console~
-* (t)     ~DelayedInit~
-* (O,afC) ~Double~
-* (t)     ~Dynamic~
-* (aC)    ~Enumeration~
-* (t)     ~Equals~
-* (O,afC) ~Float~
-* N Function
-** (O) Function
-** (t) Function0
-** (t) Function1
-** (t) Function2
-** (t) Function3
-** (t) Function4
-** (t) Function5
-** (t) Function6
-** (t) Function7
-** (t) Function8
-** (t) Function9
-** (t) Function10
-** (t) Function11
-** (t) Function12
-** (t) Function13
-** (t) Function14
-** (t) Function15
-** (t) Function16
-** (t) Function17
-** (t) Function18
-** (t) Function19
-** (t) Function20
-** (t) Function21
-** (t) Function22
-
-* (O,afC) ~Int~
-* (O,afC) ~Long~
-* (fC)    ~MatchError~
-* (fC)    ~NotImplementedError~
-* TODO (afC)   ~Nothing~
-* TODO (afC)   ~Null~
-* TODO (O,saC) ~Option~
-** (O) ~None~
-** (C) ~Some~
-
-* DONE (O,t)   ~PartialFunction~
-  CLOSED: [2018-09-03 Mon 15:15]
+* (O, afC) ~Boolean~
+* (O, afC) ~Byte~
+* (O, afC) ~Char~
+* (O)      ~Console~
+*      (T) ~DelayedInit~
+* (O, afC) ~Double~
+*      (T) ~DummyImplicit~
+*      (T) ~Dynamic~
+*     (aC) ~Enumeration~
+*      (T) ~Equals~
+* (O, afC) ~Float~
+* (O)      ~Function~
+*      (T) ~Function0~
+* (O,   T) ~Function1~
+*      (T) ~Function2~
+*      (T) ~Function3~
+*      (T) ~Function4~
+*      (T) ~Function5~
+*      (T) ~Function6~
+*      (T) ~Function7~
+*      (T) ~Function8~
+*      (T) ~Function9~
+*      (T) ~Function10~
+*      (T) ~Function11~
+*      (T) ~Function12~
+*      (T) ~Function13~
+*      (T) ~Function14~
+*      (T) ~Function15~
+*      (T) ~Function16~
+*      (T) ~Function17~
+*      (T) ~Function18~
+*      (T) ~Function19~
+*      (T) ~Function20~
+*      (T) ~Function21~
+*      (T) ~Function22~
+* (O, afC) ~Int~
+* (O, afC) ~Long~
+*     (fC) ~MatchError~
+* (O)      ~None~
+*     (fC) ~NotImplementedError~
+*    (afC) ~Nothing~
+*    (afC) ~Null~
+* (O, saC) ~Option~
+* (O,   T) ~PartialFunction~
 ** DONE Companion Object
    CLOSED: [2018-09-03 Mon 15:15]
 *** DONE Value Members
@@ -715,67 +704,65 @@
 
     - ~def toString(): String~
 
-* TODO (O)     ~Predef~
-* TODO N Product
-** (O,t) Product
-** (O,t) Product1
-** (O,t) Product2
-** (O,t) Product3
-** (O,t) Product4
-** (O,t) Product5
-** (O,t) Product6
-** (O,t) Product7
-** (O,t) Product8
-** (O,t) Product9
-** (O,t) Product10
-** (O,t) Product11
-** (O,t) Product12
-** (O,t) Product13
-** (O,t) Product14
-** (O,t) Product15
-** (O,t) Product16
-** (O,t) Product17
-** (O,t) Product18
-** (O,t) Product19
-** (O,t) Product20
-** (O,t) Product21
-** (O,t) Product22
-
-* TODO (O,t)   ~Proxy~
-* TODO (cC)    ~ScalaReflectionException~
-* TODO (C)     ~SerialVersionUID~
-* TODO (t)     ~Serializable~
-* TODO (O,afC) ~Short~
-* TODO (O,t)   ~Specializable~
-* TODO (O,cC)  ~StringContext~
-* TODO (O,fC)  ~Symbol~
-* TODO N Tuple
-** (C) Tuple1
-** (C) Tuple2
-** (C) Tuple3
-** (C) Tuple4
-** (C) Tuple5
-** (C) Tuple6
-** (C) Tuple7
-** (C) Tuple8
-** (C) Tuple9
-** (C) Tuple10
-** (C) Tuple11
-** (C) Tuple12
-** (C) Tuple13
-** (C) Tuple14
-** (C) Tuple15
-** (C) Tuple16
-** (C) Tuple17
-** (C) Tuple18
-** (C) Tuple19
-** (C) Tuple20
-** (C) Tuple21
-** (C) Tuple22
-* TODO (fC)    ~UninitializedError~
-* TODO (fcC)   ~UninitializedFieldError~
-* DONE (O,afC) ~Unit~
-  CLOSED: [2018-08-13 Mon 21:09]
+* (O)      ~Predef~
+* (O,   T) ~Product~
+* (O,   T) ~Product1~
+* (O,   T) ~Product2~
+* (O,   T) ~Product3~
+* (O,   T) ~Product4~
+* (O,   T) ~Product5~
+* (O,   T) ~Product6~
+* (O,   T) ~Product7~
+* (O,   T) ~Product8~
+* (O,   T) ~Product9~
+* (O,   T) ~Product10~
+* (O,   T) ~Product11~
+* (O,   T) ~Product12~
+* (O,   T) ~Product13~
+* (O,   T) ~Product14~
+* (O,   T) ~Product15~
+* (O,   T) ~Product16~
+* (O,   T) ~Product17~
+* (O,   T) ~Product18~
+* (O,   T) ~Product19~
+* (O,   T) ~Product20~
+* (O,   T) ~Product21~
+* (O,   T) ~Product22~
+* (O,   T) ~Proxy~
+*     (cC) ~ScalaReflectionException~
+*      (@) ~SerialVersionUID~
+* (O, afC) ~Short~
+*      (T) ~Singleton~
+*      (C) ~Some~
+* (O,   T) ~Specializable~
+* (O,  cC) ~StringContext~
+* (O,  fC) ~Symbol~
+*      (C) ~Tuple1~
+*      (C) ~Tuple2~
+*      (C) ~Tuple3~
+*      (C) ~Tuple4~
+*      (C) ~Tuple5~
+*      (C) ~Tuple6~
+*      (C) ~Tuple7~
+*      (C) ~Tuple8~
+*      (C) ~Tuple9~
+*      (C) ~Tuple10~
+*      (C) ~Tuple11~
+*      (C) ~Tuple12~
+*      (C) ~Tuple13~
+*      (C) ~Tuple14~
+*      (C) ~Tuple15~
+*      (C) ~Tuple16~
+*      (C) ~Tuple17~
+*      (C) ~Tuple18~
+*      (C) ~Tuple19~
+*      (C) ~Tuple20~
+*      (C) ~Tuple21~
+*      (C) ~Tuple22~
+*     (fC) ~UninitializedError~
+*    (fcC) ~UninitializedFieldError~
+* DONE (O, afC) ~Unit~
+  CLOSED: [2019-10-11 Fri 14:49]
   - (O) ~object Unit extends AnyValCompanion~
     _3 methods_
     + ~Unit.box(x: Unit): BoxedUnit~
@@ -793,8 +780,8 @@
   - Skill Level:
     Never used these /methods/ of ~Unit~.
 
-* DONE (fC)    ~ValueOf~
-  CLOSED: [2018-08-13 Mon 21:09]
+* DONE (fC) ~ValueOf~
+  CLOSED: [2019-10-11 Fri 14:49]
   - This /class/ is added Only after *SIP-23 - Literal-Based Singleton Types* was
     merged since Scala 2.12.2.
 
@@ -826,8 +813,8 @@
 
     + ~val value: T~
 
-* DONE (@)     ~deprecated~
-  CLOSED: [2018-08-13 Mon 21:09]
+* DONE (@)  ~deprecated~
+  CLOSED: [2019-10-11 Fri 14:51]
   - Annotation
 
   - Example:
@@ -842,19 +829,18 @@
   - Skill Level:
     Use
 
-* TODO (@)     ~deprecatedInheritance~
-* TODO (@)     ~deprecatedName~
-* TODO (@)     ~deprecatedOverriding~
-* TODO (@)     ~inline~
-* TODO (O)     ~language~
-* TODO (O)     ~languageFeature~
-* TODO (@)     ~native~
-* TODO (@)     ~noinline~
-* TODO (@)     ~specialized~
-* TODO (@)     ~throws~
-* TODO (@)     ~transient~
-* DONE (@)     ~unchecked~
-  CLOSED: [2018-08-13 Mon 16:01]
+*      (@) ~deprecatedInheritance~
+*      (@) ~deprecatedName~
+*      (@) ~deprecatedOverriding~
+*      (@) ~inline~
+*      (O) ~language~
+*      (O) ~languageFeature~
+*      (@) ~native~
+*      (@) ~noinline~
+*      (@) ~specialized~
+*      (@) ~throws~
+*      (@) ~transient~
+*      (@) ~unchecked~
   - Annotation
     #+BEGIN_SRC scala
       (x: @unchecked) match {
@@ -867,5 +853,4 @@
   - skill level:
     Use
 
-* TODO (@)     ~volatile~
-
+*      (@) ~volatile~
