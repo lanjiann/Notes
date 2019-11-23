@@ -1,10 +1,11 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.20.0-bin-SNAPSHOT
+#+VERSION: 0.20.0-bin-SNAPSHOT -> 0.21.0-bin-SNAPSHOT
 #+AUTHOR:
 #+STARTUP: entitiespretty
 
 * BLOG
-* USAGE
+* DONE USAGE
+  CLOSED: [2019-11-04 Mon 16:17]
 ** Getting Started
    *Getting Started: Users*
 *** Trying out Dotty
@@ -68,12 +69,13 @@
 *** See Also
 
 ** TODO NEW TYPES
-*** TODO Intersection types
+*** DONE Intersection types
+    CLOSED: [2019-11-10 Sun 17:47]
     The ~&~ operator creates an /intersection type/.
 
 **** Type Checking
-     The type ~S & T~ represents values that are of the type ~S~ and ~T~ at the
-     same time.
+     The type ~S & T~ represents values that are of the type ~S~ and ~T~ _at the
+     same time_.
 
      - Example:
        #+begin_src scala
@@ -93,7 +95,7 @@
 
      - If a /member/ appears in both ~A~ and ~B~, its type in ~A & B~ is the
        /intersection of its type/ in ~A~ and its type in ~B~.
-       For instance, assume the definitions:
+         For instance, assume the definitions:
        #+begin_src scala
          trait A {
            def children: List[A]
@@ -106,31 +108,74 @@
          val x: A & B = new C
          val ys: List[A & B] = x.children
        #+end_src
-       ~ys~ is of type ~List[A] & List[B]~, which can be further simplified
-       to ~List[A & B]~ because ~List~ is /convariant/.
+       ~ys~ is of type ~List[A] & List[B]~, _which can be FURTHER SIMPLIFIED
+       to_ ~List[A & B]~ _because_ ~List~ is /convariant/.
 
-     - TODO
-       TODO
-       TODO
-       One might wonder how the compiler could come up with a definition for
-       children of type List[A & B] since all its is given are children
-       definitions of type List[A] and List[B]. The answer is it does not need
-       to. A & B is just a type that represents a set of requirements for values
-       of the type. At the point where a value is constructed, one must make
-       sure that all inherited members are correctly defined. So if one defines
-       a class C that inherits A and B, one needs to give at that point a
-       definition of a children method with the required type.
+     - Q :: (One might wonder)
+            How the compiler could come up with a definition for ~children~ of
+            type ~List[A & B]~ since all its is given are ~children~ definitions
+            of type ~List[A]~ and ~List[B]~.
+
+     - A :: The answer is it *does not need to*. TODO ??? ??? ??? TODO
+              ~A & B~ is just a type that represents a set of requirements for
+            values of the type.
+              At the point where a value is constructed, one must make sure that
+            all inherited members are correctly defined. So if one _defines a class
+             ~C~ that inherits ~A~ and ~B~,_ one needs to give at that point a
+            definition of a ~children~ method with the required type.
        #+begin_src scala
          class C extends A with B {
            def children: List[A & B] = ???
          }
        #+end_src
 
+**** More Details
+***** Syntax
+      Syntactically, an /intersection type/ ~S & T~ is similar to an /infix
+      type/, where the _infix operator_ is ~&~.
+      - ~&~ is treated as a /soft keyword/.
+        + it is a _NORMAL identifier_ with the usual precedence.
+
+        + *BUT*
+          a type of the form ~A & B~
+          _is *ALWAYS* recognized as_ an /intersection type/,
+          _WITHOUT_ trying to resolve ~&~.
+
+      - Syntax:
+        #+begin_src text
+          Type      ::=  ...| InfixType
+          InfixType ::=  RefinedType {id [nl] RefinedType}
+        #+end_src
+
+***** Subtyping Rules
+      - Subtyping rules
+        TODO
+
+      - It is can be proved that ~&~ is *commutative*.
+
+      - Derived:
+        Given type constructor ~C~,
+        + If ~C~ is /covariant/, ~C[A] & C[B] ~> C[A & B]~
+        + If ~C~ is /contravariant/, ~C[A] & C[B] ~> C[A | B]~
+
+***** TODO Erasure
+      TODO TODO TODO
+
+***** Relationship with Compound Type (~with~)
+      - =from Jian=
+        ~A & B~ is different from the ~A with B~ in Scala 2.
+        The latter is not commutative!
+
+      - /Intersection types/ ~A & B~ *replace* /compound types/ ~A with B~ in
+        Scala 2.
+          For the moment, the syntax ~A with B~ is _still allowed_ and
+        *interpreted as* ~A & B~, _but its usage as a type (as opposed to in a
+        ~new~ or ~extends~ clause) will be *deprecated* and *removed* in the future._
+
 *** DONE Union types
     CLOSED: [2019-07-01 Mon 15:49]
-    The ~|~ operator creates an /union type/.
-
-    - A ~A | B~ value can be any value of type ~A~ and also any value of type ~B~.
+    A ~A | B~ value can be _any value_ of type ~A~ _and_ also _any value_ of
+    type ~B~.
 
     - Example:
       #+begin_src scala
@@ -142,17 +187,15 @@
             case UserName(name) => lookupName(name)
             case Password(hash) => lookupPassword(hash)
           }
-
           // ...
         }
       #+end_src
 
     - /Union types/ are _DUALS of /intersection types/.
-      ~|~ is *commutative*: ~A | B~ is the _SAME type_ as ~B | A~.
 
-    - The compiler will assign a /union type/ to an expression *only if such                                               [S P A C E M A C S]
+    - ~|~ is *commutative*: ~A | B~ is the _SAME type_ as ~B | A~.
 
- a
+    - The compiler will assign a /union type/ to an expression *only if such a
       type is _EXPLICITLY given_.*
       #+begin_src scala
         val password = Password(123)
@@ -167,8 +210,65 @@
         val either: Password | UserName = if (true) name else password
           // val res2: Password | UserName = UserName(Eve)
       #+end_src
-      + ~Object & Product~ is a /supertype/ of ~UserName~ and ~Product~,
+      + ~Object & Product~ is a /supertype/ of ~UserName~ and ~Password~,
         BUT NOT the /least supertype/ ~Password | UserName~
+        * =from Jian= In the document, there is is a typo (not wrong, but not very
+          meaningful): _Object & Product is a supertype of UserName and ~Product~._
+          TODO Create a PR to correct this!
+
+**** TODO More Details
+***** Syntax
+      Syntactically, /union types/ follow the same rules as /intersection types/,
+      BUT have a _LOWER precedence_.
+
+****** Intersection with pattern matching syntax - =IMPORTANT=
+       ~|~ is also used in /pattern matching/ to _SEPARATE_ /pattern alternatives/ and
+       *has _LOWER PRECEDENCE than_ ~:~ as used in /typed patterns/,* this means that:
+       #+begin_src scala
+         case _: A | B => ...
+
+         // is still equivalent to:
+         case (_: A) | B => ...
+
+         // and NOT to:
+         case _: (A | B) => ...
+       #+end_src
+
+***** Subtyping Rules
+      - ~A~ is always a subtype of ~A | B~ for all ~A~, ~B~.
+
+      - If ~A <: C~ and ~B <: C~ then ~A | B <: C~.
+
+      - Like ~&~, ~|~ is /commutative/ and /associative/:
+        #+begin_src text
+          A | B       =:= B | A
+          A | (B | C) =:= (A | B) | C
+        #+end_src
+
+      - ~&~ _is distributive over ~|~:_
+        #+begin_src text
+          A & (B | C) =:= A & B | A & C
+        #+end_src
+
+      - From these rules it follows that: TODO TODO TODO
+        *the /least upper bound (lub)/ of a set of type is the union of these
+        types.*
+
+        + This *replaces* the definition of /least upper bound/ in the Scala 2
+          specification. TODO
+
+***** TODO Motivation - TODO NOTE, TODO Re-READ
+***** TODO Join of a union type - TODO ???
+****** Example
+
+***** TODO Type inference
+****** Example
+
+***** TODO Members
+****** Example
+
+***** Exhaustivity checking
+***** TODO Erasure
 
 *** DONE Type lambdas
     CLOSED: [2019-07-01 Mon 15:55]
@@ -299,7 +399,7 @@
       + The _color values_ are members of ~Color~'s /companion object/.
 
 **** DONE Parameterized enums
-     CLOSED: [2019-07-01 Mon 17:01]
+     CLOSED: [2019-11-10 Sun 22:12]
      /Enums/ CAN BE _parameterized_:
      #+begin_src scala
        enum Color(val rgb: Int) {
@@ -312,10 +412,11 @@
      _EXPLICIT_ ~extends~ /clause/.
 
 **** DONE Methods defined for enums
-     CLOSED: [2019-07-01 Mon 17:07]
-     The values of an /enum/ correspond to _UNIQUE integers_.
-     The _integer_ associated with an /enum value/ is returned by its ~ordinal~
-     /method/.
+     CLOSED: [2019-11-10 Sun 22:12]
+     - The values of an /enum/ correspond to _UNIQUE integers_.
+
+     - The _integer_ associated with an /enum value/ is returned by its ~ordinal~
+       /method/.
 
      - Example:
        #+begin_src scala
@@ -338,7 +439,7 @@
        #+end_src
 
 **** DONE User-defined members of enums
-     CLOSED: [2019-07-01 Mon 17:11]
+     CLOSED: [2019-11-10 Sun 22:12]
      It is _possible_ to add your own definitions to an /enum/.
 
      - Example:
@@ -576,28 +677,183 @@
          to migrate from one to the other.
 
 *** Given Instances
-**** Anonymous Given Instances
-**** Alias Givens
-**** Given Instance Initialization
-**** Syntax
+    /Given instances/ (or, simply, "givens") define "canonical" values of certain
+    types that serve for /synthesizing arguments/ to /given clauses/.
+    =from Jian= /given clauses/ describes a requirement to /given instances/.
 
-*** Given Clauses
-   *Given Parameters*
+    - Example:
+      #+begin_src scala
+        trait Ord[T] {
+          def compare(x: T, y: T): Int
+
+          def (x: T) < (y: T) = compare(x, y) < 0
+          def (x: T) > (y: T) = compare(x, y) > 0
+        }
+
+        given intOrd: Ord[Int] {
+          def compare(x: Int, y: Int) =
+            if (x < y) -1 else if (x > y) +1 else 0
+        }
+
+        given listOrd[T](given ord: Ord[T]): Ord[List[T]] {
+          def compare(xs: List[T], ys: List[T]): Int = (xs, ys) match {
+            case (Nil, Nil) => 0
+            case (Nil, _)   => -1
+            case (_, Nil)   => +1
+            case (x :: xs1, y :: ys1) =>
+              val fst = ord.compare(x, y)
+              if (fst != 0) fst else xs1.compareTo(ys1)
+          }
+        }
+      #+end_src
+      + This code defines a /trait/ ~Ord~ (typeclass) with two /given instances/.
+
+      + ~(given ord: Ord[T])~ clause in ~listOrd~ defines an /implicit parameter/.
+        TODO /given clauses/ are further explained in the next section.
+
+**** Anonymous Given Instances
+     The name of a given instance can be left out.
+     #+begin_src scala
+       given Ord[Int] { /* ... */ }
+       given [T](given Ord[T]): Ord[List[T]] { /* ... */ }
+     #+end_src
+
+**** Alias Givens
+     An alias can be used to define a given instance that is equal to some expression. E.g.:
+     #+begin_src scala
+       given global: ExecutioinContext = new ForkJoinPool()
+     #+end_src
+     The _initialization rule_ is described in the next section.
+
+     - /Alias givens/ can be anonymous, e.g.
+       #+begin_src scala
+         given Position = enclosingTree.position
+         given (given outer: Context): Context = outer.withOwner(currentOwner)
+       #+end_src
+
+     - An /alias given/ can have /type parameters/ and /given clauses/ just like
+       any other /given instance/, _but it can ONLY implement a single type._
+       =from Jian= Because it is an alias -- a name or concrete thing, not a
+                   general instances.
+
+**** Given Instance Initialization - =IMPORTANT=
+     A given instance without type parameters or given clause is initialized
+     on-demand, the first time it is accessed.
+     - It is _NOT required to ENSURE_ /safe publication/, which means that
+       DIFFERENT /threads/ might create DIFFERENT /instances/ for the SAME
+       /given definition/.
+
+     - If a /given definition/ has /type parameters/ or a /given clause/, a *fresh*
+       instance is created _for EACH reference_.
+
+**** TODO Syntax - TODO
+     TODO ??? TODO ??? TODO
+     The identifier ~id~ can be omitted _only if_ (???)
+     - some types are implemented
+       OR
+     - the template body defines at least one extension method.
+
+*** TODO Given Clauses
+   # Given Parameters
 **** Anonymous Given Clauses
 **** Inferring Complex Arguments
 **** Multiple Given Clauses
 **** Summoning Instances
 **** Syntax
 
-*** Context Bounds
-**** Context Bounds
-**** Syntax
+*** DONE Context Bounds
+    CLOSED: [2019-11-12 Tue 02:20]
+    A /context bound/ is a *SHORTHAND* for expressing the common pattern (a.k.a
+    typeclass pattern) of an /implicit parameter/ that depends on a /type parameter/.
 
-*** Given Imports
-**** Importing By Type
-**** Migration
+**** Context Bounds
+     - The implicit parameter(s) *generated from* /context bounds/ *come last* in
+       the definition of the containing /method/ or /class/. E.g.
+       #+begin_src scala
+         def f[T: C1 : C2, U: C3](x: T)(given y: U, z: V): R
+
+         // would expand to
+
+         def f[T, U](x: T)(given y: U, z: V)(given C1[T], C2[T], C3[U]): R
+       #+end_src
+
+     - /Context bounds/ can be combined with /subtype bounds/.
+       If both are present, /subtype bounds/ *come first*, e.g.
+       ~def g[T <: B : C](x: T):R = ...~
+
+**** Syntax
+     #+begin_src text
+       TypeParamBounds ::= [SubtypeBounds] {ContextBound}
+       ContextBound    ::= ':' Type
+     #+end_src
+
+*** DONE Given Imports
+    CLOSED: [2019-11-13 Wed 14:44]
+    A _special form_ of /import wildcard selector/ is used to IMPORT /given
+    instances/.
+    - Example:
+      #+begin_src scala
+        object A {
+          class TC
+          given tc: TC
+          def f(given TC) = ???
+        }
+
+        object B {
+          import A._
+          import A.given
+          // ...
+        }
+      #+end_src
+      + In Dotty, ~import A._~ import all members of ~A~ *except* the /given instances/.
+
+      + Merge the two import clauses: ~import A.{given, _}~
+
+    - There are _TWO_ main benefits arising from these rules:
+      + It is made clearer where /givens/ in scope are coming from.
+
+      + Separate import not givens and givens.
+        This is particularly important since /givens/ can be ANONYMOUS, so the
+        usual recourse of using /named imports/ is NOT practical.
+
+**** DONE Importing By Type
+     CLOSED: [2019-11-13 Wed 14:37]
+     Since /givens/ can be _anonymous_ it is _NOT always practical to import them
+     by their name_, and /wildcard imports/ are typically used instead.
+       /By-type imports/ provide a _MORE SPECIFIC alternative_ to /wildcard imports/,
+     which makes it clearer what is imported.
+
+     - Example:
+       + ~import A.{given TC}~
+       + ~import A.{given T1, given T2, ..., given Tn}~
+       + ~import A.{given Ordering[?]}~
+       + /By-type imports/ can be mixed with /by-name imports/.
+         If BOTH are present in an import clause, *by-type imports come last*.
+         ~import A.{im, given Ordering[?]}~
+
+     - /Bounded wildcard selectors/ *also work* for _normal imports and exports_.
+       For instance,
+       #+begin_src scala
+         enum Color {
+           case Red, Green, Blue, Megenta
+
+           def isPrimary(c: Color): Boolean = ...
+         }
+
+         // Export all four `Color` values, but leaves the `isPrimary` method alone.
+         export Color.{_: Color}
+       #+end_src
+
+**** DONE Migration
+     CLOSED: [2019-11-13 Wed 14:42]
+     TODO NOTE
+**** DONE Syntax
+     CLOSED: [2019-11-13 Wed 14:44]
+     TODO NOTE
 
 *** Extension Methods
+    ## 0.20.0 version #
+
 **** Translation of Extension Methods
 **** Translation of Calls to Extension Methods
 **** Given Instances for Extension Methods
@@ -606,12 +862,71 @@
 **** Generic Extensions
 **** Syntax
 
-*** Implementing Typeclasses
+*** DONE Implementing Typeclasses
+    CLOSED: [2019-11-13 Wed 14:27]
+    /Given instances/, /extension methods/ and /context bounds/ allow a concise and
+    natural expression of /typeclasses/.
+
+    - /Typeclasses/ are just /traits/ with canonical implementations defined by
+      /given instances/.
+
+    - Here are some examples of standard typeclasses:
+
 **** Semigroups and monoids
+     #+begin_src scala
+       trait SemiGroup[T] {
+         def (x: T) combine (y: T): T
+       }
+
+       trait Monoid[T] extends SemiGroup[T] {
+         def unit: T
+       }
+
+       object Monoid {
+         def apply[T](given Monoid[T]) = summon[Monoid[T]]
+       }
+
+       given Monoid[String] {
+         def (x: String) combine (y: String): String = x.concat(y)
+         def unit: Int = 0
+       }
+
+       def sum[T: Monoid](xs: List[T]): T =
+         xs.foldLeft(Monoid[T].unit)(_.combine(_))
+     #+end_src
+
 **** Functors and monads
+     #+begin_src scala
+       trait Functor[F[_]] {
+         def [A, B](x: F[A]) map (f: A => B): F[B]
+       }
+
+       trait Monad[F[_]] extends Functor[F] {
+         def [A, B](x: F[A]) flatMap (f: A => F[B]): F[B]
+         def [A, B](x: F[A]) map (f: A => B) = x.flatMap(f `andThen` pure)
+
+         def pure[A](x: A): F[A]
+       }
+
+       given listMonad: Monad[List] {
+         def [A, B](xs: List[A]) flatMap (f: A => List[B]): List[B] =
+           xs.flatMap(f)
+
+         def pure[A](x: A): List[A] =
+           List(x)
+       }
+
+       given readerMonad[Ctx]: Monad[[X] =>> Ctx => X] {
+         def [A, B](r: Ctx => A) flatMap (f: A => Ctx => B): Ctx => B =
+           ctx => f(r(ctx))
+
+         def pure[A](x: A): Ctx => A =
+           ctx => x
+       }
+     #+end_src
 
 *** Typeclass Derivation
-    *Type class Derivation*
+    # Type class Derivation
 **** Types supporting ~derives~ clauses
 **** Type classes supporting automatic deriving
 ***** How to write a type class ~derived~ method using low level mechanisms
@@ -656,7 +971,7 @@
 
 **** Implementation Status and Timeline
 
-** METAPROGRAMMING
+** TODO METAPROGRAMMING
 *** DONE Overview
     CLOSED: [2019-06-24 Mon 02:35]
     The following fundamental facilities:
@@ -792,7 +1107,7 @@
       - ~S~ is the type of the successor of some singleton type.
         For example, ~S[1]~ is the /singleton type/ ~2~.
 
-***** ~eraseValue~
+***** ~erasedValue~
       - The ~erasedValue[T]~ function in ~scala.comiletime.erasedValue~ is not
         implemented -- it would always raise a ~NotImplementedError~ exception
         when called.
@@ -865,7 +1180,7 @@
             fail(indentity("foo"))  // error: failed on: indentity("foo")
           #+end_src
 
-**** DONE Implicit Matches
+**** DONE Summoning Implicits Selectively
      CLOSED: [2019-06-24 Mon 16:46]
      TODO NOTE
      TODO NOTE
@@ -1244,7 +1559,10 @@
        val b: String = defaultOf("string")
      #+end_src
 
+**** TODO Defining a macro and using it in a single project
+
 *** TODO Staging
+    * Multi-Stage Programming
 **** API
 **** Create a new Dotty project with staging enabled
 **** Example
@@ -1474,6 +1792,47 @@
 ***** Type Checking
 ***** Realtionship to SIP 35
 
+*** TODO Open Classes
+    An ~open~ /modifier/ on a class signals that the class _is planned for
+    extensions_.
+    - Example:
+      #+begin_src scala
+        // File Writer.scala
+        package p
+
+        open class Writer[T] {
+          /** Sends to stdout, can be overridden */
+          def send(x: T) = println(x)
+
+          /** Sends all arguments using `send` */
+          def sendAll(xs: T*) = xs.foreach(send)
+        }
+
+        // File encryptedWriter.scala
+        package p
+
+        class EncryptedWriter[T: Encryptable] extends Writer[T] {
+          override def send(x: T) = super.send(encrypt(x))
+        }
+      #+end_src
+
+    - An /open class/ typically comes with
+      *some documentation that describes the internal calling patterns between
+      methods of the class as well as hooks that can be overridden.*
+      + We call this the /extension contract/ of the /class/.
+        It is DIFFERENT FROM the /external contract/ between a /class/ and its
+        users.
+
+    - /Classes/ that are _not open_ *can still be extended*, *but only if* at least
+      one of two alternative conditions is met:
+      + TODO
+      + TODO
+
+**** Motivation
+**** Details
+**** Relationship with ~sealed~
+**** Migration
+
 *** Parameter Untupling
     For data like ~val xs: List[(Int, Int)]~,
     - In Scala 2.x,
@@ -1543,14 +1902,14 @@
      - With option ~-rewrite -new-syntax~, rewrite old with new
      - With option ~-rewrite -old-syntax~, rewrite new with old
 
-*** Significant Indentation
+*** TODO Optional Braces
 **** Spaces vs Tabs
 **** Indentation and Braces
-**** Indentation Marker ~:~
 **** Special Treatment of Case Clauses
 **** The End Marker
 **** Example
 **** Settings and Rewrites
+**** Variant: Indentation Marker ~:~
 
 ** OTHER CHANGED FEATURES
 *** Numeric Literals
@@ -1652,15 +2011,16 @@
 *** Dropped: Package Objects
 *** Dropped: Early Initializers
 *** Dropped: Class Shadowing
-*** Dropped: Limit 22
+*** TODO Dropped: Limit 22
 *** Dropped: XML Literals
-*** Dropped: Symbol Literals
+*** TODO Dropped: Symbol Literals
 *** Dropped: Auto-Application
 **** Migrating code
 **** Reference
 
 *** Dropped: Weak Conformance
 *** Dropped: Nonlocal Returns
+*** Dropped: ~private[this]~ and ~protected[this]~ Quanlifier
 
 * CONTRIBUTING
 ** Contribute Knowledge
@@ -1750,6 +2110,7 @@
 *** Using contexts
 
 ** Dotc vs Scalac
+   # Differences between Dotc and Scalac
 *** Denotation
 **** Denotation vs. SymDenotation
 **** Implicit Conversion
@@ -1777,15 +2138,16 @@
 **** Status of ~#~
 
 ** Overall Structure
+   # Dotty Overall Structure
 *** Package Structure
 *** Contexts
 *** Compiler Phases
 
 ** Periods
-   *Dotc's concept of time*
+   # Dotc's concept of time*
 
 ** Syntax
-   *Scala Syntax Summary*
+   # Scala Syntax Summary
 *** Lexical Syntax
 *** Keywords
 **** Regular keywords
@@ -1809,10 +2171,10 @@
 **** Type rebasing
 
 *** Type caching
-    TODO
+    # TODO
 
 *** Type inference via constraint solving
-    TODO
+    # TODO
 
 ** Dotty Internals 1: Trees & Symbols (Meeting Notes)
 *** Entry point
@@ -1825,7 +2187,6 @@
 
 **** Creating trees
 **** Meaning of trees
-
 **** Errors
 **** Assignment
 
