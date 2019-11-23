@@ -310,16 +310,24 @@
 
 *** DONE Records and Rows
     CLOSED: [2019-07-29 Mon 15:36]
-    - In Spark, each /row/ in a ~DataFrame~ is a single /record/.
+    - In Spark, each /row/ in a ~DataFrame~ is _a single /record/._
 
-    - Get the first /row/ form a ~DataFrame~: ~df.first~
+    - Spark manipulates ~Row~ objects using /column expressions/ in order to
+      produce usable values.
+
+    - Internal representation of ~Row~ is *arrays of bytes*.
+      The interface of the internal representation is _NEVER_ shown to users --
+      we *only* use /column expressions/ to manipulate them.
+
+    - Get the first /row/ form a ~DataFrame~:
+      ~df.first~
 
 **** DONE Creating Rows
      CLOSED: [2019-07-29 Mon 15:36]
      - Only a ~DataFrame~ has a /schema/.
        /Row/ doesn't have a /schema/.
        When you create a /row/ manually, you MUST specify the values in the same
-       order as the /schema/.
+       order as the /schema/ of the DataFrame to which they might be appended.
        #+begin_src scala
          import org.apache.spark.sql.Row
          val myRow = Row("Hello", null, 1, false)
@@ -340,31 +348,36 @@
          myRow[2]
        #+end_src
 
-*** TODO DataFrame Transformations
+     - You can also explicitly return a set of Data in the corresponding JVM objects
+       by using the /Dataset APIs/. TODO This is covered in Chapter 11.
+
+*** DONE DataFrame Transformations
+    CLOSED: [2019-11-03 Sun 18:03]
     - Some fundamental objectives that breaked down into several core operations:
       + Add /rows/ or /columns/
       + Remove /rows/ or /columns/
       + Transform a /row/ into a /column/ (or vice versa)
       + Change the order of /rows/ based on the values in /columns/
 
-**** TODO Creating DataFrames
+**** DONE Creating DataFrames
+     CLOSED: [2019-11-03 Sun 16:50]
      - Create ~DataFrame~'s from _raw data sources_.
        TODO This is covered extensively in Chapter 9.
+       + Example:
+         #+begin_src scala
+           // in Scala
+           val df = spark.read.format("json")
+             .load("/data/flight-data/json/2015-summary.json")
 
-     - Example:
-       #+begin_src scala
-         // in Scala
-         val df = spark.read.format("json")
-           .load("/data/flight-data/json/2015-summary.json")
+           df.createOrReplaceTempView("dfTable")
+         #+end_src
+         for illustration purposes later in this chapter, we will also register
+         this as a temporary view so that we can query it with SQL and show off
+         basic transformations in SQL, as well
+         * =from Jian= Why do we need ~createOrReplaceTempView~ here ??? TODO
 
-         df.createOrReplaceTempView("dfTable")
-       #+end_src
-       for illustration purposes later in this chapter, we will also register
-       this as a temporary view so that we can query it with SQL and show off
-       basic transformations in SQL, as well
-
-     - Create ~DataFrame~'s on the fly by taking a set of /rows/ and coverting them
-       to a ~DataFrame~:
+     - Create ~DataFrame~'s _on the fly_ by taking a set of /rows/ and coverting
+       them to a ~DataFrame~:
        #+begin_src scala
          // in Scala
          import org.apache.spark.sql.Row
@@ -387,7 +400,7 @@
        recommended for production use cases.
 
 **** DONE ~select~ and ~selectExpr~
-     CLOSED: [2019-07-30 Tue 18:00]
+     CLOSED: [2019-11-03 Sun 17:23]
      - ~select~ and ~selectExpr~ allow you to do the ~DataFrame~ equivalent of
        SQL queries on a table of data:
        #+begin_src sql
@@ -406,21 +419,56 @@
      - You can refer to columns in a number of different ways
        #+begin_src scala
          import org.apache.spark.sql.functions.{expr, col, column}
-         df.select(
-           df.col("DEST_COUNTRY_NAME"),
-           col("DEST_COUNTRY_NAME"),
-           column("DEST_COUNTRY_NAME"),
-           'DEST_COUNTRY_NAME,
-           $"DEST_COUNTRY_NAME",
-           expr("DEST_COUNTRY_NAME"))
+         df.select(df.col("DEST_COUNTRY_NAME"),
+                   col("DEST_COUNTRY_NAME"),
+                   column("DEST_COUNTRY_NAME"),
+                   $"DEST_COUNTRY_NAME",
+                   expr("DEST_COUNTRY_NAME"),
+                   'DEST_COUNTRY_NAME)
            .show(2)
        #+end_src
-       However, you can't mix ~Column~ objects and strings -- mix them is a common
+       However, you *CAN'T* mix ~Column~ objects and strings -- mix them is a common
        error, and it will result in a compiler error.
+       + ~expr~, as we mentioned, is the _most flexible_ reference.
+         =from Jian=
+         However, its too dynamic!!!
+
+       + =from Jian=
+         *CAUTION*
+         Dotty will drop /symbol literal/ and in the future ~Symbol~ class will
+         be dropped!!!
+
+     - ~selectExpr~ is a shorthand for doing a ~select~ followed by a series of
+       ~expr~. =from Jian= I don't like ~selectExpr~ -- NO /type safety/
+       + Non-Aggregations:
+         #+begin_src scala
+           df.selectExpr("DEST_COUNTRY_NAME as newColumnName", "DEST_COUNTRY_NAME")
+
+           // Create a new DataFrame with a new column "withinCountry"
+           df.selectExpr(
+             "*", // include all original columns
+             "(DEST_COUNTRY_NAME = ORIGIN_COUNTRY_NAME) as withinCountry")
+
+           // -- in SQL
+           // SELECT *, (DEST_COUNTRY_NAME = ORIGIN_COUNTRY_NAME) as withinCountry
+           // FROM dfTable
+           // LIMIT 2
+         #+end_src
+
+       + Aggregations:
+         With select expression, we can also specify aggregations over the
+         entire DataFrame by taking advantage of the functions that we have.
+         These look just like what we have been showing so far:
+         #+begin_src scala
+           // in Scala
+           df.selectExpr("avg(count)", "count(distinct(DEST_COUNTRY_NAME))")
+
+           // -- in SQL
+           // SELECT avg(count), count(distinct(DEST_COUNTRY_NAME)) FROM dfTable LIMIT 2
+         #+end_src
 
 **** DONE Converting to Spark Types (Literals)
-     CLOSED: [2019-07-30 Tue 15:25]
-     TODO NOTE
+     CLOSED: [2019-11-03 Sun 17:26]
      #+begin_src scala
        import org.apache.spark.sql.functions.lit
 
@@ -429,9 +477,13 @@
        // -- in SQL
        // SELECT *, 1 as One FROM dfTable LIMIT 2
      #+end_src
+     + =from Jian= You can also the ~cast~ method to explicitly specify the type
+       of /literals/.
 
 **** DONE Adding Columns
-     CLOSED: [2019-07-30 Tue 15:30]
+     CLOSED: [2019-11-03 Sun 17:30]
+     There is a formal and canonical way to add a new column to a ~DataFrame~:
+     =from Jian= I _prefer this way_ rather than using ~select~ or ~selectExpr~!
      - Set one value
        #+begin_src scala
          df.withColumn("numberOne", lit(1))
@@ -442,53 +494,72 @@
 
      - Set one boolean value based on equality check
        #+begin_src scala
-         df.withColumn("withinCountry", expr("ORIGIN_COUNTRY_NAME == DEST_COUNTRY_NAME"))
+         df.withColumn("withinCountry", col("ORIGIN_COUNTRY_NAME") === col("DEST_COUNTRY_NAME"))
        #+end_src
 
-     - Copy a column and give it a new name:
+     - Copy a column and give it a name:
        #+begin_src scala
          df.withColumn("Destination", expr("DEST_COUNTRY_NAME")).columns
        #+end_src
 
 **** DONE Renaming Columns
-     CLOSED: [2019-07-30 Tue 17:34]
+     CLOSED: [2019-11-03 Sun 17:32]
      ~df.withColumnRenamed("DEST_COUNTRY_NAME", "dest")~
+     Here ~"DEST_COUNTRY_NAME"~ is the old name, and ~"dest"~ is the new name!
+     No copy, just rename!
 
-**** TODO Reserved Characters and Keywords
+**** DONE Reserved Characters and Keywords
+     CLOSED: [2019-11-03 Sun 17:36]
+     Sometimes we need escape (~`~), for exmaple:
+     #+begin_src scala
+       dfWithLongColName.selectExpr("`This Long Column-Name`",
+                                    "`This Long Column-Name` as `new col`")
+     #+end_src
+
 **** DONE Case Sensitivity
-     CLOSED: [2019-07-30 Tue 17:45]
+     CLOSED: [2019-11-03 Sun 17:41]
      _By default, Spark is case insensitive_,
      but you can configure it to make it _case sensitive_.
      #+begin_src sql
        set spark.sql.caseSensitive true
      #+end_src
+     + In a /session/: ~spark_session.sql('set spark.sql.caseSensitive=true')~
+     + Globally:
+       Add =spark.sql.caseSensitive: True= in =$SPARK_HOME/conf/spark-defaults.conf=
+       * =from Jian= TODO this is from stackoverflow, and I don't understand!
+         It just has to be done in the configuration of the Spark driver as well,
+         not the master or workers.
 
 **** DONE Removing Columns
-     CLOSED: [2019-07-30 Tue 17:47]
+     CLOSED: [2019-11-03 Sun 17:41]
      #+begin_src scala
        dr.drop("ORIGIN_COUNTRY_NAME", "DEST_COUNTRY_NAME")
      #+end_src
 
 **** DONE Changing a Column's Type (cast)
-     CLOSED: [2019-07-30 Tue 17:48]
+     CLOSED: [2019-11-03 Sun 17:42]
      #+begin_src scala
-       df.withColumn("count2", col("count").cast("long"))
+       df.withColumn("count2", col("count").cast(LongType))
      #+end_src
 
 **** DONE Filtering Rows
-     CLOSED: [2019-07-30 Tue 17:52]
+     CLOSED: [2019-11-03 Sun 17:45]
      #+begin_src scala
        df.filter(col("count") < 2)
 
-       df.where("count < 2")
+       df.where(col("count") < 2)
      #+end_src
      - You can also chain filters and make AND filters.
          Spark will combine them together and run -- then there is no need to
        write multiple conditions in one expression string, which will reduce the
        readibility.
+       #+begin_src scala
+         df.where(col("count") < 2)
+           .where(col("ORIGIN_COUNTRY_NAME") =!= "Croatia")
+       #+end_src
 
 **** DONE Getting Unique Rows
-     CLOSED: [2019-07-30 Tue 17:57]
+     CLOSED: [2019-11-03 Sun 17:46]
      Get unique rows base on some columns:
      #+begin_src scala
        df.select("ORIGIN_COUNTRY_NAME", "DEST_COUNTRY_NAME").distinct()
@@ -499,15 +570,56 @@
 
 **** TODO Random Samples
 **** TODO Random Splits
-**** TODO Concatenating and Appending Rows (Union)
-**** TODO Sorting Rows
+**** DONE Concatenating and Appending Rows (Union)
+     CLOSED: [2019-11-03 Sun 17:53]
+     - *WARNING*
+       ~union~ are _currently performed based ON location, NOT ON the schema._
+       This means that columns will not automatically line up the way you think
+       they might.
+       + =from Jian= Use ~unionByName~!
+
+**** DONE Sorting Rows
+     CLOSED: [2019-11-03 Sun 18:01]
+     Use ~sort~ or ~orderBy~. They are equivalent operations that work the *EXACT*
+     same way.
+     #+begin_src scala
+       df.sort("count", "DEST_COUNTRY_NAME")
+       df.orderBy("count", "DEST_COUNTRY_NAME")
+       df.orderBy(col("count"), col("DEST_COUNTRY_NAME"))
+     #+end_src
+
+     - You can also specify _ascending_ or _descending_.
+       _ascending_ is the default.
+       #+begin_src scala
+         import org.apache.spark.sql.functions.{desc, asc}
+
+         df.orderBy(expr("count desc"))
+         df.orderBy(desc("count"), asc("DEST_COUNTRY_NAME"))
+       #+end_src
+       + An advanced tip is to use to specify where you would like your ~null~
+         values to appear in an ordered DataFrame:
+         * ~asc_nulls_first~
+         * ~desc_nulls_first~
+         * ~asc_nulls_last~
+         * ~desc_nulls_last~
+
+     - TODO *For optimization purposes*,
+       it's sometimes advisable to sort _within each partition_ BEFORE another set
+       of transformations. You can use the ~sortWithinPartitions~ method to do this:
+       #+begin_src scala
+         // in Scala
+         spark.read.format("json").load("/data/flight-data/json/*-summary.json")
+           .sortWithinPartitions("count")
+       #+end_src
+       TODO
+       TODO We will discuss this more when we look at tuning and optimization in Part III.
+
 **** DONE Limit
      CLOSED: [2019-07-30 Tue 17:59]
      ~.limit(n)~ /method/
 
 **** TODO Repartition and Coalesce
-**** DONE Collecting Rows to the Driver
-     CLOSED: [2019-08-06 Tue 16:56]
+**** TODO Collecting Rows to the Driver
      - ~toLocalIterator~ allows you to iterate over the entire dataset
        partition-by-partition in a serial manner.
 
@@ -525,10 +637,9 @@
     This chapter covered basic operations on /DataFrames/.
 
 ** TODO Chapter 6. Working with Different Types of Data
-   Chapter 5 presented basic ~DataFrame~ concepts and abstractions. This chapter
-   covers building expressions, which are the bread and butter of Spark's
-   structured operations. We also review working with a variety of different
-   kinds of data, including the following:
+   This chapter covers _building expressions_, which are the bread and butter of
+   Spark's structured operations. We also review working with a variety of
+   different kinds of data, including the following:
    - Booleans
    - Numbers
    - Strings
@@ -540,23 +651,39 @@
 *** TODO Where to Look for APIs
 *** DONE Converting to Spark Types
     CLOSED: [2019-07-30 Tue 18:38]
-    ~lit~
+    For literals, use ~lit~.
 
-*** TODO Working with Booleans
-    - xx
+*** DONE Working with Booleans
+    CLOSED: [2019-11-04 Mon 01:58]
+    Booleans are essential when it comes to data analysis because they are the
+    foundation for all filtering.
 
-    - *WARNING*
-      + TODO Scala's ~==~ and ~===~ ???
+    - In Spark, you should always chain together and filters as a sequential filter.
 
-      + Use ~===~ or ~=!=~.
-        Or use ~not~ function and ~equalTo~ /method/.
+    - Example:
+      #+begin_src scala
+        // in Scala
+        val DOTCodeFilter = col("StockCode") === "DOT"
+        val priceFilter = col("UnitPrice") > 600
+        val descripFilter = col("Description").contains("POSTAGE")
 
-    - xx
+        df.withColumn("isExpensive", DOTCodeFilter.and(priceFilter.or(descripFilter)))
+          .where("isExpensive")
+          .select("unitPrice", "isExpensive")
+      #+end_src
+      #+begin_src sql
+        -- in SQL
+        SELECT UnitPrice, (StockCode = 'DOT' AND
+                           (UnitPrice > 600 OR instr(Description, "POSTAGE") >= 1)) as isExpensive
+        FROM dfTable
+        WHERE (StockCode = 'DOT' AND (UnitPrice > 600 OR instr(Description, "POSTAGE") >= 1))
+      #+end_src
 
     - *WARNING*
       null-safe equaivalence test:
       #+begin_src scala
-        df.where(col("Description") euNullSafe "hello")
+        df.where(col("Description") eqNullSafe "hello")
+        df.where(col("Description") <=> "hello")
       #+end_src
 
 *** DONE Working with Numbers
@@ -659,33 +786,107 @@
 **** Regular Expressions
 
 *** TODO Working with Dates and Timestamps
-*** TODO Working with Nulls in Data
-**** Coalesce
-**** ifnull, nullIf, nvl, and nvl2
-**** drop
-**** fill
-**** replace
+    - xx
 
-*** TODO Ordering
-*** TODO Working with Complex Types
+    - xx
+
+    - xx
+
+*** DONE Working with Nulls in Data
+    CLOSED: [2019-11-04 Mon 02:20]
+    - *As a best practice*,
+      _you should always use ~null~'s to REPRESENT MISSING or EMPTY data in your
+      DataFrames._
+      + Rationale:
+        Spark can optimize working with null values more than it can if you use
+        empty strings or other values.
+
+    - The primary way of interacting with ~null~ values, at DataFrame scale, is to
+      use the ~.na~ subpackage on a DataFrame.
+
+    - *WARNING*
+      TODO TODO TODO
+
+    - There are *TWO* things you can do with null values:
+      + you can explicitly drop nulls
+        OR
+      + you can fill them with a value (_globally_ or _on a per-column basis_)
+
+**** DONE Coalesce
+     CLOSED: [2019-11-15 Fri 18:24]
+     Use ~coalesce~ to select the first non-null value from a set of columns.
+     #+begin_src scala
+       // in Scala
+       import org.apache.spark.sql.functions.coalesce
+
+       df.select(coalesce(col("Description"), col("CustomerId")))
+     #+end_src
+
+**** TODO ifnull, nullIf, nvl, and nvl2
+     TODO TODO TODO TODO
+     - ~ifnull~
+     - ~nullIf~
+     - ~nvl~
+     - ~nvl2~
+
+**** DONE ~drop~
+     CLOSED: [2019-11-04 Mon 02:17]
+     Use ~na.drop~ to remove /rows/ that contain ~null~'s.
+     - The default is to drop any /row/ in which _any value is ~null~:_
+       #+begin_src scala
+         df.na.drop()
+         df.na.drop("any")
+       #+end_src
+
+     - Drop a row iff all values in a row are ~null~ or ~NaN~:
+       ~df.na.drop("all")~
+
+     - Apply this to certain sets of columns by passing in an array of columns:
+       #+begin_src scala
+         df.na.drop("all", Seq("StockCode", "InvoiceNo"))
+       #+end_src
+
+**** TODO ~fill~
+**** TODO ~replace~
+
+*** DONE Ordering
+    CLOSED: [2019-11-04 Mon 02:22]
+    As we discussed in Chapter 5, you use ~asc_nulls_first~, ~desc_nulls_first~,
+    ~asc_nulls_last~,or ~desc_nulls_last~ to specify where you would like your
+    ~null~ values to appear in an ordered DataFrame.
+
+*** TODO Working with Complex Types - =HIGH PRIORITY!!!=
 **** Structs
 **** Arrays
-**** split
+**** ~split~
 **** Array Length
 **** ~array_contains~
 **** ~explode~
 **** Maps
 
 *** TODO Working with JSON
-*** TODO User-Defined Functions
-*** TODO Conclusion
+*** TODO User-Defined Functions - =HIGH PRIORITY!!!=
+    - UDFs can take and return one or more columns as input. =???=
+
+    - *By default*,
+      UDFs you defined are registered as temporary functions to be used in that
+      specific /SparkSession/ or /Context/. =???=
+
+    - Although you can write UDFs in Scala, Python, or Java, *there are performance
+      considerations that you should be aware of*. TODO TODO TODO TODO
+      TODO TODO TODO TODO
+        To illustrate this, we're going to walk through exactly what happens when
+      you create UDF, pass that into Spark, and then execute code using that UDF.
+
+*** DONE Conclusion
+    CLOSED: [2019-11-04 Mon 02:23]
 
 ** Chapter 7. Aggregations
    - Aggregation :: the act of collecting something together and is a cornerstone
                     of big data analytics.
 
    - In an /aggregation/, we will specify
-     + a key or grouping
+     + a _key_ or _grouping_
 
      + an /aggregation function/ that specifies how you should _transform_ one or
        more columns.
@@ -705,10 +906,13 @@
    - Each /grouping/ returns a ~RelationalGroupedDataset~ on which we specify our
      aggregations.
 
+   - NOTE
+     Consider how exact you need an answer to be: EXACT or APPROXIMATION?
+       When performing calculations over big data, it can be quite expensive to
+     get an EXACT answer to a question.
+
    - TODO
 
-   - NOTE
-     TODO
 
 *** Aggregation Functions
     - All /aggregations/ are available as functions, in addition to the special
@@ -720,7 +924,17 @@
     - *NOTE*
       TODO
 
-**** ~count~
+**** DONE ~count~
+     CLOSED: [2019-11-04 Mon 11:39]
+     - ~count("*")~ counts all columns.
+
+     - ~count(1)~ count every row as the literal one.
+
+     - *WARNING*
+       GOTCHAS:
+       + When ~count("*")~, it takes ~null~ into account
+       + When ~count("specificColumn")~, it will *NOT* count ~null~
+
 **** ~countDistinct~
 **** ~approx_count_distinct~
 **** ~first~ and ~last~
@@ -731,7 +945,9 @@
 **** Variance and Standard Deviation
 **** skewness and kurtosis
 **** Covariance and Correlation
-**** Aggregating to Complex Types
+**** DONE Aggregating to Complex Types
+     CLOSED: [2019-11-04 Mon 14:24]
+     For example, ~collect_set~ and ~collect_list~
 
 *** Grouping
 **** Grouping with Expressions
@@ -748,8 +964,57 @@
 *** Conclusion
 
 ** Chapter 8. Joins
-*** Join Expressions
-*** Join Types
+   - /Joins/ are an essential part of nearly _ALL_ Spark workloads.
+
+   - This chapter covers
+     + not just
+       what /joins/ exist in Spark and how to use them,
+
+     + but
+       some of the basic *internals* so that you can think about _how Spark
+       actually goes about executing the join on the cluster_. This basic
+       knowledge can help you
+       * avoid running out of memory
+         and
+       * tackle problems that you could not solve before.
+
+*** DONE Join Expressions
+    CLOSED: [2019-10-17 Thu 11:31]
+    - /Join expression/ determines whether two rows should join.
+
+    - The most common /join expression/ is ~equi-join~.
+        /Join expression/ can be more sophsticated like checking whether a key exists
+      within an array when performing a join.
+
+*** TODO Join Types
+    - /Join type/ determines what should be in the result set.
+
+    - There are a variety of different /join types/ available in Spark for you to
+      use:
+      + Inner joins :: keep rows with keys that exist in the left and right datasets
+
+      + Outer joins :: keep rows with keys in either the left or right datasets
+
+      + Left outer joins :: keep rows with keys in the left dataset
+
+      + Right outer joins :: keep rows with keys in the right dataset
+
+      + Left semi joins :: keep the rows in the left, and only the left, dataset
+           where the key appears in the right dataset
+
+      + Left anti joins :: keep the rows in the left, and only the left, dataset
+           where they do not appear in the right dataset
+
+      + Natural joins :: perform a join by implicitly matching the columns between
+                         the two datasets with the same names
+
+      + Cross (or Cartesian) joins :: match every row in the left dataset with
+           every row in the right dataset
+
+    - TODO
+    - TODO
+    - TODO
+
 *** Inner Joins
 *** Outer Joins
 *** Left Outer Joins
