@@ -352,7 +352,7 @@
 *** TODO Running the Mandelbrot Plotter - 40
 *** TODO Safety Is Invisible - 41
 
-* 3. Basic types - 43
+* TODO 3. Basic types - 43
   - Rust's types serve several goals:
     + Safety
 
@@ -383,67 +383,97 @@
     + /generics/
 
   - Here's a summary of the sorts of /types/ you'll see in Rust.
-    This table shows Rust's /primitive types/, some very /common types/ from the
+    This table shows Rust's /primitive types/, some /VERY common types/ from the
     standard library, and some examples of /user-defined types/:
-    | Type                                 | Description                          | Values                               |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~i8~, ~i16~, ~i32~, ~i64~            | Signed and unsigned integers,        | ~42~, ~-5i8~, ~0x400u16~,            |
-    | ~u8~, ~u16~, ~u32~, ~u64~            | of given bit width                   | ~0o100i16~, ~20_922_789_888_000u64~, |
-    |                                      |                                      | ~b'*'~ (~u8~ byte literal)           |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~isize~, ~usize~                     | Signed and unsigned integers,        | ~137~,                               |
-    |                                      | the same size as an address on the   | ~-0b0101_0010isize~,                 |
-    |                                      | machine (32 or 64 bits)              | ~0xffff_fc00usize~                   |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~f32~, ~f64~                         | IEEE floating-point numbers,         | ~1.61803~, ~3.14f32~, ~6.0221e23f64~ |
-    |                                      | single and double precision          |                                      |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~bool~                               | Boolean                              | ~true~, ~false~                      |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~char~                               | Unicode character, 32 bits wide      | ~'*'~, ~'\n'~, ~'字'~,               |
-    |                                      |                                      | ~'\x7f'~, ~'\u{CA0}'~                |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~(char, u8, i32)~                    | Tuple: mixed types allowed           | ~('%', 0x7f, -1)~                    |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~()~                                 | "unit" (empty) tuple                 | ~()~                                 |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~struct S { x: f32, y: f32 }~        | Named-field struct                   | ~S { x: 120.0, y: 209.0 }~           |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~struct T(i32, char);~               | Tuple-like struct                    | ~T(120, 'X')~                        |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~struct E;~                          | Unit-like struct; has no fields      | ~E~                                  |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~enum Attend { OnTime, Late(u32) }~  | Enumeration, algebraic data type     | ~Attend::Late(5)~, ~Attend::OnTime~  |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~Box<Attend>~                        | Box: owning pointer to value in heap | ~Box::new(Late(15))~                 |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~&i32~, ~&mut i32~                   | Shared and mutable references:       | ~&s.y~, ~&mut v~                     |
-    |                                      | nonowning pointers that must not     |                                      |
-    |                                      | outlive their referent               |                                      |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~String~                             | UTF-8 string, dynamically sized      | ~"ラーメン: ramen".to_string()~       |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~&str~                               | Reference to str: nonowning pointer  | ~"そば: soba"~, ~&s[0..12]~          |
-    |                                      | to UTF-8 text                        |                                      |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~[f64; 4]~, ~[u8; 256]~              | Array, fixed length; elements all    | ~[1.0, 0.0, 0.0, 1.0]~,              |
-    |                                      | of same type                         | ~[b' '; 256]~                        |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~Vec<f64>~                           | Vector, varying length; elements     | ~vec![0.367, 2.718, 7.389]~          |
-    |                                      | all of same type                     |                                      |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~&[u8]~, ~&mut [u8]~                 | Reference to slice: reference to a   | ~&v[10..20]~, ~&mut a[..]~           |
-    |                                      | portion of an array or vector,       |                                      |
-    |                                      | comprising pointer and length        |                                      |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~&Any~, ~&mut Read~                  | Trait object: reference to any       | value as ~&Any~,                     |
-    |                                      | value that implements a given set    | ~&mut file~ as ~&mut Read~           |
-    |                                      | of methods                           |                                      |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | ~fn(&str, usize) -> isize~           | Pointer to function                  | ~i32::saturating_add~                |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
-    | (Closure types have no written form) | Closure                              | ~\vert{}a, b\vert{} a*a + b*b~                   |
-    |--------------------------------------+--------------------------------------+--------------------------------------|
+    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    TODO TODO TODO TODO TODO TODO =Re-READ= TODO TODO TODO TODO TODO TODO TODO TODO
+    + Signed and unsigned integers, of given bit width
+      * Types: ~i8~, ~i16~, ~i32~, ~i64~, ~u8~, ~u16~, ~u32~, ~u64~
+      * Values: ~42~, ~-5i8~, ~0x400u16~, ~0o100i16~, ~20_922_789_888_000u64~,
+                ~b'*'~ (~u8~ byte literal)
+
+    + Signed and unsigned integers, the same size as an address on the machine
+      (32 or 64 bits)
+      * Types: ~isize~, ~usize~
+      * Values: ~137~, ~-0b0101_0010isize~, ~0xffff_fc00usize~
+
+    + IEEE floating-point numbers
+      * Types: ~f32~ (single precision), ~f64~ (double precision)
+      * Values: ~1.61803~, ~3.14f32~, ~6.0221e23f64~
+
+    + Boolean
+      * Types: ~bool~
+      * Values: ~true~, ~false~
+
+    + Unicode character, 32 bits wide
+      * Types: ~char~
+      * Values: ~'*'~, ~'\n'~, ~'字'~, ~'\x7f'~, ~'\u{CA0}'~
+
+    + Tuple: mixed types allowed
+      * Example type: ~(char, u8, i32)~
+      * Example type value: ~('%', 0x7f, -1)~
+
+    + "unit" (empty) tuple
+      * Type: ~()~
+      * Singleton value: ~()~
+
+    + Named-field struct
+      * Example type: ~struct S { x: f32, y: f32 }~
+      * Example type value: ~S { x: 120.0, y: 209.0 }~
+
+    + Tuple-like struct
+      * Example type: ~struct T(i32, char);~
+      * Example type value: ~T(120, 'X')~
+
+    + Unit-like struct; has no fields
+      * Example type: ~struct E;~
+      * Example type value: ~E~
+
+    + Enumeration, algebraic data type
+      * Example type: ~enum Attend { OnTime, Late(u32) }~
+      * Example type value: ~Attend::Late(5)~, ~Attend::OnTime~
+
+    + ~Box~: owning pointer to value in heap
+      * Example type: ~Box<Attend>~
+      * Example type value: ~Box::new(Late(15))~
+
+    + /Shared and mutable references/
+      nonowning pointers that must not outlive their referent
+      * Example type: ~&i32~, ~&mut i32~
+      * Example type value: ~&s.y~, ~&mut v~
+
+    + /UTF-8 string/, _DYNAMICALLY SIZED_
+      * Type: ~String~
+      * Values: ~"ラーメン: ramen".to_string()~
+
+    + Reference to ~str~: *nonowning* /pointer/ to UTF-8 text
+      * Type: ~&str~
+      * Values: ~"そば: soba"~, ~&s[0..12]~
+
+    + Array, fixed length; elements all of same type
+      * Example types: ~[f64; 4]~, ~[u8; 256]~
+      * Example type values: ~[1.0, 0.0, 0.0, 1.0]~, ~[b' '; 256]~
+
+    + Vector, varying length; elements all of same type
+      * Example type: ~Vec<f64>~
+      * Example type values: ~vec![0.367, 2.718, 7.389]~
+
+    + Reference to slice: reference to a portion of an array or vector, comprising
+      pointer and length
+      * Types: ~&[u8]~, ~&mut [u8]~
+      * Values: ~&v[10..20]~, ~&mut a[..]~
+
+    + Trait object: reference to any value that implements a given set of methods
+      * ~&Any~, ~&mut Read~
+      * value as ~&Any~,  ~&mut file~ as ~&mut Read~
+
+    + Pointer to function
+      * ~fn(&str, usize) -> isize~
+      * ~i32::saturating_add~
+
+    + Closure
+      * (Closure types have no written form)
+      * ~\vert{}a, b\vert{} a*a + b*b~
 
   - Most of these /types/ are convered in this chapter, except for the following:
     + We give /struct types/ their own chapter, _Chapter 9_.
@@ -1179,11 +1209,11 @@
       ~&str~'s ~chars().count()~ returns the number of characters.
 
     - It is *IMPOSSIBLE* to modify a ~&str~.
-
+      #+begin_src rust
         let mut s = "hello";
         s[0] = 'c';    // error: the type `str` cannot be mutably indexed
         s.push('\n');  // error: no method named `push` found for the `&str`
-      #+END_SRC
+      #+end_src
 
     - Create new /strings/ at /run time/, use ~String~.
 
@@ -1192,8 +1222,8 @@
       *CANNOT reallocate* its referent.
 
       =From Jian= This means if you think you need ~&mut str~, you operation mustn't
-      change it overall byte lenght, and you must justify your reasoning!!! In general,
-      this is impossible.
+      change it overall byte length, and you must justify your reasoning!!!
+      _In general, this is *IMPOSSIBLE*._
 
         In fact, the only operations available on ~&mut str~ are ~make_ascii_uppercase~
       and ~make_ascii_lowercase~ , which modify the text in place and affect only
@@ -2291,7 +2321,7 @@
        * not only can Rust force you to understand why your program is thread-safe,
        * it can even require some amount of high-level architectural design.
 
-* DONE 6. Expressions - 123 =NOTE=
+* DONE 6. Expressions - 123
   CLOSED: [2018-05-23 Wed 22:43]
 ** DONE An Expression Language - 123
    CLOSED: [2018-05-22 Tue 21:19]
@@ -2299,7 +2329,7 @@
 
 ** DONE Blocks and Semicolons - 124
    CLOSED: [2018-05-22 Tue 21:19]
-   - /Blocks/, too, are expressions
+   - /Blocks/, too, are /expressions/
      A /block/ produces a value and can be used _ANYWHERE_ a value is needed:
      #+BEGIN_SRC rust
        let display_name = match post.author() {
@@ -2327,17 +2357,19 @@
          //    = note: expected type `()`
          //               found type `(u32, u32)`
        #+END_SRC
-       If you made this mistake in a C or Java program, the compiler would simply point out
-       that you’re missing a semicolon. Here’s what Rust says:
-       Rust assumes you’ve omitted this semicolon on purpose; it doesn’t consider the possi‐
-       bility that it’s just a typo. A confused error message is the result.
-
-       *When you see expected type `()` , look for a missing semicolon first.*
+       If you made this mistake in a C or Java program, the compiler would simply
+       point out that you’re missing a semicolon. Here's what Rust says:
+         Rust assumes you've omitted this semicolon on purpose; it doesn't consider
+       the possibility that it's just a typo. A confused error message is the result.
+       =IMPORTANT= =IMPORTANT= =IMPORTANT=
+       *When you see error message that includes =expected type `()`= , look for
+       a missing semicolon first.*
 
    - Empty statements, ~;~'s, are also allowed in /blocks/.
 
-** TODO Declarations - 126
-   - ~let mut~ is kinda of like the ~final~ in Java in some aspect, if not all:
+** DONE Declarations - 126
+   CLOSED: [2019-11-23 Sat 21:01]
+   - ~let~ is kinda of like the ~final~ in Java in some aspect, if not all:
      #+BEGIN_SRC rust
        let name;
 
@@ -2351,35 +2383,45 @@
      ~name~ assignment appears in two places, but can ONLY be one of them.
      Thus, no ~mut~ required in the declaration of ~name~;
 
+   - Use before initialization is, of course, can be detected by the compiler.
+
    - A /block/ can also contain /item declarations/.
-     An item is simply any declaration that could appear globally in a program
-     or module, such as a ~fn~, ~struct~, or ~use~. For instance,
-     #+BEGIN_SRC rust
-       use std::io;
-       use std::cmp::Ordering;
+     + item :: simply any declaration that could appear globally in a program or
+               module, such as a ~fn~, ~struct~, or ~use~. For instance,
+       #+BEGIN_SRC rust
+         use std::io;
+         use std::cmp::Ordering;
 
-       fn show_files() -> io::Result<()> {
-           let mut v = vec![];
-           // ...
-           fn cmp_by_timestamp_then_name(a: &FileInfo, b: &FileInfo) -> Ordering {
-               a.timestamp.cmp(&b.timestamp)
-               // first, compare timestamps
-                   .reverse()
-               // newest file first
-                   .then(a.path.cmp(&b.path)) // compare paths to break ties
-           }
-           v.sort_by(cmp_by_timestamp_then_name);
-           // ...
-       }
-     #+END_SRC
+         fn show_files() -> io::Result<()> {
+             let mut v = vec![];
+             // ...
+             fn cmp_by_timestamp_then_name(a: &FileInfo, b: &FileInfo) -> Ordering {
+                 a.timestamp.cmp(&b.timestamp)  // first, compare timestamps
+                     .reverse()                 // newest file first
+                     .then(a.path.cmp(&b.path)) // compare paths to break ties
+             }
+             v.sort_by(cmp_by_timestamp_then_name);
+             // ...
+         }
+       #+END_SRC
+       + TODO Later chapters will cover /items/ in details.
 
-   - =TODO=
-     When a ~fn~ xxxxxx
+   - Rust's ~fn~'s declared in a block is not a /closure/ -- it can't access local
+     variables or arguments that happen to be in scope in other languages.
+       For example, the ~cmp_by_timestamp_then_name~ above can't access variable
+     ~v~ directly.
+     + Rust also has /closures/. See Chapter 14.
 
-   - =TODO=
-     A block can even contain a xxxxx
+   - TODO
+     A block can even contain a whole /module/.
+     TODO =IMPORTANT= for using /macro/:
+     + Q :: This may seem a bit much -- do we really need to be able to nest every
+            piece of the language inside every other piece?
 
-** DONE ~if~ and match - 127
+     + A :: Programmers (and particularly programmers using /macros/) have a way
+            of finding uses for every scrap of orthogonality the language provides.
+
+** DONE ~if~ and ~match~ - 127
    CLOSED: [2018-05-22 Tue 21:19]
    - SYNTAX ~if .. else if .. else~:
      #+BEGIN_SRC rust
@@ -2549,12 +2591,12 @@
    Rust compilers analyze the /control flow/ through your program.
 
    It is NOT convenient for the compiler to do the analysis with ~while true~
-   for some reason (mentioned in the book), and the designer create ~loop~.
+   for some reason (mentioned in the book) TODO, and the designer create ~loop~.
 
    =From Jian=
    This is a plausible reason.
    It is a non-fundamental solution, and a patchy solution!!!
-   You should (!!!) solve the ~while true~ problem!!!
+   The ~while true~ issue should be resolved!!! WHY NOT?!?!?!
 
 ** DONE Function and Method Calls - 134
    CLOSED: [2018-05-23 Wed 21:43]
@@ -2676,7 +2718,7 @@
        This is much more useful than C's interpretation, ~x &(BIT != 0)~ , which
      tests the wrong bit!
 
-** DONE Assignment 138
+** DONE Assignment - 138
    CLOSED: [2018-05-23 Wed 22:36]
    - /assignment/ *moves* values of /non-copyable types/.
 
@@ -2684,14 +2726,91 @@
      one will return a ~()~
 
    - Rust doesn't have ~++~ and ~--~
-** TODO Type Casts 139
+** DONE Type Casts - 139
+   CLOSED: [2019-11-24 Sun 00:10]
+   Converting a /value/ from one /type/ to another usually requires an *explicit
+   cast* in Rust. Casts use the ~as~ /keyword/:
+   #+begin_src rust
+     let x = 17;              // x is type i32
+     let index = x as usize;  // convert to usize
+   #+end_src
+   =from Jian= Of course, this piece of code is just a illustration, and you should
+   never write code in this way.
+
+   - Several kinds of casts are permitted:
+     + _Numbers_ may be cast from any of the built-in numeric types to any other.
+       * _Casting an integer to another integer type_ is always well-defined.
+         + To a narrower type => truncation
+         + Signed integer to wider type => sign-extended
+         + Unsigned integer to wider type => zero-extended
+
+       * *CAUTION*
+         Cast a large /floating-point value/ to an /integer type/ that is too small
+         to represent it can lead to an /undefined behavior/ EVEN IN SAFE Rust.
+         This is a compiler error http://github.com/rust-lang/rust/issues/10184.
+
+     + Values of type ~bool~, ~char~, or of a C-like ~enum~ type, may be cast to
+       any /integer type/.
+       * The other direction cast is not allowed.
+
+       * However, there is some function like ~std::char::from_u32()~ can do the
+         other direction conversion, and return ~Option<char>~.
+
+       * The requirement of other direction conversion has grown rare -- we typically
+         convert whole strings or streams at once, and algorithms on Unicode text are
+         often nontrivial and best left to libraries.
+
+
+     + Some casts involving /unsafe pointer types/ are also allowed.
+       TODO _See "Raw Pointers" on page 538_ TODO
+
+   - Though _MOST_ conversion usually requires a cast.
+     A _FEW_ conversions involving /reference types/ are so STRAIGHTFORWARD that
+     the language performs them even *WITHOUT* a /cast/. One trivial example is
+     converting a ~mut~ /reference/ to a non-~mut~ /reference/.
+     + Several more significant automatic conversions can happen, though:
+       * Values from type ~&String~ to type ~&str~.
+       * Values from type ~&Vec<i32>~ to ~&[i32]~.
+       * Values from type ~&Box<Chessboard>~ to ~&Chessboard~.
+
+   - The conversions above are called /deref coercions/, because they apply to
+     types that implement the ~Deref~ built-in /trait/.
+
+   - The purpose of ~Deref~ coercion is to make smart pointer types, like ~Box~,
+     behave as much like the underlying value as possible. Using a
+     ~Box<Chessboard>~ is mostly just like using a plain ~Chessboard~, thanks to
+     ~Deref~ .
+
+   - User-defined types can implement the ~Deref~ trait, too.
+     TODO When you need to write your own smart pointer type, _see “Deref and
+     DerefMut” on page 289._
+
 ** DONE Closures - 140
-   CLOSED: [2018-05-23 Wed 22:40]
+   CLOSED: [2019-11-24 Sun 00:10]
    - Example:
      ~let is_even = |x| x % 2 == 0~
 
-   - The body must a /brace block/.
-** TODO Precedence and Associativity - 140 =TODO=
+   - If you do specify a /return type/, the body of the closure must be a /block/.
+     #+begin_src rust
+       // Error
+       let is_even = |x: u64| -> bool x % 2 == 0;
+
+       // Ok
+       let is_even = |x: u64| -> bool { x % 2 == 0 };
+     #+end_src
+
+** DONE Precedence and Associativity - 140
+   CLOSED: [2019-11-24 Sun 00:16]
+   - =IMPORTANT= Table 6-1. Expressions TODO
+
+   - All of the operators that can usefully be chained are /left-associative/.
+     =from Jian= _are_ here is actually _must be_
+
+   - Operators that _CANNOT be chained_:
+     + /comparison operators/
+     + /assignment operators/
+     + /range operator/ ~..~
+
 ** DONE Onward - 142
    CLOSED: [2018-05-23 Wed 22:43]
    
@@ -7150,7 +7269,7 @@
     + ~ToOwned~
       /Conversion trait/ for converting a /reference/ to an /owned value/.
 
-  - There are OTHER IMPORTANT /standard library traits/ as well. =TODO= =TODO=
+  - There are OTHER IMPORTANT /standard library traits/ as well. TODO TODO
     + Cover ~Iterator~ and ~IntoIterator~ in Chapter 15.
     + Cover ~Hash~, for computing hash codes, in Chapter 16.
     + Cover ~Send~ and ~Sync~, which mark thread-safe types, in Chapter 19.
@@ -9009,19 +9128,205 @@
      #+END_SRC
 
 ** TODO ~HashMap<K, V>~ and ~BTreeMap<K, V>~ - 378
-*** TODO Entries - 381
-*** TODO Map Iteration - 383
+   - Entry :: key-value pair
 
-** TODO ~HashSet<T>~ and ~BTreeSet<T>~ - 384
-*** TODO Set Iteration - 384
-*** TODO When Equal Values Are Different - 385
-*** TODO Whole-Set Operations - 385
+   - *NO* two /entries/ have the same /key/.
+
+   - A ~HashMap~ stores the /keys/ and /values/ in a /hash table/, so it requires
+     a key type ~K~ that implements ~Hash~ and ~Eq~.
+     Figure 16-5. A HashMap in memory
+
+   - A ~BTreeMap~ stores the entries in order by /key/, in a tree strucgure, so it
+     requires a /key/ type ~K~ that implements ~Ord~.
+     Figure 16-6. A BTreeMap in memory
+
+   - The Rust standard library uses /B-trees/ rather than /balanced binary trees/
+     for the reasons:
+     + /B-trees/ are faster on modern hardware.
+
+     + /Binary trees/ may use fewer comparisons per search than a /B-tree/,
+         BUT searching a /B-tree/ has better /locality/. This makes CPU cache
+       misses rarer. It's a significant speed boost.
+
+   - Create
+     + ~HashMap::new()~ and ~BTreeMap::new()~
+
+     + ~iter.collect()~
+       ~iter~ must be an ~Iterator<Item=(K, V)>~
+
+     + ~HashMap::with_capacity(n)~
+       *CAUTION* this is for ~HashMap~ only, no similar function for ~BTreeMaps~.
+       * There are also related methods
+         - ~hash_map.capacity()~
+         - ~hash_map.reserve(additional)~
+         - ~hash_map.shrink_to_fit()~
+
+   - Work with keys and values:
+     + ~map.len()~ returns the NUMBER of /entries/.
+
+     + ~map.is_empty()~
+
+     + ~map.get(&key)~
+
+     + ~map.get_mut(&key)~
+       TODO TODO TODO
+
+     + ~map.insert(key, value)~
+       If the being inserted ~key~ is already in the /map/, the corresponding
+       /value/ will be updated.
+       * Returns the *old* /value/ with /type/ ~Option<V>~, if any.
+
+     + ~map.extend(iterable)~
+
+     + ~map.append(&mut map2)~
+       Moves all /entries/ from ~map2~ into ~map~. Afterward, ~map2~ is EMPTY.
+
+     + ~map.remove(&key)~
+       * Returns the *removed* /value/ with /type/ ~Option<V>~, if any.
+
+     + ~map.clear()~
+       Remove all /entries/.
+
+   - For ~BTreeMap<K, V>~ only because of its entries sorted by key:
+     + ~btree_map.split_at(&key)~
+       *splits* ~btree_map~ in two.
+       1. Entries with keys _LESS THAN_ ~key~ are left in ~btree_map~.
+       2. Returns a *new* ~BTreeMap<K, V>~ containing the _OTHER entries_.
+
+*** TODO Entries - 381
+    - TODO
+
+    - All ~Entry~ values are created by the same /method/:
+      + ~map.entry(key)~
+        * Returns an ~Entry~ for the given ~key~.
+          If _no such key_ in the /map/, this returns a _VACANT ~Entry~._
+
+        * This method takes its ~self~ argument _by ~mut~ reference_ and returns
+          an ~Entry~ with a MATCHING /lifetime/:
+          #+begin_src rust
+            pub fn entry<'a>(&'a mut self, key: K) -> Entry<'a, K, V>
+          #+end_src
+
+        * Unfortunately, it is not possible to pass a /reference/ of type ~&str~
+          to this method if the map has ~String~ keys. The ~.entry()~ /method/,
+          in that case, requires a real String .
+          TODO TODO TODO
+
+    - ~Entry~ values provide TWO /methods/ for filling in _vacant entries_:
+      + ~map.entry(key).or_insert(value)~
+        TODO 
+        TODO 
+        TODO 
+
+      + ~map.entry(key).or_insert_with(default_fn)~
+        TODO
+        TODO 
+        TODO 
+    
+*** DONE Map Iteration - 383
+    CLOSED: [2019-11-24 Sun 03:14]
+    - There are several ways to iterate over a map:
+      + Iterate and *consume* the /map/: ~for (k, v) in map~ produces ~(K, V)~
+
+      + Iterate over a /shared reference/: ~for (k, v) in &map~ produces ~(&K, &V)~
+
+      + Iterate over a ~mut~ /reference/: ~for (k, v) in &mut map~ produces ~(&K, &mut V)~
+        *CAUTION* Again, the /key/ in a map can't be moddified!
+
+    - Like /vectors/, /maps/ have ~.iter()~ and ~.iter_mut()~ /methods/ which return
+      /by-reference iterators/, just like iterating over ~&map~ or ~&mut map~. In
+      addition:
+      + ~map.keys()~ returns an /iterator/ over just the /keys/, _by reference_
+      + ~map.values()~ returns an /iterator/ over just the /values/, _by reference_
+      + ~map.values_mut()~ returns an /iterator/ over the /values/, _by ~mut~ reference_
+
+    - All ~HashMap~ /iterators/ visit the /map/'s /entries/ *in an arbitrary order*.
+      ~BTreeMap~ /iterators/ visit them in order *by key*.
+
+** DONE ~HashSet<T>~ and ~BTreeSet<T>~ - 384
+   CLOSED: [2019-11-25 Mon 23:16]
+   Rust's TWO /set types/, ~HashSet<T>~ and ~BTreeSet<T>~ are implemented as thin
+   wrappers around ~HashMap<T, ()>~ and ~BTreeSet<T, ()>~
+   - Create a /set/:
+     + ~HashSet::new()~ and ~BTreeSet::new()~
+     + ~iter.collect()~
+     + ~HashSet::with_capacity(n)~
+
+   - Basic /methods/ in common of the two /set types/:
+     + ~set.len()~
+     + ~set.is_empty()~
+     + ~set.contains(&value)~
+     + ~set.insert(value)~ returns
+       * ~true~ if a value was added
+       * ~false~ if it was already a member of the set.
+
+     + ~set.remove(&value)~ returns
+       * ~true~ if a value was removed
+       * ~false~ if it was already wasn't a member of the set.
+
+*** DONE Set Iteration - 384
+    CLOSED: [2019-11-25 Mon 23:15]
+    - _TWO_ ways to iterate over /sets/:
+      + By /values/ (consume the /set/): ~for v in set~
+      + By /shared reference/: ~for v in &set~
+
+    - NOT Supported:
+      Iterate over a set _by ~mut~ reference_
+      There is NO WAY to get _a ~mut~ reference_ to a /value/ stored in a /set/.
+
+    - ~set.iter()~ returns an /iterator/ over the members of /set/ /by reference/.
+
+    - Order:
+      + ~HashSet~ /iterators/ produce values _in an arbitrary order_.
+      + ~BTreeSet~ /iterators/ produce values _in order_, like a _sorted_ vector.
+
+*** DONE When Equal Values Are Different - 385
+    CLOSED: [2019-11-25 Mon 22:51]
+    - ~set.get(&value)~
+      + return type: ~Option<&T>~.
+      + returns a /shared reference/ to the member of /set/ that's equal to ~value~.
+
+    - ~set.take(&value)~
+      + return type ~Option<T>~.
+      + like ~set.remove(&value)~, _BUT_ it returns the removed value, if any.
+
+    - ~set.replace(&value)~
+      + return type ~Option<T>~.
+      + like ~set.insert(value)~, but if /set/ already contains a value that's
+        equal to ~value~, this replaces and returns the _OLD value_.
+
+*** DONE Whole-Set Operations - 385
+    CLOSED: [2019-11-25 Mon 22:58]
+    - Operations on whole sets (not a single element):
+      All below alphabetical name /methods/ return /iterators/;
+      all below symbol name /methods/ return _NEW set_.
+
+      + ~set1.intersection(&set2)~
+        ~&set1 & set2~
+
+      + ~set1.union(&set2)~ returns an /iterator/.
+        ~&set1 | &set2~ returns a _NEW_ /set/.
+
+      + ~set1.difference(&set2)~ returns an /iterator/.
+        ~&set1 - &set2~ returns a _NEW_ /set/.
+
+      + ~set1.symmetric_difference(&set2)~
+        ~&set1 ^ &set2~
+
+    - There are THREE /methods/ for testing _relationships between sets_:
+      + ~set1.is_disjoint(set2)~
+      + ~set1.is_subset(set2)~
+      + ~set1.is_superset(set2)~
+      + ~==~ and ~!=~
 
 ** TODO Hashing - 387
 *** TODO Using a Custom Hashing Algorithm - 388
 
-** DONE Beyond the Standard Collections 389
-   CLOSED: [2018-06-13 Wed 18:28]
+** DONE Beyond the Standard Collections - 389
+   CLOSED: [2019-11-25 Mon 23:09]
+   - Example:
+     TODO "Generic Enums" on page 218
+
    - Rust collection, as much of Rust standard library, they're designed to ensure
      that the need to write ~unsafe~ is as rare as possible.
 
@@ -11722,14 +12027,14 @@
 *** TODO Receiving Values - 475
 *** TODO Running the Pipeline - 476
 *** TODO Channel Features and Performance - 478
-*** TODO Thread Safety: Send and Sync - 479
+*** TODO Thread Safety: ~Send~ and ~Sync~ - 479
 *** TODO Piping Almost Any Iterator to a Channel - 482
 *** TODO Beyond Pipelines - 483
 
 ** TODO Shared Mutable State - 484
-*** TODO What Is a Mutex? - 484
+*** TODO What Is a ~Mutex~? - 484
 *** TODO ~Mutex<T>~ - 486
-*** TODO mut and Mutex - 488
+*** TODO ~mut~ and ~Mutex~ - 488
 *** TODO Why Mutexes Are Not Always a Good Idea - 488
 *** TODO Deadlock - 489
 *** TODO Poisoned Mutexes - 490

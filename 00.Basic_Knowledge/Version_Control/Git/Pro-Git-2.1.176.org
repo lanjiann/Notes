@@ -1,6 +1,6 @@
 #+TITLE: Pro Git
 #+AUTHOR: Scott Chacon, Ben Straub
-#+Version: 2.1.168, 2019-10-02
+#+Version: 2.1.176, 2019-11-15
 #+STARTUP: overview
 #+STARTUP: entitiespretty
 
@@ -451,29 +451,102 @@
         you can use any tool you like to rename (shell's ~mv~, GUI, etc.) a file,
         and address the add/rm (~git add~ and ~git rm~) later, before you commit.
 
-** TODO 2.3 Viewing the Commit History - 39
-*** TODO Limiting Log Output - 44
+** DONE 2.3 Viewing the Commit History - 39
+   CLOSED: [2019-11-23 Sat 18:27]
+   - ~git log~
+
+   - ~git log -p~ / ~git log --patch~
+     Use ~-<number>~ to limit the number of commits you want to log
+     Display in patch-like view
+
+   - ~git log --stat~
+     Like ~--patch~, but only one statics line per file, without details of
+     difference
+
+   - ~git log --pretty=<format>~
+     + ~oneline~
+
+     + ~format:<format-string>~
+       Example: ~git log --pretty=format:"%h - %an, %ar : %s"~
+
+     + Table1. Useful options for ~git log --pretty=format~
+       TODO TODO TODO
+
+   - Distinguish /author/ and /committer/:
+     + Author :: the person who originally wrote the work,
+     + Committer :: the person who last applied the work.
+
+   - So, if you send in a patch to a project and one of the core members applies
+     the patch, both of you get credit — _you as the /author/, and the core
+     member as the /committer/._
+
+   - Another useful option ~--graph~
+
+   - Table 2. Common options to ~git log~
+     TODO TODO TODO
+
+*** DONE Limiting Log Output - 44
+    CLOSED: [2019-11-23 Sat 18:27]
+    - ~-<n>~
+
+    - ~--since~ and ~--until~
+      Example: ~git log --since=2.weeks~
+      These options can work with lots of formats like ~"2018-01-15"~ or
+      ~"2 years 1 day 3 minutes ago"~
+
+    - Use ~--author~ to filter on a specific /author/.
+      Use ~--committer~ to filter on a specific /comitter/.
+
+    - Use ~--grep~ to search for keywords in the commit messages.
+
+    - Use ~--all-match~ option to further limit the output to just those commits
+      that match *all* ~--grep~ patterns.
+
+    - ~-S~ only show commits adding or removing code match the string.
+      For example, ~git log -S function_name~
+      + *CAUTION* TODO TODO TODO
+        This is _ALWAYS_ the last option and is generally preceded by double
+        dashes (~--~) to _separate the paths from the options_.
 
     - *Preventing the display of merge commits*
+      Use ~--no-merges~
 
-** TODO 2.4 Undoing Things - 46
+** DONE 2.4 Undoing Things - 46
+   CLOSED: [2019-11-23 Sat 18:55]
    - *CAUTION*:
-     Sometimes, undoing things can be _DANGEOUS_ -- you can't always undo some
+     Sometimes, undoing things can be _DANGEOUS_ -- you *can't* always undo some
      of these undos!
      *This is the one of the few areas in Git where you may lose some work if
      you do it wrong*
 
    - ~git commit --amend~
+     =from Jian= =IMPORTANT=
+     I think it's better not do this and create more commits -- we can merge
+     them later! This way is safer than using the ~--amend~ option!!!
 
-*** TODO Unstaging a Staged File - 47
+*** DONE Unstaging a Staged File - 47
+    CLOSED: [2019-11-23 Sat 18:44]
     - Unstage a file with ~git reset HEAD <file>~
+      Acutally, after staging files with ~git add~, when you run ~git status~,
+      there will be a hint message that =(use "git reset HEAD <file> ...") to unstage)=.
 
-    - TIPS
-      TODO
+    - *TIPS*
+      It's true that ~git reset~ _CAN BE a *dangerous* command_, especially if you
+      provide the ~--hard~ flag.
+        _HOWEVER_, in the scenario described above, the file in your working
+      directory is not touched (=from Jian= change the staged status of a file
+      won't touch its content), so it's relatively safe.
 
 *** DONE Unmodifying a Modified File - 48
     CLOSED: [2019-08-19 Mon 01:14]
     - ~git checkout -- <file>~
+
+    - ~git status~ can also give hits about this like:
+      #+begin_src text
+        Changes not staged for commit:
+          (use "git add <file>..." to update what will be committed)
+          (use "git checkout -- <file>..." to discard changes in working directory)
+      #+end_src
 
     - *CAUTION*:
       ~git checkout -- <file>~ is dangerous.
@@ -496,13 +569,13 @@
 
       + =from Jian=
         I prefer Solution 2, and we should add hooks to all the dangerous
-        commands!!!
+        commands!!! TODO TODO TODO
 
-    - *Remember*: =IMPORTANT=
+    - *Remember*: =IMPORTANT= TODO TODO TODO
       + _Anything that is committed in Git can almost always be recovered._
         Even commits that were on branches that were deleted or commits that
         were overwritten with an ~--amend~ commit can be recovered (see Data
-        Recovery for data recovery).
+        Recovery for data recovery). TODO _HOWTO ???_ TODO
 
       + However, _anything you lose that was never committed is likely never to be
         seen again._
@@ -918,7 +991,7 @@
 
 ** TODO 8.5 Summary - 370
 
-* TODO 9. Git and Other Systems - 371
+* 9. Git and Other Systems - 371
 ** TODO 9.1 Git as a Client - 371
 *** TODO Git and Subversion - 371
 **** ~git svn~
@@ -970,129 +1043,130 @@
 
 ** TODO 9.2 Migrating to Git - 417
 *** TODO Subversion - 417
-*** TODO Mercurial - 419
-*** TODO Bazaar - 422
-**** Getting the bzr-fastimport plugin - 422
-**** Project with a single branch - 423
-**** Case of a project with a main branch and a working branch - 423
-**** Synchronizing the staging area - 424
-**** Ignoring the files that were ignored with =.bzrignore= - 424
-**** Sending your repository to the server - 424
+*** TODO Mercurial - 420
+*** TODO Bazaar - 423
+**** Getting the bzr-fastimport plugin - 423
+**** Project with a single branch - 424
+**** Case of a project with a main branch and a working branch - 424
+**** Synchronizing the staging area - 425
+**** Ignoring the files that were ignored with =.bzrignore= - 425
+**** Sending your repository to the server - 425
 
-*** TODO Perforce - 425
-**** TODO Perforce Git Fusion - 421
-**** TODO Git-p4 - 425
+*** TODO Perforce - 426
+**** TODO Perforce Git Fusion - 426
+**** TODO Git-p4 - 426
 
-*** TODO TFS - 426
-*** TODO A Custom Importer - 428
+*** TODO TFS - 427
+*** TODO A Custom Importer - 429
 
-** TODO 9.3 Summary - 435
-* TODO 10. Git Internals - 436
-** TODO 10.1 Plumbing and Porcelain - 436
-** TODO 10.2 Git Objects - 437
-*** TODO Tree Objects - 439
-*** TODO Commit Objects - 442
-*** TODO Object Storage - 445
+** TODO 9.3 Summary - 436
+* TODO 10. Git Internals - 437
+** TODO 10.1 Plumbing and Porcelain - 437
+** TODO 10.2 Git Objects - 438
+*** TODO Tree Objects - 440
+*** TODO Commit Objects - 443
+*** TODO Object Storage - 446
 
-** TODO 10.3 Git References - 447
-*** TODO The HEAD - 448
-*** TODO Tags - 449
-*** TODO Remotes - 450
+** TODO 10.3 Git References - 448
+*** TODO The HEAD - 449
+*** TODO Tags - 450
+*** TODO Remotes - 451
 
-** TODO 10.4 Packfiles - 451
-** TODO 10.5 The Refspec - 454
-*** TODO Pushing Refspecs - 456
-*** TODO Deleting References - 457
+** TODO 10.4 Packfiles - 452
+** TODO 10.5 The Refspec - 455
+*** TODO Pushing Refspecs - 457
+*** TODO Deleting References - 458
 
-** TODO 10.6 Transfer Protocols - 457
-*** TODO The Dumb Protocol - 457
-*** TODO The Smart Protocol - 459
-**** TODO Uploading Data - 459
-***** TODO SSH - 459
-***** TODO HTTP(S) - 460
+** TODO 10.6 Transfer Protocols - 458
+*** TODO The Dumb Protocol - 458
+*** TODO The Smart Protocol - 460
+**** TODO Uploading Data - 460
+***** TODO SSH - 460
+***** TODO HTTP(S) - 461
 
-**** TODO Downloading Data - 461
-***** TODO SSH - 461
-***** TODO HTTP(S) - 462
+**** TODO Downloading Data - 462
+***** TODO SSH - 462
+***** TODO HTTP(S) - 463
 
-*** TODO Protocol Summary - 462
+*** TODO Protocol Summary - 463
 
-** TODO 10.7 Maintenance and Data Recovery - 462
-*** TODO Maintenance - 462
-*** TODO Data Recovery - 463
-*** TODO Removing Objects - 466
+** TODO 10.7 Maintenance and Data Recovery - 463
+*** TODO Maintenance - 463
+*** TODO Data Recovery - 464
+*** TODO Removing Objects - 467
 
-** TODO 10.8 Environment Variables - 469
-*** TODO Global Behavior - 470
-*** TODO Repository Locations - 470
-*** TODO Pathspecs - 471
-*** TODO Committing - 471
-*** TODO Networking - 471
-*** TODO Diffing and Merging - 472
-*** TODO Debugging - 472
-*** TODO Miscellaneous - 474
+** TODO 10.8 Environment Variables - 470
+*** TODO Global Behavior - 471
+*** TODO Repository Locations - 471
+*** TODO Pathspecs - 472
+*** TODO Committing - 472
+*** TODO Networking - 472
+*** TODO Diffing and Merging - 473
+*** TODO Debugging - 473
+*** TODO Miscellaneous - 475
 
-** TODO 10.9 Summary - 475
+** TODO 10.9 Summary - 476
 
-* TODO Appendix A: Git in Other Environments - 476
-** TODO Graphical Interfaces - 476
-*** TODO =gitk= and =git-gui= - 476
-*** TODO GitHub for Mac and Windows - 478
-**** TODO Installation - 480
+* TODO Appendix A: Git in Other Environments - 477
+** TODO Graphical Interfaces - 477
+*** TODO =gitk= and =git-gui= - 477
+*** TODO GitHub for Mac and Windows - 479
+**** TODO Installation - 481
 **** TODO Recommended Workflow - 480
 **** TODO Summary - 481
 
-*** TODO Other GUIs - 481
+*** TODO Other GUIs - 482
 
-** TODO Git in Visual Studio - 481
-** TODO Git in Visual Studio Code - 483
-** TODO Git in Eclipse - 483
-** TODO Git in Sublime Text - 484
-** TODO Git in Bash- 484
-** TODO Git in Zsh - 486
-** TODO Git in Powershell - 488
-*** Installation - 488
-**** Prerequisites (Windows only) - 488
-**** PowerShell Gallery - 488
-**** Update PowerShell Prompt - 489
-**** From Source - 489
+** TODO Git in Visual Studio - 482
+** TODO Git in Visual Studio Code - 484
+** TODO Git in Eclipse - 484
+** TODO Git in Sublime Text - 485
+** TODO Git in Bash - 485
+** TODO Git in Zsh - 487
+** TODO Git in Powershell - 489
+*** Installation - 489
+**** Prerequisites (Windows only) - 489
+**** PowerShell Gallery - 489
+**** Update PowerShell Prompt - 490
+**** From Source - 490
 
-** TODO Summary - 489
+** TODO Summary - 490
 
-* TODO Appendix B: Embedding Git in your Applications - 490
-** TODO Command-line Git - 490
-** TODO Libgit2 - 490
-*** TODO Advanced Functionality - 493
-*** TODO Other Bindings - 494
-**** LibGit2Sharp - 494
-**** objective-git - 495
-**** pygit2 - 495
+* TODO Appendix B: Embedding Git in your Applications - 491
+** TODO Command-line Git - 491
+** TODO Libgit2 - 491
+*** TODO Advanced Functionality - 494
+*** TODO Other Bindings - 495
+**** LibGit2Sharp - 495
+**** objective-git - 496
+**** pygit2 - 496
 
-*** TODO Further Reading - 495
+*** TODO Further Reading - 496
 
-** TODO JGit - 495
-*** Getting Set Up - 495
-*** Plumbing - 496
-*** Porcelain - 498
-*** Further Reading - 499
-
-** TODO go-git - 499
-*** Advanced Functionality - 500
+** TODO JGit - 496
+*** Getting Set Up - 496
+*** Plumbing - 497
+*** Porcelain - 499
 *** Further Reading - 500
 
-** TODO Dulwich - 500
-*** TODO Further Reading - 501
+** TODO go-git - 500
+*** Advanced Functionality - 501
+*** Further Reading - 501
 
-* TODO Appendix C: Git Commands - 502
-** TODO Setup and Config - 502
+** TODO Dulwich - 501
+*** TODO Further Reading - 502
+
+* TODO Appendix C: Git Commands - 503
+** TODO Setup and Config - 503
 *** TODO ~git config~
+*** TODO ~git config core.editor~ commands
 *** TODO ~git help~
 
-** TODO Getting and Creating Projects - 503
+** TODO Getting and Creating Projects - 505
 *** TODO ~git init~
 *** TODO ~git clone~
 
-** TODO Basic Snapshotting - 504
+** TODO Basic Snapshotting - 506
 *** TODO ~git add~
 *** TODO ~git status~
 *** TODO ~git diff~
@@ -1103,7 +1177,7 @@
 *** TODO ~git mv~
 *** TODO ~git clean~
 
-** TODO Branching and Merging - 507
+** TODO Branching and Merging - 508
 *** TODO ~git branch~
 *** TODO ~git checkout~
 *** TODO ~git merge~
@@ -1112,7 +1186,7 @@
 *** TODO ~git stash~
 *** TODO ~git tag~
 
-** TODO Sharing and Updating Projects - 509
+** TODO Sharing and Updating Projects - 510
 *** TODO ~git fetch~
 *** TODO ~git pull~
 *** TODO ~git push~
@@ -1120,36 +1194,37 @@
 *** TODO ~git archive~
 *** TODO ~git submodule~
 
-** TODO Inspection and Comparison - 511
+** TODO Inspection and Comparison - 512
 *** TODO ~git show~
 *** TODO ~git shortlog~
 *** TODO ~git describe~
 
-** TODO Debugging - 512
+** TODO Debugging - 513
 *** TODO ~git bisect~
 *** TODO ~git blame~
 *** TODO ~git grep~
 
-** TODO Patching - 512
+** TODO Patching - 513
 *** TODO ~git cherry-pick~
 *** TODO ~git rebase~
 *** TODO ~git revert~
 
-** TODO Email - 513
+** TODO Email - 514
 *** TODO ~git apply~
 *** TODO ~git am~
 *** TODO ~git format-patch~
+*** TODO ~git imap-send~
 *** TODO ~git send-email~
 *** TODO ~git request-pull~
 
-** TODO External Systems - 514
+** TODO External Systems - 515
 *** TODO ~git svn~
 *** TODO ~git fast-import~
 
-** TODO Administration - 515
+** TODO Administration - 516
 *** TODO ~git gc~
 *** TODO ~git fsck~
 *** TODO ~git reflog~
 *** TODO ~git filter-branch~
 
-** TODO Plumbing Commands - 515
+** TODO Plumbing Commands - 517
