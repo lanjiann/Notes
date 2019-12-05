@@ -1687,30 +1687,44 @@
      ~trait~ in general in Chapter 11
      Traits ~Copy~ and ~Clone~ in general in Chapter 13
 
-** DONE ~Rc~ and ~Arc~: shared ownership - 90 =Re-Read= =Reference counter and Circular reference=
-   CLOSED: [2018-05-22 Tue 14:49]
-   - ~Rc~ and ~Arc~ are safe!
-     You CANNOT
-     + forget to adjust the reference count
+** DONE ~Rc~ and ~Arc~: shared ownership - 90
+   CLOSED: [2019-11-30 Sat 21:12]
+   ALTHOUGH most values have *UNIQUE* /owners/ in typical Rust code,
+   IN SOME CASES it's _difficult to find every value a single owner_ that has
+   the /lifetime/ you need -- you'd like the value to _simply live until
+   everyone's done using it._
 
-     + create other pointers to the referent that Rust doesn't notice
+   - For these cases, Rust provides the /reference-counted pointer types/:
+     + ~Rc~ /reference count/
+     + ~Arc~ /atomic reference count/
 
-     + stumble over any of the other sorts of problems that accompany
+   - As expected, with the help of Rust design and implementation,
+     _both ~Rc~ and ~Arc~ are entirely safe_:
+     + You CANNOT
+       forget to adjust the reference count
+
+     + You CANNOT
+       create other pointers to the referent that Rust doesn't notice
+
+     + You CANNOT
+       stumble over any of the other sorts of problems that accompany
        reference-counted pointer types in C++.
 
    - ~Rc~ and ~Arc~ are very similar!
      *The ONLY DIFFERENCE* between them is that an ~Arc~ (/atomic reference count/)
-     is safe to share between threads directly, wheereas a plain ~Rc~ uses faster
+     is safe to share between threads directly, whereas a plain ~Rc~ uses faster
      /non-thread-safe/ code to update its reference count.
 
      + Use ~Rc~ if you won't share it between /threads/, and avoid performance
        penalty of an ~Arc~.
 
-     + Rust will *prevent* you from accidentally passing ~Rc~ across a /thread/
-       boundary.
+     + Rust will *prevent* you from accidentally passing ~Rc~ across a /thread
+       boundary/.
 
      *The two types are otherwise equivalent.*
-     We'll only talk about ~Rc~.
+
+   - Because of the similarity between ~Rc~ and ~Arc~,
+     we'll only talk about ~Rc~ in this section.
 
    - Use ~Rc~ to simulate the earlier Python code we saw.
      #+BEGIN_SRC rust
@@ -1721,23 +1735,32 @@
        let t: Rc<String> = s.clone();
        let u: Rc<String> = s.clone();
      #+END_SRC
-     + Cloning an ~Rc<T>~ value does NOT copy the ~T~ value;
-       instead, it simply creates ANOTHER /pointer/ to it, and increments the
-       reference count.
+     + For any type ~T~, an ~Rc<T>~ value is a /pointer/ to a /heap-allocated/ ~T~
+       that has had a /reference count/ _affixed to it_.
+
+     + *Cloning an ~Rc<T>~ value does _NOT copy the ~T~ value_;*
+       instead, it simply
+       * _creates_ ANOTHER /pointer/ to it
+         AND
+       * _increments_ the /reference count/.
 
      + The usual /ownership rules/ apply to the ~Rc~ /pointers/ themselves,
        and when the last extant ~Rc~ is /dropped/, Rust /drops/ the ~String~ as
        well.
 
-   - You can use any of ~String~'s usual /methods/ directly on an ~Rc<String>~:
-     #+BEGIN_SRC rust
-       assert!(s.contains("shira"));
-       assert_eq!(t.find("taki"), Some(5));
-       println!("{} are quite chewy, almost bouncy, but lack flavor", u);
-     #+END_SRC
+   - You can use any of ~T~'s usual /methods/ directly on an ~Rc<T>~.
+
+     + In our example, call ~String~'s /methods/ directly on an ~Rc<String>~:
+       #+BEGIN_SRC rust
+         assert!(s.contains("shira"));
+         assert_eq!(t.find("taki"), Some(5));
+         println!("{} are quite chewy, almost bouncy, but lack flavor", u);
+       #+END_SRC
+
+     + Figure 4-12. A reference-counted string, with three references.
 
    - A value owned by an ~Rc~ /pointer/ is *immutable*.
-     If you try to add some text to the end of the string:
+     For example, if you try to add some text to the end of the string:
      #+BEGIN_SRC rust
        s.push_str(" noodles");
 
@@ -1747,53 +1770,42 @@
        // 12 |     s.push_str(" noodles");
        //    |     ^ cannot borrow as mutable
      #+END_SRC
-
      + Rust's memory and thread-safety guarantees _depend on_ ensuring that *NO*
        value is ever _SIMULTANEOUSLY_ *shared* _and_ *mutable*.
-
-       Rust assumes the referent of an ~Rc~ /pointer/ might in general be *shared*,
+         Rust assumes the referent of an ~Rc~ /pointer/ might in general be *shared*,
        so it _MUST NOT be_ *mutable*.
 
-       =TODO=
-       We explain why this restriction is important in Chapter 5.
+       TODO We explain why this restriction is important in _Chapter 5 References_.
 
-   - =TODO= =Re-Write= =NOTE=
-     One well-known problem with using /reference counts/ to manage memory is
-     that, if there are ever two reference-counted values that point to each
-     other, each will hold the other’s /reference count/ above zero, so the
-     values will never be freed (Figure 4-13).
-     =Circular references=
+   - /Circular reference/ issue:
+     + _It is POSSIBLE to leak values in Rust this way_,
+       but such situations are *RARE*:
+       * You cannot create a /circular reference/ without, at some point, making
+         an older value -- =from Jian= _No simple and naive way to create
+         /circular reference/,_ which is *GOOD*!
+         - Q :: WHY?
+         - A :: This obviously
+           + _requires_ the older value to be *mutable*.
+           + Since ~Rc~ pointers hold their referents *immutable*,
+             it's _not normally possible_ to create a cycle.
 
-     It is possible to leak values in Rust this way, but such situations are
-     *rare*:
+       * _HOWEVER_,
+         Rust does provide ways to create mutable portions of otherwise
+         immutable values; this is called /interior mutability/.
+         - If you combine those techniques with ~Rc~ pointers, you can create a
+           cycle and leak memory.
+         - TODO we cover it in “Interior Mutability” on page 205. TODO
 
-     + MOSTLY:
-       You cannot create a cycle without, at some point, making an older value
-       point to a newer value. This obviously requires the older value to be
-       mutable. Since Rc pointers hold their referents immutable, it’s not
-       normally possible to create a cycle.
+   - You can
+     sometimes AVOID creating cycles of ~Rc~ pointers by using /weak pointers/,
+     ~std::rc::Weak~, for some of the links instead. 
+       However, _we won't cover those in this book;_ see the standard library's
+     documentation for details.
 
-     + YOU STILL CAN:
-       However, Rust does provide ways to create mutable portions of otherwise
-       immutable values; this is called /interior mutability/, and we cover it
-       in “Interior Mutability” on page 205 =TODO=. If you combine those
-       techniques with Rc pointers, you can create a cycle and leak memory.
-
-     *Circular references in a reference count system*
-
-   - weak pointers :: ~std::rc::Weak~. NO details in this book, please refer to
-                      the standard library doc.
-                      =TODO=
-
-   - /Moves/ and /reference-counted pointers/ are *two* ways to relax the rigidity
-     of the /ownership/ tree.
-
-     In the next chapter, we'll look at a *third* way:
-     /borrowing/ references to values.
-
-     Once you have become comfortable with both /ownership/ and /borrowing/, you
-     will have climbed the steepest part of Rust's learning curve, and you'll be
-     ready to take advantage of Rust's unique strengths.
+   - We haved learned _TWO ways_ to relax the rigidity of the /ownership tree/:
+     /Moves/ and /reference-counted pointers/. 
+       In the next chapter, we'll look at a _THIRD way_: /BORROWING references to
+     values/.
 
 * DONE 5. References and borrowing - 93
   CLOSED: [2018-06-14 Thu 21:17]
@@ -2325,7 +2337,7 @@
   CLOSED: [2018-05-23 Wed 22:43]
 ** DONE An Expression Language - 123
    CLOSED: [2018-05-22 Tue 21:19]
-   - Rust is what is called an *expression* language.
+   Rust is what is called an *expression* language.
 
 ** DONE Blocks and Semicolons - 124
    CLOSED: [2018-05-22 Tue 21:19]
@@ -2586,17 +2598,101 @@
      #+END_SRC
      =TODO= See "Propagating Errors" on page 152.
 
-** DONE Why Rust Has ~loop~ - 133 =Re-Read=
-   CLOSED: [2018-05-23 Wed 20:44]
-   Rust compilers analyze the /control flow/ through your program.
+** DONE Why Rust Has ~loop~ - 133
+   CLOSED: [2019-11-27 Wed 23:20]
+   - Several pieces of the Rust compiler analyze the /flow of control/ through your
+     program.
+     + Rust checks that
+       _EVERY path_ through a /function/ _returns a value_ of the _expected
+       return type_.
+       * To do this correctly,
+         it *needs* to know whether or not it's possible to reach the end of the
+         function.
 
-   It is NOT convenient for the compiler to do the analysis with ~while true~
-   for some reason (mentioned in the book) TODO, and the designer create ~loop~.
+     + Rust checks that
+       /local variables/ are _NEVER used uninitialized_.
+         This entails checking every path through a function to
+       MAKE SURE _there's no way to reach a place where a variable is used
+       without having already passed through code that initializes it_.
 
-   =From Jian=
-   This is a plausible reason.
-   It is a non-fundamental solution, and a patchy solution!!!
-   The ~while true~ issue should be resolved!!! WHY NOT?!?!?!
+     + Rust WARNS about
+       /unreachable code/.
+
+   - The analysis above is /flow-sensitive analyses/;
+     Java has had a /definite assignment analysis/, similar to Rust's, for years.
+
+   - When enforcing the rules in /flow-sensitive analyses/,
+     a language must strike a balance between
+     + *simplicity* --
+       make it easier for programmers to figure out what the compiler is talking
+       about sometimes.
+
+       AND
+
+     + *cleverness* --
+       Eliminate false warnings and cases where hte compiler rejects a safe program.
+
+   - Rust went for *simplicity*!!!
+     Its /flow-sensitive analyses/ do *NOT* examine loop conditions at all, instead
+     simply assuming that any condition in a program can be either true or false.
+     + Because of this Rust will reject some safe programs like
+       #+begin_src rust
+         fn wait_for_process(process: &mut Process) -> i32 {
+             while true {
+                 if process.wait() {
+                     return process.exit_code();
+                 }
+             }
+         }  // error: not all control paths return a value
+       #+end_src
+       * =from Jian=
+         We all know the ~return process.exit_code();~ will be reached if this
+         function can be finished. However, since the /flow-sensitive analyses/
+         of Rust doesn't check and consider the ~while~ condition ~true~ as TRUE
+         or FALSE.
+
+     + The ~loop~ expression is offered to help tell the compiler directly that
+       "I mean loop forever if no break inside".
+
+*** Rust's type system is affected by control flow, too.
+    =from Jian= _I add this subsection, which is not a separate subsection in book_
+
+    - Earlier we said that all branches of an /if expression/ must have the SAME
+      type. _BUT_ it would be silly to enforce this rule on some specific blocks.
+
+      + This kind of special blocks includes (not a complete list)
+        * a ~break~ or /return expression/
+        * an /infinite loop/
+        * a call to ~panic!()~ or ~std::process:exit()~.
+
+      + What all those above expressions have in common is that *they never finish
+        in the usual way*, producing a value. For example
+        * A ~break~ or ~return~ *exits* the current block ABRUPTLY;
+        * an /infinite loop/ *never finishes* at all.
+
+    - divergent function :: functions that NEVER returns.
+
+    - Q :: Then how can we type a /divergent function/???
+
+    - A :: Use the special return type ~!~. =from Jian= Bottom???
+
+    - Example:
+      + From Standard library:
+        ~std::process::exit()~ has the signature of ~fn exit(code: i32) -> !~
+
+      + User defined:
+        #+begin_src rust
+          fn serve_forever(socket: ServerSocket, handler: ServerHandler) -> ! {
+              socket.listen();
+              loop {
+                  let s = socket.accept();
+                  handler.handle();
+              }
+          }
+        #+end_src
+
+    - Of course,
+      *Rust considers it an error if the /divergent function/ return normally.*
 
 ** DONE Function and Method Calls - 134
    CLOSED: [2018-05-23 Wed 21:43]
@@ -5533,14 +5629,15 @@
   - Rust supports /polymorphism/ with two related features:
     + /generics/ -- =From Jian= /parametric polymorphism/.
       For instance, ~Vec<T>~
-      and
-    + /traits/ -- =From Jian= /Ad hoc polymorphism/
-      For instance, things that have ~.write()~ method, including ~File~'s and
-      ~TcpStream~'s.
 
-    These concepts will be familiar to many programmers,
-    =???=
-    *but Rust takes a fresh approach inspired by Haskell's /typeclasses/.*
+    + /traits/ -- =From Jian= /Ad hoc polymorphism/ inspired by Haskell's /typeclass/.
+      For instance, things that have ~.write()~ /method/, including ~File~'s and
+      ~TcpStream~'s.
+      * Functionally, Rust /traits/ are like the /rich interfaces/ supported by Scala;
+
+      * The way to use Rust /traits/ is like the way to use Haskell's /typeclasses/,
+        and the only but import difference is to use certain /trait/ it must be
+        in scope!!!
 
   - About /traits/:
     + We'll also use /traits/ to add /extension methods/ to EXISTING /types/,
@@ -7624,19 +7721,57 @@
      divvy up - 分紅
 
 * TODO 15. Iterators - 321 - =Reading=
-  The rest of this chapter falls into *five* parts:
-  1. We'll explain the ~Iterator~ and ~IntoIterator~ /traits/, which are the
-     foundation of Rust's /iterators/.
+  Rust has a very rich API for its /iterators/.
+    Use the /methods/ of /iterators/ is very common in idiomatic Rust, and being
+  familiar with the tools that come with them is essential to mastering the
+  language.
 
-  2. Then we'll go over the *three* stages of a typical /iterator/ pipeline:
-     1. *creating* an /iterator/ from some sort of _value source_;
+  - ~for~ loop provides a natural syntax for using /iterators/, but there are more
+    /methods/ can be called from /iterators/.
 
-     2. *adapting* one sort of /iterator/ into another by *selecting* or *processing*
-        values as they go by;
+  - Example:
+    1. Use ~for~ and the ~Range<i32>~ /iterator/:
+       #+begin_src rust
+         fn triangle(n: i32) -> i32 {
+             let mut sum = 0;
+             for i in 1..n+1 {
+                 sum += i;
+             }
+             sum
+         }
+       #+end_src
 
-     3. *consuming* the values the /iterator/ produces.
+    2. A equivalent but more concise way:
+       #+begin_src rust
+         fn triangle(n: i32) -> i32 {
+             (1..n+1).fold(0, |sum, item| sum + item)
+         }
+       #+end_src
+       This is concise, and it is a pretty standard fare for functional
+       programming languages.
+       + Q :: Then what is special for it in Rust?
+       + A :: Rust's iterators were carefully designed to ensure that the compiler
+              can translate them into excellent machine code as well!
 
-  3. We'll show how to *implement* /iterators/ for your own types.
+  - In a /release build/ of the 2 shown above,Rust knows the definition of ~fold~,
+    and will do:
+    1. INLINE the ~fold~ into ~triangle~
+    2. INLINE the /closure/ ~|sum, item| sum + item~
+    3. Replace the summation with the formula ~n * (n+1) / 2~
+
+  - The rest of this chapter falls into *five* parts:
+    1. We'll explain the ~Iterator~ and ~IntoIterator~ /traits/, which are the
+       foundation of Rust's /iterators/.
+
+    2. Then we'll go over the *three* stages of a typical /iterator/ pipeline:
+       1. *creating* an /iterator/ from some sort of _value source_;
+
+       2. *adapting* one sort of /iterator/ into another by *selecting* or *processing*
+          values as they go by;
+
+       3. *consuming* the values the /iterator/ produces.
+
+    3. We'll show how to *implement* /iterators/ for your own types.
 
 ** DONE The ~Iterator~ and ~IntoIterator~ Traits - 322
    CLOSED: [2018-06-12 Tue 22:08]
