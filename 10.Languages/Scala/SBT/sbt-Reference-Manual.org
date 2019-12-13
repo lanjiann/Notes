@@ -1,140 +1,6 @@
 #+TITLE: sbt Reference Manual
-#+VERSION: 2013
-#+AUTHOR: Shiti Saxena
+#+VERSION: 1.x (1.3.4)
 #+STARTUP: entitiespretty
-
-* Table of Contents                                      :TOC_4_org:noexport:
-- [[1. Getting Started with sbt][1. Getting Started with sbt]]
-  - [[a. Installing sbt][a. Installing sbt]]
-    - [[i. Installing sbt on Mac][i. Installing sbt on Mac]]
-    - [[ii. Installing sbt on Windows][ii. Installing sbt on Windows]]
-    - [[iii. Installing sbt on Linux][iii. Installing sbt on Linux]]
-  - [[b. Hello, World =NOTE=][b. Hello, World =NOTE=]]
-  - [[c. Directory structure][c. Directory structure]]
-  - [[d. Running][d. Running]]
-  - [[e. Build definition][e. Build definition]]
-  - [[f. Task graph][f. Task graph]]
-  - [[g. Scopes][g. Scopes]]
-  - [[h. Appending values][h. Appending values]]
-  - [[i. Scope delegation (~.value~ lookup)][i. Scope delegation (~.value~ lookup)]]
-  - [[j. Library dependencies][j. Library dependencies]]
-  - [[k. Multi-project builds][k. Multi-project builds]]
-  - [[l. Using plugins =TODO= =A lot of questions=][l. Using plugins =TODO= =A lot of questions=]]
-  - [[m. Custom settings and tasks][m. Custom settings and tasks]]
-  - [[n. Organizing the build][n. Organizing the build]]
-  - [[o. Getting Started summary =Important=][o. Getting Started summary =Important=]]
-- [[2. General Information][2. General Information]]
-  - [[a. Credits][a. Credits]]
-  - [[b. Community Plugins][b. Community Plugins]]
-  - [[c. Community Repository Policy][c. Community Repository Policy]]
-  - [[d. Bintray For Plugins][d. Bintray For Plugins]]
-  - [[e. Setup Notes][e. Setup Notes]]
-  - [[f. Using Sonatype][f. Using Sonatype]]
-  - [[g. Contributing to sbt][g. Contributing to sbt]]
-  - [[h. Changes][h. Changes]]
-    -   [[i. Migrating from sbt 0.13.x][i. Migrating from sbt 0.13.x]]
-    -  [[ii. sbt 1.0.4][ii. sbt 1.0.4]]
-    - [[iii. sbt 0.13.5+ Technology Previews][iii. sbt 0.13.5+ Technology Previews]]
-    -  [[iv. sbt 0.13.0 - 0.13.2][iv. sbt 0.13.0 - 0.13.2]]
-    -   [[v. sbt 0.12.4][v. sbt 0.12.4]]
-    -  [[vi. Older Changes][vi. Older Changes]]
-    - [[vii. Migrating from 0.7 to 0.10+][vii. Migrating from 0.7 to 0.10+]]
-- [[3. Detailed Topics][3. Detailed Topics]]
-  - [[a. Using sbt][a. Using sbt]]
-    -   [[i. Command Line Reference][i. Command Line Reference]]
-    -  [[ii. Console Project][ii. Console Project]]
-    - [[iii. Cross-building][iii. Cross-building]]
-    -  [[iv. Interacting with the Configuration System][iv. Interacting with the Configuration System]]
-    -   [[v. Triggered Execution][v. Triggered Execution]]
-    -  [[vi. Scripts, REPL, and Dependencies][vi. Scripts, REPL, and Dependencies]]
-    - [[vii. Understanding Incremental Recompilation][vii. Understanding Incremental Recompilation]]
-  - [[b. Configuration][b. Configuration]]
-    -    [[i. Classpaths, sources, and resources][i. Classpaths, sources, and resources]]
-    -   [[ii. Compiler Plugin Support][ii. Compiler Plugin Support]]
-    -  [[iii. Configuring Scala][iii. Configuring Scala]]
-    -   [[iv. Forking][iv. Forking]]
-    -    [[v. Global Settings][v. Global Settings]]
-    -   [[vi. Java Sources][vi. Java Sources]]
-    -  [[vii. Mapping Files][vii. Mapping Files]]
-    - [[viii. Local Scala][viii. Local Scala]]
-    -   [[ix. Macro Projects][ix. Macro Projects]]
-    -    [[x. Paths][x. Paths]]
-    -   [[xi. Parallel Execution][xi. Parallel Execution]]
-    -  [[xii. External Processes][xii. External Processes]]
-    - [[xiii. Running Project Code][xiii. Running Project Code]]
-    -  [[xiv. Testing][xiv. Testing]]
-  - [[c. Dependency Management][c. Dependency Management]]
-    -    [[i. Artifacts][i. Artifacts]]
-    -   [[ii. Dependency Management Flow][ii. Dependency Management Flow]]
-    -  [[iii. Library Management][iii. Library Management]]
-    -   [[iv. Proxy Repositories][iv. Proxy Repositories]]
-    -    [[v. Publishing][v. Publishing]]
-    -   [[vi. Resolvers][vi. Resolvers]]
-    -  [[vii. Update Report][vii. Update Report]]
-    - [[viii. Cached resolution][viii. Cached resolution]]
-  - [[d. Tasks and Commands][d. Tasks and Commands]]
-    -   [[i. Tasks][i. Tasks]]
-    -  [[ii. Input Tasks][ii. Input Tasks]]
-    - [[iii. Commands][iii. Commands]]
-    -  [[iv. Parsing and tab completion][iv. Parsing and tab completion]]
-    -   [[v. State and actions][v. State and actions]]
-    -  [[vi. Tasks/Settings: Motivation][vi. Tasks/Settings: Motivation]]
-  - [[e. Plugins and Best Practices][e. Plugins and Best Practices]]
-    -   [[i. General Best Practices][i. General Best Practices]]
-    -  [[ii. Plugins][ii. Plugins]]
-    - [[iii. Plugins Best Practices][iii. Plugins Best Practices]]
-    -  [[iv. Setting up Travis CI with sbt][iv. Setting up Travis CI with sbt]]
-    -   [[v. Testing sbt plugins][v. Testing sbt plugins]]
-    -  [[vi. sbt new and Templates][vi. sbt new and Templates]]
-    - [[vii. Cross building plugins][vii. Cross building plugins]]
-- [[4. How to...][4. How to...]]
-  - [[a. Classpaths][a. Classpaths]]
-  - [[b. Customizing paths][b. Customizing paths]]
-  - [[c. Generating files][c. Generating files]]
-  - [[d. Inspect the build][d. Inspect the build]]
-  - [[e. Interactive mode][e. Interactive mode]]
-  - [[f. Configure and use logging][f. Configure and use logging]]
-  - [[g. Project metadata][g. Project metadata]]
-  - [[h. Configure packaging][h. Configure packaging]]
-  - [[i. Running commands][i. Running commands]]
-  - [[j. Configure and use Scala][j. Configure and use Scala]]
-  - [[k. Generate API documentation][k. Generate API documentation]]
-  - [[l. Triggered execution][l. Triggered execution]]
-  - [[m .Define Custom Tasks][m .Define Custom Tasks]]
-  - [[n. How to take an action on startup][n. How to take an action on startup]]
-  - [[o. Sequencing][o. Sequencing]]
-    -   [[i. Defining a sequential task with Def.sequential][i. Defining a sequential task with Def.sequential]]
-    -  [[ii. Defining a dynamic task with Def.taskDyn][ii. Defining a dynamic task with Def.taskDyn]]
-    - [[iii. Doing something after an input task][iii. Doing something after an input task]]
-    -  [[iv. Defining a dynamic input task with Def.inputTaskDyn][iv. Defining a dynamic input task with Def.inputTaskDyn]]
-    -   [[v. How to sequence using commands][v. How to sequence using commands]]
-  - [[p. Examples][p. Examples]]
-    -   [[i. ~.sbt~ build examples][i. ~.sbt~ build examples]]
-    -  [[ii. ~.sbt~ build with ~.scala~ files example][ii. ~.sbt~ build with ~.scala~ files example]]
-    - [[iii. Advanced configurations example][iii. Advanced configurations example]]
-    -  [[iv. Advanced command example][iv. Advanced command example]]
-- [[5. Frequently Asked Questions][5. Frequently Asked Questions]]
-- [[6. Index][6. Index]]
-- [[7. Developer’s Guide (Work in progress)][7. Developer’s Guide (Work in progress)]]
-  - [[a. Modularization][a. Modularization]]
-    - [[i. Module summary][i. Module summary]]
-  - [[b. sbt Coding Guideline][b. sbt Coding Guideline]]
-  - [[c. sbt-datatype][c. sbt-datatype]]
-  - [[d. Compiler Interface][d. Compiler Interface]]
-    - [[i. Fetching the most specific sources][i. Fetching the most specific sources]]
-  - [[e. sbt Launcher][e. sbt Launcher]]
-    -   [[i. Getting Started with the sbt launcher][i. Getting Started with the sbt launcher]]
-    -  [[ii. Sbt Launcher Architecture][ii. Sbt Launcher Architecture]]
-    - [[iii. sbt Launcher Configuration][iii. sbt Launcher Configuration]]
-  - [[f. Notes][f. Notes]]
-    -   [[i. Core Principles][i. Core Principles]]
-    -  [[ii. Settings Core][ii. Settings Core]]
-    - [[iii. Setting Initialization][iii. Setting Initialization]]
-    -  [[iv. Build Loaders][iv. Build Loaders]]
-    -   [[v. Creating Command Line Applications Using sbt][v. Creating Command Line Applications Using sbt]]
-    -  [[vi. Nightly Builds][vi. Nightly Builds]]
-- [[Contents in Depth][Contents in Depth]]
-- [[Combined Pages][Combined Pages]]
 
 * DONE 1. Getting Started with sbt
   CLOSED: [2017-12-21 Thu 05:26]
@@ -145,18 +11,410 @@
 
 ** DONE a. Installing sbt
    CLOSED: [2017-12-21 Thu 17:50]
-*** TODO i. Installing sbt on Mac
+*** TODO i. Installing sbt on macOS
 *** TODO ii. Installing sbt on Windows
 *** iii. Installing sbt on Linux
 
-** TODO b. Hello, World =NOTE=
+** DONE b. sbt by example
+   CLOSED: [2019-08-09 Fri 15:17]
+*** DONE Create a minimum sbt build
+    CLOSED: [2019-08-07 Wed 16:31]
+    Assume you are in Bash, type the command below:
+    1. ~mkdir foo-build~
+    2. ~cd foo-build~
+    3. ~touch build.sbt~
+
+*** DONE Start sbt shell
+    CLOSED: [2019-08-07 Wed 16:32]
+    Run ~sbt~ and you'll see
+    #+begin_src text
+      [info] Updated file /tmp/foo-build/project/build.properties: set sbt.version to 1.1.4
+      [info] Loading project definition from /tmp/foo-build/project
+      [info] Loading settings from build.sbt ...
+      [info] Set current project to foo-build (in build file:/tmp/foo-build/)
+      [info] sbt server started at local:///Users/eed3si9n/.sbt/1.0/server/abc4fb6c89985a00fd95/sock
+      sbt:foo-build>
+    #+end_src
+
+*** DONE Exit sbt shell
+    CLOSED: [2019-08-07 Wed 17:32]
+    Sbt command ~exit~
+
+*** DONE Compile a project
+    CLOSED: [2019-08-07 Wed 17:32]
+    Sbt command ~compile~
+
+*** DONE Recompile on code change
+    CLOSED: [2019-08-07 Wed 17:33]
+    Sbt shell command ~~compile~
+
+*** DONE Create a source file
+    CLOSED: [2019-08-07 Wed 17:34]
+
+*** DONE Run a previous command
+    CLOSED: [2019-08-07 Wed 17:34]
+
+*** DONE Getting help
+    CLOSED: [2019-08-07 Wed 17:34]
+    Sbt command ~help~
+
+    - Example: ~help run~
+
+*** DONE Run your app
+    CLOSED: [2019-08-07 Wed 17:35]
+    Sbt command ~run~
+
+*** DONE Set ~ThisBuild / scalaVersion~ from sbt shell
+    CLOSED: [2019-08-07 Wed 17:35]
+    Sbt shell command ~set ThisBuild / scalaVersion := "2.12.7"~
+
+*** DONE Save the session to =build.sbt=
+    CLOSED: [2019-08-07 Wed 17:36]
+    Sbt shell command ~session save~
+
+*** DONE Name your project
+    CLOSED: [2019-08-07 Wed 17:37]
+    Edit =build.sbt=
+    #+begin_src scala
+      ThisBuishorter namesld / scalaVersion := "2.12.7"
+      ThisBuild / organization := "com.example"
+
+      lazy val hello = (project in file("."))
+        .settings(
+          name := "Hello"
+        )
+    #+end_src
+
+*** DONE Reload the build
+    CLOSED: [2019-08-07 Wed 17:39]
+    Sbt shell command ~reload~
+
+*** DONE Add ScalaTest to ~libraryDependencies~
+    CLOSED: [2019-08-07 Wed 17:41]
+    Edit =build.sbt=
+    #+begin_src scala
+      ThisBuild / scalaVersion := "2.12.7"
+      ThisBuild / organization := "com.example"
+
+      lazy val hello = (project in file("."))
+        .settings(
+          name := "Hello",
+          libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+        )
+    #+end_src
+
+    and then ~reload~
+
+*** DONE Run tests
+    CLOSED: [2019-08-07 Wed 17:41]
+    Sbt command ~test~
+
+*** DONE Run incremental tests continuously
+    CLOSED: [2019-08-07 Wed 17:41]
+    Sbt shell command ~~testQuick~
+
+*** DONE Write a test
+    CLOSED: [2019-08-07 Wed 17:43]
+    #+begin_src scala
+      // src/test/scala/HelloSpec.scala
+
+      import org.scalatest._
+
+      class HelloSpec extends FunSuite with DiagrammedAssertions {
+        test("Hello should start with H") {
+          assert("hello".startsWith("H"))
+        }
+      }
+    #+end_src
+
+*** DONE Make the test pass
+    CLOSED: [2019-08-07 Wed 17:43]
+    Correct the tests written in the last section to make it pass.
+
+*** DONE Add a library dependency
+    CLOSED: [2019-08-07 Wed 17:46]
+    Edit =build.sbt=
+    #+begin_src scala
+      ThisBuild / scalaVersion := "2.12.7"
+      ThisBuild / organization := "com.example"
+
+      lazy val hello = (project in file("."))
+        .settings(
+          name := "Hello",
+          libraryDependencies ++= Seq(
+            ""com.typesafe.play" %% "play-json" % "2.6.9",
+            "com.eed3si9n" %% "gigahorse-okhttp" % "0.3.1",
+            "org.scalatest" %% "scalatest" % "3.0.5" % Test
+          ),
+        )
+    #+end_src
+
+    and then ~reload~
+
+*** DONE Use Scala REPL
+    CLOSED: [2019-08-07 Wed 17:48]
+    Sbt command ~console~
+
+*** DONE Make a subproject
+    CLOSED: [2019-08-07 Wed 17:49]
+    Edit =build.sbt=
+    #+begin_src scala
+      ThisBuild / scalaVersion := "2.12.7"
+      ThisBuild / organization := "com.example"
+
+      lazy val hello = (project in file("."))
+        .settings(
+          name := "Hello",
+          libraryDependencies ++= Seq(
+            "com.eed3si9n" %% "gigahorse-okhttp" % "0.3.1",
+            "org.scalatest" %% "scalatest" % "3.0.5" % Test)
+          )
+
+      lazy val helloCore = (project in file("core"))
+        .settings(
+          name := "Hello Core",
+          )
+    #+end_src
+    Then ~reload~
+
+*** DONE List all subprojects
+    CLOSED: [2019-08-07 Wed 17:50]
+    Sbt command ~projects~
+
+*** DONE Compile the subproject
+    CLOSED: [2019-08-08 Thu 14:52]
+    For example: ~helloCore/compile~
+
+*** DONE Add ScalaTest to the subproject
+    CLOSED: [2019-08-08 Thu 14:53]
+    #+begin_src scala
+      ThisBuild / scalaVersion := "2.12.7"
+      ThisBuild / organization := "com.example"
+
+      val scalaTest = "org.scalatest" %% "scalatest" % "3.0.5"
+
+      lazy val hello = (project in file("."))
+        .settings(
+          name := "Hello",
+          libraryDependencies += "com.eed3si9n" %% "gigahorse-okhttp" % "0.3.1",
+          libraryDependencies += scalaTest % Test,
+          )
+
+      lazy val helloCore = (project in file("core"))
+        .settings(
+          name := "Hello Core",
+          libraryDependencies += scalaTest % Test,
+          )
+    #+end_src
+
+*** DONE Broadcasst commands
+    CLOSED: [2019-08-08 Thu 14:59]
+    Set ~aggregate~ so that the command sent to ~hello~ is broadcast to ~helloCore~ too:
+    #+begin_src scala
+      ThisBuild / scalaVersion := "2.12.7"
+      ThisBuild / organization := "com.example"
+
+      val scalaTest = "org.scalatest" %% "scalatest" % "3.0.5"
+
+      lazy val hello = (project in file(".")).
+        aggregate(helloCore).
+        settings(
+          name := "Hello",
+          libraryDependencies ++= Seq(
+            "com.eed3si9n" %% "gigahorse-okhttp" % "0.3.1",
+            scalaTest % Test,
+          )
+        )
+
+      lazy val helloCore = (project in file("core")).
+        settings(
+          name := "Hello Core",
+          libraryDependencies += scalaTest % Test,
+        )
+    #+end_src
+    After ~reload~, ~testQuick~ now runs on both subprojects.
+
+*** DONE Make hello depend on helloCore
+    CLOSED: [2019-08-09 Fri 13:24]
+    Add ~dependesOn(...)~ to a project (also move Gigahorse dependency to ~helloCore~):
+    #+begin_src scala
+      ThisBuild / scalaVersion := "2.12.7"
+      ThisBuild / organization := "com.example"
+
+      val scalaTest = "org.scalatest" %% "scalatest" % "3.0.5"
+
+      lazy val hello = (project in file("."))
+        .aggregate(helloCore)
+        .dependsOn(helloCore)
+        .settings(
+          name := "Hello",
+          libraryDependencies += scalaTest % Test,
+          )
+
+      lazy val helloCore = (project in file("core"))
+        .settings(
+          name := "Hello Core",
+          libraryDependencies += "com.eed3si9n" %% "gigahorse-okhttp" % "0.3.1",
+          libraryDependencies += scalaTest % Test,
+          )
+    #+end_src
+
+*** DONE Parse JSON using Play JSON
+    CLOSED: [2019-08-09 Fri 13:25]
+    Add ~"com.typesafe.play" %% "play-json" % "2.6.9"~
+    After ~reload~,
+    + add ~core/src/main/scala/example/core/Weather.scala~:
+      #+begin_src scala
+        package example.core
+
+        import gigahorse._, support.okhttp.Gigahorse
+        import scala.concurrent._, duration._
+        import play.api.libs.json._
+
+        object Weather {
+          lazy val http = Gigahorse.http(Gigahorse.config)
+
+          def weather: Future[String] = {
+            val baseUrl = "https://www.metaweather.com/api/location"
+            val locUrl = baseUrl + "/search/"
+            val weatherUrl = baseUrl + "/%s/"
+            val rLoc = Gigahorse.url(locUrl).
+              get.
+              addQueryString("query" -> "New York")
+
+            import ExecutionContext.Implicits.global
+
+            // TODO: from Jian -- I don't like the `get`'s below
+            for {
+              loc <- http.run(rLoc, parse)
+              woeid = (loc \ 0  \ "woeid").get
+              rWeather = Gigahorse.url(weatherUrl format woeid).get
+              weather <- http.run(rWeather, parse)
+            } yield (weather \\ "weather_state_name")(0).as[String].toLowerCase
+          }
+
+          private def parse = Gigahorse.asString andThen Json.parse
+        }
+      #+end_src
+
+    + change ~src/main/scala/example/Hello.scala~ as follows:
+      #+begin_src scala
+        package example
+
+        import scala.concurrent._, duration._
+        import core.Weather
+
+        object Hello extends App {
+          val w = Await.result(Weather.weather, 10.seconds)
+          println(s"Hello! The weather in New York is $w.")
+          Weather.http.close()
+        }
+      #+end_src
+
+    + Finally, run it with ~run~.
+
+*** DONE Add sbt-native-packger plugin
+    CLOSED: [2019-08-09 Fri 14:28]
+    1. Create =project/plugins.sbt=:
+       #+begin_src scala
+         addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.3.4")
+       #+end_src
+
+    2. Edit =build.sbt= as follows to add ~JavaAppPackaging~:
+       #+begin_src scala
+         ThisBuild / scalaVersion := "2.12.7"
+         ThisBuild / organization := "com.example"
+
+         val scalaTest = "org.scalatest" %% "scalatest" % "3.0.5"
+         val gigahorse = "com.eed3si9n" %% "gigahorse-okhttp" % "0.3.1"
+         val playJson  = "com.typesafe.play" %% "play-json" % "2.6.9"
+
+         lazy val hello = (project in file("."))
+           .aggregate(helloCore)
+           .dependsOn(helloCore)
+           .enablePlugins(JavaAppPackaging)
+           .settings(
+             name := "Hello",
+             libraryDependencies += scalaTest % Test,
+             )
+
+         lazy val helloCore = (project in file("core"))
+           .settings(
+             name := "Hello Core",
+             libraryDependencies ++= Seq(gigahorse, playJson),
+             libraryDependencies += scalaTest % Test,
+             )
+       #+end_src
+
+*** DONE Reload and create a =.zip= distribution
+    CLOSED: [2019-08-09 Fri 14:33]
+    ~reload~ and then ~dist~
+    Here is how you can run:
+    #+begin_src bash
+      cd /tmp/someother
+      unzip -o -d /tmp/someother /tmp/foo-build/target/universal/hello-0.1.0-SNAPSHOT.zip
+      ./hello-0.1.0-SNAPSHOT/bin/hello
+    #+end_src
+
+*** DONE Dockerize your app =???=
+    CLOSED: [2019-08-09 Fri 14:34]
+    1. Sbt command ~Docker/publishLocal~
+    2. Run it ~docker run hello:0.1.0-SNAPSHOT~
+*** DONE Set the version
+    CLOSED: [2019-08-09 Fri 14:38]
+    Add ~ThisBuild /version := "0.1.0"~
+
+*** DONE Switch scalaVersion temporarily
+    CLOSED: [2019-08-09 Fri 15:01]
+    Sbt shell command like ~++2.11.12!~ can force the version.
+    Run ~scalaVersion~ to check current version, and you'll see:.
+    #+begin_src scala
+      scalaVersion
+      // [info] helloCore / scalaVersion
+      // [info]  2.11.12
+      // [info] scalaVersion
+      // [info]  2.11.12 scalaVersion
+      // [info] 2.12.7
+    #+end_src
+
+    The temporary ~scalaVersion~ will go away after ~reload~.
+*** DONE Inspect the dist task =???=
+    CLOSED: [2019-08-09 Fri 15:13]
+    To find out more about ~dist~, try ~help~ and ~inspect~:
+    #+begin_src scala
+      help dist
+      // Creates the distribution packages.
+
+      inspect dist
+      // TODO: ???
+
+      inspect tree dist  // Call `inspect` recursively on the dependency tasks
+      // [info] dist = Task[java.io.File]
+      // [info]   +-Universal / dist = Task[java.io.File]
+      // ....
+    #+end_src
+
+*** DONE Batch mode
+    CLOSED: [2019-08-09 Fri 15:14]
+    ~sbt clean "testOnly HelloSpec"~
+
+*** DONE sbt new command
+    CLOSED: [2019-08-09 Fri 15:17]
+    Quickly setup a simple "Hello world" build.
+    ~sbt new sbt/scala-seed.g8~
+    It will ask you the project name.
+
+*** DONE Credits
+    CLOSED: [2019-08-09 Fri 15:15]
+    This page is based on the [[https://www.scalawilliam.com/essential-sbt/][Essential sbt]] tutorial written by William "Scala William" Narmontas.
+
 ** DONE c. Directory structure
-   CLOSED: [2017-12-18 Mon 21:07]
+   CLOSED: [2019-08-09 Fri 15:36]
    - Base directory :: the directory containing the project.
 
    - Source code :: /sbt/ uses the same directory structure as /Maven/ for source
                     files by default (all paths are relative to the base
-                    directory). 
+                    directory).
 
      + Source code directory structure
        #+BEGIN_SRC text
@@ -188,7 +446,8 @@
        see below!!!
 
      + Put =.scala= files in base directory is NOT ONLY an odd trick.
-       It becomes relevant later. =TODO= =IMPORTANT=
+       It becomes relevant later.
+       TODO =IMPORTANT=
 
    - *sbt build definition files*
      =build.sbt= (actually any files named with =.sbt= extension) in the
@@ -197,8 +456,7 @@
    - *Build support files*
      In addition to =build.sbt=, =project= directory can contain =.scala= files
      that defines helper objects and one-off plugins.
-
-     =TODO= See /organizing the build/ for more.
+     TODO See /organizing the build/ for more.
 
    - *Build products*
      Generated files (compiled classes, packaged jars, managed files, caches, and
@@ -206,15 +464,14 @@
 
    - *Configuring version control*
      Add ~target/~ to =.gitignore=
-
-     Note:
+     _Note:_ =IMPORTANT=-
      + this deliberately has _a trailing ~/~ (to match only directories)_
        and
      + it deliberately has _NO leading ~/~ (to match =project/target/= in
        addition to plain =target/=)_.
 
 ** DONE d. Running
-   CLOSED: [2017-12-18 Mon 21:07]
+   CLOSED: [2019-08-12 Mon 15:33]
    - *sbt shell*
      + Use ~sbt~ command to get into /sbt shell/.
 
@@ -222,24 +479,33 @@
        etc.
 
    - *Batch mode*
-     In you system shell, type ~sbt~, and then specify a space-separated list of
+     In you system shell, type ~sbt~, and then specify a _space-separated list_ of
      /sbt commands/ as arguments.
        If a /sbt command/ needs arguments, enclose this command and its argument
      in quotes as one string, and pass this string as one argument of the ~sbt~
      command. sbt by enclosing them in quotes.
 
-     + For example, ~sbt clean compile "testOnly TestA testB"~. Here we have
+     * For example, ~sbt clean compile "testOnly TestA testB"~. Here we have
        * _THREE commands_
        * the last command ~testOnly~ has _TWO arguments_.
 
-     + =Note=:
-       Running in batch mode requires JVM spinup and JIT each time, so your build
+     * NOTE:
+       Running in /batch mode/ requires JVM spinup and JIT each time, so your build
        will run _much slower_.
 
-       For day-to-day coding, we recommend
-       * using the /sbt shell/
-         or
-       * /Continuous build and test feature/ described below. =TODO=
+       + For day-to-day coding, we recommend
+         - using the /sbt shell/
+           or
+         - /Continuous build and test feature/ described below.
+
+       + Beginning in sbt 0.13.16, using /batch mode/ in sbt will issue an
+         informational startup message,
+         #+begin_src text
+           [info] Executing in batch mode. For better performance use sbt's shell
+           ...
+         #+end_src
+         =IMPORTANT=
+         Use ~supressSbtShellNotification := true~ to supress this!
 
    - *Continuous build and test*
      + Type in a =~= prefixed prefixed command, and press <Enter>. Then the
@@ -247,48 +513,48 @@
        change.
 
      + Press <Enter> again to stop watching for changes.
+       =IMPORTANT=
 
      + This feature can be used with either /sbt shell/ or /batch mode/.
+       =from Jian= ??? Why can I use it in /batch mode/???
 
-     + =TODO= See /Triggered Execution/ for more details.
+     + TODO See /Triggered Execution/ for more details.
 
    - *Common commands*
-     - =TODO= 
-       For a more complete list, see /Command Line Reference/.
-
-     - =TODO= This table
-       | ~clean~	           | Deletes all generated files (in the target directory).   |
-       |---------------------+----------------------------------------------------------|
-       | ~compile~	         | Compiles the main sources                                |
-       |                     | (in src/main/scala and src/main/java directories).       |
-       |---------------------+----------------------------------------------------------|
-       | ~test~	             | Compiles and runs all tests.                             |
-       |---------------------+----------------------------------------------------------|
-       | ~console~	         | Starts the Scala interpreter with a classpath            |
-       |                     | including the compiled sources and all dependencies.     |
-       |                     | To return to sbt, type :quit, Ctrl+D (Unix), or          |
-       |                     | Ctrl+Z (Windows).                                        |
-       |---------------------+----------------------------------------------------------|
-       | ~run <argument>*~	 | Runs the main class for the project in the same          |
-       |                     | virtual machine as sbt.                                  |
-       |---------------------+----------------------------------------------------------|
-       | ~package~	         | Creates a jar file containing the files in               |
-       |                     | src/main/resources and the classes compiled from         |
-       |                     | src/main/scala and src/main/java.                        |
-       |---------------------+----------------------------------------------------------|
-       | ~help <command>~	   | Displays detailed help for the specified command.        |
-       |                     | If no command is provided, displays brief                |
-       |                     | descriptions of all commands.                            |
-       |---------------------+----------------------------------------------------------|
-       | ~reload~	           | Reloads the build definition                             |
-       |                     | (=build.sbt=, =project/*.scala=, =project/*.sbt= files). |
-       |                     | Needed if you change the build definition.               |
+     For a more complete list, see /Command Line Reference/.
+     | ~clean~	           | Deletes all generated files (in the target directory).   |
+     |---------------------+----------------------------------------------------------|
+     | ~compile~	         | Compiles the main sources                                |
+     |                     | (in src/main/scala and src/main/java directories).       |
+     |---------------------+----------------------------------------------------------|
+     | ~test~	             | Compiles and runs all tests.                             |
+     |---------------------+----------------------------------------------------------|
+     | ~console~	         | Starts the Scala interpreter with a classpath            |
+     |                     | including the compiled sources and all dependencies.     |
+     |                     | To return to sbt, type :quit, Ctrl+D (Unix), or          |
+     |                     | Ctrl+Z (Windows).                                        |
+     |---------------------+----------------------------------------------------------|
+     | ~run <argument>*~	 | Runs the main class for the project in the same          |
+     |                     | virtual machine as sbt.                                  |
+     |---------------------+----------------------------------------------------------|
+     | ~package~	         | Creates a jar file containing the files in               |
+     |                     | src/main/resources and the classes compiled from         |
+     |                     | src/main/scala and src/main/java.                        |
+     |---------------------+----------------------------------------------------------|
+     | ~help <command>~	   | Displays detailed help for the specified command.        |
+     |                     | If no command is provided, displays brief                |
+     |                     | descriptions of all commands.                            |
+     |---------------------+----------------------------------------------------------|
+     | ~reload~	           | Reloads the build definition                             |
+     |                     | (=build.sbt=, =project/*.scala=, =project/*.sbt= files). |
+     |                     | Needed if you change the build definition.               |
 
    - *Tab completion*
      Press <Tab> once to show only a subset of most likely completions.
      Press <Tab> more times to show more verbose choices.
 
-   - *History Commands* =TODO= 1. =RE-READ= 2. =Try them in practice=
+   - *History Commands*
+     The sbt shell remembers history, even if you exit sbt and restart it.
      | ~!~	       | Show history command help.                                        |
      | ~!!~	       | Execute the previous command again.                               |
      | ~!:~	       | Show all previous commands.                                       |
@@ -300,149 +566,382 @@
 
 ** TODO e. Build definition
    - This page describes sbt build definitions, including
-     + some “theory”
+     + some "theory"
      + the syntax of =build.sbt=.
 
-   - *Specifying the sbt version*
-     If =project/build.sbt= is not present, the sbt launcher will choose an
-     _ARBITRARY_ version. =IMPORTANT= _NO guarantee_ to get the newest version!!!
+*** DONE Specifying the sbt version
+    CLOSED: [2019-08-12 Mon 16:06]
+    If =project/build.sbt= is not present, the sbt launcher will choose an
+    _ARBITRARY_ version --
+    *this is ALWAYS NOT what you want!!! You should never do this!!!*
 
-     _YOU SHOULD NEVER DO THIS!!!_
+*** DONE What is a build definition?
+    CLOSED: [2019-08-12 Mon 16:09]
+    - build definition :: A set of /projects/ (of type ~Project~).
 
-   - *What is a build definition?*
-     + build definition :: A set of /projects/ (of type ~Project~).
+    - The /build definition/ is defined in =build.sbt=.
 
-     + The /build definition/ is defined in =build.sbt=.
+    - Because the term /project/ can be ambiguous,
+      we often call it /subproject/ in this guide.
 
-     + Because the term /project/ can be ambiguous, we often call it /subproject/
-       in this guide.
+    - Example:
+      #+BEGIN_SRC scala
+        lazy val root = (project in file("."))
+          .settings(
+            name := "Hello",
+            scalaVersion := "2.12.3"
+          )
+      #+END_SRC
+      Each subproject is configured by _key-value pairs_ -- in the example
+      above, they are ~name~ and ~scalaVersion~ key-value pairs.
 
-     + Example:
+*** TODO How =build.sbt= defines settings
+    =build.sbt= defines /subprojects/, which holds a sequence of key-value pairs
+    called /setting expressions/ using =build.sbt= *DSL*.
+    #+BEGIN_SRC scala
+      lazy val root = (project in file("."))
+        .settings(
+          name         := "Hello",
+          organization := "com.example",
+          scalaVersion := "2.12.4",
+          version      := "0.1.0-SNAPSHOT"
+        )
+    #+END_SRC
+    + A subproject holds a sequence of key-value pairs called /setting expressions/
+      using /build.sbt DSL/.
+
+    + _setting expressions (some of them are also called /task expressions/)._
+      The name /setting expression/ has wider meaning than /task expression/.
+      organization     :=       { "com.example" }
+      ------------  ---------   -----------------
+           key      operator   (setting/task) body
+
+    + A key is an instance of ~SettingKey[T]~, ~TaskKey[T]~, or ~InputKey[T]~,
+      where ~T~ is the expected value type.
+      For example, the key ~name~ above is typed to ~SettingKey[String]~.
+
+    + You can use ~val~'s, ~lazy val~'s, and ~def~'s in =build.sbt=.
+
+    + _Top-level objects and classes_ are NOT allowed in =build.sbt=.
+      Those should go in the =project/= directory as _Scala source files_.
+      =IMPORTANT=
+
+*** TODO Keys
+**** Types
+      There are _THREE_ flavors of key:
+      + ~SettingKey[T]~:
+        a key for a value *computed ONCE* (the value is computed _when loading_
+        the /subproject/, and kept around).
+
+      + ~TaskKey[T]~:
+        a key for a value, called a /task/, that has to be *recomputed EACH
+        time*, potentially _with side effects_.
+
+      + ~InputKey[T]~:
+        a key for a /task/ that _has command line arguments_ as input.
+        TODO Check out /Input Tasks/ for more details.
+
+**** Built-in Keys
+      The built-in keys are just fields in an /object/ called ~keys~.
+      A =build.sbt= implicitly has an import =sbt.Keys._=
+
+**** Custom Keys
+     - Custom keys may be defined with their respective _creation methods_:
+       + ~settingKey~
+       + ~taskKey~
+       + ~inputKey~
+       Each /method/ expects the /type/ of the value associated with the key as
+       well as a /description/. See the definition below.
+
+     - The name of the key is taken from the ~val~ the key is assigned to.
+       For example, to define a key for a new task called ~hello~,
+        #+begin_src scala
+          lazy val hello = taskKey[Unit]("An example task")
+        #+end_src
+
+     - There are ~val~'s and ~def~'s in addition to settings.
+       1. Run ~val~'s and ~def~'s _BEFORE_ /settings/ regardless of where they
+          are defined in the file.
+
+       2. *Typically, ~lazy val~'s are used instead of ~val~'s to avoid
+          initialization order problems.*
+
+**** Task vs Setting keys
+      - Define a task with ~TaskKey[T]~.
+
+      - Tasks :: operations such as /compile/ or /package/.
+
+      - /Tasks/
+        + may return ~Unit~, OR
+        + may return a value related to the /task/.
+
+        For example, ~package~ is a ~TaskKey[File]~ and its value is the jar
+        file it creates.
+
+      - Each time you /start a task execution/, for example by typing ~compile~
+        at the /interactive sbt prompt/, *sbt will re-run any tasks involved
+        EXACTLY _ONCE_.*
+
+**** TODO Defining tasks and settings
+***** Types for tasks and settings
+
+**** TODO Keys in sbt shell
+**** TODO Imports in =build.sbt=
+     TODO
+
+**** DONE Bare =.sbt= build definition
+     CLOSED: [2019-08-12 Mon 16:45]
+     - Bare style :: write the _settings_ directly into the =build.sbt= file instead
+                     of putting them inside a ~.settings(...)~ call.
+     - Example:
+       #+begin_src scala
+         ThisBuild / version := "1.0"
+         ThisBuild / scalaVersion := "2.12.8"
+       #+end_src
+
+     - This syntax is recommended for ~ThisBuild~ scoped settings and adding plugins.
+       TODO See later section about the scoping and the plugins.
+
+**** DONE Adding library dependencies
+     CLOSED: [2019-08-12 Mon 16:50]
+     Two options:
+     1. Drop jars in =lib/= -- /unmanaged depdendencies/
+
+     2. Add in =build.sbt= through ~libraryDependencies~ as /managed depdendencies/.
+        Example:
+        #+begin_src scala
+          val derby = "org.apache.derby" % "derby" % "10.4.1.3"
+
+          ThisBuild / organization := "com.example"
+          ThisBuild / scalaVersion := "2.12.8"
+          ThisBuild / version      := "0.1.0-SNAPSHOT"
+
+          lazy val root = (project in file("."))
+            .settings(
+              name := "Hello",
+              libraryDependencies += derby
+            )
+        #+end_src
+        - Exaplain the operators:
+          + ~+=~: append to the old one
+            TODO Task Graph
+
+          + ~%~: construct an Ivy module ID from strings.
+            TODO Library depdencencies
+
+** DONE f. Multi-project builds
+   CLOSED: [2019-08-13 Tue 15:35]
+   This page introduces _multiple subprojects_ in a single build.
+
+*** DONE Multiple subprojects
+    CLOSED: [2019-08-13 Tue 14:21]
+     Sometimes users may want to _keep multiple related /subprojects/ in a single
+     build_, especially _if they depend on one another and you tend to modify them
+     together_.
+
+     - Each /subproject/ in a build
+       + has its own source directory.
+       + generates its own jar file when run ~package~.
+
+     - For example,
        #+BEGIN_SRC scala
-         lazy val root = (project in file("."))
-           .settings(
-             name := "Hello",
-             scalaVersion := "2.12.3"
-           )
+         lazy val util = (project in file("util"))
+         lazy val core = (project in file("core"))
        #+END_SRC
 
-     + Each subproject is configured by key-value pairs.
-       =IMPORTANT=
+       If the name of a base directory is the same as the name of the ~val~, it
+       can be omitted.
+       #+BEGIN_SRC scala
+         lazy val util = project
+         lazy val core = project
+       #+END_SRC
+       + The capacility of the expressiveness is limited by the allowed identifier
+         in Scala -- we often want the subproject directory name in the pattern
+         of hyphen connected words, but _hyphen_ is not a legal Scala identifier
+         character.
 
-   - *How build.sbt defines settings*
-     =build.sbt= defines /subprojects/, which holds a sequence of key-value pairs
-     called /setting expressions/ using =build.sbt= DSL.
-     #+BEGIN_SRC scala
-       lazy val root = (project in file("."))
-         .settings(
-           name         := "Hello",
+**** DONE Build-wide settings
+     CLOSED: [2019-08-13 Tue 14:17]
+     - Q :: How to factor out common setting across multiple projects?
+
+     - A :: Define the settings scoped to ~ThisBuild~. There are some limitations:
+       + the RHS needs to be
+         * a pure value
+           OR
+         * /settings/ scoped to ~Global~ or ~ThisBuild~ TODO What is ~Global~
+           =from Jian= my understanding: you can't make forward refererces to
+           get values not defined in this or an outer scope.
+
+       + There are no default settings to subprojects. TODO See *Scopes*
+
+     - Example:
+       Set the common settings once, and make it affect build-wide settings,
+       including all subprojects.
+       #+begin_src scala
+         ThisBuild / organization := "com.example"
+         ThisBuild / version      := "0.1.0-SNAPSHOT"
+         ThisBuild / scalaVersion := "2.12.8"
+
+         lazy val core = (project in file("core")).
+           settings(
+             // other settings
+           )
+
+
+         lazy val util = (project in file("util")).
+           settings(
+             // other settings
+           )
+       #+end_src
+
+**** DONE Common settings
+     CLOSED: [2019-08-13 Tue 14:21]
+     - Another way to factor out _common settings_ across multiple projects is to
+       + create a sequence named ~commonSeettings~
+         AND
+       + call ~settings~ method _on EACH project_.
+
+     - Example:
+       #+begin_src scala
+         lazy val commonSettings = Seq(
            organization := "com.example",
-           scalaVersion := "2.12.4",
-           version      := "0.1.0-SNAPSHOT"
+           version := "0.1.0-SNAPSHOT",
+           scalaVersion := "2.12.4"
          )
-     #+END_SRC
 
-     + The =build.sbt= DSL: a setting/task expression
+         lazy val core = (project in file("core")).
+           settings(
+             commonSettings,
+             // other settings
+           )
 
-       organization     :=       { "com.example" }
-       ------------  ---------   -----------------
-            key      operator   (setting/task) body
+         lazy val util = (project in file("util")).
+           settings(
+             commonSettings,
+             // other settings
+           )
+       #+end_src
 
-     + The name /setting expression/ has wider meaning than /task expression/.
-       =TODO= More details in this section.
+*** DONE Dependencies
+    CLOSED: [2019-08-13 Tue 15:20]
+    /Subprojects/ _in one build_ can be
+    - completely independent of one another.
+      OR
+    - related to one another by _TWO_ kinds of dependencies:
+      + ~aggregate~
+      + /classpath/
 
-     + A key is an instance of ~SettingKey[T]~, ~TaskKey[T]~, or ~InputKey[T]~,
-       where ~T~ is the expected value type.
+**** Aggregation
+     - Aggregation :: running a task on the _aggregate project_ will also run it
+                      on the _aggregated projects_.
 
-     + You can use ~val~'s, ~lazy val~'s, and ~def~'s in =build.sbt=.
+     - For example,
+       #+BEGIN_SRC scala
+         lazy val root = (project in file("."))
+           .aggregate(util, core)
 
-     + _Top-level objects and classes_ are NOT allowed in =build.sbt=.
-       Those should go in the =project/= directory as Scala source files.
-       =TODO=
+         lazy val util = (project in file("util"))
+         lazy val core = (project in file("core"))
+       #+END_SRC
+       + When you run ~compile~ in the sbt shell (by default, you are in the
+         ~root~ subproject),
+         _all three projects will be compiled_.
 
-   - *Keys*
-     + *Types*
-       There are _THREE_ flavors of key:
-       * ~SettingKey[T]~:
-         a key for a value _computed once_ (the value is computed _when loading_
-         the /subproject/, and kept around).
+       + If you want to compile one /subproject/ that being aggregated, rather
+         than the ~root~, you need to
+         1. use ~project <project name>~ to switch to that /subproject/
+         2. ~compile~
 
-       * ~TaskKey[T]~:
-         a key for a value, called a /task/, that has to be _recomputed EACH
-         time_, potentially _with side effects_.
+     - /aggregation/ will run the aggregated tasks *in parallel and with no
+       defined ordering between them*.
 
-       * ~InputKey[T]~:
-         a key for a /task/ that _has command line arguments_ as input.
-         =TODO= Check out /Input Tasks/ for more details.
+     - Control aggregation per-task
+       For example, avoid aggregating the ~update~ task:
+       #+BEGIN_SRC scala
+         lazy val root = (project in file("."))
+           .aggregate(util, core)
+           .settings(
+             update / aggregate := false
+           )
 
-     + *Built-in Keys*
-       The built-in keys are just fields in an object called /Keys/.
-       A =build.sbt= implicitly has an import =sbt.Keys._=
+         lazy val util = (project in file("util"))
+         lazy val core = (project in file("core"))
+       #+END_SRC
+       + ~update / aggregate~ is the aggregate key scoped to the ~update~ task.
+         TODO See *scopes*.
 
-     + *Custom Keys*
-       * Custom keys may be defined with their respective _creation methods_:
-         - ~settingKey~
-         - ~taskKey~
-         - ~inputKey~
+**** Classpath dependencies
+     #+begin_src scala
+     lazy val core = project.dependsOn(util)
+     #+end_src
+     ~dependsOn~ can have multiple arguments.
 
-       * Each method expects the type of the value associated with the key as
-         well as a description.
-         =TODO= =???=
+***** Per-configuration classpath dependencies*
+      - ~foo.dependsOn(bar)~ means that _the /compile configuration/ in ~foo~
+        depends on the /compile configuration/ in ~bar~._
 
-       * The name of the key is taken from the ~val~ the key is assigned to.
-         For example, to define a key for a new task called ~hello~,
-         ~lazy val hello = taskKey[Unit]("An example task")~
+        This can be written explicitly as:
+        ~foo.dependsOn(bar % "compile -> compile")~, where the ~-> compile~
+        part can be ignored, which is the default, no matter what before the
+        ~->~.
 
-       * There are ~val~'s and ~def~'s in addition to settings.
-         1. Run ~val~'s and ~def~'s _BEFORE_ /settings/ regardless of where they
-            are defined in the file.
+      - A useful declaration is ~test->test~.
+        This allows you to put utility code for testing in ~bar/src/test/scala~
+        and then use that code in ~foo/src/test/scala~, for example.
 
-         2. Typically, ~lazy val~'s are used instead of ~val~'s to avoid
-            initialization order problems.
+      - There can be multiple configurations for a dependency, separated by
+        semicolons. For example,
+        ~dependsOn(bar % "test->test; compile->compile")~.
 
-     + *Task vs Setting keys*
-       * Define a task with ~TaskKey[T]~.
+      - =TODO= =From Jian=
+        Can I put spaces around ~->~???
 
-       * Tasks :: operations such as compile or package.
+**** Inter-project dependencies TODO =NOT-often-used!!!=
 
-       * /Tasks/
-         - may return ~Unit~, OR
-         - may return a value related to the /task/.
+*** TODO Default root project
+    If a project is NOT defined for the root directory in the build,
+    sbt creates a default one that aggregates all other projects in the build.
 
-         For example, ~package~ is a ~TaskKey[File]~ and its value is the jar
-         file it creates.
+*** DONE Navigating projects interactively
+    CLOSED: [2019-08-13 Tue 15:34]
+    - Use ~projects~ to list all /subprojects/, including the /root project/.
+      =From Jian= Remember? In this document, /project/ and /subproject/ are
+      exchangeable.
 
-       * Each time you /start a task execution/, for example by typing ~compile~
-         at the /interactive sbt prompt/, sbt will re-run any tasks involved
-         exactly _ONCE_.
+    - When you start a /sbt shell/, *the /root project/ is selected by default.*
 
+    - Run a command on a specific subproject:
+      + Use ~project <projectName>~ to select that a specific subproject.
+        And then, run command like ~compile~.
 
-   - *Defining tasks and settings*
-     + *Types for tasks and settings*
+      + When you are in /subproject/ ~A~, you can run the command in another
+        /subproject/ with the syntax ~subProjectID/command~
 
-   - *Keys in sbt shell*
+*** DONE Common code
+    CLOSED: [2019-08-13 Tue 15:32]
+   *The definitions in =.sbt= files are not visible in other =.sbt= files.*
 
-   - *Imports in* =build.sbt=
+   In order to share code between =.sbt= files,
+   define one or more =.scala= files in the =project/= directory of the /build
+   root/.
 
-   - *Bare =.sbt= build definition*
+   - TODO See *organizing the build* for details.
 
-   - *Adding library dependencies*
-
-** DONE f. Task graph
-   CLOSED: [2017-12-19 Tue 20:27]
+** TODO g. Task graph =RE-READ=
    Continuing from /build definition/, this page explains =build.sbt= definition
    in more detail.
 
    - RATHER THAN thinking of settings as _key-value pairs_,
-     a better analogy would be to think of it as a /directed acyclic graph
-     (DAG)/ of /tasks/ where the edges denote /happens-before/. Let's call this
-     the /task graph/.
+     a better analogy would be to think of it as a /DAG/ of /tasks/ where the
+     _edges denote /happens-before/._
+     *Let's call this the /task graph/.*
 
-   - *Terminology*
+*** DONE Terminology
+    CLOSED: [2019-08-13 Tue 15:59]
      Review:
      + Setting/Task expression :: entry inside ~.settings(...)~.
 
-     + Key :: Left hand side of a setting expression.
+     + Key :: LHS of ~:=~ in a /setting\slash{}task expression/.
               It could be a ~SettingKey[A]~, a ~TaskKey[A]~, or an ~InputKey[A]~.
 
      + Setting :: Defined by a /setting expression/ with ~SettingKey[A]~.
@@ -451,238 +950,244 @@
      + Task :: Defined by a /task expression/ with ~TaskKey[A]~.
                The value is calculated _EACH TIME it is invoked_.
 
-   - *Declaring dependency to other tasks*
-     _In =build.sbt= DSL_, we use ~.value~ method to _express the dependency to
-     another task or setting_. The ~value~ method is special (explained later)
-     and _may ONLY_ be (=TODO= =From Jian= may???) called in the argument to ~:=~
-     (or, ~+=~ or ~++=~, which we'll see later).
+*** TODO Declaring dependency to other tasks
+    =IMPORTANT= *This is very tricky!!!!!*
 
-     + Example
-       #+BEGIN_SRC scala
-         // build.sbt
-         val scalacOptions = taskKey[Seq[String]]("Options for the Scala compiler.")
-         val update = taskKey[UpdateReport]("Resolves and optionally retrieves dependencies, producing a report.")
-         val clean = taskKey[Unit]("Deletes files produced by the build, such as generated sources, compiled classes, and task caches.")
+    - _In =build.sbt= DSL_, we use ~.value~ /method/ to _express the dependency
+      to another /task/ or /setting/._
 
-         scalacOptions := {
-           val ur = update.value  // `update` task happens-before `scalacOptions`
-           val x = clean.value    // `clean` task happens-before `scalacOptions`
-           // ---- `scalacOptions` begins here ----
-           ur.allConfigurations.take(3)
-         }
-       #+END_SRC
+    - The ~value~ /method/ is special (explained later) and *may ONLY* be called
+      in the argument to ~:=~ (or, ~+=~ or ~++=~, which we'll see later).
+      (TODO =From Jian= WHY *may ONLY*?)
 
-       + ~update.value~ and ~clean.value~ declare /task dependencies/, whereas
-         ~ur.allConfigurations.take(3)~ is the body of the /task/.
+    - Example
+      *Note*: The values calculated below are nonsensical for ~scalaOptions~,
+              and it's just for demonstration purpose only:
+      #+begin_src scala
+        // build.sbt
+        val scalacOptions = taskKey[Seq[String]]("Options for the Scala compiler.")
+        val update = taskKey[UpdateReport]("Resolves and optionally retrieves dependencies, producing a report.")
+        val clean = taskKey[Unit]("Deletes files produced by the build, such as generated sources, compiled classes, and task caches.")
 
-       + ~.value~ is _NOT a normal Scala method call_.
-         =build.sbt= DSL uses a _macro_ to _lift these outside of the task body_.
-         Both ~update~ and ~clean~ /tasks/ are completed by the time task engine
-         evaluates the opening ~{~ of ~scalacOptions~ _regardless of which line
-         it appears in the body_.
+        scalacOptions := {
+          val ur = update.value  // `update` task happens-before `scalacOptions`
+          val x = clean.value    // `clean` task happens-before `scalacOptions`
+          // ---- `scalacOptions` begins here ----
+          ur.allConfigurations.take(3)
+        }
+      #+end_src
+      + ~update.value~ and ~clean.value~ declare /task dependencies/, whereas
+        ~ur.allConfigurations.take(3)~ is the body of the /task/.
 
-         For example,
-         * #1
-           #+BEGIN_SRC scala
-             lazy val root = (project in file("."))
-               .settings(
-                 name := "Hello",
-                 organization := "com.example",
-                 scalaVersion := "2.12.4",
-                 version := "0.1.0-SNAPSHOT",
-                 scalacOptions := {
-                   val out = clean.value  // `clean` task happens-before `scalacOptions`
-                   val log = out.log
-                   log.info("123")
-                   val ur = update.value  // `update` task happens-before `scalacOptions`
-                   log.info("456")
-                   ur.allConfigurations.take(3)
-                 }
-               )
+      + ~.value~ is *NOT a normal Scala method call*.
+        =build.sbt= DSL uses a _macro_ to _lift these outside of the task body_.
+        Both ~update~ and ~clean~ /tasks/ are completed by the time task engine
+        evaluates the opening ~{~ of ~scalacOptions~ _regardless of which line
+        it appears in the body_.
 
-             // > scalacOptions
-             // [info] Updating {file:/xxx/}root...
-             // [info] Resolving jline#jline;2.14.1 ...
-             // [info] Done updating.
-             // [info] 123
-             // [info] 456
-             // [success] Total time: 0 s, completed Jan 2, 2017 10:38:24 PM
-           #+END_SRC
-           From the out, it looks like run ~streams~ and ~update~ before the ~{~
-           of ~scalacOptions~
+        For example,
+        * #1
+          #+BEGIN_SRC scala
+            lazy val root = (project in file(".")).
+              settings(
+                name := "Hello",
+                organization := "com.example",
+                scalaVersion := "2.12.4",
+                version := "0.1.0-SNAPSHOT",
+                scalacOptions := {
+                  val out = clean.value  // `clean` task happens-before `scalacOptions`
+                  val log = out.log
+                  log.info("123")
+                  val ur = update.value  // `update` task happens-before `scalacOptions`
+                  log.info("456")
+                  ur.allConfigurations.take(3)
+                }
+              )
 
-         * #2
-           #+BEGIN_SRC scala
-             lazy val root = (project in file("."))
-               .settings(
-                 name := "Hello",
-                 organization := "com.example",
-                 scalaVersion := "2.12.4",
-                 version := "0.1.0-SNAPSHOT",
-                 scalacOptions := {
-                   val ur = update.value  // update task happens-before scalacOptions
-                   if (false) {
-                     val x = clean.value  // clean task happens-before scalacOptions
-                   }
-                   ur.allConfigurations.take(3)
-                 }
-               )
+            // > scalacOptions
+            // [info] Updating {file:/xxx/}root...
+            // [info] Resolving jline#jline;2.14.1 ...
+            // [info] Done updating.
+            // [info] 123
+            // [info] 456
+            // [success] Total time: 0 s, completed Jan 2, 2017 10:38:24 PM
+          #+END_SRC
+          From the out, it looks like run ~streams~ and ~update~ before the ~{~
+          of ~scalacOptions~
 
-             // > run
-             // [info] Updating {file:/xxx/}root...
-             // [info] Resolving jline#jline;2.14.1 ...
-             // [info] Done updating.
-             // [info] Compiling 1 Scala source to /Users/eugene/work/quick-test/task-graph/target/scala-2.12/classes...
-             // [info] Running example.Hello
-             // hello
-             // [success] Total time: 0 s, completed Jan 2, 2017 10:45:19 PM
+        * #2
+          #+BEGIN_SRC scala
+            lazy val root = (project in file("."))
+              .settings(
+                name := "Hello",
+                organization := "com.example",
+                scalaVersion := "2.12.4",
+                version := "0.1.0-SNAPSHOT",
+                scalacOptions := {
+                  val ur = update.value  // update task happens-before scalacOptions
+                  if (false) {
+                    val x = clean.value  // clean task happens-before scalacOptions
+                  }
+                  ur.allConfigurations.take(3)
+                }
+              )
 
-             // > scalacOptions
-             // [info] Updating {file:/xxx/}root...
-             // [info] Resolving jline#jline;2.14.1 ...
-             // [info] Done updating.
-             // [success] Total time: 0 s, completed Jan 2, 2017 10:45:23 PM
-           #+END_SRC
-           Now if you check for =target/scala-2.12/classes/=, it won't exist
-           because ~clean~ task has run even though it is inside the
-           ~if (false)~.
+            // > run
+            // [info] Updating {file:/xxx/}root...
+            // [info] Resolving jline#jline;2.14.1 ...
+            // [info] Done updating.
+            // [info] Compiling 1 Scala source to /Users/eugene/work/quick-test/task-graph/target/scala-2.12/classes...
+            // [info] Running example.Hello
+            // hello
+            // [success] Total time: 0 s, completed Jan 2, 2017 10:45:19 PM
 
-       + =IMPORTANT=
-         NO guarantee about the ordering of ~update~ and ~clean~ /tasks/.
-         Can be
-         * ~update~ before ~clean~
-         * ~clean~ before ~update~
-         * in parallel
+            // > scalacOptions
+            // [info] Updating {file:/xxx/}root...
+            // [info] Resolving jline#jline;2.14.1 ...
+            // [info] Done updating.
+            // [success] Total time: 0 s, completed Jan 2, 2017 10:45:23 PM
+          #+END_SRC
+          Now if you check for =target/scala-2.12/classes/=, it won't exist
+          because ~clean~ task has run even though it is inside the
+          ~if (false)~.
 
-   - *Inlining ~.value~ calls*
-     For example,
-     #+BEGIN_SRC scala
-       scalaOptions := {
-         val x = clean.value
-         update.value.allConfigurations.take(3)
-       }
-     #+END_SRC
-     =From Jian= I don't think this is a good feature. I'll never use inlining in
-     any formal projects.
+      + =IMPORTANT=
+        NO guarantee about the ordering of ~update~ and ~clean~ /tasks/.
+        Can be
+        * ~update~ before ~clean~
+        * ~clean~ before ~update~
+        * in parallel
 
-     + *Inspecting the task*
-       From the output of ~inspect <task name>~, you can find the dependencies
-       information.
+*** Inlining ~.value~ calls
+    - Because of the specialty of ~.value~,
+      _until you're familiar with =build.sbt=,_ we recommend you *put all
+      ~.value~ calls at the top of the task body.*
 
-     + *Defining a task that depends on other settings*
-       * Example,
-         #+BEGIN_SRC scala
-           lazy val root = (project in file("."))
-             .settings(
-               name := "Hello",
-               organization := "com.example",
-               scalaVersion := "2.12.4",
-               version := "0.1.0-SNAPSHOT",
-               scalacOptions := List("-encoding", "utf8", "-Xfatal-warnings", "-deprecation", "-unchecked"),
-               scalacOptions := {
-                 val old = scalacOptions.value
-                 scalaBinaryVersion.value match {
-                   case "2.12" => old
-                   case _      => old filterNot (Set("-Xfatal-warnings", "-deprecation").apply)
-                 }
+    - Inlining ~.value~ to simplify code:
+      #+BEGIN_SRC scala
+        scalaOptions := {
+          val x = clean.value
+          update.value.allConfigurations.take(3)
+        }
+      #+END_SRC
+      You can use this to simplify the code of your build, and then you don't
+      need to give a name to ~update.value~ in this example.
+
+    - *CAUTION*:
+      =From Jian= I don't think this is a good feature. I'll never use inlining in
+      any formal projects.
+
+
+**** Inspecting the task
+     From the output of ~inspect <task name>~, you can find the dependencies
+     information.
+
+**** Defining a task that depends on other settings
+     - Example,
+       #+begin_src scala
+         lazy val root = (project in file("."))
+           .settings(
+             name := "Hello",
+             organization := "com.example",
+             scalaVersion := "2.12.4",
+             version := "0.1.0-SNAPSHOT",
+             scalacOptions := List("-encoding", "utf8", "-Xfatal-warnings", "-deprecation", "-unchecked"),
+             scalacOptions := {
+               val old = scalacOptions.value
+               scalaBinaryVersion.value match {
+                 case "2.12" => old
+                 case _      => old filterNot (Set("-Xfatal-warnings", "-deprecation").apply)
                }
-             )
+             }
+           )
 
-           // > show scalacOptions
-           // [info] * -encoding
-           // [info] * utf8
-           // [info] * -Xfatal-warnings
-           // [info] * -deprecation
-           // [info] * -unchecked
-           // [success] Total time: 0 s, completed Jan 2, 2017 11:44:44 PM
-           //
-           // > ++2.11.8!
-           // [info] Forcing Scala version to 2.11.8 on all projects.
-           // [info] Reapplying settings...
-           // [info] Set current project to Hello (in build file:/xxx/)
-           //
-           // > show scalacOptions
-           // [info] * -encoding
-           // [info] * utf8
-           // [info] * -unchecked
-           // [success] Total time: 0 s, completed Jan 2, 2017 11:44:51 PM
-         #+END_SRC
-         The ~++2.11.8!~ command can force the Scala version choice on all
-         projects.
+         // > show scalacOptions
+         // [info] * -encoding
+         // [info] * utf8
+         // [info] * -Xfatal-warnings
+         // [info] * -deprecation
+         // [info] * -unchecked
+         // [success] Total time: 0 s, completed Jan 2, 2017 11:44:44 PM
+         //
+         // > ++2.11.8!
+         // [info] Forcing Scala version to 2.11.8 on all projects.
+         // [info] Reapplying settings...
+         // [info] Set current project to Hello (in build file:/xxx/)
+         //
+         // > show scalacOptions
+         // [info] * -encoding
+         // [info] * utf8
+         // [info] * -unchecked
+         // [success] Total time: 0 s, completed Jan 2, 2017 11:44:51 PM
+       #+end_src
+       The ~++2.11.8!~ command can force the Scala version choice on all
+       projects.
 
-       * A /task key/ can depend on /a setting key/, if two keys have the same
-         value type.
-         #+BEGIN_SRC scala
-           val scalacOptions = taskKey[Seq[String]]("Options for the Scala compiler.")
-           val checksums = settingKey[Seq[String]]("The list of checksums to generate and to verify for dependencies.")
+        * A /task key/ can depend on /a setting key/, if two keys have the same
+          value type.
+          #+BEGIN_SRC scala
+            val scalacOptions = taskKey[Seq[String]]("Options for the Scala compiler.")
+            val checksums = settingKey[Seq[String]]("The list of checksums to generate and to verify for dependencies.")
 
-           scalacOptions := checksums.value
+            scalacOptions := checksums.value
 
-           // Illegal
-           checksums := scalacOptions.value
-         #+END_SRC
+            // Illegal
+            checksums := scalacOptions.value
+          #+END_SRC
 
-         There is _NO way to go the other direction_ -- a /task key/ cannot depend
-         on a /setting key/.
+          There is _NO way to go the other direction_ -- a /task key/ cannot depend
+          on a /setting key/.
 
-     + *Defining a setting that depends on other settings*
-       For example,
-       #+BEGIN_SRC scala
-         scalaSource in Compile := {
-           val old = (scalaSource in Compile).value
-           scalaBinaryVersion.value match {
-             case "2.11" => baseDirectory.value / "src-2.11" / "main" / "scala"
-             case _      => old
-           }
-         }
-       #+END_SRC
-       This rewires ~scalaSource~ in ~Compile~ key to a different directory only
-       when ~scalaBinaryVersion~ is "2.11".
+      + *Defining a setting that depends on other settings*
+        For example,
+        #+BEGIN_SRC scala
+          scalaSource in Compile := {
+            val old = (scalaSource in Compile).value
+            scalaBinaryVersion.value match {
+              case "2.11" => baseDirectory.value / "src-2.11" / "main" / "scala"
+              case _      => old
+            }
+          }
+        #+END_SRC
+        This rewires ~scalaSource~ in ~Compile~ key to a different directory only
+        when ~scalaBinaryVersion~ is "2.11".
 
-   - *What's the point of the =build.sbt= DSL?*
-     + *Intro to Make*
-     + *Rake*
-     + *Benefits of hybrid flow-based programming*
-       1. De-duplication
-          =???=
+    - *What's the point of the =build.sbt= DSL?*
+      + *Intro to Make*
+      + *Rake*
+      + *Benefits of hybrid flow-based programming*
+        1. De-duplication
+           =???=
 
-       2. Parallel
-          The task engine can schedule mutually non-dependent tasks in parallel.
+        2. Parallel
+           The task engine can schedule mutually non-dependent tasks in parallel.
 
-       3. The separation of concern and the flexibility.
-          * Use the task graph to wire the tasks together, while
+        3. The separation of concern and the flexibility.
+           * Use the task graph to wire the tasks together, while
 
-          * /sbt/ and /plugins/ can provide various features such as
-            _compilation_ and _library dependency management_ as functions that
-            can be reused.
+           * /sbt/ and /plugins/ can provide various features such as
+             _compilation_ and _library dependency management_ as functions that
+             can be reused.
 
-   - *Summary*
+    - *Summary*
 
-** TODO g. Scopes
-   - *The whole story about keys*
-   - *Scope axes*
+** TODO h. Scopes
+*** The whole story about keys
+*** Scope axes
+**** Scoping by the subproject axis
+**** Scoping by the configuration axis
+**** Scoping by Task axis
+**** Zero scope component
 
-   - 
-     + *Scoping by the subproject axis*
-     + *Scoping by the configuration axis*
-     + *Scoping by Task axis*
-     + *Global scope component*
+*** Referring to scopes in a build definition
+*** Referring to scoped keys from the sbt shell
+*** Examples of scoped key notation
+*** Inspecting scopes
+*** When to specify a scope
+*** Build-level settings
+*** Scope delegation
 
-   - *Referring to scopes in a build definition*
-
-   - *Referring to scoped keys from the sbt shell*
-
-   - *Examples of scoped key notation*
-
-   - *Inspecting scopes*
-
-   - *When to specify a scope*
-
-   - *Build-level settings*
-
-   - *Scope delegation*
-
-** TODO h. Appending values
+** TODO i. Appending values
    - *Appending to previous values:* ~+=~ and ~++=~
      + When the value type, i.e. the ~T~ in ~SettingKey[T]~, is a sequence, we
        have _TWO_ more operations (besides ~:=~):
@@ -702,20 +1207,20 @@
          sourceDirectories in Compile ++= Seq(file("sources1"), file("sources2"))
        #+END_SRC
 
-       
+
      + *When settings are undefined*
        * Whenever a setting uses ~:=~, ~+=~, or ~++=~ to create a dependency, the
          value it depends on must exist. Or else, sbt will complain
          "Reference to undefined setting". Pay attention to the /scope/.
 
-     + *Tasks based on other keys' values* =TODO= =???= 
+     + *Tasks based on other keys' values* =TODO= =???=
        ~Def.task~
-       
+
    - *Appending with dependencies:* ~+=~ and ~++=~
      Example,
      ~cleanFiles += file("coverage-report-" + name.value + ".txt")~
 
-** TODO i. Scope delegation (~.value~ lookup)
+** TODO j. Scope delegation (~.value~ lookup)
    - *Scope delegation rules*
    - *Rule 1: Scope axis precedence*
    - *Rule 2: The task axis delegation*
@@ -724,7 +1229,7 @@
    - *Inspect command lists the delegates*
    - ~.value~ *lookup vs dynamic dispatch*
 
-** DONE j. Library dependencies
+** DONE k. Library dependencies
    CLOSED: [2017-12-20 Wed 14:44]
    - Library dependencies can be added in _TWO_ ways:
      + unmanaged dependencies :: jars dropped into the =lib= directory.
@@ -851,144 +1356,6 @@
          this library is NOT listed in ~compile:dependencyClasspath~,
          but it is listed ~test:dependencyClasspath~
 
-** DONE k. Multi-project builds
-   CLOSED: [2017-12-21 Thu 01:12]
-   This page introduces _multiple subprojects_ in a single build.
-
-   - *Multiple subprojects*
-     Sometimes users may want to keep multiple related /subprojects/ in a single
-     build, especially if they depend on one another and you tend to modify them
-     together.
-
-     + Each /subproject/ in a build
-       * has its own source directory.
-       * generates its own jar file when run ~package~.
-
-     + For example,
-       #+BEGIN_SRC scala
-         lazy val util = (project in file("util"))
-         lazy val core = (project in file("core"))
-       #+END_SRC
-
-       If the name of a base directory is the same as the name of the ~val~, it
-       can be omitted.
-       #+BEGIN_SRC scala
-         lazy val util = project
-         lazy val core = project
-       #+END_SRC
-
-     + *Common settings*
-       To factor out /common settings/ across multiple /subprojects/,
-       + create a sequence named ~commonSettings~
-       + call settings method on each project. 
-
-       #+BEGIN_SRC scala
-         lazy val commonSettings = Seq(
-           organization := "com.example",
-           version := "0.1.0-SNAPSHOT",
-           scalaVersion := "2.12.4"
-         )
-
-         lazy val core = (project in file("core"))
-           .settings(
-             commonSettings,
-             // other settings
-             )
-
-         lazy val util = (project in file("util"))
-           .settings(
-             commonSettings,
-             // other settings
-             )
-       #+END_SRC
-
-     + *Build-wide settings* =TODO= =RE-DO=
-       Another a bit advanced technique for factoring out /common settings/
-       across /subprojects/ is to define the settings scoped to ~ThisBuild~.
-
-   - *Dependencies*
-     * /Subprojects/ in one build can be completely independent of one another.
-     * /Subprojects/ can be related to one another by some kind of dependency.
-       _TWO_ types:
-       - /aggregate/
-       - /classpath/
-
-     * *Aggregation*
-       - For example,
-         #+BEGIN_SRC scala
-           lazy val root = (project in file("."))
-             .aggregate(util, core)
-
-           lazy val util = (project in file("util"))
-           lazy val core = (project in file("core"))
-         #+END_SRC
-         When you run ~compile~ in the sbt shell (by default, you are in the
-         ~root~ subproject), all three projects will be compiled.
-
-         If you want to compile one /subproject/ that being aggregated, rather
-         than the ~root~ , you need to use ~project <project name>~ to switch to
-         that /subproject/.
-
-       - /aggregation/ will run the aggregated tasks in parallel and with no
-         defined ordering between them. 
-
-       - Control aggregation per-task
-         #+BEGIN_SRC scala
-           lazy val root = (project in file("."))
-             .aggregate(util, core)
-             .settings(
-               aggregate in update := false
-             )
-
-           lazy val util = (project in file("util"))
-           lazy val core = (project in file("core"))
-         #+END_SRC
-
-     * *Classpath dependencies*
-       ~lazy val core = project.dependsOn(util)~
-       ~dependsOn~ can have multiple arguments.
-
-     * *Per-configuration classpath dependencies*
-       - ~foo.dependsOn(bar)~ means that _the compile configuration in ~foo~
-         depends on the compile configuration in ~bar~._ 
-
-         This can be written explicitly as:
-         ~foo.dependsOn(bar % "compile -> compile")~, where the ~"-> compile"~
-         part can be ignored, which is the default, no matter what before the
-         ~->~.
-
-       - A useful declaration is ~"test->test"~.
-         This allows you to put utility code for testing in ~bar/src/test/scala~
-         and then use that code in ~foo/src/test/scala~, for example.
-
-       - There can be multiple configurations for a dependency. For example,
-         ~dependsOn(bar % "test->test; compile->compile")~.
-
-       - =TODO= =From Jian=
-         Can I put spaces around ~->~???
-
-   - *Default root project*
-     If a project is NOT defined for the root directory in the build,
-     sbt creates a default one that aggregates all other projects in the build.
-
-   - *Navigating projects interactively*
-     + Use ~projects~ to list all /subprojects/, including the /root project/.
-
-       =From Jian= Remember? In this document, /project/ and /subproject/ are
-       exchangeable.
-
-     + Use ~project <projectName>~ to select a current project.
-
-     + When you start a /sbt shell/, the /root project/ is selected by default.
-
-     + When you are in /subproject/ A, you can run the command in another
-       /subproject/ with the syntax ~subProjectID/command~
-
-   - *Common code*
-     The definitions in =.sbt= files are not visible in other =.sbt= files.
-     In order to share code between =.sbt= files, define one or more
-     _Scala files_ in the =project/= directory of the /build root/. 
-
 ** DONE l. Using plugins =TODO= =A lot of questions=
    CLOSED: [2017-12-21 Thu 03:44]
    - *What is a plugin?*
@@ -1002,7 +1369,7 @@
      + If your project is in directory =hello=, and you’re adding /sbt-site
        plugin/ to the build definition, create =hello/project/site.sbt= and
        declare the plugin dependency by passing the plugin's /Ivy module ID/ to
-       ~addSbtPlugin~: 
+       ~addSbtPlugin~:
        ~addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "0.7.0")~
 
      + If add /sbt-assembly/ (=TODO= ???), create =hello/project/assembly.sbt=
@@ -1031,7 +1398,7 @@
        #+END_SRC
 
        * ~enablePlugins~ method :: it allows projects to explicitly define the
-            /auto plugins/ they wish to consume. 
+            /auto plugins/ they wish to consume.
             =TODO= =???=
 
      + ~disablePlugins~ method :: exclude plugins in some project.
@@ -1045,7 +1412,7 @@
              )
          #+END_SRC
 
-     + /Auto plugins/ _should document whether they need to be explicitly enabled_. 
+     + /Auto plugins/ _should document whether they need to be explicitly enabled_.
        =TODO= =IMPORTANT=
 
      + Run the ~plugins~ command to list the enabled auto plugins.
@@ -1069,7 +1436,7 @@
            Provides the mechanisms to publish/resolve modules.
 
          - ~JvmPlugin~:
-           Provides the mechanisms to compile/test/run/package Java/Scala projects. 
+           Provides the mechanisms to compile/test/run/package Java/Scala projects.
 
        In addition, ~JUnitXmlReportPlugin~ provides an experimental support for
        generating /junit-xml/.
@@ -1091,7 +1458,7 @@
          lazy val core = (project in file("core"))
            .settings(site.settings)
        #+END_SRC
-       
+
    - *Global plugins*
      Plugins can be installed for _ALL_ your projects at once by declaring them
      in =~/.sbt/1.0/plugins/= (=From Jian= I think this =1.0= is the main
@@ -1100,7 +1467,7 @@
      Roughly speaking, any =.sbt= or =.scala= in this directory behaves as if they
      were in the =project/= directory for _ALL_ projects.
 
-     + One thing you can, but you should use sparingly: 
+     + One thing you can, but you should use sparingly:
        create =build.sbt= in this global directory, and put ~addSbtPlugin~
        expressions in it to add plugins to all your projects at once.
 
@@ -1112,7 +1479,7 @@
 
      + Some especially popular plugins are:
        * those for IDEs (to import an sbt project into your IDE)
-       * those supporting web frameworks, such as /xsbt-web-plugin/. 
+       * those supporting web frameworks, such as /xsbt-web-plugin/.
 
      + See the *Plugins* section for More details
 
@@ -1237,7 +1604,7 @@
    - *Turn them into plugins*
      =TODO=
      It's very easy to create a plugin, as /teased earlier/ and /discussed at
-     more length here/. 
+     more length here/.
 
 ** DONE n. Organizing the build
    CLOSED: [2017-12-21 Thu 05:20]
@@ -1246,7 +1613,7 @@
 
      + Any time files ending in =.scala= or =.sbt= are used, naming them
        =build.sbt= and =Dependencies.scala= are _conventions_ ONLY.
-       This also means that multiple files are allowed. 
+       This also means that multiple files are allowed.
 
    - *Tracking dependencies in one place*
      + =project/Dependencies.scala=
@@ -1293,7 +1660,7 @@
        * share values, such as keys.
 
      + The use of =.scala= files also depends on how comfortable you or your team
-       are with Scala. 
+       are with Scala.
 
    - *Defining auto plugins* =TODO=
      For more advanced users,
@@ -1309,31 +1676,88 @@
    - *Advanced Notes*
 
 * TODO 2. General Information
+  This part of the documentation has project "meta-information” such as where to
+  + where to get help
+  + where to find source code
+  + how to contribute.
+
 ** a. Credits
 ** b. Community Plugins
+*** Community Ivy Repository
+*** Cross building plugins from sbt 0.13
+*** Plugins available for sbt 1.0 (including RC-x)
+**** Code formatter plugins
+**** Documentation plugins
+**** One jar plugins
+**** Release plugins
+**** Deployment integration plugins
+**** Utility and system plugins
+**** IDE integration plugins
+**** Test plugins
+**** Library dependency plugins
+**** Web and frontend development plugins
+**** Database plugins
+**** Framework-specific plugins
+**** Code generator plugins
+**** Static code analysis plugins
+**** code coverage plugins
+**** Create new project plugins
+**** In-house plugins
+**** Verification plugins
+**** Language support plugins
+
 ** c. Community Repository Policy
 ** d. Bintray For Plugins
+*** Create an Open Source Distribution account on Bintray
+*** Create a repository for your sbt plugins
+*** Add the sbt-bintray plugin to your build
+*** Make a release
+*** Linking your package to the sbt organization
+*** Linking your package to the sbt organization (sbt org admins)
+*** Publishing your plugin to a private repository
+*** Summary
+
 ** e. Setup Notes
+*** Do not put ~sbt-launch.jar~ on your classpath
+*** Terminal encoding
+*** JVM heap, permgen, and stack sizes
+*** Boot directory
+*** HTTP/HTTPS/FTP Proxy
+
 ** f. Using Sonatype
+*** Sonatype setup
+*** sbt setup
+**** step 1: PGP Signatures
+**** step 2: sbt-pgp
+**** step 3: Credentials
+**** step 4: Configure =build.sbt=
+**** step 5: Publishing
+
+*** Optional steps
+**** sbt-sonatype
+**** Publishing tips
+**** Integrate with the release process
+
 ** g. Contributing to sbt
+*** Documentation
+
 ** h. Changes
-***   i. Migrating from sbt 0.13.x
-***  ii. sbt 1.0.4
-*** iii. sbt 0.13.5+ Technology Previews
-***  iv. sbt 0.13.0 - 0.13.2
-***   v. sbt 0.12.4
-***  vi. Older Changes
-*** vii. Migrating from 0.7 to 0.10+
+*** TODO i. Migrating from sbt 0.13.x
+*** TODO ii. sbt 1.3.x releases
+*** TODO iii. sbt 1.2.x releases
+*** TODO iv. sbt 1.1.x releases
+*** TODO v. sbt 1.0.x releases
 
 * TODO 3. Detailed Topics
 ** a. Using sbt
-***   i. Command Line Reference
-***  ii. Console Project
-*** iii. Cross-building
-***  iv. Interacting with the Configuration System
-***   v. Triggered Execution
-***  vi. Scripts, REPL, and Dependencies
-*** vii. Understanding Incremental Recompilation
+***    i. Command Line Reference
+***   ii. Console Project
+***  iii. Cross-building
+***   iv. Interacting with the Configuration System
+***    v. Triggered Execution
+***   vi. Scripts, REPL, and Dependencies
+***  vii. sbt Server
+*** viii. Understanding Incremental Recompilation
 
 ** b. Configuration
 ***    i. Classpaths, sources, and resources
@@ -1350,6 +1774,8 @@
 ***  xii. External Processes
 *** xiii. Running Project Code
 ***  xiv. Testing
+***   xv. In process class loading
+***  xvi. Globs
 
 ** c. Dependency Management
 ***    i. Artifacts
@@ -1359,15 +1785,16 @@
 ***    v. Publishing
 ***   vi. Resolvers
 ***  vii. Update Report
-*** viii. Cached resolution
+*** viii. Cached Resolution
 
 ** d. Tasks and Commands
 ***   i. Tasks
-***  ii. Input Tasks
-*** iii. Commands
-***  iv. Parsing and tab completion
-***   v. State and actions
-***  vi. Tasks/Settings: Motivation
+***  ii. Caching
+*** iii. Input Tasks
+***  iv. Commands
+***   v. Parsing and tab completion
+***  vi. State and actions
+*** vii. Tasks/Settings: Motivation
 
 ** e. Plugins and Best Practices
 ***   i. General Best Practices
@@ -1390,14 +1817,14 @@
 ** i. Running commands
 ** j. Configure and use Scala
 ** k. Generate API documentation
-** l. Triggered execution
-** m .Define Custom Tasks
-** n. How to take an action on startup
+** l .Define Custom Tasks
+** m. How to take an action on startup
+** n. Track file inputs and outputs
 ** o. Sequencing
-***   i. Defining a sequential task with Def.sequential
-***  ii. Defining a dynamic task with Def.taskDyn
+***   i. Defining a sequential task with =Def.sequential=
+***  ii. Defining a dynamic task with =Def.taskDyn=
 *** iii. Doing something after an input task
-***  iv. Defining a dynamic input task with Def.inputTaskDyn
+***  iv. Defining a dynamic input task with =Def.inputTaskDyn=
 ***   v. How to sequence using commands
 
 ** p. Examples
@@ -1408,23 +1835,135 @@
 
 * TODO 5. Frequently Asked Questions
 * TODO 6. Index
-* TODO 7. Developer’s Guide (Work in progress)
+* 7. Developer's Guide (Work in progress)
 ** a. Modularization
 *** i. Module summary
+**** IO API (~sbt/io~)
+**** Serialization API (~sbt/serialization~)
+**** Util API (~sbt/util~)
+**** LibraryManagement API (~sbt/librarymanagement~)
+**** IncrementalCompiler API (~sbt/zinc~)
+**** Build API (tbd)
+**** sbt Launcher (~sbt/launcher~)
+**** Client/Server (tbd)
+**** Website (~sbt/website~)
+
 ** b. sbt Coding Guideline
+*** General goal
+**** Clean up old deprecation
+**** Aim for zero warnings (except deprecation)
+
+*** Documentation
+*** Modular design
+**** Aim small
+**** Public APIs should be coded against "interfaces"
+**** Hide implementation details
+**** Less interdependence
+**** Hinde external classes
+**** Hide internal modules
+**** Compiler flags
+**** Package name and organization name
+
+*** Binary resiliency
+**** MiMa
+**** Public traits should contain ~def~ declarations only
+**** Abstract classes are also useful
+**** Seal traits and abstract classes
+**** Finalize the leaf classes
+**** Typeclass and subclass inheritance
+**** Avoid case classes, use sbt-datatype
+**** Prefer method overloading over default parameter values
+
+*** Other public API matters
+**** Avoid Stringly-typed programming
+**** Avoid overuse of ~def apply~
+**** Use specific datatypes (~Vector~, ~List~, or ~Array~), rather than ~Seq~
+**** Avoid calling ~toSeq~ or anything with side-effects on ~Set~
+**** Avoid calling ~toSeq~ on ~Map~
+**** Avoid functions and tuples in the signature, if Java iteroperability is needed
+
+*** Style matters
+**** Use scalafmt
+**** Avoid procedure syntax
+**** Define instances of typeclasses in their companion objects, when possible
+**** Implicit conversions for syntax (enrich-my-library pattern) should be imported
+
 ** c. sbt-datatype
+*** Using the plugin
+*** Dtatype schema
+**** Records
+**** Interfaces
+**** Enums
+
+*** Using datatype to retain binary compatibility
+*** JSON codec generation
+*** Existing parameters for protocols, records, etc.
+*** Settings
+*** Syntax summary
+
 ** d. Compiler Interface
 *** i. Fetching the most specific sources
+
 ** e. sbt Launcher
 ***   i. Getting Started with the sbt launcher
+**** Overview
+***** Applications
+***** Servers
+***** Resolving Applications/Servers
+***** Creating a Launched Application
+***** Running an Application
+***** Execution
+
 ***  ii. Sbt Launcher Architecture
+**** Module Resolution
+**** Classloader Caching and Isolation
+**** Caching
+**** Locking
+**** Service Discovery and Isolation
+
 *** iii. sbt Launcher Configuration
+**** Example
+***** 1. Scala Configuration
+***** 2. Applicaiton Identification
+***** 3. Repositories Section
+***** 4. The Boot section
+***** 5. The Ivy section
+***** 6. The Server Section
+
+**** Variable Substitution
+**** Syntax
+
 ** f. Notes
 ***   i. Core Principles
+**** Introduction to build state
+**** Settings Architecture
+**** Task Architecture
+
 ***  ii. Settings Core
+**** Example
+***** Setting up
+***** Example Settings System
+***** Example Usage
+
+**** sbt Settings Discussion
+***** Scopes
+***** Constructing settings
+***** Settings definitions
+
 *** iii. Setting Initialization
-***  iv. Build Loaders
-***   v. Creating Command Line Applications Using sbt
-***  vi. Nightly Builds
+***  iv. Creating Command Line Applications Using sbt
+**** Hello World Example
+***** Build Definition: =build.sbt=
+***** Application: =Main.scala=
+***** Launcher configuration file: =hello.build.properties=
+
+***   v. Nightly Builds
+* 8. Archived pages
+** a. Hello, World
+*** sbt new command
+*** Running your app
+*** Exiting sbt shell
+*** Build definition
+
 * TODO Contents in Depth
 * TODO Combined Pages
