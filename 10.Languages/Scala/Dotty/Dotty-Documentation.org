@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.20.0-bin-SNAPSHOT -> 0.21.0-bin-SNAPSHOT
+#+VERSION: 0.20.0-bin-SNAPSHOT -> ... -> 0.22.0-bin-SNAPSHOT
 #+AUTHOR:
 #+STARTUP: entitiespretty
 
@@ -708,14 +708,14 @@
       #+end_src
       + This code defines a /trait/ ~Ord~ (typeclass) with two /given instances/.
 
-      + ~(given ord: Ord[T])~ clause in ~listOrd~ defines an /implicit parameter/.
+      + ~(ord: Ord[T]) =>~ clause in ~listOrd~ defines an /implicit parameter/.
         TODO /given clauses/ are further explained in the next section.
 
 **** Anonymous Given Instances
      The name of a given instance can be left out.
      #+begin_src scala
        given Ord[Int] { /* ... */ }
-       given [T](given Ord[T]): Ord[List[T]] { /* ... */ }
+       given [T]: Ord[T] => Ord[List[T]] { /* ... */ }
      #+end_src
 
 **** Alias Givens
@@ -728,7 +728,7 @@
      - /Alias givens/ can be anonymous, e.g.
        #+begin_src scala
          given Position = enclosingTree.position
-         given (given outer: Context): Context = outer.withOwner(currentOwner)
+         given (outer: Context) => Context = outer.withOwner(currentOwner)
        #+end_src
 
      - An /alias given/ can have /type parameters/ and /given clauses/ just like
@@ -874,22 +874,22 @@
 
 **** Semigroups and monoids
      #+begin_src scala
-       trait SemiGroup[T] {
+       trait SemiGroup[T] with
          def (x: T) combine (y: T): T
-       }
 
-       trait Monoid[T] extends SemiGroup[T] {
+       trait Monoid[T] extends SemiGroup[T] with
          def unit: T
-       }
 
-       object Monoid {
+       object Monoid with
          def apply[T](given Monoid[T]) = summon[Monoid[T]]
-       }
 
-       given Monoid[String] {
+       given Monoid[String] with
          def (x: String) combine (y: String): String = x.concat(y)
+         def unit: String = ""
+
+       given Monoid[Int] with
+         def (x: Int) combine (y: Int): Int = x + y
          def unit: Int = 0
-       }
 
        def sum[T: Monoid](xs: List[T]): T =
          xs.foldLeft(Monoid[T].unit)(_.combine(_))
@@ -918,7 +918,7 @@
 
        given readerMonad[Ctx]: Monad[[X] =>> Ctx => X] {
          def [A, B](r: Ctx => A) flatMap (f: A => Ctx => B): Ctx => B =
-           ctx => f(r(ctx))
+           ctx => f(r(ctx))(ctx)
 
          def pure[A](x: A): Ctx => A =
            ctx => x
@@ -1040,6 +1040,9 @@
 **** Inline Definitions
 **** Recursive Inline Methods
 **** Relationship to ~@inline~
+     :PROPERTIES:
+     :ID:       b8cf9169-2dc0-4d7f-b9ff-b4df0332ad28
+     :END:
 ***** The definition of constant expression
 
 **** Specializing Inline (Whitebox)
