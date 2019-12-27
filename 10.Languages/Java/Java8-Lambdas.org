@@ -1140,16 +1140,18 @@
 ** TODO Open Exercises - 58
 
 * TODO 5. Advanced Collections and Collectors - 59
-  - *NEW ~Collector~ abstraction.*
+  - This chapter covers
+    + MORE ADVANCED collections *changes*, including the new ~Collector~ abstraction.
 
-  - /method references/
+    + /method references/
 
-  - More advanced topics within the collections library
-    + element ordering within streams =TODO= =???=
-    + other useful API changes =TODO= =???=
+    + More advanced topics within the collections library will also be covered,
+      such as
+      * element ordering within streams =TODO= =???=
+      * other useful API changes =TODO= =???=
 
 ** DONE Method References - 59
-   CLOSED: [2017-10-03 Tue 21:58]
+   CLOSED: [2019-12-26 Thu 22:50]
    - ~artist -> artist.getName()~
      can be abbreviated as
      ~Artist::getName~
@@ -1182,7 +1184,7 @@
      types/.
 
 ** DONE Element Ordering - 60
-   CLOSED: [2018-08-05 Sun 20:59]
+   CLOSED: [2019-12-26 Thu 22:50]
    *How elements are ordered in /streams/?*
 
    - The situation with /ordering/ becomes a little _MORE COMPLEX_ with ~Stream~
@@ -1193,14 +1195,15 @@
 
      + We call this the /encounter order/.
 
-     + How the /encounter order/ is defined _DEPENDS ON_ both
-       * the *source* of the data
+     + Q :: How the /encounter order/ is defined?
 
+     + A :: It _DEPENDS ON_ BOTH
+       * the *source* of the data
        * the *operations* performed on the ~Stream~.
 
    - Some intuition you may have are right!!!
-     + If a ~Stream~ created from a collection that has a defined order,
-       a /stream/ created _DIRECTLY_ from it has the same /order/ as its
+     + If a ~Stream~ created from a collection that has a _defined order_,
+       a /stream/ created _DIRECTLY_ from it has the *same* /order/ as its
        /encounter order/.
 
      + If a ~Stream~ is created from data structures like ~HashSet~,
@@ -1212,9 +1215,9 @@
      operations.
 
    - Some operations are _more EXPENSIVE_ on /ordered streams/.
-
      This problem can be solved by *ELIMINATING* /ordering/.
      To do so, call the /stream/'s ~unordered~ /method/.
+     TODO TODO TODO
 
      Most operations, however, such as ~filter~, ~map~, and ~reduce~, can
      operate VERY EFFICIENTLY on /ordered streams/.
@@ -1224,7 +1227,7 @@
      for example,
      + ~forEach~ provides *NO guarantees as to /encounter order/ if you're
        using /parallel streams/.* (This will be discussed in more detail in
-       Chapter 6. =TODO=)
+       Chapter 6. TODO)
 
      + If you require an ordering guarantee in these situations, then
        ~forEachOrdered~ is your friend!
@@ -1381,51 +1384,58 @@
 *** TODO Refactoring and Custom Collectors - 69
 *** TODO Reduction as a Collector - 76
 
-** TODO Collection Niceties - 77
-   - ~computeIfAbsent~
-     The example use a ~Map~ (~artistCache~) to cache expensive operations result.
+** DONE Collection Niceties - 77
+   CLOSED: [2019-12-26 Thu 23:01]
+   - =from Jian=
+     Since /streams/ are often used with /lambda expressions/ together,
+     after using /streams/ a lot time we may forget that /lambda expressions/ is
+     NOT only for /streams/!
 
-     #+BEGIN_SRC java
-       public Artist getArtist(String name) {
-           return artistCache.computeIfAbsent(name, this::readArtistFromDB);
-       }
-     #+END_SRC
-
-     This is equivalent to the non-lambda-old-style code below:
-
-     #+BEGIN_SRC java
-       public Artist getArtist(String name) {
-           Artist artist = artistCache.get(name);
-
-           if (artist == null) {
-               artist = readArtistFromDB(name);
-               artistCache.put(name, artist);
-           }
-
-           return artist;
-       }
-     #+END_SRC
-
-   - Iterate a ~Map~
-     + Before Java 8,
+   - Let's have a look at some useful changes that have been made to ~Map~:
+     + ~computeIfAbsent~
+       Suppose we have a ~Map<String, Artist> artistCache~, and we want to look
+       up _artists_ using an expensive database operations result.
        #+BEGIN_SRC java
-         Map<Artist, Integer> countOfAlbums = new HashMap<>();
-
-         for (Map.Entry<Artist, List<Album>> entry : albumsByArtist.entrySet()) {
-             Artist artist = entry.getKey();
-             List<Album> albums = entry.getValue();
-             countOfAlbums.put(artist, albums.size());
+         public Artist getArtist(String name) {
+             return artistCache.computeIfAbsent(name, this::readArtistFromDB);
          }
        #+END_SRC
 
-     + From Java 8 on,
-       #+BEGIN_SRC java
-         Map<Artist, Integer> countOfAlbums = new HashMap<>();
+       This is equivalent to the non-lambda-old-style code below:
 
-         albumsByArtist.forEach((artist, albums) -> {
-                 countOfAlbums.put(artist, albums.size());
-         });
+       #+BEGIN_SRC java
+         public Artist getArtist(String name) {
+             Artist artist = artistCache.get(name);
+
+             if (artist == null) {
+                 artist = readArtistFromDB(name);
+                 artistCache.put(name, artist);
+             }
+
+             return artist;
+         }
        #+END_SRC
+
+     + Iterate a ~Map~
+       * Before Java 8,
+         #+BEGIN_SRC java
+           Map<Artist, Integer> countOfAlbums = new HashMap<>();
+
+           for (Map.Entry<Artist, List<Album>> entry : albumsByArtist.entrySet()) {
+               Artist artist = entry.getKey();
+               List<Album> albums = entry.getValue();
+               countOfAlbums.put(artist, albums.size());
+           }
+         #+END_SRC
+
+       * From Java 8 on,
+         #+BEGIN_SRC java
+           Map<Artist, Integer> countOfAlbums = new HashMap<>();
+
+           albumsByArtist.forEach((artist, albums) -> {
+                   countOfAlbums.put(artist, albums.size());
+           });
+         #+END_SRC
 
 ** DONE Key Points - 78
    CLOSED: [2018-08-07 Tue 16:06]
@@ -1960,10 +1970,27 @@
      Java SE 8. Users are now _asked to migrate_ to ~java.time~ (JSR-310).
     #+END_QUOTE
 
-  - Open exercises =TODO=
-    + =TODO= =???= Jenkins CI system
-    + =TODO= =???= /collector/
-    + =TODO= =???= RxJava or ~CompletableFuture~
+  - Open exercises TODO TODO TODO TODO TODO
+    + Explain
+      * what /lambda expressions/ are
+        AND
+      * why they should be of interest to another programmer.
+
+    + Start a trial deployment of your work product on Java 8.
+
+    + Start refactoring a bit of legacy code in a real product to use streams and
+      collectors.
+
+    + Do you have any _concurrency problems_ or _large-scale data-processing_ code?
+      If so, try to prototype a refactor in order to use either streams for data
+      parallelism or some of the new concurrency features in _RxJava_ or
+      ~CompletableFuture~.
+
+    + Have a look at the design and architecture of a code base you know really well:
+      * Could it be implemented better at a macro level?
+      * Can you simplify the design?
+      * Can you reduce the amount of code needed to implement a feature?
+      * Can the code be made easier to read?
 
 * TODO Index - 161
 * Tips
