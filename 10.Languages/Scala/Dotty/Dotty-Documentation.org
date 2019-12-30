@@ -33,7 +33,7 @@
 ** cbt-projects
    *Using Dotty with cbt*
 
-** Dottydoc
+** TODO Dottydoc
 *** Using existing Templates and Layouts
 *** Blog
 *** Includes
@@ -975,21 +975,25 @@
 *** DONE Overview
     CLOSED: [2019-06-24 Mon 02:35]
     The following fundamental facilities:
-    1. /Inline/
-       /inline/ is a new _modifier_ that guarantees that a definition will be
-       inlined at the point of use.
+    1. /Inline/ NOTE DONE
+       ~inline~ is a new /soft modifier/ that *guarantees* that a definition will
+       be inlined at the point of use.
 
        - The primary motivation:
-         _reduce the overhead_ behind function calls and access to values.
+         *reduce the overhead* behind
+         + _function calls_
+         + _access to values_.
 
-       - The expansion will be performed by the Scala compiler during the /Typer/
-         /compiler phase/.
+       - The _expansion_ will be performed by the Scala compiler _during the *Typer*
+         /compiler phase/._
 
-       - As opposed to /inlining/ in some other ecosystems, /inlining/ in Scala
-         is _not merely_ a request to the compiler but is a command.
+       - ~inline~ is a command to the *compiler* (=from Jian= *MUST DO*, and fail
+         to do will lead to a compilation error -- when the code doesn't follow the
+         requirement of ~inline~).
 
        - The reason is that /inlining/ in Scala can drive other _compile-time
          operations_, like
+         TODO TODO TODO - =from Jian= I don't understand these terminology!!!
          + /inline/ /pattern matching/ (enabling type-level programming)
          + /macros/ (enabling compile-time, generative, metaprogramming)
          + /runtime code generation/ (multi-stage programming)
@@ -1036,14 +1040,78 @@
        binary format in =.tasty= files. /TASTy inspection/ allows to _load_
        these files and _analyze_ their content's tree structure.
 
-*** TODO Inline
+*** TODO Inline - TODO =RE-READ=
 **** Inline Definitions
-**** Recursive Inline Methods
-**** Relationship to ~@inline~
-     :PROPERTIES:
-     :ID:       b8cf9169-2dc0-4d7f-b9ff-b4df0332ad28
-     :END:
+     - ~inline~ definition TODO TODO TODO
+
+**** DONE Recursive Inline Methods
+     CLOSED: [2019-12-29 Sun 02:39]
+     /Inline methods/ can be *recursive*.
+       For instance, when called with a constant exponent ~n~, the following method
+     for ~power~ will be implemented by straight inline code *WITHOUT ANY /loop/ or
+     /recursion/.*
+     #+begin_src scala
+       inline def power(x: Double, n: Int): Double = {
+         if (n == 0) 1.0
+         else if (n == 1) x
+         else {
+           val y = power(x, n / 2)
+           if (n % 2 == 0) y * y else y * y * x
+         }
+       }
+
+       power(expr, 10)
+       // translates to
+       //
+       //    val x = expr
+       //    val y1 = x * x   // ^2
+       //    val y2 = y1 * y1 // ^4
+       //    val y3 = y2 * x  // ^5
+       //    y3 * y3          // ^10
+     #+end_src
+     - /Parameters/ of /inline methods/ can have an ~inline~ modifier as well.
+         This means that actual arguments to these parameters _must be constant
+       expressions_. For example:
+       ~inline def power(x: Double, inline n: Int): Double~
+
+**** DONE Relationship to ~@inline~
+     CLOSED: [2019-12-28 Sat 23:21]
+     - The ~inline~ modifier is a _MORE POWERFUL_ than the ~@inline~ annotation.
+
+     - ~@inline~ annotation ::
+       + A _hint_
+         * _Hint_ here means _try with BEST EFFORT, but NOTHING GUARANTEED!_
+
+       + The _hint_ is for the *backend* 
+         
+
+     - ~inline~ /modifier/ ::
+       + A _command_ 
+         * _Command_ here means _GUARANTEED!_
+
+       + The _command_ is for the *frontend*
+
+       + it also applies to recursive methods.
+
+     - Cross compilation between Dotty and Scala 2:
+       + Introduce ~@forceInline~ in Dotty.
+         * For dotc it is the same as ~inline~.
+         * For scalac it will be ignored.
+
+       + Usage:
+         Always use ~@forceInline @inline~ if cross compilation between Dotty and
+         Scala 2 is required. This can make
+         * Dotty always inline the annotated code
+         * Scala 2 try its best to inline.
+
+         =from Jian= TODO TODO TODO TODO TODO
+         What exactly is this /Cross compilation between Dotty and Scala 2/???
+         Does this mean due to this cross compilation, both dotc and scalac will
+         see ~@forceInline @inline~???
+
 ***** The definition of constant expression
+
+      Scala Language Specification 2.13 - _6.24 Constant Expressions_
 
 **** Specializing Inline (Whitebox)
 **** DONE Inline Conditionals
@@ -1150,6 +1218,14 @@
 
           final val two = toIntT[Succ[Succ[Zero.type]]]
         #+end_src
+        + =from Jian= I think the ~final~ here is not the best practice!!!
+          #+begin_quote
+          Used in this way, inline is equivalent to Java and Scala 2's final.
+          Note that ~final~, meaning /inlined constant/,
+          is still supported in Dotty, BUT *will be phased out*.
+            -- from "Inline Definitions" subsection in this doc
+          #+end_quote
+        
 
       - TODO
         Last paragraph???
@@ -1185,17 +1261,8 @@
 
 **** DONE Summoning Implicits Selectively
      CLOSED: [2019-06-24 Mon 16:46]
-     TODO NOTE
-     TODO NOTE
-     TODO NOTE
-     #+begin_src scala
-       inline def setFor[T]: Set[T] = implicit match {
-         case _: Ordering[T] => new TreeSet[T]
-         case _              => new HashSet[T]
-       }
-     #+end_src
-
-     + The old way is full of boilterplate:
+     Example: Generate differnt type of values based on the ~given~ context.
+     - The old way is full of boilterplate:
        #+begin_src scala
          trait SetFor[T, S <: Set[T]]
 
@@ -1207,9 +1274,40 @@
            implicit def treeSetFor[T: Ordering]: SetFor[T, TreeSet[T]] = ...
          }
        #+end_src
+       + TODO NOTE
+       + TODO NOTE
+       + TODO NOTE
 
-**** DONE Reference
-     CLOSED: [2019-06-24 Mon 16:55]
+     - The ~scala.compiletime.summonFrom~ construct makes /implicit search/ available
+       in a functional context.
+       #+begin_src scala
+         inline def setFor[T]: Set[T] = implicit match {
+           case _: Ordering[T] => new TreeSet[T]
+           case _              => new HashSet[T]
+         }
+       #+end_src
+       + A ~summonFrom~ /call/ takes a /pattern matching closure/ as argument.
+           All patterns in the /closure/ are /type ascriptions/ of the form
+         ~identifier : Type~.
+
+       + Patterns are tried in sequence (=from Jian= This help us avoiding using
+         inheritance to solve the _implicit search priority issue_).
+
+       + ~summonFrom~ application *must be reduced at /compile time/.*
+
+     - Of course, when there is /contextual abstractions/, /ambiguity errors/ can
+       happen:
+       #+begin_src scala
+         class A
+         implicit val a1: A = new A
+         implicit val a2: A = new A
+
+         inline def f: Any = summonFrom {
+           case given _: A => ???  // error: ambiguous implicits
+         }
+       #+end_src
+
+**** TODO Reference
 
 *** TODO Macros
 **** DONE Macros: Quotes and Splices
@@ -1540,7 +1638,7 @@
        between stages.
 
 **** Lifting Types
-**** Relationship with Inline
+**** Relationship with ~inline~
 **** Scope Extrusion
 **** Example Expansion
 **** Find implicits within a macro
@@ -1589,15 +1687,82 @@
 *** TODO TASTy Inspection
 **** Inspecting TASTy files
 
-** OTHER NEW FEATURES
-*** Trait Parameters
+** TODO OTHER NEW FEATURES
+*** TODO Trait Parameters
 **** Reference
 
-*** Creator Applications
-**** Motivation
-**** Discussion
+*** DONE Creator Applications
+    CLOSED: [2019-12-28 Sat 17:32]
+    - creator applications :: use simple _function call syntax_ to *create* /instances/
+      of a /class/, even if there is no ~apply~ /method/ implemented.
 
-*** Export Clauses
+    - Example:
+      #+begin_src scala
+        class StringBuilder(s: String) {
+          def this() = this("")
+        }
+
+        StringBuilder("abc")  // same as `new StringBuilder("abc")`
+        StringBuilder()       // same as `new StringBuilder()`
+      #+end_src
+
+    - There was _THREE_ rules for the function call syntax ~f(args)~, and
+      a forth rule (fallback rule) for the _function call syntax_ can be added:
+      1. if is a /method/ applicable to ~args~, typecheck ~f(args)~ unchanged,
+
+      2. if ~f~ has an ~apply~ /method/ applicable to ~args~ as a member, continue
+         with ~f.apply(args)~,
+
+      3. if ~f~ is of the form ~p.m~ and there is an /implicit conversion/ ~c~
+         applicable to ~p~ so that ~c(p).m~ is applicable to ~args~, continue
+         with ~c(p).m(args)~
+
+      4. if ~f~ is syntactically a /stable identifier/, and ~new f~ where ~f~ is
+         interpreted as a /type identifier/ is applicable to ~args~, continue
+         with ~new f(args)~.
+
+    - Similarly, the possible interpretations of a /function call with type arguments
+      ~f[targs]~ syntax/ are augmented with the following interpretation as a _FINAL
+      fallback_:
+      + if ~f~ is syntactically a /stable identifier/, and ~new f[targs]~ where ~f~
+        is interpreted as a /type identifier/ is _well-typed_, continue with ~new
+        f[targs]~.
+
+**** DONE Motivation
+     CLOSED: [2019-12-28 Sat 17:18]
+     - This doc mentions _TWO_ motivation:
+       1. Leave out ~new~ *hides* an implementation detail
+       2. makes code more pleasant to *read*
+
+     - =from Jian= I think 1 is objective, and 2 is subjective.
+
+     - Q :: What's the cose of this change?
+
+     - A :: _Add a new rule_ (a fallback rule) to the interpretation of the /function
+            call syntax/. =from Jian= All the rules are listed above before this
+            "Motivation" section.
+
+     - Q :: Why this cost is valuable?
+
+     - A :: It increase the perceived regularity of the language, since /case classes/
+            already provide /function call creation syntax/ (and are often defined for
+            this reason alone).
+
+**** DONE Discussion
+     CLOSED: [2019-12-28 Sat 17:24]
+     An alternative design would auto-generate ~apply~ /methods/ for _non /case
+     classes/._
+     - =from Jian= From the first glance, this alternative design has one good
+       point -- NO need to add new (fallback) rule for the interpretation of
+       /function call syntax/.
+
+     - However, this alternative design can *cause numerous problems*:
+       + overloading ambiguities TODO ???
+       + overriding errors TODO ???
+       + shadowing of user-defined ~apply~ /methods/ by more specific auto-generated ones.
+         TODO ???
+
+*** TODO Export Clauses
     *An ~export~ clause defines aliases for selected members of an object.*
     - Example:
       #+begin_src scala
@@ -1871,8 +2036,15 @@
 **** Examples
 
 *** DONE New Control Syntax
-    CLOSED: [2019-09-09 Mon 18:32]
+    CLOSED: [2019-12-28 Sat 17:53]
     #+begin_src scala
+      if x < 0
+        "negative"
+      else if x == 0
+        "zero"
+      else
+        "positive"
+
       if x < 0 then -x else x
 
       while x >= 0 do x = f(x)
@@ -1888,31 +2060,211 @@
     #+end_src
     - The rules in details:
       TODO
-      - TODO * 4
+      + Two choices for new ~if~ syntax:
+        * with a ~then~ that FOLLOWS the ~if~-condition
+        * with proper INDENTATION
 
-      - For ~if~ or ~while~, in their condition,
-        _newline characters_ are *NOT* _statement separators_.
-          So the meaning of newlines is the _SAME_ no matter whether parentheses
-        are present or absent.
+      + ~while~-loop with ~do~ following the ~while~-condition
+        =from Jian=
+        Remember:
+        ~do ... while~ syntax is removed from Scala 3.
+        In Scala 3, ~do~ will only show up in the _new control syntax_.
 
-      - For the enumerators of ~for~-expression,
-        newline characters are *potential* _statement separators_.
-        TODO ??? ??? ???
+      + For the enumerators of ~for~-expression,
+        * /comprehensions/ still use ~yield~
+        * /side effect loops/ use ~do~
 
 **** Rewrites
-     The Dotty compiler _can rewrite_ source code from old syntax and new syntax
-     and back.
-     - With option ~-rewrite -new-syntax~, rewrite old with new
-     - With option ~-rewrite -old-syntax~, rewrite new with old
+     The Dotty compiler _can rewrite_ source code bidirectionally
+     - old to new: option =-rewrite -new-syntax=
+     - new to old: option =-rewrite -old-syntax=
 
 *** TODO Optional Braces
-**** Spaces vs Tabs
-**** Indentation and Braces
-**** Special Treatment of Case Clauses
-**** The End Marker
-**** Example
-**** Settings and Rewrites
-**** Variant: Indentation Marker ~:~
+    *As an /experimental feature/,*
+    Scala 3 _enforces some rules on indentation_ and _allows some occurrences of
+    braces {...} to be optional_.
+    1. Some badly indented programs are ruled out, which means they are flagged
+       with warnings.
+
+    2. Some occurrences of braces ~{...}~ are made optional.
+       Generally, the rule is that adding a pair of optional braces will NOT
+       change the meaning of a well-indented program.
+
+**** DONE Indentation Rules
+     CLOSED: [2019-12-29 Sun 03:37]
+     - The compiler enforces *TWO* rules for well-indented programs, _flagging
+       violations as warnings_. =from Jian= WHY NOT Error???
+       1. In a brace-delimited region, no statement is allowed to start to the left
+          of the first statement after the opening brace that starts a new line.
+          This rule is helpful for finding missing closing braces. It prevents
+          errors like:
+          #+begin_src scala
+            if (x < 0) {
+              println(1)
+              println(2)
+  
+              println("done")  // error: indented too far to the left
+          #+end_src
+  
+       2. If significant indentation is turned off (i.e. under Scala-2 mode or
+          under ~-noindent~) and we are at the start of an indented sub-part of an
+          expression, and the indented part ends in a newline, the next statement
+          must start at an indentation width less than the sub-part. This prevents
+          errors where an opening brace was forgotten, as in
+          #+begin_src scala
+            if (x < 0)
+              println(1)
+            println(2)   // error: missing `{`
+          #+end_src
+
+     - These rules still leave a lot of leeway how programs should be indented.
+       For instance, they do *NOT impose* any restrictions on
+       + indentation within expressions,
+       + all statements of an indentation block line up exactly. TODO =???=
+         =???= =???= =???=
+
+     - The rules are _generally helpful in pinpointing_ the root cause of errors
+       related to _missing opening or closing braces_.
+
+**** TODO Optinal Braces
+**** DONE New Role of ~with~
+     CLOSED: [2019-12-29 Sun 03:36]
+     - NOTE TODO TODO TODO RULES
+       + Scala 2 syntax
+         #+begin_src scala
+           trait A {
+             def f: Any
+           }
+
+           class C(x: Int) extends A {
+             def f = x
+           }
+
+           type T = A {
+             def f: int
+           }
+         #+end_src
+
+       + Scala 3 syntax
+         * with braces
+           #+begin_src scala
+             trait A with {
+               def f: Any
+             }
+
+             class C(x: Int) extends A with {
+               def f = x
+             }
+
+             type T = A with {
+               def f: int
+             }
+           #+end_src
+
+         * without braces
+           #+begin_src scala
+             trait A with
+               def f: Any
+
+             class C(x: Int) extends A with
+               def f = x
+
+             type T = A with
+               def f: int
+           #+end_src
+
+     - The new syntax with new ~with~ usage
+       ASSUMED here that
+       braces following a ~with~ _can be TRANSPARENTLY replaced by_ an
+       indentation region.
+
+     - The new rules can make some previously allowed code *become illegal*:
+       #+begin_src scala
+         class A extends B with
+                         C
+       #+end_src
+       + ~C~ is considered as part of the body of ~A~
+
+       + ~with~ can _no longer_ at the end of a line!
+         Legal version:
+         #+begin_src scala
+           class A extends B
+                      with C
+
+           // OR
+
+           class A extends B,
+                           C
+         #+end_src
+
+**** DONE Spaces vs Tabs
+     CLOSED: [2019-12-29 Sun 03:29]
+     - _Mix SPACES and TABS is legal._
+       However, there is no rule defined about how many SPACES equals to a TAB, or
+       vice versa. This means
+       + "2 tabs, fllowed by 4 spaces" is strictly less than "2 tabs, followed by
+         5 spaces",
+
+       + BUT "2 tabs, followed by 4 spaces" is *incomparable*
+         * to "6 tabs"
+           or
+         * to "4 spaces, followed by 2 tabs".
+
+     - *CAUTION*:
+       NOT all the legal ways are recommended!!!
+       *Do NOT MIX Spaces and Tabs!!!*
+
+**** TODO Indentation and Braces
+**** DONE Special Treatment of Case Clauses - TODO
+     CLOSED: [2019-12-29 Sun 03:34]
+     - NOTE NOTE NOTE
+       Rules for ~match~ and ~catch~
+
+     - Legal form (the ~println~ in example do not belong to ~match~ block)
+       + Next leval indentation:
+         #+begin_src scala
+           x match
+             case 1 => print("I")
+             case 2 => print("II")
+             case 3 => print("III")
+             case 4 => print("IV")
+             case 5 => print("V")
+
+           println(".")
+         #+end_src
+
+       + Same level indentation:
+         #+begin_src scala
+           x match
+           case 1 => print("I")
+           case 2 => print("II")
+           case 3 => print("III")
+           case 4 => print("IV")
+           case 5 => print("V")
+
+           println(".")
+         #+end_src
+
+**** TODO The End Marker
+**** TODO Example
+**** TODO Settings and Rewrites
+**** TODO Variant: Indentation Marker ~:~
+     NOT STABLE -- Learn when this feature is stable!!!
+
+*** TODO Explicit Nulls
+**** New Type Hierarchy
+**** Unsoundness
+**** Equality
+**** Working with ~Null~
+**** Java Interop
+**** ~UncheckedNull~
+**** Flow Typing
+**** Logical Operators
+**** Inside Conditions
+**** Match Case
+**** Mutable Variable
+**** Unsupported Idioms
+**** Binary Compatibility
 
 ** OTHER CHANGED FEATURES
 *** Numeric Literals
@@ -1963,6 +2315,9 @@
     *Changes in Overload Resolution*
 **** Looking Beyond the First Argument List
 **** Parameter Types of Function Values
+
+*** TODO Match Expressions
+**** Syntax
 
 *** Vararg Patterns
 **** Compatibility considerations
@@ -2205,3 +2560,6 @@
 *** Talks
 **** Talks on Dotty
 **** Deep Dive with Dotty
+     :PROPERTIES:
+     :ID:       b5b2ba1a-6e8d-4f0c-a3c4-14f0e17ee56a
+     :END:
