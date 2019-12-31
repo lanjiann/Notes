@@ -1843,7 +1843,6 @@
          so they _can't inherit anyting_. However, ~export~ can be applied in
          toplevel, and make a similar result to the /package object/ _inheritance_ way.
 
-
 **** Syntax changes
 **** Elaboration of Export Clauses
      TODO ???
@@ -2001,7 +2000,8 @@
 **** Relationship with ~sealed~
 **** Migration
 
-*** Parameter Untupling
+*** DONE Parameter Untupling
+    CLOSED: [2019-12-31 Tue 00:56]
     For data like ~val xs: List[(Int, Int)]~,
     - In Scala 2.x,
       use _EXPLICIT_ /pattern matching/ (partial function) decomposition:
@@ -2027,13 +2027,29 @@
 
 **** Reference
 
-*** Kind Polymorphism
-*** Tupled Function
+*** TODO Kind Polymorphism
+*** TODO Tupled Function
 **** Tupled Function
 **** Examples
 
-*** ~threadUnsafe~ Annotation
+*** DONE ~threadUnsafe~ Annotation
+    CLOSED: [2019-12-31 Tue 04:24]
+    When the compiler see a ~@threadUnsafe lazy val~, it can pick a faster
+    mechanism to do the initialization.
+    
+    - =from Jian= TODO TODO TODO
+      Does this mean before introducing the ~threadUnsafe~ annotation, we only
+      have one mechanism that initialize all ~lazy val~ in a /thread safe/
+      way???
+
 **** Examples
+     #+begin_src scala
+       import scala.annotation.threadUnsafe
+
+       class ThreadUnsafeExample {
+         @threadUnsafe lazy val x: Int = 1
+       }
+     #+end_src
 
 *** DONE New Control Syntax
     CLOSED: [2019-12-28 Sat 17:53]
@@ -2252,19 +2268,126 @@
      NOT STABLE -- Learn when this feature is stable!!!
 
 *** TODO Explicit Nulls
-**** New Type Hierarchy
-**** Unsoundness
-**** Equality
-**** Working with ~Null~
-**** Java Interop
-**** ~UncheckedNull~
-**** Flow Typing
-**** Logical Operators
-**** Inside Conditions
-**** Match Case
-**** Mutable Variable
-**** Unsupported Idioms
-**** Binary Compatibility
+    Explicit nulls is an /opt-in feature/ that _modifies the Scala type system_,
+    which *makes /reference types/ (anything that extends ~AnyRef~) non-nullable.*
+
+    - opt-in feature :: A feature need to enabled via a flag.
+      + For this /explicit nulls/ feature, the flag is ~-Yexplicit-nulls~.
+
+    - After introducing this feature, some old style code will no longer typecheck:
+      #+begin_src scala
+        val x: String = null  // error: found `Null`, but required `String`
+      #+end_src
+
+      Instead, if consider the code above is a piece of Scala 2 code which can
+      typecheck, translate it into Scala 3 form:
+      #+begin_src scala
+        val x: String | Null = null
+      #+end_src
+
+**** DONE New Type Hierarchy
+     CLOSED: [2019-12-31 Tue 04:05]
+     - NEW - Without /explicit nulls/: 
+       ~Null~ is the subtype of all ~AnyRef~ subtypes.
+       The only subtype of ~Null~ is the /bottom type/ ~Noting~.
+
+     - OLD - With /explicit nulls/: 
+       ~Null~ is a subtype of ~Any~.
+       Its only subtype doesn't change, still ~Noting~.
+
+     - Of course, the /NEW type hierarchy/ descried above is the one for typechecker
+       -- before /type erasure/.
+         After /type erasure/, ~Null~, as JVM enforced, remains a /subtype/ of
+       all /reference types/
+
+**** DONE Unsoundness - =IMPORTANT=
+     CLOSED: [2019-12-31 Tue 02:32]
+     The new type system is unsound with respect to ~null~.
+     Enforcing /sound initialization/, which is can be done, is a non-goal of
+     this proposal.
+
+     - The /unsoundness/ happens because uninitialized fields in a class start out
+       as ~null~:
+       + =from Jian= The code in the document doesn't compile
+         #+begin_src scala
+           class C {
+             val f: String = foo(f)
+             def foo(f2: String): String = if (f2 == null) "field is null" else f2
+           }
+           val c = new C()
+           // c.f == "field is null"
+         #+end_src
+         Because of the code ~f2 == null~ is not legal when compile with
+         ~-Yexplicit-nulls~. Therefore, this code can't show the unsoundness --
+         must pass the compilation but break some contract(s).
+
+       + =from Jian= Corrected and simplified version:
+         #+begin_src scala
+           // -Yexplicit-nulls
+           class C with
+             val f: String = foo(f)
+             def foo(f2: String): String = f2
+
+           val c = new C
+           println(c.f)  // null
+         #+end_src
+
+**** DONE Equality
+     CLOSED: [2019-12-31 Tue 02:43]
+     - NOT Allowed:
+       Compare a value of ~AnyRef~ /subtypes/ with ~null~ is not allowed!!!
+       The related operators are ~==~, ~!=~, ~eq~, and ~ne~.
+
+     - ~null~ can _only_ be compared with values of type
+       + ~Null~
+       + nullable union ~(T | Null)~
+       + ~Any~ type.
+
+     - For some reason, if we really want to compare ~null~ with non-null values,
+       we can use /cast/. For example,
+       #+begin_src scala
+         val x: String = ???
+         val y: String | Null = ???
+
+         x == null        // error: Values of types String and Null cannot be compared with == or !=
+         x eq null        // error
+         "hello" == null  // erro
+
+         y == null  // ok
+         y == x     // ok
+
+         (x: String | Null) == null  // ok
+         (x: Any) == null            // ok
+       #+end_src
+
+**** DONE Working with ~Null~
+     CLOSED: [2019-12-31 Tue 04:01]
+     To make working with nullable values easier, we *propose* adding a few
+     utilities to the standard library. So far, we have found the following
+     useful:
+     - An extension method ~.nn~ to "cast away" nullability
+       #+begin_src scala
+         def[T] (x: T|Null) nn: x.type & T =
+           if (x == null) throw new NullPointerException("tried to cast away nullability, but value is null")
+           else           x.asInstanceOf[x.type & T]
+       #+end_src
+       This means that given ~x: String|Null~, ~x.nn~ has type ~String~, so we
+       can call all the usual methods on it. Of course, ~x.nn~ will _throw a
+       NPE_ if ~x~ is ~null~.
+         *Don't use ~.nn~ on /mutable variables/ DIRECTLY*, which may introduce
+       unknown value into the type. TODO TODO TODO ???
+
+**** TODO Java Interop
+***** ~UncheckedNull~
+
+**** TODO Flow Typing
+***** Logical Operators
+***** Inside Conditions
+***** Match Case
+***** Mutable Variable
+***** Unsupported Idioms
+
+**** TODO Binary Compatibility
 
 ** OTHER CHANGED FEATURES
 *** Numeric Literals
