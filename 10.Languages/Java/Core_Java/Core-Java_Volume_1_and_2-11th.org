@@ -1255,11 +1255,91 @@ tform for use on desktops and simple
 **** 6.5.3 Properties of Proxy Classes - 355
 
 ** TODO Chapter 7: Exceptions, Assertions, and Logging - 357
+   - If you don't want users who are using your software go away forever because of
+     a programming mistake or some external circumstance, you must:
+     + Notify the user of an erro
+     + Save all work
+     + Allow users to gracefully exit the program
+
 *** 7.1 Dealing with Errors - 358
-**** 7.1.1 The Classification of Exceptions - 359
-**** 7.1.2 Declaring Checked Exceptions - 361
-**** 7.1.3 How to Throw an Exception - 364
-**** 7.1.4 Creating Exception Classes - 365
+    - TODO NOTE
+    - TODO NOTE
+    - TODO NOTE
+
+**** DONE 7.1.1 The Classification of Exceptions - 359
+     CLOSED: [2020-01-08 Wed 01:03]
+     - In Java, an /exception/ object is *ALWAYS* an instance of a /class/ derived
+       from ~Throwable~!
+
+     - Figure 7.1 Exception hierarchy in Java
+                                       |- ...
+                     |---- ~Error~ ----|- ...
+                     |                 |- ...
+       ~Throwable~ --|
+                     |                  |- ~RuntimeException~
+                     --- ~Exception~ --- - ~IOException~
+                                        |- ...
+
+       + ~Error~
+         * isemantics describes
+           - /internal errors/
+           - /resource EXHAUSTION situations/ inside the /Java Runtime System/.
+
+         * You should not throw an object of type/subtype of ~Error~  -- there is
+           little you can do, beyond notifying the user and trying to termiate the
+           program gracefully.
+
+         * ~Erro~ is quite RARE.
+
+       + ~Exception~ has _TWO_ /DIRECT subclass/, see above.
+         * The rule "if it is a ~RuntimeException~, it was your fault" works pretty
+           well. For example, ~ArrayIndexOutOfBoundsException~ and ~NullPointerException~.
+           - =from Jian=
+             There is another situation, sometimes you just want to throw out an
+             /exception/ and terminate your program, but the /exception/ is by
+             accident a /checked exception/. People often wrap this /exception/ info
+             in to a ~RuntimeException~, and throw it.
+
+           - ~Error~ and ~RuntimeException~ belong to the category called as
+             /unchecked exception/. All other exceptions are /checked exceptions/.
+
+     - *C++ Note*
+       C++ has *TWO* FUNDAMENTAL /exception classes/:
+       + ~runtime_error~: unpredictable problems --
+         completely opposite to the throwables that are not ~RuntimeException~.
+
+       + ~logic_error~: logical errors in program --
+         it is the equivalent of Java's ~RuntimeException~.
+
+**** DONE 7.1.2 Declaring Checked Exceptions - 361
+     CLOSED: [2020-01-10 Fri 20:32]
+     Not only tell the Java compiler the input and output of a /method/,
+     BUT ALSO tell the compiler what can go wrong (=from Jian= of course, only
+     the ones that can be handled by programmers -- /checked exceptions/).
+
+     - Examples:
+       + ~public FileInputStream(String name) throws FileNotFoundException~
+       + ~public Image loadImage(String s) throws FileNotFoundException, EOFException~
+
+     - /unchecked exceptions/ are either beyond your control (~Error~) or result
+       from conditions that you should not have allowed in the first place
+       (~RuntimeException~).
+
+     - *CAUTION*
+       If you _override a method_ from a superclass,
+       the /checked exceptions/ that the subclass method declares *cannot be
+       more general than those of the superclass method*.
+       + It is OK to (=from Jian= What's the subtype relation if take the ~throws~
+         statement as a part of the type signature TODO)
+         * throw _more specific_ exceptions,
+           or
+         * _not to throw any_ exceptions in the subclass method.
+
+     - *C++ Note*
+       TODO
+
+**** TODO 7.1.3 How to Throw an Exception - 364
+**** TODO 7.1.4 Creating Exception Classes - 365
 
 *** 7.2 Catching Exceptions - 367
 **** 7.2.1 Catching an Exception - 367
