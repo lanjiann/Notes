@@ -3,542 +3,1032 @@
 #+AUTHOR: Maurice Naftalin, Philip Wadler
 #+STARTUP: entitiespretty
 
-* Table of Contents                                      :TOC_4_org:noexport:
-- [[Preface - xi][Preface - xi]]
-- [[Part I. Generics][Part I. Generics]]
-- [[1. Introduction - 3][1. Introduction - 3]]
-  - [[1.1 Generics - 4][1.1 Generics - 4]]
-  - [[1.2 Boxing and Unboxing - 6][1.2 Boxing and Unboxing - 6]]
-  - [[1.3 Foreach - 9][1.3 Foreach - 9]]
-  - [[1.4 Generic Methods and Varargs - 10][1.4 Generic Methods and Varargs - 10]]
-  - [[1.5 Assertions - 12][1.5 Assertions - 12]]
-- [[2. Subtyping and Wildcards - 15][2. Subtyping and Wildcards - 15]]
-  - [[2.1 Subtyping and the Substitution Principle - 15][2.1 Subtyping and the Substitution Principle - 15]]
-  - [[2.2 Wildcards with extends - 17][2.2 Wildcards with extends - 17]]
-  - [[2.3 Wildcards with super - 18][2.3 Wildcards with super - 18]]
-  - [[2.4 The Get and Put Principle - 19][2.4 The Get and Put Principle - 19]]
-  - [[2.5 Arrays - 22][2.5 Arrays - 22]]
-  - [[2.6 Wildcards Versus Type Parameters - 25][2.6 Wildcards Versus Type Parameters - 25]]
-  - [[2.7 Wildcard Capture - 27][2.7 Wildcard Capture - 27]]
-  - [[2.8 Restrictions on Wildcards - 28][2.8 Restrictions on Wildcards - 28]]
-- [[3. Comparison and Bounds - 31][3. Comparison and Bounds - 31]]
-  - [[3.1 Comparable - 31][3.1 Comparable - 31]]
-  - [[3.2 Maximum of a Collection - 34][3.2 Maximum of a Collection - 34]]
-  - [[3.3 A Fruity Example - 36][3.3 A Fruity Example - 36]]
-  - [[3.4 Comparator - 37][3.4 Comparator - 37]]
-  - [[3.5 Enumerated Types - 42][3.5 Enumerated Types - 42]]
-  - [[3.6 Multiple Bounds - 45][3.6 Multiple Bounds - 45]]
-  - [[3.7 Bridges - 47][3.7 Bridges - 47]]
-  - [[3.8 Covariant Overriding - 49][3.8 Covariant Overriding - 49]]
-- [[4. Declarations - 51][4. Declarations - 51]]
-  - [[4.1 Constructors - 51][4.1 Constructors - 51]]
-  - [[4.2 Static Members - 52][4.2 Static Members - 52]]
-  - [[4.3 Nested Classes - 53][4.3 Nested Classes - 53]]
-  - [[4.4 How Erasure Works - 55][4.4 How Erasure Works - 55]]
-- [[5. Evolution, Not Revolution - 59][5. Evolution, Not Revolution - 59]]
-  - [[5.1 Legacy Library with Legacy Client - 60][5.1 Legacy Library with Legacy Client - 60]]
-  - [[5.2 Generic Library with Generic Client - 60][5.2 Generic Library with Generic Client - 60]]
-  - [[5.3 Generic Library with Legacy Client - 62][5.3 Generic Library with Legacy Client - 62]]
-  - [[5.4 Legacy Library with Generic Client - 65][5.4 Legacy Library with Generic Client - 65]]
-    - [[5.4.1 Evolving a Library using Minimal Changes - 65][5.4.1 Evolving a Library using Minimal Changes - 65]]
-    - [[5.4.2 Evolving a Library using Stubs - 68][5.4.2 Evolving a Library using Stubs - 68]]
-    - [[5.4.3 Evolving a Library using Wrappers - 68][5.4.3 Evolving a Library using Wrappers - 68]]
-  - [[5.5 Conclusions - 71][5.5 Conclusions - 71]]
-- [[6. Reification - 73][6. Reification - 73]]
-  - [[6.1  Reifiable Types - 73][6.1  Reifiable Types - 73]]
-  - [[6.2  Instance Tests and Casts - 74][6.2  Instance Tests and Casts - 74]]
-  - [[6.3  Exception Handling - 79][6.3  Exception Handling - 79]]
-  - [[6.4  Array Creation - 80][6.4  Array Creation - 80]]
-  - [[6.5  The Principle of Truth in Advertising - 82][6.5  The Principle of Truth in Advertising - 82]]
-  - [[6.6  The Principle of Indecent Exposure - 86][6.6  The Principle of Indecent Exposure - 86]]
-  - [[6.7  How to Define ArrayList - 89][6.7  How to Define ArrayList - 89]]
-  - [[6.8  Array Creation and Varargs - 90][6.8  Array Creation and Varargs - 90]]
-  - [[6.9  Arrays as a Deprecated Type? - 92][6.9  Arrays as a Deprecated Type? - 92]]
-  - [[6.10 Summing Up - 95][6.10 Summing Up - 95]]
-- [[7. Reflection - 97][7. Reflection - 97]]
-  - [[7.1 Generics for Reflection - 97][7.1 Generics for Reflection - 97]]
-  - [[7.2 Reflected Types are Reifiable Types - 100][7.2 Reflected Types are Reifiable Types - 100]]
-  - [[7.3 Reflection for Primitive Types - 101][7.3 Reflection for Primitive Types - 101]]
-  - [[7.4 A Generic Reflection Library - 101][7.4 A Generic Reflection Library - 101]]
-  - [[7.5 Reflection for Generics - 104][7.5 Reflection for Generics - 104]]
-  - [[7.6 Reflecting Generic Types - 105][7.6 Reflecting Generic Types - 105]]
-- [[8. Effective Generics - 109][8. Effective Generics - 109]]
-  - [[8.1 Take Care when Calling Legacy Code - 109][8.1 Take Care when Calling Legacy Code - 109]]
-  - [[8.2 Use Checked Collections to Enforce Security - 111][8.2 Use Checked Collections to Enforce Security - 111]]
-  - [[8.3 Specialize to Create Reifiable Types - 112][8.3 Specialize to Create Reifiable Types - 112]]
-  - [[8.4 Maintain Binary Compatibility - 117][8.4 Maintain Binary Compatibility - 117]]
-- [[9. Design Patterns - 123][9. Design Patterns - 123]]
-  - [[9.1 Visitor - 123][9.1 Visitor - 123]]
-  - [[9.2 Interpreter - 127][9.2 Interpreter - 127]]
-  - [[9.3 Function - 128][9.3 Function - 128]]
-  - [[9.4 Strategy - 131][9.4 Strategy - 131]]
-  - [[9.5 Subject-Observer - 136][9.5 Subject-Observer - 136]]
-- [[Part II. Collections][Part II. Collections]]
-- [[10. The Main Interfaces of the Java Collections Framework - 145][10. The Main Interfaces of the Java Collections Framework - 145]]
-- [[11. Preliminaries - 147][11. Preliminaries - 147]]
-  - [[11.1 ~Iterable~ and ~Iterator~'s - 147][11.1 ~Iterable~ and ~Iterator~'s - 147]]
-  - [[11.2 Implementations - 149][11.2 Implementations - 149]]
-  - [[11.3 Efficiency and the O-Notation - 150][11.3 Efficiency and the O-Notation - 150]]
-  - [[11.4 Contracts - 152][11.4 Contracts - 152]]
-  - [[11.5 Collections and Thread Safety - 153][11.5 Collections and Thread Safety - 153]]
-    - [[11.5.1 Synchronization and the Legacy Collections - 155][11.5.1 Synchronization and the Legacy Collections - 155]]
-    - [[11.5.2 JDK 1.2: Synchronized Collections and Fail-Fast Iterators - 156][11.5.2 JDK 1.2: Synchronized Collections and Fail-Fast Iterators - 156]]
-    - [[11.5.3 Concurrent Collections: Java 5 and Beyond - 158][11.5.3 Concurrent Collections: Java 5 and Beyond - 158]]
-- [[12. The ~Collection~ Interface - 161][12. The ~Collection~ Interface - 161]]
-  - [[12.1 Using the Methods of Collection - 164][12.1 Using the Methods of Collection - 164]]
-  - [[12.2 Implementing Collection - 169][12.2 Implementing Collection - 169]]
-  - [[12.3 Collection Constructors - 169][12.3 Collection Constructors - 169]]
-- [[13. Sets - 171][13. Sets - 171]]
-  - [[13.1 Implementing ~Set~ - 171][13.1 Implementing ~Set~ - 171]]
-    - [[13.1.1 ~HashSet~ - 172][13.1.1 ~HashSet~ - 172]]
-    - [[13.1.2 ~LinkedHashSet~ - 174][13.1.2 ~LinkedHashSet~ - 174]]
-    - [[13.1.3 ~CopyOnWriteArraySet~ - 175][13.1.3 ~CopyOnWriteArraySet~ - 175]]
-    - [[13.1.4 ~EnumSet~ - 176][13.1.4 ~EnumSet~ - 176]]
-  - [[13.2 ~SortedSet~ and ~NavigableSet~ - 178][13.2 ~SortedSet~ and ~NavigableSet~ - 178]]
-    - [[13.2.1 ~NavigableSet~ - 181][13.2.1 ~NavigableSet~ - 181]]
-    - [[13.2.2 ~TreeSet~ - 184][13.2.2 ~TreeSet~ - 184]]
-    - [[13.2.3 ~ConcurrentSkipListSet~ - 186][13.2.3 ~ConcurrentSkipListSet~ - 186]]
-  - [[13.3 Comparing ~Set~ Implementations - 188][13.3 Comparing ~Set~ Implementations - 188]]
-- [[14. Queues - 191][14. Queues - 191]]
-  - [[14.1 Using the Methods of ~Queue~ - 193][14.1 Using the Methods of ~Queue~ - 193]]
-  - [[14.2 Implementing ~Queue~ - 195][14.2 Implementing ~Queue~ - 195]]
-    - [[14.2.1 ~PriorityQueue~ - 195][14.2.1 ~PriorityQueue~ - 195]]
-    - [[14.2.2 ~ConcurrentLinkedQueue~ - 197][14.2.2 ~ConcurrentLinkedQueue~ - 197]]
-  - [[14.3 ~BlockingQueue~ - 198][14.3 ~BlockingQueue~ - 198]]
-    - [[14.3.1 Using the Methods of ~BlockingQueue~ - 199][14.3.1 Using the Methods of ~BlockingQueue~ - 199]]
-    - [[14.3.2 Implementing ~BlockingQueue~ - 202][14.3.2 Implementing ~BlockingQueue~ - 202]]
-  - [[14.4 ~Deque~ - 206][14.4 ~Deque~ - 206]]
-    - [[14.4.1 Implementing ~Deque~ - 208][14.4.1 Implementing ~Deque~ - 208]]
-    - [[14.4.2 ~BlockingDeque~ - 209][14.4.2 ~BlockingDeque~ - 209]]
-  - [[14.5 Comparing ~Queue~ Implementations - 210][14.5 Comparing ~Queue~ Implementations - 210]]
-- [[15. Lists - 213][15. Lists - 213]]
-  - [[15.1 Using the Methods of ~List~ - 215][15.1 Using the Methods of ~List~ - 215]]
-  - [[15.2 Implementing ~List~ - 218][15.2 Implementing ~List~ - 218]]
-    - [[15.2.1 ~ArrayList~ - 218][15.2.1 ~ArrayList~ - 218]]
-    - [[15.2.2 ~LinkedList~ - 221][15.2.2 ~LinkedList~ - 221]]
-    - [[15.2.3 ~CopyOnWriteArrayList~ - 221][15.2.3 ~CopyOnWriteArrayList~ - 221]]
-  - [[15.3 Comparing ~List~ Implementations - 221][15.3 Comparing ~List~ Implementations - 221]]
-- [[16. Maps - 223][16. Maps - 223]]
-  - [[16.1 Using the Methods of ~Map~ - 225][16.1 Using the Methods of ~Map~ - 225]]
-  - [[16.2 Implementing ~Map~ - 226][16.2 Implementing ~Map~ - 226]]
-    - [[16.2.1 ~HashMap~ - 227][16.2.1 ~HashMap~ - 227]]
-    - [[16.2.2 ~LinkedHashMap~ - 227][16.2.2 ~LinkedHashMap~ - 227]]
-    - [[16.2.3 ~WeakHashMap~ - 229][16.2.3 ~WeakHashMap~ - 229]]
-    - [[16.2.4 ~IdentityHashMap~ - 231][16.2.4 ~IdentityHashMap~ - 231]]
-    - [[16.2.5 ~EnumMap~ - 233][16.2.5 ~EnumMap~ - 233]]
-  - [[16.3 ~SortedMap~ and ~NavigableMap~ - 234][16.3 ~SortedMap~ and ~NavigableMap~ - 234]]
-    - [[16.3.1 ~NavigableMap~ - 235][16.3.1 ~NavigableMap~ - 235]]
-    - [[16.3.2 ~TreeMap~ - 236][16.3.2 ~TreeMap~ - 236]]
-  - [[16.4 ~ConcurrentMap~ - 237][16.4 ~ConcurrentMap~ - 237]]
-    - [[16.4.1 ~ConcurrentHashMap~ - 238][16.4.1 ~ConcurrentHashMap~ - 238]]
-  - [[16.5 ~ConcurrentNavigableMap~ - 238][16.5 ~ConcurrentNavigableMap~ - 238]]
-    - [[16.5.1 ~ConcurrentSkipListMap~ - 239][16.5.1 ~ConcurrentSkipListMap~ - 239]]
-  - [[16.6 Comparing ~Map~ Implementations - 239][16.6 Comparing ~Map~ Implementations - 239]]
-- [[17. The ~Collections~ Class - 241][17. The ~Collections~ Class - 241]]
-  - [[17.1 Generic Algorithms - 241][17.1 Generic Algorithms - 241]]
-    - [[17.1.1 Changing the Order of List Elements - 241][17.1.1 Changing the Order of List Elements - 241]]
-    - [[17.1.2 Changing the Contents of a List - 242][17.1.2 Changing the Contents of a List - 242]]
-    - [[17.1.3 Finding Extreme Values in a Collection - 243][17.1.3 Finding Extreme Values in a Collection - 243]]
-    - [[17.1.4 Finding Specific Values in a List - 243][17.1.4 Finding Specific Values in a List - 243]]
-  - [[17.2 Collection Factories - 244][17.2 Collection Factories - 244]]
-  - [[17.3 Wrappers - 245][17.3 Wrappers - 245]]
-    - [[17.3.1 Synchronized Collections - 245][17.3.1 Synchronized Collections - 245]]
-    - [[17.3.2 Unmodifiable Collections - 246][17.3.2 Unmodifiable Collections - 246]]
-    - [[17.3.3 Checked Collections - 246][17.3.3 Checked Collections - 246]]
-  - [[17.4 Other Methods - 247][17.4 Other Methods - 247]]
-- [[Index - 251][Index - 251]]
-
 * Preface - xi
-* Part I. Generics
-* TODO 1. Introduction - 3
-** 1.1 Generics - 4
-   - *Generics Versus Templates*
+* Part I. Generics - 1
+  This part of the book describes /generics/, using the _Collections Framework_
+  as a source of examples. A comprehensive introduction to the _Collections
+  Framework_ appears in the second part of the book.
 
-** 1.2 Boxing and Unboxing - 6
-   - *Look Out for This!*
+  - The first *FIVE* chapters focus on the fundamentals of generics.
+      Once you have these five chapters under your belt, you will be able to use
+    /generics/ effectively in most basic situations.
+    + Chapter 1
+      OVERVIEW TO /generics/ and _other new features in Java 5_ including
+      * /boxing/
+      * /foreach loops/
+      * functions with a /variable number of arguments/.
 
-** 1.3 Foreach - 9
-** 1.4 Generic Methods and Varargs - 10
-** 1.5 Assertions - 12
+    + Chapter 2
+      REVIEWS
+      * how /subtyping/ works
+      * explains how /wildcards/ let you use /subtyping/ in connection with /generics/.
 
-* TODO 2. Subtyping and Wildcards - 15
-** 2.1 Subtyping and the Substitution Principle - 15
-** 2.2 Wildcards with extends - 17
-** 2.3 Wildcards with super - 18
-** 2.4 The Get and Put Principle - 19
-** 2.5 Arrays - 22
-** 2.6 Wildcards Versus Type Parameters - 25
+    + Chapter 3
+      DESCRIBES
+      * how /generics/ work with the ~Comparable~ /interface/, which requires a
+        notion of /bounds on type variables/.
+
+    + Chapter 4
+      LOOKS AT
+      * how /generics/ work with VARIOUS /declarations/, including /constructors/,
+        /static members/, and /nested classes/.
+
+    + Chapter 5
+      EXPLAINS
+      * how to evolve *legacy code* to exploit /generics/
+      * how ease of evolution is a key advantage of the design of /generics/ in Java.
+
+  - The next *FOUR* chapters treat _ADVANCED_ topics.
+    + Chapter 6
+      explains how the same design that
+      * leads to ease of evolution
+
+      * ALSO necessarily leads to a few rough edges in _the treatment of /casts/,
+        /exceptions/, and /arrays/._
+          The fit between /generics/ and /arrays/ is the *WORST* rough corner of the
+        language, and we formulate two principles to help you *work around* the
+        problems.
+
+    + Chapter 7
+      explains new features that relate /generics/ and /reflection/, including
+      * the newly generified type ~Class<T>~
+      * additions to the Java library that support /reflection of generic types/.
+
+    + Chapter 8
+      contains advice on how to use generics effectively in practical coding.
+      We consider /checked collections/, /security issues/, /specialized classes/,
+      and /binary compatibility/.
+
+    + Chapter 9
+      presents FIVE extended examples, looking at how generics affect five well-known
+      /design patterns/:
+      * Visitor
+      * Interpreter
+      * Function
+      * Strategy
+      * Subject-Observer
+
+** TODO 1. Introduction - 3
+   - Example (Java 5 and Java 5+):
+     #+begin_src java
+       List<Integer> ints = Arrays.asList(1, 2, 3);  // generics, Collection Framework, and varargs
+       int s = 0;
+       for (int n : ints) { s += n; }  // foreach loop
+       assert s == 6;
+     #+end_src
+
+   - Example (Java 4 and Java 4-):
+     #+begin_src java
+       List ints = Arrays.asList( new Integer[] {
+               new Integer(1), new Integer(2), new Integer(3)
+       } );
+       int s = 0;
+       for (Iterator it = ints.iterator(); it.hasNext();) {
+           int n = ((Integer)it.next()).intValue();
+           s += n;
+       }
+       assert s == 6;
+     #+end_src
+
+   - If we don't need the flexibility that ~ints~ doesn't have a fixed size, and
+     use /integer array/:
+     #+begin_src java
+       int[] ints = new int[] { 1, 2, 3 };
+       int s = 0;
+       for (int i = 0; i < ints.length; ++i) {
+           s += ints[i];
+       }
+       assert s == 6;
+     #+end_src
+
+   - =from Jian=
+     From Java 8 on:
+     #+begin_src java
+       List<Integer> ints = Arrays.asList(1, 2, 3);  // generics, Collection Framework, and varargs
+       final int sum = ints.stream().reduce(0, Integer::sum);
+       assert sum == 6;
+
+       // OR
+
+       assert 6 == IntStream.of(1, 2, 3).reduce(0, Integer::sum);
+     #+end_src
+
+*** TODO 1.1 Generics - 4
+    - Examples:
+      + With /generics/:
+        #+begin_src java
+          List<String> words = new ArrayList<String>();
+          words.add("Hello ");
+          words.add("world!");
+          String s = words.get(0) + words.get(1);
+          assert s.equals("Hello world!");
+        #+end_src
+
+      + Before Java 5:
+        #+begin_src java
+          List words = new ArrayList();
+          words.add("Hello ");
+          words.add("world!");
+          String s = (String)words.get(0) + (String)words.get(1);
+          assert s.equals("Hello world!");
+        #+end_src
+
+      + The bytecode compiled from the two sources above will be *identical*.
+
+    - /Type erasure/ is actually
+      + *erase type parameters*
+        AND
+      + *add casts*.
+
+    - Cast-iron guarantee :: the implicit casts added by the compilation of /generics/
+         _NEVER fail_.
+      + There is also some fine print on this guarantee: it applies _only when_ NO
+        /unchecked warnings/ have been issued by the compiler.
+        TODO Later, we will discuss at some length what causes /unchecked warnings/
+        to be issued and how to _minimize_ their effect.
+
+    - TODO ARRAY, COLLECTION, /reifieds/.
+      NOTE NOTE NOTE
+
+    - Implementing /generics/ by /erasure/ has a number of important effects (here
+      are the good ones):
+      + It keeps things *simple*, in that /generics/ do not add anything
+        fundamentally new.
+
+      + It keeps things *small*, in that there is exactly one implementation of ~List~,
+        not one version for each type.
+
+      + And it *eases evolution*, since the same library can be accessed in both
+        nongeneric and generic forms.
+
+    - *Java Generics Versus C++ Templates*
+      There are just *TWO* important things to bear in mind about the relationship
+      between /Java generics/ and /C++ templates/: /syntax/ and /semantics/.
+      *The /syntax/ is deliberately _similar_ and the /semantics/ are
+      deliberately _different_.*
+      + Syntactically,
+        /Angle brackets/ was chosen in Java because they are familiar to C++
+        /template/ uses.
+        * Differences:
+          - C++ nested parameters require extra spaces.
+            For example, ~List< List<String> >~.
+            Withoug these extra spaces, a problem arises becase ~>>~ will always
+            be considered as right-shift operator.
+
+          - Java do NOT need extra spaces.
+            Java fixes the problem by a trick in the grammar. TODO ??? TODO
+
+      + Semantically,
+        * /Java generics/ are defined by /erasure/, whereas /C++ templates/ are defined
+          by /expansion/.
+          - The /expansion/ way can benefit optimization, but it may lead to /code bloat/.
+
+          - The /erasure/ way does NOT help doing optimization as in C++, but there
+            is also NO /code bloat/ possibility.
+
+          - In practice, /Code bloat/ can be MORE CRUCIAL than _efficiency_.
+
+        * /C++ tempalte/ support singleton type (constant value).
+          /Java generics/ are restricted to types.
+
+*** TODO 1.2 Boxing and Unboxing - 6
+    - boxing :: Conversion of /primitive type/ -> CORRESPONDING /reference type/.
+
+    - unboxing :: Conversion of /reference type/ -> CORRESPONDING /primitive type/.
+
+    - Java do /boxing/ and /unboxing/ automatically.
+      Code like
+      #+begin_src java
+        List<Integer> ints = new ArrayList<Integer>();
+        ints.add(1);
+        int n = ints.get(0);
+      #+end_src
+      after /boxing/ and /unboxing/ will become
+      #+begin_src java
+        List<Integer> ints = new ArrayList<Integer>();
+        ints.add(Integer.valueOf(1));
+        int n = ints.get(0).intValue;
+      #+end_src
+
+    - TODO *Explain soon!*
+      ~Integer.valueOf(1)~ is similar in effect to ~new Integer(1)~,
+      but may _cache some values_ for improved performance.
+      + =from Jian= The constructor form of ~Integer~ is already marked as /Deprecated/.
+
+    - Performance:
+      #+begin_src java
+        public static int sum (List<Integer> ints) {
+            int s = 0;
+            for (int n : ints) { s += n; }
+            return s;
+        }
+
+        // is MUCH faster than
+
+        public static Integer sum (List<Integer> ints) {
+            Integer s = 0;                       // extra auto-boxing
+            for (Integer n : ints) { s += n; }   // extra auto-unboxing for the `+` operation, and auto-boxing after `+` is done.
+            return s;
+        }
+      #+end_src
+      With the 2007 version of Sun's compiler, the ~Integer sum (List<Integer> ints)~
+      version is 60% slower!!!
+
+    - *Look Out for This!* TODO
+      NOTE
+      NOTE
+      NOTE
+      NOTE
+      NOTE
+      NOTE
+      NOTE
+
+*** DONE 1.3 Foreach - 9
+    CLOSED: [2020-01-04 Sat 22:41]
+    /foreach loop/ can be applied to *ANY* _object that importants the
+    /interface/ ~Iterable<E>~._
+    #+begin_src java
+      List<Integer> ints = Arrays.asList(1, 2, 3);
+      int sum = 0;
+      for (int n : ints) {  // unboxing happens in this line, when assigning `ints.next()` to `n`
+          sum += n;
+      }
+    #+end_src
+    is equivalent to the following:
+    #+begin_src java
+      for (Iterator<Integer> i = ints.iterator(); i.hasNext();) {
+          int n = i.next();
+          sum += n;
+      }
+    #+end_src
+
+    - _The /foreach loop/ catches ONLY The MOST common case._
+        You need to EXPLICITLY introduce an /iterator/ if you wan't do something
+      not that simple like:
+      + Use ~remove~ method
+        #+begin_src java
+          // Remove negatives
+          public static void removeNegative(List<Double> v) {
+              for (Iterator<Double> it = v.iterator(); it.hasNext();) {
+                  if (it.next() < 0) it.remove();
+              }
+          }
+        #+end_src
+
+      + Iterate over _more than one_ list IN PARALLEL.
+        #+begin_src java
+          // Loop two iterators in parallel
+          public static double dot(List<Double> u, List<Double> v) {
+              if (u.size() != v.size()) throw new IllegalArgumentException("different sizes");
+              double d = 0;
+              Iterator<Double> uIt = u.iterator();
+              Iterator<Double> vIt = v.iterator();
+              while (uIt.hasNext()) {
+                  assert uIt.hasNext() && vIt.hasNext();
+                  d += uIt.next() * vIt.next();
+              }
+              assert !uIt.hasNext() && !vIt.hasNext();
+              return d;
+          }
+        #+end_src
+
+*** TODO 1.4 Generic Methods and Varargs - 10
+    - Syntax:
+      ~T... variable~ in parameter list.
+
+*** DONE 1.5 Assertions - 12
+    CLOSED: [2020-01-04 Sat 23:01]
+    /Assertions/ are enabled by invoing the JVM with the ~-ea~ or
+    ~-enableassertions~ flag.
+
+    - Since /assertions/ can be enabled or disabled, and
+      also because of the semantics of /assertions/,
+      an /assertion/ should *never* have /side effects/ upon which any
+      nonassertion code depends.
+
+** TODO 2. Subtyping and Wildcards - 15
+   We'll review how /subtyping/ works;
+   we'll see how /wildcards/ let you use /subtyping/ *in connection with* /generics/;
+   We'll illustrate our points with examples from the _Collections Framework_.
+
+*** DONE 2.1 Subtyping and the Substitution Principle - 15
+    CLOSED: [2020-01-05 Sun 17:07]
+    In Java,
+    one type is a /subtype/ of another
+    if they are related by an ~extends~ or ~implements~ clause.
+
+    - /Subtyping/ is *transitive*.
+
+    - Substitution Principle :: a variable of a given type may be assigned a value
+         of any subtype of that type, and a method with a parameter of a given
+         type may be invoked with an argument of any subtype of that type.
+
+    - The /substitution principle/ does *NOT* regulate the /subtyping relation/
+      between, for instance, ~List<A>~ and ~List<B>~ if ~B~ is a /subtype/ of ~A~.
+      + /Java array/ is not a part of the _Collection Framework_, and it follow a
+        DIFFERENT (=from Jian= WRONG!!!) rule. (TODO: See Section 2.5)
+
+    - The relation between types like ~List<A>~ and ~List<B>~, when ~B~ is a /subtype/
+      of ~A~, can be specified with /wildcards/. TODO: Next SECTION
+
+*** DONE 2.2 Wildcards with ~extends~ - 17 - TODO RE-READ
+    CLOSED: [2020-01-05 Sun 18:56]
+    Example:
+    #+begin_src java
+      interface Collection<E> {
+          // ...
+          public boolean addAll(Collection<? extends E> c);
+          // ...
+      }
+    #+end_src
+    - ~? extends E~ means any type that is a subtype of ~E~.
+
+    - Example:
+      #+begin_src java
+        List<Number> nums = new ArrayList<Number>();
+        List<Integer> ints = Arrays.asList(1, 2);
+        List<Double> dbls = Arrays.asList(2.78, 3.14);
+        nums.addAll(ints);
+        nums.addAll(dbls);
+        assert nums.toString().equals("[1, 2, 2.78, 3.14]");
+      #+end_src
+
+    - We can also use /wildcards/ when _declaring variables_.
+
+    - One commmon error:
+      #+begin_src java
+        List<Integer> ints = new ArrayList<>();
+        ints.add(1);
+        ints.add(2);
+        List<? extends Number> nums = ints;
+        nums.addAll(3.14);  // compile-time error
+      #+end_src
+      1. ~nums~ is a list that contains values of a subtype of ~Number~.
+         The /compile-time error/ happens because a subtype of ~Number~ might
+         conflict with the type of ~3.14~ (~double~) -- confirmed in the code
+         above.
+
+      2. In general, if a structure contains elements with a type of the form ~?
+         extends E~, we
+         + CAN get elements out of the structure,
+
+         + BUT we CANNOT put elements into the structure.
+
+      3. To put elements into the structure we need another kind of /wildcard/, as
+         explained in the next section. TODO Next Section
+
+*** TODO 2.3 Wildcards with ~super~ - 18 - TODO RE-READ
+    Example:
+    #+begin_src java
+      public static <T> void copy(List<? super T> dst, List<? extends T> src) {
+          for (int i = 0; i < src.size(); ++i) {
+              dst.set(i, src.get(i));
+          }
+      }
+    #+end_src
+    The _first_ ~?~ is the /supertype/ of ~T~, and ~T~ is the /supertype/ of the
+    _second_ ~?~. This means the _first_ ~?~ is the /supertype/ of the _second_ ~?~.
+
+    - Example:
+      #+begin_src java
+        List<Object> objs = Arrays.<Object>asList(2, 3.14, "four");
+        List<Integer> ints = Arrays.asList(5, 6);
+        Collections.copy(objs, ints);
+        assert objs.toString().equals("[5, 6, four]");
+      #+end_src
+      As with any /generic method/, the /type parameter/
+      _may be INFERRED_ or _may be given EXPLICITLY_
+      + In this case, there are *FOUR* possible choices, all of which type-check
+        and all of which have the same effect:
+        #+begin_src java
+          Collections.copy(objs, ints);           // The exact type of `ints` is given, and the tightest type `Integer` is inferred.
+          Collections.<Object>copy(objs, ints);   // compatible
+          Collections.<Number>copy(objs, ints);   // compatible
+          Collections.<Integer>copy(objs, ints);  // compatible
+        #+end_src
+        * TODO NOTE
+        * TODO NOTE
+        * TODO NOTE
+
+    - Declare the ~copy~ method with different signatures, and find out how are
+      they affected by their /wildcards/.
+      #+begin_src java
+        public static <T> void copy(List<T> dst, List<T> src);                    // 1
+        public static <T> void copy(List<T> dst, List<? extends T> src);          // 2
+        public static <T> void copy(List<? super T> dst, List<T> src);            // 3
+        public static <T> void copy(List<? super T> dst, List<? extends T> src);  // 4
+      #+end_src
+      + 1 is TOO restrictive
+        It only permits calls when the _destination_ and _source_ have *EXACTLY
+        the SAME /type/.*
+
+      + The remaining three are equivalent for calls that use implicit type parameters,
+        but differ for explicit type parameters.
+        2 works only when the type parameter is Object,
+        3 works only when the type parameter is Integer,
+        4 works (as we have seen) for all three type parameters
+          i.e., Object, Number, and Integer.
+
+      + Always use wildcards where you can in a signature, since this permits the
+        widest range of calls.
+
+*** TODO 2.4 The Get and Put Principle - 19
+    - The Get and Put Principle :: use an extends wildcard when you only get values
+         out of a structure, use a super wildcard when you only put values into
+         a structure, and don’t use a wildcard when you both get and put.
+
+*** 2.5 Arrays - 22
+*** 2.6 Wildcards Versus Type Parameters - 25
    - *Wildcards*
    - *Type Parameters*
 
-** 2.7 Wildcard Capture - 27
-** 2.8 Restrictions on Wildcards - 28
-   - *Generic Method Calls*
-   - *Supertypes*
+*** 2.7 Wildcard Capture - 27
+*** 2.8 Restrictions on Wildcards - 28
+    - *Generic Method Calls*
+    - *Supertypes*
 
-* TODO 3. Comparison and Bounds - 31
-** 3.1 Comparable - 31
-   - *Consistent with Equals*
-   - *Contract for Comparable*
-   - *Look Out for This!*
+** TODO 3. Comparison and Bounds - 31
+   Now let's look at some more advanced uses of generics.
+   This chapter describes the /interfaces/ ~Comparable<T>~ and ~Comparator<T>~.
+     Along the way, we will introduce /bounds/ on /type variables/, _an important
+   feature_ of /generics/ that is particularly useful in combination with the
+   /interfaces/ like ~Comparable<T>~ .
 
-** 3.2 Maximum of a Collection - 34
-** 3.3 A Fruity Example - 36
-** 3.4 Comparator - 37
-** 3.5 Enumerated Types - 42
-** 3.6 Multiple Bounds - 45
-** 3.7 Bridges - 47
-** 3.8 Covariant Overriding - 49
+*** 3.1 Comparable - 31
+    #+begin_src java
+      interface Comparable<T> {
+          public int compareTo(T o);
+      }
+    #+end_src
 
-* TODO 4. Declarations - 51
-** 4.1 Constructors - 51
-   - *Look Out for This!*
+    - When a class implements ~Comparable~, the ordering specified by this /interface/
+      is called the /natural ordering/ for that class.
 
-** 4.2 Static Members - 52
-** 4.3 Nested Classes - 53
-** 4.4 How Erasure Works - 55
 
-* 5. Evolution, Not Revolution - 59
-** 5.1 Legacy Library with Legacy Client - 60
-** 5.2 Generic Library with Generic Client - 60
-** 5.3 Generic Library with Legacy Client - 62
-** 5.4 Legacy Library with Generic Client - 65
-*** 5.4.1 Evolving a Library using Minimal Changes - 65
-*** 5.4.2 Evolving a Library using Stubs - 68
-*** 5.4.3 Evolving a Library using Wrappers - 68
+    - *Consistent with Equals*
 
-** 5.5 Conclusions - 71
+    - *Contract for Comparable*
 
-* 6. Reification - 73
-** 6.1  Reifiable Types - 73
-** 6.2  Instance Tests and Casts - 74
-** 6.3  Exception Handling - 79
-** 6.4  Array Creation - 80
-** 6.5  The Principle of Truth in Advertising - 82
-** 6.6  The Principle of Indecent Exposure - 86
-** 6.7  How to Define ArrayList - 89
-** 6.8  Array Creation and Varargs - 90
-** 6.9  Arrays as a Deprecated Type? - 92
-** 6.10 Summing Up - 95
+    - *Look Out for This!*
 
-* 7. Reflection - 97
-** 7.1 Generics for Reflection - 97
-** 7.2 Reflected Types are Reifiable Types - 100
-** 7.3 Reflection for Primitive Types - 101
-** 7.4 A Generic Reflection Library - 101
-** 7.5 Reflection for Generics - 104
-** 7.6 Reflecting Generic Types - 105
+*** 3.2 Maximum of a Collection - 34
+*** 3.3 A Fruity Example - 36
+*** 3.4 Comparator - 37
+*** 3.5 Enumerated Types - 42
+    Java 5 inlcudes support for /enumerated types/.
+    - Example:
+      #+begin_src java
+        enum Season { WINTER, SPRING, SUMMER, FALL }
+      #+end_src
 
-* 8. Effective Generics - 109
-** 8.1 Take Care when Calling Legacy Code - 109
-** 8.2 Use Checked Collections to Enforce Security - 111
-** 8.3 Specialize to Create Reifiable Types - 112
-** 8.4 Maintain Binary Compatibility - 117
+*** 3.6 Multiple Bounds - 45
+*** 3.7 Bridges - 47
+*** 3.8 Covariant Overriding - 49
 
-* 9. Design Patterns - 123
-** 9.1 Visitor - 123
-** 9.2 Interpreter - 127
-** 9.3 Function - 128
-** 9.4 Strategy - 131
-** 9.5 Subject-Observer - 136
+** TODO 4. Declarations - 51
+   _This chapter discusses how to *declare* a /generic class/._
+   It describes /constructors/, /static members/, and /nested classes/, and it
+   fills in some details of *how /erasure/ works*.
 
-* Part II. Collections
+*** DONE 4.1 Constructors - 51
+    CLOSED: [2020-01-05 Sun 16:00]
+    In a /generic class/, /type parameters/ appear IN THE HEADER that declares the
+    class, but _NOT IN the /constructor/._
+      However, /type parameters/ need to be passed to the /constructor/ whenever
+    construction required.
+    #+begin_src java
+      class Pair<T, U> {
+          private final T first;
+          private final U second;
+
+          public Pair(T first, U second) {
+              this.first = first;
+              this.second = second;
+          }
+      }
+
+      // The form with all required type parameters being given EXPLICITLY.
+      Pair<String, Integer> pair0 = new Pair<>("one", 2);
+
+      // Java 10+
+      // The form with all required type parameters being given, though they are IMPLICIT.
+      var pair1 = new Pair<>("one", 2);
+    #+end_src
+
+    - *Look Out for This!*
+      DO NOT forget the ~<>~.
+
+*** DONE 4.2 Static Members - 52
+    CLOSED: [2020-01-05 Sun 16:26]
+    Because of the /erasure/, /static members/ of a /generic class/ *can't refer*
+    to the the /type parameters/, not only the /generic class/ it belongs to, but
+    also any other /type parameters/.
+
+    - It is obvious that /static members/ can't refer to the /type parameters/ of
+      the /generic class/ that it belongs to. Then,
+      + Q :: Can one /static method/ have its own type parameter?
+      + A :: Still *NO*!!!
+        * For a class like ~Cell<T>~, a /method/ ~static List<U> f~ can't make a
+          lot of sense -- no clear relation between ~T~ and ~U~, and ~f~ is used
+          across ~Cell~'s with _different_ /type parameters/.
+
+        * =from Jian=
+          For ~Cell<T>~, a /method/ ~static List<T> g~ can be meaningful, but if
+          it is meaningful, why not use non-static definition ~List<T> g~.
+            If we want to make ~static List<T> g~ meaningful, we need to do a lot
+          of work to the compiler (may also introduce some conflicts I can't
+          imagine till now).
+
+    - No restriction to /static memember/ with /type arguments/.
+      For example, ~static List<Integer> f~ is LEGAL!!!
+
+    - Because /static members/ are *independent* of ANY /type parameters/, we are
+      _NOT permitted_ to follow the /class/ name with /type parameters/ when
+      accessing a /static member/:
+      #+begin_src java
+        Cell.getCount();          // ok
+        Cell<Integer>.getCount(); // compile-time error
+        Cell<?>.getCount();       // compile-time error
+      #+end_src
+
+*** DONE 4.3 Nested Classes - 53
+    CLOSED: [2020-01-05 Sun 16:39]
+    /Outer class type parameters/ are *visible* to /inner non-static class/.
+    *When applicable, /static inner classes/ are always preferred* -- they don't
+    include a /reference/ to the /enclosing instance/, which make it _simpler_ and
+    _efficient_ than /non-static inner classes/.
+
+*** TODO 4.4 How Erasure Works - 55
+    TODO - Need knowledge about /bound/!!! -- Read Chapter 3 first!!!
+
+** TODO 5. Evolution, Not Revolution - 59
+*** 5.1 Legacy Library with Legacy Client - 60
+*** 5.2 Generic Library with Generic Client - 60
+*** 5.3 Generic Library with Legacy Client - 62
+*** 5.4 Legacy Library with Generic Client - 65
+**** 5.4.1 Evolving a Library using Minimal Changes - 65
+**** 5.4.2 Evolving a Library using Stubs - 68
+**** 5.4.3 Evolving a Library using Wrappers - 68
+
+*** 5.5 Conclusions - 71
+
+** TODO 6. Reification - 73
+*** 6.1 Reifiable Types - 73
+*** 6.2 Instance Tests and Casts - 74
+    - *Nonreifiable Casts*
+
+    - *Unchecked casts*
+
+*** 6.3 Exception Handling - 79
+    - *Type Variable in a Throws Clause*
+
+*** 6.4 Array Creation - 80
+*** 6.5 The Principle of Truth in Advertising - 82
+    - *Array Begets Array*
+
+    - *A Classy Alternative*
+
+*** 6.6 The Principle of Indecent Exposure - 86
+*** 6.7 How to Define ~ArrayList~ - 89
+*** 6.8 Array Creation and Varargs - 90
+*** 6.9 Arrays as a Deprecated Type? - 92
+*** 6.10 Summing Up - 95
+
+** TODO 7. Reflection - 97
+*** 7.1 Generics for Reflection - 97
+    - *Further Examples of Generics for Reflection*
+
+*** 7.2 Reflected Types are Reifiable Types - 100
+*** 7.3 Reflection for Primitive Types - 101
+*** 7.4 A Generic Reflection Library - 101
+*** 7.5 Reflection for Generics - 104
+*** 7.6 Reflecting Generic Types - 105
+
+** TODO 8. Effective Generics - 109
+*** 8.1 Take Care when Calling Legacy Code - 109
+*** 8.2 Use Checked Collections to Enforce Security - 111
+*** 8.3 Specialize to Create Reifiable Types - 112
+    - *Delegation*
+
+    - *Inheritance*
+
+    - *Other Types*
+
+*** 8.4 Maintain Binary Compatibility - 117
+    - *Adjusting the Erasure*
+
+    - *Bridges*
+
+    - *Covariant Overriding*
+
+** TODO 9. Design Patterns - 123
+*** 9.1 Visitor - 123
+*** 9.2 Interpreter - 127
+*** 9.3 Function - 128
+*** 9.4 Strategy - 131
+    - *Parallel Class Hierarchies*
+    - *An Advanced Strategy Pattern with Recursive Generics*
+    - *Summary*
+
+*** 9.5 Subject-Observer - 136
+
+* Part II. Collections - 143
   /The Java Collections Framework/ is a set of /interfaces/ and /classes/
   IN the /packages/ ~java.util~ and ~java.util.concurrent~.
 
-* DONE 10. The Main Interfaces of the Java Collections Framework - 145
-  CLOSED: [2018-10-08 Mon 01:48]
-  - =TODO=
-    *NOTE*
+** TODO 10. The Main Interfaces of the Java Collections Framework - 145
+   - Figure 10-1. The main interfaces of the Java Collections Framework
+     =IMPORTANT=
 
-  - =TODO= Figure 10-1. The main interfaces of the Java Collections Framework
-    =RE-READ=
+   - Figure 10-1 inlcudes one /interface/ that doesn't belong to the _Java Collections
+     Framework_ but an essential adjunct to it.
 
-* TODO 11. Preliminaries - 147
-** DONE 11.1 ~Iterable~ and ~Iterator~'s - 147
-   CLOSED: [2018-11-27 Tue 00:34]
-   - ~Iterator~
-     #+BEGIN_SRC java
-       public Iterator<E> {
-           boolean hasNext();
-           E next();
-           void remove();  // remove the last element returned by the iterator
-       }
-     #+END_SRC
+   - The Framework /interfaces/ have the following purposes:
+     + ~Collection~
+       contains the core functionality required of any collection _other than a
+       map_.
+       * =from Jian= Map is a /collection/ and it is a part of the _Java Collection
+         Framework_, but ~Collection~ doesn't includes core functionalities of it???
+         What a design??? This design can be accepted if this interface was NOT called
+         _Collection_!
 
-   - The PURPOSE of /iterators/:
-     *provide a uniform way of accessing collection elements sequentially*,
+       * No direct concrete implementations.
 
-     Then whatever kind of /collection/ you are dealing with, and however it is
-     implemented, you always know how to process its elements in turn.
+     + ~Set~ TODO
+       * ~SortedSet~
+       * ~NavigableSet~ extends ~SortedSet~
 
-   - ~Iterator~'s are useful, but no one want to write code like:
-     #+BEGIN_SRC java
-       // coll refers to an object which implements `Collection`
-       // ----- not the preferred idiom from Java 5 on -----
-       for (Iterator itr = coll.iterator(); itr.hasNext();) {
-           System.out.println(itr.next());
-       }
-     #+END_SRC
-     + This is the idiom before Java 5.
+     + ~Queue~ TODO
+       * ~BlockingQueue~
+       * ~Deque~
+         - ~BlockingDeque~
 
-     + This works because ~Collection~ has an ~iterator~ /method/ which returns
-       an /iterator/ appropriate to objects of that /class/.
+     + ~List~ :: A collection in which _order is significant._
 
-   - From Java 5 on, /foreach/ statement is introduced.
-     It works with anything that implements the interface ~Iterable~,
-     #+BEGIN_SRC java
-       public Iterable<T> {
-           Iterator<T> iterator();  // return an iterator over elements of type `T`
-       }
-     #+END_SRC
+     + ~Map~ TODO
+       * ~SortedMap~
+         - ~NavigableMap~
 
-     Then we can do
-     #+BEGIN_SRC java
-       for (Object o : coll) {
-           System.out.pirntln(o);
-       }
-     #+END_SRC
+       * ~ConcurrentMap~
+         - ~ConcurrentNavigableMap~
 
-     + In Java 5, the ~Collection~ /interface/ was made to extend ~Iterable~, so
-       any set, list, or queue can be the target of /foreach/, as can /arrays/.
-   - 
-
-     =from Jian= In Java 8, you would like to use
-     #+BEGIN_SRC java
-       coll.stream().forEach(System.out::println);
-     #+END_SRC
-
-   - In Java 5, the ~Collection~ /interface/ was made to extend ~Iterable~.
-     This was NOT in the original design tracing back to Java 1.2 (Java 2).
-
-   - In practice, it is _UNUSUAL_ to implement ~Iterable~ _DIRECTLY_ in the way
-     of Example 11-1. Directly implementing ~Iterable~ as /foreach/ is most
-     commonly used with /arrays/ and /the standard collections classes/.
-
-   - ~CocurrentModificationException~ can be thrown from single-threaded code.
-
-     This can happend when you modify a colleciton, at the same time you are
-     using its /iterator/ -- /iterators/ are created as view of the underlying
-     /iterables/, structurally chane the underlying /iteratables/ usually lead
-     to failure or unpredictable results. The designer of Java decide to
-     *fail-fast* when this happen.
-
-   - The /concurrent collections/ have other strategies for *handling* /concurrent
-     modification/, such as /weakly consistent iterators/ =???= =TODO=.
-     We discuss them in more detail in Section 11.5. =TODO=
-
-** TODO 11.2 Implementations - 149
-** TODO 11.3 Efficiency and the O-Notation - 150
-** TODO 11.4 Contracts - 152
-** TODO 11.5 Collections and Thread Safety - 153
-*** TODO 11.5.1 Synchronization and the Legacy Collections - 155
-*** TODO 11.5.2 JDK 1.2: Synchronized Collections and Fail-Fast Iterators - 156
-*** TODO 11.5.3 Concurrent Collections: Java 5 and Beyond - 158
-
-* TODO 12. The ~Collection~ Interface - 161
-  - The /interface/ ~Collection~ (see Figure 12-1) defines the core functionality
-    that we expect of any collection *other than a /map/.*
-
-    + Remember ~Map~ does NOT implement ~Collection~!!!
-
-
-  - It provides methods in *4* groups:
-    + *Adding Elements* 
+** TODO 11. Preliminaries - 147
+*** DONE 11.1 ~Iterable~ and ~Iterator~'s - 147
+    CLOSED: [2018-11-27 Tue 00:34]
+    - ~Iterator~
       #+BEGIN_SRC java
-        public interface Collection<E> extends Iterable<E> {
-            boolean add(E e);
-            boolean addAll(E e);
-
-            // other methods
+        public Iterator<E> {
+            boolean hasNext();
+            E next();
+            void remove();  // remove the last element returned by the iterator
         }
       #+END_SRC
 
-      * The ~boolean~ return values indicate if a collection is changed after
-        invoking ~add~ or ~addAll~.
-        =from Jian= Usually, this can be very useful for /sets/.
+    - The PURPOSE of /iterators/:
+      *provide a uniform way of accessing collection elements sequentially*,
 
-      * The /method contracts/ specify that the elements being added *must be
-        present* after execution so,
+      Then whatever kind of /collection/ you are dealing with, and however it is
+      implemented, you always know how to process its elements in turn.
 
-        *IF* the collection *refuses* an element for any other reason (for
-        example, some collection don't permit ~null~ elements), *these /methods/
-        must throw an exception!!!*
-
-    + *Removing Elements* 
+    - ~Iterator~'s are useful, but no one want to write code like:
       #+BEGIN_SRC java
-        public interface Collection<E> extends Iterable<E> {
-            boolean remove(Object o);            // remove the elements `o`
-            void clear();                        // remove all elements
-            boolean removeAll(Collection<?> c);  // remove the elements in c
-            boolean retainAll(Collection<?> c);  // remove the elements *not* in `c`
-
-            // other methods
+        // coll refers to an object which implements `Collection`
+        // ----- not the preferred idiom from Java 5 on -----
+        for (Iterator itr = coll.iterator(); itr.hasNext();) {
+            System.out.println(itr.next());
         }
       #+END_SRC
-      * Differences from /adding methods/: they accept any type of parameters --
-        ~Object~ and the ~?~ /type parameter/.
-        =TODO= Explain later!
+      + _This is the idiom before Java 5._
 
-    + *Querying the Contents of a Collection*
+      + This works because ~Collection~ has an ~iterator~ /method/ which returns
+        an /iterator/ appropriate to objects of that /class/.
+
+    - From Java 5 on, /foreach iteration syntax/ is introduced.
+      It works with anything that implements the interface ~Iterable~,
       #+BEGIN_SRC java
-        public interface Collection<E> extends Iterable<E> {
-            boolean contains(Object o);            // `true` if `o` is present
-            boolean containsAll(Collection<?> c);  // `true` if all elements of `c`
-            boolean isEmpty();                     // ...
-            int size();                            // return the element count (or
-                                                   // `Integer.MAX_VALUE` if that is less)
-            // other methods
-        }
-      #+END_SRC
-      * The desing of
-        returning ~Integer.MAX_VALUE~ if it is less than the actually size
-        is a BAD design!!!  =from Jian=
-
-        =from Jian= the author also say something similar but NOT in a very
-        straightforward way. The author thinks /exceptions/ can be a better
-        choice.
-
-    + *Making a Colleciton's Contents Available for Futher Processing* =TODO=
-      #+BEGIN_SRC java
-        public interface Collection<E> extends Iterable<E> {
-            Iterator<E> iterator();  // return an `Iterator` over the elements
-            Object[] toArray();      // copy contents to an `Object[]`
-            <T> T[] toArray(T[] t);  // copy contents to a `T[]` (for any `T`)
+        public Iterable<T> {
+            Iterator<T> iterator();  // return an iterator over elements of type `T`
         }
       #+END_SRC
 
-      * This book is old.
-        =from Jian= this part should includes ~stream()~
+      Then we can do
+      #+BEGIN_SRC java
+        for (Object o : coll) {
+            System.out.pirntln(o);
+        }
+      #+END_SRC
 
-      * =TODO=
-        More detailed discussion about the last two ~toArray~ /methods/
-      * =TODO=
-      * =TODO=
-      * =TODO=
-      * =TODO=
+      + In Java 5, the ~Collection~ /interface/ was made to extend ~Iterable~, so
+        as any /set/, /list/, or /queue/ can be the target of /foreach/, as can
+        /arrays/.
 
-** TODO 12.1 Using the Methods of Collection - 164
-** DONE 12.2 Implementing Collection - 169
-   CLOSED: [2018-11-27 Tue 01:36]
-   - There are *NO concrete implementations* of ~Collection~.
+    - =from Jian= In Java 8, you would like to use
+      #+BEGIN_SRC java
+        coll.stream().forEach(System.out::println);
+      #+END_SRC
 
-   - There a re a series of /skeletal implementations/ -- some /abstract classes/
-     that partially implements /colleciton framework interfaces/.
+    - In Java 5, the ~Collection~ /interface/ was made to extend ~Iterable~.
+      This was NOT in the original design tracing back to Java 1.2 (Java 2).
 
-     + ~AbstractCollection~ implements ~Collection~.
-       It is on the top of this /skeletal implementations/ of ~Collection~.
+    - In practice, it is _UNUSUAL_ to implement ~Iterable~ _DIRECTLY_ in the way
+      of Example 11-1. Directly implementing ~Iterable~ as /foreach/ is most
+      commonly used with /arrays/ and /the standard collections classes/.
 
-     + ~AbstractSet~, ~AbstractList~, and some other /classes/ *extends*
-       ~AbstractCollection~.
+    - ~CocurrentModificationException~ can be thrown from single-threaded code.
 
-   - These /skeletal implementations/ are created to *help* the designer of
-     new implementations of the /Framework interfaces/ -- they have partially
-     implements some functionalities.
+      This can happend when you modify a colleciton, at the same time you are
+      using its /iterator/ -- /iterators/ are created as view of the underlying
+      /iterables/, structurally chane the underlying /iteratables/ usually lead
+      to failure or unpredictable results. The designer of Java decide to
+      *fail-fast* when this happen.
 
-     + =From Jian= Here I see a example why /trait/ is better!!!
+    - The /concurrent collections/ have other strategies for *handling* /concurrent
+      modification/, such as /weakly consistent iterators/ =???= TODO.
+      TODO We discuss them in more detail in Section 11.5.
 
-       For example, ~Collection~ could serve as the /interface/ for /bags
-     (unordered lists)/, and a programmer implementing bags could extend
-     ~AbstractCollection~ and find most of the implementation work already done.
+*** TODO 11.2 Implementations - 149
+    - Arrays
+    - Linked Lists
+    - Hash tables
+    - Trees
 
-** DONE 12.3 Collection Constructors - 169
-   CLOSED: [2018-11-27 Tue 01:45]
-   - *Two* COMMON FORMS of /constructors/ which are shared by MOST collection
-     implementation (illustrated by ~HashSet~ examples):
-     1. ~public HashSet()~
+*** TODO 11.3 Efficiency and the O-Notation - 150
+*** TODO 11.4 Contracts - 152
+*** TODO 11.5 Collections and Thread Safety - 153
+**** TODO 11.5.1 Synchronization and the Legacy Collections - 155
+**** TODO 11.5.2 JDK 1.2: Synchronized Collections and Fail-Fast Iterators - 156
+     - *Using Synchronized Collections Safely*
 
-     2. ~public HashSet(Collection<? extends E> c)~
+**** TODO 11.5.3 Concurrent Collections: Java 5 and Beyond - 158
+     - *Mechanisms*
+     - *Iterators*
 
-   - Use 2. has the same effect as creating an empty set with the /DEFAULT
-     constructor/, and then adding the contents of a collection using ~addAll~.
+** TODO 12. The ~Collection~ Interface - 161
+   - The /interface/ ~Collection~ (see Figure 12-1) defines the core functionality
+     that we expect of any collection *other than a /map/.*
 
-   - *CAUTION*
-     + The second form is usually called "copy constructor", since it copies the
-       passed in collection, and create a new collection of required type.
+     + Remember ~Map~ does NOT implement ~Collection~!!!
 
-     + *HOWEVER*,
-       we should really reserve the name /copy constructor/ to constructors that
-       only accept same type collections, copy and create a new one.
 
-     + Joshua Block suggested the term /conversion constructor/ for the 2.-like
-       /constructors/.
+   - It provides methods in *4* groups:
+     + *Adding Elements*
+       #+BEGIN_SRC java
+         public interface Collection<E> extends Iterable<E> {
+             boolean add(E e);
+             boolean addAll(E e);
 
-   - NOT ALL the collections have both of these two /constructors/.
+             // other methods
+         }
+       #+END_SRC
 
-* TODO 13. Sets - 171
-** 13.1 Implementing ~Set~ - 171
-*** 13.1.1 ~HashSet~ - 172
-*** 13.1.2 ~LinkedHashSet~ - 174
-*** 13.1.3 ~CopyOnWriteArraySet~ - 175
-*** 13.1.4 ~EnumSet~ - 176
+       * The ~boolean~ return values indicate if a collection is changed after
+         invoking ~add~ or ~addAll~.
+         =from Jian= Usually, this can be very useful for /sets/.
 
-** 13.2 ~SortedSet~ and ~NavigableSet~ - 178
-*** 13.2.1 ~NavigableSet~ - 181
-*** 13.2.2 ~TreeSet~ - 184
-*** 13.2.3 ~ConcurrentSkipListSet~ - 186
+       * The /method contracts/ specify that the elements being added *must be
+         present* after execution so,
 
-** 13.3 Comparing ~Set~ Implementations - 188
+         *IF* the collection *refuses* an element for any other reason (for
+         example, some collection don't permit ~null~ elements), *these /methods/
+         must throw an exception!!!*
 
-* TODO 14. Queues - 191
-** 14.1 Using the Methods of ~Queue~ - 193
-** 14.2 Implementing ~Queue~ - 195
-*** 14.2.1 ~PriorityQueue~ - 195
-*** 14.2.2 ~ConcurrentLinkedQueue~ - 197
+     + *Removing Elements*
+       #+BEGIN_SRC java
+         public interface Collection<E> extends Iterable<E> {
+             boolean remove(Object o);            // remove the elements `o`
+             void clear();                        // remove all elements
+             boolean removeAll(Collection<?> c);  // remove the elements in c
+             boolean retainAll(Collection<?> c);  // remove the elements *not* in `c`
 
-** 14.3 ~BlockingQueue~ - 198
-*** 14.3.1 Using the Methods of ~BlockingQueue~ - 199
-*** 14.3.2 Implementing ~BlockingQueue~ - 202
+             // other methods
+         }
+       #+END_SRC
+       * Differences from /adding methods/: they accept any type of parameters --
+         ~Object~ and the ~?~ /type parameter/.
+         TODO Explain later!
 
-** 14.4 ~Deque~ - 206
-*** 14.4.1 Implementing ~Deque~ - 208
-*** 14.4.2 ~BlockingDeque~ - 209
+     + *Querying the Contents of a Collection*
+       #+BEGIN_SRC java
+         public interface Collection<E> extends Iterable<E> {
+             boolean contains(Object o);            // `true` if `o` is present
+             boolean containsAll(Collection<?> c);  // `true` if all elements of `c`
+             boolean isEmpty();                     // ...
+             int size();                            // return the element count (or
+                                                    // `Integer.MAX_VALUE` if that is less)
+             // other methods
+         }
+       #+END_SRC
+       * The desing of
+         returning ~Integer.MAX_VALUE~ if it is less than the actually size
+         is a BAD design!!!  =from Jian=
 
-** 14.5 Comparing ~Queue~ Implementations - 210
+         =from Jian= the author also say something similar but NOT in a very
+         straightforward way. The author thinks /exceptions/ can be a better
+         choice.
 
-* TODO 15. Lists - 213
-** 15.1 Using the Methods of ~List~ - 215
-** 15.2 Implementing ~List~ - 218
-*** 15.2.1 ~ArrayList~ - 218
-*** 15.2.2 ~LinkedList~ - 221
-*** 15.2.3 ~CopyOnWriteArrayList~ - 221
+     + *Making a Colleciton's Contents Available for Futher Processing* TODO
+       #+BEGIN_SRC java
+         public interface Collection<E> extends Iterable<E> {
+             Iterator<E> iterator();  // return an `Iterator` over the elements
+             Object[] toArray();      // copy contents to an `Object[]`
+             <T> T[] toArray(T[] t);  // copy contents to a `T[]` (for any `T`)
+         }
+       #+END_SRC
 
-** 15.3 Comparing ~List~ Implementations - 221
+       * This book is old.
+         =from Jian= this part should includes ~stream()~
 
-* TODO 16. Maps - 223
-** 16.1 Using the Methods of ~Map~ - 225
-** 16.2 Implementing ~Map~ - 226
-*** 16.2.1 ~HashMap~ - 227
-*** 16.2.2 ~LinkedHashMap~ - 227
-*** 16.2.3 ~WeakHashMap~ - 229
-*** 16.2.4 ~IdentityHashMap~ - 231
-*** 16.2.5 ~EnumMap~ - 233
+       * TODO
+         More detailed discussion about the last two ~toArray~ /methods/
+       * TODO
+       * TODO
+       * TODO
+       * TODO
 
-** 16.3 ~SortedMap~ and ~NavigableMap~ - 234
-*** 16.3.1 ~NavigableMap~ - 235
-*** 16.3.2 ~TreeMap~ - 236
+*** TODO 12.1 Using the Methods of Collection - 164
+    - *Adding Elements*
+    - *Removing Elements*
+    - *Querying the Contents of a Collection*
+    - *Making the Collection Contents Available for Further Processing*
 
-** 16.4 ~ConcurrentMap~ - 237
-*** 16.4.1 ~ConcurrentHashMap~ - 238
+*** DONE 12.2 Implementing Collection - 169
+    CLOSED: [2018-11-27 Tue 01:36]
+    - There are *NO concrete implementations* of ~Collection~.
 
-** 16.5 ~ConcurrentNavigableMap~ - 238
-*** 16.5.1 ~ConcurrentSkipListMap~ - 239
+    - There a re a series of /skeletal implementations/ -- some /abstract classes/
+      that partially implements /colleciton framework interfaces/.
 
-** 16.6 Comparing ~Map~ Implementations - 239
+      + ~AbstractCollection~ implements ~Collection~.
+        It is on the top of this /skeletal implementations/ of ~Collection~.
 
-* TODO 17. The ~Collections~ Class - 241
-** 17.1 Generic Algorithms - 241
-*** 17.1.1 Changing the Order of List Elements - 241
-*** 17.1.2 Changing the Contents of a List - 242
-*** 17.1.3 Finding Extreme Values in a Collection - 243
-*** 17.1.4 Finding Specific Values in a List - 243
+      + ~AbstractSet~, ~AbstractList~, and some other /classes/ *extends*
+        ~AbstractCollection~.
 
-** 17.2 Collection Factories - 244
-** 17.3 Wrappers - 245
-*** 17.3.1 Synchronized Collections - 245
-*** 17.3.2 Unmodifiable Collections - 246
-*** 17.3.3 Checked Collections - 246
+    - These /skeletal implementations/ are created to *help* the designer of
+      new implementations of the /Framework interfaces/ -- they have partially
+      implements some functionalities.
 
-** 17.4 Other Methods - 247
+      + =From Jian= Here I see a example why /trait/ is better!!!
+
+        For example, ~Collection~ could serve as the /interface/ for /bags
+      (unordered lists)/, and a programmer implementing bags could extend
+      ~AbstractCollection~ and find most of the implementation work already done.
+
+*** DONE 12.3 Collection Constructors - 169
+    CLOSED: [2018-11-27 Tue 01:45]
+    - *Two* COMMON FORMS of /constructors/ which are shared by MOST collection
+      implementation (illustrated by ~HashSet~ examples):
+      1. ~public HashSet()~
+
+      2. ~public HashSet(Collection<? extends E> c)~
+
+    - Use 2. has the same effect as creating an empty set with the /DEFAULT
+      constructor/, and then adding the contents of a collection using ~addAll~.
+
+    - *CAUTION*
+      + The second form is usually called "copy constructor", since it copies the
+        passed in collection, and create a new collection of required type.
+
+      + *HOWEVER*,
+        we should really reserve the name /copy constructor/ to constructors that
+        only accept same type collections, copy and create a new one.
+
+      + Joshua Block suggested the term /conversion constructor/ for the 2.-like
+        /constructors/.
+
+    - NOT ALL the collections have both of these two /constructors/.
+
+** TODO 13. Sets - 171
+*** 13.1 Implementing ~Set~ - 171
+**** 13.1.1 ~HashSet~ - 172
+**** 13.1.2 ~LinkedHashSet~ - 174
+**** 13.1.3 ~CopyOnWriteArraySet~ - 175
+**** 13.1.4 ~EnumSet~ - 176
+
+*** 13.2 ~SortedSet~ and ~NavigableSet~ - 178
+    - *Getting the First and Last Elements*
+    - *Retrieving the Comparator*
+    - *Getting Range Views*
+
+**** 13.2.1 ~NavigableSet~ - 181
+     - *Getting the First and Last Elements*
+     - *Getting Range Views*
+     - *Getting Closest Matches*
+     - *Navigating the Set in Reverse Order*
+
+**** 13.2.2 ~TreeSet~ - 184
+**** 13.2.3 ~ConcurrentSkipListSet~ - 186
+
+*** 13.3 Comparing ~Set~ Implementations - 188
+
+** TODO 14. Queues - 191
+   - *Adding an Element to a Queue*
+   - *Retrieving an Element from a Queue*
+
+*** 14.1 Using the Methods of ~Queue~ - 193
+*** 14.2 Implementing ~Queue~ - 195
+**** 14.2.1 ~PriorityQueue~ - 195
+**** 14.2.2 ~ConcurrentLinkedQueue~ - 197
+
+*** 14.3 ~BlockingQueue~ - 198
+    - *Adding an Element*
+    - *Removing an Element*
+    - *Retrieving or Querying the Contents of the Queue*
+
+**** 14.3.1 Using the Methods of ~BlockingQueue~ - 199
+**** 14.3.2 Implementing ~BlockingQueue~ - 202
+     - *LinkedBlockingQueue*
+     - *ArrayBlockingQueue*
+     - *PriorityBlockingQueue*
+     - *DelayQueue*
+     - *SynchronousQueue*
+
+*** 14.4 ~Deque~ - 206
+    - *Collection-like Methods*
+    - *Queue-like Methods*
+
+**** 14.4.1 Implementing ~Deque~ - 208
+     - *ArrayDeque*
+     - *LinkedList*
+
+**** 14.4.2 ~BlockingDeque~ - 209
+     - *Implementing BlockingDeque*
+
+*** 14.5 Comparing ~Queue~ Implementations - 210
+
+** TODO 15. Lists - 213
+   - *Positional Access*
+   - *Search*
+   - *Range-View*
+   - *List Iteration*
+
+*** 15.1 Using the Methods of ~List~ - 215
+    - *Using Range-View and Iterator Methods*
+
+*** 15.2 Implementing ~List~ - 218
+**** 15.2.1 ~ArrayList~ - 218
+**** 15.2.2 ~LinkedList~ - 221
+**** 15.2.3 ~CopyOnWriteArrayList~ - 221
+
+*** 15.3 Comparing ~List~ Implementations - 221
+
+** TODO 16. Maps - 223
+   - *Adding Associations*
+   - *Removing Associations*
+   - *Querying the Contents of a Map*
+   - *Providing Collection Views of the Keys, Values, or Associations:*
+
+*** 16.1 Using the Methods of ~Map~ - 225
+*** 16.2 Implementing ~Map~ - 226
+**** 16.2.1 ~HashMap~ - 227
+**** 16.2.2 ~LinkedHashMap~ - 227
+**** 16.2.3 ~WeakHashMap~ - 229
+**** 16.2.4 ~IdentityHashMap~ - 231
+**** 16.2.5 ~EnumMap~ - 233
+
+*** 16.3 ~SortedMap~ and ~NavigableMap~ - 234
+    - *Getting the First and Last Elements*
+    - *Retrieving the Comparator*
+    - *Finding Subsequences*
+
+**** 16.3.1 ~NavigableMap~ - 235
+     - *Getting the First and Last Elements*
+     - *Getting Range Views*
+     - *Getting Closest Matches*
+     - *Navigating the Map*
+
+**** 16.3.2 ~TreeMap~ - 236
+
+*** 16.4 ~ConcurrentMap~ - 237
+**** 16.4.1 ~ConcurrentHashMap~ - 238
+
+*** 16.5 ~ConcurrentNavigableMap~ - 238
+**** 16.5.1 ~ConcurrentSkipListMap~ - 239
+
+*** 16.6 Comparing ~Map~ Implementations - 239
+
+** TODO 17. The ~Collections~ Class - 241
+*** 17.1 Generic Algorithms - 241
+**** 17.1.1 Changing the Order of List Elements - 241
+**** 17.1.2 Changing the Contents of a List - 242
+**** 17.1.3 Finding Extreme Values in a Collection - 243
+**** 17.1.4 Finding Specific Values in a List - 243
+
+*** 17.2 Collection Factories - 244
+*** 17.3 Wrappers - 245
+**** 17.3.1 Synchronized Collections - 245
+**** 17.3.2 Unmodifiable Collections - 246
+**** 17.3.3 Checked Collections - 246
+
+*** 17.4 Other Methods - 247
+    - ~addAll~
+    - ~asLifoQueue~
+    - ~disjoint~
+    - ~enumeration~
+    - ~frequency~
+    - ~list~
+    - ~newSetFromMap~
+    - ~reverseOrder~
+    - ~Conclusion~
 
 * Index - 251
