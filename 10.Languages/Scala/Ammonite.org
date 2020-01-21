@@ -1,181 +1,8 @@
-#+TITLE: Ammonite
-#+VERSION: 3rd, 2018
-#+INFO: Covers Java SE 9
-#+AUTHOR: 
-#+STARTUP: entitiespretty
 
-* Table of Contents                                      :TOC_4_org:noexport:
-- [[Ammonite-REPL][Ammonite-REPL]]
-  - [[Features][Features]]
-    - [[Pretty-printed output][Pretty-printed output]]
-      - [[Configurable Truncation][Configurable Truncation]]
-    - [[Editing][Editing]]
-      - [[Syntax Highlighting][Syntax Highlighting]]
-      - [[Multi-line editing][Multi-line editing]]
-      - [[Desktop key-bindings][Desktop key-bindings]]
-      - [[Console key-bindings][Console key-bindings]]
-      - [[History Search][History Search]]
-      - [[Block Input][Block Input]]
-      - [[Undo & Redo][Undo & Redo]]
-    - [[Magic Imports][Magic Imports]]
-      - [[import ~$file~][import ~$file~]]
-      - [[import ~$exec~][import ~$exec~]]
-      - [[import ~$ivy~][import ~$ivy~]]
-    - [[Builtins][Builtins]]
-      - [[Repl API][Repl API]]
-      - [[Utilities][Utilities]]
-    - [[Save/Load Session][Save/Load Session]]
-    - [[Superior Autocomplete][Superior Autocomplete]]
-    - [[Interrupting run-away execution with Ctrl-C][Interrupting run-away execution with Ctrl-C]]
-    - [[Compiler-crash Robustness][Compiler-crash Robustness]]
-    - [[Other Fixes][Other Fixes]]
-  - [[Configuration][Configuration]]
-    - [[Refs][Refs]]
-    - [[Compiler Flags][Compiler Flags]]
-    - [[JVM Flags][JVM Flags]]
-  - [[Embedding][Embedding]]
-    - [[Instantiating Ammonite][Instantiating Ammonite]]
-    - [[Debugging][Debugging]]
-    - [[Remote REPL][Remote REPL]]
-- [[Scala Scripts][Scala Scripts]]
-  - [[Script Files][Script Files]]
-    - [[Script Imports][Script Imports]]
-      - [[Other Scripts][Other Scripts]]
-      - [[Ivy Dependencies][Ivy Dependencies]]
-    - [[Multi-stage Scripts][Multi-stage Scripts]]
-    - [[Script Arguments][Script Arguments]]
-    - [[Ammonite Arguments in Scripts][Ammonite Arguments in Scripts]]
-    - [[Multiple Main Methods][Multiple Main Methods]]
-    - [[Script Usage Docs][Script Usage Docs]]
-    - [[Bundled Libraries][Bundled Libraries]]
-    - [[Script Builtins][Script Builtins]]
-    - [[Script Predef][Script Predef]]
-  - [[Running Scripts][Running Scripts]]
-    - [[From Bash][From Bash]]
-    - [[Watch and Reload][Watch and Reload]]
-    - [[Script Debug REPL][Script Debug REPL]]
-    - [[From the REPL][From the REPL]]
-    - [[Execution Model][Execution Model]]
-    - [[SBT Integration][SBT Integration]]
-- [[Ammonite-Ops][Ammonite-Ops]]
-  - [[Paths][Paths]]
-    - [[RelPaths][RelPaths]]
-    - [[Path Operations][Path Operations]]
-    - [[Constructing Paths][Constructing Paths]]
-  - [[Operations][Operations]]
-    - [[Operator Reference][Operator Reference]]
-    - [[Extensions][Extensions]]
-      - [[Traversable][Traversable]]
-      - [[Pipeable][Pipeable]]
-      - [[Callable][Callable]]
-    - [[Chaining][Chaining]]
-    - [[Reading Resources][Reading Resources]]
-    - [[Spawning Subprocesses][Spawning Subprocesses]]
-      - [[Environment Variables][Environment Variables]]
-      - [[Invoking Files][Invoking Files]]
-      - [[Current Working Directory][Current Working Directory]]
-- [[Ammonite-Shell][Ammonite-Shell]]
-  - [[Shell Basics][Shell Basics]]
-    - [[Working Directory][Working Directory]]
-    - [[Listing Files][Listing Files]]
-    - [[Filesystem Operations][Filesystem Operations]]
-    - [[Piping][Piping]]
-    - [[Subprocesses][Subprocesses]]
-  - [[Scripting][Scripting]]
-    - [[Scala Scripting][Scala Scripting]]
-    - [[Typed Values][Typed Values]]
-    - [[Scala/Java APIs][Scala/Java APIs]]
-    - [[Writing/Loading Scripts][Writing/Loading Scripts]]
-  - [[Design Decisions & Tradeoffs][Design Decisions & Tradeoffs]]
-    - [[Scala as the Language][Scala as the Language]]
-    - [[Running on the JVM][Running on the JVM]]
-    - [[Goals of Ammonite-Shell][Goals of Ammonite-Shell]]
-- [[Ammonite Cookbook][Ammonite Cookbook]]
-  - [[HTTP Requests][HTTP Requests]]
-  - [[Scraping HTML][Scraping HTML]]
-  - [[GUI Applications][GUI Applications]]
-  - [[Office Automation][Office Automation]]
-  - [[Image Processing][Image Processing]]
-  - [[Machine Learning][Machine Learning]]
-  - [[Play Framework Server][Play Framework Server]]
-  - [[SQL Database][SQL Database]]
-- [[Reference][Reference]]
-  - [[Community][Community]]
-  - [[Older Scala Versions][Older Scala Versions]]
-  - [[Talks][Talks]]
-  - [[In the Wild][In the Wild]]
-  - [[Scaladoc][Scaladoc]]
-  - [[Changelog][Changelog]]
-    - [[1.1.2][1.1.2]]
-    - [[1.1.1][1.1.1]]
-    - [[1.1.0][1.1.0]]
-    - [[1.0.5][1.0.5]]
-    - [[1.0.3][1.0.3]]
-    - [[1.0.2][1.0.2]]
-    - [[1.0.1][1.0.1]]
-    - [[1.0.0][1.0.0]]
-    - [[0.9.9][0.9.9]]
-    - [[0.9.8][0.9.8]]
-    - [[0.9.7][0.9.7]]
-    - [[0.9.6][0.9.6]]
-    - [[0.9.5][0.9.5]]
-    - [[0.9.4][0.9.4]]
-    - [[0.9.3][0.9.3]]
-    - [[0.9.2][0.9.2]]
-    - [[0.9.1][0.9.1]]
-    - [[0.9.0][0.9.0]]
-    - [[0.8.x][0.8.x]]
-      - [[0.8.5][0.8.5]]
-      - [[0.8.4][0.8.4]]
-      - [[0.8.3][0.8.3]]
-      - [[0.8.2][0.8.2]]
-      - [[0.8.1][0.8.1]]
-      - [[0.8.0][0.8.0]]
-    - [[0.7.x][0.7.x]]
-      - [[0.7.9][0.7.9]]
-      - [[0.7.8][0.7.8]]
-      - [[0.7.7][0.7.7]]
-      - [[0.7.6][0.7.6]]
-      - [[0.7.5][0.7.5]]
-      - [[0.7.4][0.7.4]]
-      - [[0.7.3][0.7.3]]
-      - [[0.7.2][0.7.2]]
-      - [[0.7.0][0.7.0]]
-    - [[0.6.x][0.6.x]]
-      - [[0.6.2][0.6.2]]
-      - [[0.6.1][0.6.1]]
-      - [[0.6.0][0.6.0]]
-    - [[0.5.x][0.5.x]]
-      - [[0.5.9][0.5.9]]
-      - [[0.5.8][0.5.8]]
-      - [[0.5.7][0.5.7]]
-      - [[0.5.6][0.5.6]]
-      - [[0.5.5][0.5.5]]
-      - [[0.5.4][0.5.4]]
-      - [[0.5.3][0.5.3]]
-      - [[0.5.2][0.5.2]]
-      - [[0.5.1][0.5.1]]
-      - [[0.5.0][0.5.0]]
-    - [[0.4.x][0.4.x]]
-      - [[0.4.9][0.4.9]]
-      - [[0.4.8][0.4.8]]
-      - [[0.4.7][0.4.7]]
-      - [[0.4.6][0.4.6]]
-      - [[0.4.5][0.4.5]]
-      - [[0.4.4][0.4.4]]
-      - [[0.4.3][0.4.3]]
-      - [[0.4.2][0.4.2]]
-      - [[0.4.1][0.4.1]]
-      - [[0.4.0][0.4.0]]
-    - [[0.3.x][0.3.x]]
-      - [[0.3.2][0.3.2]]
-      - [[0.3.1][0.3.1]]
-      - [[0.3.0][0.3.0]]
-    - [[0.2.x][0.2.x]]
-      - [[0.2.9][0.2.9]]
-      - [[0.2.8][0.2.8]]
-  - [[Unstable Versions][Unstable Versions]]
-    - [[Unstable Changelog][Unstable Changelog]]
+#+LINK: https://ammonite.io
+#+VERSION: --> 2.0.1
+#+AUTHOR: Haoyi Li
+#+STARTUP: entitiespretty
 
 * Ammonite-REPL
   - The Ammonite-REPL is an improved Scala REPL, re-implemented from first
@@ -237,17 +64,18 @@
     Ammonite-REPL uses ~PPrint~ to display its output by default.
 
 **** Configurable Truncation
-     - Show the ~...~ with, for example, ~show(Seq.fill(20)(100))~
+     - ~show~: Show the value without any truncation.
+       For example, ~show(Seq.fill(20)(100))~.
 
      - Change height:
        ~repl.pprinter() = repl.pprinter().copy(defaultHeight = 5)~
+       All the evaluation output after this line will be truncated to this height.
 
      - Ammonite-REPL intelligently truncates your output when it's beyond a certain
        size.
-
        + You can request for the full output to be printed on-demand, print a certain
          number of lines, or even change the implicit ~pprintConfig~ so subsequent
-         lines all use your new configuration.
+         lines all use your new configuration. TODO TODO TODO
 
 *** Editing
 **** Syntax Highlighting
@@ -255,13 +83,55 @@
 **** Desktop key-bindings
 **** Console key-bindings
 **** History Search
-**** Block Input
-     - The ~{ ... }~ will be unwrapped!
+**** DONE Block Input
+     CLOSED: [2020-01-11 Sat 17:09]
+     - Definition inside ~{ ... }~ will be unwrapped and evaluated as top-level
+       expressoins.
+         You can use this to e.g. declare mutully recursive functions or classes &
+       companion-objects WITHOUT being forced to squeeze everyting onto a single
+       line or create an ~object~ only for importing items inside it.
+       #+begin_src scala
+         // Ammonite:
 
-     - The ~{{ ... }}~ will *NOT* be unwrapped, and it can be used as a block as
-       in normal Scala source code.
+         // INPUT:
+         // {
+         //   val x = 1
+         //   val y = 2
+         //   x + y
+         // }
 
-**** Undo & Redo
+         // OUTPUT:
+         // x: Int = 1
+         // y: Int = 2
+         // res0_2: Int = 3
+       #+end_src
+
+     - Use ~{{ ... }}~ if you don't want ammonite's ~{ ... }~ behavior.
+       In ammonite ~{{ ... }}~ is like the ~{ ... }~ in scala souce code.
+       #+begin_src scala
+         // Ammonite:
+
+         // INPUT:
+         // {{
+         //   val x = 1
+         //   val y = 2
+         //   x + y
+         // }}
+
+         // OUTPUT:
+         // res0: Int = 3
+       #+end_src
+
+**** DONE Undo & Redo
+     CLOSED: [2020-01-11 Sat 17:09]
+     - Undo: ~Ctrl~ + ~-~
+       + This combination offten have conflication with the _zoom out_
+         functionality of a terminal.
+
+       + GNU Readline use ~Ctrl~ + ~_~, this works for Ammonite.
+
+
+     - Redo: ~Alt/Esc~ + ~-~
 
 *** TODO Magic Imports
      Ammonite provides a set of _magic imports_ that let you load additional code
@@ -278,14 +148,18 @@
      #+END_SRC
 
      - Import the =MyScript.sc=:
-       ~@ import $file.MyScript~
+       #+begin_src scala
+         // @
+         import $file.MyScript
 
-       + Use it: ~MyScript.elite~
-
+         // Use it:
+         MyScript.elite
+         //// res1: Int = 31337
+       #+end_src
        =From Jian=
        Here =@= is the prompt of Ammonite
 
-     - If the Scala Script is in a folder =myfolder=, you can
+     - If the Scala Script is in a _subfolder_ =myfolder=, you can
        ~@ import $file.myfolder.MyScript~
 
      - If the script is in an _OUTER folder_,
@@ -293,8 +167,6 @@
 
      - If we want to import the contents of the script in one go: 
        ~import $file.MyScript, MyScript._~
-
-       + Use it: ~elite~
 
      - *Note*
        you can also perform /file imports/ from your /predef file/, which are
@@ -318,18 +190,32 @@
         + ~sess.load()~ to reset the script BEFORE re-importing the script you need.
 
 ***** DONE Cannot directly import from inside a Script
-      CLOSED: [2018-08-01 Wed 17:39]
+      CLOSED: [2020-01-12 Sun 01:45]
       - ~@ import $file.MyScript._~ is *ILLEGAL*!!!
         You must do ~@ import $file.MyScript, MyScript._~
 
 ***** DONE Renamed-scripts and multiple-scripts
-      CLOSED: [2018-08-01 Wed 17:45]
+      CLOSED: [2020-01-12 Sun 01:45]
       - As in normal Scala Source code, use the pattern of
         ~@ import $file.{MyScript, MyOtherScript}~
 
-      - *ALWAYS ILLEGAL* ~@ import $file._~
+      - You can't use ~import $file._~ to import multiple-scripts.
 
-**** TODO import ~$exec~
+**** DONE import ~$exec~ - TODO
+     CLOSED: [2020-01-12 Sun 01:56]
+     ~import $exec~ is like copy the code inside the filename follows ~$exec~, paste
+     it to current environment (the Ammonite-REPL) and execute.
+
+     - For example,
+       when =~/.ammonite/predef.sc= file is too big, and you want to split it to
+       multiple files. Suppose the one you split out is =~/.ammonite/helper.sc=.
+       You can use ~import $exec.helper~ inside =predef.sc=, its like copy all
+       the definitions from =helper.sc= and paste it into =predef.sc= -- the
+       =predef.sc= before splition comes back.
+         You can also do this in REPL, and it's like copy all things in =helper.sc=
+       into current REPL.
+       =from Jian= I rephrase this paragraph, and I'm not sure if my
+       understanding is right. DO _EXPERIMENT_ later!!! TODO TODO TODO TODO
 
 **** TODO import ~$ivy~
 
@@ -358,23 +244,74 @@
 *** Debugging
 *** Remote REPL
 
-* Scala Scripts
-** Script Files
-*** Script Imports
+* TODO Scala Scripts
+** TODO Script Files
+*** TODO Script Imports
+    Third party dependencies here means /Ivy Depencencies/.
+
 **** Other Scripts
+     ~import $file~
+     #+begin_src scala
+       // Basic.sc
+       val basicValue = 31337
+
+       // FileImport.sc
+       import $file.Basic
+       val fileImportVal = Basic.basicValue + 1
+     #+end_src
+
+     - Use ~^~ to import things from outside the current script's enclosing folder.
+       e.g. ~import $file.^.^.foo~ will import the script =../../foo.sc=.
+
+     - ~$file~ imports inside Scala Scripts behave the _SAME as_ ~$file~ imports
+       within the Ammonite-REPL, and have the same characteristics: 
+       + Imported Scripts are Re-used
+       + Cannot directly import from inside a Script
+       + Renamed-scripts and multiple-scripts 
+
 **** Ivy Dependencies
+     - Example:
+       #+begin_src scala
+         import $ivy.`com.lihaoyi::scalatags:0.7.0`, scalatags.Text.all._
 
-*** Multi-stage Scripts
-*** Script Arguments
-*** Ammonite Arguments in Scripts
-*** Multiple Main Methods
-*** Script Usage Docs
-*** Bundled Libraries
-*** Script Builtins
-*** Script Predef
+         val rendered = div("Moo").render
+       #+end_src
 
-** Running Scripts
+     - TODO: ???
+       If you need more detailed control over what you are importing, e.g. with
+       attributes, classifiers or exclusions, you can fall back to using the
+       ~interp.load.ivy(deps: coursier.Dependency*)~ function.
+       #+begin_src scala
+         import os._
+
+         interp.load.module($printedScriptPath/"loadIvyAdvanced.sc")
+
+         serializer
+       #+end_src
+       TODO TODO TODO ??? ??? ???
+       Note that to use this function, your script needs to be a /multi-stage
+       script/ as listed below TODO, and the ~interp.load.ivy~ call needs to be
+       in an earlier block
+
+*** TODO Multi-stage Scripts
+*** TODO Script Arguments
+*** TODO Ammonite Arguments in Scripts
+*** TODO Multiple Main Methods
+*** TODO Script Usage Docs
+*** TODO Bundled Libraries
+*** TODO Script Builtins
+*** TODO Script Predef
+
+** TODO Running Scripts
 *** From Bash
+    - You can run a Scala Script from the command line: ~amm MyScript.sc~
+
+    - You can use the shebang line ~#!/usr/bin/env amm~ if you want to set your
+      script executable.
+
+    - Set ~JAVA_OPTS~ for a script to be invoked:
+      ~bash$ JAVA_OPTS='-xMX1024m' amm path/to/script.sc~
+
 *** Watch and Reload
 *** Script Debug REPL
 *** From the REPL
@@ -437,81 +374,8 @@
 ** In the Wild
 ** Scaladoc
 ** Changelog
-*** 1.1.2
-*** 1.1.1
-*** 1.1.0
-*** 1.0.5
-*** 1.0.3
-*** 1.0.2
-*** 1.0.1
-*** 1.0.0
-*** 0.9.9
-*** 0.9.8
-*** 0.9.7
-*** 0.9.6
-*** 0.9.5
-*** 0.9.4
-*** 0.9.3
-*** 0.9.2
-*** 0.9.1
-*** 0.9.0
-*** 0.8.x
-**** 0.8.5
-**** 0.8.4
-**** 0.8.3
-**** 0.8.2
-**** 0.8.1
-**** 0.8.0
-
-*** 0.7.x
-**** 0.7.9
-**** 0.7.8
-**** 0.7.7
-**** 0.7.6
-**** 0.7.5
-**** 0.7.4
-**** 0.7.3
-**** 0.7.2
-**** 0.7.0
-
-*** 0.6.x
-**** 0.6.2
-**** 0.6.1
-**** 0.6.0
-
-*** 0.5.x
-**** 0.5.9
-**** 0.5.8
-**** 0.5.7
-**** 0.5.6
-**** 0.5.5
-**** 0.5.4
-**** 0.5.3
-**** 0.5.2
-**** 0.5.1
-**** 0.5.0
-
-*** 0.4.x
-**** 0.4.9
-**** 0.4.8
-**** 0.4.7
-**** 0.4.6
-**** 0.4.5
-**** 0.4.4
-**** 0.4.3
-**** 0.4.2
-**** 0.4.1
-**** 0.4.0
-
-*** 0.3.x
-**** 0.3.2
-**** 0.3.1
-**** 0.3.0
-
-*** 0.2.x
-**** 0.2.9
-**** 0.2.8
+*** 2.0.1
+*** Other versions
 
 ** Unstable Versions
 *** Unstable Changelog
-
