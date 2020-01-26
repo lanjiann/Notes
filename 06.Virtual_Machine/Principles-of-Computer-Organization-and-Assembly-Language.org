@@ -25,7 +25,7 @@
 **** 1.2.4 Representations - 14
 
 *** 1.3 Virtual Machines - 27
-**** 1.3.1 What is a “Virtual Machine”? - 27
+**** 1.3.1 What is a "Virtual Machine"? - 27
 **** 1.3.2 Portability Concerns - 29
 **** 1.3.3 Transcending Limitations - 30
 **** 1.3.4 Ease of Updates - 30
@@ -52,21 +52,74 @@
 **** 2.2.1 The fetch-execute Cycle - 45
 **** 2.2.2 CISC vs. RISC Computers - 48
 
-*** 2.3 Arithmetic Calculations on the JVM - 49
-**** 2.3.1 General Comments - 49
-**** 2.3.2 A Sample Arithmetic Instruction Set - 50
-**** 2.3.3 Stack Manipulation Operations - 53
+*** DONE 2.3 Arithmetic Calculations on the JVM - 49
+    CLOSED: [2020-01-24 Fri 15:32]
+**** DONE 2.3.1 General Comments - 49
+     CLOSED: [2020-01-22 Wed 17:39]
+     - Q :: How many positions are there on the JVM stack?
+
+     - A :: _In theory_, because theJVMis not hardwarelimited, there are as many
+            as you need.
+            _In practice_, every program, method, or function that you write will
+            define a maximum stack size.
+
+     - Similarly, there are no hardware-defined limitations on the amount of memory
+       needed. Instead, every method defines a maximum number of local
+       variables, not stored on the stack, that can be used to store values
+       temporarily.
+
+**** TODO 2.3.2 A Sample Arithmetic Instruction Set - 50
+***** Data Types - 50
+      - Access a single bit is much less efficient than acessing a word.
+        Therefore, in the basic data types of JVM, there is no boolean.
+
+      - In JVM, /boolean/ values are simply represented as the word-sized values
+        0 or 1, or in other words as integers.
+
+      - Actually, all the sub-word storage types /byte/, /short/, and /char/ are
+        also somewhat _second-class types_.
+        + *Reason*: in the JVM doing math on a 32-bit quantity takes no more time
+          than doing math on smaller quantities, variables of this type are
+          automatically promoted to 32-bit integers inside the CPU.
+
+      - As mentioned above that for calculation, no need to distinguish /sub-word
+        types/ from word-size quantities.
+          However, *load and storage are differnt* -- _we need to save storage_!
+        For this reason, the JVM supports the operations of loading small types
+        (byte, short, char, and even boolean) from memory and storing them into
+        memory, _particularly FROM and INTO /arrays/._
+
+***** Basic Arithmetic Operations - 51
+***** Logical Operations - 52
+***** Shift Operations - 52
+***** Conversion Operations - 53
+
+**** TODO 2.3.3 Stack Manipulation Operations - 53
+***** Typeless Stack Operations - 53
+***** Constants and the Stack - 54
+***** Local Variables - 55
+      _Last section_ "Constants and the Stack" discusses pushing constants to the
+      stack with specific instructions.
+      _This section_ discusses 1. load values from memory and pushing them to the
+      stack; 2. store values back.
+
+      - ~?load[_N]~
+
+      - ~?store[_N]~
+
 **** 2.3.4 Assembly Language and Machine Code - 55
 **** 2.3.5 Illegal Operations - 56
 
-*** 2.4 An Example Program - 57
+*** DONE 2.4 An Example Program - 57
+    CLOSED: [2020-01-24 Fri 15:32]
 **** 2.4.1 An Annotated Example - 57
 **** 2.4.2 The Final JVM Code - 60
 
-*** 2.5 JVM Calculation Instructions Summarized - 60
+*** DONE 2.5 JVM Calculation Instructions Summarized - 60
+    CLOSED: [2020-01-24 Fri 15:35]
 *** 2.6 Chapter Review - 61
 *** 2.7 Exercises - 62
-*** 2.8  Programming Exercises - 63
+*** 2.8 Programming Exercises - 63
 
 ** 3 Assembly Language Programming in jasmin - 64
 *** 3.1 Java, the Programming System - 64
