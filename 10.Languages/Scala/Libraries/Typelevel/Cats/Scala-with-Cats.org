@@ -3237,6 +3237,16 @@
   /Monads/ can potentially bloat the code base through nested
   for-comprehensions.
 
+  - Example:
+    #+begin_src scala
+      def lookupUserName(id: Long): Either[Error, Option[String]] =
+        for (optUser <- lookupUser(id))
+        yield {
+          for (user <- optUser)
+          yield user.name
+        }
+    #+end_src
+
 ** TODO 5.1 Exercise: Composing Monads - 130
 ** TODO 5.2 A Transformative Example - 131
 ** TODO 5.3 Monad Transformers in Cats - 133
@@ -3249,7 +3259,7 @@
 ** TODO 5.4 Exercise: Monads: Transform and Roll Out - 140
 ** TODO 5.5 Summary - 141
 
-* DONE 6 ~Semigroupal~ and ~Applicative~ - 143 - =NOTE=
+* DONE 6 ~Semigroupal~ and ~Applicative~ - 143 - NOTE
   CLOSED: [2019-04-08 Mon 00:25]
   - We'll explore certain types of program flow that they cannot represent.
     + For example, _form validation_:
