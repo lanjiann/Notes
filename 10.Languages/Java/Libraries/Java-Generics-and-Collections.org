@@ -191,7 +191,8 @@
         * /C++ tempalte/ support singleton type (constant value).
           /Java generics/ are restricted to types.
 
-*** TODO 1.2 Boxing and Unboxing - 6
+*** DONE 1.2 Boxing and Unboxing - 6
+    CLOSED: [2020-02-03 Mon 14:27]
     - boxing :: Conversion of /primitive type/ -> CORRESPONDING /reference type/.
 
     - unboxing :: Conversion of /reference type/ -> CORRESPONDING /primitive type/.
@@ -226,8 +227,8 @@
         // is MUCH faster than
 
         public static Integer sum (List<Integer> ints) {
-            Integer s = 0;                       // extra auto-boxing
-            for (Integer n : ints) { s += n; }   // extra auto-unboxing for the `+` operation, and auto-boxing after `+` is done.
+            Integer s = 0;                      // extra auto-boxing
+            for (Integer n : ints) { s += n; }  // extra auto-unboxing for the `+` operation, and auto-boxing after `+` is done.
             return s;
         }
       #+end_src
@@ -235,13 +236,32 @@
       version is 60% slower!!!
 
     - *Look Out for This!* TODO
-      NOTE
-      NOTE
-      NOTE
-      NOTE
-      NOTE
-      NOTE
-      NOTE
+      + One _SUBTLETY_ of /boxing/ and /unboxing/ is that ~==~ is defined differently
+        on primitive and on reference types.
+        * On type ~int~, it is defined by equality of values, and
+        * on type ~Integer~, it is defined by object identity.
+
+      + So both of the following assertions succeed using Sun's JVM:
+        #+begin_src java
+          List<Integer> bigs = Arrays.asList(100, 200, 300);
+          // Case 1
+          assert sumInteger(bigs) == sum(bigs);
+
+          // Case 2
+          assert sumInteger(bigs) != sumInteger(bigs);  // not recommended
+        #+end_src
+        * Case 1: The two sides are equal (~==~) because of /auto-unboxing/
+
+        * Case 2: You shouldn't use this way to compare!!! It's not always equal
+          or unequal!
+          - When no value cached, Case 2 will be true!
+          - *Subtlety* of /caching/:
+            + Caching is _required_
+              when boxing ~int~ or ~short~ value in the range of [-128, 127], a ~char~
+              value in the range of ['\u0000', '\u007f'], a ~byte~, or a ~boolean~.
+
+            + Caching is _permitted_
+              when boxing other values.
 
 *** DONE 1.3 Foreach - 9
     CLOSED: [2020-01-04 Sat 22:41]
@@ -292,9 +312,87 @@
           }
         #+end_src
 
-*** TODO 1.4 Generic Methods and Varargs - 10
-    - Syntax:
-      ~T... variable~ in parameter list.
+*** DONE 1.4 Generic Methods and Varargs - 10
+    CLOSED: [2020-01-30 Thu 11:50]
+    - /Generic method/ example:
+      Convert ~T[]~ to ~List<T>~ for arbitrary legal ~T~
+      #+begin_src java
+        class Lists {
+            public static <T> List<T> toList(T[] arr) {
+                List<T> list = new ArrayList<>();
+                for (T elt : arr) list.add(elt);
+                return list;
+            }
+        }
+      #+end_src
+      + The /scope/ of ~T~ is the signature and the body of the method that
+        declares it.
+
+      + Invoke:
+        #+begin_src java
+          List<Integer> ints = Lists.toList(new Integer[] { 1, 2, 3 });
+          List<String> words = Lists.toList(new String[] { "hello", "world" });
+        #+end_src
+        In the first line, /auto-boxing/ happens.
+
+    - /vararg/:
+      + Permit a special, more convenient syntax for the case in which _the last
+        argument of a method is an /array/._
+
+      + Syntax: ~T... variable~ in parameter list.
+
+      + Example:
+        #+begin_src java
+          class Lists {
+              public static <T> List<T> toList(T... arr) {
+                  List<T> list = new ArrayList<>();
+                  for (T elt : arr) list.add(elt);
+                  return list;
+              }
+          }
+        #+end_src
+        * Invoke:
+          #+begin_src java
+            List<Integer> ints = Lists.toList(1, 2, 3);
+            List<String> words = Lists.toList("hello", "world");
+          #+end_src
+
+    - In the preceding examples, the /type parameter/ to the /generic method/ is
+      *inferred*, and we didn't write it out explicitly. The explicit form is like:
+      #+begin_src java
+        List<Integer> ints = Lists.<Integer>toList();
+        List<Integer> ints = Lists.<Object>toList(1, "two");
+      #+end_src
+      For the first statement:
+      + Old Sun's compiler can't infer the type when we use ~Lists.toList()~
+        instead on the RHS. Even if we declared ~List<Integer>~ on the RHS. No
+        compiling error, but _unchecked type warning_.
+
+      + Eclipse compiler use a different type inference algorithm, and compiles
+        the same line correctly without the explicit parameter.
+
+      + New Java compiler (from JDK 11 or OpenJDK 11, not sure about Java 6 ~ 10)
+        can infer the type.
+
+      + In JShell, if we evaluate ~Lists.toList()~ expression without a declared
+        varaible type and name, the element type will be inferred as ~Object~.
+        Therefore, we may need to use ~Lists.<TypeArg>toList()~ don't want to
+        manually specify its type.
+
+    - In general, the following rule of thumb suffices: in a call to a generic method,
+      if there are one or more arguments that correspond to a type parameter and
+      they all have the same type then the type parameter may be inferred; if
+      there are no arguments that correspond to the type parameter or the
+      arguments belong to different subtypes of the intended type then the type
+      parameter must be given explicitly.
+
+    - *LIMITATION* (Grammar):
+      The ~<T>~ can only show up in the qualified form, following ~.~.
+      ~<Integer>toList()~ will trigger a compile-time error.
+
+    - Similar (to our defined ~toList~) methods:
+      + ~Arrays.asList~
+      + ~Collections.addAll~
 
 *** DONE 1.5 Assertions - 12
     CLOSED: [2020-01-04 Sat 23:01]
@@ -307,36 +405,54 @@
       nonassertion code depends.
 
 ** TODO 2. Subtyping and Wildcards - 15
-   We'll review how /subtyping/ works;
-   we'll see how /wildcards/ let you use /subtyping/ *in connection with* /generics/;
-   We'll illustrate our points with examples from the _Collections Framework_.
+   Topics that we will discuss in this chapter:
+   - Review how /subtyping/ works;
+   - See how /wildcards/ let you use /subtyping/ *in connection with* /generics/;
+   - Illustrate our points with examples from the _Collections Framework_.
 
 *** DONE 2.1 Subtyping and the Substitution Principle - 15
-    CLOSED: [2020-01-05 Sun 17:07]
-    In Java,
-    one type is a /subtype/ of another
-    if they are related by an ~extends~ or ~implements~ clause.
+    CLOSED: [2020-02-04 Tue 15:20]
+    /Subtyping/ is a key feature of OOP such as Java.
 
-    - /Subtyping/ is *transitive*.
+    - subtyping (in Java) :: one type is a /subtype/ of another if they are
+         related by an ~extends~ or ~implements~ clause.
+      + /Subtyping/ is *transitive*.
 
-    - Substitution Principle :: a variable of a given type may be assigned a value
-         of any subtype of that type, and a method with a parameter of a given
-         type may be invoked with an argument of any subtype of that type.
+    - With the concept of /subtyping/, it is easy to describe /supertype/.
+
+    - EVERY /reference type/ is a /subtype/ of ~Object~.
+      ~Object~ is a /supertype/ of EVERY /reference type/.
+      Every /type/ is a /subtype/ of itself.
+
+    - Substitution Principle :: a /variable/ of a given type may be assigned a
+         value of any /subtype/ of that type, and a /method/ with a parameter of
+         a given type may be invoked with an argument of any /subtype/ of that
+         type.
+      + Example:
+        #+begin_src java
+          List<Integer> ints = new ArrayList<>();
+          ints.add(1);
+          ints.add(2);
+          List<Number> nums = ints;  // compile-time error
+          nums.add(3.14);
+          assert ints.toString().equals("[1, 2, 3.14]");  // uh oh!
+        #+end_src
 
     - The /substitution principle/ does *NOT* regulate the /subtyping relation/
       between, for instance, ~List<A>~ and ~List<B>~ if ~B~ is a /subtype/ of ~A~.
       + /Java array/ is not a part of the _Collection Framework_, and it follow a
-        DIFFERENT (=from Jian= WRONG!!!) rule. (TODO: See Section 2.5)
+        DIFFERENT rule. (TODO: See Section 2.5 -- bad design for Java with
+        generics, but required design for Java without generics).
 
     - The relation between types like ~List<A>~ and ~List<B>~, when ~B~ is a /subtype/
       of ~A~, can be specified with /wildcards/. TODO: Next SECTION
 
-*** DONE 2.2 Wildcards with ~extends~ - 17 - TODO RE-READ
-    CLOSED: [2020-01-05 Sun 18:56]
+*** DONE 2.2 Wildcards with ~extends~ - 17
+    CLOSED: [2020-02-04 Tue 15:41]
+    /Covariance/
     Example:
     #+begin_src java
       interface Collection<E> {
-          // ...
           public boolean addAll(Collection<? extends E> c);
           // ...
       }
@@ -368,18 +484,19 @@
          conflict with the type of ~3.14~ (~double~) -- confirmed in the code
          above.
 
-      2. In general, if a structure contains elements with a type of the form ~?
-         extends E~, we
-         + CAN get elements out of the structure,
+    - In general, if a structure contains elements with a type of the form
+      ~? extends E~, we
+      + CAN _get_ elements out of the structure,
+      + BUT we CANNOT _put_ elements into the structure.
 
-         + BUT we CANNOT put elements into the structure.
-
-      3. To put elements into the structure we need another kind of /wildcard/, as
-         explained in the next section. TODO Next Section
+    - To _put elements into the structure_ we need another kind of /wildcard/, as
+      explained in the next section. TODO Next Section
 
 *** TODO 2.3 Wildcards with ~super~ - 18 - TODO RE-READ
-    Example:
+    Illstration Example:
+    Copy all of the elements from a source list to a destination list.
     #+begin_src java
+      // This comes from `Collections`
       public static <T> void copy(List<? super T> dst, List<? extends T> src) {
           for (int i = 0; i < src.size(); ++i) {
               dst.set(i, src.get(i));
@@ -397,7 +514,7 @@
         assert objs.toString().equals("[5, 6, four]");
       #+end_src
       As with any /generic method/, the /type parameter/
-      _may be INFERRED_ or _may be given EXPLICITLY_
+      _may be INFERRED_ or _may be Given EXPLICITLY_
       + In this case, there are *FOUR* possible choices, all of which type-check
         and all of which have the same effect:
         #+begin_src java
@@ -422,68 +539,202 @@
         It only permits calls when the _destination_ and _source_ have *EXACTLY
         the SAME /type/.*
 
-      + The remaining three are equivalent for calls that use implicit type parameters,
-        but differ for explicit type parameters.
-        2 works only when the type parameter is Object,
-        3 works only when the type parameter is Integer,
-        4 works (as we have seen) for all three type parameters
-          i.e., Object, Number, and Integer.
+      + The remaining three are
+        equivalent for calls that use implicit type parameters,
+        BUT differ for explicit type parameters.
+        * 2 works only when the /type parameter/ is ~Object~,
+        * 3 works only when the /type parameter/ is ~Integer~,
+        * 4 works (as we have seen) for all three /type parameters/
+          i.e., ~Object~, ~Number~, and ~Integer~.
 
       + Always use wildcards where you can in a signature, since this permits the
         widest range of calls.
 
 *** TODO 2.4 The Get and Put Principle - 19
-    - The Get and Put Principle :: use an extends wildcard when you only get values
-         out of a structure, use a super wildcard when you only put values into
-         a structure, and don’t use a wildcard when you both get and put.
+    - The Get and Put Principle ::
+      + use an ~extends~ /wildcard/ when you only _get_ values out of a structure,
+      + use a ~super~ /wildcard/ when you only _put_ values into a structure,
+      + DON'T use a /wildcard/ when you both _get_ and _put_.
 
-*** 2.5 Arrays - 22
-*** 2.6 Wildcards Versus Type Parameters - 25
+*** DONE 2.5 Arrays - 22
+    CLOSED: [2020-02-06 Thu 13:51]
+    It is instructive to compare the treatment of /lists/ and /arrays/ in Java,
+    keeping in mind /the Substitution Principle/ and /the Get and Put Principle/.
+
+    - *In Java, array subtyping is /covariant/,*
+      meaning the type ~S[]~ is considered to be a /subtype/ of ~T[]~ _whenever
+      ~S~ is a subtype of ~T~._
+      + There is *no way* to create any _contravariant array_ in Java.
+        No syntax like ~(? wildcard Integer)[]~. Although, the semantics of
+        ~(? extends Integer)[]~ is the default.
+
+    - Illustrate the issue introduced by the *(by default) convariance of array*
+      with a example:
+      #+begin_src java
+        Integer[] ints = new Integer[] {1, 2, 3};
+        Number[] nums = ints;
+        nums[2] = 3.14;  // ArrayStoreException in runtime
+        assert Arrays.toString(ints).equals("[1, 2, 3.14]");  // uh oh! Can't reach this line.
+      #+end_src
+      + Since Java array is /covariant/, this doesn't violate the /Substitution Principle/.
+
+      + The reason why this issue is caught at run time:
+        When an array is allocated (as on the first line),
+        _it is tagged with its /reified type/ (a run-time representation of its
+        component type, in this case, ~Integer~)_, and every time an array is
+        assigned into (as on the third line), an ~ArrayStoreException~ is raised
+        if the /reified type/ is not compatible with the assigned value.
+
+      + Compare with ~List~:
+        * Without /wildcards/, /invariant/:
+          #+begin_src java
+            List<Integer> ints = Arrays.asList(1, 2, 3);
+            List<Number> nums = ints;  // compile-time error
+            nums.set(2, 3.14);
+            assert ints.toString().equals("[1, 2, 3.14]");  // uh oh! Can't reach this line.
+          #+end_src
+          Violate /the Substitution Principle/
+
+        * With ~extends~, /covariant/:
+          #+begin_src java
+            List<Integer> ints = Arrays.asList(1, 2, 3);
+            List<? extends Number> nums = ints;
+            nums.set(2, 3.14);  // compile-time error
+            assert ints.toString().equals("[1, 2, 3.14]");  // uh oh! Can't reach this line.
+          #+end_src
+          Violate /the Get and _Put_ Principle/
+
+        * Since Java /array/ can't be /contravariant/, there is no need to compare
+          the /contravariant/ ~List~ with /array/.
+
+    - Q :: Is make /array/ /covariant/ (BY DEFAULT, and ONLY) is a good design decision?
+
+    - A ::
+      + Before the advent of /generics/, it was absolutely necessary.
+        Without it, there is no way to declare /methods/ that apply for many/all
+        types like:
+        #+begin_src java
+          public static void sort(Object[] a);
+          public static void fill(Object[] a, Object val);
+        #+end_src
+
+      + Now, with /generics/, /covariant arrays/ _are no longer necessary_.
+        #+begin_src java
+          public static <T> void sort(T[] a);
+          public static <T> void fill(T[] a, T val);
+        #+end_src
+
+    - In some sense, covariant arrays are an artifact of the lack of generics in
+      earlier versions of Java. Once you have generics, covariant arrays are
+      probably the wrong design choice, and the only reason for retaining them
+      is backward compatibility.
+
+    - TODO
+      Sections _Section 6.4 - Section 6.8_ discuss inconvenient interactions
+      between /generics/ and /arrays/. *For many purposes, it may be sensible to
+      consider arrays a deprecated type.* We return to this point in Section
+      6.9.
+
+*** DONE 2.6 Wildcards Versus Type Parameters - 25
+    CLOSED: [2020-02-06 Thu 14:26]
    - *Wildcards*
-   - *Type Parameters*
+     #+begin_src java
+       interface Collection<E> {
+           public boolean contains(Object o);
+           public boolean containsAll(Collection<?> c);
+           // ...
+       }
+     #+end_src
+     + ~<?>~ stands for ~<? extends Object>~
 
-*** 2.7 Wildcard Capture - 27
-*** 2.8 Restrictions on Wildcards - 28
+     + Legal code:
+       #+begin_src java
+         Object obj = "one";
+         List<Object> objs = Arrays.<Object>asList("one", 2, 3.14, 4);
+         List<Integer> ints = Arrays.asList(2, 4);
+         assert objs.contains(obj);
+         assert objs.containsAll(ints);
+         assert !ints.contains(obj);
+         assert !ints.containsAll(obj);
+       #+end_src
+
+   - *Type Parameters*
+     #+begin_src java
+       interface MyCollection<E> {  // alternative design
+           public boolean contains(E o);
+           public boolean containsAll(Collection<? extends E> c);
+           // ...
+       }
+     #+end_src
+     + This only allow single direction check:
+       #+begin_src java
+         Object obj = "one";
+         MyList<Object> objs = MyList.<Object>asList("one", 2, 3.14, 4);
+         MyList<Integer> ints = MyList.asList(2, 4);
+         assert objs.contains(obj);
+         assert objs.containsAll(ints);
+         assert !ints.contains(obj);     // compile-time error
+         assert !ints.containsAll(objs); // compile-time error
+       #+end_src
+
+   - Q :: Which is a better design?
+
+   - A :: This is argurable!!!
+     + Use site backward compatibility prefer the _wildcards solution_.
+     + The _wildcards solution_ can do _two direction check_.
+     + The _two direction check_ is rarely used, and can be work around by the
+       _type parameters solution_.
+     + _Type parameters solution_ catch more errors in compile time.
+
+   - Similar design happens in the signature of ~remove~, ~removeAll~, and ~retianAll~
+     of the ~Collection<E>~ class.
+
+*** TODO 2.7 Wildcard Capture - 27
+*** TODO 2.8 Restrictions on Wildcards - 28
     - *Generic Method Calls*
     - *Supertypes*
 
 ** TODO 3. Comparison and Bounds - 31
    Now let's look at some more advanced uses of generics.
    This chapter describes the /interfaces/ ~Comparable<T>~ and ~Comparator<T>~.
-     Along the way, we will introduce /bounds/ on /type variables/, _an important
-   feature_ of /generics/ that is particularly useful in combination with the
-   /interfaces/ like ~Comparable<T>~ .
+   - Along the way, we will introduce /bounds/ on /type variables/, _an important
+     feature_ of /generics/ that is particularly useful in combination with the
+     /interfaces/ like ~Comparable<T>~ .
 
-*** 3.1 Comparable - 31
+*** TODO 3.1 Comparable - 31
     #+begin_src java
       interface Comparable<T> {
           public int compareTo(T o);
       }
     #+end_src
 
-    - When a class implements ~Comparable~, the ordering specified by this /interface/
-      is called the /natural ordering/ for that class.
+    - natural ordering :: the ordering specified by ~Comparable~
 
+    - Comparison is not supported between ARBITRARY /numerical types/.
+      The ~Number~ class does NOT implement the ~Comparable~ interface.
 
     - *Consistent with Equals*
+      Usually, we require that two objects are equal iff they compare as the same.
+      ~x.equals(y)~ iff ~x.compareTo(y) == 0~.
+      We say that the /natural ordering/ is *consistent* with equals.
 
     - *Contract for Comparable*
 
     - *Look Out for This!*
 
-*** 3.2 Maximum of a Collection - 34
-*** 3.3 A Fruity Example - 36
-*** 3.4 Comparator - 37
-*** 3.5 Enumerated Types - 42
+*** TODO 3.2 Maximum of a Collection - 34
+*** TODO 3.3 A Fruity Example - 36
+*** TODO 3.4 Comparator - 37
+*** TODO 3.5 Enumerated Types - 42
     Java 5 inlcudes support for /enumerated types/.
     - Example:
       #+begin_src java
         enum Season { WINTER, SPRING, SUMMER, FALL }
       #+end_src
 
-*** 3.6 Multiple Bounds - 45
-*** 3.7 Bridges - 47
-*** 3.8 Covariant Overriding - 49
+*** TODO 3.6 Multiple Bounds - 45
+*** TODO 3.7 Bridges - 47
+*** TODO 3.8 Covariant Overriding - 49
 
 ** TODO 4. Declarations - 51
    _This chapter discusses how to *declare* a /generic class/._
