@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.20.0-bin-SNAPSHOT -> ... -> 0.22.0-bin-SNAPSHOT
+#+VERSION: 0.20.0-bin-SNAPSHOT -> ... -> 0.23.0-bin-20200213-26de50a-NIGHTLY
 #+AUTHOR:
 #+STARTUP: entitiespretty
 
@@ -7,7 +7,7 @@
 * DONE USAGE
   CLOSED: [2019-11-04 Mon 16:17]
 ** Getting Started
-   *Getting Started: Users*
+   # *Getting Started: Users*
 *** Trying out Dotty
 **** In your web browser
 **** sbt
@@ -15,6 +15,8 @@
 **** Standalone installation
 
 ** sbt-projects
+   # *Using Dotty with sbt*
+
 ** IDE support for Dotty
 *** Prerequisites
 *** Usage
@@ -31,9 +33,10 @@
 *** Implementation details
 
 ** cbt-projects
-   *Using Dotty with cbt*
+   # *Using Dotty with cbt*
 
-** TODO Dottydoc
+** DONE Dottydoc
+   CLOSED: [2020-02-15 Sat 02:33]
 *** Using existing Templates and Layouts
 *** Blog
 *** Includes
@@ -382,6 +385,8 @@
         }
       #+end_src
 
+**** More details
+
 ** TODO ENUMS
 *** DONE Enumerations
     CLOSED: [2019-07-02 Tue 13:11]
@@ -596,7 +601,7 @@
 **** TODO Reference
 
 *** TODO Translation
-    *Translation of Enum and ADTs*
+    # *Translation of Enum and ADTs*
     1.
     2.
     3.
@@ -676,7 +681,7 @@
          old-style implicits and new-style delegates and given clauses and how
          to migrate from one to the other.
 
-*** Given Instances
+*** TODO Given Instances
     /Given instances/ (or, simply, "givens") define "canonical" values of certain
     types that serve for /synthesizing arguments/ to /given clauses/.
     =from Jian= /given clauses/ describes a requirement to /given instances/.
@@ -711,7 +716,7 @@
       + ~(ord: Ord[T]) =>~ clause in ~listOrd~ defines an /implicit parameter/.
         TODO /given clauses/ are further explained in the next section.
 
-**** Anonymous Given Instances
+**** Anonymous Givens
      The name of a given instance can be left out.
      #+begin_src scala
        given Ord[Int] { /* ... */ }
@@ -736,6 +741,7 @@
        =from Jian= Because it is an alias -- a name or concrete thing, not a
                    general instances.
 
+**** Given Whitebox Macro Instances
 **** Given Instance Initialization - =IMPORTANT=
      A given instance without type parameters or given clause is initialized
      on-demand, the first time it is accessed.
@@ -753,11 +759,10 @@
        OR
      - the template body defines at least one extension method.
 
-*** TODO Given Clauses
-   # Given Parameters
-**** Anonymous Given Clauses
+*** TODO Using Clauses
+**** Anonymous Context Parameters
 **** Inferring Complex Arguments
-**** Multiple Given Clauses
+**** Multiple Using Clauses
 **** Summoning Instances
 **** Syntax
 
@@ -781,6 +786,7 @@
        If both are present, /subtype bounds/ *come first*, e.g.
        ~def g[T <: B : C](x: T):R = ...~
 
+**** Migration
 **** Syntax
      #+begin_src text
        TypeParamBounds ::= [SubtypeBounds] {ContextBound}
@@ -788,6 +794,7 @@
      #+end_src
 
 *** DONE Given Imports
+    # Importing Givens
     CLOSED: [2019-11-13 Wed 14:44]
     A _special form_ of /import wildcard selector/ is used to IMPORT /given
     instances/.
@@ -851,15 +858,12 @@
      CLOSED: [2019-11-13 Wed 14:44]
      TODO NOTE
 
-*** Extension Methods
-    ## 0.20.0 version #
-
+*** TODO Extension Methods
 **** Translation of Extension Methods
 **** Translation of Calls to Extension Methods
-**** Given Instances for Extension Methods
-**** Given Instances with Collective Parameters
 **** Operators
 **** Generic Extensions
+**** Collective Extensions
 **** Syntax
 
 *** DONE Implementing Typeclasses
@@ -925,7 +929,7 @@
        }
      #+end_src
 
-*** Typeclass Derivation
+*** TODO Typeclass Derivation
     # Type class Derivation
 **** Types supporting ~derives~ clauses
 **** Type classes supporting automatic deriving
@@ -935,27 +939,28 @@
 **** Syntax
 **** Discussion
 
-*** Multiversal Equality
+*** TODO Multiversal Equality
 **** Deriving ~Eql~ Instances
 **** Precise Rules for Equality Checking
 **** Predefined ~Eql~ Instances
 **** Why Two Type Parameters?
 
-*** Implicit Function Types
+*** TODO Context Functions
 **** Example: Builder Pattern
 **** Example: Postconditions
 **** Reference
 
-*** Implicit Conversions
+*** TODO Implicit Conversions
 **** Examples
 
-*** Implicit By-Name Parameters
+*** TODO By-Name Context Parameters
 **** Reference
 
-*** Relationship with Scala 2 Implicits
-**** Simulating Contextual Abstraction with Implicits
+*** TODO Relationship with Scala 2 Implicits
+**** Simulating Scala 3 Contextual Abstraction with Scala 2 Implicits
 ***** Given Intances
 ***** Anonymous Given Intances
+***** Anonymous Collective Extensions
 ***** Given Clauses
 ***** Context Bounds
 ***** Extension Methods
@@ -963,7 +968,7 @@
 ***** Implicit Function Types
 ***** Implicit By-Name Parameters
 
-**** Simulating Scala 2 Implicits in Dotty
+**** Simulating Scala 2 Implicits in Scala 3
 ***** Implicit Conversions
 ***** Implicit Classes
 ***** Implicit Values
@@ -1020,12 +1025,7 @@
        Programming"/. /Staging/ is built on the _SAME_ foundations as /macros/.
        It uses /quotes/ and /splices/, but _LEAVES OUT_ /inline/.
 
-    4. /Erased Terms/ =???= TODO
-       Erased terms are used to enforce guarantees about program constraints.
-       As erased terms are guaranteed not to be used in computations, they will
-       not appear at the generated code.
-
-    5. /TASTy Reflection/
+    4. /TASTy Reflection/
        + /Quotations/ are a "black-box" representation of code.
          They can be parameterized and composed using /splices/ but their
          structure cannot be analyzed from the outside.
@@ -1035,12 +1035,12 @@
          The _representation type_ is a form of /typed abstract syntax tree/,
          which gives rise to the "TASTy` moniker.
 
-    6. /TASTy Inspection/
+    5. /TASTy Inspection/
        /Typed abstract syntax trees/ are serialized in a custom compressed
        binary format in =.tasty= files. /TASTy inspection/ allows to _load_
        these files and _analyze_ their content's tree structure.
 
-*** TODO Inline - TODO =RE-READ=
+*** TODO Inline
 **** Inline Definitions
      - ~inline~ definition TODO TODO TODO
 
@@ -1082,11 +1082,11 @@
        + A _hint_
          * _Hint_ here means _try with BEST EFFORT, but NOTHING GUARANTEED!_
 
-       + The _hint_ is for the *backend* 
-         
+       + The _hint_ is for the *backend*
+
 
      - ~inline~ /modifier/ ::
-       + A _command_ 
+       + A _command_
          * _Command_ here means _GUARANTEED!_
 
        + The _command_ is for the *frontend*
@@ -1225,7 +1225,7 @@
           is still supported in Dotty, BUT *will be phased out*.
             -- from "Inline Definitions" subsection in this doc
           #+end_quote
-        
+
 
       - TODO
         Last paragraph???
@@ -1258,6 +1258,8 @@
 
             fail(indentity("foo"))  // error: failed on: indentity("foo")
           #+end_src
+
+***** The ~scala.compiletime.ops~ package
 
 **** DONE Summoning Implicits Selectively
      CLOSED: [2019-06-24 Mon 16:46]
@@ -1478,42 +1480,6 @@
        The reference to ~f~ is legal because it is _quoted, then spliced_,
        whereas the reference to ~x~ is legal because it is _spliced, then quoted_.
 
-**** TODO Types and the PCP
-     - In principle, The /phase consistency principle/ applies to /types/ as well
-       as for /expressions/.
-       This might seem too restrictive. Indeed, the definition of ~reflect~
-       above is _NOT phase correct_ since there is a /quote/ but no /splice/
-       between the parameter binding of ~T~ and its usage. But the code _can be
-       made phase correct_ *by adding a binding of a ~Type[T]~ tag*:
-       #+begin_src scala
-         def reflect[T, U](f: Expr[T] => Expr[U]) given (t: Type[T]): Expr[T => U] =
-           '{ (x: $t) => ${ f('x) } }
-       #+end_src
-
-     - In this version of ~reflect~, the type of ~x~ is now the result of /splicing/
-       the ~Type~ value ~t~. This operation is /splice/ correct -- there is one
-       /quote/ and one /splice/ between the use of ~t~ and its definition.
-
-     - To avoid clutter, the Scala implementation tries to convert ANY
-       /phase-incorrect reference/ to a type ~T~ to a /type-splice/, by
-       rewriting ~T~ to ~${ the[Type[T]]}~. For instance, the user-level
-       definition of ~reflect~:
-       #+begin_src scala
-         def reflect[T: Type, U: Type](f: Expr[T] => Expr[U]): Expr[T => U] =
-           '{ (x: T) => ${ f('x) } }
-       #+end_src
-       would be rewritten to
-       #+begin_src scala
-         def reflect[T: Type, U: Type](f: Expr[T] => Expr[U]): Expr[T => U] =
-           '{ (x: ${ the[Type[T]] }) => ${ f('x) } }
-       #+end_src
-
-     - The ~the~ query succeeds because there is a /delegate/ of type ~Type[T]~
-       available (namely the given parameter corresponding to the /context
-       bound/ ~: Type~), and the reference to that value is phase-correct.
-         If that was not the case, the phase inconsistency for ~T~ would be
-       reported as an error.
-
 **** TODO Lifting Expressions
      - Consider the following implementation of a staged interpreter that implements
        a compiler through staging.
@@ -1637,11 +1603,11 @@
        to declutter slightly the code at the cost of readable phase distinction
        between stages.
 
-**** Lifting Types
-**** Relationship with ~inline~
-**** Scope Extrusion
-**** Example Expansion
-**** Find implicits within a macro
+**** TODO Lifting Types
+**** TODO Relationship with ~inline~
+**** TODO Scope Extrusion
+**** TODO Example Expansion
+**** TODO Find implicits within a macro
 **** TODO Relationship with Whitebox Inline
      ~Inline~ documents inlining.
      The code below introduces a /whitebox inline method/ that can calculate
@@ -1661,20 +1627,22 @@
      #+end_src
 
 **** TODO Defining a macro and using it in a single project
+**** TODO Pattern matching on quoted expressions
+***** ~scala.quoted.matching~
+***** Quoted patterns
+
+**** TODO Recovering precise types using patterns
+**** TODO More details
 
 *** TODO Staging
-    * Multi-Stage Programming
+    # *Multi-Stage Programming*
 **** API
 **** Create a new Dotty project with staging enabled
 **** Example
-
-*** TODO Erased Terms
-**** Why erased terms?
-**** How to define erased terms?
-**** What happens with erased values at runtime?
-**** State machine with erased evidence example
+**** Template project
 
 *** TODO TASTy Reflection
+    # *TASTy Reflect*
 **** API: From quotes and splices to TASTy reflect trees and back
 ***** Sealing and Unsealing
 ***** Obtaining and underlying argument
@@ -1686,6 +1654,7 @@
 
 *** TODO TASTy Inspection
 **** Inspecting TASTy files
+**** Template project
 
 ** TODO OTHER NEW FEATURES
 *** TODO Trait Parameters
@@ -2036,7 +2005,7 @@
     CLOSED: [2019-12-31 Tue 04:24]
     When the compiler see a ~@threadUnsafe lazy val~, it can pick a faster
     mechanism to do the initialization.
-    
+
     - =from Jian= TODO TODO TODO
       Does this mean before introducing the ~threadUnsafe~ annotation, we only
       have one mechanism that initialize all ~lazy val~ in a /thread safe/
@@ -2118,10 +2087,10 @@
             if (x < 0) {
               println(1)
               println(2)
-  
+
               println("done")  // error: indented too far to the left
           #+end_src
-  
+
        2. If significant indentation is turned off (i.e. under Scala-2 mode or
           under ~-noindent~) and we are at the start of an indented sub-part of an
           expression, and the indented part ends in a newline, the next statement
@@ -2143,76 +2112,7 @@
        related to _missing opening or closing braces_.
 
 **** TODO Optinal Braces
-**** DONE New Role of ~with~
-     CLOSED: [2019-12-29 Sun 03:36]
-     - NOTE TODO TODO TODO RULES
-       + Scala 2 syntax
-         #+begin_src scala
-           trait A {
-             def f: Any
-           }
-
-           class C(x: Int) extends A {
-             def f = x
-           }
-
-           type T = A {
-             def f: int
-           }
-         #+end_src
-
-       + Scala 3 syntax
-         * with braces
-           #+begin_src scala
-             trait A with {
-               def f: Any
-             }
-
-             class C(x: Int) extends A with {
-               def f = x
-             }
-
-             type T = A with {
-               def f: int
-             }
-           #+end_src
-
-         * without braces
-           #+begin_src scala
-             trait A with
-               def f: Any
-
-             class C(x: Int) extends A with
-               def f = x
-
-             type T = A with
-               def f: int
-           #+end_src
-
-     - The new syntax with new ~with~ usage
-       ASSUMED here that
-       braces following a ~with~ _can be TRANSPARENTLY replaced by_ an
-       indentation region.
-
-     - The new rules can make some previously allowed code *become illegal*:
-       #+begin_src scala
-         class A extends B with
-                         C
-       #+end_src
-       + ~C~ is considered as part of the body of ~A~
-
-       + ~with~ can _no longer_ at the end of a line!
-         Legal version:
-         #+begin_src scala
-           class A extends B
-                      with C
-
-           // OR
-
-           class A extends B,
-                           C
-         #+end_src
-
+**** TODO Optinal Braces Around Template Bodies
 **** DONE Spaces vs Tabs
      CLOSED: [2019-12-29 Sun 03:29]
      - _Mix SPACES and TABS is legal._
@@ -2267,7 +2167,7 @@
 **** TODO Variant: Indentation Marker ~:~
      NOT STABLE -- Learn when this feature is stable!!!
 
-*** TODO Explicit Nulls
+*** TODO Explicit Nulls --- TODO -----------------------------------------------------
     Explicit nulls is an /opt-in feature/ that _modifies the Scala type system_,
     which *makes /reference types/ (anything that extends ~AnyRef~) non-nullable.*
 
@@ -2287,11 +2187,11 @@
 
 **** DONE New Type Hierarchy
      CLOSED: [2019-12-31 Tue 04:05]
-     - NEW - Without /explicit nulls/: 
+     - NEW - Without /explicit nulls/:
        ~Null~ is the subtype of all ~AnyRef~ subtypes.
        The only subtype of ~Null~ is the /bottom type/ ~Noting~.
 
-     - OLD - With /explicit nulls/: 
+     - OLD - With /explicit nulls/:
        ~Null~ is a subtype of ~Any~.
        Its only subtype doesn't change, still ~Noting~.
 
@@ -2389,6 +2289,23 @@
 
 **** TODO Binary Compatibility
 
+*** TODO Safe Initialization
+    Dotty implements experimental safe initialization check, which can be
+    enabled by the compiler option ~-Ycheck-init~.
+
+**** A Quick Glance
+***** Parent-Child Interaction
+***** Inner-Outer Interaction
+***** Functions
+
+**** Design Goals
+**** Principles and Rules
+**** Modularity
+**** Theory
+**** Back Doors
+**** Caveats
+**** References
+
 ** OTHER CHANGED FEATURES
 *** Numeric Literals
 **** Meaning of Numeric Literals
@@ -2397,8 +2314,9 @@
 **** Example
 **** Compile-Time Errors
 
-*** DONE Programmatic Structural Types
+*** DONE Structural Types
     CLOSED: [2020-01-18 Sat 14:23]
+    # *Programmatic Structural Types*
     - Some usecases are more awkward in statically typed languages than in
       dynamically typed languages
 
@@ -2516,7 +2434,7 @@
      - ~@infix~ annotation :: it is applied on a /method definition/ allows using
        the method as an _infix operation_.
 
-     - Example: 
+     - Example:
        #+begin_src scala
          trait MultiSet[T] {
            @infix
@@ -2631,6 +2549,12 @@
     *Wildcard Arguments in Types*
 **** Motivation
 **** Migration Strategy
+
+
+
+
+
+
 
 *** Type Checking
     *Type Checking*
