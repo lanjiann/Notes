@@ -1,233 +1,36 @@
 #+TITLE: Modern C
-#+Copyright: 2016 - 2018
+#+Copyright: 2020
 #+AUTHOR: Jens Gustedt
 #+STARTUP: entitiespretty
 
-* Table of Contents                                      :TOC_4_org:noexport:
-- [[Preliminaries][Preliminaries]]
-- [[LEVEL 0. Encounter - 1][LEVEL 0. Encounter - 1]]
-  - [[1. Getting started - 1][1. Getting started - 1]]
-    - [[1.1. Imperative programming - 1][1.1. Imperative programming - 1]]
-    - [[1.2. Compiling and running - 3][1.2. Compiling and running - 3]]
-  - [[2. The principal structure of a program - 6][2. The principal structure of a program - 6]]
-    - [[2.1. Grammar - 6][2.1. Grammar - 6]]
-    - [[2.2. Declarations - 7][2.2. Declarations - 7]]
-    - [[2.3. Definitions - 9][2.3. Definitions - 9]]
-    - [[2.4. Statements - 10][2.4. Statements - 10]]
-      - [[2.4.1. Iteration][2.4.1. Iteration]]
-      - [[2.4.2. Function return][2.4.2. Function return]]
-- [[LEVEL 1. Acquaintance - 13][LEVEL 1. Acquaintance - 13]]
-  - [[Warning to experienced C Programmers - 13][Warning to experienced C Programmers - 13]]
-  - [[3. Everthing is about control - 15][3. Everthing is about control - 15]]
-    - [[3.1. Conditional execution - 15][3.1. Conditional execution - 15]]
-    - [[3.2. Iterations - 17][3.2. Iterations - 17]]
-    - [[3.3. Multiple selection - 20][3.3. Multiple selection - 20]]
-  - [[4. Expressing computations - 23][4. Expressing computations - 23]]
-    - [[4.1. Arithmetic - 23][4.1. Arithmetic - 23]]
-      - [[4.1.1. ~+~, ~-~ and ~*~][4.1.1. ~+~, ~-~ and ~*~]]
-      - [[4.1.2. Division and remainder][4.1.2. Division and remainder]]
-    - [[4.2. Operators that modify objects - 26][4.2. Operators that modify objects - 26]]
-    - [[4.3. Boolean context - 27][4.3. Boolean context - 27]]
-      - [[4.3.1. Comparison][4.3.1. Comparison]]
-      - [[4.3.2. Logic][4.3.2. Logic]]
-    - [[4.4. The ternary or conditional operator - 28][4.4. The ternary or conditional operator - 28]]
-    - [[4.5. Evaluation order - 29][4.5. Evaluation order - 29]]
-  - [[5. Basic values and data - 30 - =RE-READ=][5. Basic values and data - 30 - =RE-READ=]]
-      - [[5.0.1. Values][5.0.1. Values]]
-      - [[5.0.2. Types][5.0.2. Types]]
-      - [[5.0.3. Binary representation and the abstract state machine][5.0.3. Binary representation and the abstract state machine]]
-      - [[5.0.4. Optimization][5.0.4. Optimization]]
-    - [[5.1. Basic types - 32][5.1. Basic types - 32]]
-    - [[5.2. Specifying values - 34][5.2. Specifying values - 34]]
-    - [[5.3. Initializers - 37][5.3. Initializers - 37]]
-    - [[5.4. Named constants - 38][5.4. Named constants - 38]]
-      - [[5.4.1. Read-only objects][5.4.1. Read-only objects]]
-      - [[5.4.2. Enumerations. =RE-READ DO NOT QUITE UNDERSTAND=][5.4.2. Enumerations. =RE-READ DO NOT QUITE UNDERSTAND=]]
-      - [[5.4.3. Macros][5.4.3. Macros]]
-      - [[5.4.4. Compound literals =RE-READ=][5.4.4. Compound literals =RE-READ=]]
-      - [[5.4.5. Complex constants][5.4.5. Complex constants]]
-    - [[5.5. Binary representions - 42 - =RE-READ=][5.5. Binary representions - 42 - =RE-READ=]]
-      - [[5.5.1. Unsigned integers][5.5.1. Unsigned integers]]
-      - [[5.5.2. Bit sets and bitwise operators][5.5.2. Bit sets and bitwise operators]]
-      - [[5.5.3. Shift operators][5.5.3. Shift operators]]
-      - [[5.5.4. Boolean values][5.5.4. Boolean values]]
-      - [[5.5.5. Signed integers][5.5.5. Signed integers]]
-      - [[5.5.6. Fixed width integer types][5.5.6. Fixed width integer types]]
-      - [[5.5.7. Floating point data][5.5.7. Floating point data]]
-  - [[6. Aggregate data types - 50][6. Aggregate data types - 50]]
-    - [[6.1. Arrays - 50][6.1. Arrays - 50]]
-      - [[6.1.1. Array declaration][6.1.1. Array declaration]]
-      - [[6.1.2. Array operations][6.1.2. Array operations]]
-      - [[6.1.3. Array length][6.1.3. Array length]]
-      - [[6.1.4. Arrays as parameters][6.1.4. Arrays as parameters]]
-      - [[6.1.5. Strings are special][6.1.5. Strings are special]]
-    - [[6.2. Pointers as opaque types - 55][6.2. Pointers as opaque types - 55]]
-    - [[6.3. Structures - 56][6.3. Structures - 56]]
-    - [[6.4. New names for types: ~typedef~ - 60][6.4. New names for types: ~typedef~ - 60]]
-  - [[7. Functions - 62][7. Functions - 62]]
-    - [[7.1. Simple functions - 62][7.1. Simple functions - 62]]
-    - [[7.2. ~main~ is special - 63][7.2. ~main~ is special - 63]]
-    - [[7.3. Recursion - 65 - =RE-READ=][7.3. Recursion - 65 - =RE-READ=]]
-  - [[8. C Library functions - 70][8. C Library functions - 70]]
-    - [[8.1. Mathematics - 74][8.1. Mathematics - 74]]
-    - [[8.2. Input, output and file manipulation - 74 =TODO=][8.2. Input, output and file manipulation - 74 =TODO=]]
-      - [[8.2.1. Unformated output of text][8.2.1. Unformated output of text]]
-      - [[8.2.2. Files and streams][8.2.2. Files and streams]]
-      - [[8.2.3. Text IO][8.2.3. Text IO]]
-      - [[8.2.4. Formatted output][8.2.4. Formatted output]]
-      - [[8.2.5. Unformatted input of text][8.2.5. Unformatted input of text]]
-    - [[8.3. String processing and conversion - 84 =TODO=][8.3. String processing and conversion - 84 =TODO=]]
-    - [[8.4. Time - 87 =TODO=][8.4. Time - 87 =TODO=]]
-    - [[8.5. Runtime environment settings - 91 =TODO=][8.5. Runtime environment settings - 91 =TODO=]]
-    - [[8.6. Program termination and assertions - 92 =TODO=][8.6. Program termination and assertions - 92 =TODO=]]
-- [[LEVEL 2. Cognition - 95][LEVEL 2. Cognition - 95]]
-  - [[9. Style - 95][9. Style - 95]]
-    - [[9.1. Formatting - 95][9.1. Formatting - 95]]
-    - [[9.2. Naming - 95][9.2. Naming - 95]]
-  - [[10. Organization and documentation - 99][10. Organization and documentation - 99]]
-    - [[10.1. Interface documentation - 100][10.1. Interface documentation - 100]]
-    - [[10.2. Implementation - 103][10.2. Implementation - 103]]
-    - [[10.3. Macros - 103][10.3. Macros - 103]]
-    - [[10.4. Pure functions - 105][10.4. Pure functions - 105]]
-  - [[11. Pointers - 106 =RE-READ=][11. Pointers - 106 =RE-READ=]]
-    - [[11.1. Address-of and object-of operators - 108][11.1. Address-of and object-of operators - 108]]
-    - [[11.2. Pointer arithmetic - 109][11.2. Pointer arithmetic - 109]]
-    - [[11.3. Pointers and ~struct~'s - 112][11.3. Pointers and ~struct~'s - 112]]
-    - [[11.4. Opaque structures - 115][11.4. Opaque structures - 115]]
-    - [[11.5. Array and pointer access are the same - 115][11.5. Array and pointer access are the same - 115]]
-    - [[11.6. Array and pointer parameters are the same - 116][11.6. Array and pointer parameters are the same - 116]]
-    - [[11.7. Null pointers - 117][11.7. Null pointers - 117]]
-    - [[11.8. Function pointers - 118 =TODO: Re-Read=][11.8. Function pointers - 118 =TODO: Re-Read=]]
-  - [[12. The C memory model - 121 =RE-READ=][12. The C memory model - 121 =RE-READ=]]
-    - [[12.1. A uniform memory model - 122][12.1. A uniform memory model - 122]]
-    - [[12.2. Unions - 122][12.2. Unions - 122]]
-    - [[12.3. Memory and state - 124 =RE-READ=][12.3. Memory and state - 124 =RE-READ=]]
-    - [[12.4. Pointers to unspecific objects - 125][12.4. Pointers to unspecific objects - 125]]
-    - [[12.5. Implicit and explicit conversions - 126][12.5. Implicit and explicit conversions - 126]]
-    - [[12.6. Effective Type - 127][12.6. Effective Type - 127]]
-    - [[12.7. Alignment - 128 =RE-READ=][12.7. Alignment - 128 =RE-READ=]]
-  - [[13. Allocation, initialization and destruction - 130][13. Allocation, initialization and destruction - 130]]
-    - [[13.1. ~malloc~ and friends - 131][13.1. ~malloc~ and friends - 131]]
-      - [[13.1.1. A complete example with varying array size][13.1.1. A complete example with varying array size]]
-      - [[13.1.2. Ensuring consistency of dynamic allocations][13.1.2. Ensuring consistency of dynamic allocations]]
-    - [[13.2. Storage duration, lifetime and visibility - 139][13.2. Storage duration, lifetime and visibility - 139]]
-      - [[13.2.1. Static storage duration][13.2.1. Static storage duration]]
-      - [[13.2.2. Automatic storage duration][13.2.2. Automatic storage duration]]
-    - [[13.3. Initialization - 144][13.3. Initialization - 144]]
-    - [[13.4. Digression: a machine model - 146][13.4. Digression: a machine model - 146]]
-  - [[14. More involved use of the C library - 149][14. More involved use of the C library - 149]]
-    - [[14.1. Text processing - 149][14.1. Text processing - 149]]
-    - [[14.2. Formatted input - 155][14.2. Formatted input - 155]]
-    - [[14.3. Extended character sets - 157][14.3. Extended character sets - 157]]
-    - [[14.4. Binary files - 164][14.4. Binary files - 164]]
-  - [[15. Error checking and cleanup - 165][15. Error checking and cleanup - 165]]
-- [[LEVEL 3. Experience - 171][LEVEL 3. Experience - 171]]
-  - [[16. Performance - 171][16. Performance - 171]]
-    - [[Safety first - 171][Safety first - 171]]
-    - [[Optimizers are good enough - 172][Optimizers are good enough - 172]]
-    - [[Help the compiler - 172][Help the compiler - 172]]
-    - [[16.1. Inline functions - 173][16.1. Inline functions - 173]]
-    - [[16.2. Avoid aliasing: restrict qualifiers - 176][16.2. Avoid aliasing: restrict qualifiers - 176]]
-    - [[16.3. Measurement and inspection - 177][16.3. Measurement and inspection - 177]]
-  - [[17. Functionlike macros - 183][17. Functionlike macros - 183]]
-    - [[17.1. how does it work - 184][17.1. how does it work - 184]]
-    - [[17.2. Argument checking - 186][17.2. Argument checking - 186]]
-    - [[17.3. Accessing the calling context - 189][17.3. Accessing the calling context - 189]]
-    - [[17.4. Variable length argument lists - 192][17.4. Variable length argument lists - 192]]
-      - [[17.4.1. Variadic macros][17.4.1. Variadic macros]]
-      - [[17.4.2. A detour: variadic functions][17.4.2. A detour: variadic functions]]
-    - [[17.5. Type generic programming - 199][17.5. Type generic programming - 199]]
-      - [[17.5.1. Default arguments][17.5.1. Default arguments]]
-  - [[18. Variations in Control Flow - 206][18. Variations in Control Flow - 206]]
-    - [[18.1. Sequencing - 207][18.1. Sequencing - 207]]
-    - [[18.2. Short jumps - 209][18.2. Short jumps - 209]]
-    - [[18.3. Functions - 212][18.3. Functions - 212]]
-    - [[18.4. Long jumps - 213][18.4. Long jumps - 213]]
-    - [[18.5. Signal handlers - 217][18.5. Signal handlers - 217]]
-  - [[19. Threads - 225][19. Threads - 225]]
-    - [[19.1. Simple inter-thread control - 227][19.1. Simple inter-thread control - 227]]
-    - [[19.2. Thread local data - 228][19.2. Thread local data - 228]]
-    - [[19.3. Critical data and critical sections - 229][19.3. Critical data and critical sections - 229]]
-    - [[19.4. Communicating through condition variables - 231][19.4. Communicating through condition variables - 231]]
-    - [[19.5. More sophisticated thread management - 234][19.5. More sophisticated thread management - 234]]
-  - [[20. Atomic access and memory consistency - 236][20. Atomic access and memory consistency - 236]]
-    - [[20.1. The “happend before” relation - 237][20.1. The “happend before” relation - 237]]
-    - [[20.2. Synchronizing C library calls - 238][20.2. Synchronizing C library calls - 238]]
-    - [[20.3. Sequential consistency - 239][20.3. Sequential consistency - 239]]
-    - [[20.4. Other consistency models - 240][20.4. Other consistency models - 240]]
-- [[LEVEL 4. Ambition - 243][LEVEL 4. Ambition - 243]]
-  - [[21. The ~register~ overhaul - 244][21. The ~register~ overhaul - 244]]
-    - [[Overview - 245][Overview - 245]]
-    - [[21.1. Introduce ~register~ storage class in file scope - 245][21.1. Introduce ~register~ storage class in file scope - 245]]
-      - [[21.1.1. Changes for object types][21.1.1. Changes for object types]]
-    - [[21.2. Typed constants with ~register~ storage class and ~const~ qualification - 246][21.2. Typed constants with ~register~ storage class and ~const~ qualification - 246]]
-    - [[21.3. Extend ICE to register constants - 249][21.3. Extend ICE to register constants - 249]]
-    - [[21.4. Functions - 251][21.4. Functions - 251]]
-      - [[21.4.1. Optimization opportunities][21.4.1. Optimization opportunities]]
-      - [[21.4.2. Relaxed constraints for TU local objects][21.4.2. Relaxed constraints for TU local objects]]
-      - [[21.4.3. Changes for function types][21.4.3. Changes for function types]]
-    - [[21.5. Unify designators - 253][21.5. Unify designators - 253]]
-  - [[22. Improve type generic expression programming - 256][22. Improve type generic expression programming - 256]]
-    - [[22.1. Storage class for compound literals - 257][22.1. Storage class for compound literals - 257]]
-    - [[22.2. Inferred types for variables and functions - 258][22.2. Inferred types for variables and functions - 258]]
-      - [[22.2.1. Extended use of auto][22.2.1. Extended use of auto]]
-    - [[22.3. Anonymous functions - 261][22.3. Anonymous functions - 261]]
-      - [[22.3.1. ~static~ anonymous functions][22.3.1. ~static~ anonymous functions]]
-      - [[22.3.2. ~register~ anonymous functions][22.3.2. ~register~ anonymous functions]]
-      - [[22.3.3. ~auto~ anonymous functions][22.3.3. ~auto~ anonymous functions]]
-      - [[22.3.4. A partial implementation][22.3.4. A partial implementation]]
-  - [[23. Improve the C library - 263][23. Improve the C library - 263]]
-    - [[23.1. Make the presence of all C library headers mandatory - 263][23.1. Make the presence of all C library headers mandatory - 263]]
-    - [[23.2. Add requirements for sequence points - 269][23.2. Add requirements for sequence points - 269]]
-    - [[23.3. Provide type generic interfaces for string functions - 271][23.3. Provide type generic interfaces for string functions - 271]]
-  - [[24. Modules - 274][24. Modules - 274]]
-    - [[24.1. C needs a specific approach - 275][24.1. C needs a specific approach - 275]]
-    - [[24.2. All is about naming - 275][24.2. All is about naming - 275]]
-    - [[24.3. Modular C features - 276][24.3. Modular C features - 276]]
-  - [[25. Simplify the object and value models - 277][25. Simplify the object and value models - 277]]
-    - [[25.1. Remove objects of temporary lifetime - 277][25.1. Remove objects of temporary lifetime - 277]]
-    - [[25.2. Introduce comparison operator for object types - 277][25.2. Introduce comparison operator for object types - 277]]
-    - [[25.3. Make ~memcpy~ and ~memcmp~ consistent - 277][25.3. Make ~memcpy~ and ~memcmp~ consistent - 277]]
-    - [[25.4. Enforce representation consistency for ~_Atomic~ objects - 278][25.4. Enforce representation consistency for ~_Atomic~ objects - 278]]
-    - [[25.5. Make string literals ~char const~ array - 278][25.5. Make string literals ~char const~ array - 278]]
-    - [[25.6. Default initialize padding to ~0~ - 278][25.6. Default initialize padding to ~0~ - 278]]
-    - [[25.7. Make ~restrict~ qualification part of the function interface - 278][25.7. Make ~restrict~ qualification part of the function interface - 278]]
-      - [[25.7.1. Function parameters][25.7.1. Function parameters]]
-      - [[25.7.2. Function return][25.7.2. Function return]]
-      - [[25.7.3. Proposed additions][25.7.3. Proposed additions]]
-    - [[25.8. References - 279][25.8. References - 279]]
-  - [[26. Contexts - 279][26. Contexts - 279]]
-    - [[26.1. Introduce evaluation contexts in the standard - 279][26.1. Introduce evaluation contexts in the standard - 279]]
-    - [[26.2. Convert object pointers to void* in unspecific context - 279][26.2. Convert object pointers to void* in unspecific context - 279]]
-    - [[26.3. Introduce =nullptr= as a generic null pointer constant and deprecate ~NULL~ - 279][26.3. Introduce =nullptr= as a generic null pointer constant and deprecate ~NULL~ - 279]]
-- [[List of Rules - 281][List of Rules - 281]]
-- [[Listings - 292][Listings - 292]]
-- [[Bibliography - 295][Bibliography - 295]]
-- [[Index - 299][Index - 299]]
-
+* Acknowledgments - ix
+* About this book - xi
+* About the cover illustration - xvi
 * DONE Preliminaries
   CLOSED: [2018-12-27 Thu 17:27]
   - Rule A :: C and C++ are different, don't mix them and don't mix them up.
 
 * DONE LEVEL 0. Encounter - 1
   CLOSED: [2017-04-25 Tue 16:11]
-** 1. Getting started - 1
-   - Rule B :: Don't panic.
+** DONE 1. Getting started - 3
+   CLOSED: [2020-02-16 Sun 15:45]
+   - TAKEAWAY B :: Don't panic.
 
-*** 1.1. Imperative programming - 1
-    - Rule 0.1.1.1 :: C is an imperative programming language.
+*** 1.1. Imperative programming - 4
+    - TAKEAWAY 1.1 :: C is an imperative programming language.
 
-*** 1.2. Compiling and running - 3
-    - Rule 0.1.2.1 :: C is a compiled programming language.
+*** 1.2. Compiling and running - 5
+    - TAKEAWAY 1.2 :: C is a compiled programming language.
 
-    - Rule 0.1.2.2 :: A C program is portable between different platforms.
+    - TAKEAWAY 1.3 :: A correct C program is portable between different platforms.
 
     - ~-Werror~ (for gcc): reject programs with =warnings=, all =warnings= will
       be treated as errors.
 
-    - Rule 0.1.2.3 :: A C program should compile cleanly without warnings.
+    - TAKEAWAY 1.4 :: A C program should compile cleanly without warnings.
 
-** 2. The principal structure of a program - 6
+** DONE 2. The principal structure of a program - 11
+   CLOSED: [2020-02-16 Sun 15:49]
    - There are _two_ categories of aspects to consider in a C program:
      + syntactical aspects :: how do we specify the program so the compiler
           understands it.
@@ -241,7 +44,7 @@
        2. definitions of objects (where things are) and
        3. statements (what are things supposed to do).
 
-*** 2.1. Grammar - 6
+*** 2.1. Grammar - 11
     - special words
     - punctuations
       + parenthesis (should always come in pairs):
@@ -250,15 +53,15 @@
         3. ~[]~
         4. ~/**/~
         5. ~<>~: on the same logical line of text.
-    - Rule 0.2.1.1 :: Punctuation characters can be used with several different meanings.
+    - TAKEAWAY 2.1 :: Punctuation characters can be used with several different meanings.
     - comments
     - literals
     - identifiers
     - functions
     - operators
 
-*** 2.2. Declarations - 7
-    - Rule 0.2.2.1 :: All identifiers of a program have to be declared.
+*** 2.2. Declarations - 13
+    - TAKEAWAY 2.2 :: All identifiers of a program have to be declared.
 
     - How identifiers differ from keywords?
       + identifier: declared before being used.
@@ -266,42 +69,43 @@
 
     - Declarations may be repeated, but only if they specify exactly the same thing.
 
-    - Rule 0.2.2.2 :: Identifiers may have several consistent declarations.
+    - TAKEAWAY 2.3 :: Identifiers may have several consistent declarations.
 
-    - Rule 0.2.2.3 :: Declarations are bound to the scope in which they appear.
+    - TAKEAWAY 2.4 :: Declarations are bound to the scope in which they appear.
 
     - Identifiers in _file scope_ are often referred to as globals.
  
-*** 2.3. Definitions - 9
-    - Rule 0.2.3.1 :: Declarations specify identifiers whereas definitions speci-
+*** 2.3. Definitions - 15
+    - TAKEAWAY 2.5 :: Declarations specify identifiers whereas definitions speci-
                       fy objects.
 
-    - Rule 0.2.3.2 :: An object is defined at the same time as it is initialized.
+    - TAKEAWAY 2.6 :: An object is defined at the same time as it is initialized.
 
-    - Rule 0.2.3.3 :: Missing elements in initializers default to 0. (=TODO ??=).
+    - TAKEAWAY 2.7 :: Missing elements in initializers default to 0.
 
-    - Rule 0.2.3.4 :: For an array with =n= the first element has index ~0~, the
+    - TAKEAWAY 2.8 :: For an array with =n= the first element has index ~0~, the
                       last has index ~n-1~.
 
-    - Rule 0.2.3.5 :: Each object must have exactly one definition.
-                      _COMMENT_: This rule concerns data objects as well as func-
-                      tion objects.
+    - TAKEAWAY 2.9 :: Each object must have exactly one definition.
 
-*** 2.4. Statements - 10
-**** 2.4.1. Iteration
+    - _COMMENT_: This rule concerns data objects as well as function objects.
+
+*** 2.4. Statements - 17
+**** 2.4.1. Iteration - 17
      - /domain iteration/: each iteration of ~for~ is related to a specific value
        ~i~, which makes this ~for~ an iteration over the /domain/ =0, . . . , 4=.
        This kind of iteration is called /domain iteration/.
  
-     - Rule 0.2.4.1 :: Domain iterations should be coded with a for statement.
+     - TAKEAWAY 2.10 :: Domain iterations should be coded with a for statement.
 
-     - Rule 0.2.4.2 :: The loop variable should be defined in the initial part of
-                       a ~for~, if it not used outside.
+     - TAKEAWAY 2.11 :: The loop variable should be defined in the initial part of
+                        a ~for~, if it not used outside.
 
-**** 2.4.2. Function return
+**** 2.4.2. Function calls - 18
+**** 2.4.3. Function return - 19
      - ~EXIT_SUCCESS~ from ~stdlib.h~
 
-* DONE LEVEL 1. Acquaintance - 13
+* DONE LEVEL 1. Acquaintance - 21
   CLOSED: [2017-04-25 Tue 16:11]
   - Write good C programs.
     "Good" here refers to _a modern understanding of the language_:
@@ -325,9 +129,9 @@
   - We use prefix notation for code blocks (in this book).
 
 ** TODO Warning to experienced C Programmers - 13
-** DONE 3. Everthing is about control - 15
+** DONE 3. Everthing is about control - 27
    CLOSED: [2017-04-25 Tue 16:11]
-*** 3.1. Conditional execution - 15
+*** 3.1. Conditional execution - 28
    - /controlling expression/, /dependent block/
 
    - Rule 1.3.1.1 :: The value 0 represents logical false.
@@ -345,7 +149,7 @@
    - Rule 1.3.1.4 :: All scalars have a truth value.
                      TABLE 1. Scalar types used in this book =RE-READ=
 
-*** 3.2. Iterations - 17
+*** 3.2. Iterations - 30
     - Example 1:
       #+BEGIN_SRC c
       #include <stdlib.h>
@@ -402,12 +206,12 @@
 
     - PAGE 19 =TODO ???=
 
-*** 3.3. Multiple selection - 20
+*** 3.3. Multiple selection - 34
     - The /fallback/ case of ~switch~.
     - Rule 1.3.3.1 :: ~case~ values must be integer constant expressions.
     - Rule 1.3.3.2 :: ~case~ labels must not jump beyond a variable definition. =TODO ???=
 
-** DONE 4. Expressing computations - 23
+** DONE 4. Expressing computations - 37
    CLOSED: [2017-04-25 Tue 16:11]
    - Rule 1.4.0.1 :: The type ~size_t~ represents values in the range
                      ~[0, SIZE_MAX]~.
@@ -417,8 +221,8 @@
      2. 2^32 − 1 = 4294967295 (common today)
      3. 2^64 − 1 = 18446744073709551615 (common today)
 
-*** 4.1. Arithmetic - 23
-**** 4.1.1. ~+~, ~-~ and ~*~
+*** 4.1. Arithmetic - 40
+**** 4.1.1. ~+~, ~-~ and ~*~ - 40
      - TABLE 2 :: value operators =IMPORTANT=
      - TABLE 3 :: object operators =IMPORTANT=
      - TABLE 4 :: type operators =IMPORTANT=
@@ -427,7 +231,7 @@
                        mathematically correct result if it is representable as a
                        ~size_t~.
 
-**** 4.1.2. Division and remainder
+**** 4.1.2. Division and remainder - 41
      - ~/~ and ~%~.
      - Rule 1.4.1.3 :: For unsigned values, ~a == (a/b)*b + (a%b)~ is ~true~.
      - Rule 1.4.1.4 :: Unsigned ~/~ and ~%~ are well defined only if the second
@@ -439,7 +243,7 @@
                        the operands. _And thus_
      - Rule 1.4.1.8 :: Unsigned ~/~ and ~%~ can't overflow.
 
-*** 4.2. Operators that modify objects - 26
+*** 4.2. Operators that modify objects - 42
     - Rule 1.4.2.1 :: Operators must have all their characters directly attached
                       to each other. i.e. ~+ +~ is invalid.
     - Rule 1.4.2.2 :: Side effects in value expressions are evil.
@@ -448,24 +252,24 @@
     - Sciene You will nicely obey to _Rule 1.4.2.2_, you will not be tempted to
       use them.
 
-*** 4.3. Boolean context - 27
+*** 4.3. Boolean context - 43
     - Two categories:
       1. comparisons
       2. logical evaluation
 
-**** 4.3.1. Comparison
+**** 4.3.1. Comparison - 43
      - Rule 1.4.3.1 :: Comparison operators return the values ~false~ or ~true~.
-**** 4.3.2. Logic
+**** 4.3.2. Logic - 44
      - Rule 1.4.3.2 :: Logic operators return the values ~false~ or ~true~.
 
 
     - Page =26= _NEW_Standard.
-*** 4.4. The ternary or conditional operator - 28
+*** 4.4. The ternary or conditional operator - 45
     - =complex.h= is indirectly included by =tgmath.h=.
     - ~__STDC_NO_COMPLEX__~
     - ~#error~
 
-*** 4.5. Evaluation order - 29
+*** 4.5. Evaluation order - 45
     - Rule 1.4.5.1 :: &&, ||, ?: and , evaluate their first operand first.
 
     - Rule 1.4.5.2 :: Don’t use the , operator.
@@ -489,8 +293,9 @@
 
     - Rule 1.4.5.5 :: Functions that are called inside expressions should not have side effects.
 
-** TODO 5. Basic values and data - 30 - =RE-READ=
-**** 5.0.1. Values
+** TODO 5. Basic values and data - 49 - =RE-READ=
+*** 5.1. The abstract state machine - 50
+**** 5.1.1. Values - 52
      - Rule 1.5.0.1 :: All values are numbers or translate to such.
 
      - The /state/ of the program execution is determined by: =IMPORTANT=
@@ -506,7 +311,7 @@
        ignore the IO action details, it can be considered as platform
        independent.
 
-**** 5.0.2. Types
+**** 5.1.2. Types - 52
      - A /type/ is an additional property that C associates with values.
 
      - Rule 1.5.0.2 :: All values have a type that is statically determined.
@@ -519,7 +324,7 @@
      - Rule 1.5.0.4 (ver2) :: A value's type determines the sematics of all
           related operations, and then determines the results of all operations.
 
-**** 5.0.3. Binary representation and the abstract state machine
+**** 5.1.3. Binary representation and the abstract state machine - 52
      - Since there are things that can't be specified by C standard,
        C can't impose the results of the operations on a given type completely.
        e.g.
@@ -559,7 +364,7 @@
      - Rule 1.5.0.7 (as-if) :: Programs execute as if following the abstract
           state machine.
 
-**** 5.0.4. Optimization
+**** 5.1.4. Optimization - 53
      - =IMPORTANT= How a concrete executable achieves this goal is left to the
        discretion of the compiler creators.
          Most modern C compilers produce code that
@@ -575,7 +380,7 @@
 
      - Rule 1.5.0.8 :: Type determines optimization opportunities. =IMPORTANT=
 
-*** 5.1. Basic types - 32
+*** 5.2. Basic types - 54
     - _first level of specification_: it is entirely done with _keywords_ of
       the language, such as ~signed~, ~int~ or ~double~.
         This first level is mainly _organized_ according to _C internals_.
@@ -609,7 +414,7 @@
          properties, namely modulo operation.
       2. They can't raise signals on overflow and
       3. They can be optimized best.
-      =TODO= They are described in more detail in Section 5.5.1. =IMPORTANT=
+      TODO They are described in more detail in Section 5.5.1. =IMPORTANT=
 
     - Rule 1.5.1.2 :: Use ~size_t~ for
       1. _sizes_,
@@ -630,7 +435,7 @@
 
     - PAGE 34 =RE-READ=
 
-*** 5.2. Specifying values - 34
+*** 5.3. Specifying values - 57
     - /literals/:
       * =123= - /decimal integer constant/.
       * =077= - /octal integer constant/. This type of specification has merely
@@ -712,7 +517,30 @@
 
     - Rule 1.5.2.10 :: Literals have value, type and binary representation.
 
-*** 5.3. Initializers - 37
+**** 5.2.1 Complex constants - 61
+     - Complex types are _not necessarily supported_ by all C platforms.
+       The fact can be checked by inspecting ~__STDC_NO_COMPLEX__~.
+
+     - To have full support of complex types, use ~#include <complex.h>~.
+       If you use ~#include <tgmath.h>~ for mathematical functions, =complex.h=
+       this is already done implicitly.
+
+     - Rule 1.5.4.12 :: ~I~ (macro) is reserved for the imaginary unit.
+                        =COMMENT=: leave ~I~ alone, don't use it as the name of
+                                   an identifier you create.
+
+     - Two form:
+       1. ~0.5 + 0.5*I~ is of type ~double complex~, and ~0.5F + 0.5F*I~ is of
+          type ~float complex~.
+       2. ~CMPLX(0.5, 0.5)~ is the same ~double complex~ value as above.
+          ~CMPLXF(0.5F, 0.5F)~ is the same ~float complex~ value as above.
+            =COMMENT=: This usage is what Jian guesses, no example in the book.
+            =TODO= read the ~complex.h~ later.
+
+     - TABLE 9. Bounds for scalar types used in this book =TODO RE-READ=
+
+*** 5.4. Implicit conversions - 61
+*** 5.5. Initializers - 64
     - Rule 1.5.3.1 :: All variables should be initialized.
 
     - =TODO= VLA, see Section 6.1.3, that don’t allow for an initializer, or code
@@ -765,10 +593,12 @@
       as catch-all initializer in the C standard, so this is one of the rare
       cases where I would switch off a compiler warning.
 
-*** 5.4. Named constants - 38
+*** 5.6. Named constants - 65
     - Rule 1.5.4.1 All constants with particular meaning must be named.
+
     - Rule 1.5.4.2 All constants with different meaning must be distinguished.
-**** 5.4.1. Read-only objects
+
+**** 5.6.1. Read-only objects - 66
      - Rule 1.5.4.3 An object of const-qualified type is read-only.
        =COMMENT=: That DOESN'T MEAN that the compiler or run-time system may not
        perhaps change the value of such an object: other parts of the program
@@ -786,7 +616,7 @@
        Unfortunately, the const keyword had only been introduced much later than
        string literals to the C language, and therefore remained as it is for
        backward compatibility.
-**** 5.4.2. Enumerations. =RE-READ DO NOT QUITE UNDERSTAND=
+**** 5.6.2. Enumerations - 67 =RE-READ DO NOT QUITE UNDERSTAND=
       - Rule 1.5.4.5 :: Enumeration constants have either
         1. an explicit or
         2. positional value.
@@ -802,7 +632,7 @@
         enumeration constant you'd have to ensure that the value fits into a
         ~signed~.
 
-**** 5.4.3. Macros
+**** 5.6.3. Macros - 68
      - example: ~# define M_PI 3.14159265358979323846~. This macro definition
        consists of 5 different parts:
        1. A starting ~#~ character that _must be_ the first non-blank character
@@ -818,7 +648,7 @@
        =COMMENT=: This is a =CONVETIONS=, and it is applicable for most cases,
        though not all.
 
-**** 5.4.4. Compound literals =RE-READ=
+**** 5.6.4. Compound literals - 69 =RE-READ=
      - For types that don't have literals that describe their constants, things
        get even a bit more complicated.
          We have to use /compound literals/ on the replacement side of the macro.
@@ -869,31 +699,10 @@
                         the whole spread of the macro definition easily.
 
      - 
-**** 5.4.5. Complex constants
-     - Complex types are _not necessarily supported_ by all C platforms.
-       The fact can be checked by inspecting ~__STDC_NO_COMPLEX__~.
-
-     - To have full support of complex types, use ~#include <complex.h>~.
-       If you use ~#include <tgmath.h>~ for mathematical functions, =complex.h=
-       this is already done implicitly.
-
-     - Rule 1.5.4.12 :: ~I~ (macro) is reserved for the imaginary unit.
-                        =COMMENT=: leave ~I~ alone, don't use it as the name of
-                                   an identifier you create.
-
-     - Two form:
-       1. ~0.5 + 0.5*I~ is of type ~double complex~, and ~0.5F + 0.5F*I~ is of
-          type ~float complex~.
-       2. ~CMPLX(0.5, 0.5)~ is the same ~double complex~ value as above.
-          ~CMPLXF(0.5F, 0.5F)~ is the same ~float complex~ value as above.
-            =COMMENT=: This usage is what Jian guesses, no example in the book.
-            =TODO= read the ~complex.h~ later.
-
-     - TABLE 9. Bounds for scalar types used in this book =TODO RE-READ=
-
-*** 5.5. Binary representions - 42 - =RE-READ=
+*** 5.7. Binary representions - 70 - =RE-READ=
     - Rule 1.5.5.1 :: The same value may have different binary representations.
-**** 5.5.1. Unsigned integers
+
+**** 5.5.1. Unsigned integers - 70
      - Rule 1.5.5.2 :: Unsigned arithmetic wraps nicely.
 
      - ~UINT_MAX~, ~ULONG_MAX~ and ~ULLONG_MAX~ are provided through =limits.h=.
@@ -914,7 +723,7 @@
      - Rule 1.5.5.4 :: Arithmetic on an ~unsigned~ integer type is determined by
                        its precision.
 
-**** 5.5.2. Bit sets and bitwise operators
+**** 5.5.2. Bit sets and bitwise operators - 71
      - ~|~, ~&~, and ~^~.
 
      - All these operator can be written with identifiers, namely ~bitor~,
@@ -942,15 +751,15 @@
          }
        #+END_SRC
 
-**** 5.5.3. Shift operators
+**** 5.5.3. Shift operators - 73
      - Rule 1.5.5.5 :: The second operand of a shift operation must be less than
                        the precision.
 
-**** 5.5.4. Boolean values
+**** 5.5.4. Boolean values - 74
      - Treating ~bool~ as an _unsigned type_ is a certain stretch of the concept.
      - Assignment to a variable of that type doesn’t follow the
        Modulus Rule 1.4.1.5, but a the special Rule 1.3.1.1.
-**** 5.5.5. Signed integers
+**** 5.5.5. Signed integers - 74
      - The complexity of _signed types_ are more complicated than
        _unsigned types_, because a C implementation has to decide on two points:
        1. What happens on arithmetic overflow?
@@ -992,7 +801,7 @@
 
      - Rule 1.5.5.12 :: Use ~unsigned~ types for bit operations.
 
-**** 5.5.6. Fixed width integer types
+**** 5.5.6. Fixed width integer types - 77
      - Rule 1.5.5.13 :: If the type ~uintN_t~ is provided it is an unsigned
                         integer type with _exactly N bits width_ and precision.
 
@@ -1033,7 +842,7 @@
                         ~_MIN~ (only ~signed~), ~maximum _MAX~ and literals ~_C~
                         macros are provided, too.
 
-**** 5.5.7. Floating point data
+**** 5.5.7. Floating point data - 78
      - =float.h=: ~DBL_MIN~ and ~DBL_MAX~ that provides us with the _minimal_ and
        _maximal_ values for ~double~.
        =But beware=: here ~DBL_MIN~ is the smallest number that is strictly
@@ -1064,7 +873,7 @@
      - For any =z= of one of the three complex types we ~#include <tgmath.h>~
        have that ~z == creal(z)+ cimag(z)*I~
 
-** DONE 6. Aggregate data types - 50
+** DONE 6. Derived data types - 81
    CLOSED: [2017-04-25 Tue 16:11]
    =50 ~ 61=
    - All other data types in C are derived from the basic types that we know now.
@@ -1077,9 +886,9 @@
 
    - /aggregate data types/
 
-*** 6.1. Arrays - 50
+*** 6.1. Arrays - 82
     - Rule 1.6.1.1 :: Arrays are not pointers.
-**** 6.1.1. Array declaration
+**** 6.1.1. Array declaration - 82
      - /multidimensional array/:
        #+BEGIN_SRC C
        // For those, declarations become a bit more difficult to read since []
@@ -1089,7 +898,7 @@
        double (D[M])[N];
        #+END_SRC
 
-**** 6.1.2. Array operations
+**** 6.1.2. Array operations - 83
      - Rule 1.6.1.2 :: An array in a condition evaluates to ~true~.
 
      - Rule 1.6.1.3 :: There are array objects but no array values.
@@ -1104,7 +913,7 @@
 
      - Rule 1.6.1.5 :: Arrays can't be assigned to.
 
-**** 6.1.3. Array length
+**** 6.1.3. Array length - 83
      - There are two different categories of arrays:
        1. /fixed length arrays (FLA)/: exist from the very beginning of C.
        2. /variable length arrays (VLA)/: introduced in C99 and is relatively
@@ -1128,7 +937,7 @@
      - Rule 1.6.1.11 :: The length of an array A is ~(sizeof A) / (sizeof A[0])~.
                         =REMARK=: A must be an array, not a pointer to the array.
                                   Again, Arrays are not pointers (Rule 1.6.1.1)!!!
-**** 6.1.4. Arrays as parameters
+**** 6.1.4. Arrays as parameters - 85
      - Rule 1.6.1.12 :: The innermost dimension of an array parameter to a
                         function is lost.
 
@@ -1138,7 +947,7 @@
      - Rule 1.6.1.14 :: Array parameters behave as-if the array is
                         /passed by reference/.
 
-**** 6.1.5. Strings are special
+**** 6.1.5. Strings are special - 85
      - Rule 1.6.1.15 :: A string is a 0-terminated array of ~char~.
 
      - As all arrays, _strings_ can't be assigned to, but they can be initialized
@@ -1185,7 +994,7 @@
 
      - C11 introduces functions with bounds checking: ~strnlen_s~ and ~strcpy_s~.
 
-*** 6.2. Pointers as opaque types - 55
+*** 6.2. Pointers as opaque types - 89
     - The binary representation of pointer is completely up to the platform.
 
     - Rule 1.6.2.1 :: Pointers are opaque objects.
@@ -1216,7 +1025,8 @@
                                 null.
 
     - Rule 1.6.2.6 :: Always initialize pointers.
-*** 6.3. Structures - 56
+
+*** 6.3. Structures - 91
     - The _order_ or position of the fields in the structure is usually _NOT_
       important.
  
@@ -1245,7 +1055,7 @@
     - Rule 1.6.3.6 :: All struct declarations in a nested declaration have the
                       same scope of visibility.
 
-*** 6.4. New names for types: ~typedef~ - 60
+*** 6.4. New names for types: type aliases - 96
     - a structure
       1. not only _introduces a way to aggregate differing information into one
          unit_,
@@ -1287,9 +1097,8 @@
 
     - Rule 1.6.4.2 :: Identifier names terminating with =_t= are _reserved_.
 
-** DONE 7. Functions - 62
+** DONE 7. Functions - 99
    CLOSED: [2017-04-25 Tue 16:11]
-   =62 ~ 69=
    - Motivation: /modularity/ =IMPORTANT=
      * Avoid code repetition
        + Avoid copy and paste errors.
@@ -1308,18 +1117,18 @@
      _handle error conditions_ or _other forms of exceptions from the usual
      control flow_
      * ~exit~, ~_Exit~, ~quick_exit~ and ~abort~ terminate the program execution
-       =TODO= See Section 8.6
+       TODO See Section 8.6
      * ~goto~ transfers control within a function body
-       =TODO= See Section 13.2.2 and 15
+       TODO See Section 13.2.2 and 15
      * ~setjmp~ and ~longjmp~ can be used to return unconditionally to a calling
        context,
-       =TODO= see Section 18.4.
+       TODO see Section 18.4.
      * Certain events of the execution environment or calls to the function raise
        may raise so-called signals and that pass control to a specialized
        function, a /signal handler/.
-       =TODO ???=
+       TODO ???
 
-*** 7.1. Simple functions - 62
+*** 7.1. Simple functions - 100
     - /prototype/: _declaration_ and _definition_ included:
       * a parameter type-list and
       * a return type.
@@ -1375,7 +1184,7 @@
     - Rule 1.7.1.5 :: Reaching the end of the ~{}~ block of a function is only
                       allowed for void functions. 
 
-*** 7.2. ~main~ is special - 63
+*** 7.2. ~main~ is special - 102
     - The prototype of ~main~ function is enforced by the C standard,
       but it is implemented by the programmer.
 
@@ -1448,7 +1257,7 @@
                       =TODO=: usage??? only used to identify the end? We have
                               ~argc~ already!!! Historical reason???
 
-*** 7.3. Recursion - 65 - =RE-READ=
+*** 7.3. Recursion - 104 - =RE-READ=
     - Rule 1.7.3.1 :: Make all preconditions for a function explicit.
 
     - Rule 1.7.3.2 :: In a recursive function, first check the termination
@@ -1495,7 +1304,7 @@
     - /VLA/: variable-length array
     - /FLA/: fixed-length array
 
-** TODO 8. C Library functions - 70
+** TODO 8. C Library functions - 113
    - The functionality that the C standard provides is separated into _TWO_ big
      parts:
      1. the proper C language,
@@ -1505,73 +1314,77 @@
      + Compilers: /gcc/ and /clang/
      + Standard Libraries: /glibc/, /dietlibc/, and /musl/
 
-   - Roughly, library functions target one or two different purposes:
-     1. Platform abstraction layer: Implement some functions (e.g. IO) requires
-        deep platform specific knowledge. Standard library should provide some of
-        them.
+*** TODO 8.1 General properties of the C library and its functions - 113
+    - Roughly, library functions target one or two different purposes:
+      1. Platform abstraction layer: Implement some functions (e.g. IO) requires
+         deep platform specific knowledge. Standard library should provide some of
+         them.
 
-     2. Basic tools: Functions that implement a task (such as e.g. ~strtod~) that
-        often occurs in programming in C for which
-        _it is important that the interface is fixed_.
+      2. Basic tools: Functions that implement a task (such as e.g. ~strtod~) that
+         often occurs in programming in C for which
+         _it is important that the interface is fixed_.
 
-   - ~snprintf~: =TODO Section 14.1=
+    - ~snprintf~: =TODO Section 14.1=
 
-   - /Interfaces/: Most interfaces of the C library are specified as functions,
-     _but_ implementations are free to chose to implement them as macros, were
-     this is appropriate.
+**** 8.1.1 Headers - 114
+     - TABLE 12. C library headers
+       | Name              | Content                                      | Mentioned Section |
+       |-------------------+----------------------------------------------+-------------------|
+       | ~<assert.h>~      | assert run time conditions                   |               8.6 |
+       | ~<complex.h>~     | complex numbers                              |             5.5.7 |
+       | ~<ctype.h>~       | character classification and conversion      |               8.3 |
+       | ~<errno.h>~       | error codes                                  |                15 |
+       | ~<fenv.h>~        | floating-point environment.                  |                   |
+       | ~<float.h>~       | properties of floating point types           |               5.5 |
+       | ~<inttypes.h>~    | format conversion of integer types           |             5.5.6 |
+       | ~<iso646.h>~      | alternative spellings for operators          |               4.1 |
+       | ~<limits.h>~      | properties of integer types                  |             5.0.3 |
+       | ~<locale.h>~      | internationalization                         |               8.5 |
+       | ~<math.h>~        | type specific mathematical functions         |               8.1 |
+       | ~<setjmp.h>~      | non-local jumps                              |              18.4 |
+       | ~<signal.h>~      | signal handling functions                    |              18.5 |
+       | ~<stdalign.h>~    | alignment of objects                         |              12.7 |
+       | ~<stdarg.h>~      | functions with varying number of arguments   |            17.4.2 |
+       | ~<stdatomic.h>~   | atomic operations                            |              18.5 |
+       | ~<stdbool.h>~     | Booleans                                     |               3.1 |
+       | ~<stddef.h>~      | basic types and macros                       |               5.1 |
+       | ~<stdint.h>~      | exact width integer types                    |             5.5.6 |
+       | ~<stdio.h>~       | input and output                             |               8.2 |
+       | ~<stdlib.h>~      | basic functions                              |                 2 |
+       | ~<stdnoreturn.h>~ | non-returning functions                      |                 7 |
+       | ~<string.h>~      | string handling                              |               8.3 |
+       | ~<tgmath.h>~      | type generic mathematical functions          |               8.1 |
+       | ~<threads.h>~     | threads and control structures               |                19 |
+       | ~<time.h>~        | time handling                                |               8.4 |
+       | ~<uchar.h>~       | Unicode characters                           |              14.3 |
+       | ~<wchar.h>~       | wide string                                  |              14.3 |
+       | ~<wctype.h>~      | wide character classification and conversion |              14.3 |
 
-   - /functionlike macros/:
-     #+BEGIN_SRC C
-     #define putchar(A) putc(A, stdout)
-     #+END_SRC
-     =COMMENT=: Since the replacement text may contain a macro argument several
-     times, it would be quite bad to pass any expression with side effects to
-     such a macro-or-function.
-     Fortunately, because of Rule 1.4.2.2 you don't do that, anyhow.
+**** 8.1.2 Interfaces - 114
+     - Most interfaces of the C library are specified as functions,
+       _but_ implementations are free to chose to implement them as macros, were
+       this is appropriate.
 
-   - TABLE 12. C library headers
-     | Name              | Content                                      | Mentioned Section |
-     |-------------------+----------------------------------------------+-------------------|
-     | ~<assert.h>~      | assert run time conditions                   |               8.6 |
-     | ~<complex.h>~     | complex numbers                              |             5.5.7 |
-     | ~<ctype.h>~       | character classification and conversion      |               8.3 |
-     | ~<errno.h>~       | error codes                                  |                15 |
-     | ~<fenv.h>~        | floating-point environment.                  |                   |
-     | ~<float.h>~       | properties of floating point types           |               5.5 |
-     | ~<inttypes.h>~    | format conversion of integer types           |             5.5.6 |
-     | ~<iso646.h>~      | alternative spellings for operators          |               4.1 |
-     | ~<limits.h>~      | properties of integer types                  |             5.0.3 |
-     | ~<locale.h>~      | internationalization                         |               8.5 |
-     | ~<math.h>~        | type specific mathematical functions         |               8.1 |
-     | ~<setjmp.h>~      | non-local jumps                              |              18.4 |
-     | ~<signal.h>~      | signal handling functions                    |              18.5 |
-     | ~<stdalign.h>~    | alignment of objects                         |              12.7 |
-     | ~<stdarg.h>~      | functions with varying number of arguments   |            17.4.2 |
-     | ~<stdatomic.h>~   | atomic operations                            |              18.5 |
-     | ~<stdbool.h>~     | Booleans                                     |               3.1 |
-     | ~<stddef.h>~      | basic types and macros                       |               5.1 |
-     | ~<stdint.h>~      | exact width integer types                    |             5.5.6 |
-     | ~<stdio.h>~       | input and output                             |               8.2 |
-     | ~<stdlib.h>~      | basic functions                              |                 2 |
-     | ~<stdnoreturn.h>~ | non-returning functions                      |                 7 |
-     | ~<string.h>~      | string handling                              |               8.3 |
-     | ~<tgmath.h>~      | type generic mathematical functions          |               8.1 |
-     | ~<threads.h>~     | threads and control structures               |                19 |
-     | ~<time.h>~        | time handling                                |               8.4 |
-     | ~<uchar.h>~       | Unicode characters                           |              14.3 |
-     | ~<wchar.h>~       | wide string                                  |              14.3 |
-     | ~<wctype.h>~      | wide character classification and conversion |              14.3 |
+     - /functionlike macros/:
+       #+BEGIN_SRC C
+       #define putchar(A) putc(A, stdout)
+       #+END_SRC
+       =COMMENT=: Since the replacement text may contain a macro argument several
+       times, it would be quite bad to pass any expression with side effects to
+       such a macro-or-function.
+       Fortunately, because of Rule 1.4.2.2 you don't do that, anyhow.
 
-   - /Error checking/: C library functions usually indicate failure through a
-     special return value. _However_, what value indicates the failure can be
+**** 8.1.3 Error checking - 116
+     C library functions usually indicate failure through a special return value.
+     _However_, what value indicates the failure can be
      different and depends on the function itself. _Generally, READ THE MANUAL._
-     + There are three categories that apply:
+     - There are three categories that apply:
        1. a special value that indicates an error,
        2. a special value that indicates success, and
        3. functions that return some sort of positive counter on success and a
           negative value on failure.
 
-     + A typical error checking code:
+     - A typical error checking code:
        #+BEGIN_SRC C
        if (puts("hello world") == EOF) {
                perror("can't output to terminal:");
@@ -1579,11 +1392,11 @@
        }
        #+END_SRC
 
-     + Rule 1.8.0.1 :: Failure is always an option.
+     - Rule 1.8.0.1 :: Failure is always an option.
 
-     + Rule 1.8.0.2 :: Check the return value of library functions for errors.
+     - Rule 1.8.0.2 :: Check the return value of library functions for errors.
 
-     + TABLE 13. Error return strategies for C library functions.
+     - TABLE 13. Error return strategies for C library functions.
        Some functions may also indicate a specific error condition through the
        value of the macro ~errno~.
        | failure              | test            | typical case                  | example                    |
@@ -1603,13 +1416,14 @@
        | negative value       | ~value < 0~     | positive value is a "counter" | ~printf~                   |
        |----------------------+-----------------+-------------------------------+----------------------------|
 
-     + Rule 1.8.0.3 :: Fail fast, fail early and fail often.
+     - Rule 1.8.0.3 :: Fail fast, fail early and fail often.
        =COMMENT=: An immediate failure of the program is often the best way to
        ensure that bugs are detected and get fixed in early development.
 
-   - /Bounds-checking interfaces/
-     + bounds-checking interfaces of /Annex K/ of the standard.
-     + _TWO_ macros regulate access to theses interfaces:
+**** 8.1.4 Bounds-checking interfaces - 117
+     - bounds-checking interfaces of /Annex K/ of the standard.
+
+     - _TWO_ macros regulate access to theses interfaces:
        1. ~__STDC_LIB_EXT1__~ tells if this optional interfaces is supported, and
        2. ~__STDC_WANT_LIB_EXT1__~ switches it on.
        The later must be set before any header files are included:
@@ -1623,17 +1437,17 @@
        // Use printf_s from here on.
        #+END_SRC
 
-     + Rule 1.8.0.4 :: Identifier names terminating with ~_s~ are reserved.
+     - Rule 1.8.0.4 :: Identifier names terminating with ~_s~ are reserved.
 
-     + If a bounds-checking function encounters an inconsistency, a
+     - If a bounds-checking function encounters an inconsistency, a
        /runtime constraint violation/,
        it usually should end program execution after printing a diagnostic.
 
-   - /Platform preconditions/
-     + Rule 1.8.0.5 :: Missed preconditions for the execution platform must abort
-                       compilation.
+**** 8.1.5 Platform preconditions - 118
+     - Rule 1.8.0.5 :: Missed preconditions for the execution platform must abort
+                         compilation.
 
-     + The classical tool to achieve this are /preprocessor conditionals/ as we
+     - The classical tool to achieve this are /preprocessor conditionals/ as we
        have seen them above:
        #+BEGIN_SRC c
        #if !__STDC_LIB_EXT1__
@@ -1641,27 +1455,27 @@
        #endif
        #+END_SRC
        
-     + Rule 1.8.0.6 :: Only evaluate macros and integer literals in a
+     - Rule 1.8.0.6 :: Only evaluate macros and integer literals in a
                        preprocessor condition.
 
-     + Rule 1.8.0.7 :: In preprocessor conditions unknown identifiers evaluate
+     - Rule 1.8.0.7 :: In preprocessor conditions unknown identifiers evaluate
                        to 0.
 
-     + ~__Static_assert~ and ~static_assert~ from =assert.h=.
+     - ~__Static_assert~ and ~static_assert~ from =assert.h=.
        #+BEGIN_SRC c
        #include <assert.h>
        static_assert(sizeof(double) == sizeof(long double),
            "Extra precision needed for convergence.");
        #+END_SRC
 
-*** 8.1. Mathematics - 74
+*** 8.2. Mathematics - 119
     - =math.h= and =tgmath.h= (type generic macros).
 
     - TABLE 14. Mathematical functions.
       Type generic macros are printed in red, real functions in green.
  
-*** 8.2. Input, output and file manipulation - 74 =TODO=
-**** 8.2.1. Unformated output of text
+*** TODO 8.3. Input, output and file manipulation - 121
+**** 8.3.1. Unformated text output - 121
      - The ~type int as parameter~ for ~putchar~ is just a _historical accident_
        that shouldn't hurt you much.
 
@@ -1689,7 +1503,7 @@
 
      - Rule 1.8.2.3 :: puts and fputs differ in their end of line handling.
 
-**** 8.2.2. Files and streams
+**** 8.3.2. Files and streams - 123
      - ~fopen~ and ~freopen~:
        #+BEGIN_SRC c
        FILE* fopen(char const path[static 1], char const mode[static 1]);
@@ -1739,7 +1553,7 @@
          }
          #+END_SRC
 
-**** 8.2.3. Text IO
+**** 8.3.3. Text IO - 125
      - For efficiency, output to text streams is usually /buffered/.
        Physical reason.
 
@@ -1776,7 +1590,7 @@
        int rename(char const oldpath[static 1], char const newpath[static 1]);
        #+END_SRC
 
-**** 8.2.4. Formatted output
+**** 8.3.4. Formatted output - 127
      - Rule 1.8.2.7 :: Parameters of ~printf~ must exactly correspond to the
                        format specifiers.
 
@@ -1794,7 +1608,7 @@
        2. They don't check if the expressions in the list correspond to correct
           format specifiers. 
 
-**** 8.2.5. Unformatted input of text
+**** 8.3.5. Unformatted text input - 130
      - ~fgetc~ and ~fgets~
        #+BEGIN_SRC c
        int fgetc(FILE * stream);
@@ -1822,16 +1636,16 @@
 
      - Rule 1.8.2.11 :: End of file can only be detected after a failed read.
 
-*** 8.3. String processing and conversion - 84 =TODO=
+*** TODO 8.4. String processing and conversion - 132
     - TABLE 21. Character classifiers.
     - Rule 1.8.3.1 :: The interpretation of numerically encoded characters
                       depends on the execution character set.
 
-*** 8.4. Time - 87 =TODO=
-*** 8.5. Runtime environment settings - 91 =TODO=
+*** TODO 8.5. Time - 136
+*** TODO 8.6. Runtime environment settings - 141
     - TABLE 23. strftime format specifiers.
 
-*** 8.6. Program termination and assertions - 92 =TODO=
+*** TODO 8.7. Program termination and assertions - 143
     - Rule 1.8.6.1 :: Regular program termination should use ~return~ from
                       ~main~.
     - TABLE 24. Categories for the ~setlocale~ function
@@ -1848,8 +1662,8 @@
     - Rule 1.8.6.5 :: In production compilations, use ~NDEBUG~ (macro) to switch
                       off all ~assert~ (macro).
 
-* TODO LEVEL 2. Cognition - 95
-** DONE 9. Style - 95
+* TODO LEVEL 2. Cognition - 147
+** DONE 9. Style - 149
    CLOSED: [2017-04-25 Tue 16:10]
   - Programs serve both sides:
     + give instructions to the compiler and the final executable.
@@ -1884,12 +1698,12 @@
   - You can decide the style of your own project,
     but be careful if you want others to adhere to it.
 
-*** 9.1. Formatting - 95
+*** 9.1. Formatting - 150
     - _The need for code formatting originates in human incapacity_.
     - Rule 2.9.1.1 :: Choose a consistent strategy for white space and other text formatting.
     - Rule 2.9.1.2 :: Have your text editor automatically format your code correctly.
 
-*** 9.2. Naming - 95
+*** 9.2. Naming - 151
     - _The limit of automatic formatting tools is reached when it comes to naming._
 
     - There are two different aspects to naming:
@@ -1980,7 +1794,7 @@
     - Rule 2.9.2.9 :: A global variable identifies state.
     - Rule 2.9.2.10 :: A function or functional macro identifies an action.
 
-** DONE 10. Organization and documentation - 99
+** DONE 10. Organization and documentation - 157
    CLOSED: [2017-04-25 Tue 16:10]
    - Rule 2.10.0.1 (what) :: Function interfaces describe what is done.
 
@@ -1996,7 +1810,7 @@
 
    - Rule 2.10.0.6 :: Document the interface -- Explain the implementation.
 
-*** 10.1. Interface documentation - 100
+*** 10.1. Interface documentation - 158
     - Rule 2.10.1.1 :: Document interfaces thoroughly.
 
     - Rule 2.10.1.2 :: Structure your code in units that have strong semantic
@@ -2013,7 +1827,7 @@
       #endif
       #+END_SRC
 
-*** 10.2. Implementation - 103
+*** 10.2. Implementation - 161
     - Good programming only needs to explain the ideas and prerequisites that are
       not obvious, the difficult part. Through the structure of the code, it
       shows what it does and how.
@@ -2027,273 +1841,278 @@
       1. /burried jumps/: ~break~, ~continue~, ~return~, and ~goto~.
       2. /flyspeck expressions/: =TODO=
 
-*** 10.3. Macros - 103
-    - Rule 2.10.3.1 :: Macros should not change control flow in a surprising way.
+**** 10.2.1. Macros - 162
+     - Rule 2.10.3.1 :: Macros should not change control flow in a surprising way.
 
-    - ~do ... while(false)~ trick used in macro for grouping several statements.
+     - ~do ... while(false)~ trick used in macro for grouping several statements.
 
-    - Rule 2.10.3.2 :: Function like macros should syntactically behave like
-                       function calls.
+     - Rule 2.10.3.2 :: Function like macros should syntactically behave like
+                        function calls.
 
-    - Possible pitfalls are: =PAGE 105= many many!!! =TODO=
+     - Possible pitfalls are: =PAGE 105= many many!!! =TODO=
 
-*** 10.4. Pure functions - 105
-    - Functions are extensions of the value operators (in Table 2), and
-                NOT of the object operators (of Table 3).
+**** 10.2.2. Pure functions - 164
+     - Functions are extensions of the value operators (in Table 2), and
+                 NOT of the object operators (of Table 3).
 
-    - Rule 2.10.4.1 :: Function parameters are passed by value.
+     - Rule 2.10.4.1 :: Function parameters are passed by value.
 
-    - Rule 2.10.4.2 :: Global variables are frowned upon.
+     - Rule 2.10.4.2 :: Global variables are frowned upon.
 
-    - A function with the following two properties is called /pure/:
-      + No other effects than returning a value.
-      + The returned value only depends on its parameters.
-        No matter how many times you call the function, it always returns the
-        same result if you pass the same parameters.
+     - A function with the following two properties is called /pure/:
+       + No other effects than returning a value.
+       + The returned value only depends on its parameters.
+         No matter how many times you call the function, it always returns the
+         same result if you pass the same parameters.
 
-    - Rule 2.10.4.3 :: Express small tasks as pure functions whenever possible.
+     - Rule 2.10.4.3 :: Express small tasks as pure functions whenever possible.
 
-    - =TODO= ~inline~ and /link time optimization/
+     - =TODO= ~inline~ and /link time optimization/
 
 ** TODO 11. Pointers - 106 =RE-READ=
-*** 11.1. Address-of and object-of operators - 108
-    - Rule 2.11.1.1 :: Using ~*~ with an _indeterminate_ or /null pointer/ has
-                       /undefined behavior/.
+*** 11.1. Pointer operators - 170
+**** 11.1.1. Address-of and object-of operators - 170
+     - Rule 2.11.1.1 :: Using ~*~ with an _indeterminate_ or /null pointer/ has
+                        /undefined behavior/.
 
-      + The _indeterminate_ case might access some random object in memory and
-        modify it. Often this leads to bugs that are difficult to trace.
+       + The _indeterminate_ case might access some random object in memory and
+         modify it. Often this leads to bugs that are difficult to trace.
 
-      + The /null pointer/ case will nicely crash your program -- consider this
-        to be a feature.
+       + The /null pointer/ case will nicely crash your program -- consider this
+         to be a feature.
 
-*** 11.2. Pointer arithmetic - 109
-    - Rule 2.11.2.1 :: A VALID pointer addresses the _FIRST_ element of an ARRAY
-                       of the /base type/.
+**** 11.1.2. Pointer addition - 171
+     - Rule 2.11.2.1 :: A VALID pointer addresses the _FIRST_ element of an ARRAY
+                        of the /base type/.
 
-    - Code in 3 ways:
-      #+BEGIN_SRC c
-        // #1
-        double sum0(size_t len, double const* a) {
-          double ret = 0.0;
+     - Code in 3 ways:
+       #+BEGIN_SRC c
+         // #1
+         double sum0(size_t len, double const* a) {
+           double ret = 0.0;
 
-          for (size_t i = 0; i < len; ++i) {
-            ret += *(a + i);
-          }
+           for (size_t i = 0; i < len; ++i) {
+             ret += *(a + i);
+           }
 
-          return ret;
-        }
+           return ret;
+         }
 
-        // #2
-        double sum1(size_t len, double const* a) {
-          double ret = 0.0;
+         // #2
+         double sum1(size_t len, double const* a) {
+           double ret = 0.0;
 
-          for (double const* p = a; p < a+len; ++p) {
-            ret += *p;
-          }
+           for (double const* p = a; p < a+len; ++p) {
+             ret += *p;
+           }
 
-          return ret;
-        }
+           return ret;
+         }
 
-        // #3
-        double sum2(size_t len, double const* a) {
-          double ret = 0.0;
+         // #3
+         double sum2(size_t len, double const* a) {
+           double ret = 0.0;
 
-          for (double const*const aStop = a+len; a < aStop; ++a) {
-            ret += *a;
-          }
+           for (double const*const aStop = a+len; a < aStop; ++a) {
+             ret += *a;
+           }
 
-          return ret;
-        }
-      #+END_SRC
+           return ret;
+         }
+       #+END_SRC
 
-    - Rule 2.11.2.2 :: The length an array object cannot be reconstructed from a
-                       pointer.
+     - Rule 2.11.2.2 :: The length an array object cannot be reconstructed from a
+                        pointer.
 
-    - =Comment= In this case ~sizeof~ doesn't work.
-      You must pass the length to functions.
+     - =Comment= In this case ~sizeof~ doesn't work.
+       You must pass the length to functions.
 
-      For example,
-      #+BEGIN_SRC c
-        double A [7] = { 0, 1, 2, 3, 4, 5, 6, };
+       For example,
+       #+BEGIN_SRC c
+         double A [7] = { 0, 1, 2, 3, 4, 5, 6, };
 
-        double s0_7 = sum0(7, &A[0]);  // for the whole
-        double s1_6 = sum0(6, &A[1]);  // for last 6
-        double s2_3 = sum0(3, &A[2]);  // for 3 in the middle
-      #+END_SRC
+         double s0_7 = sum0(7, &A[0]);  // for the whole
+         double s1_6 = sum0(6, &A[1]);  // for last 6
+         double s2_3 = sum0(3, &A[2]);  // for 3 in the middle
+       #+END_SRC
 
-    - Rule 2.11.2.3 :: Pointers are NOT arrays.
+     - Rule 2.11.2.3 :: Pointers are NOT arrays.
 
-    - So if we pass arrays through pointers to a function, it is important to
-      retain the real length that the array has.
-        This is why we prefer the array notation for pointer interfaces through-
-      out this book:
-      #+BEGIN_SRC c
-      // "Preferred" form contains more info. It DIRECTLY tells the reader `a`
-      // is an array of length `len`
+     - So if we pass arrays through pointers to a function, it is important to
+       retain the real length that the array has.
+         This is why we prefer the array notation for pointer interfaces through-
+       out this book:
+       #+BEGIN_SRC c
+       // "Preferred" form contains more info. It DIRECTLY tells the reader `a`
+       // is an array of length `len`
 
-      // Preferred
-      double sum0(size_t len, double const a[len]);
+       // Preferred
+       double sum0(size_t len, double const a[len]);
       
-      // Just OK
-      double sum0(size_t len, double const * a);
-      #+END_SRC
+       // Just OK
+       double sum0(size_t len, double const * a);
+       #+END_SRC
 
-    - Another difference is:
-      that pointers have value and that that value can change.
-      Thus they can be used by value operators as operands.
-      _Array is not a value type_.
+     - Another difference is:
+       that pointers have value and that that value can change.
+       Thus they can be used by value operators as operands.
+       _Array is not a value type_.
 
-    - Setting pointers to 0 if it hasn't some valid address is very important and
-      should not be forgotten.
-      It helps to check and keep track if a pointer has been set.
+     - Setting pointers to 0 if it hasn't some valid address is very important and
+       should not be forgotten.
+       It helps to check and keep track if a pointer has been set.
 
-    - Rule 2.11.2.4 :: Pointers have truth.
+     - Rule 2.11.2.4 :: Pointers have truth.
 
-    - Rule 2.11.2.5 :: A pointed-to object must be of the indicated type.
+     - Rule 2.11.2.5 :: A pointed-to object must be of the indicated type.
 
-    - Rule 2.11.2.6 :: A pointer must point to
-      + a valid object,
-      + one position beyond a valid object
-        or 
-      + be /null/.
+     - Rule 2.11.2.6 :: A pointer must point to
+       + a valid object,
+       + one position beyond a valid object
+         or 
+       + be /null/.
 
-    - =COMMENT=:
-      1. This usually works:
-         #+BEGIN_SRC c
-         double A[2] = { 0.0, 1.0, };
-         double * p = &A[0];
-         printf("element %g\n", *p); // referencing object
-         p += 2;                     // valid pointer, no object
-         printf("element %g\n", *p); // referencing non-object
-                                     // undefined behavior
-         #+END_SRC
-
-      2. This may crash at the increment operation:
-         #+BEGIN_SRC c
-         double A[2] = { 0.0, 1.0, };
-         double * p = &A[0];
-         printf("element %g\n", *p); // referencing object
-         p += 3;                     // valid pointer, no object
-         printf("element %g\n", *p); // referencing non-object
-                                     // undefined behavior
-         #+END_SRC
-
-    - Rule 2.11.2.7 :: Only subtract pointers to elements of an array object.
-
-      + _It is *only allowed* if the two pointers refer to elements of the *same*
-        array object_.
-
-    - Rule 2.11.2.8 :: All pointer differences have type ~ptrdiff_t~.
-
-    - Rule 2.11.2.9 :: Use ~ptrdiff_t~ to encode
-                       SIGNED differences of _positions_ or _sizes_.
-
-*** 11.3. Pointers and ~struct~'s - 112
-    - If ~a~ is a pointer, ~a->tv_sec~ is nothing but ~(*a).tv_sec~.
-    
-*** 11.4. Opaque structures - 115
-    - Rule 2.11.4.1 :: Don't hide pointers in a ~typedef~. =Extremely Important=
-
-*** 11.5. Array and pointer access are the same - 115
-    - Rule 2.11.5.1 :: The two expressions ~A[i]~ and ~*(A+i)~ are equivalent.
-
-    - =COMMENT=: This holds _regardless_ whether ~A~ is an array or a pointer.
-
-    - If ~A~ is an array, ~*(A+i)~ shows our first application of one of the most
-      important rules in C, called /array-to-pointer decay/.
-
-    - Rule 2.11.5.2 :: Evaluation of an array ~A~ returns ~&A[0]~.
-
-    - =COMMENT=: In fact, this is the reason behind Rules 1.6.1.3 to 1.6.1.5:
-      Whenever an array occurs that requires a value,
-      1. it decays to a pointer and
-      2. we loose all additional information.
-
-*** 11.6. Array and pointer parameters are the same - 116
-    - Rule 2.11.6.1 :: In a function declaration any array parameters rewrites to
-                       a pointer. =IMPORTANT=
-
-    - =COMMENT=: The rule that we follow in this book to: =IMPORTANT=
-      1. use array notation if we suppose that this _CAN'T be null_, and
-      2. use pointer notation if it corresponds to one single item of the base
-         type that also _can be null_ to indicate a special condition.
-
-    - Rule 2.11.6.2 :: Only the innermost dimension of an array parameter is
-                       rewritten.
-
-    - Examples(they are equivalent):
-      1. 
+     - =COMMENT=:
+       1. This usually works:
           #+BEGIN_SRC c
-          void matrix_mult(size_t n, size_t k, size_t m,
-                           double (C[n])[m],
-                           double (A[n])[k],
-                           double (B[k])[m]);
-         
+          double A[2] = { 0.0, 1.0, };
+          double * p = &A[0];
+          printf("element %g\n", *p); // referencing object
+          p += 2;                     // valid pointer, no object
+          printf("element %g\n", *p); // referencing non-object
+                                      // undefined behavior
           #+END_SRC
 
-      2.
-         #+BEGIN_SRC c
-         void matrix_mult(size_t n, size_t k, size_t m,
-                          double (*C)[m],
-                          double (*A)[k],
-                          double (*B)[m]);
-         #+END_SRC
+       2. This may crash at the increment operation:
+          #+BEGIN_SRC c
+          double A[2] = { 0.0, 1.0, };
+          double * p = &A[0];
+          printf("element %g\n", *p); // referencing object
+          p += 3;                     // valid pointer, no object
+          printf("element %g\n", *p); // referencing non-object
+                                      // undefined behavior
+          #+END_SRC
 
-      Observe that once we have rewritten the innermost dimension as a pointer,
-      the parameter type is not an array anymore, but a "pointer to array". So
-      there is no need to rewrite the subsequent dimensions.        
+**** 11.1.3. Pointer subtraction and difference - 173
 
-    - Rule 2.11.6.3 :: Declare length parameters before array parameters.
+     - Rule 2.11.2.7 :: Only subtract pointers to elements of an array object.
 
-*** 11.7. Null pointers - 117
-    - /null pointer/: 0 value of any pointer type.
+       + _It is *only allowed* if the two pointers refer to elements of the *same*
+         array object_.
 
-    - C has the concept of /null pointer/. Here:
-      #+BEGIN_SRC c
-      double const * const nix = 0;
-      double const * const nax = nix;
-      #+END_SRC
-      "nix" and "nax" would be such _a pointer object of value 0_.
-      _But_ unfortunately a /null pointer constant/ is then not what you'd
-      expect. =IMPORTANT=
-      1. here by /constant/ the term refers to a compile time constant and _NOT_
-         to a ~const~ qualified object.
-         So for that reason already, both pointer objects above are not null
-         pointer constants.
-      2. the permissible type for these constants is restricted, it may be
-         * any constant expression of _integer_ type or
-         * of type ~void*~.
+     - Rule 2.11.2.8 :: All pointer differences have type ~ptrdiff_t~.
 
-    - =TODO=: Other pointer types are not permitted, and we will only learn about
-      pointers of that "type" below in Section 12.4. =IMPORTANT=
+     - Rule 2.11.2.9 :: Use ~ptrdiff_t~ to encode
+                        SIGNED differences of _positions_ or _sizes_.
 
-    - The definition by the C standard of what could be the expansion of the
-      macro ~NULL~ is quite loose, it just has to be a null pointer constant.
-      Therefore a C compiler could chose any of the following for it:
-      | expansion                       | type                 |
-      |---------------------------------+----------------------|
-      | ~0U~                            | ~unsigned~           |
-      |---------------------------------+----------------------|
-      | ~0~                             | ~signed~             |
-      | ~'\0'~                          |                      |
-      | enumeration constant of value 0 |                      |
-      |---------------------------------+----------------------|
-      | ~0UL~                           | ~unsigned long~      |
-      | ~0L~                            | ~signed long~        |
-      |---------------------------------+----------------------|
-      | ~0ULL~                          | ~unsigned long long~ |
-      | ~0LL~                           | ~signed long~        |
-      |---------------------------------+----------------------|
-      | ~(void *)0~                     | ~void*~              |
+**** 11.1.4. Pointer validity - 177
+**** 11.1.5. Null pointers - 177
+     - /null pointer/: 0 value of any pointer type.
+
+     - C has the concept of /null pointer/. Here:
+       #+BEGIN_SRC c
+       double const * const nix = 0;
+       double const * const nax = nix;
+       #+END_SRC
+       "nix" and "nax" would be such _a pointer object of value 0_.
+       _But_ unfortunately a /null pointer constant/ is then not what you'd
+       expect. =IMPORTANT=
+       1. here by /constant/ the term refers to a compile time constant and _NOT_
+          to a ~const~ qualified object.
+          So for that reason already, both pointer objects above are not null
+          pointer constants.
+       2. the permissible type for these constants is restricted, it may be
+          * any constant expression of _integer_ type or
+          * of type ~void*~.
+
+     - =TODO=: Other pointer types are not permitted, and we will only learn about
+       pointers of that "type" below in Section 12.4. =IMPORTANT=
+
+     - The definition by the C standard of what could be the expansion of the
+       macro ~NULL~ is quite loose, it just has to be a null pointer constant.
+       Therefore a C compiler could chose any of the following for it:
+       | expansion                       | type                 |
+       |---------------------------------+----------------------|
+       | ~0U~                            | ~unsigned~           |
+       |---------------------------------+----------------------|
+       | ~0~                             | ~signed~             |
+       | ~'\0'~                          |                      |
+       | enumeration constant of value 0 |                      |
+       |---------------------------------+----------------------|
+       | ~0UL~                           | ~unsigned long~      |
+       | ~0L~                            | ~signed long~        |
+       |---------------------------------+----------------------|
+       | ~0ULL~                          | ~unsigned long long~ |
+       | ~0LL~                           | ~signed long~        |
+       |---------------------------------+----------------------|
+       | ~(void *)0~                     | ~void*~              |
        
-    - Rule 2.11.7.1 :: Don't use ~NULL~.
+     - Rule 2.11.7.1 :: Don't use ~NULL~.
 
-    - =COMMENT=: ~NULL~ hides more than it clarifies,
-      1. either use =0=, or
-      2. if you really want to emphasize that the value is a pointer use the
-         magic token sequence ~(void*)0~ directly.
+     - =COMMENT=: ~NULL~ hides more than it clarifies,
+       1. either use =0=, or
+       2. if you really want to emphasize that the value is a pointer use the
+          magic token sequence ~(void*)0~ directly.
 
-*** 11.8. Function pointers - 118 =TODO: Re-Read=
+*** 11.2. Pointers and structures - 178
+    - If ~a~ is a pointer, ~a->tv_sec~ is nothing but ~(*a).tv_sec~.
+    
+**** 11.??. Opaque structures - 115
+     - Rule 2.11.4.1 :: Don't hide pointers in a ~typedef~. =Extremely Important=
+
+*** 11.3. Pointers and arrays - 182
+**** 11.3.1. Array and pointer access are the same - 182
+     - Rule 2.11.5.1 :: The two expressions ~A[i]~ and ~*(A+i)~ are equivalent.
+
+     - =COMMENT=: This holds _regardless_ whether ~A~ is an array or a pointer.
+
+     - If ~A~ is an array, ~*(A+i)~ shows our first application of one of the most
+       important rules in C, called /array-to-pointer decay/.
+
+     - Rule 2.11.5.2 :: Evaluation of an array ~A~ returns ~&A[0]~.
+
+     - =COMMENT=: In fact, this is the reason behind Rules 1.6.1.3 to 1.6.1.5:
+       Whenever an array occurs that requires a value,
+       1. it decays to a pointer and
+       2. we loose all additional information.
+
+**** 11.3.2. Array and pointer parameters are the same - 182
+     - Rule 2.11.6.1 :: In a function declaration any array parameters rewrites to
+                        a pointer. =IMPORTANT=
+
+     - =COMMENT=: The rule that we follow in this book to: =IMPORTANT=
+       1. use array notation if we suppose that this _CAN'T be null_, and
+       2. use pointer notation if it corresponds to one single item of the base
+          type that also _can be null_ to indicate a special condition.
+
+     - Rule 2.11.6.2 :: Only the innermost dimension of an array parameter is
+                        rewritten.
+
+     - Examples(they are equivalent):
+       1. 
+           #+BEGIN_SRC c
+           void matrix_mult(size_t n, size_t k, size_t m,
+                            double (C[n])[m],
+                            double (A[n])[k],
+                            double (B[k])[m]);
+         
+           #+END_SRC
+
+       2.
+          #+BEGIN_SRC c
+          void matrix_mult(size_t n, size_t k, size_t m,
+                           double (*C)[m],
+                           double (*A)[k],
+                           double (*B)[m]);
+          #+END_SRC
+
+       Observe that once we have rewritten the innermost dimension as a pointer,
+       the parameter type is not an array anymore, but a "pointer to array". So
+       there is no need to rewrite the subsequent dimensions.        
+
+     - Rule 2.11.6.3 :: Declare length parameters before array parameters.
+
+*** 11.4. Function pointers - 184 =TODO: Re-Read=
     - Rule 2.11.8.1 :: A function =f= without following opening =(= decays to a
                        pointer to its start.
 
@@ -2359,11 +2178,11 @@
       he found, there.
       _This has a certain overhead and should be avoided in time critical code_.
 
-** TODO 12. The C memory model - 121 =RE-READ=
+** TODO 12. The C memory model - 191 =RE-READ=
    - Apply unary operator ~&~ to (almost) all objects to retrieve their address.
      =Comment (footnote 16)=: only objects that are declared with keyword
                               ~register~ don't have an address.
-     =TODO= (see Section 13.2.2 on Level 2).
+     TODO (see Section 13.2.2 on Level 2).
 
    - Seen from C, the address is important, and it's not necessary to care about
      the "real" locations (, which can be in the RAM, a disk file, or an IO port,
@@ -2372,7 +2191,7 @@
 
    - Rule 2.12.0.1 :: Pointer types with distinct base types are distinct.
 
-*** DONE 12.1. A uniform memory model - 122
+*** DONE 12.1. A uniform memory model - 193
     CLOSED: [2017-04-24 Mon 17:48]
     - THREE distinct types that by definition use _exactly one byte_ of memory:
       1. ~char~
@@ -2406,7 +2225,7 @@
                        1. apply to object types: 
                           ONLY ~sizeof(object)~ is right.
 
-*** DONE 12.2. Unions - 122
+*** DONE 12.2. Unions - 193
     CLOSED: [2017-04-24 Mon 17:48]
     - /Unions/ are similar in declaration to ~struct~
       but have different semantic!
@@ -2423,7 +2242,7 @@
 
     - The in memory representation of other base types are more complicated.
 
-*** DONE 12.3. Memory and state - 124 =RE-READ=
+*** DONE 12.3. Memory and state - 195 =RE-READ=
     CLOSED: [2017-04-25 Tue 15:57]
     - /aliasing/: The phenomenon of accessing the same object through different
       pointers.
@@ -2446,7 +2265,7 @@
       allows to specify aliasing properties of pointer arguments, even if they
       have the same base type.
                        
-*** DONE 12.4. Pointers to unspecific objects - 125
+*** DONE 12.4. Pointers to unspecific objects - 197
     CLOSED: [2017-04-25 Tue 00:17]
     - The main purpose of ~void~ is to be used a fallback pointer type:
 
@@ -2469,7 +2288,7 @@
       =From Jian= The sematics of an operation is connected to the type of the
                   operand(s), and ~void~ has no realted operation.
 
-*** DONE 12.5. Implicit and explicit conversions - 126
+*** DONE 12.5. Explicit conversions - 198
     CLOSED: [2017-04-25 Tue 01:05]
     - Problematic:
       #+BEGIN_SRC c
@@ -2575,7 +2394,7 @@
         }
         #+END_SRC
 
-*** DONE 12.6. Effective Type - 127
+*** DONE 12.6. Effective Type - 199
     CLOSED: [2017-04-25 Tue 02:06]
     - To cope with different views to the same object that pointers may provide,
       C has introduced the concept of effective types. It heavily restricts how
@@ -2629,7 +2448,7 @@
         and
       + so he may assume that the objects are different.
 
-*** DONE 12.7. Alignment - 128 =RE-READ=
+*** DONE 12.7. Alignment - 200 =RE-READ=
     CLOSED: [2017-04-25 Tue 15:57]
     - /alignment/
 
@@ -2651,8 +2470,8 @@
 
     - ~\under{}Alignof(oneArg)~, ~\under{}Alignas(oneArg)~, ~<stdalign.h>~
 
-** TODO 13. Allocation, initialization and destruction - 130
-*** 13.1. ~malloc~ and friends - 131
+** TODO 13. Storage - 205
+*** 13.1. ~malloc~ and friends - 206
     - /dynamic memory allocation/, related functions are in  =stdlib.h=:
       #+BEGIN_SRC c
       #include <stdlib.h>
@@ -2680,11 +2499,11 @@
 
     - Rule 2.13.1.2 :: Objects that are allocated through malloc are
                        uninitialized.
-**** 13.1.1. A complete example with varying array size
+**** 13.1.1. A complete example with varying array size - 207
      - Rule 2.13.1.3 :: ~malloc~ indicates failure by returning a null pointer
                         value.
 
-**** 13.1.2. Ensuring consistency of dynamic allocations
+**** 13.1.2. Ensuring consistency of dynamic allocations - 215
      - Rule 2.13.1.4 :: For every ~malloc~ there must be a ~free~.
 
      - Rule 2.13.1.5 :: For every free there must be a ~malloc~.
@@ -2692,7 +2511,7 @@
      - Rule 2.13.1.6 :: Only call free with pointers as they are returned by
                         ~malloc~.
                         
-*** 13.2. Storage duration, lifetime and visibility - 139
+*** 13.2. Storage duration, lifetime, and visibility - 215
      - Rule 2.13.2.1 :: Identifiers only have visibility inside their scope,
                         starting at their declaration.
 
@@ -2710,11 +2529,11 @@
      - Rule 2.13.2.6 :: Refering to an object outside of its lifetime has
                         undefined behavior.
 
-**** 13.2.1. Static storage duration
+**** 13.2.1. Static storage duration - 219
      - Rule 2.13.2.7 :: Objects with static storage duration are always
                         initialized.
 
-**** 13.2.2. Automatic storage duration
+**** 13.2.2. Automatic storage duration - 220
      - Rule 2.13.2.8 :: Unless they are VLA or temporary objects, automatic
                         objects have a lifetime corresponding to the execution of
                         their block of definition.
@@ -2742,7 +2561,8 @@
      - Rule 2.13.2.16 :: Temporary lifetime ends at the end of the enclosing full
                          expression.
 
-*** 13.3. Initialization - 144
+*** 13.3. Digression: using objects "before" their definition - 221
+*** 13.4. Initialization - 223
     * Rule 2.13.3.1 :: Objects of static or thread storage duration are
                        initialized per default.
 
@@ -2752,9 +2572,10 @@
     * Rule 2.13.3.3 :: Systematically provide an initialization function for each
                        of your data types.
 
-*** 13.4. Digression: a machine model - 146
-** TODO 14. More involved use of the C library - 149
-*** 14.1. Text processing - 149
+*** 13.5. Digression: a machine model - 225
+
+** TODO 14. More involved processing and IO - 231
+*** 14.1. Text processing - 231
     - Rule 2.14.1.1 :: The string strto... conversion functions are not
                        ~const~-safe.
 
@@ -2768,156 +2589,156 @@
 
     - Rule 2.14.1.5 :: Use ~snprintf~ when formatting output of unknown length.
 
-*** 14.2. Formatted input - 155
+*** 14.2. Formatted input - 238
     - TABLE 1
     - TABLE 2
     - TABLE 3
 
-*** 14.3. Extended character sets - 157
+*** 14.3. Extended character sets - 239
     - Rule 2.14.3.1 :: Multibyte characters don't contain null bytes.
 
     - Rule 2.14.3.2 :: Multibyte strings are null terminated.
 
-*** 14.4. Binary files - 164
+*** 14.4. Binary streams - 247
+*** 14.5. Error checking and cleanup - 249
 
-** TODO 15. Error checking and cleanup - 165
-   - The C standard itself imposes only ~EOF~ (which is negative), and ~EDOM~,
-     ~EILSEQ~ nad ~ERANGE~ (which is positive).
+* TODO LEVEL 3. Experience - 255
+** 15. Performance - 257 - TODO Re-number TAKEAWAY's
+   - TAKEAWAY D :: Premature optimization is the root of all evil.
 
-   - Rule 2.15.0.1 :: Labels for ~goto~ are visible in the whole function that
-                      contains them.
+   - TAKEAWAY 15.1 :: Do not trade off safety for performance.
 
-   - Rule 2.15.0.2 :: ~goto~ can only jump to a label inside the same function.
+   - TAKEAWAY 15.2 :: Optimizers are clever enough to eliminate unused initializations.
 
-   - Rule 2.15.0.3 :: ~goto~ should not jump over variable initializations.
+   - TAKEAWAY 15.3 :: The different notations of pointer arguments to functions
+                      result in the same binary code.
 
-* TODO LEVEL 3. Experience - 171
-** 16. Performance - 171
-*** Safety first - 171
-*** Optimizers are good enough - 172
-    - Rule 3.16.0.1 :: Optimizers are clever enough to eliminate unused initiali-
-                       zations.
+   - TAKEAWAY 15.4 :: Not taking addresses of local variables helps the optimizer
+                      because it inhibits aliasing.
 
-    - Rule 3.16.0.2 :: The different notations of pointer arguments to functions
-                       result in the same binary code.
+*** 15.1. Inline functions - 260
+    - TAKEAWAY 15.5 :: Inlining can open a lot of optimization opportunities.
 
-    - Rule 3.16.0.3 :: Not taking addresses of local variables helps the optimiz-
-                       er because it inhibits aliasing.
-*** Help the compiler - 172
-*** 16.1. Inline functions - 173
-    - Rule 3.16.1.1 :: Inlining can open a lot of optimization opportunities.
-
-    - Rule 3.16.1.2 :: Adding a compatible declaration without ~inline~ keyword
+    - TAKEAWAY 15.6 :: Adding a compatible declaration without ~inline~ keyword
                        ensures the emission of the function symbol in the current
                        TU.
 
-    - Rule 3.16.1.3 :: An ~inline~ function definition is visible in all TU.
+    - TAKEAWAY 15.7 :: An ~inline~ function definition is visible in all TU.
 
-    - Rule 3.16.1.4 :: An ~inline~ definition goes in a header file.
+    - TAKEAWAY 15.8 :: An ~inline~ definition goes in a header file.
 
-    - Rule 3.16.1.5 :: An additional declaration without ~inline~ goes in exactly
-      one TU.
+    - TAKEAWAY 15.9 :: An additional declaration without ~inline~ goes in exactly
+                       one TU.
 
-    - Rule 3.16.1.6 :: Only expose functions as ~inline~ if you consider them to
-                       be stable.
+    - TAKEAWAY 15.10 :: Only expose functions as ~inline~ if you consider them to
+                        be stable.
 
-    - Rule 3.16.1.7 :: All identifiers that are local to an ~inline~ function
-                       should be protected by a convenient naming convention.
+    - TAKEAWAY 15.11 :: All identifiers that are local to an ~inline~ function
+                        should be protected by a convenient naming convention.
 
-    - Rule 3.16.1.8 :: ~inline~ functions can't access identifiers of ~static~
-                       functions.
+    - TAKEAWAY 15.12 :: ~inline~ functions can't access identifiers of ~static~
+                        functions.
 
-    - Rule 3.16.1.9 :: ~inline~ functions can't define or access identifiers of
-                       ~static~ objects.
+    - TAKEAWAY 15.13 :: ~inline~ functions can't define or access identifiers of
+                        ~static~ objects.
 
-*** 16.2. Avoid aliasing: restrict qualifiers - 176
-    - Rule 3.16.2.1 :: A ~restrict~-qualified pointer has to provide exclusive
-                       access.
+*** 15.2. Avoid aliasing: restrict qualifiers - 263
+    - TAKEAWAY 15.14 :: A ~restrict~-qualified pointer has to provide exclusive
+                        access.
 
-    - Rule 3.16.2.2 :: A ~restrict~-qualification constrains the caller of a
-                       function.
+    - TAKEAWAY 15.15 :: A ~restrict~-qualification constrains the caller of a
+                        function.
 
-*** 16.3. Measurement and inspection - 177
-    - Rule 3.16.3.1 :: Don't speculate about performance of code, verify it
-                       rigorously.
+*** 15.3. Measurement and inspection - 265
+    - TAKEAWAY D :: Don't speculate about performance of code, verify it rigorously.
 
-    - Rule 3.16.3.2 :: Complexity assessment of algorithms needs proofs.
+    - TAKEAWAY 15.16 :: Complexity assessment of algorithms needs proofs.
 
-    - Rule 3.16.3.3 :: Performance assessment of code needs measurement.
+    - TAKEAWAY 15.17 :: Performance assessment of code needs measurement.
 
-    - Rule 3.16.3.4 :: All measurements introduce bias.
+    - TAKEAWAY 15.18 :: All measurements introduce bias.
 
-    - Rule 3.16.3.5 :: Instrumentation changes compile time and runtime
-                       properties.
+    - TAKEAWAY 15.19 :: Instrumentation changes compile time and runtime properties.
 
-    - Rule 3.16.3.6 :: Collecting higher order moments of measurements to compute
-                       variance and skew is simple and cheap.
+    - TAKEAWAY 15.20 :: The relative standard deviation of run times must be in a
+                        low percentage range.
 
-    - Rule 3.16.3.7 :: Run time measurements must be hardened with statistics.
+    - TAKEAWAY 15.21 :: Collecting higher order moments of measurements to compute
+                        variance and skew is simple and cheap.
 
-** 17. Functionlike macros - 183
-   - Rule 3.17.0.1 :: Whenever possible, prefer an inline function to a function-
-                      al macro.
-   - Rule 3.17.0.2 :: A functional macro shall provide a simple interface to a
+    - TAKEAWAY 15.22 :: Runtime measurements must be hardened with statistics.
+
+** TODO 16. Function-like macros - 275
+   - TAKEAWAY 16.1 :: Whenever possible, prefer an inline function to a functional
+                      macro.
+
+   - TAKEAWAY 16.2 :: A functional macro shall provide a simple interface to a
                       complex task.
-*** 17.1. how does it work - 184
-    - Rule 3.17.1.1 :: Macro replacement is done in an early translation phase,
+
+*** 16.1. How function-like macros work - 277
+    - TAKEAWAY 16.3 :: Macro replacement is done in an early translation phase,
                        before any other interpretation is given to the tokens
                        that compose the program.
 
-    - Rule 3.17.1.2 :: If the name of functional macro is not followed by () it
-                       is not expanded.
+    - TAKEAWAY 16.4 (macro retention) :: If the name of functional macro is not
+                                         followed by () it is not expanded.
 
-*** 17.2. Argument checking - 186
-*** 17.3. Accessing the calling context - 189
-    - Rule 3.17.3.1 :: The line number in ~__LINE__~ may not fit into an ~int~.
+*** 16.2. Argument checking - 279
+*** 16.3. Accessing the calling context - 282
+    - TAKEAWAY 16.5 :: The line number in ~__LINE__~ may not fit into an ~int~.
 
-*** 17.4. Variable length argument lists - 192
-**** 17.4.1. Variadic macros
-**** 17.4.2. A detour: variadic functions
-     - Rule 3.17.4.1 :: When passed to a variadic parameter, all arithmetic types
+    - TAKEAWAY 16.6 :: Using ~__LINE__~ is inherently dangerous.
+
+    - TAKEAWAY 16.7 :: Stringification with the operator ~#~ does not expand macros
+                       in its argument.
+
+*** 16.4. Default argument lists - 285
+*** 16.5. Variable length argument lists - 286
+**** 16.5.1. Variadic macros - 287
+**** 16.5.2. A detour: variadic functions - 291
+     - TAKEAWAY 16.8 :: When passed to a variadic parameter, all arithmetic types
                         are converted as for arithmetic operations, with the ex-
                         ception of ~float~ arguments which are converted to
                         ~double~.
 
-     - Rule 3.17.4.2 :: A variadic function has to receive valid information
+     - TAKEAWAY 16.9 :: A variadic function has to receive valid information
                         about the type of each argument in the variadic list.
 
-     - Rule 3.17.4.3 :: Using variadic functions is not portable, unless each
-                        argument is forced to a specific type.
+     - TAKEAWAY 16.10 :: Using variadic functions is not portable, unless each
+                         argument is forced to a specific type.
 
-     - Rule 3.17.4.4 :: Avoid variadic functions for new interfaces.
+     - TAKEAWAY 16.11 :: Avoid variadic functions for new interfaces.
 
-     - Rule 3.17.4.5 :: The ~va_arg~ mechnanism doesn't give access to the length
-                        of the ~va_list~ .
+     - TAKEAWAY 16.12 :: The ~va_arg~ mechnanism doesn't give access to the length
+                         of the ~va_list~ .
 
-     - Rule 3.17.4.6 :: A variadic function needs a specific convention for the
-                        length of the list. 
+     - TAKEAWAY 16.13 :: A variadic function needs a specific convention for the
+                         length of the list. 
 
-*** 17.5. Type generic programming - 199
-    - Rule 3.17.5.1 :: The result type of a ~_Generic~ expression depends on the
-                       type of chosen expression.
+*** 16.6. Type-generic programming - 294
+    - TAKEAWAY 16.14 :: The result type of a ~_Generic~ expression depends on the
+                        type of chosen expression.
 
-    - Rule 3.17.5.2 :: Using ~_Generic~ with inline functions adds optimization
-                       oportunities.
+    - TAKEAWAY 16.15 :: Using ~_Generic~ with ~inline~ functions adds optimization
+                        oportunities.
 
-    - Rule 3.17.5.3 :: The type expressions in a ~_Generic~ expression should
-                       only be unqualified types, no array types and no function
-                       types.
+    - TAKEAWAY 16.16 :: The type expressions in a ~_Generic~ expression should
+                        only be unqualified types, no array types and no function
+                        types.
 
-    - Rule 3.17.5.4 :: The type expressions in a _Generic expression must refer
-                       to mutually incompatible types.
+    - TAKEAWAY 16.17 :: The type expressions in a ~_Generic~ expression must refer
+                        to mutually incompatible types.
 
-    - Rule 3.17.5.5 :: The type expressions in a _Generic expression cannot be a
-                       pointer to VLA.
+    - TAKEAWAY 16.18 :: The type expressions in a ~_Generic~ expression cannot be
+                        a pointer to VLA.
 
-    - Rule 3.17.5.6 :: All choices expression1 ... expressionN in a ~_Generic~
-                       must be valid.
+    - TAKEAWAY 16.19 :: All choices expression1 ... expressionN in a ~_Generic~
+                        must be valid.
 
-**** 17.5.1. Default arguments
-** 18. Variations in Control Flow - 206
-*** 18.1. Sequencing - 207
-    - Rule 3.18.1.1 :: Side effects in functions can lead to indeterminate results.
+** 17. Variations in control flow - 301 - TODO Re-number TAKEAWAY's
+*** 17.1. A complicated example - 303
+*** 17.2. Sequencing - 305
+    - TAKEAWAY 17.1 :: Side effects in functions can lead to indeterminate results.
 
     - Here is a list of all sequence points that are defined in terms of C's grammar:
       * The end of a statement, either by semicolon (;) or closing brace (}).
@@ -2934,188 +2755,233 @@
       points. The first two are more or less obvious but should be stated
       nevertheless:
 
-    - Rule 3.18.1.2 :: The specific operation of any operator is sequenced after
+    - TAKEAWAY 17.2 :: The specific operation of any operator is sequenced after
                        the evaluation of all its operands.
 
-    - Rule 3.18.1.3 :: The effect of updating an object by any of the assignment,
+    - TAKEAWAY 17.3 :: The effect of updating an object by any of the assignment,
                        increment or decrement operators is sequenced after the
                        evaluation of its operands.
 
-    - Rule 3.18.1.4 :: A function call is sequenced with respect to all evalua-
+    - TAKEAWAY 17.4 :: A function call is sequenced with respect to all evalua-
                        tions of the caller.
 
-    - Rule 3.18.1.5 :: Initialization list expressions for array or structure
+    - TAKEAWAY 17.5 :: Initialization list expressions for array or structure
                        types are indeterminately sequenced.
 
-*** 18.2. Short jumps - 209
-    - Rule 3.18.2.1 :: Each iteration defines a new instance of a local object.
+*** 17.3. Short jumps - 308
+    - TAKEAWAY 17.1 :: Each iteration defines a new instance of a local object.
 
-    - Rule 3.18.2.2 :: ~goto~ should only be used for exceptional changes in
+    - TAKEAWAY 17.2 :: ~goto~ should only be used for exceptional changes in
                        control flow.
 
-*** 18.3. Functions - 212
-    - Rule 3.18.3.1 :: Each function call defines a new instance of a local
+*** 17.4. Functions - 309
+    - TAKEAWAY 17.1 :: Each function call defines a new instance of a local
                        object.
 
-*** 18.4. Long jumps - 213
-    - Rule 3.18.4.1 :: ~longjmp~ never returns to the caller.
+*** 17.5. Long jumps - 310
+    - TAKEAWAY 17.1 :: ~longjmp~ never returns to the caller.
 
-    - Rule 3.18.4.2 :: When reached through normal control flow, a call to
+    - TAKEAWAY 17.2 :: When reached through normal control flow, a call to
                        ~setjmp~ marks the call location as a jump target and
                        returns =0=.
 
-    - Rule 3.18.4.3 :: Leaving the scope of a call to ~setjmp~ invalidates the
+    - TAKEAWAY 17.3 :: Leaving the scope of a call to ~setjmp~ invalidates the
                        jump target.
 
-    - Rule 3.18.4.4 :: A call to ~longjmp~ transfers control directly to the
+    - TAKEAWAY 17.4 :: A call to ~longjmp~ transfers control directly to the
                        position that was set by ~setjmp~ as if that had returned
                        the condition argument.
 
-    - Rule 3.18.4.5 :: A =0= as _condition_ parameter to ~longjmp~ is replaced
+    - TAKEAWAY 17.5 :: A =0= as _condition_ parameter to ~longjmp~ is replaced
                        by =1=.
 
-    - Rule 3.18.4.6 :: ~setjmp~ may only be used in simple comparisons inside
+    - TAKEAWAY 17.6 :: ~setjmp~ may only be used in simple comparisons inside
                        controlling expression of conditionals.
 
-    - Rule 3.18.4.7 :: Optimization interacts badly with calls to ~setjmp~.
+    - TAKEAWAY 17.7 :: Optimization interacts badly with calls to ~setjmp~.
 
-    - Rule 3.18.4.8 :: Objects that are modified across longjmp must be
+    - TAKEAWAY 17.8 :: Objects that are modified across longjmp must be
                        ~volatile~.
 
-    - Rule 3.18.4.9 :: ~volatile~ objects are reloaded from memory each time they
+    - TAKEAWAY 17.9 :: ~volatile~ objects are reloaded from memory each time they
                        are accessed.
 
-    - Rule 3.18.4.10 :: ~volatile~ objects are stored to memory each time they
+    - TAKEAWAY 17.10 :: ~volatile~ objects are stored to memory each time they
                         are modified.
 
-    - Rule 3.18.4.11 :: The ~typedef~ for ~jmp_buf~ hides an array type.
+    - TAKEAWAY 17.11 :: The ~typedef~ for ~jmp_buf~ hides an array type.
 
-*** 18.5. Signal handlers - 217
-    - Rule 3.18.5.1 :: C's signal handling interface is minimal and should only
+*** 17.6. Signal handlers - 315
+    - TAKEAWAY 17.1 :: C's signal handling interface is minimal and should only
                        be used for elementary situations.
 
-    - Rule 3.18.5.2 :: Signal handlers can kick in at any point of execution.
+    - TAKEAWAY 17.2 :: Signal handlers can kick in at any point of execution.
 
-    - Rule 3.18.5.3 :: After return from a signal handler, execution resumes
+    - TAKEAWAY 17.3 :: After return from a signal handler, execution resumes
                        exactly where it was interrupted.
 
-    - Rule 3.18.5.4 :: A C statement may correspond to several processor
+    - TAKEAWAY 17.4 :: A C statement may correspond to several processor
                        instructions.
 
-    - Rule 3.18.5.5 :: Signal handlers need types with uninterruptible
+    - TAKEAWAY 17.5 :: Signal handlers need types with uninterruptible
                        operations.
 
-    - Rule 3.18.5.6 :: Objects of type ~sig~atomic_t_ should not be used as
+    - TAKEAWAY 17.6 :: Objects of type ~sig~atomic_t_ should not be used as
                        counters.
 
-    - Rule 3.18.5.7 :: Unless specified otherwise, C library functions are not
+    - TAKEAWAY 17.7 :: Unless specified otherwise, C library functions are not
                        asynchrounous signal safe.
 
-** 19. Threads - 225
-*** 19.1. Simple inter-thread control - 227
-*** 19.2. Thread local data - 228
-    - Rule 3.19.2.1 :: Pass thread specific data through function arguments.
+** TODO 18. Threads - 225
+*** 18.1. Simple inter-thread control - 328
+    - TAKEAWAY 18.1 :: If a tread T_{0} writes a non-atomic object that is simultaneously
+                       read or written by another thread T_{1} the behavior of the execution
+                       becomes undefined.
 
-    - Rule 3.19.2.2 :: Keep thread specific state in local variables.
+    - TAKEAWAY 18.2 :: In view of execution in different threads, standard operations
+                       on atomic objects are indivisible and linearizable.
 
-    - Rule 3.19.2.3 :: Use ~thread_local~ if initialization can be determined at
-                       compile time.
+    - TAKEAWAY 18.3 :: Use the specifier syntax ~_Atomic (T)~ for atomic declarations.
 
-*** 19.3. Critical data and critical sections - 229
-    - Rule 3.19.3.1 :: Every mutex must be initialized with ~mtx_init~.
+    - TAKEAWAY 18.4 :: There are no atomic array types.
 
-    - Rule 3.19.3.2 :: A thread that holds a non-recursive mutex must not call
-                       any of the mutex lock function for it.
+    - TAKEAWAY 18.5 :: Atomic objects are the privileged tool to force the absence
+                       of race conditions.
 
-    - Rule 3.19.3.3 :: A recursive mutex is only released after the holding
-                       thread issues as many calls to ~mtx_unlock~ as it has
-                       acquired locks.
+*** 18.2. Race-free initialization and destruction - 330
+    - TAKEAWAY 18.6 :: A properly initialized ~FILE*~ can be used race-free by
+                       several threads.
 
-    - Rule 3.19.3.4 :: A locked mutex must be released before the termination of
-                       the thread.
+    - TAKEAWAY 18.7 :: Concurrent write operations should print entire lines at
+                       once.
 
-    - Rule 3.19.3.5 :: A thread must only call ~mtx_unlock~ on a mutex that it
-                       holds.
+    - TAKEAWAY 18.8 :: Destruction and deallocation of shared dynamic objects needs
+                       a lot of care.
 
-    - Rule 3.19.3.6 :: Each successful mutex lock corresponds to exactly one call
-                       to ~mtx_unlock~.
+*** 18.3. Thread local data - 333
+    - TAKEAWAY 18.9 :: Pass thread specific data through function arguments.
 
-    - Rule 3.19.3.7 :: A mutex must be destroyed at the end of its lifetime.
+    - TAKEAWAY 18.10 :: Keep thread specific state in local variables.
 
-*** 19.4. Communicating through condition variables - 231
-    - Rule 3.19.4.1 :: On return from a ~cnd_t~ wait, the expression must be
-                       checked, again.
+    - TAKEAWAY 18.11 :: A ~thread_local~ variable has one separate instance for
+                        each thread.
 
-    - Rule 3.19.4.2 :: A condition variable can only be used simultaneously with
-                       one mutex.
+    - TAKEAWAY 18.12 :: Use ~thread_local~ if initialization can be determined at
+                        compile time.
 
-    - Rule 3.19.4.3 :: A ~cnd_t~ must be initialized dynamically.
+*** 18.4. Critical data and critical sections - 333
+    - TAKEAWAY 18.13 :: Mutex operations provide linearizability.
 
-    - Rule 3.19.4.4 :: A ~cnd_t~ must be destroyed at the end of its lifetime.
+    - TAKEAWAY 18.14 :: Every mutex must be initialized with ~mtx_init~.
 
-*** 19.5. More sophisticated thread management - 234
-    - Rule 3.19.5.1 :: Returning from ~main~ or calling ~exit~ terminates all
-                       threads.
+    - TAKEAWAY 18.15 :: A thread that holds a non-recursive mutex must not call
+                        any of the mutex lock function for it.
 
-    - Rule 3.19.5.2 :: While blocking on ~mtx_t~ or ~cnd_t~ a thread frees
-                       processing resources.
+    - TAKEAWAY 18.16 :: A recursive mutex is only released after the holding
+                        thread issues as many calls to ~mtx_unlock~ as it has
+                        acquired locks.
 
-** 20. Atomic access and memory consistency - 236
-   - Rule 3.20.0.1 :: Every evaluation has an effect.
+    - TAKEAWAY 18.17 :: A locked mutex must be released before the termination of
+                        the thread.
 
-*** 20.1. The “happend before” relation - 237
-    - Rule 3.20.1.1 :: If F is sequenced before E, then F -> E.
+    - TAKEAWAY 18.18 :: A thread must only call ~mtx_unlock~ on a mutex that it
+                        holds.
 
-    - Rule 3.20.1.2 :: The set of modifications of an atomic object A are
-                       performed in an order that is consistent with the
-                       sequenced before relation of any threads that deals with
-                       A.
+    - TAKEAWAY 18.19 :: Each successful mutex lock corresponds to exactly one call
+                        to ~mtx_unlock~.
 
-    - Rule 3.20.1.3 :: An acquire operation E in a thread T_E synchronizes with a
-                       release operation F in another thread T_F if E reads the
-                       value that F has written.
+    - TAKEAWAY 18.20 :: A mutex must be destroyed at the end of its lifetime.
 
-    - Rule 3.20.1.4 :: If F synchronizes with E, all effects X that have happened
-                       before F must be visible at all evaluations G that happen
-                       after E.
+*** 18.5. Communicating through condition variables - 336
+    - TAKEAWAY 18.21 :: On return from a ~cnd_t~ wait, the expression must be
+                        checked, again.
 
-    - Rule 3.20.1.5 :: We only can conclude that one evaluation happened before
-                       another if we have a sequenced chain of synchronizations
-                       that links them.
+    - TAKEAWAY 18.22 :: A condition variable can only be used simultaneously with
+                        one mutex.
 
-    - Rule 3.20.1.6 :: If an evaluation F happened before E, all effects that are
-                       known to have happened before F are also known to have
-                       happened before E.
+    - TAKEAWAY 18.23 :: A ~cnd_t~ must be initialized dynamically.
 
-*** 20.2. Synchronizing C library calls - 238
-    - Rule 3.20.2.1 :: Critical sections that are protected by the same mutex
+    - TAKEAWAY 18.24 :: A ~cnd_t~ must be destroyed at the end of its lifetime.
+
+*** 18.6. More sophisticated thread management - 341
+    - TAKEAWAY 18.25 :: Returning from ~main~ or calling ~exit~ terminates all
+                        threads.
+
+    - TAKEAWAY 18.26 :: While blocking on ~mtx_t~ or ~cnd_t~ a thread frees
+                        processing resources.
+
+** TODO 19. Atomic access and memory consistency - 345
+   - TAKEAWAYS 19.1 :: Every evaluation has an effect.
+
+*** 19.1. The "happend before" relation - 347
+    - TAKEAWAYS 19.2 :: If F is sequenced before E, then F -> E.
+
+    - TAKEAWAYS 19.3 :: The set of modifications of an atomic object A are performed
+                        in an order that is consistent with the sequenced before
+                        relation of any threads that deals with A.
+
+    - TAKEAWAYS 19.4 :: An acquire operation E in a thread T_E synchronizes with a
+                        release operation F in another thread T_F if E reads the value
+                        that F has written.
+
+    - TAKEAWAYS 19.5 :: If F synchronizes with E, all effects X that have happened
+                        before F must be visible at all evaluations G that happen
+                        after E.
+
+    - TAKEAWAYS 19.6 :: We only can conclude that one evaluation happened before
+                        another if we have a sequenced chain of synchronizations
+                        that links them.
+
+    - TAKEAWAYS 19.7 :: If an evaluation F happened before E, all effects that are
+                        known to have happened before F are also known to have happened
+                        before E.
+
+*** 19.2. C library calls that provide synchronization - 349
+    - TAKEAWAY 19.8 :: Critical sections that are protected by the same mutex
                        occur sequentially.
 
-    - Rule 3.20.2.2 :: In a critical section that is protected by mutex mut all
+    - TAKEAWAY 19.9 :: In a critical section that is protected by mutex mut all
                        effects of previous critical sections protected by mut are
                        visible.
 
-    - Rule 3.20.2.3 :: ~cnd_wait~ or ~cnd_timedwait~ have release-acquire
-                       semantics.
+    - TAKEAWAY 19.10 :: ~cnd_wait~ or ~cnd_timedwait~ have release-acquire
+                        semantics.
 
-    - Rule 3.20.2.4 :: Calls to ~cnd_signal~ or ~cnd_broadcast~ should always
-                       occur inside a critical section that is protected by the
-                       same mutex as the waiters.
+    - TAKEAWAY 19.11 :: Calls to ~cnd_signal~ or ~cnd_broadcast~ synchronize via
+                        the mutex.
 
-*** 20.3. Sequential consistency - 239
-    - Rule 3.20.3.1 :: All atomic operations with sequential consistency occur in
-                       one global modification order, regardless of the atomic
-                       object they are applied to.
+    - TAKEAWAY 19.12 :: Calls to ~cnd_signal~ or ~cnd_broadcast~ should occur inside
+                        a critical section that is protected by the same mutex as
+                        the waiters.
 
-    - Rule 3.20.3.2 :: All operators and functional interfaces on atomics that
-                       don't specify otherwise have sequential consistency.
+*** 19.3. Sequential consistency - 352
+    - TAKEAWAY 19.13 :: All atomic operations with sequential consistency occur in
+                        one global modification order, regardless of the atomic
+                        object they are applied to.
 
-*** 20.4. Other consistency models - 240
-    - Rule 3.20.4.1 :: Every functional interface for atomic objects has a form
-                       with ~_explicit~ appended which allows to specify its con-
-                       sistency model.
+    - TAKEAWAY 19.14 :: All operators and functional interfaces on atomics that
+                        don't specify otherwise have sequential consistency.
 
-* TODO LEVEL 4. Ambition - 243
+*** 19.4. Other consistency models - 353
+    - TAKEAWAY 19.15 :: Every functional interface for atomic objects has a form with
+                        ~_explicit~ appended which allows to specify its consistency
+                        model.
+
+* Takeaways - 357
+* Bibliography - 370
+* Index - 372
+* TODO (DELETED) LEVEL 4. Ambition - 243
+** TODO (DELETED) 15. Error checking and cleanup - 165
+   - The C standard itself imposes only ~EOF~ (which is negative), and ~EDOM~,
+     ~EILSEQ~ nad ~ERANGE~ (which is positive).
+
+   - Rule 2.15.0.1 :: Labels for ~goto~ are visible in the whole function that
+                      contains them.
+
+   - Rule 2.15.0.2 :: ~goto~ can only jump to a label inside the same function.
+
+   - Rule 2.15.0.3 :: ~goto~ should not jump over variable initializations.
+
 ** 21. The ~register~ overhaul - 244
    - Rule 4.21.0.1 :: Objects that are declared with /register/ storage duration
                       can't alias.
@@ -3207,9 +3073,4 @@
 *** 26.1. Introduce evaluation contexts in the standard - 279
 *** 26.2. Convert object pointers to void* in unspecific context - 279
 *** 26.3. Introduce =nullptr= as a generic null pointer constant and deprecate ~NULL~ - 279
-
-* List of Rules - 281
-* Listings - 292
-* Bibliography - 295
-* Index - 299
 
