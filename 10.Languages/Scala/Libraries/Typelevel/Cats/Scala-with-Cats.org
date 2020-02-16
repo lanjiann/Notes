@@ -3233,7 +3233,8 @@
 
 ** TODO 4.11 Summary - 128
 
-* TODO 5 Monad Transformers - 129
+* DONE 5 Monad Transformers - 129
+  CLOSED: [2020-02-16 Sun 01:55]
   /Monads/ can potentially bloat the code base through nested
   for-comprehensions.
 
@@ -3247,17 +3248,334 @@
         }
     #+end_src
 
-** TODO 5.1 Exercise: Composing Monads - 130
-** TODO 5.2 A Transformative Example - 131
-** TODO 5.3 Monad Transformers in Cats - 133
-*** TODO 5.3.1 The Monad Transformer Classes - 133
-*** TODO 5.3.2 Building Monad Stacks - 134
-*** TODO 5.3.3 Constructing and Unpacking Instances - 136
-*** TODO 5.3.4 Default Instances - 137
-*** TODO 5.3.5 Usage Patterns - 138
+** DONE 5.1 Exercise: Composing Monads - 130
+   CLOSED: [2020-02-15 Sat 20:23]
+   - Q :: Do /monads/ compose???
 
-** TODO 5.4 Exercise: Monads: Transform and Roll Out - 140
-** TODO 5.5 Summary - 141
+   - A :: Generally speaking, No! It is easy to show this:
+     #+begin_src scala
+       import cats.Monad
+       import cats.syntax.applicative._  // for `pure`
+       import cats.syntax.flatMap._      // for `flatMap`
+       import scala.language.higherKinds
+
+       // Hypothetical example. This won't actually compile:
+       def compose[M1[_]: Monad, M2[_]: Monad] = {
+         type Composed[A] = M1[M2[A]]
+
+         new Monad[Composed] {
+           def pure[A](a: A): Composed[A] =
+             a.pure[M2].pure[M1]
+
+           def flatMap[A, B](fa: Composed[A])
+                            (f: A => Composed[B]): Composed[B] = {
+             // Problem! How do we write flatMap?
+             ???
+           }
+         }
+       }
+     #+end_src
+     + Without extra info, there is no way to implement ~flatMap~.
+
+     + *We need some extra info!!!*
+       For example, if ~M2~ is ~Option~, we can implement ~flatMap~ as:
+       #+begin_src scala
+         def flatMap[A, B](fa: Composed[A])
+                          (f: A => Composed[B]): Composed[B] =
+           fa.flatMap(_.fold(None.pure[M1])(f))
+       #+end_src
+       This is the idea behind /monad transformers/ -- =from Jian= extra info is
+       given for one monad.
+
+   - Cats defines transformers for a variety of monads, each providing the extra
+     knowledge we need to compose that monad with others.
+
+** DONE 5.2 A Transformative Example - 131
+   CLOSED: [2020-02-15 Sat 22:28]
+   - Cats /monad transformer/ naming convetion:
+     Inner monad name suffixed with T. For example, ~OptionT~ and ~EitherT~.
+
+   - We often alias a composed monad.
+     For example, alias ~OptionT[List, A]~ to ~ListOption[A]~.
+     Note how we build ~ListOption~ from the inside out.
+
+   - Create instance of ~ListOption~:
+     #+begin_src scala
+       import cats.Monad
+       import cats.instances.list._      // for Monad
+       import cats.syntax.applicative._  // for pure
+
+       val result1: ListOption[Int] = OptionT(List(Option(10)))
+       // result1: ListOption[Int] = OptionT(List(Some(10)))
+
+       val result2: ListOption[Int] = 32.pure[ListOption]
+       // result2: ListOption[Int] = OptionT(List(Some(32)))
+
+       result1.flatMap { (x: Int) =>
+         result2.map { (y: Int) =>
+           x + y
+         }
+       }
+
+       // OR
+
+       for {
+         x <- result1
+         y <- result2
+       } yield x + y
+
+       // res1: cats.data.OptionT[List, Int] = OptionT(List(Some(42)))
+     #+end_src
+
+   - *Complexity of Imports*
+     The imports in the code samples above hint at how everything bolts
+     together.
+
+     1. We import ~cats.syntax.applicative~ to get the ~pure~ syntax.
+        ~pure~ requires an implicit parameter of type ~Applicative[ListOption]~.
+        _Learn ~Applicative~ in the next chapter. All /monads/ are also
+        /applicatives/._
+
+     2. In order to generate our ~Applicative[ListOption]~ we need _instances of
+        ~Applicative~ for ~List~ and ~OptionT~._
+        + ~OptionT~ is a Cats data type so its instance is provided by its
+          /companion object/.
+
+        + The instance for ~List~ comes from ~cats.instances.list~
+
+     3. We're not importing ~cats.syntax.functor~ or ~cats.syntax.flatMap~.
+        This is because ~OptionT~ is a _CONCRETE_ data type with its own explicit
+        ~map~ and ~flatMap~ /methods/.
+
+     We discuss imports in details is just because we refuse to use the
+     universal Cats import, ~cats.implicits~.
+
+** DONE 5.3 Monad Transformers in Cats - 133
+   CLOSED: [2020-02-16 Sun 01:21]
+   Each /monad transformer/ is a data type, defined in ~cats.data~, that allows
+   us to _WRAP stacks of /monads/ TO produce NEW /monads/._
+
+   - The main concepts we have to cover to understand /monad transformers/:
+     + the available /transformer/ classes;
+     + how to BUILD STACKS of /monads/ using /transformers/;
+     + how to CONSTRUCT /instances/ of _a /monad/ stack_;
+     + how to PULL APART a stack to ACCESS the wrapped /monads/.
+
+*** DONE 5.3.1 The Monad Transformer Classes - 133
+    CLOSED: [2020-02-15 Sat 23:48]
+    - In fact, MANY /monads/ in Cats are defined by *combining*
+      + a /monad transformer/
+        with
+      + the ~Id~ /monad/.
+
+    - Concretely, some of the available instances are:
+      + ~cats.data.OptionT~ for ~Option~;
+      + ~cats.data.EitherT~ for ~Either~;
+      + ~cats.data.ReaderT~ for ~Reader~;
+      + ~cats.data.WriterT~ for ~Writer~;
+      + ~cats.data.StateT~ for ~State~;
+      + ~cats.data.IdT~ for ~Id~;
+
+    - *Kleisli Arrows*
+      + In Section 4.8 we mentioned that *the ~Reader~ /monad/ was a specialisation
+        of a more general concept called a _"kleisli arrow"_,* represented in Cats as
+        ~cats.data.Kleisli~.
+
+      + In fact, ~Kleisli~ and ~ReaderT~ are the same thing!
+        ~ReaderT~ is actually a /type alias/ for ~Kleisli~.
+          This is why when we were creating ~Reader~'s last chapter and seeing
+        ~Kleisli~'s on the console.
+
+*** DONE 5.3.2 Building Monad Stacks - 134
+    CLOSED: [2020-02-16 Sun 00:35]
+    - Many /monads/ and all transformers have AT LEAST _two_ /type parameters/,
+      so we often have to _define /type aliases/ for intermediate stages_.
+
+    - Example:
+      Suppose we want to create a NEW /monad/ by composing ~Option~ (inside) and
+      ~Either~. We need to use ~Either~ as the FIRST /type parameter/ of ~OptionT~.
+      _However, ~Either~ itself has *TWO* /type parameters/ and /monads/ ONLY have
+      one._
+        We *need* (=from Jian= and *must use*) a /type alias/ to convert the
+      type constructor to the correct shape:
+      #+begin_src scala
+        // Alias `Either` to a type constructor with one parameter:
+        type ErrorOf[A] = Either[String, A]
+
+        // Build our final monad stack using `OptionT`:
+        type ErrorOrOption[A] = OptionT[ErrorOr, A]
+      #+end_src
+      + =from Jian=
+        We can't define the NEW /monad/ as ~OptionT[Either[String, _], A]~
+        * Q :: Can Scala support syntax like this without any ambiguity???
+        * A :: =Jian's Guess=:
+               I'm not sure, even suppose the compiler understand the ~_~
+               syntax, I guess the compiler won't allow this because it can't
+               know ~String~ here is a part of the context -- for the compiler,
+               it may thing both ~String~ and ~A~ are /type parameters/.
+
+      + Usage:
+        #+begin_src scala
+          import cats.instances.either._  // for Monad
+
+          val a = 10.pure[ErrorOrOption]
+          // a: ErrorOrOption[Int] = OptionT(Right(Some(10)))
+
+          val b = 32.pure[ErrorOrOption]
+          // a: ErrorOrOption[Int] = OptionT(Right(Some(32)))
+
+          // val c = a.flatMap(x => b.map(y => x)
+          for {
+            x <- a
+            y <- b
+          } yield x + y
+          // c: cats.data.OptionT[ErrorOr,Int] = OptionT(Right(Some(42)))
+        #+end_src
+
+    - Things become even more confusing when we want to stack three or more /monads/.
+      For example, let's create a ~Future~ of an ~Either~ of ~Option~.
+      + Build inside out with an ~OptionT~ of an ~EitherT~ of ~Future~.
+        HOWEVER, we CANNOT define this in one line because ~EitherT~ has _THREE_
+        /type parameters/:
+        #+begin_src scala
+          case class EitherT[F[_], E, A](stack: F[Either[E, A]]) {
+            // ...
+          }
+        #+end_src
+        * The three type parameters are as follows:
+          - ~F[_]~ is the _outer monad_ in the stack (~Either~ is the inner);
+          - ~E~ is the _error type_ for the ~Either~.
+          - ~A~ is the _result type_ for the ~Either~.
+          -
+
+      + Definition and usage:
+        #+begin_src scala
+          import scala.concurrent.Future
+          import cats.data.{EitherT, OptionT}
+
+          type FutureEither[A] = EitherT[Future, String, A]
+          type FutureEitherOption[A] = OptionT[FutureEither, A]
+
+          import cats.instances.future._  // for Monad
+          import scala.concurrent.Await
+          import scala.concurrent.ExecutionContext.Implicits.global
+          import scala.concurrent.duration._
+
+          val futureEitherOr: FutureEitherOption[Int] =
+            for {
+              a <- 10.pure[FutureEitherOption]
+              b <- 32.pure[FutureEitherOption]
+            } yield a + b
+        #+end_src
+
+    - *Kind Projector*
+      /Kind projector/ is a compiler plugin that *enhances* Scala's type syntax
+      to _make it EASIER to define_ /partially applied type constructors/.
+      + For example,
+        #+begin_src scala
+          import cats.instances.option._  // for Monad
+          // import cats.instances.option._
+
+          123.pure[EitherT[Option, String, ?]]
+          // res7: cats.data.EitherT[Option,String,Int] = EitherT(Some(Right(123)))
+        #+end_src
+
+      + CAUTION:
+        The /kind projector/ *CANNOT simplify ALL* _type declarations_ down to a
+        single line, but it can reduce the number of intermediate type
+        definitions _needed to keep our code readable_.
+
+*** DONE 5.3.3 Constructing and Unpacking Instances - 136
+    CLOSED: [2020-02-16 Sun 00:52]
+    - Use the ~apply~ method or ~pure~ method to create _transformed monad stacks
+      instances_:
+      + Use ~apply~
+        #+begin_src scala
+          val errorStack1 = OptionT[ErrorOr, Int](Right(Some(10)))
+          // errorStack1: cats.data.OptionT[ErrorOr,Int] = OptionT(Right(Some(10)))
+        #+end_src
+
+      + Use ~pure~
+        #+begin_src scala
+          val errorStack2 = 32.pure[ErrorOrOption]
+          // errorStack2: ErrorOrOption[Int] = OptionT(Right(Some(32)))
+        #+end_src
+
+    - Use the ~value~ /method/ to unpack, and
+      each ~value~ can upack one level:
+      #+begin_src scala
+        // Extracting the untransformed monad stack:
+        errorStack1.value
+        // res11: ErrorOr[Option[Int]] = Right(Some(10))
+
+        // Mapping over the `Either` in the stack:
+        errorStack2.value.map(_.getOrElse(-1))
+        // res13: scala.util.Either[String,Int] = Right(32)
+
+
+        // Multiple levels unpack
+        futureEitherOr
+        // res14: FutureEitherOption[Int] = OptionT(EitherT(Future(Success(Right(Some(42))))))
+
+        val intermediate = futureEitherOr.value
+        // intermediate: FutureEither[Option[Int]] = EitherT(Future(Success(Right(Some(42)))))
+
+        val future = intermediate.value
+        // stack: scala.concurrent.Future[Either[String,Option[Int]]] = Future(Success(Right(Some(42))))
+
+        Await.result(stack, 1.second)
+        // res15: Either[String,Option[Int]] = Right(Some(42))
+      #+end_src
+
+*** DONE 5.3.4 Default Instances - 137
+    CLOSED: [2020-02-16 Sun 00:57]
+    - Some of the Cats monads defined by /monad transformers/:
+      #+begin_src scala
+        type Reader[E, A] = ReaderT[Id, E, A]  // = Kleisli[Id, E, A]
+        type Writer[W, A] = WriterT[Id, W, A]
+        type State[S, A] = StateT[Id, S, A]
+      #+end_src
+
+    - In other cases, /monad transformers/ are defined separately to their
+      _corresponding_ /monads/, and the /methods/ of the transformer *tend to
+      MIRROR the /methods/ on the /monad/.* For example,
+      + ~OptionT~ defines ~getOrElse~
+      + ~EitherT~ defines ~fold~, ~bimap~, ~swap~, and other useful /methods/.
+
+*** DONE 5.3.5 Usage Patterns - 138
+    CLOSED: [2020-02-16 Sun 01:21]
+    The system with /monad transformers/ need to be well designed.
+    _Without careful thought_, developers of code based on this system may
+    end up having to unpack and repack /monads/ in different configurations to
+    operate on them in differnt contexts.
+
+    - Unfortunately, there aren't one-size-fits-all approaches to working with
+      /monad transformers/. The two common approaches:
+      1. For *small* OR/AND *homogenous* code bases,
+         we can define a single "super stack", and stick ot it throughout our
+         code base.
+         =from Jian= Even in large and heterogeneous code base, we may find some
+         "super stacks", though most of the stacks are not of this kind.
+
+      2. For *large* AND/OR *heterogeneous* code bases,
+         we often identify and make local /monad transformers/, use them in
+         local, and untansform them before passing them on through _module
+         boundaries_.
+
+    - Example code: 138 and 139
+
+    - The approache 2 is more universal, but it also need more consideration and
+      trade off.
+        Try to experiment more and gather feedback from colleagures to determine
+      whether monad transformers are a good fit.
+
+** DONE 5.4 Exercise: Monads: Transform and Roll Out - 140
+   CLOSED: [2020-02-16 Sun 01:55]
+** DONE 5.5 Summary - 141
+   CLOSED: [2020-02-16 Sun 01:36]
+   In this chapter we *introduced* /monad transformers/, which *eliminate* the
+   need for /NESTED for comprehensions/ and /pattern matching/ when working with
+   "stacks" of _NESTED monads_.
 
 * DONE 6 ~Semigroupal~ and ~Applicative~ - 143 - NOTE
   CLOSED: [2019-04-08 Mon 00:25]
