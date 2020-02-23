@@ -1,5 +1,5 @@
 #+TITLE: Scala with Cats
-#+AUTHOR: Noel Welsh and Dave Gurnell
+#+AUTHOR: Noel Welsh, Dave Gurnell
 #+Date: November 2017
 #+STARTUP: entitiespretty
 
@@ -64,23 +64,30 @@
 * Part I. Theory - 7
 * DONE 1 Introduction - 9
   CLOSED: [2019-03-23 Sat 02:53]
+  The majority of the tools provided by Cats are delivered in the form of /type
+  classes/ that we can apply to existing Scala types. These tools allow us to
+  extend existing libraries with new functionality, without using traditional
+  inheritance, and without altering the original library source code.
+
+  - TODO TODO TODO ??? ??? ???
+    We'll finish by _tying_ /type classes/ back _into_ /algebraic data types/,
+    /pattern matching/, /value classes/, and /type aliases/, presenting a
+    structured approach to functional programming in Scala.
+
 ** DONE 1.1 Anatomy of a Type Class - 10
-   CLOSED: [2019-03-17 Sun 00:46]
+   CLOSED: [2020-02-16 Sun 20:16]
    There are *THREE* important _components_ to the /type class pattern/:
    1. the /type class/ itself
-
    2. /instances/ for particular types
-
    3. the /interface methods/ that we expose to users.
 
 *** DONE 1.1.1 The Type Class - 10
-    CLOSED: [2019-03-16 Sat 23:32]
+    CLOSED: [2020-02-16 Sun 19:41]
     A /type class/ is an /interface/ OR /API/
     that REPRESENTS some functionality we want to implement.
 
     - In Cats a /type class/
-      + is represented by a *trait*
-        * with AT LEAST _ONE_ /type parameter/.
+      + is represented by _a *trait* with AT LEAST *ONE* /type parameter/._
 
     - For example,
       represent generic "serialize to JSON" behaviour as follows:
@@ -97,12 +104,13 @@
           def write(value: A): Json
         }
       #+end_src
-      ~JsonWriter~ is our "type class"
+      ~JsonWriter~ is our "type class", with ~Json~ and its /subtypes/ providing
+      supporting code.
 
 *** DONE 1.1.2 Type Class Instances - 10
-    CLOSED: [2019-03-16 Sat 23:49]
-    The /instances/ of a /type class/ provide *implementations for the types* we
-    care about.
+    CLOSED: [2020-02-16 Sun 19:41]
+    _The /instances/ of a /type class/ provide *implementations for the types* we
+    care about._
 
     - In Scala
       we define /instances/ by
@@ -127,23 +135,24 @@
                 JsObject(Map("name"  -> JsString(value.name),
                              "email" -> JsString(value.email)))
             }
+
           // etc...
         }
       #+end_src
 
-*** DONE 1.1.3 Type Class Interfaces - 11 - =RE-READ=
-    CLOSED: [2019-03-17 Sun 00:46]
+*** DONE 1.1.3 Type Class Interfaces - 11
+    CLOSED: [2020-02-16 Sun 20:15]
     A /type class interface/ is any functionality we expose to users.
 
     - /Interfaces/ are /generic methods/ that _accept_ /instances/ of the /type
       class/ as /implicit parameters/.
 
-    - There are _two_ common ways of specifying an interface:
-      1. Interface Objects
-      2. Interface Syntax
+    - There are _two_ common ways of specifying an /interface/:
+      1. *Interface Objects*
+      2. *Interface Syntax* -- =from Jian= more flexible and fluent
 
 **** DONE Interface Objects - 11
-     CLOSED: [2019-03-17 Sun 00:33]
+     CLOSED: [2020-02-16 Sun 20:00]
      The SIMPLEST way of creating an /interface/ is to place /methods/ in a
      /singleton object/:
      #+begin_src scala
@@ -165,11 +174,11 @@
        ~Json.toJson(Person("Dave", "dave@example.com"))(personWriter)~
 
 **** DONE Interface Syntax - 12
-     CLOSED: [2019-03-17 Sun 00:46]
-     - We can _ALTERNATIVELY_ use /extension methods/ to *extend* _existing
-       types_ with /interface methods/.
+     CLOSED: [2020-02-16 Sun 20:08]
+     We can _ALTERNATIVELY_ use /extension methods/ to *extend* _existing
+     types_ with /interface methods/.
 
-       Cats refers to this as *syntax* for the /type class/:
+     - Cats refers to this as *syntax* for the /type class/:
        #+begin_src scala
          object JsonSyntax {
            implicit class JsonWriterOps[A](value: A) {
@@ -185,22 +194,13 @@
          import JsonSyntax._
 
          Person("Dave", "dave@example.com").toJson
-         // res6: Json = JsObject(Map(name -> JsString(Dave), email -> JsString(dave@example.com)))
+         // res6: Json = JsObject(Map(name  -> JsString(Dave),
+         //                           email -> JsString(dave@example.com)))
        #+end_src
-
-       The compiler inserts the required /implicit parameters/:
-       ~Person("Dave", "dave@example.com").toJson(personWriter)~
-
-     - =TODO=
-       + Q :: What is the process of
-              expanding ~Person("Dave", "dave@example.com").toJson~
-              to
-              ~JsonWriterOps(Person("Dave", "dave@example.com")).toJson(personWriter)~?
-
-       + A :: TODO ???
-
-
-**** DONE The _implicitly_ Method - 13
+       The compiler _searches_ for candidates for the /implicit parameters/ and
+       _fill_ them in for us:
+       ~Person("Dave", "dave@example.com").toJson(personWriter)
+**** DONE The ~implicitly~ Method - 13
      CLOSED: [2019-03-17 Sun 00:16]
      We can use ~implicitly~ to summon any value from /implicit scope/.
 
@@ -221,28 +221,26 @@
      - Most /type classes/ in Cats provide *other means* to _summon_ /instances/.
 
        HOWEVER, ~implicitly~ is a *good fallback* _for debugging purposes_.
-       We can insert a call to ~implicitly~ within the general flow of our code
-       to
+       We can insert a call to ~implicitly~ within the general flow of our code to
        + _ensure_ the compiler CAN FIND an /instance/ of a /type class/
          and
-       + _ensure_ that there are no AMBIGUOUS implicit errors.
+       + _ensure_ that there are *no* AMBIGUOUS implicit errors.
 
-** TODO 1.2 Working with Implicits - 13
-   There are a few rules we need to know about /implicits/ (/implicit values/ and
-   /implicit parameters/) to use them effectively.
+** DONE 1.2 Working with Implicits - 13
+   CLOSED: [2020-02-16 Sun 23:53]
+   _Working with /type classes/ in Scala_ means working with /implicit values/
+   and /implicit parameters/.
+     There are a few rules we need to know to do this effectively.
 
 *** DONE 1.2.1 Packaging Implicits - 13
-    CLOSED: [2019-03-20 Wed 13:27]
+    CLOSED: [2020-02-16 Sun 22:26]
     *Placing* /instances/ in a /companion object/ to the /type class/ has
     special significance in Scala because it plays into something called
     /implicit scope/.
 
 *** DONE 1.2.2 Implicit Scope - 14
-    CLOSED: [2019-03-20 Wed 15:34]
+    CLOSED: [2020-02-16 Sun 22:31]
     - The _compiler_ *searches* for CANDIDATE /type class instances/ *by type*.
-      =from Jian=
-      In Scala 3, we may have /named implicits/, then search can be *by type AND
-      name*.
 
     - For example,
       the compiler will search for ~JsonWriter[String]~ when it sees
@@ -250,18 +248,15 @@
 
     - The compiler searches for candidate instances in the /implicit scope/ at
       the call site, which _ROUGHLY_ consists of:
-      + local or inherited definitions;
+      1. local or inherited definitions;
 
-      + imported definitions;
+      2. imported definitions;
 
-      + definitions in the /companion object/ of the /type class/ or the
-        /parameter type/ (in the example ~JsonWriter~ or ~String~).
+      3. definitions in the /companion object/ of the /type class/ or the
+         /parameter type/ (in the example ~JsonWriter~ or ~String~).
 
-      Of course, the ~implicit~ keyword is the prerequisite. Without it
-      definitions can't be considered in /implicit scope/.
-
-    - Ambiguous implicit values ERROR:
-      *NOT only one* /implicit values/ with proper type can be found.
+    - One object must be first declared with the ~implicit~ keyword and then be
+      considered in /implicit scope/.
 
     - The precise rules of /implicit resolution/ are more complex then the ones
       listed above!
@@ -287,13 +282,15 @@
       + With options 3 and 4, instances are *always in implicit scope*,
         regardless of where we try to use them.
 
-*** TODO 1.2.3 Recursive Implicit Resolution - 15
-    - =TODO=
+*** DONE 1.2.3 Recursive Implicit Resolution - 15
+    CLOSED: [2020-02-16 Sun 23:53]
+    The power of /type classes/ and /implicits/ lies in the compiler's ability
+    to *COMBINE* /implicit definitions/ when _SEARCHING for candidate instances._
 
     - Example:
       #+begin_src scala
         implicit def optionWriter[A]
-          (implicit writer: JsonWriter[A]) =
+            (implicit writer: JsonWriter[A]): JsonWriter[Option[A]] =
           new JsonWriter[Option[A]] {
             def write(option: Option[A]): Json =
               option match {
@@ -303,53 +300,94 @@
           }
 
       #+end_src
-
-      + A simplified version:
+      + The process of search implicits and fill them in:
         #+begin_src scala
-          import scala.reflect.ClassTag
+          Json.toJson(Option("A string"))
 
-          implicit def optionWriter[A : ClassTag](implicit writer: JsonWriter[A]) = {
-            case Some(v: A) => writer.write(v)
-            case None       => JsNull
-          }
+          // Search for an implicit `JsonWriter[Option[String]]`.
+          // It find the implicit method for `JsonWriter[Option[A]]`:
+          Json.toJson(Option("A string"))(optionWriter[String])
+
+          // and recursively searches for a `JsonWriter[String]` for `optionWriter[String]`:
+          Json.toJson(Option("A string"))(optionWriter(stringWriter))
         #+end_src
-        =TODO= WHY type ~A~ is erased???
 
-    - =TODO=
+    - A simplified version =from Jian= (use reflection --> slower):
+      #+begin_src scala
+        import scala.reflect.ClassTag
+
+        implicit def optionWriter[A : ClassTag](implicit writer: JsonWriter[A]) = {
+          case Some(v: A) => writer.write(v)
+          case None       => JsNull
+        }
+      #+end_src
+      TODO WHY type ~A~ is erased???
 
     - *Implicit Conversions*
-      + PREFERRED:
-        /Implicit function/ definition with /implicit parameters/.
-
+      In this section we define /implicit function/ with /implicit parameters/.
         This make compiler recursively search the required /implicits/. _This is
-        the preferred pattern._
+        the preferred pattern._ *This is _NOT_ the /implicit conversion pattern/!!!*
 
-      + NOT Preferred in modern Scala code, older pattern:
-        /implicit conversion/.
-
+      + /Implicit conversion/ is an older pattern, and it is NOT Preferred in modern
+        Scala code:
         Compiler will give a warning, and if you want to dimiss the warning
         (*DON'T!*), you need ~import scala.language.implicitConversions~ in your
-        file (this is also indicated in the warning message).
+        file (this is also indicated in the warning message) or set a
+        corresponding compiler option.
 
       + Attention:
         /Interface Syntax/ is different from /implicit conversion/.
         It is defined as an /implicit class/ with /extension methods/!
 
+      + From Jian:
+        + /Implicit Conversion/:
+          A implicit function that convert from a value of ~A~ to a value of ~B~.
+          * The value of ~A~ is not marked ~implicit~
+          * ~B~ is not a type with /extension methods/. It's just another type.
+
+        + /Interface Syntax/:
+          A /implicit class/ ~Extended_A~ with a constructor of one parameter that typed ~A~.
+          It "add" /extension methods/ to the value passed in ~A~.
+
 ** DONE 1.3 Exercise: Printable Library - 18
-   CLOSED: [2019-03-22 Fri 13:03]
-   The limitation of ~toString~ method. =TODO=
-   Work around these problems with ~Printable~ /type class/.
+   CLOSED: [2020-02-17 Mon 00:16]
+   - A few disadvantages of the native ~toString~ method of any objects in Scala:
+     + It is implemented for every type in the language, many implementations are
+       of limited use, and we can't opt-in to specific implementations for specific
+       types. TODO ??? TODO ???
 
-   - Let's *define* a ~Printable~ /type class/ to work around these problems:
-     1. *Define* a /type class/ ~Printable[A]~ containing a SINGLE /method/ ~format~,
-        which
-        + _accept_ a value of type ~A~
-        + _return_ a ~String~.
+   - Let's *define* a ~Printable~ /type class/ to _work around_ these problems:
+     1. *Define* a /type class/ ~Printable[A]~ containing a SINGLE /method/
+        ~format(value: A): String~,
+        #+begin_src scala
+          trait Printable[A] {
+            def format(value: A): String
+          }
+        #+end_src
 
-     2. *Create* an object ~PrintableInstances~ containing /instanceS/ of
-        ~Printable~ FOR ~String~ and ~Int~.
+     2. *Create* an object ~PrintableInstances~ containing /instances/ of
+        ~Printable~ (for ~String~ and ~Int~ in our example).
+        #+begin_src scala
+          object PrintableInstances {
+            implicit val stringPrintable: Printable[String] =
+              identity[String] _
+
+            implicit val intPrintable: Printable[Int] =
+              (_: Int).toString
+          }
+        #+end_src
 
      3. *Define* an object ~Printable~ with TWO /generic interface methods/:
+        #+begin_src scala
+          // The "interface object" way.
+          object Printable {
+            def format[A](input: A)(implicit p: Printable[A]): String =
+              p.format(input)
+
+            def print(input: A)(implicit p: Printable[A]): Unit =
+              println(format(input))
+          }
+        #+end_src
         + ~format~ uses the relevant ~Printable~ to convert the ~A~ to a ~String~.
           * accepts a value of type ~A~
           * returns a ~Printable~ of the corresponding type.
@@ -358,36 +396,13 @@
           * accepts the same parameters as ~format~
           * returns ~Unit~.
 
-   - Code:
-     #+begin_src scala
-       trait Printable[A] {
-         def format(value: A): String
-       }
-
-       object PrintableInstances {
-         implicit val StringPrintable: Printable[String] =
-           identity[String] _
-
-         val IntPrintable: Printable[Int] =
-           (_: Int).toString
-       }
-
-       object Printable {
-         def format[A](input: A)(implicit p: Printable[A]): String =
-           p.format(input)
-
-         def print(input: A)(implicit p: Printable[A]): Unit =
-           println(format(input))
-       }
-     #+end_src
-
 *** DONE Using the Library - 19
-    CLOSED: [2019-03-21 Thu 18:34]
+    CLOSED: [2020-02-17 Mon 00:26]
     #+begin_src scala
       final case class Cat(name: String, age: Int, color: String)
 
       // Add to the `PrintableInstances`
-      implicit val cat = new Printable[Cat] {
+      implicit val catPrintable = new Printable[Cat] {
         def format(cat: Cat): String = {
           val name: String  = Printable.format(cat.name)
           val age: String   = Printable.format(cat.age)
@@ -398,10 +413,21 @@
     #+end_src
 
 *** DONE Better Syntax - 19
-    CLOSED: [2019-03-22 Fri 13:03]
+    CLOSED: [2020-02-17 Mon 00:28]
+    #+begin_src scala
+      object PrintableSyntax {
+        implicit class PrintableOps[A](value: A) {
+          def format(implicit p: Printable[A]): String =
+            Printable.format(value)
 
-** DONE 1.4 Meet Cats - 20 - =TODO= _Exercise_
-   CLOSED: [2019-03-20 Wed 22:23]
+          def print(implicit p: Printable[A]): Unit =
+            Printable.print(value)
+        }
+      }
+    #+end_src
+
+** DONE 1.4 Meet Cats - 20
+   CLOSED: [2020-02-17 Mon 03:26]
    - Previous section:
      we saw *HOW* to *implement* /type classes/ _in Scala_.
 
@@ -411,7 +437,7 @@
    - Cats is written using a /modular structure/ that allows us to choose which
      /type classes/, /instances/, and /interface methods/ we want to use.
 
-     Let's take a first look using ~cats.Show~ as an example.
+   - Let's take a first look using ~cats.Show~ as an example.
      ~Show~ is Cats' equivalent of the ~Printable~ /type class/ we defined in
      the last section.
 
@@ -425,7 +451,7 @@
      #+end_src
 
 *** DONE 1.4.1 Importing Type Classes - 20
-    CLOSED: [2019-03-20 Wed 20:39]
+    CLOSED: [2020-02-17 Mon 02:51]
     /Type classes/ are defined in ~cats~ /package/.
     Use it with ~import cats.Show~
 
@@ -433,12 +459,12 @@
       that *locates* an /instance/ for any type we specify.
 
       However, you need to bring related /implicits/ to scope first.
-      ONLY ~Show.apply[Int]~ will throw errors.
+      ~Show.apply[Int]~ need an implicit!
 
 *** DONE 1.4.2 Importing Default Instances - 21
-    CLOSED: [2019-03-20 Wed 20:49]
+    CLOSED: [2020-02-17 Mon 02:56]
     The ~cats.instances~ /package/ provides /DEFAULT instances/ for a wide
-    variety (=HOW WIDE???=) of types.
+    variety of types. TODO Check what are in the ~cats.instances~ package.
 
     - EACH /import/ provides /instances/ of ALL Cats' /type classes/
       for a SPECIFIC /parameter type/:
@@ -458,10 +484,10 @@
         import cats.instances.int._     //  for Show
         import cats.instances.string._  //  for Show
 
-        val showInt: Show[Int]       = Show.apply[Int]
+        val showInt:    Show[Int]    = Show.apply[Int]
         val showString: Show[String] = Show.apply[String]
 
-
+        // Usage examples:
         val intAsString: String =
           showInt.show(123)
         // intAsstring: String = 123
@@ -472,7 +498,7 @@
       #+end_src
 
 *** DONE 1.4.3 Importing Interface Syntax - 22
-    CLOSED: [2019-03-20 Wed 20:56]
+    CLOSED: [2020-02-17 Mon 02:57]
     Make ~Show~ easier to use by _importing the /interface syntax/ from
     ~cats.syntax.show~._
 
@@ -489,13 +515,11 @@
       #+end_src
 
     - Cats provides *SEPARATE* syntax imports for EACH /type class/.
-      =TODO= We will introduce these as we encounter them in later sections and
-      chapters.
 
 *** DONE 1.4.4 Importing All The Things! - 22
-    CLOSED: [2019-03-20 Wed 21:14]
+    CLOSED: [2020-02-17 Mon 03:00]
     - You should feel free to take one of the following shortcuts to simplify your
-      imports:
+      imports: =IMPORTANT=
       + ~import cats._~ imports *ALL* of Cats' /type classes/ in one go;
 
       + ~import cats.instances.all._~ imports *ALL* of the /type class instances/
@@ -506,22 +530,21 @@
       + ~import cats.implicits._~ imports *ALL* of the /standard type class
         instances/ and *ALL* of the /syntax/ in one go.
 
-    - Most people start their files with the following imports:
-      #+begin_src scala
-        import cats._
-        import cats.implicits._
-      #+end_src
+    - Most people
+      1. _start_ their files with the following imports:
+         #+begin_src scala
+           import cats._
+           import cats.implicits._
+         #+end_src
 
-      reverting to more specific imports only if they encounter naming conflicts
-      or problems with ambiguous implicits:
+      2. _reverting_ to more specific imports _only if they encounter naming conflicts
+         or problems with ambiguous implicits._
 
 *** DONE 1.4.5 Defining Custom Instances - 23
-    CLOSED: [2019-03-20 Wed 22:23]
+    CLOSED: [2020-02-17 Mon 03:26]
     - Q :: *HOW to define* an /instance/ of ~Show~?
 
     - A :: implementing the /trait/ for a given type:
-           =TODO= Replace this example with ~java.time.LocalDate~.
-                  STOP using ~java.util.Date~ even in example code!!!
            #+begin_src scala
              import java.util.Date
 
@@ -539,37 +562,63 @@
               date => s"${date.getTime}ms since the epoch."
         #+end_src
 
-    - Cats also provides a couple of convenient methods to *simplify* the process
+    - =from Jian=
+      Should avoid an old and not well designed class like ~java.util.Date~ as a
+      illsutration example. I try to use ~java.time.LocalDate~ adn do a similar
+      job:
+      #+begin_src scala
+        import java.time.LocalDateTime
+        import java.time.ZoneOffset
+
+        implicit val dateShow: Show[LocalDateTime] =
+          new Show[LocalDateTime] {
+            def show(dateTime: LocalDateTime): String =
+              s"${LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli}ms since the epoch."
+          }
+      #+end_src
+
+    - =IMPORTANT=
+      Cats also provides a couple of convenient methods to *simplify* the process
       of creating /instances/.
 
       For ~Show~, there are two _construction methods_ on the /companion object/.
       + ~def show[A](f: A => String): Show[A]~
+        Create a ~Show~ /instance/ from a function
 
       + ~def fromToString[A]: Show[A]~
+        Create a ~Show~ /instance/ from a ~toString~ /method/
 
     - Use the ~show~ _construction method_:
       #+begin_src scala
-        implicitval dateShow: Show[Date] =
+        implicit val dateShow: Show[Date] =
           Show.show(date => s"${date.getTime}ms since the epoch.")
       #+end_src
-
       =from Jian= This is still more code then my *Simplified code* above.
-                  WHY do we need ~show~???
+                  WHY do we need ~show~??? I _guess_ this is because before
+                  Scala 2.11 the simplified syntax for an instance of SAM is not
+                  allowed. Then, do we still want to keep this for the future Scala.
 
     - Many /type classes/ in Cats provide /helper methods/ like these for
       *constructing* /instances/,
       + either *from scratch*
       + or by *transforming existing* /instances/ for other types.
-        =TODO= =TODO= =TODO=
+        TODO MORE examples!!!
 
-*** TODO 1.4.6 Exercise: Cat _Show_ - 24
+*** DONE 1.4.6 Exercise: Cat ~Show~ - 24
+    CLOSED: [2020-02-17 Mon 00:35]
+    The implementation is trivial -- only the /implicit value/ ~catShow~ we need
+    to define -- just provide the function that can convert ~Cat~ to a ~String~
+    of the format we want. All other things can be imported from Cats.
 
-** DONE 1.5 Example: _Eq_ - 24
-   CLOSED: [2018-10-24 Wed 22:10]
+    _The import thing is *knowing what to import*._
+
+** DONE 1.5 Example: ~Eq~ - 24
+   CLOSED: [2020-02-17 Mon 00:58]
    - ~Eq~ is designed to
-     + support *type-safe equality*
+     + _support_ *type-safe equality* -- compre values of the same type
+       (=from Jian= a narrowed down type, not consider them as the root type ~Any~)
        and
-     + address annoyances using Scala's built-in ~==~ operator.
+     + _address_ annoyances using Scala's built-in ~==~ operator.
 
    - With the built-in ~==~ no type-safty equality check, we may make _mistake_
      like:
@@ -582,7 +631,7 @@
      ~cats.Eq~ is designed to do this!!!
 
 *** DONE 1.5.1 Equality, Liberty, and Fraternity - 25
-    CLOSED: [2018-10-24 Wed 21:18]
+    CLOSED: [2020-02-17 Mon 00:51]
     We can use ~Eq~ to define /type-safe equality/ between /instances/ of ANY
     given /type/:
     #+BEGIN_SRC scala
@@ -593,19 +642,23 @@
         // other concrete methods based on `eqv`...
       }
     #+END_SRC
-    The /interface syntax/, defined in ~cats.syntax.eq~, provides *two* /methods/
-    for performing equality checks provided there is an instance ~Eq[A]~ _in
-    scope_:
-    - ~===~ compares two objects for /equality/;
+    - =from Jian=
+      Use ~eqv~ rather than ~eq~ is because ~eq~ (a function in Scala behaved
+      like the ~==~ in Java) is already used by Scala.
 
-    - ~=!=~ compares two objects for /inequality/.
+    - The /interface syntax/ of ~Eq~ is defined in ~cats.syntax.eq~.
+      It provides *two* /methods/ for performing equality checks provided there
+      is an instance ~Eq[A]~ _in scope_:
+      + ~===~ compares two objects for /equality/;
+
+      + ~=!=~ compares two objects for /inequality/.
 
 *** DONE 1.5.2 Comparing Ints - 25
-    CLOSED: [2018-10-24 Wed 21:21]
+    CLOSED: [2020-02-17 Mon 00:51]
     Examples:
     #+BEGIN_SRC scala
       import cats.Eq
-      import cats.instances.int._  // for `Eq`
+      import cats.instances.int._  // for `Eq[Int]`
 
       val eqInt = Eq[Int]
 
@@ -618,7 +671,7 @@
       eqInt.eqv(123, "234")
       //// type mismatch error
 
-      import cats.syntax.eq._  // for `===` and `=!=`
+      import cats.syntax.eq._  // for the infix operators `===` and `=!=`
 
       123 === 123
       // res5: Boolean = true
@@ -628,7 +681,7 @@
     #+END_SRC
 
 *** DONE 1.5.3 Comparing Options - 26
-    CLOSED: [2018-10-24 Wed 21:26]
+    CLOSED: [2020-02-17 Mon 00:54]
     #+BEGIN_SRC scala
       import cats.instances.int._     // for `Eq`
       import cats.instances.option._  // for `Eq`
@@ -643,27 +696,28 @@
       Option(1) === Option.empty[Int]
       // res10: Boolean = false
     #+END_SRC
+    - =from Jian= Here it MUST be ~(Some(1): Option[Int])~ or ~Option(1)~.
+      ~Some(1) === (None: Option[Int])~ have /type error/ -- here you can only
+      compare ~Option[Int]~ with ~Option[Int]~, and compre its different subtypes
+      will lead to /type error/ -- extremely strict type checking!!!
 
-    =IMPORTANT= =RE-READ= =RE-READ=
-    =from Jian=
-    Must be ~(Some(1): Option[Int])~ or ~Option(1)~.
-    ~Some(1) === (None: Option[Int])~ have /type error/ -- here you can only
-    compre ~Option[Int]~ with ~Option[Int]~, and compre its different subtypes
-    will lead to /type error/ -- extremely strict type checking!!!
+      =from Jian=
+      Can Dotty make this more flexible???
 
-    OR use special syntax from ~cats.syntax.option~:
-    #+BEGIN_SRC scala
-      import cats.syntax.option._  // for some and none
 
-      1.some === none[Int]
-      // res11: Boolean = false
+    - OR use special syntax from ~cats.syntax.option~:
+      #+BEGIN_SRC scala
+        import cats.syntax.option._  // for some and none
 
-      1.some =!= none[Int]
-      // res12: Boolean = true
-    #+END_SRC
+        1.some === none[Int]
+        // res11: Boolean = false
+
+        1.some =!= none[Int]
+        // res12: Boolean = true
+      #+END_SRC
 
 *** DONE 1.5.4 Comparing Custom Types - 28
-    CLOSED: [2018-10-24 Wed 21:30]
+    CLOSED: [2020-02-17 Mon 00:55]
     Define our own instances of ~Eq~ with ~Eq.instance~ /method/, which accepts
     a function of type ~(A, A) => Boolean~ and returns an ~Eq[A]~:
     #+BEGIN_SRC scala
@@ -683,7 +737,7 @@
     #+END_SRC
 
 *** DONE 1.5.5 Exercise: Equality, Liberty, and Felinity - 28
-    CLOSED: [2018-10-24 Wed 22:06]
+    CLOSED: [2020-02-17 Mon 00:58]
     #+BEGIN_SRC scala
       import cats.Eq
       import cats.syntax.eq._
@@ -721,15 +775,11 @@
       implicit val catEq: Eq[Cat] =
         Eq.instance[Cat] { (c1, c2) => c1 == c2 }
     #+END_SRC
-    This is NOT applicable for /non-case classes/.
-
-    - =IMPORTANT= =TODO=
-      Justify!!!
-      Re-consider it with corner cases.
-      =from Jian= Till now, it is right!
+    We can't use ~==~ between ~c1~ and ~c2~, but for /case classes/, ~==~ is
+    enough!!! This is NOT applicable for /non-case classes/.
 
 ** DONE 1.6 Controlling Instance Selection - 29
-   CLOSED: [2019-03-23 Sat 02:53]
+   CLOSED: [2020-02-17 Mon 22:32]
    Two issues that _CONTROL /instance/ selection_ must be considered:
    - What is the _relationship_ BETWEEN an instance defined on _a type and its
      subtypes_?
@@ -744,7 +794,7 @@
 *** DONE 1.6.1 Variance - 29
     CLOSED: [2019-03-23 Sat 02:52]
 **** DONE Covariance - 29
-     CLOSED: [2019-03-22 Fri 15:00]
+     CLOSED: [2020-02-17 Mon 22:00]
      - Covariance :: the type ~F[B]~ is a /subtype/ of the type ~F[A]~ if ~B~ is
                      a /subtype/ of ~A~.
 
@@ -754,12 +804,12 @@
        /immutable collections/ are /covariant/.
 
 **** DONE Contravariance - 30
-     CLOSED: [2019-03-22 Fri 15:11]
-     - Contravariance :: the type ~F[B]~ is a /subtype/ of the type ~F[A]~ if ~A~ is
-                         a /subtype/ of ~B~.
+     CLOSED: [2020-02-17 Mon 22:00]
+     - Contravariance :: the type ~F[B]~ is a /subtype/ of the type ~F[A]~ if ~A~
+                         is a /subtype/ of ~B~.
 
-     - /Covariance/ is useful for modelling types that represent processes,
-       like our ~JsonWriter~ /type class/ above:
+     - /Covariance/ is useful for modeling types that represent processes, like
+       our ~JsonWriter~ /type class/ above:
        #+begin_src scala
          trait JsonWriter[-A] {
            def write(value: A): Json
@@ -777,8 +827,17 @@
          def format[A](value: A, writer: JsonWriter[A]): Json =
            writer.write(value)
        #+end_src
+       + Logically (even we don't know the /contravariance/ of ~JsonWriter[A]~,
+         we still have some reasonable expectation), what kind of combinations
+         are legal?
+         - When ~value~ is a ~Circle~, ~writer~ can be ~JsonWriter[Circle]~ and
+           ~JsonWriter[Shape]~.
 
-     - =TODO=
+         - When ~value~ is a ~Shape~, ~writer~ can ONLY be ~JsonWriter[Shape]~.
+
+       + The expectation above is the expectation for /contravariance/:
+         ~JsonWriter[Shape]~ is a subtype of ~JsonWriter[Circle]~ because ~Circle~
+         is a subtype of ~Shape~.
 
 **** DONE Invariance - 31
      CLOSED: [2019-03-22 Fri 15:11]
@@ -792,8 +851,8 @@
        Let's imagine we have an /algebraic data type/ like:
        #+begin_src scala
          sealed trait A
-         final case object B extends A
-         final case object C extends A
+         case object B extends A
+         case object C extends A
        #+end_src
        1. Will an /supertype/ (in this example, it is ~A~) /instance/ be selected
           for /subtypes/ (in this example, they are ~B~ and ~C~)?
@@ -811,28 +870,26 @@
        | Supertype instance used?      | No        | No        | Yes           |
        | More specific type preferred? | No        | Yes       | No            |
 
-     - _Cats generally *prefers* to use /invariant type classes/._
-       =IMPORTANT=
-       + Q :: WHY???
-
-       + A :: This allows us to *specify more specific* /instances/ for
-              /subtypes/ if we want.
-
-              For example, a value of /type/ ~Some[Int]~, our /type class
-              instance/ for ~Option~ will *NOT* be used.
-                We can solve this problem with a type annotation like
-              ~Some(1): Option[Int]~ or by using /"smart constructors"/ like the
-              ~Option.apply~, ~Option.empty~, ~some~, and ~none~ /methods/.
+     - There is no perfect system, and
+       _Cats generally *prefers* to use /invariant type classes/._
+       This allows us to *specify more specific* /instances/ for /subtypes/ if
+       we want.
+       + This also introduce some "issue" that we need to pay attention.
+         For example,
+         a value of /type/ ~Some[Int]~, our /type class instance/ for ~Option~
+         will *NOT* be used.
+           We can solve this problem with a /type annotation/ like
+         ~Some(1): Option[Int]~ or by using /"smart constructors"/ like the
+         ~Option.apply~, ~Option.empty~, ~some~, and ~none~ /methods/.
 
 ** DONE 1.7 Summary - 32
-   CLOSED: [2018-10-24 Wed 22:18]
+   CLOSED: [2020-02-17 Mon 23:50]
    - First, we use plain Scala to introduce the concept of /type classes/.
-     =TODO= LINK IN YOUTUBE
      We implementated our own ~Printable~ /type class/ using plain Scala before
      looking at two examples from /Cats/ -- ~Show~ and ~Eq~
 
-   - The _general patterns_ in ~Cats~ /type classes/:
-     + /Type classes/ are /generic traits/ _in the ~cats~ package_.
+   - The _general patterns_ in ~Cats~:
+     + /Cats type classes/ are /generic traits/ _in the ~cats~ package_.
 
      + *EACH* /type class/ has a /companion object/ with,
        * an ~apply~ /method/ for materializing instances;
@@ -844,18 +901,12 @@
        class/.
 
      + MANY /type classes/ have /syntax/ provided via the ~cats.syntax~ /package/.
-       =from Jian= Usually, /extension methods/.
 
-   - *NEXT*
-     Look at several broad and powerful /type classes/ -- ~Semigroup~, ~Monoid~,
-     ~Functor~, ~Monad~, ~Semigroupal~, ~Applicative~, ~Traverse~, and more.
+* DONE 2 Monoids and Semigroups - 35
+  CLOSED: [2020-02-18 Tue 02:22]
+  /Type classes/ /monoid/ and /semigroup/ allow us to combine values.
+  - There are instances for ~Int~, ~String~, ~List~, ~Option~, and many more.
 
-     + We will learn
-       * what functionality the /type class/ *provides*,
-       * the _formal rules_ (*laws* in math) it *follows*,
-       * how it is *implemented* in Cats.
-
-* TODO 2 Monoids and Semigroups - 35
 *** DONE Integer addition - 35
     CLOSED: [2018-10-26 Fri 21:35]
     - Operation: Closed under integer ~+~
@@ -874,15 +925,24 @@
     - Identity: ~""~
     - Associativity
 
+** DONE 2.1 Definition of a ~Monoid~ - 37
+   CLOSED: [2020-02-18 Tue 00:20]
+   - Formally, a /monoid/ for a type ~A~:
+     + It has
+       * an operation ~combine~ with type ~(A, A) => A~
+       * an element ~empty~ of type ~A~
+     + It obeys
+       * association laws
+       * identity laws
 
-** DONE 2.1 Definition of a _Monoid_ - 37
-   CLOSED: [2018-10-26 Fri 22:43]
-   #+BEGIN_SRC scala
-     trait Monoid[A] {
-       def combine(x: A, y: A): A
-       def empty: A
-     }
-   #+END_SRC
+   - /Monoid/ in Cats:
+     #+BEGIN_SRC scala
+       trait Monoid[A] {
+         def combine(x: A, y: A): A
+         def empty: A
+       }
+     #+END_SRC
+
    - Only the ~combine~ and ~empty~ /methods/ of this ~trait~ *CANNOT* guarantee
      the _monoid in math_ -- /monoids/ *must formally obey* several /laws/, here
      are functions that can be used to _test_ the /laws/:
@@ -897,8 +957,16 @@
          (m.combine(x, m.empty) == x) && (m.combine(m.empty, x) == x)
        }
      #+END_SRC
-     + /Integer subtraction/ does *NOT* obey the /associative law (for /monoid/)/,
-       and there is NO /monoid/ under /integer subtraction/ operation.
+     + =from Jian=
+       Scala does NOT contain a system that can prove a thing defined as monoid-like
+       is really a /monoid/. We write down laws, and then prove it with some proof
+       system (including a person with pen and paper :-)). In Scala, a more applicable
+       way is write down the laws in code, and use tests to show some proof (of
+       course, this is often not comprehensive). Even in Scala, we should do the
+       paper and pen proof for complicated user-defined monoid.
+
+   - /Integer subtraction/ does *NOT* obey the /associative law (for /monoid/)/,
+     and there is NO /monoid/ under /integer subtraction/ operation.
 
    - AGAIN,
      *Unlawful instances are dangerous*!!!
@@ -907,15 +975,15 @@
 
      It will yield *unpredictable results*.
 
-** DONE 2.2 Definition of a _Semigroup_ - 38
-   CLOSED: [2018-10-26 Fri 22:52]
+** DONE 2.2 Definition of a ~Semigroup~ - 38
+   CLOSED: [2020-02-18 Tue 00:24]
    /Semigroups/ have only ~combine~ and NO ~empty~.
 
    - /Semigroups/ are often /monoids/.
 
    - We can add some _restriction_ to eliminate /identitis/ of /monoids/, and
      make them no longer /monids/, but /semigroups/ ONLY.
-     For example,
+     For example, there is one we often see and use
      + positive numbers
 
      + none empty sequences.
@@ -932,18 +1000,9 @@
          def empty: A
        }
      #+end_src
-     =From Jian= The book use /inheritance/, but I want to argue that this is
-     actually a /subtyping/. I replace the "inheritance" in the book with
-     "subtyping", and get:
-       We'll see this kind of /subtypping/ often when discussing /type classes/.
-     It provides _modularity_ and allows us to re-use behaviour (=from Jian= API
-     compatibility):
-       if we define a ~Monoid~ for a type A, we get a ~Semigroup~ _for free_.
-     Similarly, if a /method/ requires a parameter of /type/ ~Semigroup[B]~, we
-     can pass a ~Monoid[B]~ instead.
 
 ** DONE 2.3 Exercise: The Truth About Monoids - 39
-   CLOSED: [2018-10-26 Fri 22:59]
+   CLOSED: [2020-02-18 Tue 00:49]
    We first complete the ~Monoid~ related definitions in Cats:
    #+begin_src scala
      trait Semigroup[A] {
@@ -985,8 +1044,8 @@
    The /identity law/ holds in each case is straightforward.
    The /associative law/ can be proved by enumerating the cases.
 
-** DONE 2.4 Exercise: All _Set_ for Monoids - 40
-   CLOSED: [2018-10-26 Fri 23:06]
+** DONE 2.4 Exercise: All ~Set~ for Monoids - 40
+   CLOSED: [2020-02-18 Tue 00:52]
    - ~Monoid[Set[A]]~ exists UNDER /sets/ ~union~ operation with ~Set.empty[A]~ as
      /identity/:
      #+BEGIN_SRC scala
@@ -1028,17 +1087,17 @@
      #+END_SRC
 
 ** DONE 2.5 Monoids in Cats - 40
-   CLOSED: [2018-10-26 Fri 23:35]
+   CLOSED: [2020-02-18 Tue 01:09]
    We've seen what /monoids/ are.
-   Now let's look at their _implementation in Cats_.
+   Now let's look at their *implementation in Cats*.
 
    - Once again we'll look at the *THREE* main aspects of the implementation:
      + the /type class/
      + the /instances/
-     + the /interface/
+     + the /interface/ (syntax)
 
 *** DONE 2.5.1 The Monoid Type Class - 40
-    CLOSED: [2018-10-26 Fri 23:09]
+    CLOSED: [2020-02-18 Tue 00:58]
     ~cats.Monoid~ (an alias of ~cats.kernel.Monoid~) and ~cats.Semigroup~ (an
     alias of ~cats.kernel.Semigroup~).
     #+begin_src scala
@@ -1050,18 +1109,20 @@
       /Cats Kernel/ is a _subproject_ of Cats providing _a small set_ of
       /typeclasses/ *for libraries that don't require the full Cats toolbox*.
 
-      While these _CORE_ /type classes/ are technically defined in the
-      ~cats.kernel~ /package/, they are ALL *aliased* to the ~cats~ package so
-      we rarely need to be aware of the distinction.
+      While these _CORE_ /type classes/ are technically defined in the ~cats.kernel~
+      /package/, _they are ALL *aliased* to the ~cats~ package so we RARELY need
+      to be aware of the distinction._
 
-        The /Cats Kernel/ /type classes/ covered in this book: ~Eq~,
-      ~Semigroup~, and ~Monoid~.
+      + The /Cats Kernel/ /type classes/ covered in this book:
+        * ~Eq~
+        * ~Semigroup~
+        * ~Monoid~
 
-      All the other /type classes/ we cover are part of the main Cats project and
-      are defined _directly_ in the ~cats~ /package/.
+      + All the other /type classes/ we cover are part of the main Cats project
+        and are defined _directly_ in the ~cats~ /package/.
 
 *** DONE 2.5.2 Monoid Instances - 41
-    CLOSED: [2018-10-26 Fri 23:12]
+    CLOSED: [2020-02-18 Tue 00:59]
     - Example (usage):
       #+BEGIN_SRC scala
         import cats.Monoid
@@ -1087,7 +1148,7 @@
       #+end_src
 
 *** DONE 2.5.3 Monoid Syntax - 42
-    CLOSED: [2018-10-26 Fri 23:14]
+    CLOSED: [2020-02-18 Tue 01:00]
     ~|+|~ is the /combine/ operator, which comes from ~cats.syntax.semigroup._~
     #+BEGIN_SRC scala
       import cats.instances.string._
@@ -1101,8 +1162,8 @@
       // inResult: Int = 3
     #+END_SRC
 
-*** DONE 2.5.4 Exercise: Adding All The Things - 43 - =TODO= =???=
-    CLOSED: [2018-10-26 Fri 23:35]
+*** DONE 2.5.4 Exercise: Adding All The Things - 43
+    CLOSED: [2020-02-18 Tue 01:06]
     - Write ~add~ for ~Int~
       #+BEGIN_SRC scala
         def add(items: List[Int]): Int =
@@ -1116,7 +1177,7 @@
         import cats.instances.option._
         import cats.syntax.semigroup._
 
-        def add[A : Monoid](items: List[A])(implicit monoid: Monoid[A]): A =
+        def add[A](items: List[A])(implicit monoid: Monoid[A]): A =
           items.foldLeft(monoid.empty)(_ |+| _)
       #+END_SRC
 
@@ -1129,10 +1190,6 @@
       #+END_SRC
       This is because /Cats/ will ONLY generate a ~Monoid~ for ~Option[Int]~.
 
-      =TODO= =IMPORTANT= =HOWTO= =???=
-      We'll se how to get around this in a moment.
-      =TODO= =IMPORTANT= =HOWTO= =???=
-
     - Make ~Order~ addable.
       #+BEGIN_SRC scala
         import cats.Monoid
@@ -1141,7 +1198,8 @@
 
         implicit val orderMonoid = new Monoid[Order] {
           def combine(x: Order, y: Order): Order =
-            Order(x.totalCost + y.totalCost, x.quantity + y.quantity)
+            Order(x.totalCost + y.totalCost,
+                  x.quantity + y.quantity)
 
           def empty: Order =
             Order(0.0, 0.0)
@@ -1149,11 +1207,12 @@
       #+END_SRC
 
 ** DONE 2.6 Applications of Monoids - 43
-   CLOSED: [2018-10-27 Sat 00:08]
+   CLOSED: [2020-02-18 Tue 02:12]
    Here are a few big ideas where /monoids/ play a major role.
+   TODO More detail in case studies later in this book.
 
 *** DONE 2.6.1 Big Data - 44
-    CLOSED: [2018-10-26 Fri 23:46]
+    CLOSED: [2020-02-18 Tue 02:11]
     - Use cases (Need process a huge amount of logs, NOT/CANNOT in ONLY one
       computer):
       + Calculate how many total visitors a web site has received.
@@ -1166,7 +1225,7 @@
 
       + If we want to calculate 99% and 95% response times from our server logs,
         we can use a data structure called a ~QTree~ for which there is a /monoid/.
-        =TODO= =???= ~QTree~.
+        TODO _Learn how to design and implement this data structure._
 
     - Summary:
       Almost every analysis that we might want to do over a large data set is a
@@ -1176,66 +1235,119 @@
       This is exactly what Twitter's Algebird and Summingbird projects have
       done. We explore this idea further in the map-reduce case study.
 
-*** DONE 2.6.2 Distributed Systems - 44 - =TODO= =Case-Study= =NOTE=
-    CLOSED: [2018-10-27 Sat 00:06]
-    We explore this idea further in *the CRDT case study*.
+*** DONE 2.6.2 Distributed Systems - 44
+    CLOSED: [2020-02-18 Tue 02:11]
+    TODO =Case-Study= We explore this idea further in *the CRDT case study*.
 
 *** DONE 2.6.3 Monoids in the Small - 45
-    CLOSED: [2018-10-27 Sat 00:08]
+    CLOSED: [2020-02-18 Tue 02:11]
     There are also many cases where having a monoid around makes it easier to
     write a small code fragment.
 
     See *case studies* of this book
 
-** TODO 2.7 Summary - 45
+** DONE 2.7 Summary - 45
+   CLOSED: [2020-02-18 Tue 02:21]
 
-* TODO 3 Functors - 47
+* DONE 3 Functors - 47 - TODO _contravariant and invariant functors_
+  CLOSED: [2020-02-20 Thu 11:22]
   - /Functors/ allow us to represent sequences of operations within a /context/.
-
-    + =from Jian=
-      Here the author use /(COMPUTATIONAL) context/ is more exact than /structure/.
-        It might NOT be /structure/ -- unless you think the type is a concrete
-      container. =from Jian= This what a book told me. Need Examples!!!
 
   - /Functor/ is the base of /applicative functor/ and /monad/, which are more
     useful.
 
-** DONE 3.1 Examples of Functors - 47 - =???=
-   CLOSED: [2018-10-27 Sat 00:22]
+** DONE 3.1 Examples of Functors - 47
+   CLOSED: [2020-02-18 Tue 02:31]
    - Because ~map~ leaves the the /context/ unchanged, we can call it repeatedly
      to *sequence* multiple computations on the _contents_ of an initial data
      structure.
+     #+begin_src scala
+       // Of course, the first two map's can be merged to one,
+       // Here is a illustration example, not best practice:
+       List(1, 2, 3).
+         map(_ + 1).
+         map(_ * 2).
+         map(_ + "!")
+     #+end_src
 
    - We should think of ~map~
-     + *NOT* as an /iteration pattern/,
-     + BUT as a way of *sequencing* computations on values
+     + *NOT*
+       as an /iteration pattern/,
+       =from Jian=
+       This point of view is not related to composition and is rules
+       In the context of category, we don't inspect the object we use in this
+       point of view.
+
+     + BUT
+       as a way of *sequencing* computations on values
        IGNORING SOME COMPLICATION dictated by the relevant data type.
 
-     =NOT very clear about this paragraph!!!=
-
 ** DONE 3.2 More Examples of Functors - 49
-   CLOSED: [2018-10-27 Sat 00:54]
-*** DONE ~Futures~ - 49 - =Not a good and simple example for Functor=
-    CLOSED: [2018-10-27 Sat 00:26]
-    - =TODO=
-      Some thing about ~Future~ and its async features.
+   CLOSED: [2020-02-18 Tue 13:43]
+   1. Before:
+      The ~map~ methods of ~List~, ~Option~, and ~Either~ apply functions eagerly.
+
+   2. However, the idea of _sequencing computations_ is MORE GENERAL than this.
+
+   3. This Section:
+      Let's investigate the behaviour of some other functors that apply the
+      pattern in different ways.
+
+*** DONE ~Futures~ - 49
+    CLOSED: [2020-02-18 Tue 13:16]
+    #+begin_src scala
+      import scala.concurrent.{Future, Await}
+      import scala.concurrent.ExecutionContext.Implicits.global
+      import scala.concurrent.duration._
+
+      val future: Future[String] =
+        Future(123).
+          map(n => n + 1).
+          map(n => n * 2).
+          map(n => n + "!")
+
+      Await.result(future, 1.second)
+      // res3: String = 248!
+    #+end_src
 
     - *Futures and Referential Transparency*
       + Scala's ~Future~'s are *NOT* a great EXAMPLE of _pure functional pro-
         gramming_ because they are *NOT* /referentially transparent/.
 
-      + Example =TODO=
+      + =from Jian=
+        * Q :: Want to use ~Future~ as a /functor/?
+        * A :: ONLY use it to do pure computations.
 
 *** DONE Functions (?!) - 49
-    CLOSED: [2018-10-27 Sat 00:53]
-    - /Single argument functions/ are also /functors/
-      =IMPORTANT=
+    CLOSED: [2020-02-20 Thu 09:53]
+    - *It turns out that /single argument functions/ are also /functors/*
 
     - ~map~ for /single argument functions/ is, by concept, /function composition/
-      (it works like ~andThen~) -- a kind of *sequencing*! We can think of this as
-      lazily queueing up operations similar to ~Future~.
+      (it works like ~andThen~) -- a kind of *sequencing*! It's queueing up
+      operations.
 
       For example:
+      #+begin_src scala
+        import cats.instances.functor._  // for `Functor`
+        import cats.syntax.functor._     // for `map`
+
+        val func1: Int => Double =
+          (x: Int) => x.toDouble
+
+        val func2: Int => Double =
+          (y: Double) => y * 2
+
+        (func1 map func2)(1)      // composition using `map`
+        // res7: Double = 2.0
+
+        (func1 andThen func2)(1)  // composition using `andThen`
+        // res8: Double = 2.0
+
+        func2(func2(1))           // composition with manually encoding
+        // res9: Double = 2.0
+      #+end_src
+
+    - Example:
       #+begin_src scala
         val func =
           ((x: Int) => x.toDouble).
@@ -1257,13 +1369,11 @@
         //        func1.map(func2)
       #+END_SRC
 
-      + =TODO= EXPLAIN in Seciton 3.8
-        =IMPORTANT=
-        =IMPORTANT=
-        =IMPORTANT=
+      + TODO EXPLAIN in Seciton 3.8
+        Use compiler option ~-Ypartial-unification~
 
 ** DONE 3.3 Definition of a Functor - 54
-   CLOSED: [2018-10-27 Sat 00:53]
+   CLOSED: [2020-02-18 Tue 17:07]
    #+BEGIN_SRC scala
      package cats
 
@@ -1273,30 +1383,29 @@
        def map[A, B](fa: F[A])(f: A => B): F[B]
      }
    #+END_SRC
-   - =TODO=
-     NEXT SECTION will explain:
+   - TODO Next SECTION will explain:
      + /type constructors/ and /higher kinded types/ -- be related to the ~F[_]~
        above.
-
      + The ~scala.language~ line.
 
 
    - *Functor Laws*
-     =from Jian= You implment the ~Functor[F[_]]~ /trait/, you only create a
-     /functor in code/, you must VERIFY these /laws/ to guarantee a *FORMAL*
-     /functor in math/.
-
      + *Identity*:
        calling ~map~ with the /identity function/ is the same as doing nothing:
-       _fa.map(identity) \equiv{} fa_
+       _(fa map identity) \equiv{} fa_
 
      + *Composition*:
        mapping with two functions ~f~ and ~g~ is the same as mapping with ~f~
        and then mapping with ~g~:
        _fa.map(g(f(_))) \equiv{} fa.map(f).map(g)_
+       =from Jian=
+       The RHS can also be written as ~fa map f map g~
+       Or a much more easier to understand version (ONLY when ~fa~ is a single
+       parameter function):
+       ~fa andThen g(f(_))~ \equiv{} ~fa andThen f andThen g~
 
 ** DONE 3.4 Aside: Higher Kinds and Type Constructors - 55
-   CLOSED: [2018-10-27 Sat 01:50]
+   CLOSED: [2020-02-19 Wed 16:01]
    =IMPORTANT=
    - kinds :: "types" for /types/ -- a concept used to category /types/.
 
@@ -1344,16 +1453,14 @@
        More concise, and you may prefer this in your projects.
 
 ** DONE 3.5 Functors in Cats - 57
-   CLOSED: [2019-03-26 Tue 00:02]
+   CLOSED: [2020-02-19 Wed 20:06]
    Examine the aspects we did for /monoids/:
    1. the /type class/
-
    2. the /instances/
-
    3. the /syntax/
 
 *** DONE 3.5.1 The ~Functor~ Type Class - 57
-    CLOSED: [2018-10-27 Sat 02:10]
+    CLOSED: [2020-02-19 Wed 16:03]
     - We *obtain* /instances/ using the STANDARD ~Functor.apply~ /method/ on the
       /companion object/.
 
@@ -1400,7 +1507,7 @@
       #+END_SRC
 
 *** DONE 3.5.2 ~Functor~ Syntax - 58
-    CLOSED: [2018-11-26 Mon 01:37]
+    CLOSED: [2020-02-19 Wed 19:33]
     Use examples other than ~Option~ and ~List~ as illustration.
     (Rationale: Compiler _always prefer a built-in_ method _over_ an extension
     method).
@@ -1440,12 +1547,11 @@
       #+begin_src scala
         implicit class FunctorOps[F[_], A](src: F[A]) {
           def map[B](func: A => B)
-                 (implicit functor: Functor[F]): F[B] =
+                    (implicit functor: Functor[F]): F[B] =
             functor.map(src)(func)
         }
       #+end_src
 
-      =Jian's Guess= =Still not clear about the implicit searching details=
       #+begin_src scala
         foo.map(_ + 1)
         // `foo` should have type `F[Int]`
@@ -1474,7 +1580,7 @@
           ~foo~ (type ~A~) in scope. If we don't, we get a compiler error.
 
 *** DONE 3.5.3 Instances for Custom Types - 60
-    CLOSED: [2019-03-25 Mon 23:59]
+    CLOSED: [2020-02-19 Wed 19:53]
     - Simple and straightfoward example (already in ~cats.instances~):
       #+BEGIN_SRC scala
         implicit val optionFunctor: Functor[Option] =
@@ -1485,7 +1591,7 @@
       #+END_SRC
 
     - Must *inject dependencies* into our /instances/,
-      BUT we can't add parameter(s) to ~future.map~.
+      BUT we can't add parameter(s) to ~future.map~ -- obviously.
 
       Thus, we provide /dependencies/ when summon the required /instance/.
       #+BEGIN_SRC scala
@@ -1519,14 +1625,12 @@
       #+end_src
 
 *** DONE 3.5.4 Exercise: Branching out with Functors - 61
-    CLOSED: [2018-10-27 Sat 02:24]
+    CLOSED: [2020-02-19 Wed 20:05]
     #+BEGIN_SRC scala
       sealed trait Tree[+A]
 
-      final case class Branch[A](left: Tree[A], right: Tree[A])
-          extends Tree[A]
-      final case class Leaf[A](value: A)
-          extends Tree[A]
+      final case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+      final case class Leaf[A](value: A)                        extends Tree[A]
 
       implicit treeFunctor = new Functor[Tree] {
         def map[A, B](tree: Tree[A])(func: A => B): Tree[B] =
@@ -1536,43 +1640,36 @@
           }
       }
     #+END_SRC
-    This is right, but not complete:
-    #+begin_src scala
-      Branch(Leaf(10), Leaf(20)).map(_ * 2)
-      // <console>: 42: error: value map is not a member of wrapper.Branch[Int]
-      //        Branch(Leaf(10), Leaf(20)).map(_ * 2)
-      //
-    #+end_src
-    =from Jian= Can dotty resolve this???
-    Let's add some smart constructors to compensate:
-    #+begin_src scala
-      object Tree {
-        def branch[A](left: Tree[A], right: Tree[A]): Tree[A] =
-          Branch(left, right)
+    1. This is right, but not complete:
+       #+begin_src scala
+         Branch(Leaf(10), Leaf(20)).map(_ * 2)
+         // <console>: 42: error: value map is not a member of wrapper.Branch[Int]
+         //        Branch(Leaf(10), Leaf(20)).map(_ * 2)
+       #+end_src
+       =from Jian= Can dotty new /enum/ resolve this???
 
-        def leaf[A](value: A): Tree[A] =
-          Leaf(value)
-      }
+    2. Let's add some smart constructors to compensate:
+       #+begin_src scala
+         object Tree {
+           def branch[A](left: Tree[A], right: Tree[A]): Tree[A] =
+             Branch(left, right)
 
-      Tree.leaf(100).map(_ * 2)
-      Tree.branch(Tree.leaf(10), Tree.leaf(20)).map(_ * 2)
-    #+end_src
+           def leaf[A](value: A): Tree[A] =
+             Leaf(value)
+         }
 
-** DONE 3.6 Contravariant and Invariant Functors - 61
+         Tree.leaf(100).map(_ * 2)
+         Tree.branch(Tree.leaf(10), Tree.leaf(20)).map(_ * 2)
+       #+end_src
+
+** DONE 3.6 Contravariant and Invariant Functors - 61 - TODO
    CLOSED: [2019-03-31 Sun 01:56]
-   - As we have seen,
-     we can think of ~Functor~'s ~map~ /method/ as *"appending"* a
-     transformation to a chain.
-
    - The ~Functor~ we explored is actually /covariant functor/, and its ~map~
      *appends* a transformation to a chain.
 
    - We're now going to look at _TWO_ other /type classes/:
-     + contravariant functor ::
-          one representing *prepending* operations to a chain,
-
-     + invariant functor ::
-          one representing building a *bidirectional* chain of operations.
+     + contravariant functor :: one representing *prepending* operations to a chain,
+     + invariant functor :: one representing building a *bidirectional* chain of operations.
 
    - *This Section is Optional!*
      You do _NOT NEED_ to know about /contravariant and invariant functors/ to
@@ -1630,7 +1727,7 @@
        ~final case class Box[A](value: A)~
        Define an /instance/ of ~Printable~ for ~Box~.
        #+begin_src scala
-         implicit def boxPrintable[A](implicit p: Printable[A]): Box[A] =
+         implicit def boxPrintable[A](implicit p: Printable[A]): Printable[Box[A]] =
            p.contramap[Box[A]](_.value)
        #+end_src
 
@@ -1649,7 +1746,7 @@
     - The most intuitive examples:
       A /type class/ that represents _encoding_ and _decoding_ as some data type,
       such as Play JSON's ~Format~ and scodec's ~Codec~.
-      =TODO= I know the former, but I don't know the latter. =TODO=
+      TODO I know the former, but I don't know the latter. TODO
 
     - Build our own ~Codec~ by enhancing ~Printable~ to support /encoding/ and
       /deconding/ to/from a ~String~:
@@ -1752,7 +1849,7 @@
        =TODO=
        =RE-DO=
 
-** DONE 3.7 Contravariant and Invariant in Cats - 68 - =TODO= =NOTE=
+** DONE 3.7 Contravariant and Invariant in Cats - 68 - TODO
    CLOSED: [2019-03-31 Sun 02:12]
    Cats provide /contravariant and invariant functors/ through /type classes/
    ~cats.Contravariant~ and ~cats.Invariant~. Here is a SIMPLIFIED version:
@@ -1777,12 +1874,17 @@
     #+end_src
 
 ** TODO 3.8 Aside: Partial Unification - 70
+   - =from Jian= A clear explanation from _djspiewak_ (GitHub name):
+     https://gist.github.com/djspiewak/7a81a395c461fd3a09a6941d4cd040f2
+     This article doesn't mention the walkaround for right-biased
+     partial-unification, which is given in this section. See blow.
+
    - SI-2712, which is identified as a bug, is a type inference limitation. It is
      already fixed.
      + Before Scala 2.13,
        Use the compiler option =-Ypartial-unification=;
 
-     + From Scala 2.13 on, partial-unification is there by default, and no option
+     + From Scala 2.13 on, _partial-unification_ is there by default, and no option
        for it.
 
    - Example:
@@ -1807,49 +1909,98 @@
          //                          ^
        #+end_src
 
-*** TODO 3.8.1 Unifying Type Constructors - 70
+*** DONE 3.8.1 Unifying Type Constructors - 70
+    CLOSED: [2020-02-20 Thu 10:42]
     In order to compile an expression like ~func1.map(func2)~ above, the compiler
     has to search for a ~Functor~ for ~Function1~.
 
-    - During the search, however, ~Functor~ accepts a /type constructor/ with *ONE*
-      /type parameter/:
-      #+begin_src scala
-        trait Functor[F[_]] {
-          def map[A, B](fa: F[A])(func: A => B): F[B]
-        }
-      #+end_src
+    1. During the search, however, ~Functor~ accepts a /type constructor/ with *ONE*
+       /type parameter/:
+       #+begin_src scala
+         trait Functor[F[_]] {
+           def map[A, B](fa: F[A])(func: A => B): F[B]
+         }
+       #+end_src
+
+       and ~Function1~ has *TWO* /type parameters/.
+
+       #+begin_src scala
+         trait Function1[-A, +B] {
+           def apply(arg: A): B
+         }
+       #+end_src
+
+    2. We know if one is fixed, this number of /type parameters/ mismatch can be
+       resolved. And we know in this case it should be the /parameter type/ ~A~.
+         However, the compiler by default doesn't know which should. The compiler
+       option ~-Ypartial-unification~ can tell the compiler do left-to-right
+       elimination, and fix the ~A~ of ~Function1[-A, +B]~ in this exmaple.
+
+    3. =from Jian=
+       The link from gist I provide a useful mnemonic:
+       When use set the ~-Ypartial-unification~ option, we can consider all type
+       constructors by default curried and can be partially applied.
 
 *** TODO 3.8.2 Left-to-Right Elimination - 71
+    - TODO NOTE
+
+    - TODO NOTE
+
+    - TODO NOTE
+
+    - Walkaround:
+      #+begin_src scala
+        import cats.Functor
+        import cats.instances.function._  // for Functor
+        import cats.syntax.functor._      // for map
+
+        type <=[B, A] = A => B
+        type F[A] = Double <= A
+
+        val func1 = (x: Int) => x.toDouble
+        val func2 = (y: Double) => y * 2
+
+        val func2b: Double <= Double = func2
+
+        val func3c = func2b.contramap(func1)
+      #+end_src
 
 ** DONE 3.9 Summary - 74
    CLOSED: [2019-10-10 Thu 14:16]
    Functors represent sequencing behaviours.
 
    - We covered three types of functor in this chapter:
-     - /Covariant Functors/,
+     + /Covariant Functors/,
        represent the ability to _apply functions to a value in some context_
        with their ~map~ /method/,
 
        Successive calls to ~map~ apply these functions _in sequence_, each
        accepting the result of its PREdecessor as a parameter.
 
-     - /Contravariant functors/,
+     + /Contravariant functors/,
        with their ~contramap~ /method/,
        represent the ability to *"prepend"* functions to a function-like context.
 
        Successive calls to ~contramap~ sequence these functions _in the opposite
        order to_ ~map~.
 
-     - /Invariant functors/,
+     + /Invariant functors/,
        represent _bidirectional transformations_. It has the ~imap~ method.
+
+   - /Functors/ for collections are extremely important, as they transform each
+     element independently of the rest. This allows us to parallelise or
+     distribute transformations on large collections, a technique leveraged
+     heavily in "mapreduce" frameworks like Hadoop.
+     TODO
+     We will investigate this approach in more detail in the Map-reduce case
+     study later in the book.
 
    - The ~Contravariant~ and ~Invariant~ /type classes/ are less widely applicable
      but are still useful for building data types that _represent *transformations*._
-
-     TODO TODO TODO
+     TODO
      We will revisit them to discuss the ~Semigroupal~ /type class/ later in Chapter 6.
 
-* TODO 4 Monads - 77
+* TODO 4 Monads - 77 - TODO =ReRead=
   - Informally,
     a /monad/ is anything with a /computational context/ and a ~flatMap~
     /method/ that obey the /monad laws/.
@@ -2057,9 +2208,9 @@
 
 ** DONE 4.3 The ~Identity~ Monad - 88
    CLOSED: [2019-04-01 Mon 14:33]
-   - =TODO= NOTE
-   - =TODO= NOTE
-   - =TODO= NOTE
+   - TODO NOTE
+   - TODO NOTE
+   - TODO NOTE
 
 *** 4.3.1 Exercise: Monadic Secret Identies - 91
     #+begin_src scala
@@ -2355,7 +2506,7 @@
      handling monads* (If you don't need this kind of abstraction right now, feel free to skip
      onwards to Section 4.6).
 
-     + For example, you can use ~MonadError~ to abstract =TODO=
+     + For example, you can use ~MonadError~ to abstract TODO
        * over ~Future~ and ~Try~,
          OR
        * over ~Either~ and ~EitherT~ (which we will meet in Chapter 5).
@@ -2455,7 +2606,7 @@
         // res4: Either[String,Int] = Left(Number to low!)
       #+end_src
 
-    - There are other useful variants of these /methods/. =TODO= =TODO= =TODO=
+    - There are other useful variants of these /methods/. TODO TODO TODO
       See the source of ~cats.MonadError~ and ~cats.ApplicativeError~ for more
       info.
 
@@ -2578,7 +2729,7 @@
       *The return type is important!!!*
 
       The compiler needs ~Eval~, rather than its /subtypes/, too narrow types
-      can make the compiler be confused. =TODO= =MORE DETAILS= =???=
+      can make the compiler be confused. TODO =MORE DETAILS= =???=
       =From Jian= =END=
 
     - Extract the result of an ~Eval~ using its ~value~ /method/:
@@ -2742,7 +2893,6 @@
       BUT they are *bounded by the size of the /heap/ rather than the /stack/.*
 
 *** TODO 4.6.5 Exercise: Safer Folding using ~Eval~ - 108
-    =TODO=
     =from Jian= I made a mistake at my first try. Try to do it again later.
 
 ** DONE 4.7 The ~Writer~ Monad - 108
@@ -2771,7 +2921,7 @@
 
      - Other examples from ~cats.data~ include the /monad transformers/ that we
        will see in the next chapter, and the ~Validated~ type we will encounter
-       in Chapter 6. =TODO= =TODO= =TODO=
+       in Chapter 6. TODO TODO TODO
 
 *** DONE 4.7.1 Creating and Unpacking Writers - 109
     CLOSED: [2019-04-13 Sat 23:55]
@@ -2983,7 +3133,7 @@
          // res0: cats.Id[String] = Garfield
        #+end_src
 
-    3. =TODO= What advantage do ~Reader~'s give us over the raw functions???
+    3. TODO What advantage do ~Reader~'s give us over the raw functions???
 
 *** DONE 4.8.2 Composing Readers - 115
     CLOSED: [2019-04-16 Tue 17:12]
@@ -3086,21 +3236,22 @@
 
     - DI and use other ways rather than ~Reader~ =???= =WHY=
       For more advanced problems
-      where we have lots of /dependencies/,  =TODO= =EXAMPLE???=
+      where we have lots of /dependencies/, TODO =EXAMPLE???=
       or
-      where a program _isn't easily represented as a pure function_, =TODO= =EXAMPLE???=
+      where a program _isn't easily represented as a pure function_, TODO =EXAMPLE???=
       _other /dependency injection/ techniques tend to be more appropriate_.
 
     - *Kleisli Arraows*
       You may have noticed from console output that ~Reader~ is implemented
       in terms of another type called ~Kleisli~.
 
-      + /Kleisli arrows/ provide a _more general form_ of ~Reader~ that _generalise
+      * /Kleisli arrows/ provide a _more general form_ of ~Reader~ that _generalise
         over the type constructor of the result type_.
 
-      + =TODO= We will encounter ~Kleislis~ again in Chapter 5.
+      * TODO We will encounter ~Kleislis~ again in Chapter 5.
 
-** TODO 4.9 The ~State~ Monad - 119
+** DONE 4.9 The ~State~ Monad - 119
+   CLOSED: [2020-02-20 Thu 14:20]
    ~cats.data.State~ allows us to
    pass additional /state/ around as part of a computation.
    =from Jian= /state/ as /computation context/.
@@ -3111,7 +3262,7 @@
      without using mutation.*
 
 *** DONE 4.9.1 Creating and Unpacking State - 119
-    CLOSED: [2019-04-08 Mon 23:07]
+    CLOSED: [2020-02-20 Thu 11:52]
     The instance of /state monad/ ~State[S, A]~ represent functions of type
     ~S => (S, A)~, where ~S~ is the /type/ of the /state/ and ~A~ is the /type/
     of the result.
@@ -3137,10 +3288,8 @@
       + ~runA~
       they return different combinations of /state/ and /result/.
       TODO ??? ??? ???
-
-    - _Each_ /method/ returns an /instance/ of ~Eval~, which ~State~ uses to
+        _Each_ /method/ returns an /instance/ of ~Eval~, which ~State~ uses to
       maintain /stack safety/.
-      TODO ??? ??? ???
 
     - We call the ~value~ /method/ as usual to extract actual result:
       #+begin_src scala
@@ -3154,11 +3303,12 @@
         // state: Int = 10
 
         // Get the result, ignore the state;
-        val state = a.runR(10).value
+        val state = a.runA(10).value
         // result: String = The state is 10
       #+end_src
 
-*** TODO 4.9.2 Composing and Transforming State - 120
+*** DONE 4.9.2 Composing and Transforming State - 120
+    CLOSED: [2020-02-20 Thu 12:59]
     As we've seen with ~Reader~ and ~Writer~, the power of the ~State~ /monad/
     comes from *combining* /instances/.
 
@@ -3191,10 +3341,79 @@
         // result: (String, String) = (Result of step1: 21,Result of step2: 42)
       #+end_src
 
-*** TODO 4.9.3 Exercise: Post-Order Calculator - 123
+    - The general model for using the State monad is to represent each step of a
+      computation as an instance and compose the steps using the _standard monad
+      operators_.
+        Cats provides several convenience constructors for creating primitive
+      steps:
+      + ~get~ extracts the state as the result;
+        #+begin_src scala
+          val getDemo = State.get[Int]
+          // getDemo: cats.data.State[Int, Int] = cats.data.IndexedStateT@4df6ba6a
+
+          getDemo.run(10).value
+          // res3: (Int, Int) = (10, 10)
+        #+end_src
+
+      + ~set~ updates the state and returns unit as the result;
+        #+begin_src scala
+          val setDemo = State.get[Int](30)
+          // setDemo: cats.data.State[Int, Unit] = cats.data.IndexedStateT@4620d0ef
+
+          setDemo.run(10).value
+          // res4: (Int, Unit) = (30, ())
+        #+end_src
+
+      + ~pure~ ignores the state and returns a supplied result;
+        #+begin_src scala
+          val pureDemo = State.pure[Int, String]("Result")
+          // pureDemo: cats.data.State[Int,String] = cats.data.IndexedStateT@988d7b2
+
+          pureDemo.run(10).value
+          // res5: (Int, String) = (10,Result)
+        #+end_src
+
+      + ~inspect~ extracts the state via a transformation function;
+        #+begin_src scala
+          val inspectDemo = State.pure[Int, String](_ + "!")
+          // inspectDemo: cats.data.State[Int,String] = cats.data.IndexedStateT@13734a20
+
+          inspectDemo.run(10).value
+          // res6: (Int, String) = (10,10!)
+        #+end_src
+
+      + ~modify~ updates the state using an update function.
+        #+begin_src scala
+          val modifyDemo = State.modify[Int, String](_ + 1)
+          // modifyDemo: cats.data.State[Int,Unit] = cats.data.IndexedStateT@79493b6e
+
+          modifyDemo.run(10).value
+          // res7: (Int, Unit) = (10,())
+        #+end_src
+
+    - Use /comprehension/:
+      #+begin_src scala
+        import State._
+
+        val program: State[Int, (Int, Int, Int)] = for {
+          a <- get[Int]
+          _ <- set[Int](a + 1)
+          b <- get[Int]
+          _ <- modify[Int](_ + 1)
+          c <- inspect[Int, Int](_ * 1000)
+        } yield (a, b, c)
+        // program: cats.data.State[Int,(Int, Int, Int)] = cats.data.IndexedStateT@b8a0617
+
+        val (state, result) = program.run(1).value
+        // state: Int = 3
+        // result: (Int, Int, Int) = (1,2,3000)
+      #+end_src
+
+*** DONE 4.9.3 Exercise: Post-Order Calculator - 123 - TODO =RE-READ=
+    CLOSED: [2020-02-20 Thu 14:20]
 
 ** TODO 4.10 Defining Custom Monads - 126
-   - =TODO=
+   - TODO
 
 *** TODO 4.10.1 Exercise: Branching out Further with Monads - 127
     #+begin_src scala
@@ -3231,7 +3450,40 @@
       }
     #+end_src
 
-** TODO 4.11 Summary - 128
+** DONE 4.11 Summary - 128
+   CLOSED: [2020-02-20 Thu 11:45]
+   In this chapter we've seen monads up-close.
+   - We saw that ~flatMap~ can be viewed as an operator for sequencing computations,
+     dictating the order in which operations must happen. From this viewpoint,
+     + ~Option~ represents a computation that can fail without an error message,
+
+     + ~Either~ represents computation that can fail with a message,
+
+     + ~List~ represents multiple POSSIBLE results,
+
+     + ~Future~ represents a computation that may produce a value at some point
+       in the future.
+
+   - =from Jian=
+     CAUTION: Use the data type mentioned above as monad only when the *monad
+     laws* are satisfied!!! For instance, ~Future~'s are often used with side
+     effects, and are actually _not always_ /monad/.
+
+   - Learn some of the custom types and data structures that Cats provides, including
+     + ~Id~
+     + ~Reader~
+     + ~Writer~
+     + ~State~
+
+   - Finally, in the unlikely event that we have to implement a custom monad,
+     we've learned about defining our own instance using ~tailRecM~.
+     + ~tailRecM~ is an odd wrinkle that is a concession to building a functional
+       programming library that is stack-safe by default.
+
+     + We
+       * _don't need_ to understand ~tailRecM~ to understand /monads/,
+       * _BUT_ having it around gives us benefits of which we can be grateful when
+         writing monadic code.
 
 * DONE 5 Monad Transformers - 129
   CLOSED: [2020-02-16 Sun 01:55]
@@ -3577,8 +3829,8 @@
    need for /NESTED for comprehensions/ and /pattern matching/ when working with
    "stacks" of _NESTED monads_.
 
-* DONE 6 ~Semigroupal~ and ~Applicative~ - 143 - NOTE
-  CLOSED: [2019-04-08 Mon 00:25]
+* DONE 6 ~Semigroupal~ and ~Applicative~ - 143
+  CLOSED: [2020-02-21 Fri 10:42]
   - We'll explore certain types of program flow that they cannot represent.
     + For example, _form validation_:
       When we validate a form we want to return all the errors to the user, *not
@@ -3605,15 +3857,14 @@
     of the /semigroupal/ formulation that is _emphasised in Cats_.
       This alternative formulation provides a link to other libraries and languages
     such as Scalaz and Haskell.
-
-    =TODO= =TODO= =TODO=
+    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     We'll take a look at different formulations of ~Applicative~, as well as the
     relationships between ~Semigroupal~, ~Functor~, ~Applicative~, and ~Monad~,
     towards the end of the chapter.
     =IMPORTANT=
 
 ** DONE 6.1 ~Semigroupal~ - 144
-   CLOSED: [2019-04-03 Wed 18:17]
+   CLOSED: [2020-02-20 Thu 14:42]
    ~cat.Semigroupal~ is a /type class/ that allows us to *combine contexts*:
    If we have two objects of type ~F[A]~ and ~F[B]~, a ~Semigroupal[F]~ allows
    us to combine them to form an ~F[(A, B)]~.
@@ -3632,10 +3883,10 @@
        parameters.
 
 *** DONE 6.1.1 Joining Two Contexts - 145
-    CLOSED: [2019-04-03 Wed 17:11]
-    - While ~Semigroup~ allows us to *join* /values/,
-      ~Semigroupal~ allows us to *join* /contexts/.
-      For example,
+    CLOSED: [2020-02-20 Thu 14:40]
+    While ~Semigroup~ allows us to *join* /values/,
+    ~Semigroupal~ allows us to *join* /contexts/.
+    - For example,
       #+begin_src scala
         import cats.Semigroupal
         import cats.instances.option._  // for Semigroupal
@@ -3651,7 +3902,7 @@
       #+end_src
 
 *** DONE 6.1.2 Joining Three or More Contexts - 145
-    CLOSED: [2019-04-03 Wed 18:17]
+    CLOSED: [2020-02-20 Thu 14:42]
     The companion object for ~Semigroupal~ defines a set of methods on top of
     ~product~.
 
@@ -3676,13 +3927,15 @@
         // res6: Option[Int] = None
       #+end_src
 
-    - There are also: TODO TODO TODO
-      ~contramap2~ to ~contramap22~ for ~Contravariant~;
-      ~impa2~ to ~imap22~ for ~Invariant~.
+    - There are also:
+      TODO NO detail in this book. Learn to use these methods!!!
+      + ~contramap2~ to ~contramap22~ for ~Contravariant~;
+      + ~impa2~ to ~imap22~ for ~Invariant~.
 
 ** DONE 6.2 Apply Syntax - 146
-   CLOSED: [2019-04-04 Thu 13:18]
-   /Apply syntax/ is a shorthand for the /methods/ described above.
+   CLOSED: [2020-02-20 Thu 14:47]
+   /Apply syntax/, ~cats.syntax.apply~, is a shorthand for the /methods/
+   described above.
 
    - Import the syntax form ~cats.syntax.apply~.
      #+begin_src scala
@@ -3714,18 +3967,20 @@
         Option("Orange & black")).mapN(Cat.apply)
        // res9: Option[Cat] = Some(Cat(Garfield,1978,Orange & black))
      #+end_src
-     + You must guarantee _RIGHT ARITY_, or there will be compile time error.
+     + It's nice to see that this syntax is type checked!!!
+       You must guarantee _RIGHT ARITY_, or there will be *compile time error*
+       (_GOOOOOOD!!!_).
 
      + Internally ~mapN~ uses the ~Semigroupal~ to extract the values from the
        ~Option~ and the ~Functor~ to apply the values to the function.
 
-*** DONE 6.2.1 Fancy Functors and Apply Syntax - 148
-    CLOSED: [2019-04-04 Thu 13:16]
+*** DONE 6.2.1 Fancy Functors and Apply Syntax - 148 - TODO =???=
+    CLOSED: [2020-02-20 Thu 14:50]
     /Apply syntax/ also has ~contramapN~ and ~imapN~ /methods/ that accept
     /Contravariant functors/ and /Invariant functors/.
 
     - WHY??????????????
-      =TODO= =IMPORTANT= =TODO= =TODO= =IMPORTANT=
+      =TODO= =IMPORTANT= =TODO=
       Why do we combine ~Monoid~ with ~Invariant~, rather than others?
 
     - For example, we can combine ~Monoid~'s using ~Invariant~:
@@ -3768,26 +4023,104 @@
         // res17: Cat = Cat(GarfieldHeathcliff,3966,List(Lasagne, Junk Food))
       #+end_src
 
-** DONE 6.3 ~Semigroupal~ Applied to Different Types - 149 - =NOTE=
-   CLOSED: [2019-04-04 Thu 15:32]
+** DONE 6.3 ~Semigroupal~ Applied to Different Types - 149
+   CLOSED: [2020-02-20 Thu 15:43]
    ~Semigroupal~ doesn't always provide the behaviour we expect, particularly
    for types that also have instances of ~Monad~.
 
    We have seen the behaviour of the ~Semigroupal~ for ~Option~.
    Let's look at some examples for other types.
 
-**** TODO ~Future~ - 149
-     NOTE
+**** DONE ~Future~ - 149
+     CLOSED: [2020-02-20 Thu 15:34]
+     #+begin_src scala
+       import cats.Semigroupal
+       import cats.instances.future._ // for Semigroupal
+       import scala.concurrent._
+       import scala.concurrent.duration._
+       import scala.concurrent.ExecutionContext.Implicits.global
+       import scala.language.higherKinds
 
-**** TODO ~List~ - 150
-     NOTE
+       val futurePair = Semigroupal[Future].product(Future("Hello"), Future(123))
+       Await.result(futurePair, 1.second)
+       // res1: (String, Int) = (Hello,123)
+     #+end_src
+     The two ~Future~'s start executing the moment we create them, so they are
+     already calculating results by the time we call product.
 
-**** TODO ~Either~ - 150
-     NOTE
+     Use _apply syntax_ to zip fixed numbers of ~Future~'s:
+     #+begin_src scala
+       import cats.syntax.apply._ // for mapN
 
-*** TODO 6.3.1 Semigroupal Applied to Monads - 151
-**** DONE 6.3.1.1 Exercise: The Product of Monads - 152 - =TODO= =RE-DO=
-     CLOSED: [2019-04-04 Thu 15:31]
+       case class Cat(
+         name: String,
+         yearOfBirth: Int,
+         favoriteFoods: List[String]
+       )
+
+       val futureCat = (
+         Future("Garfield"),
+         Future(1978),
+         Future(List("Lasagne"))
+       ).mapN(Cat.apply)
+
+       Await.result(futureCat, 1.second)
+       // res4: Cat = Cat(Garfield,1978,List(Lasagne))
+     #+end_src
+
+**** DONE ~List~ - 150
+     CLOSED: [2020-02-20 Thu 15:37]
+     #+begin_src scala
+       import cats.Semigroupal
+       import cats.instances.list._ // for Semigroupal
+
+       Semigroupal[List].product(List(1, 2), List(3, 4))
+       // res5: List[(Int, Int)] = List((1,3), (1,4), (2,3), (2,4))
+     #+end_src
+     TODO
+     This unexpected behavior (cartesion product, rather than simple zip) will
+     be explained later.
+
+**** DONE ~Either~ - 150
+     CLOSED: [2020-02-20 Thu 15:43]
+     #+begin_src scala
+       import cats.instances.either._ // for Semigroupal
+
+       type ErrorOr[A] = Either[Vector[String], A]
+
+       Semigroupal[ErrorOr].product(
+         Left(Vector("Error 1")),
+         Left(Vector("Error 2"))
+       )
+       // res7: ErrorOr[(Nothing, Nothing)] = Left(Vector(Error 1))
+     #+end_src
+     We see the unexpected fail fast behavior!
+     Same reason as we see in the last section (~List~).
+     TODO Explain later.
+
+*** DONE 6.3.1 Semigroupal Applied to Monads - 151
+    CLOSED: [2020-02-20 Thu 15:29]
+    The reason for the surprising results for ~List~ and ~Either~ is that they are
+    both /monads/.
+    - _To ensure CONSISTENT semantics_,
+      *Cats' ~Monad~ (which extends ~Semigroupal~) provides a standard definition
+      of ~product~ in terms of ~map~ and ~flatMap~.*
+
+      This gives what we might think of as unexpected and less useful behaviour
+      for a number of data types. _The consistency of semantics is important for
+      higher level abstractions_, but we don't know about those yet.
+
+    - Even our results for ~Future~ are a trick of the light.
+      Its ~product~ provides sequential ordering that origin from ~flatMap~:
+        The _parallel execution_ we observe occurs because our constituent
+      ~Future~'s start running before we call ~product~!!!
+      =from Jian=
+      this means the _parallel execution_ is still there, but nothing related
+      to ~flatMap~ or ~product~, who only do the combination after _parallel
+      execution_.
+
+**** DONE 6.3.1.1 Exercise: The Product of Monads - 152
+     CLOSED: [2020-02-20 Thu 15:07]
      #+begin_src scala
        import cats.Monad
 
@@ -3795,23 +4128,19 @@
        import cats.syntax.functor._  // for map
 
        def product[M[_]: Monad, A, B](x: M[A], y: M[B]): M[(A, B)] =
-         x.flatMap(xx => y.map(yy => (xx, yy)))
+         for {
+           xv <- x
+           yv <- y
+         } yield (xv, yv)
      #+end_src
 
-** TODO 6.4 Validated - 152
-   - By now we are familiar with the fail-fast error handling behaviour of
-     ~Either~.
-       Furthermore, because ~Either~ is a /monad/, we know that the sematics of
-     product are the same as those for ~flatMap~.
-
-     =IMPORTANT=
-     In fact, it is *IMPOSSIBLE* for us to
-     design a /monadic data type/ that implements error accumulating semantics
-     without breaking the consistency of these two methods.
-
+** TODO 6.4 Validated - 152 - TODO =Exercise=
+   It is *impossible* for us to design a /monadic data type/ that implements
+   error (=from Jian= parallel) accumulating semantics without breaking the
+   consistency of ~flatMap~, ~map~, and ~product~.
    - Cats provides a /data type/ called ~Validated~ that has an instance of
      ~Semigroupal~ but *NO* /instance/ of ~Monad~.
-       The implementation of ~product~ is therefore free to accumulate errors:
+     _The implementation of ~product~ is therefore free to accumulate errors_:
      #+begin_src scala
        import cats.Semigroupal
        import cats.data.Validated
@@ -3827,13 +4156,10 @@
        // res1: AllErrorsOr[(Nothing, Nothing)] = Invalid(List(Error 1, Error 2))
      #+end_src
 
-   - ~Validated~ _complements_ ~Either~ nicely.
-     With them, we have support for both of the common types of error handling:
-     + fail-fast
-     + accumulating
+   - ~Validated~ (accumulating) _complements_ ~Either~ (fail fast) nicely.
 
 *** DONE 6.4.1 Creating Instances of Validated - 153
-    CLOSED: [2019-04-07 Sun 00:35]
+    CLOSED: [2020-02-20 Thu 15:58]
     - ~Validated~ has two subtypes:
       + ~Validated.Valid~
       + ~Validated.Invalid~
@@ -3848,6 +4174,10 @@
           val i = Validated.Invalid(List("Badness"))
           // i: cats.data.Validated.Invalid[List[String]] = Invalid(List(Badness))
         #+end_src
+        =from Jian=
+        I don't prefer this way because of their return types are the subtypes, which
+        is may lead to some issues.
+          The /static methods/ below can return the ~Validated~ type, which is preferred!
 
       + Use /static methods/ ~valid~ and ~invalid~, which is _preferred_.
         #+begin_src scala
@@ -3903,10 +4233,43 @@
           // res11: cats.data.Validated[String,Int] = Invalid(Badness)
         #+end_src
 
-*** TODO 6.4.2 Combining Instances of Validated - 154
+*** DONE 6.4.2 Combining Instances of Validated - 154
+    CLOSED: [2020-02-20 Thu 16:14]
+    - We can _combine_ instances of ~Validated~ using any of the methods or syntax
+      described for ~Semigroupal~ above.
+      #+begin_src scala
+        import cats.instances.vector._ // for Semigroupal
+        import cats.syntax.apply._  // for tupled
 
-*** DONE 6.4.3 Methods of Validated - 156
-    CLOSED: [2019-04-07 Sun 01:18]
+        (
+          Vector(404).invalid[Int],
+          Vector(500).invalid[Int]
+        ).tupled
+        // res15: cats.data.Validated[scala.collection.immutable.Vector[Int],(Int, Int)] = Invalid(Vector(404, 500))
+      #+end_src
+
+    - ~Validated~ accumulates errors using a ~Semigroup~, so we need one of those
+      in scope to summon the ~Semigroupal~. If no proper ~Semigroup~ instance in
+      scope, we get an _ANNOYINGLY *unhelpful* compilation error_:
+      #+begin_src scala
+        Semigroupal[AllErrorsOr]
+        // <console>:28: error: could not find implicit value for parameter instance: cats.Semigroupal[AllErrorsOr]
+        //        Semigroupal[AllErrorsOr]
+        //                   ^
+      #+end_src
+      Correction:
+      #+begin_src scala
+        import cats.instances.string._  // for Semigroup
+        Semigroupal[AllErrorsOr]
+        // res13: cats.Semigroupal[AllErrorsOr] = cats.data.ValidatedInstances$$anon$1@533850f5
+      #+end_src
+
+    - We can also use ~NonEmptyList~ and ~NonEmptyVector~ types to prevent us
+      failing without at least one error!!!
+      =from Jian= This is important. Mostly, we don't want to fail without any log or hint.
+
+*** DONE 6.4.3 Methods of Validated - 156 - TODO _more practice_
+    CLOSED: [2020-02-20 Thu 16:20]
     - ~Validated~ comes with a suite of /methods/ that closely resemble those
       available for ~Either~, including the /methods/ from ~cats.syntax.either~.
       + ~map~
@@ -3978,20 +4341,21 @@
 
 *** TODO 6.4.4 Exercise: Form Validation - 158
 
-** TODO 6.5 Apply and ~Applicative~ - 159
+** DONE 6.5 Apply and ~Applicative~ - 159
+   CLOSED: [2020-02-21 Fri 10:36]
    /Semigroupals/ are NOT mentioned FREQUENTLY in the wider functional
    programming literature.
      They provide a _subset_ of the functionality of a related /type class/
    called an /applicative functor/ ("applicative" for short).
 
-   - /Semigroupal/ and /Applicative/ _effectively provide ALTERNATIVE *encodings*
+   - ~Semigroupal~ and ~Applicative~ _effectively provide ALTERNATIVE *encodings*
      of the same notion of *joining contexts*._
 
-   - Both /Semigroupal/ and /Applicative/ encodings are introduced in the same
+   - Both ~Semigroupal~ and ~Applicative~ encodings are introduced in the same
      2008 paper by Conor McBride and Ross Paterson.
-     + /Semigroupal/ is referred to as "monoidal" in the paper
+     + _footnote 2_: /Semigroupal/ is referred to as "monoidal" in the paper
 
-   - Cats models /applicatives/ using _TWO_ /type classes/:
+   - Cats models /applicatives/ using _TWO_ /type classes/: =IMPORTANT=
      1. ~cats.Apply~, extends ~Semigroupal~ and ~Functor~ and adds an ~ap~ /method/
         that applies a parameter to a function within a context.
 
@@ -4018,39 +4382,87 @@
      ~ap~, and ~map~
      that
      allows _any one of them to be defined in terms of the other two_.
+     TODO TODO TODO _TRY!!!_
 
    - ~Applicative~ also introduces the ~pure~ method.
-       This is the SAME ~pure~ we saw in ~Monad~.
-     It constructs a new applicative instance from an unwrapped value.
+       This is the ~pure~ we saw in ~Monad~, who extends ~Applicative~.
+     It constructs a new _applicative instance_ from an unwrapped value.
 
      In this sense,
      ~Applicative~ is related to ~Apply~ as ~Monoid~ is related to ~Semigroup~.
-     =TODO= =???= =TODO= =???=
 
-*** TODO 6.5.1 The Hierarchy of Sequencing Type Classes - 160
+*** DONE 6.5.1 The Hierarchy of Sequencing Type Classes - 160
+    CLOSED: [2020-02-21 Fri 10:36]
     There is a whole family of /type classes/ that concern themselves with
-    *sequencing* computations _in different ways_.
+    *sequencing* computations _in DIFFERENT ways_.
 
-    - =TODO= NOTE
+    - Figure 6.1: ~Monad~ type class hierarchy
+      ~Semigroupal~ (~product~)  ~Functor~ (~map~)
+                     \            /
+                      \          /
+                      ~Apply~ (~ap~)
+                       /        \
+                      /          \
+      ~Applicative~ (~pure~)   ~FlatMap~ (~map~)
+                      \          /
+                       \        /
+                         ~Monad~
 
-** TODO 6.6 Summary - 162
-    - =TODO= NOTE
+    - EACH /type class/ in the hierarchy represents a particular set of sequencing
+      semantics, introduces a set of /characteristic methods/, and *defines the
+      functionality of its supertypes in terms of them*:
+      + every /apply/ is a /functor/;
+        ~Apply~
+        * _defines_
+          - ~ap~
+          - (override) ~product~ _in terms of_ and ~map~
+        * _inherits_ ~map~ (from ~Functor~)
 
-    - The next chapter covers ~Traverse~ and ~Foldable~, two powerful /type
-      classes/ for *converting between* data types.
+      + every /applicative/ is a /semigroupal/;
+        ~Applicative~
+        * _defines_
+          - ~pure~
+          - (_override_) ~ap~ TODO _???What's the diff between this and /apply/'s???_
 
-* TODO 7 ~Foldable~ and ~Traverse~ - 165
+        * _inherits_ standard definitions of
+          - ~product~ (from ~Semigroupal~)
+          - ~map~ (from ~Functor~).
+
+      + every /monad/ is an /applicative/;
+        ~Monad~
+        * _defines_
+          - ~flatMap~
+          - (override) ~product~, ~ap~, and ~map~, _in terms of_ ~pure~ and ~flatMap~;
+            =from Jian= The only one that ~Monad~ does _NOT override_ is ~pure~.
+        * _inherits_ ~pure~ (from ~Applicative~)
+
+    - Assume there is a /monad/ ~Foo~ and a /applicative functor/ ~Bar~.
+      + Q :: What can we say about them without knowing more about their implementation?
+      + A :: Since ~Monad~ is a subtype of ~Applicative~, we know more about ~Foo~.
+             ~Foo~ can guarantee more properties, while ~Bar~, who has fewer
+             laws, may have a wider range of behaviours.
+               _This is a classic trade-off of power (in the mathematical sense)
+             versus constraint._
+
+    - If you want to _impose a strict sequencing_ on the computations, ~Monad~ is good.
+      If you want to avoid this, ~Semigroupal~ and ~Applicative~ can be a good choice.
+
+** DONE 6.6 Summary - 162
+   CLOSED: [2020-02-21 Fri 10:42]
+
+* DONE 7 ~Foldable~ and ~Traverse~ - 165
+  CLOSED: [2020-02-22 Sat 00:56]
   _TWO_ /type classes/ that capture *iteration over collecons*:
   - ~Foldable~ abstracts the familiar ~foldLeft~ and ~foldRight~ operations;
 
   - ~Traverse~ is a higher-level abstraction that uses ~Applicative~'s to *iterate*
-    _with LESS pain than folding_. =TODO=
+    _with LESS pain than folding_. TODO
 
   We'll start by looking at ~Foldable~, and then _examine cases where folding
-  becomes complex and ~Traverse~ becomes convenient._ =TODO= =IMPORTANT=
+  becomes complex and ~Traverse~ becomes convenient._ TODO =IMPORTANT=
 
 ** DONE 7.1 ~Foldable~ - 165
-   CLOSED: [2019-04-08 Mon 01:03]
+   CLOSED: [2020-02-21 Fri 15:08]
    - The ~Foldable~ /type class/ captures the ~foldLeft~ and ~foldRight~ /methods/
      we're used to in sequences like ~List~'s, ~Vector~'s, and ~Stream~'s.
 
@@ -4063,10 +4475,10 @@
        _plug_ them _into_ our code.
 
    - ~Foldable~ gives us greate use cases for ~Monoid~'s and the ~Eval~ /monad/.
-     =TODO= =???=
+     TODO =???=
 
 *** DONE 7.1.1 Folds and Folding - 166
-    CLOSED: [2019-03-31 Sun 02:40]
+    CLOSED: [2020-02-21 Fri 10:52]
     - Depending on the operation we're performing, the order in which we fold may
       be important. Thus there are _TWO_ standard variants of /fold/:
       + ~foldLeft~ traverses from "left" to "right" (start to finish)
@@ -4076,7 +4488,7 @@
       /associative/.
 
 *** DONE 7.1.2 Exercise: Reflecting on Folds - 167
-    CLOSED: [2019-03-31 Sun 02:44]
+    CLOSED: [2020-02-21 Fri 10:52]
     Try using ~foldLeft~ and ~foldRight~ with _empty lists_ as accumulator and
     ~::~ as the binary operator. See the result.
     #+begin_src scala
@@ -4092,41 +4504,33 @@
       }
       // List(1, 2, 3)
     #+end_src
-    + We are carefully specify the type of the accumulator to avoid a type error.
-      If we use ~Nil~, Scala will think we use ~List.empty[Nothing]~ as an
-      accumulator, which will lead to a type error.
 
 *** DONE 7.1.3 Exercise: Scaf-fold-ing Other Methods - 167
-    CLOSED: [2019-03-31 Sun 03:03]
+    CLOSED: [2020-02-21 Fri 10:57]
     Implement ~List~'s ~map~, ~flatMap~, ~filter~, and ~sum~ /methods/ in terms
     of ~foldRight~:
     #+begin_src scala
-      abstract class List[+A] {
-        // Assume already implemented
-        def foldRight[B](acc: B)(op: (A, B) => B) = ???
+      def map[A, B](list: List[A])(f: A => B): List[B] =
+        list.foldRight(List.empty[B]){ (e, acc) =>
+          f(e) :: acc
+        }
 
-        def map[B](f: A => B): List[B] =
-          this.foldRight(List.empty[B]){ (e, acc) =>
-            f(e) :: acc
-          }
+      def flatMap[A, B](list: List[A])(f: A => List[B]): List[B] =
+        list.foldRight(List.empty[B]){ (e, acc) =>
+          f(e) ::: acc
+        }
 
-        def flatMap[B](f: A => List[B]): List[B] =
-          this.foldRight(List.empty[B]){ (e, acc) =>
-            f(e) ::: acc
-          }
+      def filter[A](list: List[A])(p: A => Boolean): List[A] =
+        list.foldRight(List.empty[A]){ (e, acc) =>
+          if (p(e)) e :: acc else acc
+        }
 
-        def filter[A](p: A => Boolean): List[A] =
-          this.foldRight(List.empty[A]){ (e, acc) =>
-            if (p(e)) e :: acc else acc
-          }
-
-        def sum[A](implicit m: Monoid[A]): A =
-          this.foldRight(m.empty)(m.combine)
-      }
+      def sum[A](list: List[A])(implicit m: Monoid[A]): A =
+        list.foldRight(m.empty)(m.combine)
     #+end_src
 
 *** DONE 7.1.4 Foldable in Cats - 168
-    CLOSED: [2019-04-08 Mon 01:03]
+    CLOSED: [2020-02-21 Fri 15:08]
     Cats' ~Foldable~ abstracts ~foldLeft~ and ~foldRight~ into a /type class/.
     - Instances of ~Foldable~
       1. _define_ these TWO /methods/
@@ -4162,8 +4566,8 @@
         // res3: Int = 1230
       #+end_src
 
-**** DONE 7.1.4.1 Folding Right - 168 - ???
-     CLOSED: [2019-04-08 Mon 00:56]
+**** DONE 7.1.4.1 Folding Right - 168 - TODO =RE-READ=
+     CLOSED: [2020-02-21 Fri 14:36]
      ~Foldable~ defines ~foldRight~ differently to ~foldLeft~, in terms of the
      ~Eval~ /monad/:
      #+begin_src scala
@@ -4180,7 +4584,7 @@
      - Example:
        =from Jian= Replace ~Stream~ with other data types. Might not be
        ~LazyList~, I guess ~LazyList~ might have already done the right thing.
-       =from Jian= =IMPORTANT= =TODO= =TODO=
+       =from Jian= =IMPORTANT= TODO TODO
 
        #+begin_src scala
          import cats.Eval
@@ -4211,8 +4615,8 @@
 
        We use ~Stream~ here is just because ~Stream~ is an exception.
 
-**** DONE 7.1.4.2 Folding with Monoids - 170 - ???
-     CLOSED: [2019-09-16 Mon 00:16]
+**** DONE 7.1.4.2 Folding with Monoids - 170
+     CLOSED: [2020-02-21 Fri 14:39]
      - ~Foldable~ provides us with a host of useful /methods/ defined on top of
        ~foldLeft~. Many of these are facsimilies of familiar methods from the
        standard library:
@@ -4244,7 +4648,7 @@
          #+end_src
 
      - Finally, we can compose ~Foldable~'s to support deep traversal of nested
-       sequences: TODO ??? ??? ???
+       sequences: TODO =IMPORTANT= details ??? TODO
        #+begin_src scala
          import cats.instance.vector._  // for Monoid
 
@@ -4255,7 +4659,7 @@
        #+end_src
 
 **** DONE 7.1.4.3 Syntax for Foldable - 171
-     CLOSED: [2019-04-08 Mon 01:02]
+     CLOSED: [2020-02-21 Fri 15:08]
      With syntax imported, the first argument to the /static method/ becomes
      the /receiver/ of the /method/ call:
      #+begin_src scala
@@ -4287,18 +4691,18 @@
 
        + If we need a *stack-safe implementation* of ~foldRight~, using ~Eval~ as
          the accumulator is enough to force the compiler to select the method
-         from Cats -- from the type the compiler knows the right one!
-         TODO TODO TODO -- =REVIEW ~Eval~=
+         from Cats.
 
-** TODO 7.2 ~Traverse~ - 172
+** DONE 7.2 ~Traverse~ - 172 - TODO 7.2.2 =RE-READ=
+   CLOSED: [2020-02-22 Sat 00:56]
    ~foldLeft~ and ~foldRight~ are flexible iteration methods but they require us
-   to do a lot of work to define _accumulators_ and _combinator functions_.
+   to do a lot of work to *define _accumulators_ and _combinator functions_.*
      The ~Traverse~ /type class/ is a higher level tool that leverages
    ~Applicative~'s to provide a more convenient, more lawful, pattern for
    iteration.
 
 *** DONE 7.2.1 Traversing with ~Future~'s - 172
-    CLOSED: [2019-07-14 Sun 13:41]
+    CLOSED: [2020-02-21 Fri 15:17]
     - Question:
       A list of server hostnames and method to poll a host for its uptime:
       #+begin_src scala
@@ -4388,9 +4792,10 @@
       2. We'll end up with an extremely valuable tool that trivialises many
          operations involving sequences and other data types.
 
-*** TODO 7.2.2 Traversing with ~Applicative~'s - 175
-    - If we squint, we'll see that we can _rewrite_ ~traverse~ in terms of an
-      ~Applicative~. Our accumulator from the example above:
+*** DONE 7.2.2 Traversing with ~Applicative~'s - 175 - TODO
+    CLOSED: [2020-02-21 Fri 15:51]
+    - We'll see that we can _rewrite_ ~traverse~ in terms of an ~Applicative~.
+      Our accumulator from the example above:
       ~Future(List.empty[Int])~ is equivalent to ~Applicative.pure~:
       #+begin_src scala
         import cats.Applicative
@@ -4425,7 +4830,8 @@
       #+begin_src scala
         import scala.language.higherKinds
 
-        def listTraverse[F[_]: Applicative, A, B](list: List[A])(func: A => F[B]): F[List[B]] =
+        def listTraverse[F[_]: Applicative, A, B](list: List[A])
+                                                 (func: A => F[B]): F[List[B]] =
           list.foldLeft(List.empty[B].pure[F]) { (accum, item) =>
             (accum, func(item)).mapN(_ :+ _)
           }
@@ -4451,7 +4857,7 @@
        ~Vector(List(1, 3), List(1, 4), List(2, 3), List(2, 4))~
 
 **** DONE 7.2.2.2 Exercise: Traversing with ~Option~'s - 177
-     CLOSED: [2019-07-14 Sun 14:04]
+     CLOSED: [2020-02-21 Fri 15:48]
      #+begin_src scala
        import cats.instances.option._  // for Applicative
 
@@ -4470,7 +4876,8 @@
          // None
        #+end_src
 
-**** TODO 7.2.2.3 Exercise: Traversing with ~Validated~ - 177
+**** DONE 7.2.2.3 Exercise: Traversing with ~Validated~ - 177 - TODO -WHY
+     CLOSED: [2020-02-21 Fri 15:51]
      #+begin_src scala
        import cats.data.Validated
        import cats.instances.list._ // for Monoid
@@ -4486,12 +4893,37 @@
          }
      #+end_src
 
-*** TODO 7.2.3 ~Traverse~ in Cats - 178
+*** DONE 7.2.3 ~Traverse~ in Cats - 178
+    CLOSED: [2020-02-22 Sat 00:56]
+    Generalise over differnt sequence types using a /type class/, which brings us
+    to Cats' ~Traverse~. Here's the abbreviated definition:
+    #+begin_src scala
+      package cats
 
-** TODO 7.3 Summary - 180
+      trait Traverse[F[_]] {
+        def traverse[G[_]: Applicative, A, B]
+                    (inputs: F[A])(func: A => G[B]): G[F[B]]
+
+        def sequence[G[_]: Applicative, A]
+                    (inputs: F[G[A]]): G[F[A]] =
+          traverse(inputs)(identity)
+      }
+    #+end_src
+
+    - Cats provides instances of ~Traverse~ for ~List~, ~Vector~, ~Stream~, ~Option~,
+      ~Either~, and a variety of other types.
+        We can _summon instances_ as usual using ~Traverse.apply~ and use ~traverse~
+      and ~sequence~ /methods/ as described in the previous section. Or use the
+      syntax ~cats.syntax.traverse~
+
+** DONE 7.3 Summary - 180
+   CLOSED: [2020-02-22 Sat 00:56]
 
 * Part II. Case Studies - 181
 * TODO 8 Case Study: Testing Asynchronous Code - 183
+  Simplify unit tests for asynchronous code
+  by making them synchronous.
+
 ** TODO 8.1 Abstracting over Type Constructors - 185
 ** TODO 8.2 Abstracting over Monads - 186
 ** TODO 8.3 Summary - 187
