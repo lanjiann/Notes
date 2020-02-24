@@ -63,7 +63,7 @@
 
      - It's possible to override these rules and use any name,
        i.e., any sequence of characters, by surrounding it with backticks:
-       #+begin_src python
+       #+begin_src r
          `_abc` <- 1
          `_abc`
          #> [1] 1
@@ -110,7 +110,7 @@
      CLOSED: [2020-02-22 Sat 16:24]
      Trace the memory change with ~base::tracemem(variable)~
      - Example:
-       #+begin_src python
+       #+begin_src r
          x <- c(1, 2, 3)
          cat(tracemem(x), "\n")
          #> <0x7f80c0e0ffc8>
@@ -122,7 +122,7 @@
 
      - If there is only one copy, R will optimize the modification process, and
        stop making a copy on modification -- =from Jian= reasonable.
-       #+begin_src python
+       #+begin_src r
          y[[3]] <- 5L
          # You can see nothing from `tracememe()`
        #+end_src
@@ -142,7 +142,7 @@
      - For R version < 3.1.0, *copies were ALWAYS /deep copies/.*
 
      - To see values that are shared across lists, use ~lobstr::ref(obj1, obj2)~.
-       #+begin_src python
+       #+begin_src r
          ref(l1, l2)
          #> █ [1:0x37f23e8] <list>
          #> ├─[2:0x1fa2918] <dbl>
@@ -170,14 +170,14 @@
        + =from Jian= ??? A extremely confusing name and definition
 
      - Example:
-       #+begin_src python
+       #+begin_src r
          x <- c("a", "a", "abc", "d")
        #+end_src
 
      - CAUTION: remember the /global string pool/.
 
      - Check the shared objects:
-       #+begin_src python
+       #+begin_src r
          ref(x, character = TRUE)
          #> █ [1:0x7a3b088] <chr>
          #> ├─[2:0x133f808] <string: "a">
@@ -205,7 +205,7 @@
     CLOSED: [2020-02-22 Sat 16:18]
     You canfind out how much memory an object takes with ~lobstr::obj_size()~.
     - Example:
-      #+begin_src python
+      #+begin_src r
         lobstr::obj_size(letters)
         #> 1,712 B
 
