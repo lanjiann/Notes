@@ -120,14 +120,122 @@
    - TODO NOTE
 
 ** TODO 2.6 Character vectors - 10
-** TODO 2.7 Index vectors; selecting and modifying subsets of a data set - 10
-** TODO 2.8 Other types of objects - 11
+** DONE 2.7 Index vectors; selecting and modifying subsets of a data set - 10
+   CLOSED: [2020-03-01 Sun 00:25]
+   - Index vectors can be any of four distinct types:
+     + A logical vector ::
+       =from Jian= predicate
+       ~y <- x[!is.na(x)]~
 
-* 3 Objects, their modes and attributes - 13
-** 3.1 Intrinsic attributes: mode and length - 13
-** 3.2 Changing the length of an object - 14
-** 3.3 Getting and setting attributes - 14
-** 3.4 The class of an object - 14
+     + A vector of positive integral quantities :: Select these elements
+       ~y <- x[-(1:5)]~
+
+     + A vector of negative integral quantities :: Exclude these elements
+       ~y <- x[-(1:5)]~
+
+     + A vector of character strings :: Given each index a name of string.
+       #+begin_src r
+         fruit <- c(5, 10, 1, 20)
+         names(fruit) <- c("organge", "banana", "apple", "peach")
+         lunch <- fruit[c("apple", "organge")]
+       #+end_src
+       TODO This option is particularly useful in connection with /data frames/,
+       as we shall see later.
+
+   - Use index vector in receiving end:
+     #+begin_src r
+       x[is.na(x)] <- 0
+
+       y[y < 0] <- -y[y < 0]
+       # This is the same as `y <- abs(y)`
+     #+end_src
+
+** DONE 2.8 Other types of objects - 11
+   CLOSED: [2020-03-01 Sun 00:28]
+   - /matrices/
+   - /factors/
+   - /lists/
+   - /data frames/
+   - /functions/
+
+* DONE 3 Objects, their modes and attributes - 13
+  CLOSED: [2020-03-01 Sun 02:14]
+** DONE 3.1 Intrinsic attributes: mode and length - 13
+   CLOSED: [2020-03-01 Sun 01:45]
+   - _The entities R operates on_ are technically known as /objects/.
+
+   - TODO: some other details
+
+   - Five /modes/:
+     + /numeric/
+     + /complex/
+     + /logical/
+     + /character/
+     + /raw/
+
+   - /Mode/ and /length/ are called "intrinsic attributes" of an /object/.
+
+   - ~mode~, ~length~, ~attributes~
+
+   - There are multiple ~NA~'s with differnt /modes/.
+     However, we just don't need to pay attention on this, and we often can't
+     fill this.
+
+** DONE 3.2 Changing the length of an object - 14
+   CLOSED: [2020-03-01 Sun 01:45]
+   - Create *empty* /objects/:
+     #+begin_src r
+       c <- character()
+
+       e <- numeric()
+     #+end_src
+
+   - Add elememt(s) of the _right_ /mode/ to an /object/ can chnage its length
+     (remember ~e~ is of numeric mode. It is created in the last entry, and it
+     is empty):
+     #+begin_src r
+       e[3] <- 17
+
+       # Result:
+       # `e` equals [NA, NA, 17]
+     #+end_src
+
+   - Ways of *shrink* an /object/:
+     + selection some elements:
+       ~alpha <- alpha[2 * 1:5]~
+
+     + Provide wanted a length:
+       ~length(alpha) <- 3~
+
+** DONE 3.3 Getting and setting attributes - 14
+   CLOSED: [2020-03-01 Sun 02:00]
+   - There are two functions:
+     + ~attributes(object)~ returns a list of all the non-intrinsic attributes
+       currently defined for that /object/.
+
+     + ~attr(object, name)~ can be ued to select a specific attribute.
+
+   - Example:
+     ~attr(z, "dim") <- c(10, 10)~
+     Allow R to treat ~z~ as if it were a 10-by-10 matrix.
+
+** DONE 3.4 The class of an object - 14
+   CLOSED: [2020-03-01 Sun 02:14]
+   *All /objects/ in R have a /class/, reported by the function ~class~.*
+
+   - For _simple_ vectors, the /class/ is the same as its /mode/.
+     However, there are other possible values like
+     + "matrix"
+     + "array"
+     + "factor"
+     + "data.frame"
+
+   - ~class~ can be used in oo style of programming in R.
+     For example, ~plot()~ function is sensitive to the ~class~.
+
+   - Use ~unclass()~ to temporarily remove the effects of /class/.
+     For exmaple, assume ~winter~ is a ~data.frame~, do ~unclass(winter)~, and
+     print it, it won't how a ~data.frame~ style output.
 
 * 4 Ordered and unordered factors - 16
 ** 4.1 A specific example - 16
@@ -135,8 +243,24 @@
 ** 4.3 Ordered factors - 17
 
 * 5 Arrays and matrices - 18
-** 5.1 Arrays - 18
-** 5.2 Array indexing. Subsections of an array - 18
+** DONE 5.1 Arrays - 18
+   CLOSED: [2020-03-01 Sun 02:40]
+   - dimention vector :: a vector of non-negative integers.
+     Its length is ~k~ then the array is k-dimensional.
+     Example: a matrix is a 2-dimensional array.
+
+   - Assume ~z~ is a /vector/.
+     It can be made as an array by assigning a /dimension vector/ to it:
+     ~dim(z) <- c(3, 5, 100)~
+
+   - /Arrays/ can be one-dimensional. Then they are treated in the same way as
+     /vectors/, TODO but the exceptions can cause confusion.
+
+** TODO 5.2 Array indexing. Subsections of an array - 18
+   - /Array indexing/ examples:
+     + ~a[2, 1, 1]~
+     + ~a[2,,]~
+
 ** 5.3 Index matrices - 19
 ** 5.4 The ~array()~ function- 20
 *** 5.4.1 Mixed vector and array arithmetic. The recycling rule - 20
