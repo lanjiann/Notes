@@ -4920,15 +4920,40 @@
    CLOSED: [2020-02-22 Sat 00:56]
 
 * Part II. Case Studies - 181
-* TODO 8 Case Study: Testing Asynchronous Code - 183
+* DONE 8 Case Study: Testing Asynchronous Code - 183
+  CLOSED: [2020-02-24 Mon 09:56]
   Simplify unit tests for asynchronous code
   by making them synchronous.
+
+  - XXX TODO
+    #+begin_src scala
+      import scala.concurrent.Future
+
+      trait UptimeClient {
+        def getUptime(hostname: String): Future[Int]
+      }
+    #+end_src
+
+  - XXX TODO
+    #+begin_src scala
+      import cats.instances.future._  // for Applicative
+      import cats.instances.list._    // for Traverse
+      import cats.syntax.traverse._   // for traverse
+
+      import scala.concurrent.ExecutionContext.Implicits.global
+
+      class UptimeService(client: UptimeClient) {
+        def getTotalUptime(hostname: List[String]): Future[Int] =
+          hostname.traverse(client.getUptime).map(_.sum)
+      }
+    #+end_src
 
 ** TODO 8.1 Abstracting over Type Constructors - 185
 ** TODO 8.2 Abstracting over Monads - 186
 ** TODO 8.3 Summary - 187
 
-* TODO 9 Case Study: Map-Reduce - 189
+* DONE 9 Case Study: Map-Reduce - 189
+  CLOSED: [2020-02-24 Mon 09:56]
 ** TODO 9.1 Parallelizing ~map~ and ~fold~ - 189
 ** TODO 9.2 Implementing ~foldMap~ - 191
 ** TODO 9.3 Parallelising ~foldMap~ - 193
