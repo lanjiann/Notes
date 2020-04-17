@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.23.0-bin-20200214-5374d91-NIGHTLY
+#+VERSION: 0.23.0-bin-20200305-84f2e41-NIGHTLY -> 0.24.0-bin-SNAPSHOT
 #+AUTHOR:
 #+STARTUP: entitiespretty
 
@@ -11,6 +11,8 @@
 *** Trying out Dotty
 **** In your web browser
 **** sbt
+     Use sbt (1.1.4+)
+
 **** IDE support
 **** Standalone installation
 
@@ -71,7 +73,8 @@
 *** Meta Programming
 *** See Also
 
-** TODO NEW TYPES
+** DONE NEW TYPES
+   CLOSED: [2020-03-08 Sun 21:34]
 *** DONE Intersection types
     CLOSED: [2019-11-10 Sun 17:47]
     The ~&~ operator creates an /intersection type/.
@@ -293,7 +296,8 @@
     - TODO
       _More details_ link
 
-*** TODO Match types
+*** DONE Match types - TODO _mechanism_
+    CLOSED: [2020-03-08 Sun 21:34]
     - A /match type/ reduces to one of a number of right hand sides, depending on
       a /scrutinee type/. Example:
       #+begin_src scala
@@ -319,7 +323,7 @@
       + ~P1~, ..., ~Pn~ are patterns.
         * /Type variables/ in patterns start as usual with a lower case letter.
 
-    - Match types can form part of recursive type definitions. Example:
+    - Match types can form part of *RECURSIVE TYPE definitions*. Example:
       #+begin_src scala
         type LeafElem[X] = X match {
           case String      => Char
@@ -342,14 +346,42 @@
       + This is necessary to _make the recursive invocation ~x *: Concat[xs, Ys]~
         type check_, since ~*:~ demands a ~Tuple~ as its right operand.
 
-**** TODO Representation of Match Types
-**** Match type reduction
-**** Subtyping Rules for Match Types
-**** Variance Laws for Match Types
-**** Typing Rules for Match Expressions
-**** Overlapping Patterns
-**** Handling Termination
-**** Related Work
+**** DONE Representation of Match Types
+     CLOSED: [2020-03-08 Sun 21:32]
+     # =from Jian= Internal Representation of Match Types
+     #+begin_src scala
+       S match {
+         case P1 => T1
+         case P2 => T2
+         // ...
+         case Pn => Tn
+       }
+     #+end_src
+     - It's _internal representation_ (=from Jian= Tasty???) is
+       ~Match(S, C1, ..., Cn) <: B~
+       + ~Ci~ is of the form ~[Xs] => P => T~
+         * ~[Xs]~
+           a /type parameter clause/ of the /variables bound/ in pattern ~Pi~.
+           _It can be omitted if there is *NO* /bound/._
+
+         * Each case (~Pi => Ti~) is either:
+           - a /unary function type/ like ~String => Char~
+             OR
+           - a /type lambda over a unary function type/ like ~Array[t] => LeafElem[t]~.
+
+         * ~B~ is the declared /upper bound/ of the /match type/, or ~Any~ if no
+           such bound is given.
+
+       + Scrutiny, /bound types/ and /pattern types/ must be /first-order types/.
+         TODO =from Jian= ??? I don't quite understand this sentence!?!?
+
+**** TODO Match type reduction
+**** TODO Subtyping Rules for Match Types
+**** TODO Variance Laws for Match Types
+**** TODO Typing Rules for Match Expressions
+**** TODO Overlapping Patterns
+**** TODO Handling Termination
+**** TODO Related Work
 
 *** DONE Dependent Function Types
     CLOSED: [2019-07-01 Mon 16:10]
@@ -681,10 +713,11 @@
          old-style implicits and new-style delegates and given clauses and how
          to migrate from one to the other.
 
-*** TODO Given Instances
+*** DONE Given Instances
+    CLOSED: [2020-03-08 Sun 23:12]
     /Given instances/ (or, simply, "givens") define "canonical" values of certain
-    types that serve for /synthesizing arguments/ to /given clauses/.
-    =from Jian= /given clauses/ describes a requirement to /given instances/.
+    types that serve for /synthesizing arguments/ to /context parameters/.
+    =from Jian= /context parameters/ describes a requirement to /given instances/.
 
     - Example:
       #+begin_src scala
@@ -695,12 +728,12 @@
           def (x: T) > (y: T) = compare(x, y) > 0
         }
 
-        given intOrd: Ord[Int] {
+        given intOrd as Ord[Int] {
           def compare(x: Int, y: Int) =
             if (x < y) -1 else if (x > y) +1 else 0
         }
 
-        given listOrd[T](given ord: Ord[T]): Ord[List[T]] {
+        given listOrd[T](using ord: Ord[T]) as Ord[List[T]] {
           def compare(xs: List[T], ys: List[T]): Int = (xs, ys) match {
             case (Nil, Nil) => 0
             case (Nil, _)   => -1
@@ -711,29 +744,38 @@
           }
         }
       #+end_src
-      + This code defines a /trait/ ~Ord~ (typeclass) with two /given instances/.
+      This code defines a /trait/ ~Ord~ (typeclass) with two /given instances/.
 
-      + ~(ord: Ord[T]) =>~ clause in ~listOrd~ defines an /implicit parameter/.
-        TODO /given clauses/ are further explained in the next section.
-
-**** Anonymous Givens
-     The name of a given instance can be left out.
+**** DONE Anonymous Givens
+     CLOSED: [2020-03-08 Sun 21:52]
+     The name of a /given instance/ *can be left out*.
      #+begin_src scala
        given Ord[Int] { /* ... */ }
-       given [T]: Ord[T] => Ord[List[T]] { /* ... */ }
+       given [T](using Ord[T]) as Ord[List[T]] { /* ... */ }
      #+end_src
+     If the name of a given is missing,
+     the compiler will _synthesize a name_ from the implemented type(s).
+     =from Jian= The doc doesn't mention the rules of synthesizing this name, for
+                 the users the rules is not important -- you define an anonymous
+                 given means you plan not to use its name.
 
-**** Alias Givens
-     An alias can be used to define a given instance that is equal to some expression. E.g.:
+**** DONE Alias Givens
+     CLOSED: [2020-03-08 Sun 23:11]
+     An alias can be used to define a given instance that is equal to some
+     expression. E.g.:
      #+begin_src scala
-       given global: ExecutioinContext = new ForkJoinPool()
+       given global as ExecutioinContext = new ForkJoinPool()
      #+end_src
-     The _initialization rule_ is described in the next section.
+     When the first time ~global~ is accessed, the RHS is evaludated, which is then
+     returned for this and all subsequent accesses to ~global~.
+     =from Jian= A kind of /lazy evaluation/.
+     =from Jian= More initialization rules in the "Given Instance Initialization"
+                 below.
 
-     - /Alias givens/ can be anonymous, e.g.
+     - /Alias givens/ can be _anonymous_, e.g.
        #+begin_src scala
          given Position = enclosingTree.position
-         given (outer: Context) => Context = outer.withOwner(currentOwner)
+         given (using outer: Context) as Context = outer.withOwner(currentOwner)
        #+end_src
 
      - An /alias given/ can have /type parameters/ and /given clauses/ just like
@@ -741,39 +783,170 @@
        =from Jian= Because it is an alias -- a name or concrete thing, not a
                    general instances.
 
-**** Given Whitebox Macro Instances
-**** Given Instance Initialization - =IMPORTANT=
-     A given instance without type parameters or given clause is initialized
-     on-demand, the first time it is accessed.
-     - It is _NOT required to ENSURE_ /safe publication/, which means that
-       DIFFERENT /threads/ might create DIFFERENT /instances/ for the SAME
-       /given definition/.
+**** DONE Given Whitebox Macro Instances
+     CLOSED: [2020-03-08 Sun 23:11]
+     An ~inline~ alias given can be marked as a /whitebox macro/ by writing
+     ~_ <:~ _in front of_ the implemented type. Example:
+     #+begin_src scala
+       inline given mkAnnotations[A, T] as _ <: Annotations[A, T] = ${
+         // code producing a value of a subtype of Annotations
+       }
+     #+end_src
+     The type of an application of ~mkAnnotations~ is the type of its RHS, which
+     can be a proper /subtype/ of the declared result type ~Annotations[A, T]~.
 
-     - If a /given definition/ has /type parameters/ or a /given clause/, a *fresh*
-       instance is created _for EACH reference_.
+**** DONE Given Instance Initialization
+     CLOSED: [2020-03-08 Sun 23:11]
+     - A /given instance/
+       + without /type parameters/ or /context parameters/
+         *is initialized on-demand, the first time it is accessed.*
+         =from Jian= *FROM OLD Dotty Doc*
+         * It is _NOT required to ENSURE_ /safe publication/, which means that
+           DIFFERENT /threads/ might create DIFFERENT /instances/ for the SAME
+           /given definition/.
 
-**** TODO Syntax - TODO
-     TODO ??? TODO ??? TODO
-     The identifier ~id~ can be omitted _only if_ (???)
-     - some types are implemented
-       OR
-     - the template body defines at least one extension method.
+       + has /type parameters/ or /context parameters/, a *FRESH* instance is
+         created _for EACH reference_.
 
-*** TODO Using Clauses
-**** Anonymous Context Parameters
-**** Inferring Complex Arguments
-**** Multiple Using Clauses
-**** Summoning Instances
-**** Syntax
+**** DONE Syntax
+     CLOSED: [2020-03-08 Sun 23:11]
+
+*** DONE Using Clauses
+    CLOSED: [2020-03-09 Mon 00:56]
+    - Functional programming tends to express most dependencies as simple function
+      parameterization.
+      + =from Jian=
+        How does Functional programming express dependencies
+
+    - This is clean and powerful, but it sometimes leads to functions that take
+      many parameters where the same value is passed over and over again in long
+      call chains to many functions.
+      + =from Jian=
+        The issue that following the way that Functional programming express
+        dependencies
+
+    - /Context parameters/ can help here since they enable the compiler to synthesize
+      repetitive arguments instead of the programmer having to write them explicitly.
+      + =from Jian=
+        The way of Scala to resolve the issue mentioned in the last bullet.
+
+    - Example:
+      #+begin_src scala
+        def max[T](x: T, y: T)(using ord: Ord[T]): T =
+          if ord.compare(x, y) < 0 then y else x
+
+        // The explicit way
+        max(2, 3)(using intOrd)
+
+        // The implicit way
+        max(2, 3)
+        max(List(1, 2, 3), Nil)
+      #+end_src
+
+**** DONE Anonymous Context Parameters
+     CLOSED: [2020-03-09 Mon 00:20]
+     - =from Jian=
+       A functional /context parameter/ always co-exit with a /given instance/.
+       Such as /given instances/, /context parameter/ can be anonymous, though the
+       reason for /context parameter/ is different from the reason for /given
+       instance/.
+       + Anonymous /given instances/ (frequency: Almost Always):
+         /given instances/ search is always match types.
+         Name is not that important.
+
+       + Anonymous /context parameters/ (frequency: Often):
+         =from Doc=
+         It is used only in synthesized arguments for OTHER /context parameters/.
+         Example:
+         #+begin_src scala
+           def maximum[T](xs: List[T])(using Ord[T]): T =
+             xs.reduceLeft(max)
+         #+end_src
+         Here the context parameter of type ~Ord[T]~ is synthesized for ~max~,
+         not for explicit use as inside ~max~.
+
+     - /Vararg parameters/ are not supported in /using clauses/.
+       + =from Jian=
+         In the example above,
+         * ~Ord[T]~ is the /context parameter/.
+
+         * ~using Ord[T]~ is the /using clause/.
+
+**** DONE Inferring Complex Arguments
+     CLOSED: [2020-03-09 Mon 00:49]
+     #+begin_src scala
+       def descending[T](using asc: Ord[T]): Ord[T] = new Ord[T] {
+         def compare(x: T, y: T) = asc.compare(y, x)
+       }
+
+       def minimum[T](xs: List[T])(using Ord[T]) =
+         maximum(xs)(using descending)
+
+       // minimum(xs)
+       // maximum(xs)(using descending)
+       // maximum(xs)(using descending(using listOrd))
+       // maximum(xs)(using descending(using listOrd(using intOrd)))
+     #+end_src
+     - =from Jian=
+       The description of this section is NOT clear!!!
+       Here is my understanding:
+         If, in the example above, not ~using descending~ passed in, the ~maximum~
+       function will find the maximum value. This why we must manually provide the
+       ~using descending~ to make the code be functional as we expect. Or else, it
+       is runnable (with a wrong synthesized ~Ord[T]~ instance) and returns a wrong
+       result.
+
+**** DONE Multiple Using Clauses
+     CLOSED: [2020-03-09 Mon 00:52]
+     There can be several using clauses in a definition and using clauses can be
+     freely mixed with normal parameter clauses. Example:
+     #+begin_src scala
+       def f(u: Universe)(using ctx: u.Context)(using s: ctx.Symbol, k: ctx.Kind) = ...
+     #+end_src
+
+     - Multiple using clauses are matched left-to-right in applications. Example:
+       #+begin_src scala
+         object global extends Universe { type Context = ... }
+         given ctx  as global.Context { type Symbol = ...; type Kind = ... }
+         given sym  as ctx.Symbol
+         given kind as ctx.Kind
+       #+end_src
+
+     - Then the following calls are all valid (and normalize to the last one)
+       #+begin_src scala
+         f(global)
+         f(global)(using ctx)
+         f(global)(using ctx)(using sym, kind)
+       #+end_src
+
+     - Invalid, for example:
+       ~f(global)(using sym, kind)~
+
+**** DONE Summoning Instances
+     CLOSED: [2020-03-09 Mon 00:56]
+     - =from Jian=
+       ~sommon~ from ~Predef~ is a replacement of the ~implicitly~ in Scala 2.
+
+     - The ~summon~ is simply defined as /the (*non-widening*) identity function/
+       over a /context parameter/:
+       #+begin_src scala
+         def sommon[T](using x: T): x.type = x
+       #+end_src
+
+**** DONE Syntax
+     CLOSED: [2020-03-09 Mon 00:56]
 
 *** DONE Context Bounds
     CLOSED: [2019-11-12 Tue 02:20]
     A /context bound/ is a *SHORTHAND* for expressing the common pattern (a.k.a
-    typeclass pattern) of an /implicit parameter/ that depends on a /type parameter/.
+    typeclass pattern) of an /context parameter/ that depends on *A* /type parameter/.
+    #+begin_src scala
+      def maximum[T: Ord](xs: List[T]): T = xs.reduceLeft(max)
+    #+end_src
 
 **** Context Bounds
-     - The implicit parameter(s) *generated from* /context bounds/ *come last* in
-       the definition of the containing /method/ or /class/. E.g.
+     - The /context parameter(s)/ *generated from* /context bounds/ come *LAST*
+       in the definition of the containing /method/ or /class/. E.g.
        #+begin_src scala
          def f[T: C1 : C2, U: C3](x: T)(given y: U, z: V): R
 
@@ -783,7 +956,7 @@
        #+end_src
 
      - /Context bounds/ can be combined with /subtype bounds/.
-       If both are present, /subtype bounds/ *come first*, e.g.
+       _If both are present, /subtype bounds/ *come first*,_ e.g.
        ~def g[T <: B : C](x: T):R = ...~
 
 **** Migration
@@ -802,25 +975,25 @@
       #+begin_src scala
         object A {
           class TC
-          given tc: TC
-          def f(given TC) = ???
+          given tc as TC
+          def f(using TC) = ???
         }
 
         object B {
           import A._
-          import A.given
+          import A.{given _}
           // ...
         }
       #+end_src
       + In Dotty, ~import A._~ import all members of ~A~ *except* the /given instances/.
 
-      + Merge the two import clauses: ~import A.{given, _}~
+      + Merge the two import clauses: ~import A.{given _, _}~
 
     - There are _TWO_ main benefits arising from these rules:
       + It is made clearer where /givens/ in scope are coming from.
 
-      + Separate import not givens and givens.
-        This is particularly important since /givens/ can be ANONYMOUS, so the
+      + It enables importing all /givens/ without importing anything else.
+        This is _particularly important since /givens/ can be ANONYMOUS_, so the
         usual recourse of using /named imports/ is NOT practical.
 
 **** DONE Importing By Type
@@ -832,13 +1005,17 @@
 
      - Example:
        + ~import A.{given TC}~
+
        + ~import A.{given T1, given T2, ..., given Tn}~
-       + ~import A.{given Ordering[?]}~
+
+       + ~import A.{given Ordering[?]}~ -- =IMPORTANT= easy to forget this usage
+
        + /By-type imports/ can be mixed with /by-name imports/.
          If BOTH are present in an import clause, *by-type imports come last*.
          ~import A.{im, given Ordering[?]}~
 
-     - /Bounded wildcard selectors/ *also work* for _normal imports and exports_.
+     - =from Jian= *EXIST BEFORE, but _DELETED_ from this page (ver 0.23.0)*
+       /Bounded wildcard selectors/ *also work* for _normal imports and exports_.
        For instance,
        #+begin_src scala
          enum Color {
@@ -858,16 +1035,270 @@
      CLOSED: [2019-11-13 Wed 14:44]
      TODO NOTE
 
-*** TODO Extension Methods
-**** Translation of Extension Methods
-**** Translation of Calls to Extension Methods
-**** Operators
-**** Generic Extensions
-**** Collective Extensions
-**** Syntax
+*** DONE Extension Methods
+    CLOSED: [2020-03-10 Tue 00:59]
+    /Extension methods/ allow one to add /methods/ to a /type/ after the /type/
+    is defined.
+    =from Jian= A way to extend a closed (not own, or better not change) system.
+
+    - Example:
+      + Definition:
+        #+begin_src scala
+          final case class Circle(x: Double, y: Double, radius: Double)
+
+          def (c: Circle).circumference: Double = c.radius * math.Pi * 2
+        #+end_src
+
+      + Invoke as regular methods:
+        #+begin_src scala
+          val circle = Circle(0, 0, 1)
+          circle.circumference
+        #+end_src
+
+**** DONE Translation of Extension Methods
+     CLOSED: [2020-03-09 Mon 23:15]
+     - extension methods :: /methods/ that have a parameter clause in front of the
+       defined identifier.
+
+     - They translate to methods where the leading parameter section is moved to
+       after the defined identifier.
+         So, the definition of ~circumference~ above translates to the plain
+       method, and can also be invoked as such:
+       #+begin_src scala
+         def circumference(c: Circle): Double = c.radius * math.Pi * 2
+
+         assert(circle.circumference == circumference(circle))
+       #+end_src
+
+**** DONE Translation of Calls to Extension Methods
+     CLOSED: [2020-03-10 Tue 00:06]
+     - When is an /extension method/ applicable? There are two possibilities.
+       An /extension method/ is applicable
+       + if it is visible under a simple name,
+         in a scope enclosing the application,
+         by being
+         * _defined_
+           or
+         * _inherited_
+           or
+         * _imported_
+
+       + if it is a member of some /given instance/ at the point of the application.
+
+     - Example:
+       #+begin_src scala
+         trait StringSeqOps {
+           def (xs: Seq[String]).longestStrings = {
+             val maxLength = xs.map(_.length).max
+             xs.filter(_.length == maxLength)
+           }
+         }
+       #+end_src
+       Use the the /extension methods/ in TWO ways:
+       + Define ~given ops1 as StringSeqOps~,
+         and then ~List("here", "is", "a", "list").longestStrings~ is legal
+         everywhere ~ops1~ is available.
+
+       + Define ~longestStrings~ as a member of a /normal object/.
+         But then the /method/ has to be brought into scope to be usable as an
+         /extension method/.
+         #+begin_src scala
+           object ops2 extends StringSeqOps
+           import ops2.longestStrings
+           List("here", "is", "a", "list").longestStrings
+         #+end_src
+
+     - The _PRECISE_ *rules for RESOLVING a selection to an extension method* are
+       as follows:
+         Assume a selection ~e.m[Ts]~ where ~m~ is not a member of ~e~, where
+       the /type arguments/ ~[Ts]~ are _OPTIONAL_, and where ~T~ is the expected
+       type. The following two rewritings *are tried in order*:
+
+       1. The selection is rewritten to ~m[Ts](e)~.
+
+       2. If the first rewriting does not typecheck with expected type ~T~, and
+          there is a /given instance/ ~g~ in either the /current scope/ or in
+          the /context scope/ of ~T~, and ~g~ defines an /extension method/
+          named ~m~, then selection is expanded to ~g.m[Ts](e)~. This second
+          rewriting is attempted at the time where the compiler also tries an
+          /implicit conversion/ from ~T~ to a type containing ~m~.
+            *If there is more than one way of rewriting, an ambiguity error
+          results.*
+
+     - So ~circle.circumference~ translates to ~CircleOps.circumference(circle)~,
+       provided ~circle~ has type ~Circle~ and ~CircleOps~ is /given/ (i.e. it is
+       visible at the point of call or it is defined in the /companion object/ of
+       ~Circle~).
+
+**** DONE Operators
+     CLOSED: [2020-03-10 Tue 00:16]
+     - Use /extension method syntax/ to define operators.
+       + This case is indicated by *omitting the period* between the leading
+         parameter list and the operator.
+
+       + This syntax mirrors the way the operator is applied.
+
+     - Examples:
+       #+begin_src scala
+         def (x: String) < (y: String) = ???
+         def (x: Elem) +: (xs: Seq[Elem]) = ???
+         def (x: Number) min (y: Number) = ???
+
+         "ab" < "c"
+         1 +: List(2, 3)
+         x min 3
+       #+end_src
+       + For /alphanumeric extension operators/ like ~min~ an ~@infix~ annotation
+         is *implied*.
+
+       + The translations:
+         #+begin_src scala
+           def <(x: String)(y: String) = ???
+
+           def +:(xs: Seq[Elem])(x: Elem) = ???
+
+           def min(x: Number)(y: Number) = ???
+         #+end_src
+         * Remember that in Scala ~:~ suffixed operators are all /right associative/!!!
+           This is why ~+:~ in the translation, the order of ~x~ and ~xs~ are swapped!
+
+**** DONE Generic Extensions
+     CLOSED: [2020-03-10 Tue 00:33]
+     We already discussed ~StringSeqOps~, which extends a specific instance of
+     generic type (~Seq[String]~).
+       This section will discuss /extension method of generic type/.
+
+     - Examples:
+       #+begin_src scala
+         def [T](xs: List[T]) second =
+           xs.tail.head
+
+         def [T](xs: List[List[T]]) flattened =
+           xs.foldLeft[List[T]](Nil)(_ ++ _)
+
+         def [T: Numeric](x: T) + (y: T): T =
+           summon[Numeric[T]].plus(x, y)
+       #+end_src
+
+     - Usage:
+       ~List(1, 2, 3).second[Int]~
+
+**** DONE Extension Instances
+     CLOSED: [2020-03-10 Tue 00:59]
+     It is quite common to wrap one or more /extension methods/ in a /given
+     instance/, _in order to make them available as methods without needing to be
+     imported explicitly_. This pattern is supported by a special /extension
+     syntax/.
+
+     - Example:
+       #+begin_src scala
+         extension ops {
+           def (xs: Seq[String]).longestStrings: Seq[String] = {
+             val maxLength = xs.map(_.length).max
+             xs.filter(_.length == maxLength)
+           }
+
+           def (xs: Seq[String]).longestString: String = xs.longestStrings.head
+
+           def [T](xs: List[T]).second: T = xs.tail.head
+         }
+       #+end_src
+
+     - *An /extension instance/ can _ONLY_ contain /extension methods/.*
+       *Other definitions are not allowed.* The name ~ops~ of the ~extension~ is
+       *optional*. It can be left out:
+       #+begin_src scala
+         extension {
+           def (xs: Seq[String]).longestStrings: Seq[String] = ...
+           def [T](xs: List[T]).second: T = ...
+         }
+       #+end_src
+       + If no name is given explicitly for ~extension~, a name will be synthesized
+         from the _name_ and _type_ of the *first* implemented /extension method/.
+
+     - /Extension instances/ map DIRECTLY to /given instances/.
+       The code above would expand to
+       #+begin_src scala
+         given ops as AnyRef {
+           def (xs: Seq[String]).longestStrings: Seq[String] = ...
+           def (xs: Seq[String]).longestString: String = ...
+           def [T](xs: List[T]).second: T = ...
+         }
+       #+end_src
+
+     - The type "implemented" by this /given instance/ is ~AnyRef~, which is _not
+       a type one can summon by itself._ TODO TODO TODO TODO TODO TODO ??? TODO TODO
+         This means that the instance can _ONLY_ be used for its /extension methods/.
+
+**** DONE Collective Extensions
+     CLOSED: [2020-03-10 Tue 00:47]
+     Define several /extension methods/ that *SHARE the SAME left-hand parameter type.*
+       In this case one can "pull out" the common parameters into the /extension
+     instance/ itself. Examples:
+     #+begin_src scala
+       extension stringOps on (ss: Seq[String]) {
+         def longestStrings: Seq[String] = {
+           val maxLength = ss.map(_.length).max
+           ss.filter(_.length == maxLength)
+         }
+         def longestString: String = longestStrings.head
+       }
+
+       extension listOps on [T](xs: List[T]) {
+         def second: T = xs.tail.head
+         def third: T = xs.tail.second
+       }
+
+       extension on [T](xs: List[T])(using Ordering[T]) {
+         def largest(n: Int) = xs.sorted.takeRight(n)
+       }
+     #+end_src
+     + The /collective extensions/ above expand to the following /extension instances/:
+       #+begin_src scala
+         extension stringOps {
+           def (ss: Seq[String]).longestStrings: Seq[String] = {
+             val maxLength = ss.map(_.length).max
+             ss.filter(_.length == maxLength)
+           }
+           def (ss: Seq[String]).longestString: String =
+             ss.longestStrings.head
+         }
+
+         extension listOps {
+           def [T](xs: List[T]).second: T = xs.tail.head
+           def [T](xs: List[T]).third: T = xs.tail.second
+         }
+
+         extension {
+           def [T](xs: List[T]).largest(using Ordering[T])(n: Int) =
+             xs.sorted.takeRight(n)
+         }
+       #+end_src
+       * Illustrate the code transformation by inspecting
+         ~def longestString: String = longestStrings.head~
+         #+begin_src scala
+           def (ss: Seq[String]).longestString: String =
+             ss.longestString.head
+         #+end_src
+
+**** DONE Syntax
+     CLOSED: [2020-03-10 Tue 00:47]
+     - TODO
+
+     - ~extension~ and ~on~ are /soft keywords/, recognized only when they appear
+       at the start of a statement in one of the patterns
+       #+begin_src scala
+         extension on ...
+
+         extension <ident> on ...
+
+         extension { ...
+
+         extension <ident> { ...
+       #+end_src
 
 *** DONE Implementing Typeclasses
-    CLOSED: [2019-11-13 Wed 14:27]
+    CLOSED: [2020-03-09 Mon 01:00]
     /Given instances/, /extension methods/ and /context bounds/ allow a concise and
     natural expression of /typeclasses/.
 
@@ -878,50 +1309,55 @@
 
 **** Semigroups and monoids
      #+begin_src scala
-       trait SemiGroup[T] with
+       trait SemiGroup[T] {
          def (x: T) combine (y: T): T
+       }
 
-       trait Monoid[T] extends SemiGroup[T] with
+       trait Monoid[T] extends SemiGroup[T] {
          def unit: T
+       }
 
-       object Monoid with
-         def apply[T](given Monoid[T]) = summon[Monoid[T]]
+       object Monoid {
+         def apply[T](using m: Monoid[T]) = m
+       }
 
-       given Monoid[String] with
+       given Monoid[String] {
          def (x: String) combine (y: String): String = x.concat(y)
          def unit: String = ""
+       }
 
-       given Monoid[Int] with
+       given Monoid[Int] {
          def (x: Int) combine (y: Int): Int = x + y
          def unit: Int = 0
+       }
 
        def sum[T: Monoid](xs: List[T]): T =
-         xs.foldLeft(Monoid[T].unit)(_.combine(_))
+         xs.foldLeft(Monoid[T].unit)(_ combine _)
      #+end_src
 
 **** Functors and monads
      #+begin_src scala
        trait Functor[F[_]] {
-         def [A, B](x: F[A]) map (f: A => B): F[B]
+         def [A, B](x: F[A]).map(f: A => B): F[B]
        }
 
        trait Monad[F[_]] extends Functor[F] {
-         def [A, B](x: F[A]) flatMap (f: A => F[B]): F[B]
-         def [A, B](x: F[A]) map (f: A => B) = x.flatMap(f `andThen` pure)
+         def [A, B](x: F[A]).flatMap(f: A => F[B]): F[B]
+         def [A, B](x: F[A]).map(f: A => B) = x.flatMap(f `andThen` pure)
 
          def pure[A](x: A): F[A]
        }
 
-       given listMonad: Monad[List] {
-         def [A, B](xs: List[A]) flatMap (f: A => List[B]): List[B] =
+       given listMonad as Monad[List] {
+         def [A, B](xs: List[A]).flatMap(f: A => List[B]): List[B] =
            xs.flatMap(f)
 
          def pure[A](x: A): List[A] =
            List(x)
        }
 
-       given readerMonad[Ctx]: Monad[[X] =>> Ctx => X] {
-         def [A, B](r: Ctx => A) flatMap (f: A => Ctx => B): Ctx => B =
+       given readerMonad[Ctx] as Monad[[X] =>> Ctx => X] {
+         def [A, B](r: Ctx => A).flatMap(f: A => Ctx => B): Ctx => B =
            ctx => f(r(ctx))(ctx)
 
          def pure[A](x: A): Ctx => A =
@@ -950,8 +1386,87 @@
 **** Example: Postconditions
 **** Reference
 
-*** TODO Implicit Conversions
+*** DONE Implicit Conversions
+    CLOSED: [2020-03-11 Wed 00:14]
+    /Implicit conversions/ are defined by /given instances/ of the
+    ~scala.Conversion~ class.
+
+    - ~scala.Conversion~ class is defined in package scala as follows:
+      #+begin_src scala
+        abstract class Conversion[-T, +U] extends (T => U)
+      #+end_src
+
+    - Example:
+      #+begin_src scala
+        given Conversion[String, Token] {
+          def apply(str: String): Token = new KeyWord(str)
+        }
+      #+end_src
+      + Express more concisely as:
+        #+begin_src scala
+          given Conversion[String, Token] = new KeyWord(_)
+        #+end_src
+
+    - An /implicit conversion/ is applied automatically by the compiler in _THREE_
+      situations:
+      + _Type_ doesn't match, but an after an /implicit conversion/, type can match.
+
+      + _Method Name_ doesn't match, but an after an /implicit conversion/, method
+        can be found.
+
+      + _Method Name matches, but Method Signature doesn't match_, but an after
+        an /implicit conversion/, /method signature/ can match.
+
 **** Examples
+     1. In ~Predef~
+        #+begin_src scala
+          given int2Integer as Conversion[Int, java.lang.Integer] =
+            java.lang.Integer.valueOf(_)
+        #+end_src
+
+     2. /Magnet pattern/ that use /implicit conversion/:
+        #+begin_src scala
+          object Completions {
+
+            // The argument "magnet" type
+            enum CompletionArg {
+              case Error(s: String)
+                  case Response(f: Future[HttpResponse])
+                  case Status(code: Future[StatusCode])
+            }
+
+            object CompletionArg {
+
+              // conversions defining the possible arguments to pass to `complete`
+              // these always come with CompletionArg
+              // They can be invoked explicitly, e.g.
+              //
+              //   CompletionArg.fromStatusCode(statusCode)
+
+              given fromString     as Conversion[String, CompletionArg]               = Error(_)
+              given fromFuture     as Conversion[Future[HttpResponse], CompletionArg] = Response(_)
+              given fromStatusCode as Conversion[Future[StatusCode], CompletionArg]   = Status(_)
+            }
+
+            import CompletionArg._
+
+            def complete[T](arg: CompletionArg) = arg match {
+              case Error(s) => ...
+              case Response(f) => ...
+              case Status(code) => ...
+            }
+          }
+        #+end_src
+        + =from Jian= Why does ~complete~ have a /type parametr/ ~T~.
+
+        + This setup is more complicated than simple overloading of ~complete~ (the
+          traditional way of implementing the /magnet pattern/),
+          BUT it can still be useful
+          * *if normal /overloading/ is not available* (as in the case above, since
+            we cannot have two overloaded methods that take ~Future[...]~ arguments),
+            =from Jian= ??? /Type erasure/ ???
+            _OR_
+          * if normal overloading would lead to a _combinatorial explosion of variants_.
 
 *** TODO By-Name Context Parameters
 **** Reference
@@ -992,9 +1507,11 @@
        - The _expansion_ will be performed by the Scala compiler _during the *Typer*
          /compiler phase/._
 
-       - ~inline~ is a command to the *compiler* (=from Jian= *MUST DO*, and fail
+       - =IMPORTANT=
+         ~inline~ is a command to the *compiler* (=from Jian= *MUST DO*, and fail
          to do will lead to a compilation error -- when the code doesn't follow the
-         requirement of ~inline~).
+         requirement of ~inline~). This is different from some other ecosystems, in
+         which /inline/ is a request that _might be_ satisfied by the compiler.
 
        - The reason is that /inlining/ in Scala can drive other _compile-time
          operations_, like
@@ -1041,57 +1558,164 @@
        these files and _analyze_ their content's tree structure.
 
 *** TODO Inline
-**** Inline Definitions
-     - ~inline~ definition TODO TODO TODO
+**** DONE Inline Definitions
+     CLOSED: [2020-03-11 Wed 00:43]
+     - ~inline~ :: a new /soft modifier/ that *guarantees* that a definition will
+                   be inlined at the point of use.
+     - Example:
+       #+begin_src scala
+         object Config {
+           inline val logging = false
+         }
+
+         object Logger {
+
+           private var indent = 0
+
+           inline def log[T](msg: String, indentMargin: =>Int)(op: => T): T =
+             if (Config.logging) {
+               println(s"${"  " * indent}start $msg")
+               indent += indentMargin
+               val result = op
+               indent -= indentMargin
+               println(s"${"  " * indent}$msg = $result")
+               result
+             }
+             else op
+         }
+       #+end_src
+       + The ~Config~ object contains a definition of the /inline value/ ~logging~.
+         This means that logging is treated as a constant value, equivalent to
+         its RHS ~false~. The RHS of such an ~inline val~ must itself be a
+         /constant expression/.
+         * Used in this way, ~inline~ is *equivalent to* Java and Scala 2's ~final~.
+           =IMPORTANT=
+           Note that ~final~, meaning /inlined constant/,
+           - is still supported in Dotty,
+           - but *will be Phased Out*.
+
+       + The ~Logger~ object contains a definition of the /inline method/ ~log~.
+         This method will always _be inlined at the point of call_.
+
+       + Usage and re-write:
+         #+begin_src scala
+           var indentSetting = 2
+
+           def factorial(n: BigInt): BigInt = {
+             log(s"factorial($n)", indentSetting) {
+               if (n == 0) 1
+               else n * factorial(n - 1)
+             }
+           }
+         #+end_src
+
+         - With current definition ~inline val logging = false~,
+           The usage code will be re-written as
+           #+begin_src scala
+             def factorial(n: BigInt): BigInt = {
+               if (n == 0) 1
+               else        n * factorial(n - 1)
+             }
+           #+end_src
+
+         - If the example code define ~inline val logging = false~, then the
+           usage code will be re-written as
+           #+begin_src scala
+             def factorial(n: BigInt): BigInt = {
+               val msg = s"factorial($n)"
+               println(s"${"  " * indent}start $msg")
+               Logger.inline$indent_=(indent.+(indentSetting))
+               val result =
+                 if (n == 0) 1
+                 else        n * factorial(n - 1)
+               Logger.inline$indent_=(indent.-(indentSetting))
+               println(s"${"  " * indent}$msg = $result")
+               result
+             }
+           #+end_src
+           NOTE:
+           + The /by-value parameter/ ~msg~ is _evaluated only once_,
+             per the usual Scala semantics, by binding the value and reusing the
+             ~msg~ through the body of ~factorial~.
+
+           + The special handling of the assignment to the ~private var indent~.
+             It is achieved by *generating* a /setter method/ ~def
+             inline$indent_=~ and calling it instead.
 
 **** DONE Recursive Inline Methods
      CLOSED: [2019-12-29 Sun 02:39]
      /Inline methods/ can be *recursive*.
-       For instance, when called with a constant exponent ~n~, the following method
-     for ~power~ will be implemented by straight inline code *WITHOUT ANY /loop/ or
-     /recursion/.*
-     #+begin_src scala
-       inline def power(x: Double, n: Int): Double = {
-         if (n == 0) 1.0
-         else if (n == 1) x
-         else {
-           val y = power(x, n / 2)
-           if (n % 2 == 0) y * y else y * y * x
+     - For instance, when called with a constant exponent ~n~, the following method
+       for ~power~ will be implemented by straight inline code *WITHOUT ANY
+       /loop/ or /recursion/.*
+       #+begin_src scala
+         inline def power(x: Double, n: Int): Double = {
+           if (n == 0) 1.0
+           else if (n == 1) x
+           else {
+             val y = power(x, n / 2)
+             if (n % 2 == 0) y * y else y * y * x
+           }
          }
-       }
 
-       power(expr, 10)
-       // translates to
-       //
-       //    val x = expr
-       //    val y1 = x * x   // ^2
-       //    val y2 = y1 * y1 // ^4
-       //    val y3 = y2 * x  // ^5
-       //    y3 * y3          // ^10
-     #+end_src
+         power(expr, 10)
+         // translates to
+         //
+         //    val x = expr
+         //    val y1 = x * x   // ^2
+         //    val y2 = y1 * y1 // ^4
+         //    val y3 = y2 * x  // ^5
+         //    y3 * y3          // ^10
+       #+end_src
+
      - /Parameters/ of /inline methods/ can have an ~inline~ modifier as well.
-         This means that actual arguments to these parameters _must be constant
-       expressions_. For example:
+         This means that actual arguments to these parameters *must be constant
+       expressions*. For example:
        ~inline def power(x: Double, inline n: Int): Double~
+
+     - There also can be /inline parameters/.
+       /Inline parameters/ have call semantics *equivalent* to /by-name parameters/
+       but allow for duplication of the code in the argument.
+       TODO ??? TODO ??? TODO
+         It is usually useful when /constant values/ need to be propagated to
+       allow further optimizations/reductions.
+
+     - The difference in translation between /by-value/, /by-name/, and ~inline~
+       parameters:
+       #+begin_src scala
+         inline def funkyAssertEquals(actual: Double,
+                                      expected: =>Double,
+                                      inline delta: Double): Unit =
+           if ((actual - expected).abs > delta)
+             throw new AssertionError(s"difference between ${expected} and ${actual} was larger than ${delta}")
+
+         funkyAssertEquals(computeActual(), computeExpected(), computeDelta())
+         // translates to
+         //
+         //    val actual = computeActual()
+         //    def expected = computeExpected()
+         //    if (actual - expected).abs > computeDelta() then
+         //      throw new AssertionError(s"difference between ${expected} and ${actual} was larger than ${computeDelta()}")
+       #+end_src
 
 **** DONE Relationship to ~@inline~
      CLOSED: [2019-12-28 Sat 23:21]
      - The ~inline~ modifier is a _MORE POWERFUL_ than the ~@inline~ annotation.
 
-     - ~@inline~ annotation ::
-       + A _hint_
-         * _Hint_ here means _try with BEST EFFORT, but NOTHING GUARANTEED!_
+       + ~@inline~ annotation ::
+         * A _hint_
+           - _Hint_ here means _try with BEST EFFORT, but NOTHING GUARANTEED!_
 
-       + The _hint_ is for the *backend*
+         * The _hint_ is for the *backend*
 
 
-     - ~inline~ /modifier/ ::
-       + A _command_
-         * _Command_ here means _GUARANTEED!_
+       + ~inline~ /modifier/ ::
+         * A _command_
+           - _Command_ here means _GUARANTEED!_
 
-       + The _command_ is for the *frontend*
+         * The _command_ is for the *frontend*
 
-       + it also applies to recursive methods.
+         * it also applies to recursive methods.
 
      - Cross compilation between Dotty and Scala 2:
        + Introduce ~@forceInline~ in Dotty.
@@ -1099,21 +1723,25 @@
          * For scalac it will be ignored.
 
        + Usage:
-         Always use ~@forceInline @inline~ if cross compilation between Dotty and
-         Scala 2 is required. This can make
-         * Dotty always inline the annotated code
-         * Scala 2 try its best to inline.
+         Always use ~@forceInline @inline~ if cross compilation between Dotty
+         and Scala 2 is required. This can make
+         * Dotty always inline the annotated code (becase of ~@forceInline~)
+         * Scala 2 try its best to inline (because of ~@inline~)
 
          =from Jian= TODO TODO TODO TODO TODO
          What exactly is this /Cross compilation between Dotty and Scala 2/???
-         Does this mean due to this cross compilation, both dotc and scalac will
-         see ~@forceInline @inline~???
+         It seems due to this cross compilation, both dotc and scalac will see
+         ~@forceInline @inline~.
+         TODO TODO TODO
+           My old understanding of /cross compilation/ is dotc compiles Scala 3
+         code, scalac compiles Scala 2 code, and the compiled code will be
+         combined together in some way. It seems this understanding is wrong!
 
 ***** The definition of constant expression
 
       Scala Language Specification 2.13 - _6.24 Constant Expressions_
 
-**** Specializing Inline (Whitebox)
+**** TODO Specializing Inline (Whitebox)
 **** DONE Inline Conditionals
      CLOSED: [2019-06-24 Mon 03:05]
      #+begin_src scala
@@ -1309,19 +1937,22 @@
          }
        #+end_src
 
+***** ~summonInline~
+
 **** TODO Reference
 
 *** TODO Macros
 **** DONE Macros: Quotes and Splices
-     CLOSED: [2019-06-26 Wed 15:36]
+     CLOSED: [2020-03-31 Tue 17:27]
      - Macros are built on two well-known fundamental operations:
-       + quotation :: ~'{...}~ for /expressions/ (both forms are equivalent);
+       + quotation :: ~'{...}~ for /expressions/;
                       ~'[...]~ for /types/.
 
        + splicing :: ~${ ... }~
 
-     - Additionally, _within_ a /quote/ or a /splice/ we can /quote/ or /splice/
-       _identifiers_ directly (i.e. ~'e~ and ~$e~).
+     - Additionally,
+       _within_ a /quote/ or a /splice/ we can /quote/ or /splice/ _identifiers_
+       directly (i.e. ~'e~ and ~$e~).
 
      - Readers may notice the _RESEMBLANCE_ of the two aforementioned syntactic
        schemes with the familiar /string interpolation syntax/. /Quotes/ and
@@ -1351,12 +1982,12 @@
          inline def assert(expr: => Boolean): Unit =
            ${ assertImpl('expr) }
 
-         def assertImpl(expr: Expr[Boolean]) = '{
+         def assertImpl(expr: Expr[Boolean])(using QuoteContext) = '{
            if (!$expr)
              throw new AssertionError(s"failed assertion: ${${ showExpr(expr) }}")
          }
 
-         def showExpr(expr: Expr[Boolean]): Expr[String] =
+         def showExpr(expr: Expr[Boolean])(using QuoteContext): Expr[String] =
            '{ "<some source code>" }  // Better implementation later in this document
        #+end_src
 
@@ -1380,7 +2011,7 @@
        #+end_src
 
 **** DONE Types for Quotations
-     CLOSED: [2019-06-26 Wed 15:44]
+     CLOSED: [2020-03-31 Tue 17:37]
      - The /type signatures/ of /quotes/ and /splices/ can be described using
        _TWO_ _FUNDAMENTAL /types/:_
        + ~Expr[T]~: /abstract syntax trees/ representing /expressions/ of /type/ ~T~
@@ -1402,26 +2033,29 @@
          sealed abstract calss Expr[+T]
          sealed abstract calss Type[T]
        #+end_src
-       All constructors for these types are provided by the system, which is the
-       reason why they are defined as ~sealed~.
+       Both ~Expr~ and ~Type~ are ~abstract~ and ~sealed~, so _ALL /constructors/
+       for these types are PROVIDED BY THE SYSTEM._
 
      - One way to construct values of type ~Expr[T]~ or ~Type[T]~ is by /quoting/,
-       TODO ???
-       the other is by /type-specific lifting operations/ that will be discussed later on.
+       TODO ??? TODO
+       the other is by /type-specific lifting operations/ that will be discussed
+       later on.
 
-**** TODO The Phase Consistency Principle
+**** DONE The Phase Consistency Principle - TODO RE-READ
+     CLOSED: [2020-03-31 Tue 18:08]
      - A fundamental /phase consistency principle (PCP)/ regulates accesses to /free
        variables/ in /quoted/ and /spliced/ code:
-       + For any /free variable reference/ ~x~,
-         the _number_ of /quoted scopes/ and the _number_ of /spliced scopes/
-         between the reference to ~x~ and the definition of ~x~ *must be equal*.
+       #+begin_quote
+       For any /free variable reference/ ~x~,
+       the _number_ of /quoted scopes/ and the _number_ of /spliced scopes/
+       between the reference to ~x~ and the definition of ~x~ *must be equal*.
+       #+end_quote
+       + ~this~-reference count as /free variables/.
 
-     - Here, ~this~-reference count as /free variables/.
-       TODO
-
-     - We assume all imports are fully expanded and that ~_root_~ is *NOT* a /free
-       variable/. So /references/ _to global definitions_ are allowed everywhere.
-       TODO
+       + We assume
+         * ALL _imports_ are fully expanded
+         * ~_root_~ is *NOT* a /free variable/.
+         So /references/ to /global definitions/ are allowed everywhere.
 
      - The /phase consistency principle/ can _be motivated as follows_:
        1. Suppose the result of a program _P_ is some /quoted text/ ~'{ ... x ... }~
@@ -1444,26 +2078,52 @@
        ensures that program elaboration will lead to neither of the two unwanted
        situations described above.
 
+     - In what concerns the range of features it covers, this form of macros (Scala 3
+       macro) introduces a principled meta programming framework that is quite
+       close to the /MetaML family of languages/.
+       + One difference is that MetaML does NOT have an equivalent of the PCP.
+           quoted code in MetaML can access variables in its immediately
+         enclosing environment, with some restrictions and caveats since such
+         accesses involve serialization. _However, this does not constitute a
+         fundamental gain in expressiveness._
+
 **** TODO From ~Expr~'s to Functions and Back
-     - The ~Expr~ /companion object/ contains an _implicit ~AsFunction~ conversion_
-       that TURNS a /tree describing a function/ INTO a function _mapping trees to
-       trees_.
+     It is possible to convert back and forth any ~Expr[T => R]~ into ~Expr[T] => Expr[R]~!
+
+     - The conversions can be implemented as follows:
+       #+begin_src scala
+         def to[T, R](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
+           '{ (x: T) => ${ f('x) } }
+
+         def from[T, R](f: Expr[T => R])(using QuoteContext): Expr[T] => Expr[R] =
+           (x: Expr[T]) => '{ $f($x) }
+       #+end_src
+       This decorator gives ~Expr~ the ~apply~ operation of an /applicative functor/,
+
+     - Example:
+       TODO TODO TODO
+
+     - One limitation of ~from~ is that it does NOT \beta{}-reduce when a lambda is called
+       immediately, as evidenced in the mode ~{ ((x: Int) => x.toString)(2) }~.
+         In some cases we want to remove the lambda from the code, for this we provide
+       the method ~Expr.betaReduce~ that turns a tree describing a function into a
+       function mapping trees to trees. TODO TODO TODO
        #+begin_src scala
          object Expr {
            // ...
-           implicit class AsFunction[...](...) {
-             // ...
-           }
+           def betaReduce[...](...)(...): ... = ...
          }
        #+end_src
-       This decorator gives ~Expr~ the ~apply~ operation of an /applicative functor/,
+
+     - OLD NOTE
        where ~Expr~'s over /function types/ can be applied to ~Expr~ _arguments_.
        The definition of ~AsFunction(f).apply(x)~ is assumed to be functionally
        the same as ~'{($f)($x)}~, however it should *optimize* this call by
        returning the result of /beta-reducing/ ~f(x)~ if ~f~ is a known lambda
        expression.
 
-     - The ~AsFunction~ decorator distributes applications of ~Expr~ over /function
+     - OLD NOTE
+       The ~AsFunction~ decorator distributes applications of ~Expr~ over /function
        arrows/:
        #+begin_src scala
          AsFunction(_).apply: Expr[S => T] => (Expr[S] => Expr[T])
@@ -1475,11 +2135,13 @@
          }
        #+end_src
 
-     - Note how the FUNDAMENTAL /phase consistency principle/ works in _two different
+     - OLD NOTE
+       Note how the FUNDAMENTAL /phase consistency principle/ works in _two different
        directions_ here for ~f~ and ~x~.
        The reference to ~f~ is legal because it is _quoted, then spliced_,
        whereas the reference to ~x~ is legal because it is _spliced, then quoted_.
 
+**** TODO Lifting Types - TODO ???
 **** TODO Lifting Expressions
      - Consider the following implementation of a staged interpreter that implements
        a compiler through staging.
@@ -1603,12 +2265,12 @@
        to declutter slightly the code at the cost of readable phase distinction
        between stages.
 
-**** TODO Lifting Types
+**** TODO Lifting Types - TODO *WRONG*
 **** TODO Relationship with ~inline~
 **** TODO Scope Extrusion
 **** TODO Example Expansion
 **** TODO Find implicits within a macro
-**** TODO Relationship with Whitebox Inline
+**** TODO Relationship with Whitebox ~Inline~
      ~Inline~ documents inlining.
      The code below introduces a /whitebox inline method/ that can calculate
      either a value of /type/ ~Int~ or a value of /type/ ~String~.
@@ -1628,7 +2290,6 @@
 
 **** TODO Defining a macro and using it in a single project
 **** TODO Pattern matching on quoted expressions
-***** ~scala.quoted.matching~
 ***** Quoted patterns
 
 **** TODO Recovering precise types using patterns
@@ -1639,12 +2300,11 @@
 **** API
 **** Create a new Dotty project with staging enabled
 **** Example
-**** Template project
 
 *** TODO TASTy Reflection
     # *TASTy Reflect*
 **** API: From quotes and splices to TASTy reflect trees and back
-***** Sealing and Unsealing
+***** Extractors
 ***** Obtaining and underlying argument
 ***** Positions
 ***** Tree Utilities
@@ -2167,7 +2827,7 @@
 **** TODO Variant: Indentation Marker ~:~
      NOT STABLE -- Learn when this feature is stable!!!
 
-*** TODO Explicit Nulls --- TODO -----------------------------------------------------
+*** TODO Explicit Nulls
     Explicit nulls is an /opt-in feature/ that _modifies the Scala type system_,
     which *makes /reference types/ (anything that extends ~AnyRef~) non-nullable.*
 
@@ -2200,37 +2860,23 @@
          After /type erasure/, ~Null~, as JVM enforced, remains a /subtype/ of
        all /reference types/
 
-**** DONE Unsoundness - =IMPORTANT=
-     CLOSED: [2019-12-31 Tue 02:32]
+**** DONE Unsoundness
+     CLOSED: [2020-03-21 Sat 02:26]
      The new type system is unsound with respect to ~null~.
      Enforcing /sound initialization/, which is can be done, is a non-goal of
      this proposal.
 
      - The /unsoundness/ happens because uninitialized fields in a class start out
        as ~null~:
-       + =from Jian= The code in the document doesn't compile
-         #+begin_src scala
-           class C {
-             val f: String = foo(f)
-             def foo(f2: String): String = if (f2 == null) "field is null" else f2
-           }
-           val c = new C()
-           // c.f == "field is null"
-         #+end_src
-         Because of the code ~f2 == null~ is not legal when compile with
-         ~-Yexplicit-nulls~. Therefore, this code can't show the unsoundness --
-         must pass the compilation but break some contract(s).
+       #+begin_src scala
+         // -Yexplicit-nulls
+         class C with
+           val f: String = foo(f)
+           def foo(f2: String): String = f2
 
-       + =from Jian= Corrected and simplified version:
-         #+begin_src scala
-           // -Yexplicit-nulls
-           class C with
-             val f: String = foo(f)
-             def foo(f2: String): String = f2
-
-           val c = new C
-           println(c.f)  // null
-         #+end_src
+         val c = new C
+         // c.f == "field is null"
+       #+end_src
 
 **** DONE Equality
      CLOSED: [2019-12-31 Tue 02:43]
@@ -2550,10 +3196,6 @@
 **** Motivation
 **** Migration Strategy
 
-
-
-
-
 *** Type Checking
     *Type Checking*
     - [//]:# todo: fill in
@@ -2563,13 +3205,14 @@
     - [//]:# todo: fill in
 
 *** Implicit Resolution
-    *Changes in Implicit Resolution*
+    # *Changes in Implicit Resolution*
 
 *** Implicit Conversions
 **** Examples
 
 *** Overload Resolution
-    *Changes in Overload Resolution*
+    # Changes in Overload Resolution
+
 **** Looking Beyond the First Argument List
 **** Parameter Types of Function Values
 
@@ -2586,7 +3229,8 @@
 **** Migration
 
 *** Pattern Matching
-    *Option-less pattern matching*
+    # Option-less pattern matching
+
 **** Extractors
 ***** Fixed-Arity Extractors
 ***** Variadic Extractors
@@ -2599,11 +3243,12 @@
 **** Product-Sequence Match
 
 *** Eta Expansion
-    *Automatic Eta Expansion*
+    # Automatic Eta Expansion
 **** Automatic eta-expansion and nullary methods
 
 *** Compiler Plugins
-    *Changes in Compiler Plugins*
+    # Changes in Compiler Plugins
+
 **** Using Compiler Plugins
 **** Writing a Standard Compiler Plugin
 **** Writing a Research Compiler Plugin
