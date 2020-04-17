@@ -2245,20 +2245,20 @@
                        raise TypeError('cannot fetch name')
                    else:
                        return self.name.transform()
- 
+
                def setName(self, value):
                    if not valid(value):
                        raise TypeError('cannot change name')
                    else:
                        self.name = transform(value)
- 
+
            person = Person()
            person.getName()
            person.setName('value')
          #+END_SRC
 
        From 1 to 2, there is an API change, which is NOT what we want.
-       
+
 **** DONE Inserting Code to Run on Attribute Access - 1220 =RE-READ=
      CLOSED: [2017-09-06 Wed 04:01]
      - /attribute accessor/ method can help fix the API even in the future in
@@ -2476,15 +2476,15 @@
          class D:
              def __get__(*args): print('get')
              def __set__(*args): raise AttributeError('cannot set')
-  
+
          class C:
              a = D()
-  
+
          x = C()
-  
+
          x.a          # Rounted to C.a.__get__
          # get
-  
+
          x.a = 00     # Rounted to C.a.__set__
          # AttributeError: cannot set
        #+END_SRC
@@ -2599,8 +2599,8 @@
 **** TODO Using State Information in Descriptors - 1232
      - /descriptors/ can use BOTH _instance state_ and _descriptor state_, or any
        combination thereof:
-       + 
-       + 
+       +
+       +
 
 **** TODO How Properties and Descriptors Relate - 1236
      _NOT from this book_
@@ -2664,7 +2664,7 @@
       as /delegation/ =TODO=,
       but may also incur extra calls in some contexts, and are too dynamic to
       register in dir results =TODO=.
-      
+
     - ~__getattr__~ is run _for undefined attributes_ -- because it is run only
       for attributes not stored on an instance or inherited from one of its
       classes, its use is straightforward.
@@ -2736,16 +2736,16 @@
          class Wrapper:
              def __init__(self, object):
                  self.wrapped = object                    # Save object
-  
+
              def __getattr__(self, attrname):
                  print('Trace: ' + attrname)              # Trace fetch
                  return getattr(self.wrapped, attrname)   # Delegate fetch
-  
+
          x = Wrapper([1, 2, 3])
          x.append(4)                                      # Prints "Trace: append"
          print(x.wrapped)                                 # Prints "[1, 2, 3, 4]"
        #+END_SRC
-  
+
        There is no analog of this for /properties/ and /descriptors/.
 
 ***** Avoiding loops in attribute interception methods
@@ -2755,13 +2755,13 @@
           def __getattribute__(self, name):
               """Wrong! LOOP!"""
               x = self.other                     # LOOPS!
-  
+
           # self.name
           # self.other
           # self.other
           # ...
-  
-  
+
+
           def __getattribute__(self, name):
               """Right!"""
               x = object.__getattribute__(self, 'other')  # Force higher to avoid loops.
@@ -2850,55 +2850,188 @@
 *** TODO Test Your Knowledge: Quiz 1266
 *** TODO Test Your Knowledge: Answers 1267
 
-** 39. Decorators - 1269
-*** What's a Decorator? - 1269
-**** Managing Calls and Instances - 1270
-**** Managing Functions and Classes - 1270
-**** Using and Defining Decorators - 1271
-**** Why Decorators? - 1271
+** TODO 39. Decorators - 1269
+*** DONE What's a Decorator? - 1269
+    CLOSED: [2020-04-04 Sat 16:41]
+    - /Decoration/ is a way to specify *management* or *augmentation* code for
+      /functions/ and /classes/.
 
-*** The Basics - 1273
-**** Function Decorators - 1273
-**** Class Decorators - 1277
-**** Decorator Nesting - 1279
-**** Decorator Arguments - 1281
-**** Decorators Manage Functions and Classes, Too - 1282
+    - /Decorators/ themselves take _the form of /callable objects/ (e.g., functions)
+      that process other /callable objects/._
 
-*** Coding Function Decorators - 1283
-**** Tracing Calls - 1283
-**** Decorator State Retention Options - 1285
-**** Class Blunders I: Decorating Methods - 1289
-**** Timing Calls - 1295
-**** Adding Decorator Arguments - 1298
+    - _TWO_ flavors of Python decorators:
+      + /Function decorators/
+        * Added in Python 2.4
 
-*** Coding Class Decorators - 1301
-**** Singleton Classes - 1301
-**** Tracing Object Interfaces - 1303
-**** Class Blunders II: Retaining Multiple Instances - 1308
-**** Decorators Versus Manager Functions - 1309
-**** Why Decorators? (Revisited) - 1310
+        * Do name rebinding at function definition time, providing a layer of logic
+          that can _manage /functions/ and /methods/, or later calls to them_.
 
-*** Managing Functions and Classes Directly - 1312
-*** Example: "Private" and "Public" Attributes - 1314
-**** Implementing Private Attributes - 1314
-**** Implementation Details I - 1317
-**** Generalizing for Public Declarations, Too - 1318
-**** Implementation Details II - 1320
-**** Open Issues - 1321
-**** Python Isn't About Control - 1329
+      + Class decorators
+        * Added in Python 2.6 and 3.0
 
-*** Example: Validating Function Arguments - 1330
-**** The Goal - 1330
-**** A Basic Range-Testing Decorator for Positional Arguments - 1331
-**** Generalizing for Keywords and Defaults, Too - 1333
-**** Implementation Details - 1336
-**** Open Issues - 1338
-**** Decorator Arguments Versus Function Annotations - 1340
-**** Other Applications: Type Testing (If You Insist!) - 1342
+        * Do name rebinding at class definition time, providing a layer of logic
+          that can _manage /classes/, or the /instances/ created by later calls
+          to them._
 
-*** Chapter Summary - 1343
-**** Test Your Knowledge: Quiz - 1344
-**** Test Your Knowledge: Answers - 1345
+**** DONE Managing Calls and Instances - 1270
+     CLOSED: [2020-04-04 Sat 15:20]
+     - Wrapper (a.k.a. proxy):
+       + Call proxies (=from Jian= for /functions/)
+       + Interface proxies (=from Jian= for /classes/)
+
+     - Decorators achieve these effects by _automatically *rebinding* /function/
+       and /class/ names to other callables_, at the end of ~def~ and ~class~
+       statements.
+
+**** TODO Managing Functions and Classes - 1270
+     - xx
+       + /Function managers/
+       + /Class managers/
+
+     - xx
+
+**** TODO Using and Defining Decorators - 1271
+**** DONE Why Decorators? - 1271
+     CLOSED: [2020-04-04 Sat 16:41]
+     - /Decorators/ are *NEVER strictly REQUIRED*.
+       However, it can help
+       + making intent clearer
+         A very explicit syntax makes /decorators/ easier to spot than helper
+         function calls, which can be arbitrarily far-removed.
+
+       + minimizing augmentation code redundancy
+         /decorators/ are applied once at their definition sites.
+           Not like helper functions that need to be called everytime there is a
+         call to the _decorated objects_.
+
+       + ensuring correct API usage
+         For a /decorated objects/, when use them, there is no way to forget related
+         helper functions.
+
+     - In other words, beyond their technical model, decorators offer some advantages
+       in terms of both code maintenance and consistency. Moreover, as structuring
+       tools, decorators naturally foster encapsulation of code, which reduces
+       redundancy and makes future changes easier.
+       TODO RE-PHRASE
+
+     - Drawbacks: TODO Explore these in code later in this chapter TODO
+       Because of insert wrapper logic,
+       + Alter the types of the decorated objects;
+       + Incur extra calls when used as call proxies or interface proxies.
+
+     - On the other hand, the same considerations apply to any technique that adds
+       wrapping logic to objects.
+
+     - *Decorators versus macros*:
+       + /Python's decorators/ bear _similarities_ to what some call /aspect-oriented
+         programming/ in other languages.
+
+       + /Python's decorator syntax/ also very _closely resembles_ /Java's annotations/,
+         though Python's model is usually considered more flexible and general.
+         TODO ??? TODO ??? TODO
+
+       + /Decorators/ are a /runtime/ operation, based upon name rebinding.
+         Not like /macros/ in other languages that typically associated with
+         code generation in /compile time/.
+           They are fundamentally different in scope, implementation, and coding
+         pattern.
+
+       + /Decorators/ are about /callable objects/ *managing* /callable objects/.
+
+*** TODO The Basics - 1273
+**** TODO Function Decorators - 1273
+***** Usage - 1273
+***** Implementation - 1274
+***** Supporting method decoration - 1275
+
+**** TODO Class Decorators - 1277
+***** Usage - 1277
+***** Implementation - 1277
+***** Supporting method decoration - 1279
+
+**** TODO Decorator Nesting - 1279
+**** TODO Decorator Arguments - 1281
+**** TODO Decorators Manage Functions and Classes, Too - 1282
+
+*** TODO Coding Function Decorators - 1283
+**** TODO Tracing Calls - 1283
+**** TODO Decorator State Retention Options - 1285
+***** Class instance attributes - 1285
+***** Enclosing scopes and globals - 1286
+***** Enclosing scopes and nonlocals - 1287
+***** Function attributes
+
+**** TODO Class Blunders I: Decorating Methods - 1289
+***** Using nested functions to decorate methods - 1291
+***** Using descriptors to decorate methods - 1292
+
+**** TODO Timing Calls - 1295
+***** Decorators versus per-call timing - 1297
+***** Testing subtleties - 1297
+
+**** TODO Adding Decorator Arguments - 1298
+***** Timing with decorator arguments - 1299
+
+*** TODO Coding Class Decorators - 1301
+**** TODO Singleton Classes - 1301
+***** Coding alternatives - 1302
+
+**** TODO Tracing Object Interfaces - 1303
+***** Tracing interfaces with class decorators - 1304
+***** Applying class decorators to built-in types - 1306
+
+**** TODO Class Blunders II: Retaining Multiple Instances - 1308
+**** TODO Decorators Versus Manager Functions - 1309
+**** TODO Why Decorators? (Revisited) - 1310
+
+*** TODO Managing Functions and Classes Directly - 1312
+*** TODO Example: "Private" and "Public" Attributes - 1314
+**** TODO Implementing Private Attributes - 1314
+**** TODO Implementation Details I - 1317
+***** Inheritance versus delegation - 1317
+***** Decorator arguments - 1317
+***** State retention and enclosing scopes - 1317
+***** Using ~_dict_~ and ~__slot__~ (and other virtual names) - 1318
+
+**** TODO Generalizing for Public Declarations, Too - 1318
+**** TODO Implementation Details II - 1320
+***** Using ~__X~ pseudoprivate names - 1321
+***** Breaking privacy - 1321
+***** Decorator tradeoffs - 1321
+
+**** TODO Open Issues - 1321
+***** Caveat: Implicitly run operator overloading methods fail to delegate under 3.X - 1322
+***** Approaches to redefining operator overloading methods for 3.X - 1324
+****** Inline definition - 1324
+****** Mix-in superclasses - 1325
+****** Coding variations: Routers, descriptors, automation - 1326
+
+***** Should operator methods be validated? - 1327
+****** Implementation alternatives: ~__getattribute__~ inserts, call stack inspection - 1328
+
+**** TODO Python Isn't About Control - 1329
+
+*** TODO Example: Validating Function Arguments - 1330
+**** TODO The Goal - 1330
+**** TODO A Basic Range-Testing Decorator for Positional Arguments - 1331
+**** TODO Generalizing for Keywords and Defaults, Too - 1333
+**** TODO Implementation Details - 1336
+***** Function introspection - 1336
+***** Argument assumptions - 1337
+***** Matching algorithm - 1338
+
+**** TODO Open Issues - 1338
+***** Invalid calls - 1338
+***** Arbitrary arguments - 1339
+***** Decorator nesting - 1340
+
+**** TODO Decorator Arguments Versus Function Annotations - 1340
+**** TODO Other Applications: Type Testing (If You Insist!) - 1342
+
+*** TODO Chapter Summary - 1343
+**** TODO Test Your Knowledge: Quiz - 1344
+**** TODO Test Your Knowledge: Answers - 1345
+
 ** 40. Metaclasses - 1355
 *** To Metaclass or Not to Metaclass - 1356
 **** Increasing Levels of "Magic" - 1357
@@ -3017,4 +3150,4 @@
 *** Part VI, Classes and OOP 1489
 *** Part VII, Exceptions and Tools 1497
 
-* Index 
+* Index
