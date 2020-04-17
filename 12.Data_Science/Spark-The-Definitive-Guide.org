@@ -881,7 +881,7 @@
 *** DONE Conclusion
     CLOSED: [2019-11-04 Mon 02:23]
 
-** Chapter 7. Aggregations
+** TODO Chapter 7. Aggregations
    - Aggregation :: the act of collecting something together and is a cornerstone
                     of big data analytics.
 
@@ -913,57 +913,196 @@
 
    - TODO
 
-
-*** Aggregation Functions
+*** TODO Aggregation Functions
     - All /aggregations/ are available as functions, in addition to the special
       cases that can apear on ~DataFrame~'s or via ~.stat~, like we saw in Chapter 6.
 
-    - You can find most /aggregation functions/ in the /package/
+    - You can find _most_ /aggregation functions/ in the /package/
       ~org.apache.spark.sql.functions~
 
-    - *NOTE*
-      TODO
+    - NOTE
+      - There are some gaps between (this change every release, and it's possible
+        to provide a definitive list):
+        + the available SQL functions and the functions
+        + that we can import in Scala and Python.
+
+      - This section covers the most common functions.
 
 **** DONE ~count~
-     CLOSED: [2019-11-04 Mon 11:39]
+     CLOSED: [2020-03-11 Wed 02:09]
      - ~count("*")~ counts all columns.
+       + Avoid using ~count(1)~, which has a confused semantics.
 
-     - ~count(1)~ count every row as the literal one.
+     - Example
+       #+begin_src scala
+         import org.apache.spark.sql.functions.count
+
+         df.select(count("StockCode")).show()  // 541909
+       #+end_src
+       The corresponding SQL is
+       ~SELECT COUNT(*) FROM dfTable~
 
      - *WARNING*
        GOTCHAS:
        + When ~count("*")~, it takes ~null~ into account
        + When ~count("specificColumn")~, it will *NOT* count ~null~
+         =from Jian= as in SQL
 
-**** ~countDistinct~
-**** ~approx_count_distinct~
-**** ~first~ and ~last~
-**** ~min~ and ~max~
-**** ~sum~
-**** ~sumDistinct~
-**** ~avg~
-**** Variance and Standard Deviation
-**** skewness and kurtosis
-**** Covariance and Correlation
+**** DONE ~countDistinct~
+     CLOSED: [2020-03-11 Wed 02:12]
+
+     #+begin_src scala
+       import org.apache.spark.sql.functions.countDistinct
+
+       df.select(countDistinct("StockCode")).show()  // 4070
+     #+end_src
+
+     - In SQL:
+       ~SELECT COUNT(DISTINCT *) FROM dfTable~
+
+**** DONE ~approx_count_distinct~
+     CLOSED: [2020-03-11 Wed 02:17]
+     The exact distinct count is not always relevant.
+       There are times when an approximation to a certain degree of accuracy will
+     work just fine.
+
+     - Example
+       #+begin_src scala
+         import org.apache.spark.sql.functions.approx_count_distinct
+
+         df.select(approx_count_distinct("StockCode", 0.1)).show()  // 3364
+       #+end_src
+       + In SQL:
+         ~SELECT approx_count_distinct(StockCode, 0.1) FROM dfTable~
+         We provide such a big maximum estimation error, an thus receive an
+         answer that is quite far off but does complete more quickly than
+         ~countDistinct~.
+
+**** DONE ~first~ and ~last~
+     CLOSED: [2020-03-11 Wed 02:19]
+     #+begin_src scala
+       import org.apache.spark.sql.functions.{first, last}
+
+       df.select(first("StockCode"), last("StockCode")).show()
+     #+end_src
+
+     - In SQL:
+       #+begin_src sql
+         SELECT first(StockCode), last(StockCode) FROM dfTable
+       #+end_src
+       +-----------------------+----------------------+
+       |first(StockCode, false)|last(StockCode, false)|
+       +-----------------------+----------------------+
+       |                 85123A|                 22138|
+       +-----------------------+----------------------+
+
+**** DONE ~min~ and ~max~
+     CLOSED: [2020-03-11 Wed 02:25]
+     #+begin_src scala
+       import org.apache.spark.sql.functions.{min, max}
+
+       df.select(min("Quantity"), max("Quantity")).show()
+     #+end_src
+
+     - In SQL:
+       #+begin_src sql
+         SELECT min(Quantity), max(Quantity) FROM dfTable
+       #+end_src
+       +-------------+-------------+
+       |min(Quantity)|max(Quantity)|
+       +-------------+-------------+
+       |       -80995|        80995|
+       +-------------+-------------+
+
+**** DONE ~sum~
+     CLOSED: [2020-03-11 Wed 02:26]
+     #+begin_src scala
+       import org.apache.spark.sql.functions.sum
+
+       df.select(sum("Quantity")).show() // 5176450
+     #+end_src
+
+     - In SQL:
+       #+begin_src sql
+         SELECT sum(Quantity) FROM dfTable
+       #+end_src
+
+**** DONE ~sumDistinct~
+     CLOSED: [2020-03-11 Wed 02:29]
+     #+begin_src scala
+       import org.apache.spark.sql.functions.sumDistinct
+
+       df.select(sumDistinct("Quantity")).show() // 29310
+     #+end_src
+     - In SQL
+       TODO =from Jian= NO DISTINCT required???!!!??? TODO
+       #+begin_src sql
+         SELECT SUM(Quantity) FROM dfTable
+       #+end_src
+
+**** DONE ~avg~
+     CLOSED: [2020-03-11 Wed 02:36]
+     #+begin_src scala
+       import org.apache.spark.sql.functions.{sum, count, avg, expr}
+
+       df.select(count("Quantity").alias("total_transactions"),
+                 sum("Quantity").alias("total_purchases"),
+                 avg("Quantity").alias("avg_purchases"),
+                 mean("Quantity").alias("mean_purchases"))
+         .selectExpr("total_purchases/total_transactions",
+                     "avg_purchases",
+                     "mean_purchases")
+         .show()
+
+       //  +--------------------------------------+----------------+----------------+
+       //  |(total_purchases / total_transactions)|   avg_purchases|  mean_purchases|
+       //  +--------------------------------------+----------------+----------------+
+       //  |                      9.55224954743324|9.55224954743324|9.55224954743324|
+       //  +--------------------------------------+----------------+----------------+
+     #+end_src
+
+     - NOTE
+       You can also _average all the distinct values by specifying *distinct*
+       (TODO how? example?)._ In fact, most aggregate functions support doing so
+       only on distinct values.
+
+**** TODO Variance and Standard Deviation
+**** TODO skewness and kurtosis
+**** TODO Covariance and Correlation
 **** DONE Aggregating to Complex Types
      CLOSED: [2019-11-04 Mon 14:24]
      For example, ~collect_set~ and ~collect_list~
+     #+begin_src scala
+       import org.apache.spark.sql.functions.{collect_set, collect_list}
 
-*** Grouping
+       df.agg(collect_set("Country"), collect_list("Country")).show()
+
+       // +--------------------+---------------------+
+       // |collect_set(Country)|collect_list(Country)|
+       // +--------------------+---------------------+
+       // |[Portugal, Italy,...| [United Kingdom, ...|
+       // +--------------------+---------------------+
+     #+end_src
+     - In SQL:
+       #+begin_src sql
+         SELECT collect_set(Country), collect_set(Country) FROM dfTable
+       #+end_src
+
+*** TODO Grouping
 **** Grouping with Expressions
 **** Grouping with Maps
 
-*** Window Functions
-*** Grouping Sets
+*** TODO Window Functions
+*** TODO Grouping Sets
 **** Rollups
 **** Cube
 **** Grouping Metadata
 **** Pivot
 
-*** User-Defined Aggregation Functions
-*** Conclusion
+*** TODO User-Defined Aggregation Functions
+*** TODO Conclusion
 
-** Chapter 8. Joins
+** TODO Chapter 8. Joins
    - /Joins/ are an essential part of nearly _ALL_ Spark workloads.
 
    - This chapter covers
@@ -1011,17 +1150,88 @@
       + Cross (or Cartesian) joins :: match every row in the left dataset with
            every row in the right dataset
 
+    - code ::
+
     - TODO
     - TODO
     - TODO
 
-*** Inner Joins
-*** Outer Joins
-*** Left Outer Joins
-*** Right Outer Joins
-*** Left Semi Joins
-*** Left Anti Joins
-*** Natural Joins
+*** DONE Inner Joins
+    CLOSED: [2020-03-11 Wed 15:40]
+    - Keep the rows from the left and the rows from the right, which satisfy the
+      given /join expression/.
+
+    - /Inner joins/ are the default join.
+      Explicitly specify the join type as ~"inner"~.
+
+    - Example:
+      #+begin_src scala
+        val joinExpression = person.col("graduate_program") === graduateProgram("id")
+
+        person.join(graduateProgram, joinExpression).show()
+      #+end_src
+      + In SQL:
+        #+begin_src sql
+          SELECT * FROM person JOIN graduateProgram
+            ON person.graduate_program = graudateProgram.id
+        #+end_src
+
+    - Keys that do not exist in both DataFrames will not show in the resulting DataFrame.
+
+*** DONE Outer Joins
+    CLOSED: [2020-03-11 Wed 16:29]
+    /Outer joins/ evaluate the keys in *BOTH* of the DataFrames or tables and
+    includes (and joins together) the rows that *evaluate to true or false*.
+      If there is no equivalent row in either the left or right DataFrame,
+    Spark will insert ~null~:
+    #+begin_src scala
+      person.join(graduateProgram, joinExpression, "outer").show()
+    #+end_src
+    - In SQL:
+      #+begin_src sql
+        SELECT * FROM person FULL OUTER JOIN graduateProgram
+          ON graduate_program = graduateProgram.id
+      #+end_src
+
+    - /FULL OUTER JOIN/ and /FULL JOIN/ are the same.
+
+*** DONE Left Outer Joins
+    CLOSED: [2020-03-11 Wed 15:09]
+    Keep all the left dataFrame rows, and the matched right dataFrame.
+      If for a left row no matched right row, ~null~ will be inserted in the
+    place of right parts.
+    - Example:
+      #+begin_src scala
+        person.join(graduateProgram, joinExpression, "left_outer").show()
+      #+end_src
+      + In SQL:
+        #+begin_src sql
+          SELECT * FROM graduateProgram LEFT OUTER JOIN person
+            ON person.graduate_program = graduateProgram.id
+        #+end_src
+
+*** DONE Right Outer Joins
+    CLOSED: [2020-03-11 Wed 15:07]
+    Keep all the right dataFrame rows, and the matched left dataFrame.
+      If for a right row no matched left row, ~null~ will be inserted in the
+    place of left parts.
+    - Example:
+      #+begin_src scala
+        person.join(graduateProgram, joinExpression, "right_outer").show()
+      #+end_src
+      + In SQL:
+        #+begin_src sql
+          SELECT * FROM person RIGHT OUTER JOIN graduateProgram
+            ON person.graduate_program = graduateProgram.id
+        #+end_src
+
+*** TODO Left Semi Joins
+*** TODO Left Anti Joins
+*** DONE Natural Joins
+    CLOSED: [2020-03-11 Wed 16:44]
+    =from Jian=
+    Avoid /natural joins/. You don't really need it!
+
 *** Cross (Cartesian) Joins
 *** Challenges When Using Joins
 **** Joins on Complex Types
