@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.23.0-bin-20200305-84f2e41-NIGHTLY -> 0.24.0-bin-SNAPSHOT
+#+VERSION: 0.25.0-bin-SNAPSHOT
 #+AUTHOR:
 #+STARTUP: entitiespretty
 
@@ -650,7 +650,7 @@
 **** Other Rules
 
 ** TODO CONTEXTUAL ABSTRACTIONS
-*** Overview
+*** TODO Overview
 **** TODO Critique of the Status Quo
      TODO
      TODO
@@ -658,60 +658,62 @@
 
 **** TODO The New Design
      - The following pages introduce a *REDESIGN* of /contextual abstractions/ in
-       Scala. They introduce four fundamental changes:
-       1. /Delegates/:
+       Scala. *They introduce _four_ fundamental CHANGES*:
+       1. /Given Instances/:
           a new way to define basic terms that can be synthesized.
-          + _They replace /implicit definitions/._
+          + They _replace_ /implicit definitions/.
 
           + The core principle of the proposal:
             rather than mixing the ~implicit~ /modifier/ with a large number of
-            features, we have a single way to define terms that can be
-            synthesized for types.
+            features, we have a SINGLE WAY to define terms that can be synthesized
+            for types.
 
-       2. /Given Clauses/:
-          a new syntax for /implicit parameters and their arguments/.
+       2. /Using Clauses/:
+          a new syntax for _IMPLICIT parameters and their arguments_.
           + Both are introduced with the same keyword, ~given~.
 
-          + TODO This unambiguously aligns parameters and arguments, solving a
-            number of language warts.
+          + TODO
+            It unambiguously aligns parameters and arguments, solving a number
+            of language warts.
 
-          + TODO It also allows us to have _SEVERAL /implicit parameter/ sections_,
-            and to have /implicit parameters/ followed by normal ones.
+          + TODO
+            It also allows us to have _SEVERAL_ ~using~ clauses in a definition.
 
-       3. /Delegate Imports/:
-          a new class of /imports/ that _SPECIFICALLY import delegates_ and nothing
-          else.
-            /Delegates/ *must be* imported with ~import delegate~, a plain ~import~
-          will no longer bring them into scope.
+       3. /"Given" Imports/:
+          a new class of /import selectors/ that _SPECIFICALLY import givens_
+          and nothing else.
 
        4. /Implicit Conversions/:
-          now expressed as /delegates/ of a standard ~Conversion~ class.
-          All other forms of /implicit conversions/ will _be phased out_.
+          now expressed as /given instances/ of a standard ~Conversion~ class.
+          All other forms of /implicit conversions/ WILL _be phased out_.
 
      - This section also contains pages describing other language features that
        are _related to_ /context abstraction/. These are: TODO TODO TODO
-       + Context Bounds, which carry over unchanged.
+       + /Context Bounds/, which carry over unchanged.
 
-       + Extension Methods replace implicit classes in a way that integrates better
-         with typeclasses.
+       + /Extension Methods/ REPLACE /implicit classes/ in a way that _integrates
+         better with typeclasses_.
 
-       + Implementing Typeclasses demonstrates how some common typeclasses can be
+       + /Implementing Typeclasses/ demonstrates how some common typeclasses can be
          implemented using the new constructs.
 
-       + Typeclass Derivation introduces constructs to automatically derive typeclass
-         delegates for ADTs.
+       + /Typeclass Derivation/ introduces constructs to automatically derive /typeclass
+         instances/ for ADTs.
 
-       + Multiversal Equality introduces a special typeclass to support type safe
-         equality.
+       + /Multiversal Equality/ introduces a special typeclass to support /type safe
+         equality/.
 
-       + Implicit Function Types provide a way to abstract over given clauses.
+       + /Context Functions/ provide a way to abstract over /context parameters/.
 
-       + Implicit By-Name Parameters are an essential tool to define recursive
-         synthesized values without looping.
+       + /By-Name Context Parameters/ are an essential tool to DEFINE /recursive
+         synthesized values/ WITHOUT looping.
 
-       + Relationship with Scala 2 Implicits discusses the relationship between
-         old-style implicits and new-style delegates and given clauses and how
-         to migrate from one to the other.
+       + _Relationship with Scala 2 Implicits_ discusses the relationship between
+         old-style implicits and new-style givens and how to migrate from one to
+         the other.
+
+     - =START FROM=
+       Overall, the new design achieves a better separation of term inference from the rest of the
 
 *** DONE Given Instances
     CLOSED: [2020-03-08 Sun 23:12]
@@ -740,7 +742,7 @@
             case (_, Nil)   => +1
             case (x :: xs1, y :: ys1) =>
               val fst = ord.compare(x, y)
-              if (fst != 0) fst else xs1.compareTo(ys1)
+              if (fst != 0) fst else compare(xs1, ys1)
           }
         }
       #+end_src
@@ -759,9 +761,8 @@
                  the users the rules is not important -- you define an anonymous
                  given means you plan not to use its name.
 
-**** DONE Alias Givens
-     CLOSED: [2020-03-08 Sun 23:11]
-     An alias can be used to define a given instance that is equal to some
+**** TODO Alias Givens
+     An alias can be used to define a /given instance/ that is equal to some
      expression. E.g.:
      #+begin_src scala
        given global as ExecutioinContext = new ForkJoinPool()
@@ -772,28 +773,30 @@
      =from Jian= More initialization rules in the "Given Instance Initialization"
                  below.
 
-     - /Alias givens/ can be _anonymous_, e.g.
+     - This operation is /thread-safe/.
+
+     - /Alias givens/ can be _anonymous_ as well, e.g.
        #+begin_src scala
          given Position = enclosingTree.position
-         given (using outer: Context) as Context = outer.withOwner(currentOwner)
+         given (using config: Config) as Factory = MemoizingFactory(config)
        #+end_src
 
-     - An /alias given/ can have /type parameters/ and /given clauses/ just like
-       any other /given instance/, _but it can ONLY implement a single type._
+     - An /alias given/ can have /type parameters/ and /context parameters/ just like
+       any other /given/, _but it can ONLY implement a single type._
        =from Jian= Because it is an alias -- a name or concrete thing, not a
                    general instances.
 
-**** DONE Given Whitebox Macro Instances
-     CLOSED: [2020-03-08 Sun 23:11]
-     An ~inline~ alias given can be marked as a /whitebox macro/ by writing
-     ~_ <:~ _in front of_ the implemented type. Example:
+**** TODO Given Macros
+     Given aliases can have the ~inline~ and ~transparent~ modifiers.
+     Example:
      #+begin_src scala
-       inline given mkAnnotations[A, T] as _ <: Annotations[A, T] = ${
+       transparent inline given mkAnnotations[A, T] as Annotations[A, T] = ${
          // code producing a value of a subtype of Annotations
        }
      #+end_src
-     The type of an application of ~mkAnnotations~ is the type of its RHS, which
-     can be a proper /subtype/ of the declared result type ~Annotations[A, T]~.
+     Since ~mkAnnotations~ is ~transparent~, the type of an application is the
+     type of its right hand side, which can be a proper /subtype/ of the declared
+     /result type/ ~Annotations[A, T]~.
 
 **** DONE Given Instance Initialization
      CLOSED: [2020-03-08 Sun 23:11]
@@ -948,11 +951,11 @@
      - The /context parameter(s)/ *generated from* /context bounds/ come *LAST*
        in the definition of the containing /method/ or /class/. E.g.
        #+begin_src scala
-         def f[T: C1 : C2, U: C3](x: T)(given y: U, z: V): R
+         def f[T: C1 : C2, U: C3](x: T)(using y: U, z: V): R
 
          // would expand to
 
-         def f[T, U](x: T)(given y: U, z: V)(given C1[T], C2[T], C3[U]): R
+         def f[T, U](x: T)(using y: U, z: V)(using C1[T], C2[T], C3[U]): R
        #+end_src
 
      - /Context bounds/ can be combined with /subtype bounds/.
@@ -1044,7 +1047,7 @@
     - Example:
       + Definition:
         #+begin_src scala
-          final case class Circle(x: Double, y: Double, radius: Double)
+          case class Circle(x: Double, y: Double, radius: Double)
 
           def (c: Circle).circumference: Double = c.radius * math.Pi * 2
         #+end_src
@@ -1070,8 +1073,7 @@
          assert(circle.circumference == circumference(circle))
        #+end_src
 
-**** DONE Translation of Calls to Extension Methods
-     CLOSED: [2020-03-10 Tue 00:06]
+**** TODO Translation of Calls to Extension Methods
      - When is an /extension method/ applicable? There are two possibilities.
        An /extension method/ is applicable
        + if it is visible under a simple name,
@@ -1087,26 +1089,39 @@
 
      - Example:
        #+begin_src scala
-         trait StringSeqOps {
-           def (xs: Seq[String]).longestStrings = {
-             val maxLength = xs.map(_.length).max
-             xs.filter(_.length == maxLength)
-           }
+         trait IntOps {
+           def (i: Int).isZero: Boolean =
+             i == 0
+
+           def (i: Int).safeMod(x: Int): Option[Int] =
+             // extension method defined in same scope IntOps
+             if x.isZero then None
+             else             Some(i % x)
+         }
+
+         object IntOpsEx extends IntOps {
+           def (i: Int).safeDiv(x: Int): Option[Int] =
+             // extension method brought into scope via inheritance from IntOps
+             if x.isZero then None
+             else             Some(i / x)  // TODO: in the doc, this is `i % x`, and I think it's a typo
+
+         }
+
+         trait SafeDiv {
+           import IntOpsEx._  // brings safeDiv and safeMod into scope
+
+           def (i: Int) divide(d: Int): Option[(Int, Int)] =
+             // extension methods imported and thus in scope
+             (i.safeDiv(d), i.safeMod(d)) match {
+               case (Some(d), Some(r)) => Some((d, r))
+               case _                  => None
+             }
          }
        #+end_src
-       Use the the /extension methods/ in TWO ways:
-       + Define ~given ops1 as StringSeqOps~,
-         and then ~List("here", "is", "a", "list").longestStrings~ is legal
-         everywhere ~ops1~ is available.
-
-       + Define ~longestStrings~ as a member of a /normal object/.
-         But then the /method/ has to be brought into scope to be usable as an
-         /extension method/.
-         #+begin_src scala
-           object ops2 extends StringSeqOps
-           import ops2.longestStrings
-           List("here", "is", "a", "list").longestStrings
-         #+end_src
+       + TODO
+       + TODO
+       + TODO
+       + TODO
 
      - The _PRECISE_ *rules for RESOLVING a selection to an extension method* are
        as follows:
@@ -1140,9 +1155,9 @@
 
      - Examples:
        #+begin_src scala
-         def (x: String) < (y: String) = ???
-         def (x: Elem) +: (xs: Seq[Elem]) = ???
-         def (x: Number) min (y: Number) = ???
+         def (x: String) < (y: String) = ...
+         def (x: Elem) +: (xs: Seq[Elem]) = ...
+         def (x: Number) min (y: Number) = ...
 
          "ab" < "c"
          1 +: List(2, 3)
@@ -1153,11 +1168,9 @@
 
        + The translations:
          #+begin_src scala
-           def <(x: String)(y: String) = ???
-
-           def +:(xs: Seq[Elem])(x: Elem) = ???
-
-           def min(x: Number)(y: Number) = ???
+           def <(x: String)(y: String) = ...
+           def +:(xs: Seq[Elem])(x: Elem) = ...
+           def min(x: Number)(y: Number) = ...
          #+end_src
          * Remember that in Scala ~:~ suffixed operators are all /right associative/!!!
            This is why ~+:~ in the translation, the order of ~x~ and ~xs~ are swapped!
@@ -1335,35 +1348,66 @@
          xs.foldLeft(Monoid[T].unit)(_ combine _)
      #+end_src
 
-**** Functors and monads
+     - TODO
+
+     - TODO
+
+**** TODO Functors
      #+begin_src scala
-       trait Functor[F[_]] {
-         def [A, B](x: F[A]).map(f: A => B): F[B]
-       }
-
-       trait Monad[F[_]] extends Functor[F] {
-         def [A, B](x: F[A]).flatMap(f: A => F[B]): F[B]
-         def [A, B](x: F[A]).map(f: A => B) = x.flatMap(f `andThen` pure)
-
-         def pure[A](x: A): F[A]
-       }
-
-       given listMonad as Monad[List] {
-         def [A, B](xs: List[A]).flatMap(f: A => List[B]): List[B] =
-           xs.flatMap(f)
-
-         def pure[A](x: A): List[A] =
-           List(x)
-       }
-
-       given readerMonad[Ctx] as Monad[[X] =>> Ctx => X] {
-         def [A, B](r: Ctx => A).flatMap(f: A => Ctx => B): Ctx => B =
-           ctx => f(r(ctx))(ctx)
-
-         def pure[A](x: A): Ctx => A =
-           ctx => x
+       trait Functor[F[?]] {
+         def [A, B](x: F[A]).map(mapper: A => B): F[B]
        }
      #+end_src
+
+     - The instance of ~Functor~ for ~List~ now becomes:
+       #+begin_src scala
+         given Functor[List] {
+           def [A, B](original: List[A]).map(mapper: A => B): List[B] =
+             original.map(mapper)  // List already has a `map` method
+         }
+       #+end_src
+
+**** TODO Monads
+     #+begin_src scala
+       // "A `Monad` for type `F[?]` is a `Functor[F]`" => thus has the `map` ability
+       trait Monad[F[?]] extends Functor[F] {
+         // `pure` can construct F[A] from a single value A
+         def pure[A](x: A): F[A]
+
+         // the flattening ability is named `flatMap`, using extension methods as previous exmaples
+         def [A, B](x: F[A]).flatMap(f: A => F[B]): F[B]
+
+         // the `map(f)` ability is simply a combination of applying `f` then
+         // turning the result into an `F[A]` then applying `flatMap` to it
+         def [A, B](x: F[A]).map(f: A => B) = x.flatMap(f `andThen` pure)
+       }
+     #+end_src
+
+***** List
+      #+begin_src scala
+        given listMonad as Monad[List] {
+          def pure[A](x: A): List[A] =
+            List(x)
+
+          def [A, B](xs: List[A]).flatMap(f: A => List[B]): List[B] =
+            xs.flatMap(f)  // Let's rely on the existing `flatMap` method of `List`
+        }
+      #+end_src
+
+***** Option
+      #+begin_src scala
+        given optionMonad as Monad[Option] {
+          def pure[A](x: A): Option[A] =
+            Option(x)
+
+          def [A, B](xs: Option[A]).flatMap(f: A => Option[B]): Option[B] =
+            xs.flatMap(f)  // Let's rely on the existing `flatMap` method of `Option`
+        }
+      #+end_src
+
+***** TODO The Reader Monad
+
+**** TODO Summary
 
 *** TODO Typeclass Derivation
     # Type class Derivation
@@ -1431,8 +1475,8 @@
             // The argument "magnet" type
             enum CompletionArg {
               case Error(s: String)
-                  case Response(f: Future[HttpResponse])
-                  case Status(code: Future[StatusCode])
+              case Response(f: Future[HttpResponse])
+              case Status(code: Future[StatusCode])
             }
 
             object CompletionArg {
@@ -1451,8 +1495,8 @@
             import CompletionArg._
 
             def complete[T](arg: CompletionArg) = arg match {
-              case Error(s) => ...
-              case Response(f) => ...
+              case Error(s)     => ...
+              case Response(f)  => ...
               case Status(code) => ...
             }
           }
@@ -1472,7 +1516,7 @@
 **** Reference
 
 *** TODO Relationship with Scala 2 Implicits
-**** Simulating Scala 3 Contextual Abstraction with Scala 2 Implicits
+**** Simulating Scala 3 Contextual Abstraction Concepts with Scala 2 Implicits
 ***** Given Intances
 ***** Anonymous Given Intances
 ***** Anonymous Collective Extensions
@@ -2141,7 +2185,7 @@
        The reference to ~f~ is legal because it is _quoted, then spliced_,
        whereas the reference to ~x~ is legal because it is _spliced, then quoted_.
 
-**** TODO Lifting Types - TODO ???
+**** TODO Lifting Types - TODO =WIERD= TODO
 **** TODO Lifting Expressions
      - Consider the following implementation of a staged interpreter that implements
        a compiler through staging.
@@ -2168,10 +2212,10 @@
        to /quoted/ Scala code of type ~Expr[Int]~. The compiler takes an environment
        that maps variable names to Scala ~Expr~'s.
        #+begin_src scala
-         import delegate scala.quoted._
+         import scala.quoted.{given _, _}
 
-         def compile(e: Exp, env: Map[String, Expr[Int]]): Expr[Int] = e match {
-           case Num(n)          => n.toExpr
+         def compile(e: Exp, env: Map[String, Expr[Int]])(using QuoteContext): Expr[Int] = e match {
+           case Num(n)          => Expr(n)
            case Plus(e1, e2)    => '{ ${ compile(e1, env) } + ${ compile(e2, env) } }
            case Var(x)          => env(x)
            case Let(x, e, body) => '{ val y = ${ compile(e, env) }; ${ compile(body, env + (x -> 'y)) } }
@@ -2188,12 +2232,14 @@
        ~toExpr~. Shouldn't ~n~ be /quoted/? In fact this would _NOT_ work since
        replacing ~n~ by ~'n~ in the clause _would NOT be phase correct_.
 
-     - The ~toExpr~ extension method is defined in package ~quoted~:
+     - The ~Expr.apply~ method is defined in package ~quoted~:
        #+begin_src scala
          package quoted
 
-         delegate LiftingOps {
-           def (x: T) toExpr[T] given (ev: Liftable[T]): Expr[T] = ev.toExpr(x)
+         object Expr {
+           // ...
+           def apply[T: Liftable](x: T)(using QuoteContext): Expr[T] = summon[Liftable[T]].toExpr(x)
+           // ...
          }
        #+end_src
 
@@ -2211,7 +2257,7 @@
        representation of ~Expr~ trees. For instance, here is a possible instance
        of ~Liftable[Boolean]~:
        #+begin_src scala
-         delegate for Liftable[Boolean] {
+         given Liftable[Boolean] {
            def toExpr(b: Boolean) = if (b) '{ true } else '{ false }
          }
        #+end_src
@@ -2220,7 +2266,7 @@
        possible implementation of ~Liftable[Int]~ that does not use the
        underlying tree machinery:
        #+begin_src scala
-         delegate for Liftable[Int] {
+         given Liftable[Int] {
            def toExpr(n: Int): Expr[Int] = n match {
              case Int.MinValue    => '{ Int.MinValue }
              case _ if n < 0      => '{ - ${ toExpr(-n) } }
@@ -2234,9 +2280,9 @@
      - Since Liftable is a type class, its instances can be conditional.
        For example, a List is liftable if its element type is:
        #+begin_src scala
-         delegate [T: Liftable] for Liftable[List[T]] {
-           def toExpr(xs: List[T]): Expr[List[T]] = xs match {
-             case head :: tail => '{ ${ toExpr(head) } :: ${ toExpr(tail) } }
+         given [T: Liftable : Type] for Liftable[List[T]] {
+           def toExpr(xs: List[T]) = xs match {
+             case head :: tail => '{ ${ Expr(head) } :: ${ Expr(tail) } }
              case Nil          => '{ Nil: List[T] }
            }
          }
@@ -2250,9 +2296,9 @@
      - Using /lifting/, we can now give the missing definition of ~showExpr~ in
        the introductory example:
        #+begin_src scala
-         def showExpr[T](expr: Expr[T]): Expr[String] = {
+         def showExpr[T](expr: Expr[T])(using QuoteContext): Expr[String] = {
            val code: String = expr.show
-           code.toExpr
+           Expr(code)
          }
        #+end_src
        That is, the ~showExpr~ /method/ _converts_ its ~Expr~ argument to a
@@ -2265,7 +2311,7 @@
        to declutter slightly the code at the cost of readable phase distinction
        between stages.
 
-**** TODO Lifting Types - TODO *WRONG*
+**** TODO Lifting Types - TODO =WIERD= TODO *WHY 2 "Lifting Types"*
 **** TODO Relationship with ~inline~
 **** TODO Scope Extrusion
 **** TODO Example Expansion
@@ -2275,13 +2321,14 @@
      The code below introduces a /whitebox inline method/ that can calculate
      either a value of /type/ ~Int~ or a value of /type/ ~String~.
      #+begin_src scala
-       inline def defaultOf(inline str: String) <: Any =
-         ${ defaultOfImpl(str) }
+       transparent inline def defaultOf(inline str: String) =
+         ${ defaultOfImpl('str) }
 
-       def defaultOfImpl(str: String): Expr[Any] = str match {
-         case "int"    => '{1}
-         case "string" => '{"a"}
-       }
+       def defaultOfImpl(strExpr: Expr[String])(using QuoteContext): Expr[Any] =
+         strExpr.unliftOrError match {
+           case "int"    => '{1}
+           case "string" => '{"a"}
+         }
 
        // in a separate file
        val a: Int    = defaultOf("int")
@@ -2490,19 +2537,19 @@
           opaque type Logarithm = Double
 
           object Logarithm {
+            // These are the ways to lift to the Logarithm type
 
-            // These are the ways to lift to the logarithm type
             def apply(d: Double): Logarithm = math.log(d)
 
             def safe(d: Double): Option[Logarithm] =
               if (d > 0.0) Some(math.log(d)) else None
           }
 
-          // Extension methods define opaque types' public APIs
-          given LogarithmOps {
-            def (x: Logarithm) toDouble: Double = math.exp(x)
-            def (x: Logarithm) + (y: Logarithm): Logarithm = Logarithm(math.exp(x) + math.exp(y))
-            def (x: Logarithm) * (y: Logarithm): Logarithm = Logarithm(x + y)
+          // Extension methods define opaque type aliases' public APIs
+          extension LogarithmOps on (x: Logarithm) {
+            def toDouble: Double = math.exp(x)
+            def + (y: Logarithm): Logarithm = Logarithm(math.exp(x) + math.exp(y))
+            def * (y: Logarithm): Logarithm = Logarithm(x + y)
           }
         }
       #+end_src
@@ -2516,10 +2563,9 @@
       + Outside ~Logarithms~, ~Logarithm~ is treated as a _NEW abstract type_.
         * Legal operations example:
           #+begin_src scala
-            import Logarithms._
-            import Predef.{any2stringadd => _, _}
+            import Logarithms.Logarithm
 
-            val l1 = Logarithm(1.0)
+            val l = Logarithm(1.0)
             val l2 = Logarithm(2.0)
             val l3 = l1 * l2
             val l4 = l1 + l2
@@ -2533,10 +2579,10 @@
 
         * Illegal operations example:
           #+begin_src scala
-            val d: Double = l1       // error: found: Logarithm, required: Double
+            val d: Double = l        // error: found: Logarithm, required: Double
             val l2: Logarithm = 1.0  // error: found: Double, required: Logarithm
-            l1 * 2                   // error: found: Int(2), required: Logarithm
-            l2 / l2                  // error: `/` is not a member fo Logarithm
+            l * 2                    // error: found: Int(2), required: Logarithm
+            l / l2                   // error: `/` is not a member fo Logarithm
           #+end_src
 
 **** Bounds For Opaque Type Alias
@@ -2549,19 +2595,19 @@
          opaque type PermissionChoice = Int
          opaque type Permission <: Permissions & PermissionChoice = Int
 
-         def (x: Permissions) & (y: Permissions): Permissions = x & y
+         def (x: Permissions) & (y: Permissions): Permissions = x | y
          def (x: PermissionChoice) | (y: PermissionChoice): PermissionChoice = x | y
-         def (x: Permissions) is (y: Permissions): Boolean = (x & y) == y
-         def (x: Permissions) isOneOf (y: PermissionChoice): Boolean = (x & y) != 0
+         def (granted: Permissions).is(required: Permissions): Boolean = (granted & required) == required
+         def (granted: Permissions).isOneOf(required: PermissionChoice): Boolean = (granted & required) != 0
 
          val NoPermission: Permission = 0
-         val ReadOnly: Permission = 1
-         val WriteOnly: Permission = 2
-         val ReadWrite: Permissions = ReadOnly & WriteOnly
-         val ReadOrWrite: PermissionChoice = ReadOnly | WriteOnly
+         val Read: Permission = 1
+         val Write: Permission = 2
+         val ReadWrite: Permissions = Read | Write
+         val ReadOrWrite: PermissionChoice = Read | Write
        }
      #+end_src
-     - In conepts, the ~Access~ object defines THREE /opaque types/:
+     - The ~Access~ object defines THREE /opaque type aliases/:
        + ~Permission~,       representing a single permission,
        + ~Permissions~,      representing a conjunction (logical "and") of permissions,
        + ~PermissionChoice~, representing a disjunction (logical "or") of permissions.
@@ -2575,13 +2621,21 @@
 
            case class Item(rights: Permissions)
 
-           val x = Item(ReadOnly)  // OK, since Permission <: Permissions
+           val roItem = Item(Read)  // OK, since Permission <: Permissions
+           val rwItem = Item(ReadWrite)
+           val noItem = Item(NoPermission)
 
-           assert(!x.rights.is(ReadWrite))
-           assert(x.rights.isOneOf(ReadOrWrite))
+           assert(!roItem.rights.is(ReadWrite))
+           assert(roItem.rights.isOneOf(ReadOrWrite))
+
+           assert(rwItem.rights.is(ReadWrite))
+           assert(rwItem.rights.isOneOf(ReadOrWrite))
+
+           assert(!noItem.rights.is(ReadWrite))
+           assert(!noItem.rights.isOneOf(ReadOrWrite))
          }
        #+end_src
-       + On the other hand, ~x.rights.isOneOf(ReadWrite)~ can't pass the type check.
+       + On the other hand, ~roItem.rights.isOneOf(ReadWrite)~ can't pass the type check.
 
 **** TODO More details
 ***** Syntax
@@ -2597,6 +2651,7 @@
         package p
 
         open class Writer[T] {
+
           /** Sends to stdout, can be overridden */
           def send(x: T) = println(x)
 
@@ -2604,7 +2659,7 @@
           def sendAll(xs: T*) = xs.foreach(send)
         }
 
-        // File encryptedWriter.scala
+        // File EncryptedWriter.scala
         package p
 
         class EncryptedWriter[T: Encryptable] extends Writer[T] {
@@ -2683,7 +2738,7 @@
 *** DONE New Control Syntax
     CLOSED: [2019-12-28 Sat 17:53]
     #+begin_src scala
-      if x < 0
+      if x < 0 then
         "negative"
       else if x == 0
         "zero"
@@ -2822,6 +2877,9 @@
          #+end_src
 
 **** TODO The End Marker
+***** TODO When to Use End Markers
+***** TODO Syntax
+
 **** TODO Example
 **** TODO Settings and Rewrites
 **** TODO Variant: Indentation Marker ~:~
