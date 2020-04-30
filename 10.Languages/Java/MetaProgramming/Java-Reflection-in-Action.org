@@ -1,6 +1,7 @@
 #+TITLE: Java Reflection in Action
 #+Authors: Ira R. Forman and Nate Forman
-#+Version: 2014 - Java 1.4
+#+Version: 2005 - Java 1.4
+#+MISSION: Include Java 5+ change of relfection
 #+STARTUP: entitiespretty
 
 * preface - xiii
@@ -9,32 +10,41 @@
 * about the title - xx
 * about the cover illustration - xxi
 * 1 A few basics - 1
-  - Steps:
+  - Steps of modifying code:
     1. Examine the program for its structure or data.
     2. Make decisions using the results of the examination.
     3. Change the behavior, structure, or data of the program based upon the decisions.
 
+  - As programmer, you must be familiar with steps, which are the things you do
+    in your everyday work.
+      Learning /reflection/ allows you your program do this adaptation for you.
+
+  - Example:
+    #+begin_src java
+      public class HelloWorld {
+          public void printName() {
+              System.out.println(this.getClass().getName());
+          }
+      }
+    #+end_src
+    You can see the 3 steps in this example. The ~printName~ method
+    1. _examines_ the object for its class (~this.getClass()~).
+    2. In doing so, the _decision_ of what to print is made by delegating to the object's class.
+    3. The method _acts on this decision_ BY printing the returned name.
+
+  - Without /reflection/, to do the work in the above example, we need hardcode as
+    ~System.out.println("HelloWord")~, and override the ~printName~ in every subclass
+    of ~HelloWord~.
+
 ** DONE 1.1 Reflection's value proposition - 3
    CLOSED: [2019-05-15 Wed 13:16]
    - reflection :: the ability of a running program to examine itself and its software
-                   environment, and to change what it does depending on what it finds.[?] [Homepage] [Documentation] [Gitter Chat] [Update Spacemacs]
-                                              [Update Packages] [Rollback Package Update]
-                                                 [Release Notes] [Search in Spacemacs]
-
-
-
-
-                                         228 packages loaded in 21.644s (e:158 r:2 l:17 b:51)
-
-
-
-           Recent Files:
-               ~/__Study__/Work-Related-Notes-master/Java-R
+                   environment, and to change what it does depending on what it finds.
 
    - metadata :: the information _represent something itself_.
 
    - metaobjects :: in an object-oriented world, the objects of the organized
-                      /metadata/.
+                    /metadata/.
 
    - introspection :: the runtime self-examination of the /metaobjects/
 
