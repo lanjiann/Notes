@@ -1593,7 +1593,74 @@
         can imagine, why it is inserted automatically by the compiler is
         backward compatibility.
 
-*** TODO 3.8 Covariant Overriding - 49
+*** DONE 3.8 Covariant Overriding - 49
+    CLOSED: [2020-04-17 Fri 02:57]
+    - Java 5 supports /covariant method overriding/.
+      This feature is _NOT directly related to /generics/,_ but we mention it here
+      + because it is worth knowing,
+      + because it is implemented using a /bridging technique/.
+
+    - In Java 1.4-,
+      one method _can override_ another
+      _only if_
+      the _argument and return types_ *match exactly*.
+
+    - In Java 5,
+      a method can override another
+      _if_
+      + the /argument types/ *match exactly*
+        AND
+      + _the /return type/ of the overriding method_ is a *subtype* of the
+        /return type/ of the other method.
+
+    - Illustrates the advantages of /covariant overriding/ by inspecting the
+      ~clone~ method of ~Object~:
+      #+begin_src java
+        class Object {
+            public Object clone() { ... }
+        }
+      #+end_src
+      + In Java 1.4, any class that overrides ~clone~ must give it *exactly the
+        same* /return type/, namely ~Object~:
+        #+begin_src java
+          class Point {
+              public int x;
+              public int y;
+
+              public Point(int x, int y) {
+                  this.x = x;
+                  this.y = y;
+              }
+
+              public Object clone() {
+                  return new Point(x,y);
+              }
+          }
+        #+end_src
+        Here, even though ~clone~ always returns a ~Point~, _the rules require it
+        to have the /return type/ ~Object~._
+          *This is ANNOYING*, since every invocation of ~clone~ _MUST cast_ its
+        result.
+        #+begin_src java
+          Point p = new Point(1,2);
+          Point q = (Point)p.clone();
+        #+end_src
+
+      + In Java 5+,
+        /covariant overriding/ is implemented using the /bridging technique/.
+        #+begin_src java
+          for (Method m : Point.class.getMethods())
+              if (m.getName().equals("clone"))
+                  System.out.println(m.toGenericString() + " is " + m.isBridge() ? "" : "not " + "a bridge method.");
+
+          // JDK 7+:
+          // public Point Point.clone() is not a brdige method.
+          // public java.lang.Object Point.clone() is a bridge method.
+        #+end_src
+        Here the /bridging technique/ exploits the fact that
+        _in a /class file/ *two methods of the same class may have the same
+        argument signature*, even though this is *not permitted in Java source*._
+        The /bridge method/ simply calls the first method.
 
 ** DONE 4. Declarations - 51
    CLOSED: [2020-04-17 Fri 00:27]
@@ -1812,6 +1879,7 @@
 *** TODO 5.5 Conclusions - 71
 
 ** TODO 6. Reification - 73
+   - TO BE CONTINUE: PAGE 77
 *** 6.1 Reifiable Types - 73
 *** 6.2 Instance Tests and Casts - 74
     - *Nonreifiable Casts*
