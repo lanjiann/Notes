@@ -1,10 +1,20 @@
 #+TITLE: OS-Lib
 #+SUBTITLE: a simple, flexible, high-performance Scala interface to common OS filesystem and subprocess APIs
-#+VERSION: 0.4.2
+#+VERSION: 0.6.2
 #+AUTHOR: Haoyi Li
 #+STARTUP: entitiespretty
 
 * Getting Started
+  #+begin_src scala
+    // SBT
+    "com.lihaoyi" %% "os-lib" % "0.6.2"
+
+    // Mill
+    ivy"com.lihaoyi::os-lib:0.6.2"
+  #+end_src
+
+  - 0.7.0 is released!
+
 * Cookbook
 ** Concatenate text files
 ** Spawning a subprocess on multiple files
@@ -16,64 +26,76 @@
 
 * Operations
 ** Reading & Writing
-*** os.read
-*** os.read.bytes
-*** os.read.chunks
-*** os.read.lines
-*** os.read.lines.stream
-*** os.read.inputStream
-*** os.write
-*** os.write.append
-*** os.write.over
-*** os.write.outputStream
-*** os.truncate
+*** ~os.read~
+*** ~os.read.bytes~
+*** ~os.read.chunks~
+*** ~os.read.lines~
+*** ~os.read.lines.stream~
+*** ~os.read.inputStream~
+*** ~os.write~
+*** ~os.write.append~
+*** ~os.write.over~
+*** ~os.write.outputStream~
+*** ~os.truncate~
 
 ** Listing & Walking
-*** os.list
-*** os.list.stream
-*** os.walk
-*** os.walk.attrs
-*** os.walk.stream
-*** os.walk.stream.attrs
+*** ~os.list~
+*** ~os.list.stream~
+*** ~os.walk~
+*** ~os.walk.attrs~
+*** ~os.walk.stream~
+*** ~os.walk.stream.attrs~
 
 ** Manipulating Files & Folders
-*** os.exists
-*** os.move
-*** os.move.into
-*** os.move.over
-*** os.copy
-*** os.copy.into
-*** os.copy.over
-*** os.makeDir
-*** os.makeDir.all
-*** os.remove
-*** os.remove.all
-*** os.hardlink
-*** os.symlink
-*** os.followLink
-*** os.temp
-*** os.temp.dir
+*** ~os.exists~
+*** ~os.move~
+*** ~os.move.into~
+*** ~os.move.over~
+*** ~os.copy~
+*** ~os.copy.into~
+*** ~os.copy.over~
+*** ~os.makeDir~
+*** ~os.makeDir.all~
+*** ~os.remove~
+*** ~os.remove.all~
+*** ~os.hardlink~
+*** ~os.symlink~
+*** ~os.followLink~
+*** ~os.temp~
+*** ~os.temp.dir~
 
 ** Filesystem Metadata
-*** os.stat
-*** os.stat.posix
-*** os.isFile
-*** os.isDir
-*** os.isLink
-*** os.size
-*** os.mtime
+*** ~os.stat~
+*** ~os.stat.posix~
+*** ~os.isFile~
+*** ~os.isDir~
+*** ~os.isLink~
+*** ~os.size~
+*** ~os.mtime~
 
 ** Filesystem Permissions
-*** os.perms
-*** os.owner
-*** os.group
+*** ~os.perms~
+*** ~os.owner~
+*** ~os.group~
 
 ** Spawning Subprocesses
-*** os.proc.call
-*** os.proc.spawn
+   - =from Jian=
+     The manual doesn't mention that we can specify the /shell/ in the way that
+     #+begin_src scala
+       val res0 = os.proc("ls", wd/"folder2").call(cwd = wd)
+
+       val res1 = os.proc("powershell", "Get-Content", wd/"file.txt").call(cwd = wd)
+       val res2 = os.proc("cmd", "type", wd/"file.txt").call(cwd = wd)
+
+       // `os.proc("powershell Get-Content", wd/"file.txt").call(cwd = wd)` can't compile!!!
+
+     #+end_src
+
+*** ~os.proc~ and ~call~
+*** ~os.proc~ and ~spawn~
 
 ** Watching for Changes
-*** os.watch.watch
+*** ~os.watch.watch~
 
 * Data Types
 ** ~os.Path~
