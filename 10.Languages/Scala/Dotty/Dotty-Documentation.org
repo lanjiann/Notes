@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.25.0-bin-20200523-5358651-NIGHTLY
+#+VERSION: 0.25.0-bin-20200603-cc8d6c3-NIGHTLY
 #+AUTHOR:
 #+STARTUP: entitiespretty
 
@@ -2865,7 +2865,7 @@
        #+end_src
 
 **** DONE Types for Quotations
-     CLOSED: [2020-03-31 Tue 17:37]
+     CLOSED: [2020-06-04 Thu 23:56]
      - The /type signatures/ of /quotes/ and /splices/ can be described using
        _TWO_ _FUNDAMENTAL /types/:_
        + ~Expr[T]~: /abstract syntax trees/ representing /expressions/ of /type/ ~T~
@@ -2890,10 +2890,9 @@
        Both ~Expr~ and ~Type~ are ~abstract~ and ~sealed~, so _ALL /constructors/
        for these types are PROVIDED BY THE SYSTEM._
 
-     - One way to construct values of type ~Expr[T]~ or ~Type[T]~ is by /quoting/,
-       TODO ??? TODO
-       the other is by /type-specific lifting operations/ that will be discussed
-       later on.
+     - *TWO* ways to construct values of type ~Expr[T]~ or ~Type[T]~:
+       + by /quoting/,
+       + =TODO= by /type-specific lifting operations/ that will be discussed later on.
 
 **** DONE The Phase Consistency Principle - TODO =RE-READ=
      CLOSED: [2020-03-31 Tue 18:08]
@@ -2942,7 +2941,8 @@
          fundamental gain in expressiveness._
 
 **** TODO From ~Expr~'s to Functions and Back
-     It is possible to convert back and forth any ~Expr[T => R]~ into ~Expr[T] => Expr[R]~!
+     It is possible to
+     CONVERT _back and forth_ any ~Expr[T => R]~ into ~Expr[T] => Expr[R]~!
 
      - The conversions can be implemented as follows:
        #+begin_src scala
@@ -2952,7 +2952,14 @@
          def from[T, R](f: Expr[T => R])(using QuoteContext): Expr[T] => Expr[R] =
            (x: Expr[T]) => '{ $f($x) }
        #+end_src
-       This decorator gives ~Expr~ the ~apply~ operation of an /applicative functor/,
+       - This decorator gives ~Expr~ the ~apply~ operation of an /applicative functor/.
+
+       - Note how the fundamental /phase consistency principle/ works in two different
+         directions here for ~f~ and ~x~.
+         + For example,
+           in the method ~to~,
+           * the reference to ~f~ is legal because it is /quoted/, then /spliced/,
+           * the reference to ~x~ is legal because it is /spliced/, then /quoted/.
 
      - Example:
        #+begin_src scala
@@ -2961,7 +2968,8 @@
 
          // (x: Expr[Int]) => '{ ((x: Int) => x.toString)($x) }
          val f2: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
-           f2('{2})  // '{ ((x: Int) => x.toString)(2) }
+
+         f2('{2})  // '{ ((x: Int) => x.toString)(2) }
        #+end_src
 
      - One limitation of ~from~ is that it does NOT \beta{}-reduce when a lambda is called
