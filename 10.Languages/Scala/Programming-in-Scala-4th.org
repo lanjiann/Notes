@@ -9136,11 +9136,7 @@
   patterns that are decoupled from an object's representation.
 
 ** DONE 26.1 An example: extracting email addresses - 631
-   CLOSED: [2017-12-02 Sat 01:34]
-   - =FROM JIAN= TODO
-     All the examples before are oversimplified, modify them to runnable real
-     world code later!!!
-
+   CLOSED: [2020-05-29 Sat 12:23]
    - Compare
      + Access function:
        #+BEGIN_SRC scala
@@ -9170,9 +9166,9 @@
 
          val sep: String = ???
 
-         val result: Option[List[EMail]] = ss.
-           split(sep).
+         val result: Option[List[String]] = ss.
            sliding(2).
+           map(_.split(sep)).
            find { case List(e1, e2) =>
              isEMail(e1) && isEMail(e2) && user(e1) == user(e2)
            }
@@ -9186,33 +9182,40 @@
      + Pattern matching:
        #+BEGIN_SRC scala
          @annotation.tailrec
-         def findSuccessiveSameUser(ss: List[EMail]): Unit = {
+         def findSuccessiveSameUser(ss: List[String]): Unit = {
            ss match {
-             case Nil =>
-               println("not successive email addresses with the same user part")
-             case EMail(u1, d1) :: EMail(u2, d2) :: _ if u1 == u2 =>
-               println(f"Two successive email addresses with the same user part ${u1}")
-             case _ :: tl =>
-               findSuccessiveSameUser(tl)
+             case Nil | _ :: Nil                                  => println("not successive email addresses with the same user part")
+             case EMail(u1, d1) :: EMail(u2, d2) :: _ if u1 == u2 => println(f"Two successive email addresses with the same user part ${u1}")
+             case _ :: tl                                         => findSuccessiveSameUser(tl)
            }
          }
 
-         findSuccessiveSameUser(ss.split(sep).sliding(2).map(toEmail))
+         findSuccessiveSameUser(ss.sliding(2))
        #+END_SRC
 
-   - Scala's /extractors/  let you define new /patterns/ for _preexisting_ types,
-     where the /pattern/ need NOT follow the internal representation of the type.
+   - Scala's /extractors/ let you define new /patterns/ for _pre-existing_ types,
+     where the /pattern/ need _NOT_ follow the internal representation of the type.
 
 ** DONE 26.2 Extractors - 632
    CLOSED: [2017-12-02 Sat 05:57]
-   - extractor :: an object that has a method called ~unapply~ as one of its
+   - extractor :: an /object/ that has a /method/ called ~unapply~ as one of its
                   members.
 
-   - xxx
+   - The purpose of that ~unapply~ /method/ is to *match* a value and *take it
+     apart*.
+
+   - Often,
+     the /extractor object/ also defines a _dual_ /method/ ~apply~ for *building*
+     values, but *this is _NOT_ required*.
+     + =from Jian=
+       /case classes/ always generate these mutually dual /methods/ ~apply~ and
+       ~unapply~.
+
+   - Listing 26.1
      #+BEGIN_SRC scala
        object EMail {
          // The injection method (optional)
-         def apply(user: String, domain: String) = user + "@" + domain
+         def apply(user: String, domain: String) = f"$user@$domain"
 
          def unapply(str: String): Option[(String, String)] =
            (str split "@") match {

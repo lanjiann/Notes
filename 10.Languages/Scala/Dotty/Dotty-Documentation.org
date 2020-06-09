@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.25.0-bin-20200603-cc8d6c3-NIGHTLY
+#+VERSION: 0.25.0-bin-20200608-fa84627-NIGHTLY
 #+AUTHOR:
 #+STARTUP: entitiespretty
 
@@ -2798,15 +2798,14 @@
 *** TODO Macros
 **** DONE Macros: Quotes and Splices
      CLOSED: [2020-03-31 Tue 17:27]
-     - Macros are built on two well-known fundamental operations:
+     - Macros are built on _TWO_ well-known fundamental operations:
        + quotation :: ~'{...}~ for /expressions/;
                       ~'[...]~ for /types/.
 
        + splicing :: ~${ ... }~
 
-     - Additionally,
-       _within_ a /quote/ or a /splice/ we can /quote/ or /splice/ _identifiers_
-       directly (i.e. ~'e~ and ~$e~).
+     - Additionally, *within* a /quote/ or a /splice/
+       we can /quote/ or /splice/ _identifiers_ *directly* (i.e. ~'e~ and ~$e~).
 
      - Readers may notice the _RESEMBLANCE_ of the two aforementioned syntactic
        schemes with the familiar /string interpolation syntax/. /Quotes/ and
@@ -2821,15 +2820,15 @@
        2. an _arithmetic expression_ that will be evaluated followed by the /splicing/
           of its string representation.
 
-     - The entry point for /macros/ is an /inline method/ with a *top-level* /splice/.
-       We call it a top-level because it is the *only occasion* where we encounter a
-       /splice/ *outside* a /quote/ (consider as a /quote/ the compilation-unit at the
-       call-site).
+     - The *entry point* for /macros/: an /inline method/ with a *top-level* /splice/.
+       + We call it a *top-level*
+         because it is the *ONLY* OCCASION where we encounter a /splice/ *outside*
+         a /quote/ (consider as a /quote/ the compilation-unit at the call-site).
 
-       For example, the code below presents an ~inline~ /method/ ~assert~ which
-       calls at compile-time a method ~assertImpl~ with a /boolean expression
-       tree/ as argument. ~assertImpl~ evaluates the expression and prints it again
-       in an error message if it evaluates to ~false~.
+     - For example, the code below presents an ~inline~ /method/ ~assert~ which
+       calls at compile-time a method ~assertImpl~ with a /boolean expression tree/
+       as argument. ~assertImpl~ evaluates the expression and prints it again in
+       an error message if it evaluates to ~false~.
        #+begin_src scala
          import sala.quoted._
 
@@ -2848,12 +2847,12 @@
      - /Quotations/ can have _spliced_ parts in them; in this case the embedded /splices/
        _are evaluated and embedded as part of_ the formation of the /quotation/.
 
-     - /Quotes/ and /splices/ can also be applied *DIRECTLY* to _identifiers_.
-       + An /identifier/ ~$x~ starting with a ~$~ that appears _INSIDE_ a /quoted
-         expression or type/ is _treated as_ a /splice/ ~${x}~.
+       - /Quotes/ and /splices/ can also be applied *DIRECTLY* to _identifiers_.
+         + An /identifier/ ~$x~ starting with a ~$~ that appears _INSIDE_ a /quoted
+           expression or type/ is _treated as_ a /splice/ ~${x}~.
 
-       + Analogously, an /quoted identifier/ ~'x~ that appears _INSIDE_ a /splice/
-         is _treated as_ a /quote/ ~'{x}~.
+         + Analogously, an /quoted identifier/ ~'x~ that appears _INSIDE_ a /splice/
+           is _treated as_ a /quote/ ~'{x}~.
 
      - /Quotes/ and /splices/ are *DUALS of each other*.
        For arbitrary /expressions/ ~e~ and /types/ ~T~ we have:
@@ -2865,20 +2864,21 @@
        #+end_src
 
 **** DONE Types for Quotations
-     CLOSED: [2020-06-04 Thu 23:56]
+     CLOSED: [2020-05-30 Sat 15:39]
      - The /type signatures/ of /quotes/ and /splices/ can be described using
        _TWO_ _FUNDAMENTAL /types/:_
        + ~Expr[T]~: /abstract syntax trees/ representing /expressions/ of /type/ ~T~
 
        + ~Type[T]~: /type structures/ representing /type/ ~T~.
 
-     - /Quoting/ takes
-       + /expressions/ of /type/ ~T~ to /expressions/ of /type/ ~Expr[T]~
-       + /types/ ~T~ to /expressions/ of /type/ ~Type[T]~.
+     - /Quoting/ and /splicing/ are dual to each other
+       + /Quoting/
+         * /expressions/ of /type/ ~T~ ---> /expressions/ of /type/ ~Expr[T]~
+         * /types/ ~T~ ---> /expressions/ of /type/ ~Type[T]~.
 
-     - /Splicing/ takes
-       + expressions of /type/ ~Expr[T]~ to /expressions/ of /type/ ~T~
-       + expressions of /type/ ~Type[T]~ to /types/ ~T~.
+       + /Splicing/
+         - expressions of /type/ ~Expr[T]~ ---> /expressions/ of /type/ ~T~
+         - expressions of /type/ ~Type[T]~ ---> /types/ ~T~.
 
      - The two types can be defined in package ~scala.quoted~ as follows:
        #+begin_src scala
@@ -2894,8 +2894,8 @@
        + by /quoting/,
        + =TODO= by /type-specific lifting operations/ that will be discussed later on.
 
-**** DONE The Phase Consistency Principle - TODO =RE-READ=
-     CLOSED: [2020-03-31 Tue 18:08]
+**** DONE The Phase Consistency Principle
+     CLOSED: [2020-05-30 Sat 15:40]
      - A fundamental /phase consistency principle (PCP)/ regulates accesses to /free
        variables/ in /quoted/ and /spliced/ code:
        #+begin_quote
@@ -2940,7 +2940,8 @@
          accesses involve serialization. _However, this does not constitute a
          fundamental gain in expressiveness._
 
-**** TODO From ~Expr~'s to Functions and Back
+**** DONE From ~Expr~'s to Functions and Back
+     CLOSED: [2020-06-09 Tue 02:40]
      It is possible to
      CONVERT _back and forth_ any ~Expr[T => R]~ into ~Expr[T] => Expr[R]~!
 
@@ -2952,6 +2953,17 @@
          def from[T, R](f: Expr[T => R])(using QuoteContext): Expr[T] => Expr[R] =
            (x: Expr[T]) => '{ $f($x) }
        #+end_src
+       - =TODO=
+         In Dotty 0.24 (the newest release), the /type parameters/ need /context
+         bounds/.
+         #+begin_src scala
+           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
+             '{ (x: T) => ${ f('x) } }
+
+           def from[T: Type, R: Type](f: Expr[T => R])(using QuoteContext): Expr[T] => Expr[R] =
+             (x: Expr[T]) => '{ $f($x) }
+         #+end_src
+
        - This decorator gives ~Expr~ the ~apply~ operation of an /applicative functor/.
 
        - Note how the fundamental /phase consistency principle/ works in two different
@@ -2968,25 +2980,90 @@
 
          // (x: Expr[Int]) => '{ ((x: Int) => x.toString)($x) }
          val f2: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
-
          f2('{2})  // '{ ((x: Int) => x.toString)(2) }
        #+end_src
+       + =TODO= =IMPORTANT=
+         It seems the code below can't work in Dotty 0.24, and it my only works
+         in Dotty 0.24.
 
-     - One limitation of ~from~ is that it does NOT \beta{}-reduce when a lambda is called
-       immediately, as evidenced in the mode ~{ ((x: Int) => x.toString)(2) }~.
-         In some cases we want to remove the lambda from the code, for this we provide
-       the method ~Expr.betaReduce~ that turns a tree describing a function into a
-       function mapping trees to trees. TODO TODO TODO
-       #+begin_src scala
-         object Expr {
-           // ...
-           def betaReduce[...](...)(...): ... = ...
-         }
-       #+end_src
+       + =TODO=
+         I can't evaluate this piece of code with Dotty 0.24 -- can't find required
+         ~QuoteContext~.
 
-**** TODO Lifting Types - TODO =WIERD= TODO
-**** TODO Lifting Expressions
-     - Consider the following implementation of a staged interpreter that implements
+     - One *LIMITATION* of ~from~:
+       it does _NOT_ \beta{}-reduce when a lambda is called immediately, as evidenced
+       in the mode ~{ ((x: Int) => x.toString)(2) }~.
+       + OVERRIDE this limitation:
+         * REQUIREMENT:
+           In some cases we want to remove the lambda from the code.
+
+         * SOLUTION:
+           For this we provide the /method/ ~Expr.betaReduce~ that turns _a tree
+           describing a function_ into _a function mapping trees to trees_.
+           #+begin_src scala
+             object Expr {
+               // ...
+               def betaReduce[...](...)(...): ... = ...
+             }
+           #+end_src
+
+       + IMPLEMENTATION:
+         The definition of ~Expr.betaReduce(f)(x)~ is *assumed* to be functionally the
+         same as ~'{($f)($x)}~, however _it SHOULD *optimize* this call by returning
+         the result of beta-reducing ~f(x)~ if ~f~ is a *KNOWN* lambda expression._
+         ~Expr.betaReduce~ DISTRIBUTES applications of ~Expr~ over function arrows:
+         #+begin_src scala
+           Expr.betaReduce(_): Expr[(T1, ..., Tn) => R] => ((Expr[T1], ..., Expr[Tn]) => Expr[R])
+         #+end_src
+
+**** DONE Lifting Types - =from Jian= _MOTIVATION_
+     CLOSED: [2020-06-09 Tue 03:04]
+     - Types are not directly affected by the /phase consistency principle/.
+       + *It is possible to use types defined at any level in any other level.*
+         *But*, if a type is used in a SUBSEQUENT /stage/ (=from Jian= ???) it
+         will need to be _lifted_ to a ~Type~.
+
+         * The resulting value of ~Type~ will be subject to PCP.
+           Indeed, the definition of ~reflect~ above uses ~T~ in the NEXT /stage/,
+           there is a /quote/ but NO /splice/ between the parameter binding of
+           ~T~ and its usage. But the code can be rewritten by adding a binding
+           of a ~Type[T]~ tag:
+           #+begin_src scala
+             def reflect[T, U](f: Expr[T] => Expr[U])(using t: Type[T]): Expr[T => U] =
+               '{ (x: $t) => ${ f('x) } }
+           #+end_src
+           - In this version of ~reflect~, the type of ~x~ is now the result of /splicing/
+             the ~Type~ value ~t~.
+
+           - This operation is /splice/ CORRECT -- there is one quote and one splice
+             between the use of ~t~ and its definition.
+
+     - *To _AVOID_ clutter*,
+       the Scala implementation tries to _CONVERT *ANY* /type reference/ to a type
+       ~T~ *in subsequent phases* to a /type-splice/,_ by rewriting ~T~ to
+       ~${summon[Type[T]] }~.
+       + For instance, the user-level definition of ~reflect~:
+         #+begin_src scala
+           def reflect[T: Type, U: Type](f: Expr[T] => Expr[U]): Expr[T => U] =
+             '{ (x: T) => ${ f('x) } }
+         #+end_src
+
+         would be *rewritten* to
+
+         #+begin_src scala
+           def reflect[T: Type, U: Type](f: Expr[T] => Expr[U]): Expr[T => U] =
+             '{ (x: ${ summon[Type[T]] }) => ${ f('x) } }
+         #+end_src
+         * The summon query succeeds because
+           - there is a given instance of type ~Type[T]~ available
+           - _the reference to that value is phase-correct._
+
+         * If that was NOT the case,
+           the phase inconsistency for ~T~ would be _reported_ as an error.
+
+**** DONE Lifting Expressions
+     CLOSED: [2020-06-09 Tue 03:29]
+     - Consider the following implementation of a /staged interpreter/ that implements
        a compiler through staging.
        #+begin_src scala
          import scala.quoted._
@@ -2998,18 +3075,17 @@
            case Let(x: String, e: Exp, in: Exp)
          }
        #+end_src
+       + The interpreted language consists of numbers ~Num~, addition ~Plus~, and
+         variables ~Var~ which are bound by ~Let~.
 
-     - The interpreted language consists of numbers ~Num~, addition ~Plus~, and
-       variables ~Var~ which are bound by ~Let~. Here are two sample expressions
-       in the language:
+     - Here are two sample expressions in the language:
        #+begin_src scala
          val exp    = Plus(Plus(Num(2), Var("x")), Num(4))
          val letExp = Let("x", Num(3), exp)
        #+end_src
 
      - Here's a compiler that maps an expression given in the interpreted language
-       to /quoted/ Scala code of type ~Expr[Int]~. The compiler takes an environment
-       that maps variable names to Scala ~Expr~'s.
+       to /quoted/ Scala code of type ~Expr[Int]~.
        #+begin_src scala
          import scala.quoted.{given _, _}
 
@@ -3021,50 +3097,52 @@
          }
        #+end_src
 
-     - Running compile(letExp, Map()) would yield the following Scala code:
+     - Running ~compile(letExp, Map()~) would yield the following Scala code:
        #+begin_src scala
          '{ val y = 3; (2 + y) + 4 }
        #+end_src
 
-     - The body of the first clause, ~case Num(n) => n.toExpr~, looks suspicious.
+     - The body of the first clause, ~case Num(n) => Expr(n)~, *looks suspicious*.
        ~n~ is declared as an ~Int~, yet it is converted to an ~Expr[Int]~ with
-       ~toExpr~. Shouldn't ~n~ be /quoted/? In fact this would _NOT_ work since
-       replacing ~n~ by ~'n~ in the clause _would NOT be phase correct_.
+       ~Expr.apply~.
+       + Q :: Shouldn't ~n~ be /quoted/?
+
+       + A :: In fact this would _NOT_ work since replacing ~n~ by ~'n~ in the
+               clause _would NOT be phase correct_.
 
      - The ~Expr.apply~ method is defined in package ~quoted~:
        #+begin_src scala
          package quoted
 
          object Expr {
-           // ...
            def apply[T: Liftable](x: T)(using QuoteContext): Expr[T] = summon[Liftable[T]].toExpr(x)
            // ...
          }
        #+end_src
+       + This method says that values of types implementing the ~Liftable~ /type
+         class/ can be converted ("lifted") to ~Expr~ values using ~Expr.apply~.
 
-     - The extension says that values of types implementing the ~Liftable~ /type
-       class/ can be converted ("lifted") to ~Expr~ values using ~toExpr~,
-       provided a /delegate import/ of ~scala.quoted._~ is in scope.
+     - Dotty comes with /given instances/ of ~Liftable~ for several types including
+       ~Boolean~, ~String~, and /ALL primitive number types/.
+       + For example,
+         ~Int~ values can be converted to ~Expr[Int]~ values by wrapping the
+         value in a ~Literal~ /tree node/.
+         This makes use of the underlying /tree representation/ in the compiler
+         *for efficiency*.
+         * But the ~Liftable~ instances are nevertheless NOT magic in the sense
+           that they could all be defined in a user program without knowing
+           anything about the representation of ~Expr~ trees.
+           - For instance, here is a possible instance of ~Liftable[Boolean]~:
+             #+begin_src scala
+               given Liftable[Boolean] {
+                 def toExpr(b: Boolean) =
+                   if (b) '{ true } else '{ false }
+               }
+             #+end_src
 
-     - Dotty comes with /delegate definitions/ of ~Liftable~ for several types
-       including ~Boolean~, ~String~, and /ALL primitive number types/.
-         For example, ~Int~ values can be converted to ~Expr[Int]~ values by
-       wrapping the value in a ~Literal~ /tree node/. This makes use of the
-       underlying tree representation in the compiler for efficiency. But the
-       ~Liftable~ instances are nevertheless not magic in the sense that they
-       could all be defined in a user program without knowing anything about the
-       representation of ~Expr~ trees. For instance, here is a possible instance
-       of ~Liftable[Boolean]~:
-       #+begin_src scala
-         given Liftable[Boolean] {
-           def toExpr(b: Boolean) =
-             if (b) '{ true } else '{ false }
-         }
-       #+end_src
-
-     - Once we can lift bits, we can work our way up. For instance, here is a
-       possible implementation of ~Liftable[Int]~ that does not use the
-       underlying tree machinery:
+     - Once we can lift bits, we can work our way up.
+       For instance, here is a possible implementation of ~Liftable[Int]~ that
+       does not use the underlying tree machinery:
        #+begin_src scala
          given Liftable[Int] {
            def toExpr(n: Int): Expr[Int] = n match {
@@ -3077,8 +3155,8 @@
          }
        #+end_src
 
-     - Since Liftable is a type class, its instances can be conditional.
-       For example, a List is liftable if its element type is:
+     - Since ~Liftable~ is a /type class/, its instances can be conditional.
+       For example, a ~List~ is /liftable/ _if its element type is_:
        #+begin_src scala
          given [T: Liftable : Type] for Liftable[List[T]] {
            def toExpr(xs: List[T]) = xs match {
@@ -3088,10 +3166,13 @@
          }
        #+end_src
 
-     - In the end, Liftable resembles very much a serialization framework.
-       Like the latter it can be derived systematically for all collections,
-       case classes and enums. Note also that the synthesis of type-tag values
-       of type Type[T] is essentially the type-level analogue of lifting.
+     - In the end, ~Liftable~ _RESEMBLES_ very much a serialization framework.
+       Like the latter it can be derived systematically for all /collections/,
+       /case classes/ and /enums/.
+
+     - =TODO= =???= =TODO=
+       Note also that the synthesis of type-tag values of type ~Type[T]~ is
+       essentially the type-level analogue of /lifting/.
 
      - Using /lifting/, we can now give the missing definition of ~showExpr~ in
        the introductory example:
@@ -3101,17 +3182,19 @@
            Expr(code)
          }
        #+end_src
-       That is, the ~showExpr~ /method/ _converts_ its ~Expr~ argument to a
-       string (~code~), and *lifts* the result back to an ~Expr[String]~ using
-       the ~toExpr~ method.
+       + That is, the ~showExpr~ /method/ _converts_ its ~Expr~ argument to a
+         string (~code~), and *lifts* the result back to an ~Expr[String]~ using
+         ~Expr.apply~.
 
      - Note:
-       the ~toExpr~ extension /method/ can be ommited by importing an /implicit
-       conversion/ with ~import scala.quoted.autolift._~. The programmer is able
-       to declutter slightly the code at the cost of readable phase distinction
-       between stages.
+       Lifting ~String~ to ~Expr[String]~ using ~Expr(code)~ can be ommited by
+       importing an /implicit conversion/ with ~import scala.quoted.autolift._~.
+       + The programmer is able to
+         _declutter_ slightly the code
+         *at the cost of*
+         readable /phase distinction/ between /stages/.
 
-**** TODO Lifting Types - TODO =WIERD= TODO *WHY 2 "Lifting Types"*
+**** TODO Lifting Types - =from Jian= _MECHANISM_
 **** TODO Relationship with ~inline~
 **** TODO Scope Extrusion
 **** TODO Example Expansion
@@ -4565,8 +4648,12 @@
 
        + In Scala 3.1+, they will be enabled by default.
 
-*** TODO Pattern Matching
+*** TODO Pattern Matching - =Further simplification will come, no need to read now=
     # Option-less pattern matching
+    - CAUTION:
+      *There are plans for further simplification*,
+      in particular to factor out /product match/ and /name-based match/ into a
+      SINGLE type of /extractor/.
 
 **** Extractors
 ***** Fixed-Arity Extractors
