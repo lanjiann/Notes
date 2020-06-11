@@ -1,6 +1,6 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.25.0-bin-20200608-fa84627-NIGHTLY
-#+AUTHOR:
+#+VERSION: 0.26.0-bin-20200610-4b39622-NIGHTLY
+#+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 
 * BLOG
@@ -692,15 +692,15 @@
        + /Context Bounds/, which carry over unchanged.
 
        + /Extension Methods/ REPLACE /implicit classes/ in a way that _INTEGRATES
-         BETTER with /typeclasses/._
+         BETTER with /type classes/._
 
-       + /Implementing Typeclasses/ demonstrates how some common /typeclasses/ can
+       + /Implementing Type classes/ demonstrates how some common /type classes/ can
          be implemented using the new constructs. TODO ??? TODO
 
-       + /Typeclass Derivation/ introduces constructs to AUTOMATICALLY *derive*
-         /typeclass instances/ for ADTs.
+       + /Type class Derivation/ introduces constructs to AUTOMATICALLY *derive*
+         /type class instances/ for ADTs.
 
-       + /Multiversal Equality/ introduces a special typeclass to support /type safe
+       + /Multiversal Equality/ introduces a special type class to support /type safe
          equality/.
 
        + /Context Functions/ provide a way to abstract over /context parameters/.
@@ -795,7 +795,7 @@
           }
         }
       #+end_src
-      This code defines a /trait/ ~Ord~ (typeclass) with two /given instances/.
+      This code defines a /trait/ ~Ord~ (type class) with two /given instances/.
 
 **** DONE Anonymous Givens
      CLOSED: [2020-03-08 Sun 21:52]
@@ -991,7 +991,7 @@
 *** DONE Context Bounds
     CLOSED: [2019-11-12 Tue 02:20]
     A /context bound/ is a *SHORTHAND* for expressing the common pattern (a.k.a
-    typeclass pattern) of an /context parameter/ that depends on *A* /type parameter/.
+    type class pattern) of an /context parameter/ that depends on *A* /type parameter/.
     #+begin_src scala
       def maximum[T: Ord](xs: List[T]): T = xs.reduceLeft(max)
     #+end_src
@@ -1152,7 +1152,7 @@
            def (i: Int).safeDiv(x: Int): Option[Int] =
              // extension method brought into scope via inheritance from IntOps
              if x.isZero then None
-             else             Some(i / x)  // TODO: in the doc, this is `i % x`, and I think it's a typo
+             else             Some(i / x)
 
          }
 
@@ -1167,10 +1167,10 @@
              }
          }
        #+end_src
-       + TODO
-       + TODO
-       + TODO
-       + TODO
+       + =TODO=
+       + =TODO=
+       + =TODO=
+       + =TODO=
 
      - The _PRECISE_ *rules for RESOLVING a selection to an extension method* are
        as follows:
@@ -1359,15 +1359,15 @@
          extension <ident> { ...
        #+end_src
 
-*** DONE Implementing Typeclasses
+*** DONE Implementing Type classes
     CLOSED: [2020-03-09 Mon 01:00]
     /Given instances/, /extension methods/ and /context bounds/ allow a concise and
-    natural expression of /typeclasses/.
+    natural expression of /type classes/.
 
-    - /Typeclasses/ are just /traits/ with canonical implementations defined by
+    - /Type classes/ are just /traits/ with canonical implementations defined by
       /given instances/.
 
-    - Here are some examples of standard typeclasses:
+    - Here are some examples of standard type classes:
 
 **** Semigroups and monoids
      #+begin_src scala
@@ -1458,7 +1458,7 @@
 
 **** TODO Summary
 
-*** TODO Typeclass Derivation
+*** TODO Type class Derivation
     # Type class Derivation
 **** Types supporting ~derives~ clauses
 **** Type classes supporting automatic deriving
@@ -1474,7 +1474,7 @@
       _BUT_ it is also dangerous since it *undermines* /type safety/.
 
     - /Multiversal equality/ is an _opt-in way_ to make /universal equality/ SAFER.
-        It uses a /binary typeclass/ ~Eql~ to indicate that values of *two* given
+        It uses a /binary type class/ ~Eql~ to indicate that values of *two* given
       /types/ can be compared with each other.
 
     - If we want to disable /universal equality/ check for ~T~, we can do
@@ -1483,7 +1483,7 @@
 
         val x = ...  // of type T
         val y = ...  // of type S, but should be T
-        x == y       // can't typecheck because T drevies the typeclass Eql
+        x == y       // can't typecheck because T drevies the type class Eql
       #+end_src
 
     - Alternatively, one can also provide an ~Eql~ /given instance/ directly,
@@ -1544,7 +1544,7 @@
 **** DONE Deriving ~Eql~ Instances
      CLOSED: [2020-05-23 Sat 22:31]
      ~class Box[T](x: T) derives Eql~
-     - By the usual rules of /typeclass derivation/, this generates the following
+     - By the usual rules of /type class derivation/, this generates the following
        ~Eql~ instance in the companion object of ~Box~:
        #+begin_src scala
          given [T, U](using Eql[T, U]) as Eql[Box[T], Box[U]] = Eql.derived
@@ -2015,7 +2015,7 @@
       They *expand* to the respective forms of /implicit parameters/.
 
 ***** Extension Methods
-***** Typeclass Derivation
+***** Type class Derivation
 ***** Implicit Function Types
 ***** Implicit By-Name Parameters
 
@@ -3250,10 +3250,120 @@
 *** TODO Trait Parameters
 **** Reference
 
+*** DONE Super Traits
+    CLOSED: [2020-06-10 Wed 23:46]
+    - /Traits/ are used in _TWO_ roles:
+      + As *mixins* for other /classes/ and /traits/
+      + As *types* of ~vals~, ~defs~, or ~parameters~
+
+    - /Super traits/ is designed to address the topic:
+      Some /traits/ are used primarily in the _first role_,
+      and we usually do *NOT* want to see them in /inferred types/.
+      + Example:
+        #+begin_src scala
+          trait Kind
+          case object Var extends Kind
+          case object Val extends Kind
+          val x = Set(if condition then Val else Var)
+        #+end_src
+        The inferred type of ~x~ in Scala 2 is ~Set[Kind & Product & Serializable]~
+        whereas one would have hoped it to be ~Set[Kind]~.
+        * The reasoning for this particular type to be inferred is as follows:
+          1. The /type/ of the conditional above is the /union type/ ~Val | Var~
+             (in concept -- we don't actually have the union type syntax in Scala 2).
+
+          2. A /union type/ is widened in /type inference/ to the *least supertype*
+             that is _NOT_ a /union type/.
+               In the example, this type is ~Kind & Product & Serializable~
+             since all THREE /traits/ are /supertraits/ of both ~Val~ and ~Var~.
+             So that type becomes the inferred element type of the set.
+
+    - Scala 3 allows one to mark a /trait/ as a ~super~ /trait/, which means that
+      it can be suppressed in /type inference/.
+      #+begin_src scala
+        // In Scala 3
+        super trait S
+        trait Kind
+        case object Var extends Kind
+        case object Val extends Kind
+        val x = Set(if condition then Val else Var)
+      #+end_src
+      Now ~x~ has /inferred type/ ~Set[Kind]~ -- the common /super trait/ ~S~ does
+      _NOT_ appear in the /inferred type/.
+
+**** Super Traits
+     - The traits ~scala.Product~, ~java.lang.Serializable~ and ~java.lang.Comparable~
+       are *treated _AUTOMATICALLY_ as /super traits/.*
+         Other /traits/ can _be turned into_ /super traits/, by adding the keyword
+       ~super~ in front of /trait/, as shown above.
+
+     - Every /trait/ *can be* declared as a /super trait/.
+
+     - Typically /super traits/ are /traits/ that influence the implementation of
+       inheriting /classes/ and /traits/ and that are _NOT usually used as types by
+       themselves._
+       + Two examples from the standard collection library:
+         * ~IterableOps~,
+           which provides method implementations for an ~Iterable~
+
+         * ~StrictOptimizedSeqOps~,
+           which optimises some of these implementations for sequences with
+           efficient indexing.
+
+     - =IMPORTANT=
+       Generally, any /trait/ that is _extended recursively_ is a good candidate
+       to be declared a /super trait/.
+
+**** Retro-Fitting Scala 2 Libraries
+     - To allow cross-building between Scala 2 and 3,
+       ~super~ /traits/ can also be introduced by adding the ~@superTrait~
+       annotation, which is _defined in package ~scala.annotation~._
+
+     - Example:
+       #+begin_src scala
+         import scala.annotation.superTrait
+
+         @superTrait trait StrictOptimizedSeqOps[+A, +CC[_], +C] ...
+       #+end_src
+
+     - The ~@superTrait~ annotation *will be deprecated and removed in some later
+       version* of Scala _when cross-building with Scala 2 will NO LONGER be a
+       concern._
+
+**** TODO Rules for Inference
+     - /Super traits/ *can be* given as /explicit types/ as usual.
+       But they are often elided when types are inferred.
+         Roughly, the rules for /type inference/ say that /super traits/ _are
+       DROPPED from intersections WHERE POSSIBLE._
+
+     - The precise rules are NOT follows:
+       + When inferring a type of a type variable, or the type of a ~val~, or the
+         /return type/ of a ~def~,
+
+       + where that type is not higher-kinded,
+
+       + and where ~B~ is its known /upper bound/ or ~Any~ if none exists:
+
+       + If the /type inferred/ so far is of the form ~T1 & ... & Tn~ where n >= 1,
+         replace the maximal number of ~Ti~'s by ~Any~, while ensuring that the
+         resulting type is still a subtype of the bound ~B~.
+
+       + However, do NOT perform this /widening/ if all types ~Ti~ can get replaced
+         in that way.
+
+     - The _last clause_ *ensures* that
+       a single /super trait/ instance such as ~Product~ is not widened to
+       ~Any~.
+       + =IMPORTANT= =SUMMARY=
+         /Super trait/ instances are _ONLY dropped_ when they appear _in conjunction
+         with some other type._
+
+**** Syntax
+
 *** DONE Creator Applications
-    CLOSED: [2019-12-28 Sat 17:32]
-    - creator applications :: use simple _function call syntax_ to *create* /instances/
-      of a /class/, even if there is no ~apply~ /method/ implemented.
+         CLOSED: [2019-12-28 Sat 17:32]
+         - creator applications :: use simple _function call syntax_ to *create* /instances/
+           of a /class/, even if there is no ~apply~ /method/ implemented.
 
     - Example:
       #+begin_src scala
@@ -3321,7 +3431,7 @@
        + shadowing of user-defined ~apply~ /methods/ by more specific auto-generated ones.
          TODO ???
 
-*** DONE Export Clauses -- TODO _Elaboration of Export Clauses_
+*** DONE Export Clauses -- =TODO= _Elaboration of Export Clauses_
     CLOSED: [2020-05-18 Mon 02:46]
     *An ~export~ clause defines aliases for selected members of an object.*
     - NOTE:
@@ -4755,7 +4865,7 @@
       + the ~@main~ method can have an _ARBITRARY number_ of parameters.
 
       + For each parameter type there *must be* an instance of the
-        ~scala.util.FromString~ /typeclass/ that is used to
+        ~scala.util.FromString~ /type class/ that is used to
         _convert_ an *argument string* _to_ the *required parameter type*.
 
       + The _parameter list_ of a ~@main~ method can end in a repeated parameter
