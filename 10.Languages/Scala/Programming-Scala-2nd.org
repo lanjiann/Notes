@@ -135,8 +135,44 @@
 *** Purity Inside Versus Outside - 176
 
 ** Recursion - 176
-** Tail Calls and Tail-Call Optimization - 177
-*** Trampoline for Tail Calls - 178
+** TODO Tail Calls and Tail-Call Optimization - 177
+   - =TODO=
+   - =TODO=
+   - =TODO=
+
+*** DONE Trampoline for Tail Calls - 178
+    CLOSED: [2020-06-29 Mon 04:02]
+    - Trampoline :: a loop that works through a list of functions, calling each one in turn.
+      + It's obvious that this name is a metaphor.
+
+    - Examples:
+      + Given in the book and the ScalaDoc of ~scala.util.control.TailCalls~
+        #+begin_src scala
+          import scala.util.control.TailCalls._
+
+          def isEven(xs: List[Int]): TailRec[Boolean] =
+            if (xs.isEmpty) done(true) else tailcall(isOdd(xs.tail))
+
+          def isOdd(xs: List[Int]): TailRec[Boolean] =
+            if (xs.isEmpty) done(false) else tailcall(isEven(xs.tail))
+
+          isEven((1 to 100000).toList).result
+        #+end_src
+
+      + =from Jian= Given in the Scaladoc of ~scala.util.control.TailCalls~
+        =from Jian= The above example is easy to understand, but _why this can
+                    use /trampoline/???_
+        #+begin_src scala
+          def fib(n: Int): TailRec[Int] =
+            if (n < 2)
+              done(n)
+            else for {
+              x <- tailcall(fib(n - 1))
+              y <- tailcall(fib(n - 2))
+            } yield x + y
+
+          fib(40).result
+        #+end_src
 
 ** Partially Applied Functions Versus Partial Functions - 179
 ** Currying and Other Transformations on Functions - 181
@@ -398,7 +434,53 @@
 ** Recap and What's Next - 515
 
 * TODO 24. Metaprogramming: Macros and Reflection - 517
-** TODO Tools for Understanding Types - 518
+  - Metaprogramming is programming that manipulates programs, rather than data.
+    + =from Jian=
+       Usually convert programs to data, manipulates it, and then convert it back
+       to data.
+
+  - The word /reflection/ is also sometimes used to mean _metaprogramming IN
+    GENERAL._ That is the sense of the term for the Scala reflection library
+    (=from Jian= /runtime reflection/ and /macros/).
+    + However, sometimes the term has the narrower meaning of *runtime "introspection"*
+      of code with *LIMITED or NO modifications*.
+
+  - In languages like Scala where code is compiled and then run, versus being
+    interpreted "on the fly" like many dynamically typed languages, there is a
+    distinction between compile-time and runtime metaprogramming.
+    In compile-time metaprogramming, any invocations occur just before or during
+    compilation. The classic C-language preprocessor is an example of processing
+    that transforms the source code before it's compiled.
+
+  - Scala's metaprogramming support happens at compile time using a macro facility.
+    Macros work more like constrained compiler plug-ins, because they manipulate
+    the abstract syntax tree (AST) produced from the parsed source code.
+    + /Macros/ are invoked to manipulate the AST before the final compilation phases
+      leading to byte-code generation.
+
+  - The _Java reflection library_ and
+    Scala's expanded library offer /runtime reflection/.
+
+  - Scala's reflection API, _which includes the /macro/ support_, is the most
+    rapidly evolving part of Scala (=from Jian= Deprecated in Scala 3). Because
+    it's a fast-moving target, we'll focus on the *most STABLE parts*:
+    + /runtime reflection/
+    + a /macro tool/ called /quasiquotes/.
+    + However, we'll end with a full macro example using the current macro API.
+
+  - A next-generation macro facility is being developed.
+    The project is called *Scala Meta*. At the time of this writing, a preview
+    release is forthcoming. You should look there for the latest information
+    about macros as they will appear in a subsequent release of Scala. For the
+    current macro implementation for Scala 2.10 and 2.11, see http://scalamacros.org
+    and Macro Paradise, the incubator project for the current macro system.
+
+  - We'll begin with some useful REPL tools for understanding the types of
+    expressions, then explore /runtime reflection/, followed by /quasiquotes/
+    with a final macro example.
+
+** DONE Tools for Understanding Types - 518
+   CLOSED: [2020-06-26 Fri 01:14]
    #+begin_src scala
      // REPL
 
@@ -421,37 +503,147 @@
 
 ** DONE Runtime Reflection - 518
    CLOSED: [2019-05-24 Fri 14:33]
-   - Whereas compile-time reflection is used for manipulating code
+   - /Compile-time reflection/ is used for _manipulating code_.
 
    - /Runtime reflection/ is often called /extreme late binding/.
      It is used primarily to
      + *"tweak"* language /semantics/ (within limits)
-       and
      + *load code* that is NOT KNOWN at /compile time/,
 
-   - Examples: =TODO=
-     which instance to use for a particular feature might be specified dynamically
-     through properties or command-line arguments. The reflection API is used to
-     locate the corresponding types in the available byte code found on the
-     CLASSPATH, and if found, construct instances. Tools like IDEs can use
-     reflection to discover and load plug-ins. IDEs often use reflection to
-     learn about code in projects and libraries, to support code completion,
-     type checking, etc. Byte-code tools might use reflection to look for
-     security vulnerabilities and other problems.
+   - Examples: =TODO= _More Details_
+     + Which instance to use for a particular feature might be specified dynamically
+       through properties or command-line arguments.
 
-*** DONE Reflecting on Types - 519 - =re-do=
-    CLOSED: [2019-05-24 Fri 14:05]
-    - Java ways
+     + The reflection API is used to locate the corresponding types in the available
+       byte code found on the ~CLASSPATH~, and if found, construct instances.
 
-    - =TODO= NOTE
+     + Tools like IDEs can use /reflection/ _to *discover* and *load* plug-ins._
 
-    - =TODO= NOTE
+     + IDEs often use /reflection/ to learn about code in projects and libraries,
+       to support
+       * code completion
+       * type checking
+       * etc.
+
+     + Byte-code tools might use reflection to look for security vulnerabilities
+       and other problems.
+
+*** DONE Reflecting on Types - 519
+    CLOSED: [2020-06-26 Fri 02:09]
+    - Use Java's reflection API, such as methods in ~java.lang.Class~:
+      #+begin_src scala
+        import scala.language.existentials
+
+        trait T[A] {
+          val vT: A
+          def mT = vT
+        }
+
+        class C(foo: Int) extends T[String] {
+          val vT = "T"
+          val vC = "C"
+          def mC = vC
+
+          class C2
+        }
+
+        object Main extends App {
+          val c = new C(3)
+          // c: C = $anon$1@5a58e6a4
+
+          val clazz = classOf[C]  // Scala method: classOf[C]
+          // clazz: Class[C] = class C
+
+          val clazz2 = c.getClass  // Method from java.langObject
+          // clazz2: Class[_ <: C] = class $anon$1
+
+          val name = clazz.getName
+          // name: String = C
+
+          val methods = clazz.getMethods
+          // methods: Array[java.lang.reflect.Method] =
+          //   Array(pubic java.lang.String C.mC(), public java.lang.Object C.vT(), ...)
+
+          val ctors = clazz.getConstructors
+          // ctors: Array[java.lang.reflect.Constructor[_]] = Array(public C(int))
+
+          val fields = clazz.getFields
+          // fields: Array[java.lang.reflect.Field] = Array()
+
+          val parentInterfaces = clazz.getInterfaces
+          // parentInterfaces: Array[Class[_]] = Array(interface T)
+
+          val superClass = clazz.getSuperclass
+          // superClass: Class[_ >: C] = class.java.lang.Object
+
+          val typeParams = clazz.getTypeParameters
+          // typeParams: Array[java.lang.reflect.TypeVariable[Class[C]]] = Array()
+        }
+      #+end_src
+      + These /methods/ are *ONLY available* on /subtypes/ of ~AnyRef~.
+
+      + Note that ~getFields~ does *NOT* appear to recognize the fields in ~C~ for
+        Scala types! -- =from Jian= Conclusion: don't use ~getFields~ in Scala.
+
+    - _Check type_ and /cast/:
+      + Examples:
+        + Check type: ~c.isInstanceOf[String]~
+        + /Cast/: ~c.asInstanceOf[T[String]]~
+
+      + Java uses /operators/ that are /language keywords/ for these tasks.
+
+      + The Scala /method/ names are DELIBERATELY verbose to *discourage* their use!
+        Other language features, especially pattern matching, are better
+        alternatives.
 
 *** DONE Class Tags, Type Tags, and Manifests - 520
-    CLOSED: [2019-05-24 Fri 14:33]
-    - =TODO= NOTE
-    - =TODO= NOTE
-    - =TODO= NOTE
+    CLOSED: [2020-06-29 Mon 01:41]
+    - The core Scala 2.11 library has a *small* reflection API, while the more
+      advanced reflection features are in the separate library.
+
+    - Let's investigate ~ClassTag~ _in the core library_, which is _a tool for
+      retaining some information that is otherwise lost to type /erasure/,_ the
+      "feature" of the JVM where it doesn't retain the values used for /type
+      parameters/ when instantiating /parameterized types/.
+
+    - We saw in "More on Type Matching" on page 119 that /erasure/ prevents us from
+      /pattern matching/ on the types used as /type parameters/ in /parameterized
+      types/.
+      + We used an _ugly workaround_ then, where we
+        1. matched on the /collection/
+        2. then matched on the /types/ _within it_.
+
+      + We also *CAN'T* /overload/ /methods/ where the only difference between them
+        is the /type parameter/ for a /parameterized type/ used in the /signatures/.
+
+    - ~ClassTag~ provides a BETTER (=from Jian= but still) _workaround_ that we'll
+      now examine:
+      #+begin_src scala
+        // src/main/scala/progscala2/metaprogramming/match-types.sc
+        import scala.reflect.ClassTag
+
+        object A {
+          def useClassTag[T : ClassTag](seq: Seq[T]): String = seq match {  // 1
+            case Nil       => "Nothing"
+            case head +: _ => implicitly(head).getClass.toString  // 2
+          }
+
+          def check(seq: Seq[_]): String =  // 3
+            s"Seq: ${useClassTag(seq)}"
+
+          Seq(Seq(5.5,5.6,5.7),
+              Seq("a", "b"),
+              Seq(1, "two", 3.14),
+              Nil) foreach {  // 4
+            case seq: Seq[_] => println("%20s: %s".format(seq, check(seq)))
+            case x           => println("%20s: %s".format(x, "unknown!"))
+          }
+        }
+      #+end_src
+      + The second ~case~ of ~useClassTag~ check the first element of an non-empty
+        ~seq~. It has a bug that it use the first element type to represent the
+        type of all elements in this ~seq~ -- it should be /least upper bound/!
+        =TODO= We'll fix this bug shortly.
 
     - ~ClassTag~ is a weaker version of ~scala.reflect.api.TypeTags#TypeTag~,
       _found in the separate API_.
@@ -460,18 +652,17 @@
       + ~ClassTag~ only retains the /runtime/ info.
 
       + Finally, there is a ~scala.reflect.api.TypeTags#WeakTypeTag~ for /abstract
-        types/. =TODO= See the detailed description in the Scala docs.
+        types/. =TODO= See the detailed description in the Scala docs. =TODO=
 
-    - *Note*
-      there are OLDER types in the /reflect package/ called ~Manifests~ that were used
-      for the same purpose *before Scala 2.10 introduced ~TypeTag~, ~ClassTag~, etc.*
-      *These types are being deprecated.* Don't use them in your new code!
+    - *CAUTION*
+      There are *DEPRECATED* /types/ (=from Jian= itself is not marked as
+      ~@deprecated(...)~, but its superclass ~ClassManifest~ is *DEPRECATED*) in
+      the ~reflect~ /package/ called ~Manifest~ that were used for the same
+      purpose *before Scala 2.10 introduced ~TypeTag~, ~ClassTag~, etc.*
 
-    - =IMPORTANT= =IMPORTANT= =IMPOTANT==
-      Another important usage for ~ClassTag~ is to _construct Java Arrays of the
+    - Another important usage for ~ClassTag~ is to _construct Java Arrays of the
       correct ~AnyRef~ /subtype/._
-
-      Here is an example adapted from the Scaladoc page for ClassTag:
+      Here is an example adapted from the Scaladoc page for ~ClassTag~:
       #+begin_src scala
         // src/main/scala/progscala2/metaprogramming/mkArray.sc
         import scala.reflect.ClassTag
@@ -493,17 +684,15 @@
         //                       ^
         // res2: Array[Any] = Array(1, two, 3.14)
       #+end_src
-It uses the Array.apply method for AnyRefs, which has a second argument list with a
-single implicit ClassTag argument.
+      It uses the ~Array.apply~ method for ~AnyRef~'s, which has a second argument
+      list with a single _implicit_ ~ClassTag~ argument.
 
 ** DONE Scala's Advanced Runtime Reflection API - 522
-   CLOSED: [2019-05-24 Fri 15:41]
-   Require ~import scala.reflect.runtime.universe._~
+   CLOSED: [2020-06-29 Mon 03:41]
+   *All the code blow require ~import scala.reflect.runtime.universe._~.*
 
    - Get ~Type~:
      #+begin_src scala
-       import scala.reflect.runtime.universe._
-
        def toType[T : TypeTag](t: T): Type = typeOf[T]
      #+end_src
      + the ~universe~ is of type ~scala.reflect.api.JavaUniverse~
@@ -534,13 +723,13 @@ single implicit ClassTag argument.
 
    - Compare types for equality or parent-child relationships:
      #+begin_src scala
-       toType(1) =:= typeOf[AnyVal] // false
-       toType(1) =:= toType(1) // true
-       toType(1) =:= toType(true) // false
+       toType(1) =:= typeOf[AnyVal]  // false
+       toType(1) =:= toType(1)       // true
+       toType(1) =:= toType(true)    // false
 
-       toType(1) <:< typeOf[AnyVal] // true
-       toType(1) <:< toType(1) // true
-       toType(1) <:< toType(true) // false
+       toType(1) <:< typeOf[AnyVal]  // true
+       toType(1) <:< toType(1)       // true
+       toType(1) <:< toType(true)    // false
 
        typeOf[Seq[Int]] =:= typeOf[Seq[Any]] // false
        typeOf[Seq[Int]] <:< typeOf[Seq[Any]] // true
@@ -550,9 +739,9 @@ single implicit ClassTag argument.
      #+begin_src scala
        // src/main/scala/progscala2/metaprogramming/func.sc
 
-       class CSuper              { def msuper() = println("CSuper") }
-       class C    extends CSuper { def m() = println("C") }
-       class CSub extends C      { def msub() = println("CSub") }
+       sealed class CSuper              { def msuper() = println("CSuper") }
+       sealed class C    extends CSuper { def m() = println("C") }
+       final  class CSub extends C      { def msub() = println("CSub") }
 
        typeOf[C      => C     ] =:= typeOf[C => C]  // true
        typeOf[CSuper => CSub  ] =:= typeOf[C => C]  // false
@@ -574,7 +763,7 @@ single implicit ClassTag argument.
        }
      #+end_src
      + Both the ~Type~ and ~Symbol~ here defined in ~reflect.runtime.universe~,
-       *NOT to be confused with ~scala.Symbol~.*
+       *NOT to be confused with ~scala.Symbol~.* =IMPORTANT= =!!!=
        =from Jian= How they can pick a different name for one of them.
 
      + Example:
@@ -616,9 +805,9 @@ single implicit ClassTag argument.
        //   method seq, method companion, method $init$, method toString, ...)
      #+end_src
      + ~members~ returns ALL /declarations/ that are /inherited/, too.
-       =TODO=
+     + Method ~declarations~ exists, but it is *DEPRECATED* and use the ~decls~!
 
-   - =TODO=
+   - =TODO= =TODO= =TODO=
      You'll find more examples in the _overview_ and the reflection _Scaladocs_.
 
 ** TODO Macros - 525
