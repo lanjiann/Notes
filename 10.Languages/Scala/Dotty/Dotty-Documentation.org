@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.26.0-bin-20200610-4b39622-NIGHTLY
+#+VERSION: 0.26.0-bin-20200702-ffd6a58-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 
@@ -10,19 +10,44 @@
    # *Getting Started: Users*
 *** Trying out Dotty
 **** In your web browser
+     The online Scala playground [[https://scastie.scala-lang.org][Scastie]] -- a project of _Scala Center_.
+
 **** sbt
      Use sbt (1.1.4+)
+     - Dotty project:
+       ~sbt new lampepfl/dotty.g8~
+
+     - Dotty project that _cross compiles_ with Scala 2:
+       ~sbt new lampepfl/dotty-cross.g8~
 
 **** IDE support
+     Check the *IDE support for Dotty* section.
+
 **** Standalone installation
+     - Releases include _THREE_ executables:
+       #+begin_src text
+         .
+         |\under_ bin
+             |\under_ dotc
+             |\under_ dotd
+             |\under_ dotr
+       #+end_src
+       + dotc is the Dotty compiler
+       + dotd is the Dotty Documentation tool
+       + dotc is the Dotty REPL
 
 ** sbt-projects
    # *Using Dotty with sbt*
+   A redirect link to the sbt subsection in the -Getting Started- section.
 
 ** IDE support for Dotty
 *** Prerequisites
+    Follow the instructions for the dotty-example-project in github under lampepfl.
+
 *** Usage
-*** Status
+    Install _Visual Studio Code_, and use command ~sbt launchIDE~.
+
+*** TODO Status
 **** Fully supported features
 **** Partial working features
 **** Unimplemented features
@@ -30,10 +55,12 @@
 
 *** Feedback
 
-** Worksheet mode in Dotty IDE
+** TODO Worksheet mode in Dotty IDE
 *** How to use the worksheets
-*** Implementation details
+*** TODO Implementation details
+    More details in [[https://dotty.epfl.ch/docs/usage/worksheet-mode-implementation-details.html][Worksheet mode - Implementation details]]
 
+** TODO Language Versions
 ** cbt-projects
    # *Using Dotty with cbt*
 
@@ -61,7 +88,7 @@
 
 *** Default Includes
 
-* REFERENCE
+* TODO REFERENCE
 ** Overview
 *** Goals
 *** Essential Foundations
@@ -70,7 +97,7 @@
 *** Dropped Constructs
 *** Changes
 *** New Constructs
-*** Meta Programming
+*** Metaprogramming
 *** See Also
 
 ** DONE NEW TYPES
@@ -2028,7 +2055,8 @@
 **** TODO Implementation Status and Timeline
 
 ** TODO METAPROGRAMMING
-*** TODO Overview - TODO =RE-READ=
+*** DONE Overview - =TODO= =RE-READ=
+    CLOSED: [2020-06-24 Wed 03:50]
     The following pages introduce the *redesign* of /metaprogramming/ in Scala.
     The following fundamental facilities:
     1. /Inline/
@@ -2043,19 +2071,21 @@
        - The _expansion_ will be performed by the Scala compiler _during the *Typer*
          /compiler phase/._
 
-       - =IMPORTANT=
-         ~inline~ is a command to the *compiler* (=from Jian= *MUST DO*, and fail
-         to do will lead to a compilation error -- when the code doesn't follow the
-         requirement of ~inline~).
+       - ~inline~ is a *COMMAND* (*MUST DO*) to the *compiler*.
            This is _DIFFERENT_ from some other ecosystems, in which /inline/ is a
          request that _might be_ satisfied by the compiler.
          + The _REASON_:
            /inlining/ in Scala can drive other _compile-time operations_, like
-           * /inline/ /pattern matching/ (enabling /type-level programming/)
-           * TODO /macros/ (enabling /compile-time, generative, metaprogramming/)
-           * TODO /runtime code generation/ (/multi-stage programming/)
+           * /inline pattern matching/ (enabling /type-level programming/)
 
-    2. TODO =READING= /Macros/ construct code at /compile-time/
+           * /macros/ (enabling /compile-time, generative, metaprogramming/)
+
+           * /runtime code generation/ (/multi-stage programming/)
+             - =from Jian=
+               WHY this is considered as one kind of drive othe _compile-time
+               operations_.
+
+    2. /Macros/ construct code at /compile-time/
        - /Macros/ are built on _TWO_ well-known fundamental operations:
          + quotation :: *convert program code to data*, specifically, a (tree-like)
            representation of this code.
@@ -2069,7 +2099,8 @@
        - Together with ~inline~, _these two abstractions_ allow to construct
          program code programmatically.
 
-    3. TODO /Staging/ construct new code at /runtime/.
+    3. =TODO=
+       /Staging/ construct new code at /runtime/.
        That way, code generation can depend not only on static data but also on
        data available at runtime. This splits the evaluation of the program in
        two or more phases or ... /stages/.
@@ -2077,7 +2108,8 @@
        Programming"/. /Staging/ is built on the _SAME_ foundations as /macros/.
        It uses /quotes/ and /splices/, but _LEAVES OUT_ /inline/.
 
-    4. TODO /TASTy Reflection/
+    4. =TODO=
+       /TASTy Reflection/
        + /Quotations/ are a "black-box" representation of code.
          They can be parameterized and composed using /splices/ but their
          structure cannot be analyzed from the outside.
@@ -2087,7 +2119,8 @@
          The _representation type_ is a form of /typed abstract syntax tree/,
          which gives rise to the "TASTy` moniker.
 
-    5. TODO /TASTy Inspection/
+    5. =TODO=
+       /TASTy Inspection/
        /Typed abstract syntax trees/ are serialized in a custom compressed
        binary format in =.tasty= files. /TASTy inspection/ allows to _load_
        these files and _analyze_ their content's tree structure.
@@ -2653,7 +2686,7 @@
           val addition: 1 + 1 = 2
         #+end_src
 
-**** DONE Summoning Implicits Selectively - TODO =RE-READ=
+**** DONE Summoning Implicits Selectively - =TODO= =RE-READ=
      CLOSED: [2020-05-26 Tue 04:23]
      - It is foreseen that *many areas* of /typelevel programming/ *can be* done
        with _REWRITE_ methods *instead of* /implicits/.
@@ -2797,7 +2830,7 @@
 
 *** TODO Macros
 **** DONE Macros: Quotes and Splices
-     CLOSED: [2020-03-31 Tue 17:27]
+     CLOSED: [2020-06-21 Sun 22:43]
      - Macros are built on _TWO_ well-known fundamental operations:
        + quotation :: ~'{...}~ for /expressions/;
                       ~'[...]~ for /types/.
@@ -2843,6 +2876,12 @@
          def showExpr(expr: Expr[Boolean])(using QuoteContext): Expr[String] =
            '{ "<some source code>" }  // Better implementation later in this document
        #+end_src
+       + =IMPORTANT= =IMPORTANT= =IMPORTANT=
+         =from Jian=
+         The ~inline~ method with /top level splice/
+         can provide a /given ~QuoteContext~ instance/, which, in syntax, is NOT
+         be written out explicitly! This is why the signature of the above ~asset~
+         does *NOT* have a ~(using QuoteContext)~ parameter list.
 
      - /Quotations/ can have _spliced_ parts in them; in this case the embedded /splices/
        _are evaluated and embedded as part of_ the formation of the /quotation/.
@@ -2896,8 +2935,8 @@
 
 **** DONE The Phase Consistency Principle
      CLOSED: [2020-05-30 Sat 15:40]
-     - A fundamental /phase consistency principle (PCP)/ regulates accesses to /free
-       variables/ in /quoted/ and /spliced/ code:
+     - A fundamental /phase consistency principle (PCP)/ regulates accesses to
+       /free variables/ in /quoted/ and /spliced/ code:
        #+begin_quote
        For any /free variable reference/ ~x~,
        the _number_ of /quoted scopes/ and the _number_ of /spliced scopes/
@@ -2932,7 +2971,7 @@
        situations described above.
 
      - In what concerns the range of features it covers, this form of macros (Scala 3
-       macro) introduces a principled meta programming framework that is quite
+       macro) introduces a principled metaprogramming framework that is quite
        close to the /MetaML family of languages/.
        + One difference is that MetaML does NOT have an equivalent of the PCP.
            quoted code in MetaML can access variables in its immediately
@@ -2941,29 +2980,18 @@
          fundamental gain in expressiveness._
 
 **** DONE From ~Expr~'s to Functions and Back
-     CLOSED: [2020-06-09 Tue 02:40]
+     CLOSED: [2020-06-22 Mon 01:49]
      It is possible to
      CONVERT _back and forth_ any ~Expr[T => R]~ into ~Expr[T] => Expr[R]~!
 
      - The conversions can be implemented as follows:
        #+begin_src scala
-         def to[T, R](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
+         def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
            '{ (x: T) => ${ f('x) } }
 
-         def from[T, R](f: Expr[T => R])(using QuoteContext): Expr[T] => Expr[R] =
+         def from[T: Type, R: Type](f: Expr[T => R])(using QuoteContext): Expr[T] => Expr[R] =
            (x: Expr[T]) => '{ $f($x) }
        #+end_src
-       - =TODO=
-         In Dotty 0.24 (the newest release), the /type parameters/ need /context
-         bounds/.
-         #+begin_src scala
-           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
-             '{ (x: T) => ${ f('x) } }
-
-           def from[T: Type, R: Type](f: Expr[T => R])(using QuoteContext): Expr[T] => Expr[R] =
-             (x: Expr[T]) => '{ $f($x) }
-         #+end_src
-
        - This decorator gives ~Expr~ the ~apply~ operation of an /applicative functor/.
 
        - Note how the fundamental /phase consistency principle/ works in two different
@@ -2974,6 +3002,7 @@
            * the reference to ~x~ is legal because it is /spliced/, then /quoted/.
 
      - Example:
+       =from Jian= =TODO= Need to create a /given instance/ of ~QuoteContext~
        #+begin_src scala
          // '{ (x: Int) => x.toString }
          val f1: Expr[Int => String] = to((x: Expr[Int]) => '{ $x.toString })
@@ -2982,32 +3011,73 @@
          val f2: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
          f2('{2})  // '{ ((x: Int) => x.toString)(2) }
        #+end_src
-       + =TODO= =IMPORTANT=
-         It seems the code below can't work in Dotty 0.24, and it my only works
-         in Dotty 0.24.
-
-       + =TODO=
-         I can't evaluate this piece of code with Dotty 0.24 -- can't find required
-         ~QuoteContext~.
-
-     - One *LIMITATION* of ~from~:
-       it does _NOT_ \beta{}-reduce when a lambda is called immediately, as evidenced
-       in the mode ~{ ((x: Int) => x.toString)(2) }~.
-       + OVERRIDE this limitation:
-         * REQUIREMENT:
-           In some cases we want to remove the lambda from the code.
-
-         * SOLUTION:
-           For this we provide the /method/ ~Expr.betaReduce~ that turns _a tree
-           describing a function_ into _a function mapping trees to trees_.
+       + =from Jian=
+         To make the code above runnable, they must be used in a scope with a
+         given ~QuoteContext~ instance. To satisfy this, there are two ways:
+         * Compile Time Macro:
            #+begin_src scala
-             object Expr {
-               // ...
-               def betaReduce[...](...)(...): ... = ...
+             import scala.quoted._
+
+             inline def runf1: Int => String = ${ mcrImpl1 }
+             def mcrImpl1(using QuoteContext): Expr[Int => String] =
+               to((x: Expr[Int]) => '{ $x.toString })
+
+             inline def runf2: String = ${ mcrImpl2 }
+             def mcrImpl2(using QuoteContext): Expr[String] = {
+               val f2: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
+               f2('{2})
              }
            #+end_src
 
-       + IMPLEMENTATION:
+         * Multi-Stage Programming (inlucdes /runtime/ evaluation, see next section
+           for details):
+           1. Include dependency (this was inside dotty before, and they are now
+              separated) ~"ch.epfl.lamp" %% "dotty-staging" % scalaVersion.value~.
+
+           2. Then,
+              #+begin_src scala
+                import scala.quoted._
+                import scala.quoted.staging._
+
+                given Toolbox = Toolbox.make(getClass.getClassLoader)
+
+                //// '{ (x: Int) => x.toString }
+                val runf1: Int => String = run {
+                  to((x: Expr[Int]) => '{ $x.toString })
+                }
+
+                //// (x: Expr[Int]) => '{ ((x: Int) => x.toString)($x) }
+                val runf2: String = run {
+                  val f2: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
+                  f2('{2})
+                }
+              #+end_src
+
+     - *LIMITATION* of ~from~ ::
+       it does _NOT_ \beta{}-reduce when a lambda is called immediately
+       #+begin_src scala
+         inline def resultOfFrom: String = ${ resultOfFromImpl }
+         def resultOfFromImpl(using QuoteContext): Expr[String] = {
+           val f: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
+           Expr(f('{2}).show)
+         }
+         // ((x: scala.Int) => x.toString()).apply(2)
+       #+end_src
+
+       + In some cases we _want to *REMOVE* the lambda from the code_,
+         for this we provide the method ~Expr.betaReduce~ that turns a /TREE
+         describing a function/ into a /FUNCTION mapping trees to trees/.
+         #+begin_src scala
+           inline def forBetaReduceExample: String = ${ forBetaReduceExampleImpl }
+
+           def forBetaReduceExampleImpl(using QuoteContext): Expr[String] = {
+             val afterBetaReduction = Expr.betaReduce('{ (x: Int) => x.toString })('{2})
+             Expr(afterBetaReduction.show)
+           }
+           // 2.toString()
+         #+end_src
+
+       + ~Expr.betaReduce~ _IMPLEMENTATION_:
          The definition of ~Expr.betaReduce(f)(x)~ is *assumed* to be functionally the
          same as ~'{($f)($x)}~, however _it SHOULD *optimize* this call by returning
          the result of beta-reducing ~f(x)~ if ~f~ is a *KNOWN* lambda expression._
@@ -3016,53 +3086,53 @@
            Expr.betaReduce(_): Expr[(T1, ..., Tn) => R] => ((Expr[T1], ..., Expr[Tn]) => Expr[R])
          #+end_src
 
-**** DONE Lifting Types - =from Jian= _MOTIVATION_
+**** DONE Lifting Types
      CLOSED: [2020-06-09 Tue 03:04]
-     - Types are not directly affected by the /phase consistency principle/.
-       + *It is possible to use types defined at any level in any other level.*
-         *But*, if a type is used in a SUBSEQUENT /stage/ (=from Jian= ???) it
-         will need to be _lifted_ to a ~Type~.
+     - */Types/ are _NOT_ directly affected by the /phase consistency principle/.*
+       + *It is possible to use /types/ defined at any level in any other level.*
+         *But*, if a type is used in a SUBSEQUENT /stage/ it will need to be _lifted_
+         to a ~Type~.
 
-         * The resulting value of ~Type~ will be subject to PCP.
-           Indeed, the definition of ~reflect~ above uses ~T~ in the NEXT /stage/,
+         * The resulting value of ~Type~ will be subject to /PCP/.
+           Indeed, the definition of ~to~ above uses ~T~ in the NEXT /stage/,
            there is a /quote/ but NO /splice/ between the parameter binding of
            ~T~ and its usage. But the code can be rewritten by adding a binding
            of a ~Type[T]~ tag:
            #+begin_src scala
-             def reflect[T, U](f: Expr[T] => Expr[U])(using t: Type[T]): Expr[T => U] =
+             def to[T, R: Type](f: Expr[T] => Expr[R])(using t: Type[T])(using QuoteContext): Expr[T => R] =
                '{ (x: $t) => ${ f('x) } }
            #+end_src
-           - In this version of ~reflect~, the type of ~x~ is now the result of /splicing/
+           - In this version of ~to~, the type of ~x~ is now the result of /splicing/
              the ~Type~ value ~t~.
 
-           - This operation is /splice/ CORRECT -- there is one quote and one splice
-             between the use of ~t~ and its definition.
+           - This operation is /splice/ CORRECT -- there is one /quote/ and one
+             /splice/ BETWEEN the _use_ of ~t~ AND its _definition_.
 
-     - *To _AVOID_ clutter*,
+      - *To _AVOID_ clutter* (=MOTIVATION= of /lifting types/),
        the Scala implementation tries to _CONVERT *ANY* /type reference/ to a type
-       ~T~ *in subsequent phases* to a /type-splice/,_ by rewriting ~T~ to
-       ~${summon[Type[T]] }~.
-       + For instance, the user-level definition of ~reflect~:
+       ~T~ *in subsequent phases* to a /type-splice/,_ by *rewriting* ~T~ to
+        (automatically) ~${summon[Type[T]] }~.
+       + For instance, the user-level definition of ~to~:
          #+begin_src scala
-           def reflect[T: Type, U: Type](f: Expr[T] => Expr[U]): Expr[T => U] =
+           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
              '{ (x: T) => ${ f('x) } }
          #+end_src
 
          would be *rewritten* to
 
          #+begin_src scala
-           def reflect[T: Type, U: Type](f: Expr[T] => Expr[U]): Expr[T => U] =
+           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
              '{ (x: ${ summon[Type[T]] }) => ${ f('x) } }
          #+end_src
          * The summon query succeeds because
-           - there is a given instance of type ~Type[T]~ available
+           - there is a /given instance/ of type ~Type[T]~ available
            - _the reference to that value is phase-correct._
 
          * If that was NOT the case,
            the phase inconsistency for ~T~ would be _reported_ as an error.
 
 **** DONE Lifting Expressions
-     CLOSED: [2020-06-09 Tue 03:29]
+     CLOSED: [2020-06-24 Wed 00:52]
      - Consider the following implementation of a /staged interpreter/ that implements
        a compiler through staging.
        #+begin_src scala
@@ -3087,7 +3157,7 @@
      - Here's a compiler that maps an expression given in the interpreted language
        to /quoted/ Scala code of type ~Expr[Int]~.
        #+begin_src scala
-         import scala.quoted.{given _, _}
+         import scala.quoted._
 
          def compile(e: Exp, env: Map[String, Expr[Int]])(using QuoteContext): Expr[Int] = e match {
            case Num(n)          => Expr(n)
@@ -3097,25 +3167,36 @@
          }
        #+end_src
 
-     - Running ~compile(letExp, Map()~) would yield the following Scala code:
+     - Running ~compile(letExp, Map.empty)~ would yield the following Scala code:
        #+begin_src scala
          '{ val y = 3; (2 + y) + 4 }
        #+end_src
+       =from Jian=
+       You can check this representation with the help of ~showExpr~ mentioned below.
 
-     - The body of the first clause, ~case Num(n) => Expr(n)~, *looks suspicious*.
+     - The body of the first clause, ~case Num(n) => Expr(n)~, *looks SUSPICIOUS*.
        ~n~ is declared as an ~Int~, yet it is converted to an ~Expr[Int]~ with
        ~Expr.apply~.
-       + Q :: Shouldn't ~n~ be /quoted/?
+       + Q :: Shouldn't ~n~ be /quoted/ (=from Jian= Use ~'n~ instead of ~Expr(n)~)?
 
        + A :: In fact this would _NOT_ work since replacing ~n~ by ~'n~ in the
-               clause _would NOT be phase correct_.
+               clause would *NOT* be /phase correct/ (=from Jian= violate PCP).
+
+     - =from Jian=
+       From the Q&A above we know it's better to find a easy way to _lift a value
+       of ~T~ to ~Expr[T]~ with enough information hiding_. A good API for this is
+       already hinted above -- use ~Expr.apply[T: Liftable](v: T)~ to do this.
+       We'll talk about the knowledge about ~Expr.apply~ below.
 
      - The ~Expr.apply~ method is defined in package ~quoted~:
        #+begin_src scala
          package quoted
 
          object Expr {
-           def apply[T: Liftable](x: T)(using QuoteContext): Expr[T] = summon[Liftable[T]].toExpr(x)
+           /** Lift a value into an expression containing the construction of that value */
+           def apply[T: Liftable](x: T)(using QuoteContext): Expr[T] =
+             summon[Liftable[T]].toExpr(x)
+
            // ...
          }
        #+end_src
@@ -3126,12 +3207,14 @@
        ~Boolean~, ~String~, and /ALL primitive number types/.
        + For example,
          ~Int~ values can be converted to ~Expr[Int]~ values by wrapping the
-         value in a ~Literal~ /tree node/.
-         This makes use of the underlying /tree representation/ in the compiler
+         value in a ~Literal~ /tree node/ (=from Jian= actually ~Literal(Constant(n))~).
+           This makes use of the underlying /tree representation/ in the compiler
          *for efficiency*.
-         * But the ~Liftable~ instances are nevertheless NOT magic in the sense
-           that they could all be defined in a user program without knowing
-           anything about the representation of ~Expr~ trees.
+         * _BUT_ the ~Liftable~ instances are nevertheless NOT magic in the sense
+           that they could all be defined in a user program *without knowing
+           anything about the representation of ~Expr~ trees* (=from Jian= this
+           can be done is because the fundamental types /given ~Liftable~ instances/
+           are provided by Scala).
            - For instance, here is a possible instance of ~Liftable[Boolean]~:
              #+begin_src scala
                given Liftable[Boolean] {
@@ -3141,8 +3224,9 @@
              #+end_src
 
      - Once we can lift bits, we can work our way up.
-       For instance, here is a possible implementation of ~Liftable[Int]~ that
-       does not use the underlying tree machinery:
+       For instance, here is a possible implementation (=from Jian= of course,
+       not the best way!) of ~Liftable[Int]~ that _does *NOT* use the underlying
+       tree machinery_:
        #+begin_src scala
          given Liftable[Int] {
            def toExpr(n: Int): Expr[Int] = n match {
@@ -3154,11 +3238,16 @@
            }
          }
        #+end_src
+       + =from Jian=
+         Since the PCP is only for /free variables/, and ~'{ Int.MinValue }~ and
+         ~'{ 0 }~ don't include any /free variables/, they are legal and no
+         violation to PCP. We can see they other 3 branches includes /free
+         variables/ and follow PCP!
 
      - Since ~Liftable~ is a /type class/, its instances can be conditional.
        For example, a ~List~ is /liftable/ _if its element type is_:
        #+begin_src scala
-         given [T: Liftable : Type] for Liftable[List[T]] {
+         given [T: Liftable : Type] as Liftable[List[T]] {
            def toExpr(xs: List[T]) = xs match {
              case head :: tail => '{ ${ Expr(head) } :: ${ Expr(tail) } }
              case Nil          => '{ Nil: List[T] }
@@ -3166,7 +3255,7 @@
          }
        #+end_src
 
-     - In the end, ~Liftable~ _RESEMBLES_ very much a serialization framework.
+     - *In the end, ~Liftable~ _RESEMBLES_ very much a serialization framework.*
        Like the latter it can be derived systematically for all /collections/,
        /case classes/ and /enums/.
 
@@ -3195,11 +3284,211 @@
          readable /phase distinction/ between /stages/.
 
 **** TODO Lifting Types - =from Jian= _MECHANISM_
-**** TODO Relationship with ~inline~
-**** TODO Scope Extrusion
+**** TODO Relationship with ~inline~ _Rationale of Design_
+     - First Impression (=from Jian= I add this title):
+       Seen by itself, principled metaprogramming in Dotty looks
+       _MORE like_ a framework for /runtime metaprogramming/
+       _THAN_ one for /compile-time metaprogramming/ with /macros/.
+
+     - But combined with Dotty's ~inline~ feature it can be _turned into_ a
+       compile-time system.
+         The idea is that /macro elaboration/ can be understood as a *combination*
+       of a /macro library/ and a /quoted program/.
+
+     - Example used to illustrate the above discussion,
+       here's the ~assert~ /macro/ again together with a program that CALLS
+       ~assert~.
+       #+begin_src scala
+         object Macros {
+
+           inline def assert(inline expr: Boolean): Unit =
+             ${ assertImpl('expr) }
+
+           def assertImpl(expr: Expr[Boolean]) =
+             '{ if !($expr) then throw new AssertionError("failed assertion: " + ${expr.show}) }
+         }
+
+         object App {
+           val program = {
+             val x = 1
+             Macros.assert(x != 0)
+           }
+         }
+       #+end_src
+       + The example is only /phase correct/ because ~Macros~ is a /global value/
+         and as such *NOT subject to* _phase consistency checking_.
+         * *Conceptually that's a bit unsatisfactory.*
+           - If the PCP is so fundamental,
+             it should be applicable without the /global value/ *exception*.
+
+           - _BUT_ in the example as given this does not hold since both ~assert~
+             and program call ~assertImpl~ *with a* /splice/ but *no* /quote/.
+
+       + However, one could argue that the example is really missing an important
+         aspect:
+         The /macro library/ has to be compiled in a phase *prior to* the program
+         using it, _BUT_ in the code above, /macro/ and /program/ are _defined
+         together_.
+           A more accurate view of /macros/ would be to have the _user program_ be
+         in a /phase/ *after* the /macro definitions/, reflecting the fact that
+         /macros/ have to be defined and compiled before they are used.
+           Hence, conceptually the program part should be treated by the compiler
+         *as if* (=from Jian= not real legal code?) it was quoted:
+         #+begin_src scala
+           val program = '{
+             val x = 1
+             ${ Macros.assertImpl('{ x != 0 }) }
+           }
+         #+end_src
+
+     - If program is treated as a /quoted expression/, the call to ~Macro.assertImpl~
+       becomes /phase correct/ even if _macro library_ and _program_ are
+       conceptualized as local definitions.
+
+     - Q :: But what about the call from ~assert~ to ~assertImpl~?
+     - A :: Here, *we need a _tweak_ of the /typing rules/.*
+            An ~inline~ function such as ~assert~ that contains a /splice/ operation
+            *outside* an ENCLOSING /quote/ is called a /macro/.
+              /Macros/ are supposed to be expanded in a SUBSEQUENT /phase/, i.e. in
+            a /quoted context/. Therefore, they are also type checked *as if*
+            they were in a /quoted context/.
+       + For instance, the definition of ~assert~ is typechecked *as if* it
+         appeared INSIDE /quotes/.
+           _This makes the call from ~assert~ to ~assertImpl~ phase-correct,_
+         even if we assume that both definitions are *local*.
+
+     - The ~inline~ modifier is used to declare a ~val~ that is either a constant or
+       is a parameter that will be a constant when instantiated.
+         This aspect is also important for /macro expansion/.
+         =from Jian= More details about this "important"?!?!?!
+
+     - To get values out of expressions containing constants ~Expr~ provides the
+       /methods/
+       + ~unlift[T]~: return a value of ~Option[T]~
+       + ~unliftOrError[T]~: return a value of ~T~
+
+     - Wanted: avoid having incidental ~val~ bindings generated by the /inlining/
+               of the ~def~
+       Solution: it is *RECOMMENDED* to use /an ~inline~ parameter/.
+       + To illustrate this, consider an implementation of the ~power~ function that
+         makes use of a statically known exponent:
+         #+begin_src scala
+           inline def power(x: Double, inline n: Int) =
+             ${ powerCode('x, 'n) }
+
+           private def powerCode(x: Expr[Double], n: Expr[Int])(using QuoteContext): Expr[Double] =
+             n.unlift match {
+               case Some(m) => powerCode(x, m)
+               case None    => '{ Math.pow($x, $y) }
+             }
+
+           private def powerCode(x: Expr[Double], n: Int)(using QuoteContext): Expr[Double] =
+             if      (n == 0)     '{ 1.0 }
+             else if (n == 1)     x
+             else if (n % 2 == 0) '{ val y = $x * $x; ${ powerCode('y, n / 2) } }
+             else                 '{ $x * ${ powerCode(x, n - 1) } }
+         #+end_src
+
+**** DONE Scope Extrusion
+     CLOSED: [2020-06-24 Wed 02:43]
+     - /Quotes/ and /splices/ are duals _as far as_ the PCP is concerned.
+
+     - _But_ there is an *additional RESTRICTION* that needs to be imposed on
+       /splices/ to guarantee /soundness/:
+       code in /splices/ *must be _FREE_ of /side effects/.*
+       + The restriction prevents code like this:
+         #+begin_src scala
+           var x: Expr[T] = ...
+             '{ (y: T) => ${ x = 'y; 1 } }
+         #+end_src
+         This code, IF it was accepted, would *extrude* a reference to a /quoted
+         variable/ ~y~ from its /scope/.
+           This would subsequently allow access to a variable outside the scope
+         where it is defined, which is LIKELY (=TODO= =???=) problematic.
+         1. The code is clearly /phase consistent/, so we CANNOT use PCP to rule
+           it out.
+
+         2. Instead we postulate a FUTURE /effect system/ that can guarantee that
+            /splices/ are pure.
+            - In the absence of such a system we simply demand that /spliced
+              expressions/ are pure *by convention*, and allow for *undefined
+              compiler behavior* if they are not.
+
+            - This is analogous to the status of pattern guards in Scala, which
+              are also required, but NOT VERIFIED, to be pure.
+
+     - /Multi-Stage Programming/ (=from Jian= next section) introduces one
+       additional /method/ where you can *expand code at runtime* with a
+       /method/ ~scala.quoted.staging.run~.
+       + =from Jian=
+         /Staging/ is *not* a part of the standard libary. Need to includes the
+         dependency: ~"ch.epfl.lamp" %% "dotty-staging" % scalaVersion.value~
+
+     - Call ~scala.quoted.staging.run~ in /splices/ is forbidden!
+       This is a little bit tricky.
+       + Use this example code to illustrate this trickiness:
+         #+begin_src scala
+           '{ (x: Int) => ${ run('x); 1 } }  // Not legal code
+         #+end_src
+         * This is /phase correct/, _BUT_ WILL lead us into *TROUBLE*.
+
+         * Evaluate the /splice/ will reduce the expression ~run('x)~ to ~x~.
+           But then the result is *no longer* /phase correct/.
+           #+begin_src scala
+             '{ (x: Int) => ${ x; 1 } }
+           #+end_src
+
+       + To *prevent* this /soundness hole/ it seems easiest to classify ~run~ as
+         a /side-effecting operation/. It would thus be *prevented from appearing
+         in /splices/.*
+           In a base language with /side effects/ we would have to do this anyway:
+         Since ~run~ runs _ARBITRARY_ code it can ALWAYS produce a /side effect/
+         if the code it runs produces one.
+         =TODO= =TODO= =TODO=
+
 **** TODO Example Expansion
-**** TODO Find implicits within a macro
+     - Assume we have two methods, one map that takes an ~Expr[Array[T]]~ and a
+       function ~f~ and one ~sum~ that performs a sum by delegating to ~map~.
+       #+begin_src scala
+         object Macros {
+           def map[T](arr: Expr[Array[T]], f: Expr[T] => Expr[Unit])
+                     (using t: Type[T], qctx: QuoteContext): Expr[Unit] = '{
+             var i: Int = 0
+             while (i < ($arr).length) {
+               val element: $t = ($arr)(i)
+               ${f('element)}
+               i += 1
+             }
+           }
+
+           def sum(arr: Expr[Array[Int]])(using QuoteContext): Expr[Int] = '{
+             var sum = 0
+             ${ map(arr, x => '{sum += $x}) }
+             sum
+           }
+
+           inline def sum_m(arr: Array[Int]): Int = ${sum('arr)}
+         }
+       #+end_src
+
+**** DONE Find implicits within a macro
+     CLOSED: [2020-06-24 Wed 02:45]
+     Make implicit search available in a /quote context/ with
+     ~scala.quoted.Expr.summon~:
+     #+begin_src scala
+       import scala.quoted._
+       inline def setFor[T]: Set[T] = ${ setForExpr[T] }
+
+       def setForExpr[T: Type](using QuoteContext): Expr[Set[T]] = {
+         Expr.summon[Ordering[T]] match {
+           case Some(ord) => '{ new TreeSet[T]()($ord) }
+           case _         => '{ new HashSet[T] }
+         }
+       }
+     #+end_src
+
 **** TODO Relationship with Whitebox ~Inline~
+     =from Jian= *I don't quite understand!!!*
      ~Inline~ documents inlining.
      The code below introduces a /whitebox inline method/ that can calculate
      either a value of /type/ ~Int~ or a value of /type/ ~String~.
@@ -3218,7 +3507,31 @@
        val b: String = defaultOf("string")
      #+end_src
 
-**** TODO Defining a macro and using it in a single project
+**** DONE Defining a macro and using it in a single project
+     CLOSED: [2020-06-24 Wed 03:50]
+     - =from Jian=
+       Of course, if the /macros/ project is *different* from the project use
+       /macros/, the compilation is much simpler, and this doc does discuss.
+
+     - It is possible to define /macros/ and use them in the *same project* as
+       long as the implementation of the /macros/ does NOT have /runtime
+       dependencies/ on code in the file where it is used.
+       + It might still have /compile-time dependencies/ on
+         /types/ and /quoted code/ that refers to the use-site file.
+
+     - To provide the functionality of a project inlcudes both /macros/ and the
+       code use them, Dotty provides a /transparent compilation mode/ where
+       1. Files that try to expand a /macro/ but fail because the /macro/ has NOT
+          been compiled yet are *suspended*.
+
+       2. If there are any suspended files when the compilation ends,
+          the compiler will *AUTOMATICALLY* RESTART compilation of the suspended
+          files using the output of the previous (partial) compilation as /macro/
+          classpath.
+
+       3. In case *ALL* files are *suspended* due to /cyclic dependencies/ the
+          compilation will *FAIL* with an error.
+
 **** TODO Pattern matching on quoted expressions
 ***** TODO Quoted patterns
 ***** TODO Recovering precise types using patterns
