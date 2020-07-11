@@ -1,5 +1,5 @@
 #+TITLE: sbt Reference Manual
-#+VERSION: 1.x (1.3.10)
+#+VERSION: 1.x (1.3.13)
 #+STARTUP: entitiespretty
 
 * DONE 1. Getting Started with sbt
@@ -570,61 +570,66 @@
      + the syntax of =build.sbt=.
 
 *** DONE Specifying the sbt version
-    CLOSED: [2019-08-12 Mon 16:06]
-    If =project/build.sbt= is not present, the sbt launcher will choose an
-    _ARBITRARY_ version --
-    *this is ALWAYS NOT what you want!!! You should never do this!!!*
+    CLOSED: [2020-07-05 Sun 02:46]
+    In =project/build.properties=, write =sbt.version=1.3.13=
 
 *** DONE What is a build definition?
-    CLOSED: [2019-08-12 Mon 16:09]
+    CLOSED: [2020-07-05 Sun 02:50]
     - build definition :: A set of /projects/ (of type ~Project~).
 
     - The /build definition/ is defined in =build.sbt=.
 
     - Because the term /project/ can be ambiguous,
-      we often call it /subproject/ in this guide.
+      *we often call /project/ /subproject/ in this guide.*
 
     - Example:
       #+BEGIN_SRC scala
         lazy val root = (project in file("."))
           .settings(
             name := "Hello",
-            scalaVersion := "2.12.3"
+            scalaVersion := "2.13.3"
           )
       #+END_SRC
-      Each subproject is configured by _key-value pairs_ -- in the example
+      Each /subproject/ is configured by _key-value pairs_ -- in the example
       above, they are ~name~ and ~scalaVersion~ key-value pairs.
 
 *** TODO How =build.sbt= defines settings
     =build.sbt= defines /subprojects/, which holds a sequence of key-value pairs
     called /setting expressions/ using =build.sbt= *DSL*.
     #+BEGIN_SRC scala
-      lazy val root = (project in file("."))
-        .settings(
+      ThisBuild / organization := "com.example"
+      ThisBuild / scalaVersion := "2.13.3"
+      ThisBuild / version      := "0.1.0-SNAPSHOT"
+
+      lazy val root = (project in file(".")).
+        settings(
           name         := "Hello",
-          organization := "com.example",
-          scalaVersion := "2.12.4",
-          version      := "0.1.0-SNAPSHOT"
         )
     #+END_SRC
     + A subproject holds a sequence of key-value pairs called /setting expressions/
-      using /build.sbt DSL/.
+      using =build.sbt= /DSL/.
 
     + _setting expressions (some of them are also called /task expressions/)._
+      =TODO= We will see more on the difference later in this page.
       The name /setting expression/ has wider meaning than /task expression/.
       organization     :=       { "com.example" }
       ------------  ---------   -----------------
            key      operator   (setting/task) body
 
+    + A setting expression consists of three parts:
+      1. Left-hand side is a /key/.
+      2. /Operator/, which in this case is ~:=~
+      3 Right-hand side is called the /body/, or the /setting body/.
+
     + A key is an instance of ~SettingKey[T]~, ~TaskKey[T]~, or ~InputKey[T]~,
-      where ~T~ is the expected value type.
-      For example, the key ~name~ above is typed to ~SettingKey[String]~.
+       where ~T~ is the expected value type.
+       For example, the key ~name~ above is typed to ~SettingKey[String]~.
 
     + You can use ~val~'s, ~lazy val~'s, and ~def~'s in =build.sbt=.
 
-    + _Top-level objects and classes_ are NOT allowed in =build.sbt=.
-      Those should go in the =project/= directory as _Scala source files_.
-      =IMPORTANT=
+    + _Top-level /objects/ and /classes/ are *NOT allowed* in =build.sbt=._
+        Those should go in the =project/= directory as _Scala source files_.
+        =IMPORTANT=
 
 *** TODO Keys
 **** Types
