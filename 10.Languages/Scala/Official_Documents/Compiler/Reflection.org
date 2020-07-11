@@ -685,7 +685,8 @@
     + marconilanna
     + heathermiller
 
-** TODO Symbols
+** DONE Symbols
+   CLOSED: [2020-07-04 Sat 04:01]
    - /Symbols/ are used to *establish bindings* BETWEEN a *name* AND the *entity*
      it refers to, such as a /class/ or a /method/.
 
@@ -711,7 +712,8 @@
      * getting the parameter type of a method
      * finding out the type of a field.
 
-*** TODO The ~Symbol~ Owner Hierarchy
+*** DONE The ~Symbol~ Owner Hierarchy
+    CLOSED: [2020-07-03 Fri 23:07]
     - /Symbols/ are organized in a hierarchy.
       + For example,
         * a /symbol/ that represents a parameter of a method is *owned* by the
@@ -722,41 +724,56 @@
         * a /class/ is owned by a containing package and so on.
 
     - If a /symbol/ does _NOT have an owner,_ for example, because it refers to a
-      top-level entity, such as a top-level package, then its owner is the
-      special ~NoSymbol~ /singleton object/. Representing a missing symbol,
+      _top-level entity_, such as a top-level package, then its owner is the
+      special ~NoSymbol~ /singleton object/. Representing a _MISSING symbol_,
       + ~NoSymbol~ is commonly used in the API to denote an empty or default value.
-        Accessing the owner of NoSymbol throws an exception. See the API docs
-        for the general interface provided by type Symbol.
+        _Accessing the owner of ~NoSymbol~ throws an exception._
 
-*** TODO ~TypeSymbol~'s
-    A TypeSymbol represents type, class, and trait declarations, as well as type
-    parameters. Interesting members that do not apply to the more specific
-    ClassSymbols, include isAbstractType, isContravariant, and isCovariant.
+*** DONE ~TypeSymbol~'s
+    CLOSED: [2020-07-03 Fri 23:15]
+    A ~TypeSymbol~ represents /type, class, and trait declarations/, as well as
+    /type parameters/.
 
-    - ClassSymbol:
-      Provides access to all information contained in a class or trait
-      declaration, e.g., name, modifiers (isFinal, isPrivate, isProtected,
-      isAbstractClass, etc.), baseClasses, and typeParams.
+    - Interesting members that *do _NOT apply_ to the more specific ~ClassSymbol~'s,*
+      include ~isAbstract~, ~isContravariant~, and ~isCovariant~.
+      + =from Jian=
+        Here _NOT apply_ means always return ~false~.
 
-*** TODO ~TermSymbol~'s
-    The type of term symbols representing val, var, def, and object declarations
-    as well as packages and value parameters.
+      + =from Jian=
+        Current version uses ~isAbstractType~, which is _DEPRECATED_.
+        Should use ~isAbstract~.
+
+    - ~ClassSymbol~:
+      Provides access to all information contained in a /class or trait
+      declaration/, e.g., ~name~, modifiers (~isFinal~, ~isPrivate~, ~isProtected~,
+      ~isAbstractClass~, etc.), ~baseClasses~, and ~typeParams~.
+
+*** DONE ~TermSymbol~'s
+    CLOSED: [2020-07-04 Sat 00:05]
+    The /type/ of /term symbols/ representing _val_, _var_, _def_, and _object_
+    declarations as well as _packages_ and _value parameters_.
     - ~MethodSymbol~:
-      The type of method symbols representing def declarations (subclass of
-      TermSymbol). It supports queries like checking whether a method is a
-      (primary) constructor, or whether a method supports variable-length
-      argument lists.
+      Represent /def declarations/.
+      + /subclass/ of ~TermSymbol~
+      + It supports queries like checking
+        - whether a /method/ is a (primary) constructor,
+        - whether a /method/ supports /variable-length argument lists/.
 
     - ~ModuleSymbol~:
-      The type of module symbols representing object declarations. It allows
-      looking up the class implicitly associated with the object definition via
-      member moduleClass. The opposite look up is also possible. One can go back
-      from a module class to the associated module symbol by inspecting its
-      selfType.termSymbol.
+      =TODO= =TODO= =TODO= =TODO= =TODO= =TODO=
+      =from Jian= Examples??????? =from Jian=
+      Represent /object declarations/.
+      + It allows *looking up* the /class/ implicitly associated with the object
+        definition via member ~moduleClass~.
+      + The opposite look up is also possible.
+        One can go back from a /module class/ to the associated /module symbol/ by
+        inspecting its ~selfType.termSymbol~.
 
-*** TODO ~Symbol~ Conversions
-    - There can be situations where one uses a method that returns an instance of the general Symbol type. In cases like these, it’s possible to convert the more general Symbol type obtained to the specific, more specialized symbol type needed.
-    - Symbol conversions, such as asClass or asMethod, are used to convert to a more specific subtype of Symbol as appropriate (if you want to use the MethodSymbol interface, for example).
+*** DONE ~Symbol~ Conversions
+    CLOSED: [2020-07-04 Sat 00:24]
+    - It's possible to _CONVERT_ the MORE GENERAL ~Symbol~ type obtained _TO_ the
+      SPECIFIC, MORE SPECIALIZED /symbol type/ needed.
+
     - For example,
       #+begin_src scala
         import scala.reflect.runtime.universe._
@@ -768,40 +785,54 @@
         object showResult {
           val testMember = typeOf[C[Int]].member(TermName("test"))
           // testMember: scala.reflect.runtime.universe.Symbol = method test
+
+          testMember.asMethod
+          // res0: scala.reflect.runtime.universe.MethodSymbol = method test
         }
-
       #+end_src
 
-    - In this case, member returns an instance of ~Symbol~, not ~MethodSymbol~ as one
-      might expect. Thus, we must use ~asMethod~ to ensure that we obtain a ~MethodSymbol~
-      #+begin_src scala
-        testMember.asMethod
-        // res0: scala.reflect.runtime.universe.MethodSymbol = method test
-      #+end_src
+*** DONE Free symbols
+    CLOSED: [2020-07-04 Sat 04:00]
+    - The _TWO_ /symbol/ types ~FreeTermSymbol~ and ~FreeTypeSymbol~ have a special
+      status, in the sense that they refer to symbols whose available information
+      is not complete.
 
-*** TODO Free symbols
-    The two symbol types FreeTermSymbol and FreeTypeSymbol have a special
-    status, in the sense that they refer to symbols whose available information
-    is not complete. These symbols are generated in some cases during
-    reification (see the corresponding section about reifying trees for more
-    background). Whenever reification cannot locate a symbol (meaning that the
-    symbol is not available in the corresponding class file, for example,
-    because the symbol refers to a local class), it reifies it as a so-called
-    “free type”, a synthetic dummy symbol that remembers the original name and
-    owner and has a surrogate type signature that closely follows the original.
-    You can check whether a symbol is a free type by calling sym.isFreeType. You
-    can also get a list of all free types referenced by a tree and its children
-    by calling tree.freeTypes. Finally, you can get warnings when reification
-    produces free types by using -Xlog-free-types.
+    - These symbols are generated in some cases during /reification/
+      + =TODO=
+        see the corresponding section about /reifying trees/ for more background.
 
-** TODO Types
-   As its name suggests, instances of Type represent information about the type
-   of a corresponding symbol. This includes its members (methods, fields, type
-   aliases, abstract types, nested classes, traits, etc.) either declared
-   directly or inherited, its base types, its erasure and so on. Types also
-   provide operations to test for type conformance or equivalence.
+    - Whenever /reification/ *CANNOT locate* a /symbol/ (meaning that the /symbol/
+      is NOT available in the corresponding class file, for example, because the
+      /symbol/ refers to a local class),
+      =???= =TODO= =???=
+        it reifies it as a so-called "free type", a /synthetic dummy symbol/ that
+      remembers the original name and owner and has a surrogate type signature
+      that closely follows the original.
+      =TODO= NEED EXAMPLEs =TODO=
+      + Check by ~sym.isFreeType~
 
-*** Instantiating Types
+      + Get a list of all free types referenced by a tree and it children by
+        calling ~tree.freeTypes~.
+
+      + Get warnings when ~tree.freeTypes~ /reification/ produces /free types/
+        by using ~-Xlog-free-types~.
+
+** DONE Types
+   CLOSED: [2020-07-04 Sat 04:46]
+   - ~Type~: a instance of ~Type~ represents information about a type of a
+     corresponding /symbol/.
+
+   - This includes its members (methods, fields, type aliases, abstract types,
+     nested classes, traits, etc.) either declared directly or inherited, its
+     base types, its erasure and so on.
+     =from Jian=
+     This sentence is hard to understand? Looks wierd!!!
+     What does it mean???
+
+   - Types also PROVIDE operations to *test* for _type conformance or equivalence_.
+
+*** DONE Instantiating Types
+    CLOSED: [2020-07-04 Sat 04:20]
     - In general, there are three ways to instantiate a Type.
       1. via method ~typeOf~ on ~scala.reflect.api.TypeTags~, which is mixed into
          ~Universe~ (_simplest and most common_).
@@ -812,7 +843,8 @@
       4. Manual instantiation using factory methods such as ~typeRef~ or ~polyType~
          on ~scala.reflect.api.Types~, (_NOT recommended_).
 
-**** Instantiating Types With ~typeOf~
+**** DONE Instantiating Types With ~typeOf~
+     CLOSED: [2020-07-04 Sat 04:20]
      - To *instantiate* a /type/, most of the time,
        the ~scala.reflect.api.TypeTags#typeOf~ /method/ can be used.
        + For example:
@@ -831,15 +863,12 @@
            and it can return the widened ~Type~ instance: ~scala.List[Int]~.
 
      - In this example, a ~scala.reflect.api.Types$TypeRef~ is returned, which
-       corresponds to the type constructor ~List~, applied to the type argument
+       corresponds to the /type constructor/ ~List~, applied to the /type argument/
        ~Int~.
 
-     - Note, however, that this approach requires one to specify by hand the type
-       we're trying to instantiate. What if we're interested in obtaining an
-       instance of ~Type~ that corresponds to some arbitrary instance? One can
-       simply define a method with a context bound on the type parameter– this
-       generates a specialized ~TypeTag~ for us, which we can use to obtain the
-       type of our arbitrary instance:
+     - ~typeOf~ approach requires one to _specify by hand_ the type we're trying
+       to instantiate. We can define a function with the help of ~typeOf~ but
+       takes one parameter:
        #+begin_src scala
          def getType[T: TypeTag](obj: T) = typeOf[T]
 
@@ -864,9 +893,10 @@
 
      - Note:
        Method ~typeOf~ does *NOT* work for types with /type parameters/, such as
-       ~typeOf[List[A]]~ where ~A~ is a /type parameter/.
+       ~typeOf[List[A]]~ where ~A~ is a /type parameter/ (=from Jian= means not
+       concrete! /type argument/ is the concorete one).
          In this case, one can use ~scala.reflect.api.TypeTags#weakTypeOf~ instead.
-       For more details, see the ~TypeTag~'s section of this guide.
+       For more details, see the =TypeTags= section of this guide.
 
 **** DONE Standard Types
      CLOSED: [2020-07-02 Thu 23:11]
@@ -884,14 +914,18 @@
      - The _list_ of /standard types/ is specified in /trait/ ~StandardTypes~ in
        ~scala.reflect.api.StandardDefinitions~.
 
-*** Common Operations on Types
-    - Types are typically used for type conformance tests or are queried for members.
-      The three main classes of operations performed on types are:
-      1. Checking the subtyping relationship between two types.
-      2. Checking for equality between two types.
-      3. Querying a given type for certain members or inner types.
+*** DONE Common Operations on Types
+    CLOSED: [2020-07-04 Sat 04:46]
+    - ~Type~'s are typically used for /type conformance tests/ or /are queried for
+      members/.
 
-**** Subtyping Relationships
+    - The three main classes of operations performed on types are:
+      1. *Checking* the /subtyping relationship/ between two types.
+      2. *Checking* for /equality/ between two types.
+      3. *Querying* a given type for certain members or inner types. =TODO= =???=
+
+**** DONE Subtyping Relationships
+     CLOSED: [2020-07-04 Sat 04:30]
      - Given two ~Type~ instances, one can easily test whether one is a /subtype/
        of the other using ~<:<~ (and in exceptional cases, ~weak_<:<~, *explained
        below*)
@@ -928,20 +962,17 @@
            if (true) 1 else 1d
            // res2: Double = 1.0
          #+end_src
+         * if-expression result type is defined to be the /weak least upper bound/
+           of the two types (i.e., the /least upper bound/ with respect to /weak
+           conformance/).
 
-       + In the if-expression shown above, the result type is defined to be the
-         weak least upper bound of the two types (i.e., the least upper bound
-         with respect to weak conformance).
+         * Thus, since ~Double~ is defined to be /the *least upper bound* with
+           respect to weak conformance/ between ~Int~ and ~Double~ (according to
+           the spec, shown above), ~Double~ is inferred as the type of the given
+           if-expression.
 
-       + Thus, since Double is defined to be the least upper bound with respect
-         to weak conformance between Int and Double (according to the spec,
-         shown above), Double is inferred as the type of our example
-         if-expression.
-
-       + Note that method ~weak_<:<~ checks for weak conformance (as opposed to
-         ~<:<~ which checks for conformance without taking into consideration
-         weak conformance relations in section 3.5.3 of the spec) and thus returns
-         the correct result when inspecting conformance relations between /numeric
+       + Note that method ~weak_<:<~ checks for /weak conformance/ and thus returns
+         the correct result when inspecting /conformance relations/ between /numeric
          types/ ~Int~ and ~Double~:
          #+begin_src scala
            typeOf[Int] weak_<:< typeOf[Double]
@@ -951,7 +982,7 @@
            // res4: Boolean = false
          #+end_src
 
-       + Whereas using ~<:<~ would incorrectly report that Int and Double do not
+       + Whereas using ~<:<~ would INCORRECTLY report that ~Int~ and ~Double~ do not
          conform to each other in any way:
          #+begin_src scala
            typeOf[Int] <:< typeOf[Double]
@@ -961,10 +992,12 @@
            // res5: Boolean = false
          #+end_src
 
-**** Type Equality
-     - Similar to type conformance, one can easily check the equality of two types.
-       That is, given two arbitrary types, one can use method ~=:=~ to see if both
-       denote the exact same compile-time type.
+**** DONE Type Equality
+     CLOSED: [2020-07-04 Sat 04:34]
+     - Similar to /type conformance/, one can easily *check* the /equality of two
+       types/.
+         That is, given two arbitrary types, one can use method ~=:=~ to see if
+       both denote the *exact same* /compile-time type/.
        #+begin_src scala
          import scala.reflect.runtime.universe._
 
@@ -979,20 +1012,11 @@
          // res0: Boolean = true
        #+end_src
 
-     - Note that the precise type info must be the same for both instances. In the
-       following code snippet, for example, we have two instances of ~List~ with
-       different type arguments.
-       #+begin_src scala
-         getType(List(1,2,3)) =:= getType(List(1.0, 2.0, 3.0))
-         // res1: Boolean = false
-
-         getType(List(1,2,3)) =:= getType(List(9,8,7))
-         // res2: Boolean = true
-       #+end_src
-
      - Also important to note is that ~=:=~ should always be used to compare types
-       for equality. That is, never use ~==~, as it can't check for type equality
-       in the presence of type aliases, whereas ~=:=~ can:
+       for equality.
+       + *CAUTION*
+         That is, _NEVER_ use ~==~, as *it can't check for /type equality/ in the
+         presence of /type aliases/,* whereas ~=:=~ can:
        #+begin_src scala
          type Histogram = List[Int]
          // defined type alias Histogram
@@ -1004,150 +1028,537 @@
          // res4: Boolean = false
        #+end_src
 
-     - As we can see, ~==~ incorrectly reports that ~Histogram~ and ~List[Int]~
-       have different types.
+**** DONE Querying Types for Members and Declarations
+     CLOSED: [2020-07-04 Sat 04:46]
+     - Given a ~Type~, one can also query it for specific members or declarations.
+       A ~Type~'s members include all /fields/, /methods/, /type aliases/, /abstract
+       types/, _nested classes / objects / traits_, etc.
 
-**** Querying Types for Members and Declarations
-     - Given a Type, one can also query it for specific members or declarations.
-       A Type’s members include all fields, methods, type aliases, abstract
-       types, nested classes/objects/traits, etc. A Type’s declarations are only
-       those members that were declared (not inherited) in the
-       class/trait/object definition which the given Type represents.
+     - A ~Type~'s declarations are only those members that were declared (*NOT
+       inherited*) in the class/trait/object definition which the given Type
+       represents.
 
-     - To obtain a Symbol for some specific member or declaration, one need only
-       to use methods members or decls which provide the list of definitions
+     - To obtain a ~Symbol~ for some specific member or declaration, one need only
+       to use methods members or ~decls~ which provide the list of definitions
        associated with that type. There also exists singular counterparts for
-       each, methods member and decl as well. The signatures of all four are
-       shown below:
+       each, methods ~member~ and ~decl~ as well. The signatures of all four are
+       shown below: =TODO= =EXAMPLE= =TRY= =TODO=
        #+begin_src scala
          /** The member with given name, either directly declared or inherited, an
-           ,* OverloadedSymbol if several exist, NoSymbol if none exist. */
+           * `OverloadedSymbol` if several exist, `NoSymbol` if none exist. */
          def member(name: Universe.Name): Universe.Symbol
 
-         /** The defined or declared members with name name in this type; an
-           ,* OverloadedSymbol if several exist, NoSymbol if none exist. */
+         /** The defined or declared members with given name in this type; an
+           * `OverloadedSymbol` if several exist, `NoSymbol` if none exist. */
          def decl(name: Universe.Name): Universe.Symbol
 
-         /** A Scope containing all members of this type
-           ,* (directly declared or inherited). */
+         /** A `Scope` containing all members of this type
+           * (directly declared or inherited). */
          def members: Universe.MemberScope // MemberScope is a type of
                                            // Traversable, use higher-order
                                            // functions such as map,
                                            // filter, foreach to query!
 
-         /** A Scope containing the members declared directly on this type. */
+         /** A `Scope` containing the members declared directly on this type. */
          def decls: Universe.MemberScope // MemberScope is a type of
                                                 // Traversable, use higher-order
                                                 // functions such as map,
                                                 // filter, foreach to query!
        #+end_src
 
-     - For example, to look up the map method of List, one can do:
+     - For example, to look up the ~map~ method of ~List~, one can do:
        #+begin_src scala
          import scala.reflect.runtime.universe._
 
          typeOf[List[_]].member(TermName("map"))
          // res0: scala.reflect.runtime.universe.Symbol = method map
        #+end_src
+       * Note that we pass method member a ~TermName~,
+         since we're looking up a /method/.
 
-     - Note that we pass method member a ~TermName~, since we're looking up a method.
-       If we were to look up a type member, such as ~List~'s self type, ~Self~, we
-       would pass a ~TypeName~:
-       #+begin_src scala
-         typeOf[List[_]].member(TypeName("Self"))
-         // res1: scala.reflect.runtime.universe.Symbol = type Self
-       #+end_src
+       * If we were to look up a /type member/, such as ~List~'s /self type/,
+         ~Self~, we would pass a ~TypeName~:
+         #+begin_src scala
+           typeOf[List[_]].member(TypeName("Self"))
+           // res1: scala.reflect.runtime.universe.Symbol = type Self
+         #+end_src
 
-     - We can also query all members or declarations on a type in interesting ways.
-       We can use method members to obtain a Traversable (MemberScopeApi extends
-       Traversable) of Symbols representing all inherited or declared members on
-       a given type, which means that we can use popular higher-order functions
-       on collections like foreach, filter, map, etc., to explore our type’s
-       members. For example, to print the members of List which are private, one
-       must simply do:
-       #+begin_src scala
-         typeOf[List[Int]].members.filter(_.isPrivate).foreach(println _)
-         // method super$sameElements
-         // method occCounts
-         // class CombinationsItr
-         // class PermutationsItr
-         // method sequential
-         // method iterateUntilEmpty
-       #+end_src
+     - _QUERY_ *ALL* /members/ or /declarations/ on a /type/ in interesting ways.
+       We can use /method/ ~members~ to obtain a ~Traversable~ (~MemberScopeApi~
+       *extends* ~Traversable~) of ~Symbols~ representing all /inherited or
+       declared members/ on a GIVEN /type/
+       + For example,
+         to print the /members/ of ~List~ which are ~private~, simply do:
+         #+begin_src scala
+           typeOf[List[Int]].members.filter(_.isPrivate).foreach(println)
+           // method super$sameElements
+           // method occCounts
+           // class CombinationsItr
+           // class PermutationsItr
+           // method sequential
+           // method iterateUntilEmpty
+         #+end_src
 
 ** TODO Trees
-   - Trees are the basis of Scala’s abstract syntax which is used to represent programs.
-     They are also called abstract syntax trees and commonly abbreviated as ASTs.
+   - ~Tree~, a structure in /Scala reflection/, is the concrete representation of
+     Scala's abstract syntax. They are also called AST.
 
-   - In Scala reflection, APIs that produce or use trees are the following:
+   - In /Scala reflection/, APIs that *produce* or *use* /trees/ are the following:
      1. Scala annotations, which use trees to represent their arguments, exposed
-        in ~Annotation.scalaArgs~ (for more, see the Annotations section of this
+        in ~Annotation.scalaArgs~ (for more, see the *Annotations* section of this
         guide).
 
-     2. ~reify~, a special method that takes an expression and returns an AST that
-        represents this expression.
+     2. ~reify~, a special /method/ that _takes_ an /expression/ and _returns_ an
+        /AST/ that represents this expression.
 
-     3. Compile-time reflection with macros (outlined in the Macros guide) and
-        runtime compilation with toolboxes both use trees as their program
-        representation medium.
+     3. /Compile-time reflection/ with ~macros~ (outlined in the *Macros* guide)
+        and /runtime compilation/ with /toolboxes/ both use /trees/ as their
+        program representation medium.
 
-   - It's important to note that trees are immutable except for three fields --
-     ~pos~ (~Position~), ~symbol~ (~Symbol~), and ~tpe~ (~Type~), which are
-     assigned when a tree is typechecked.
+   - It's important to note that /trees/ *are _immutable_ _except_ for THREE
+     fields* -- ~pos~ (~Position~), ~symbol~ (~Symbol~), and ~tpe~ (~Type~),
+     which are assigned when a /tree/ is typechecked.
 
-*** Kinds of ~Tree~'s
-    - There are three main categories of trees:
-      1. /Subclasses/ of ~TermTree~
-         which represent terms, e.g., method invocations are represented by
-         Apply nodes, object instantiation is achieved using New nodes, etc.
+*** DONE Kinds of ~Tree~'s
+    CLOSED: [2020-07-04 Sat 19:11]
+    - There are _THREE_ main categories of /trees/:
+      1. /Subclasses/ of ~TermTree~ which represent *terms*,
+         e.g.,
+         + /method invocations/ are represented by ~Apply~ nodes,
+         + /object instantiation/ is achieved using ~New~ nodes,
+         + etc.
 
-      2. /Subclasses/ of ~TypTree~
-         which represent types that are explicitly specified in program source
-         code, e.g., List[Int] is parsed as AppliedTypeTree. Note: TypTree is
-         not misspelled, nor is it conceptually the same as TypeTree– TypeTree
-         is something different. That is, in situations where Types are
-         constructed by the compiler (e.g., during type inference), they can be
-         wrapped in TypeTree trees and integrated into the AST of the program.
+      2. /Subclasses/ of ~TypTree~ which represent *types* that are _EXPLICITLY
+         SPECIFIED in program source code_,
+         + e.g., ~List[Int]~ is parsed as ~AppliedTypeTree~.
 
-      3. /Subclasses/ of ~SymTree~
-         which introduce or reference definitions. Examples of the introduction
-         of new definitions include ClassDefs which represent class and trait
-         definitions, or ValDef which represent field and parameter definitions.
-         Examples of the reference of existing definitions include Idents which
-         refer to an existing definition in the current scope such as a local
-         variable or a method.
+         + Note:
+           ~TypTree~ is *NOT* misspelled, *NOR* is it conceptually the same as
+           ~TypeTree~ -- ~TypeTree~ is something different.
+             That is, in situations where ~Type~'s are constructed by the
+           compiler (e.g., during type inference), they can be wrapped in
+           ~TypeTree~ trees and integrated into the AST of the program.
 
-    - Any other type of tree that one might encounter are typically syntactic or
-      short-lived constructs. For example, ~CaseDef~, which wraps individual match
-      cases; such nodes are neither terms nor types, nor do they carry a symbol.
+      3. /Subclasses/ of ~SymTree~ which *introduce or reference definitions*.
+         + Examples of the *introduction* of new definitions include
+           * ~ClassDef~'s represent /class and trait definitions/
+           * ~ValDef~'s represent /field and parameter definitions/.
 
-*** Inspecting Trees
-*** Traversing Trees
-    After one understands the structure of a given tree, typically the next step
-    is to extract info from it. This is accomplished by traversing the tree, and
-    it can be done in one of two ways:
-    - Traversal via pattern matching.
-    - Using a subclass of ~Traverser~
+         + Examples of the *reference* of existing definitions include
+           * ~Ident~'s refer to an existing definition _in the CURRENT scope_ such
+             as a /local variable/ or a /method/.
 
-**** Traversal via Pattern Matching
-**** Traversal via ~Traverser~
+    - Any other /type/ of /tree/ that one might encounter are TYPICALLY /syntactic
+      or short-lived constructs/.
+      + For example,
+        ~CaseDef~, which wraps individual match cases; such nodes are NEITHER
+        /terms/ NOR /types/, NOR do they carry a /symbol/.
 
-*** Creating Trees
-    When working with runtime reflection, one need not construct trees manually.
-    However, runtime compilation with toolboxes and compile-time reflection with
-    macros both use trees as their program representation medium. In these
-    cases, there are three recommended ways to create trees:
-    - Via method ~reify~ (should be preferred wherever possible).
-    - Via method ~parse~ on ~ToolBox~'es.
-    - Manual construction (not recommended).
+*** DONE Inspecting Trees
+    CLOSED: [2020-07-04 Sat 19:11]
+    - Scala Reflection provides a handful of ways to *visualize* /trees/, all
+      available through a /universe/.
+      Given a /tree/, one can:
+      + use /methods/ ~show~ or ~toString~ which *print* pseudo-Scala code
+        represented by the tree.
 
-**** Tree Creation via ~reify~
-***** Splicing Trees
+      + use /methods/ ~showRaw~ to see the _raw internal_ tree that the typechecker
+        operates upon.
 
-**** Tree Creation via ~parse~ on ~ToolBox~'es
+    - For example, given the following tree:
+      #+begin_src scala
+        import scala.reflect.runtime.universe._
+
+        // Add 2 to x.
+        val tree = Apply(Select(Ident(TermName("x")), TermName("$plus")),
+                         List(Literal(Constant(2))))
+        // tree: scala.reflect.runtime.universe.Apply = x.$plus(2)
+
+      #+end_src
+      + We can use ~show(tree)~ (or ~toString~, which is _equivalent_) to see what
+        that /tree/ represents -- in the case above, it is a string of ~"x.$plus(2)"~.
+
+    - We can also _go in the *other direction*._
+      Given some Scala expression, we can
+      1. obtain a /tree/,
+      2. then use method ~showRaw~ to see the _raw internal_ /tree/ that the compiler
+         and typechecker operate on.
+
+    - For example, given the expression:
+      #+begin_src scala
+        import scala.reflect.runtime.universe._
+
+        val expr = reify { class Flower { def name = "Rose" } }
+        // expr: scala.reflect.runtime.universe.Expr[Unit] = ...
+      #+end_src
+      + ~reify~ simply
+        * takes the /Scala expression/
+        * returns a Scala ~Expr~, which is simply _wraps_ a ~Tree~ and a ~TypeTag~
+          (see the =Expr= section of this guide for more information about ~Exprs~).
+
+    - We can obtain the tree that expr contains by:
+      #+begin_src scala
+        val tree = expr.tree
+        // tree: scala.reflect.runtime.universe.Tree =
+        // {
+        //   class Flower extends AnyRef {
+        //     def <init>() = {
+        //       super.<init>();
+        //       ()
+        //     };
+        //     def name = "Rose"
+        //   };
+        //   ()
+        // }
+      #+end_src
+
+    - And we can inspect the raw tree by simply doing:
+      #+begin_src scala
+        showRaw(tree)
+        // res1: String = Block(List(ClassDef(Modifiers(), TypeName("Flower"), List(), Template(List(Ident(TypeName("AnyRef"))), emptyValDef, List(DefDef(Modifiers(), termNames.CONSTRUCTOR, List(), List(List()), TypeTree(), Block(List(Apply(Select(Super(This(typeNames.EMPTY), typeNames.EMPTY), termNames.CONSTRUCTOR), List())), Literal(Constant(())))), DefDef(Modifiers(), TermName("name"), List(), List(), TypeTree(), Literal(Constant("Rose"))))))), Literal(Constant(())))
+      #+end_src
+
+*** TODO Traversing Trees
+    After one understands the structure of a given /tree/, typically the next step
+    is to extract info from it. This is accomplished by *traversing* the /tree/,
+    and it can be done in one of _TWO_ ways:
+    - *Traversal* via /pattern matching/.
+    - Using a /subclass/ of ~Traverser~
+
+**** TODO Traversal via Pattern Matching
+     - Traversal via /pattern matching/ is the SIMPLEST and MOST COMMON way to
+       *traverse* a /tree/.
+
+     - Typically, one _traverses_ a /tree/ via /pattern matching/ when they are
+       interested in the state of a given /tree/ at a *single* /node/.
+
+     - For example, say we simply want to obtain the function and the argument of
+       the only ~Apply~ /node/ in the following tree:
+       #+begin_src scala
+         import scala.reflect.runtime.universe._
+
+         val tree = Apply(Select(Ident(TermName("x")), TermName("$plus")),
+                          List(Literal(Constant(2))))
+         // tree: scala.reflect.runtime.universe.Apply = x.$plus(2)
+
+         val Apply(fun, arg :: Nil) = tree
+         // fun: scala.reflect.runtime.universe.Tree = x.$plus
+         // arg: scala.reflect.runtime.universe.Tree = 2
+       #+end_src
+
+     - Note that ~Tree~'s can TYPICALLY be *quite complex*, with /nodes/ _nested
+       arbitrarily deep_ within other /nodes/. A simple illustration would be if we were to add
+       a second ~Apply~ node to the above tree which serves to add 3 to our sum:
+       #+begin_src scala
+         val tree = Apply(Select(Apply(Select(Ident(TermName("x")), TermName("$plus")),
+                                       List(Literal(Constant(2)))),
+                                 TermName("$plus")),
+                          List(Literal(Constant(3))))
+         // tree: scala.reflect.runtime.universe.Apply = x.$plus(2).$plus(3)
+       #+end_src
+
+     - If we apply the same npatternn match as above, we obtain the outer ~Apply~
+       node which contains as its function the entire tree representing ~x.$plus(2)~
+       that we saw above:
+       #+begin_src scala
+         val Apply(fun, arg :: Nil) = tree
+         // fun: scala.reflect.runtime.universe.Tree = x.$plus(2).$plus
+         // arg: scala.reflect.runtime.universe.Tree = 3
+
+         showRaw(fun)
+         // val res3: String = Select(Apply(Select(Ident(TermName("x")), TermName("$plus")),
+         //                                 List(Literal(Constant(2)))),
+         //                           TermName("$plus"))
+       #+end_src
+
+     - In cases where one must do some richer task, such as
+       + *traversing* an ENTIRE /tree/ without stopping at a SPECIFIC /node/,
+         or
+       + *collecting* and *inspecting* ALL /nodes/ of a SPECIFIC /type/, using
+         ~Traverser~ for traversal might be more advantageous.
+
+**** TODO Traversal via ~Traverser~
+     - In situations where it's necessary to traverse an entire tree from top to
+       bottom, using traversal via pattern matching would be infeasible -- to do
+       it this way, one must individually handle every type of node that we
+       might come across in the pattern match. Thus, in these situations,
+       typically class ~Traverser~ is used.
+
+     - ~Traverser~ makes sure to visit *every* /node/ in a given /tree/,
+       in a _depth-first search_.
+
+     - To use a ~Traverser~, simply subclass ~Traverser~ and _override_ /method/
+       ~traverse~. In doing so, you can simply provide custom logic to handle
+       only the cases you're interested in.
+       + For example, if, given our ~x.$plus(2).$plus(3)~ /tree/ from the previous
+         section, we would like to collect all Apply nodes, we could do:
+         #+begin_src scala
+           import scala.reflect.runtime.universe._
+
+           object traverser extends Traverser {
+             val tree = Apply(Select(Apply(Select(Ident(TermName("x")), TermName("$plus")),
+                                           List(Literal(Constant(2)))),
+                                     TermName("$plus")), List(Literal(Constant(3))))
+               // tree: scala.reflect.runtime.universe.Apply = x.$plus(2).$plus(3)
+
+             var applies = List.empty[Apply]
+
+             override def traverse(tree: Tree): Unit = tree match {
+               case app @ Apply(fun, args) =>
+                 applies = app :: applies
+                 super.traverse(fun)
+                 super.traverseTrees(args)
+
+               case _ => super.traverse(tree)
+             }
+           }
+         #+end_src
+
+     - In the above, we intend to construct a list of ~Apply~ /nodes/ that we find in
+       our given /tree/.
+
+     - We achieve this by in effect adding a special case to the already /depth-first
+       traverse/ method defined in /superclass/ ~Traverser~, via /subclass/
+       ~traverser~'s _overridden_ ~traverse~ /method/.
+         Our special case affects only nodes that match the pattern ~Apply(fun, args)~,
+       where fun is some function (represented by a ~Tree~) and args is a list of
+       arguments (represented by a list of ~Tree~'s).
+
+     - When a /tree/ matches the pattern (i.e., when we have an ~Apply~ /node/),
+       we simply add it to our ~List[Apply]~, ~applies~, and continue our _traversal_.
+
+     - Note that, in our match, we call ~super.traverse~ on the function fun wrapped
+       in our ~Apply~, and we call ~super.traverseTrees~ on our argument list args
+       (essentially the same as ~super.traverse~, but for ~List[Tree]~ rather than a
+       single ~Tree~). In both of these calls, our objective is simple– we want to
+       make sure that we use the default traverse method in Traverser because we
+       don't know whether the Tree that represents fun contains our ~Apply~ pattern–
+       that is, we want to traverse the entire sub-tree. Since the ~Traverser~
+       /superclass/ calls ~this.traversve~, passing in every nested sub- tree,
+       eventually our custom traverse method is guaranteed to be called for each
+       sub-tree that matches our ~Apply~ pattern.
+
+     - To trigger the /traverse/ and to see the resulting ~List~ of matching ~Apply~
+       /nodes/, simply do:
+       #+begin_src scala
+         traverser.traverse(tree)
+
+         traverser.applies
+         // res0: List[scala.reflect.runtime.universe.Apply] = List(x.$plus(2), x.$plus(2).$plus(3))
+       #+end_src
+
+*** DONE Creating Trees
+    CLOSED: [2020-07-04 Sat 22:35]
+    - When working with /runtime reflection/, one *need NOT construct* /trees/
+      manually.
+
+    - However,
+      *BOTH*
+
+      /runtime/ compilation with /toolboxes/
+      and
+      /compile-time reflection/ with /macros/
+
+      *use* /trees/ as their _program representation medium_.
+
+    - In these cases, there are three recommended ways to create /trees/:
+      + Via /method/ ~reify~ (should be preferred wherever possible).
+      + Via /method/ ~parse~ on ~ToolBox~'es.
+      + Manual construction (*NOT recommended*).
+
+**** DONE Tree Creation via ~reify~
+     CLOSED: [2020-07-04 Sat 21:51]
+     - ~Tree~ creation via /method/ ~reify~ is the recommended way of creating
+       trees in Scala Reflection.
+
+     - Example:
+       #+begin_src scala
+         import scala.reflect.runtime.universe._
+
+         { val tree = reify(println(2)).tree; showRaw(tree) }
+         // res0: String = Apply(Select(Select(This(TypeName("scala")), TermName("Predef")),
+         //                                    TermName("println")),
+         //                      List(Literal(Constant(2))))
+       #+end_src
+       + Note:
+         the ~println~ /method/ was transformed to ~scala.Predef.println~.
+         Such transformations ensure that regardless of where the result of
+         ~reify~ is used, *it will _NOT_ unexpectedly change its meaning.*
+         * For example,
+           even if this ~println(2)~ snippet is later inserted into a block of
+           code that defines its own ~println~, it wouldn't affect the behavior
+           of the snippet.
+
+       + This way of creating trees is thus /hygenic/,
+         in the sense that it *PRESERVES* _bindings of identifiers._
+
+***** DONE Splicing Trees
+      CLOSED: [2020-07-04 Sat 22:00]
+      Using ~reify~ also allows one to *compose* /trees/ from SMALLER /trees/.
+      This is done using ~Expr.splice~.
+
+      - Note:
+        ~Expr~ is ~reify~'s /return type/.
+        It can be thought of as a simple wrapper which contains a typed ~Tree~, a
+        ~TypeTag~ and a handful of _reification-relevant methods_, such as ~splice~.
+        For more information about ~Expr~'s, see the relevant section of this guide.
+
+      - For example, let's try to construct a tree representing ~println(2)~ using
+        ~splice~:
+        #+begin_src scala
+          val x = reify(2)
+          // x: scala.reflect.runtime.universe.Expr[Int(2)] = Expr[Int(2)](2)
+
+          reify(println(x.splice))
+          // res1: scala.reflect.runtime.universe.Expr[Unit] =
+          //   Expr[Unit](scala.this.Predef.println(2))
+        #+end_src
+
+      - Note, HOWEVER,
+        that there is *A requirement* for the argument of ~reify~ to be _valid
+        and typeable Scala code_.
+          If instead of the argument to ~println~ we wanted to abstract over the
+        ~println~ itself, it wouldn't be possible:
+        #+begin_src scala
+          val fn = reify(println)
+          // fn: scala.reflect.runtime.universe.Expr[Unit] =
+          //   Expr[Unit](scala.this.Predef.println())
+
+          reify(fn.splice(2))
+          // <console>:12: error: Unit does not take parameters
+          //             reify(fn.splice(2))
+          //                             ^
+        #+end_src
+        + As we can see,
+          - *the compiler assumes* that we wanted to ~reify~ a call to ~println~
+            with _NO_ arguments,
+
+          - *while* what we _really wanted_ was to capture the name of the function
+            to be called.
+
+        + These types of use-cases are _currently_ *INEXPRESSIBLE* when using ~reify~.
+
+**** DONE Tree Creation via ~parse~ on ~ToolBox~'es
+     CLOSED: [2020-07-04 Sat 22:07]
+     - ~Toolbox~'es can be used to
+       + typecheck
+       + compile
+       + execute /abstract syntax trees/.
+
+     - A /toolbox/ can also be used to *parse* a string *into* an /AST/.
+
+     - Note:
+       Using /toolboxes/ requires =scala-compiler.jar= to be on the /classpath/.
+
+     - Let's see how ~parse~ deals with the ~println~ example from the previous
+       section:
+       #+begin_src scala
+         import scala.reflect.runtime.universe._
+         import scala.tools.reflect.ToolBox
+
+         val tb = runtimeMirror(getClass.getClassLoader).mkToolBox()
+         // tb: scala.tools.reflect.ToolBox[scala.reflect.runtime.universe.type] =
+         //   scala.tools.reflect.ToolBoxFactory$ToolBoxImpl@7bc979dd
+
+         showRaw(tb.parse("println(2)"))
+         // res2: String = Apply(Ident(TermName("println")), List(Literal(Constant(2))))
+       #+end_src
+
+     - =IMPORTANT=
+       It's important to note that, _UNLIKE_ ~reify~,
+       /toolboxes/ are _NOT LIMITED_ by the typeability requirement–
+       although this flexibility is achieved *by SACRIFICING robustness*.
+       + That is, here we can see that ~parse~, unlike ~reify~, *doesn't reflect*
+         the fact that ~println~ should be bound to the standard ~println~ /method/.
+
+     - *CAUTION*
+       when using /macros/, one *SHOULDN'T* use ~ToolBox.parse~.
+       This is because there's _ALREADY_ a ~parse~ /method/ _built into_ the
+       /macro context/.
+       + For example:
+         #+begin_src scala
+           import scala.language.experimental.macros
+
+           def impl(c: scala.reflect.macros.Context) = c.Expr[Unit](c.parse("println(2)"))
+
+           def test: Unit = macro impl
+
+           // In another file!!!
+           test
+           //// 2
+         #+end_src
+
 ***** Typechecking with ~ToolBox~'es
+      - As earlier alluded to, ~ToolBox~'es enable one to do more than just
+        constructing trees from strings. They can also be used to typecheck,
+        compile, and execute trees.
 
-**** Tree Creation via Manual Construction
+      - In addition to outlining the structure of the program, trees also hold
+        important information about the semantics of the program encoded in ~symbol~
+        (a symbol assigned to trees that introduce or reference definitions), and
+        ~tpe~ (the type of the tree). By default these fields are empty, but
+        typechecking fills them in.
+
+      - When using the runtime reflection framework, typechecking is implemented by
+        ~ToolBox.typeCheck~. When using macros, at compile time one can use the
+        ~Context.typeCheck~ method.
+        #+begin_src scala
+          import scala.reflect.runtime.universe._
+
+          val tree = reify { "test".length }.tree
+          // tree: scala.reflect.runtime.universe.Tree = "test".length()
+
+          import scala.tools.reflect.ToolBox
+
+          val tb = runtimeMirror(getClass.getClassLoader).mkToolBox()
+          // tb: scala.tools.reflect.ToolBox[scala.reflect.runtime.universe.type] = ...
+
+          val ttree = tb.typeCheck(tree)
+          // ttree: tb.u.Tree = "test".length()
+
+          ttree.tpe
+          // res5: tb.u.Type = Int
+
+          ttree.symbol
+          // res6: tb.u.Symbol = method length
+        #+end_src
+
+      - Here, we simply create a tree that represents a call to ~"test".length~,
+        and use ~ToolBox~ ~tb~'s ~typeCheck~ method to typecheck the tree. As we
+        can see, ~ttree~ gets the correct type, ~Int~, and its ~Symbol~ is
+        correctly set.
+
+**** DONE Tree Creation via Manual Construction
+     CLOSED: [2020-07-04 Sat 22:34]
+     If all else fails, one can manually construct /trees/.
+
+     - It is obvious that manual construction of a ~Tree~
+       + is the most _low-level_ way to create /trees/,
+
+       + should _only_ be attempted if _no other approach_ works.
+
+       + sometimes offers
+         * *greater flexibility* when compared with ~parse~,
+         * though this /flexibility/ is achieved _at a COST of_ *excessive verbosity
+           and fragility*.
+
+     - Our earlier example involving ~println(2)~ can be manually constructed as
+       follows:
+       #+begin_src scala
+         Apply(Ident(TermName("println")), List(Literal(Constant(2))))
+         // res0: scala.reflect.runtime.universe.Apply = println(2)
+       #+end_src
+
+     - The canonical use case for this technique is when the target /tree/ _needs
+       to be assembled from dynamically created parts_, which do _NOT_ make sense
+       in isolation from one another.
+       + In that case, =TODO=
+         * ~reify~ will most likely be inapplicable, because it requires its argument
+           to be typeable.
+
+         * ~parse~ might not work either, since quite often, /trees/ are assembled
+           on _sub-expression level_, with individual parts being *INEXPRESSIBLE
+           as Scala sources*. =from Jian= Need Examples!!!
 
 * TODO Annotations, Names, Scopes, and More
   - Contributors:

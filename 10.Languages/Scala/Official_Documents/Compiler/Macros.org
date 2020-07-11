@@ -2,13 +2,117 @@
 #+VERSION: 2.13.3
 #+STARTUP: entitiespretty
 
-* Use Cases
-* Blackbox Vs Whitebox
-** Why macros work?
-** Blackbox and whitebox macros
-** Codifying the distinction
+* DONE Use Cases
+  CLOSED: [2020-07-04 Sat 23:32]
+  - Author:
+    Eugene Burmako
 
-* Def Macros
+  - Contributors:
+    + SethTisue
+    + komainu8
+    + ashawley
+    + f0ster
+    + heathermiller
+
+  - The recent talk _"What Are Macros Good For?"_ describes and systemizes uses that
+    /macros/ found among Scala 2.10 users. The thesis of the talk is that /macros/
+    are good for
+    + code generation,
+
+    + static checking
+
+    + DSLs
+
+  - The adoption of /Scala macros/ is illustrated with a number of examples from
+    research and industry.
+
+  - We have also published a paper in the Scala'13 workshop, _"Scala Macros: Let
+    Our Powers Combine!"_, covering the state of the art of macrology in Scala
+    2.10 from a more academic point of view. In the paper we show how the /rich
+    syntax/ and /static types/ of Scala synergize with /macros/ and explore how
+    /macros/ enable new and unique ways to use pre-existing language features.
+
+* TODO Blackbox Vs Whitebox
+  _SEPARATION_ of /macros/ into /blackbox/ ones and /whitebox/ ones is a feature
+  of Scala 2.11.x and Scala 2.12.x.
+
+  - The blackbox/whitebox separation is *NOT supported* _in Scala 2.10.x._
+
+  - It is also *NOT supported* in /macro paradise/ _for Scala 2.10.x._
+
+** TODO Why macros work? - =RE-READ=
+** TODO Blackbox and whitebox macros
+   - However sometimes def macros transcend the notion of "just a regular method".
+     For example, it is possible for a macro expansion to yield an expression of
+     a type that is more specific than the return type of a macro. In Scala
+     2.10, such expansion will retain its precise type as highlighted in the
+     “Static return type of Scala macros” article at Stack Overflow.
+
+   - This curious feature provides additional flexibility, enabling fake type
+     providers, extended vanilla materialization, fundep materialization and
+     extractor macros, but it also sacrifices clarity - both for humans and for
+     machines.
+
+   - To concretize the crucial distinction between macros that behave just like
+     normal methods and macros that refine their return types, we introduce the
+     notions of blackbox macros and whitebox macros. Macros that faithfully
+     follow their type signatures are called blackbox macros as their
+     implementations are irrelevant to understanding their behaviour (could be
+     treated as black boxes). Macros that can’t have precise signatures in
+     Scala’s type system are called whitebox macros (whitebox def macros do have
+     signatures, but these signatures are only approximations).
+
+   - We recognize the importance of both blackbox and whitebox macros, however we
+     feel more confidence in blackbox macros, because they are easier to
+     explain, specify and support. Therefore our plans to standardize macros
+     only include blackbox macros. Later on, we might also include whitebox
+     macros into our plans, but it’s too early to tell.
+
+** TODO Codifying the distinction
+   - In the 2.11 release, we take first step of standardization by expressing the
+     distinction between blackbox and whitebox macros in signatures of def
+     macros, so that scalac can treat such macros differently. This is just a
+     preparatory step, so both blackbox and whitebox macros remain experimental
+     in Scala 2.11.
+
+   - We express the distinction by replacing ~scala.reflect.macros.Context~ with
+     ~scala.reflect.macros.blackbox.Context~ and ~scala.reflect.macros.whitebox.Context~.
+     If a /macro impl/ is defined with ~blackbox.Context~ as its first argument,
+     then /macro defs/ that are using it are considered /blackbox/, and analogously
+     for ~whitebox.Context~. Of course, the vanilla ~Context~ is still there for
+     compatibility reasons, but it issues a deprecation warning encouraging to
+     choose between /blackbox and whitebox macros/.
+
+   - /Blackbox def macros/ are *treated DIFFERENTLY* from /def macros/ of Scala 2.10.
+     The following restrictions are applied to them by the /Scala typechecker/:
+     1. When an application of a blackbox macro expands into tree x, the expansion
+        is wrapped into a type ascription (x: T), where T is the declared return
+        type of the blackbox macro with type arguments and path dependencies
+        applied in consistency with the particular macro application being
+        expanded. This invalidates blackbox macros as an implementation vehicle
+        of type providers.
+
+     2. When an application of a blackbox macro still has undetermined type
+        parameters after Scala’s type inference algorithm has finished working,
+        these type parameters are inferred forcedly, in exactly the same manner
+        as type inference happens for normal methods. This makes it impossible
+        for blackbox macros to influence type inference, prohibiting fundep
+        materialization.
+
+     3. When an application of a blackbox macro is used as an implicit candidate,
+        no expansion is performed until the macro is selected as the result of
+        the implicit search. This makes it impossible to dynamically calculate
+        availability of implicit macros.
+
+     4. When an application of a blackbox macro is used as an extractor in a
+        /pattern match/, it triggers an unconditional compiler error, preventing
+        customizations of pattern matching implemented with macros.
+
+   - /Whitebox def macros/ work *exactly like* /def macros/ used to work in Scala 2.10.
+     + No restrictions of any kind get applied, so everything that could be done with
+       /macros in 2.10/ should be possible in 2.11 and 2.12.
+
+* TODO Def Macros
 ** Intuition
 *** Generic macros
 
