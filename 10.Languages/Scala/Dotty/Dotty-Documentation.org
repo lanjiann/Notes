@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.26.0-bin-20200702-ffd6a58-NIGHTLY
+#+VERSION: 0.26.0-bin-20200710-a162b7b-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 
@@ -448,7 +448,7 @@
 
 ** TODO ENUMS
 *** DONE Enumerations
-    CLOSED: [2019-07-02 Tue 13:11]
+    CLOSED: [2020-07-10 Fri 23:57]
     An /enumeration/ is used to define a /type/ consisting of _a set of NAMED values._
 
     - Example:
@@ -457,13 +457,16 @@
           case Red, Green, Blue
         }
       #+end_src
-      + This defined a new ~sealed~ /class/ ~Color~ with 3 values: ~Color.Red~,
-        ~Color.Green~, ~Color.Blue~.
+      Desugare to core Scala features are explained in the section _Translation_.
+      + This defined a new ~sealed~ /class/ ~Color~ with 3 values:
+        * ~Color.Red~
+        * ~Color.Green~
+        * ~Color.Blue~
 
       + The _color values_ are members of ~Color~'s /companion object/.
 
 **** DONE Parameterized enums
-     CLOSED: [2019-11-10 Sun 22:12]
+     CLOSED: [2020-07-10 Fri 19:08]
      /Enums/ CAN BE _parameterized_:
      #+begin_src scala
        enum Color(val rgb: Int) {
@@ -476,10 +479,9 @@
      _EXPLICIT_ ~extends~ /clause/.
 
 **** DONE Methods defined for enums
-     CLOSED: [2019-11-10 Sun 22:12]
+     CLOSED: [2020-07-10 Fri 19:15]
      - The values of an /enum/ correspond to _UNIQUE integers_.
-
-     - The _integer_ associated with an /enum value/ is returned by its ~ordinal~
+       The _integer_ associated with an /enum value/ is returned by its ~ordinal~
        /method/.
 
      - Example:
@@ -492,18 +494,15 @@
        #+end_src
 
      - The /companion object/ of an /enum/ also defines *TWO* utility /methods/.
-       + ~valueOf~: obtain an /enum value/ by its _name_.
-       + ~values~: returns _ALL_ /enum values/ defined in an enumeration in an ~Array~.
-       #+begin_src scala
-         Color.valueOf("Blue")
-         // val res0: Color = Blue
+       + ~valueOf~: obtain an /enum value/ by its _name_:
+         ~Color.valueOf("Blue")  // val res0: Color = Blue~
 
-         Color.values
-         // val res1: Array[Color] = Array(Red, Green, Blue)
-       #+end_src
+       + ~values~: returns _ALL_ /enum values/ defined in an enumeration in an
+         ~Array~:
+         ~Color.values  // val res1: Array[Color] = Array(Red, Green, Blue)~
 
 **** DONE User-defined members of enums
-     CLOSED: [2019-11-10 Sun 22:12]
+     CLOSED: [2020-07-10 Fri 19:23]
      It is _possible_ to add your own definitions to an /enum/.
 
      - Example:
@@ -524,42 +523,45 @@
          }
        #+end_src
 
-     - It is also possible to define an explicit /companion object/ for an /enum/:
+     - It is also possible to define an *EXPLICIT* /companion object/ for an /enum/:
        #+begin_src scala
          object Planet {
            def main(args: Array[String]) = {
              val earthWeight = args(0).toDouble
              val mass = earthWeight / Earth.surfaceGravity
-             values map { p =>
+             for (p <- values)
                println(s"Your weight on $p is ${p.surfaceWeight(mass)}")
-             }
            }
          }
        #+end_src
+       + =from Jian= ???
+         Before compiling, will ~case~'s be merged into the generated /companion
+         object/???
 
 **** DONE Compatibility with Java Enums
-     CLOSED: [2019-07-02 Tue 10:37]
+     CLOSED: [2020-07-10 Fri 21:53]
      If you want to use a enum in Scala in Java, you need to extends
      ~java.lang.Enum[T]~, where ~T~ is your _enum type name_.
      - Example
        #+begin_src scala
          enum Color extends java.lang.Enum[Color] { case Red, Green, Blue }
-       #+end_src
 
-     - Example
-       #+begin_src scala
+         // Use `Color` as you would use a Java enum:
          Color.Red.compareTo(Color.Green)
          // val res15: Int = -1
        #+end_src
+       + There is _NO need to provide_ /constructor arguments/ (as defined in the
+         Java API docs) to ~java.lang.Enum~ when extending it – _the compiler will
+         GENERATE them AUTOMATICALLY._
 
      - For a more in-depth example of using Scala 3 /enums/ from Java, see this
-       test (in GITHUB dotty project repo). In the test, the /enums/ are defined
-       in the ~MainScala.scala~ file and used from a Java source, ~Test.java~.
+       test (in GITHUB dotty project repo) -- the /enums/ are defined in the
+       ~MainScala.scala~ file and used from a Java source, ~Test.java~.
 
 **** DONE Implementation
-     CLOSED: [2019-07-02 Tue 13:11]
-     /Enums/ are represented as ~sealed~ /classes/ that extend the ~scala.Enum~
-     /trait/.
+     CLOSED: [2020-07-10 Fri 23:56]
+     /Enums/ are represented as ~sealed~ /abstract classes/ that extend the
+     ~scala.Enum~ /trait/.
 
      - ~scala.Enum~ defines a _SINGLE_ /public method/, ~ordinal~:
        #+begin_src scala
@@ -585,18 +587,19 @@
        #+end_src
 
      - /Enum values/ *WITHOUT* ~extends~ /clauses/ all share a single implementation
-       that can be instantiated using a /private method/ that takes a tag and a name
-       as arguments.
+       that can be instantiated using a /private method/ that takes _a tag (=from Jian=
+       /ordinal/???)_ and _a name_ as /arguments/.
          For instance, ~Color.Red~ would expand to
          #+begin_src scala
            val Red: Color = $new(0, "Red")
          #+end_src
 
 **** TODO Reference
+     For more info, see [[https://github.com/lampepfl/dotty/issues/1970][Issue #1970]] and [[https://github.com/lampepfl/dotty/pull/4003][PR #4003]].
 
 *** DONE Algebraic Data Types
-    CLOSED: [2019-07-02 Tue 13:35]
-    The ~enum~ concept is general enough to ALSO support ADTs and GADTs. =TODO=
+    CLOSED: [2020-07-11 Sat 01:28]
+    The ~enum~ concept is general enough to ALSO support ADTs and GADTs.
 
     - Example:
       #+begin_src scala
@@ -605,6 +608,11 @@
           case None
         }
       #+end_src
+      + ~case Some~ is a shorthand for writing a /case class/ that _extends_
+        ~Option~.
+
+      + ~None~ is NOT parameterized, it is treated as a _normal_ enum value.
+
       + The ~extends~ clauses can be given explicitly:
         #+begin_src scala
           enum Option[+T] {
@@ -613,37 +621,49 @@
           }
         #+end_src
 
-      + If ~Option~ was /non-variant/, you'd need to give the ~extends~ /clause/
-        of None *EXPLICITLY*.
+      + Note:
+        The /parent type/ of the ~None~ value is inferred as ~Option[Nothing]~.
+        Generally,
+        * all /covariant/ /type parameters/ of the /enum class/ are *minimized* in
+          a compiler-generated ~extends~ clause
 
-    - Generally, for /enum classes/
-      + all /covariant type parameters/  are *minimized* in a compiler-generated
-        ~extends~ /clause/
+        * whereas all /contravariant/ /type parameters/ are *maximized*.
 
-      + all /contravariant type parameters/ are *maximized*.
+        * If ~Option~ was /non-variant/, you would need to give the ~extends~
+          /clause/ of ~None~ *EXPLICITLY*.
 
-    - If not directly ~new~ a enumeration, a type is always its parent.
+    - If not directly ~new~ a enumeration, the /type/ is always its parent.
       For example,
+      + ~Option.Some(2)~ is of /type/ ~Option[Int]~
+      + ~Option.None~ is of /type/ ~Option[Nothing]~
+      + ~new Option.Some(2)~ is of /type/ ~Option.Some[Int]~
+
+    - As all other enums, ADTs can define methods.
       #+begin_src scala
-        Option.Some("hello")
-        // val res1: t2.Option[String] = Some(hello)
+        enum Option[+T] {
+          case Some(x: T)
+          case None
 
-        Option.None
-        // val res2: t2.Option[Nothing] = None
+          def isDefined: Boolean = this match {
+            case None => false
+            case some => true
+          }
+        }
 
-        new Option.Some(2)
-        // res3: t2.Option.Some[Int] = Some(2)
+        object Option {
+          def apply[T >: Null](x: T): Option[T] =
+            if (x == null) None else Some(x)
+        }
       #+end_src
 
-    - /Enumerations/ and /ADTs/ have been presented as two *different concepts*.
-      _BUT_
-      since they share the same syntactic construct, they can be seen simply as
-      two ends of a spectrum and it is perfectly possible to construct hybrids.
-      For instance, the code below gives an implementation of Color either with
-      three enum values or with a parameterized case that takes an RGB value.
-      TODO TODO TODO
-      TODO TODO TODO
-      TODO TODO TODO
+    - /Enumerations/ and /ADTs/ have been presented as two *DIFFERENT concepts*.
+      _BUT_ since they _share the SAME /syntactic construct/,_
+      1. they can be seen simply as two ends of a spectrum
+         AND
+      2. it is perfectly possible to construct *hybrids*.
+
+    - For instance, the code below gives an implementation of ~Color~ either with
+      three /enum values/ or with a /parameterized case/ that takes an RGB value.
       #+begin_src scala
         enum Color(val rgb: Int) {
           case Red           extends Color(0xFF0000)
@@ -658,23 +678,140 @@
      - TODO NOTE
 
 **** TODO Reference
+     For more info, see [[https://github.com/lampepfl/dotty/issues/1970][Issue #1970]].
 
 *** TODO Translation
     # *Translation of Enum and ADTs*
-    1.
-    2.
-    3.
-    4.
-    5.
-    6.
-    7.
-    8.
-    9.
+    1. An ~enum~ definition
+       + ~enum E ... { <defs> <cases> }~ expands to
+         * a ~sealed abstract class~ that extends the ~scala.Enum~ /trait/
+           AND
+         * an associated /companion object/ that CONTAINS the _defined cases_,
+           =TODO= expanded according to rules (2 - 8) =TODO=.
 
-**** Translation of Enumerations
-**** Scopes for Enum Cases
-**** Translation of Java-compatible enums
-**** Other Rules
+       + The /enum trait/
+         * _starts with_ a compiler-generated import that imports the names ~<caseIds>~
+           of all cases _so that they can be used WITHOUT prefix *IN* the trait._
+           #+begin_src scala
+             sealed abstract class E ... extends <parents> with scala.Enum {
+               import E.{ <caseIds> }
+               <defs>
+             }
+
+             object E { <cases> }
+           #+end_src
+
+    2. =TODO= Re-write =TODO= A /simple case/ consisting of a comma-separated list
+       of enum names:
+       ~case C_1, ..., C_n~ expands to ~case C_1; ...; case C_n~
+       + Any /modifiers/ or /annotations/ on the ORIGINAL case _extend_ to ALL
+         EXPANDED cases.
+
+    3. For a /enum/ ~E~, its /simple case/
+       ~case C~ -----> ~val C = $new(n, "C")~.
+       + Here, ~$new~ is a /private method/ that creates an instance of ~E~
+         (=TODO= see below).
+
+    4. For a enum ~E[V1 T1 >: L1 <: U1, ..., Vn Tn >: Ln <: Un]~, where _n > 0_ and
+       the /variances/ ~Vi~ is either ~+~ or ~\minus~,
+       /simple case/ ~case C~ -----> ~case C extends E[B1, ..., Bn]~, where
+       ~Bi~ is ~Li~ if ~Vi~ is ~+~ and ~Ui~ if ~Vi~ is ~\minus~.
+       + =TODO= This result is then further rewritten with *rule (8)*.
+
+       + /Simple cases/ of /enums/ with /NON-VARIANT/ /type parameters/ are *not
+         permitted* (however /value cases/ with *EXPLICIT* ~extends~ clause are)
+         =TODO= ??? =TODO=
+
+    5. For a ~enum E~, its /class case/
+       ~case C <type-params> <value-params>~  ----->
+       ~case C <type-parmas> <value-parmas> extends E~.
+       + =TODO= This result is then further rewritten with *rule (9)*.
+
+    6. For a ~enum E[Ts]~, its /class case/ with NEITHER /type parameters/ NOR an
+       ~extends~ clause
+       ~case C <value-params>~ -----> ~case C[Ts] <value-params> extends E[Ts]~.
+       + =TODO= This result is then further rewritten with *rule (9)*.
+       + For /class cases/ that have /type parameters/ themselves, an /extends
+         clause/ needs to be GIVEN EXPLICITLY.
+
+    7. For a ~enum E[Ts]~,
+       its /class case/
+       ~case C <value-params> extends <parents>~ ----->
+       ~case C[Ts] <value-parmas> extends <parents>~
+       *provided* at least one of the /type parameters/ ~Ts~ is mentioned
+       + in a /parameter type/ in ~<value-params>~
+         OR
+       + in a /type argument/ in ~<parents>~.
+
+    8. ~enum E[Ts]~'s /value case/
+       ~case C extends <parents>~ ----->
+       ~val C = new <pareents> { <body>; def ordinal = n; $values.register(this) }~
+       in ~E~'s /companion object/, and
+       + ~n~ starting from ~0~.
+
+       + The statement ~$values.register(this)~ registers the value as one of the
+         ~values~ of the enumeration (=TODO= see below). ~$values~ is a
+         /compiler-defined _private_ value/ in the /companion object/.
+
+       + The /anonymous class/ (the value referenced by ~C~) also implements the
+         /abstract/ ~Product~ /methods/ that it inherits from ~Enum~.
+
+       + It's an *error*
+         if a /value case/ referes to a /type parameter/ of the enclosing ~enum~
+         in a /type argument/ of ~<parents>~.
+
+    9. ~enum E[Ts]~'s /class case/
+       ~case C <params> extends <parents>~ ----->
+       ~final case class C <params> extends <parents>~ in ~E~'s /companion object/.
+       + However, *unlike* for a REGULAR /case class/, the return type of the associated
+         ~apply~ method is a /fully parameterized type instance/ of the /enum class/
+         ~E~ itself instead of ~C~.
+
+       + ~ordinal~ /method/ is defined as ~def ordinal = n~, where ~n~ the /ordinal
+         number/ of the /case/ in the /companion object/, starting from ~0~.
+
+       + It is an *error*
+         if a /value case/ refers to a /type parameter/ of the ENCLOSING ~enum~
+         in a /parameter type/ in ~<params>~ or in a /type argument/ of ~<parents>~,
+         unless that parameter is already a /type parameter/ of the case, i.e. the
+         parameter name is defined in <params>.
+
+**** TODO Translation of Enumerations
+     - enumerations :: /non-generic enums/ that define one or more *singleton* cases.
+
+     - /Companion objects/ of /enumerations/ define the following additional
+       /synthetic members/.
+       + A /method/ ~valueOf(name: String): E~.
+         It returns the singleton case value whose toString representation is
+         name.
+
+       + A /method/ ~values~ which returns an ~Array[E]~ of *ALL* /singleton case/
+         values in ~E~, _in the *ORDER* of their definitions._
+
+     - /Companion objects/ of /enumerations/ that contain _at least_ one /simple case/
+       define in addtion:
+       + A /private method/ ~$new~ which defines a new simple /case value/ with given
+         /ordinal number/ and /name/.
+         This /method/ can be thought as being defined as follows:
+         #+begin_src scala
+           private of $new(_$ordinal: Int, $name: String) = new E {
+             def $ordinal = $_ordinal
+             override def toString = $name
+             $values.register(this)  // register enum value so that `valueOf` and `values` can return it.
+           }
+         #+end_src
+
+     - The /anonymous class/ also implements the /abstract/ ~Product~ /methods/
+       that it _inherits_ from ~Enum~. The ~$ordinal~ /method/ above is used to
+       generate the ~ordinal~ /method/ if the /enum/ does NOT /extend/ a
+       ~java.lang.Enum~ *(as /Scala enums/ do NOT /extend/ ~java.lang.Enums~ unless
+       explicitly specified)*.
+         In case it does, there is no need to generate ~ordinal~ as
+       ~java.lang.Enum~ defines it.
+
+**** TODO Scopes for Enum Cases
+**** TODO Translation of Java-compatible enums
+**** TODO Other Rules
 
 ** TODO CONTEXTUAL ABSTRACTIONS
 *** TODO Overview
@@ -1485,15 +1622,451 @@
 
 **** TODO Summary
 
-*** TODO Type class Derivation
-    # Type class Derivation
-**** Types supporting ~derives~ clauses
-**** Type classes supporting automatic deriving
-***** How to write a type class ~derived~ method using low level mechanisms
+*** TODO Type Class Derivation
+    # Type Class Derivation
+    /Type class derivation/ is a way to *automatically* GENERATE /given instances/
+    for /type classes/ which satisfy some simple conditions.
 
-**** Deriving instances elsewhere
-**** Syntax
-**** Discussion
+    - A /type class/ in this sense is *ANY* /trait/ or /class/ with *one* /type
+      parameter/ determining the type being operated on.
+
+    - Common examples of /type class/ are ~Eq~, ~Ordering~, or ~Show~.
+
+    - For example, given the following ~Tree~ algebraic data type (ADT) with a
+      ~dervies~ clause,
+      #+begin_src scala
+        enum Tree[T] derives Eq, Ordering, Show {
+          case Branch(left: Tree[T], right: Tree[T])
+          case Left(elem: T)
+        }
+      #+end_src
+      + _The ~derives~ clause_ *generates* the following /given instances/ for the
+        ~Eq~, ~Ordering~ and ~Show~ /type classes/ in the /companion object/ of ~Tree~,
+        #+begin_src scala
+          given [T: Eq]       as Eq[Tree[T]]    = Eq.derived
+          given [T: Ordering] as Ordering[Tree] = Ordering.derived
+          given [T: Show]     as Show[Tree]     = Show.derived
+        #+end_src
+
+      + We say that
+        * ~Tree~ is the /deriving type/
+        * the ~Eq~, ~Ordering~ and ~Show~ /given instances/ are /derived instances/.
+
+**** DONE Types supporting ~derives~ clauses - =TODO=
+     CLOSED: [2020-07-08 Wed 16:20]
+     *ALL* data types CAN HAVE _a ~derives~ clause_.
+
+     - This document FOCUSES PRIMARILY on data types which also have a /given
+       instance/ of the ~Mirror~ /type class/ available.
+
+     - /Instances/ of the ~Mirror~ /type class/ are generated *AUTOMATICALLY* by
+       the compiler for,
+       + /enums/ and /enum cases/
+       + /case classes/ and /case objects/
+       + /sealed classes or traits/ that have *ONLY* /case classes/ and /case
+         objects/ as children
+
+     - ~Mirror~ /type class instances/ provide
+       + information at the type level about the components and labelling of the /type/.
+       + minimal term level infrastructure to allow higher level libraries to provide
+         comprehensive derivation support.
+
+     - ~Mirror~ /type class/ definition
+       #+begin_src scala
+         sealed trait Mirror {
+
+           /** The mirrored *-type */
+           type MirroredMonoType
+
+           /** The name of the type */
+           type MirroredLabel <: String
+
+           /** The names of the elements of the type */
+           type MirroredElemLabels <: Tuple
+         }
+
+         object Mirror {
+
+           /** The Mirror for a product type */
+           trait Product extends Mirror {
+             /** Create a new instance of type `T` with elements taken from product `p`. */
+             def fromProduct(p: scala.Product): MirroredMonoType
+           }
+
+           trait Sum extends Mirror { self =>
+             /** The ordinal number of the case class of `x`. For enums, `ordinal(x) == x.ordinal` */
+             def ordinal(x: MirroredMonoType): Int
+           }
+
+           trait Singleton extends Product {
+             type MirroredMonoType = this.type
+             type MirroredType = this.type
+             type MirroredElemTypes = EmptyTuple
+             type MirroredElemLabels = EmptyTuple
+             def fromProduct(p: scala.Product) = this
+           }
+
+           type Of[T]        = Mirror { type MirroredType = T; type MirroredMonoType = T ; type MirroredElemTypes <: Tuple }
+           type ProductOf[T] = Mirror.Product { type MirroredType = T; type MirroredMonoType = T ; type MirroredElemTypes <: Tuple }
+           type SumOf[T]     = Mirror.Sum { type MirroredType = T; type MirroredMonoType = T; type MirroredElemTypes <: Tuple }
+         }
+       #+end_src
+       + ~Product~ types (i.e. /case classes and objects/, and /enum cases/) have
+         /mirrors/ which are *subtypes* of ~Mirror.Product~.
+
+       + ~Sum~ types (i.e. /sealed class/ or /traits with product children/, and
+         /enums/) have /mirrors/ which are *subtypes* of ~Mirror.Sum~.
+
+     - For the ~Tree~ ADT from above the following ~Mirror~ instances will be *automatically*
+       provided by the compiler,
+       #+begin_src scala
+         // Mirror for Tree
+         Mirror.Sum {
+           type MirroredType = Tree[_]
+           type MirroredElemTypes = (Tree.Branch[_], Tree.Leaf[_])
+           type MirroredMonoType = Tree[_]
+           type MirroredLabels = "Tree"
+           type MirroredElemLabels = ("Branch", "Leaf")
+
+           def ordinal(x: MirroredMonoType): Int = x match {
+             case _: Tree.Branch[_] => 0
+             case _: Tree.Leaf[_]   => 1
+           }
+         }
+
+         // Mirror for Branch
+         Mirror.Product {
+           type MirroredType = Tree.Branch[_]
+           type MirroredElemTypes = (Tree[_], Tree[_])
+           type MirroredMonoType = Tree.Branch[_]
+           type MirroredLabels = "Branch"
+           type MirroredElemLabels = ("left", "right")
+
+           def fromProduct(p: Product): MirroredMonoType =
+             new Tree.Branch(...)
+         }
+
+         // Mirror for Leaf
+         Mirror.Product {
+           type MirroredType = Tree.Leaf[_]
+           type MirroredElemTypes = Tuple1[_]
+           type MirroredMonoType = Tree.Leaf[_]
+           type MirroredLabels = "Leaf"
+           type MirroredElemLabels = Tuple1["elem"]
+
+           def fromProduct(p: Product): MirroredMonoType =
+             new Tree.Leaf(...)
+         }
+       #+end_src
+
+     - Note the following properties of ~Mirror~ /types/,
+       + Properties are encoded _using /types/ RATHER THAN /terms/._
+         This means that
+         * they have _no_ runtime footprint _unless_ used
+         * they are a _compile time feature_ for use with Dotty's metaprogramming
+           facilities.
+
+       + The /kinds/ of ~MirroredType~ and ~MirroredElemTypes~ match the /kind/
+         of the data type the /mirror/ is an instance for.
+         * This allows ~Mirror~'s to support /ADTs/ of *all* /kinds/.
+
+       + There is NO distinct representation type for /sums/ or /products/ (ie.
+         there is no ~HList~ or ~Coproduct~ type as in Scala 2 versions of shapeless).
+           Instead the collection of child types of a data type is represented by
+         an ordinary, possibly parameterized, /tuple type/.
+         * Dotty's metaprogramming facilities can be used to work with these /tuple
+           types/ as-is, and _higher level libraries_ can be *built on top of them*.
+
+       + For both /product/ and /sum/ types, the elements of ~MirroredElemTypes~
+         are arranged in *definition order* (i.e. ~Branch[T]~ precedes ~Leaf[T]~ in
+         ~MirroredElemTypes~ for ~Tree~ because ~Branch~ is defined _BEFORE_ ~Leaf~
+         in the source file).
+         * This means that ~Mirror.Sum~ *differs* in this respect from /shapeless's
+           generic representation/ for ADTs in Scala 2, where the constructors
+           are *ordered alphabetically by name*.
+
+       + The methods ~ordinal~ and ~fromProduct~ are defined in terms of
+         ~MirroredMonoType~ which is the type of /kind-*/ which is obtained from
+         ~MirroredType~ by *wildcarding* its /type parameters/.
+
+**** TODO Type classes supporting automatic deriving
+     - A /trait/ or /class/ can appear in a /derives clause/ if its /companion
+       object/ defines a /method/ named ~derived~.
+
+     - The /signature/ and _implementation_ of a /DERIVED method/ for a /type
+       class/ ~TC[_]~ are arbitrary but it is typically of the following form,
+       #+begin_src scala
+         def derived[T](using Mirror.Of[T]): TC[T] = ...
+       #+end_src
+
+     - That is, the ~derived~ method takes a /context parameter/ of (some /subtype/
+       of) type ~Mirror~ which defines the shape of the /deriving type/ ~T~, and
+       computes the /type class/ _implementation_ according to that shape.
+         This is all that the provider of an ADT with a ~derives~ _clause_ has to
+       know about the _derivation_ of a /type class instance/.
+
+     - Note that ~derived~ methods may have context ~Mirror~ parameters indirectly
+       (e.g. by having a context argument which in turn has a context ~Mirror~
+       parameter, or not at all (e.g. they might use some completely different
+       user-provided mechanism, for instance using Dotty macros or runtime
+       reflection). We expect that (direct or indirect) ~Mirror~ based
+       implementations will be the most common and that is what this document
+       emphasises.
+
+     - Type class authors will most likely use higher level derivation or generic
+       programming libraries to implement ~derived~ methods. An example of how a
+       derived method might be implemented using only the low level facilities
+       described above and Dotty's general metaprogramming features is provided
+       below. It is not anticipated that type class authors would normally
+       implement a ~derived~ method in this way, however this walkthrough can be
+       taken as a guide for authors of the higher level derivation libraries
+       that we expect typical type class authors will use (for a fully worked
+       out example of such a library, see shapeless 3).
+
+***** TODO How to write a type class ~derived~ method using low level mechanisms
+      - The low-level method we will use to implement a type class derived method
+        in this example exploits three new type-level constructs in Dotty:
+        inline methods, inline matches, and implicit searches via summonInline
+        or summonFrom. Given this definition of the Eq type class,
+        #+begin_src scala
+          trait Eq[T] {
+            def eqv(x: T, y: T): Boolean
+          }
+        #+end_src
+        we need to implement a method Eq.derived on the companion object of Eq
+        that produces a given instance for Eq[T] given a Mirror[T].
+
+      - Here is a possible implementation,
+        #+begin_src scala
+          inline given derived[T](using m: Mirror.Of[T]) as Eq[T] = {
+            val elemInstances = summonAll[m.MirroredElemType]          // (1)
+            inline m match {                                           // (2)
+              case s: Mirror.SumOf[T]     => eqSum(s, elemInstances)
+              case p: Mirror.ProductOf[T] => eqProduct(p, elemInstances)
+            }
+          }
+        #+end_src
+
+      - Note that derived is defined as an inline given. This means that the method
+        will be expanded at call sites (for instance the compiler generated
+        instance definitions in the companion objects of ADTs which have a
+        derived Eq clause), and also that it can be used recursively if
+        necessary, to compute instances for children.
+
+      - The body of this method (1) first materializes the Eq instances for all
+        the child types of type the instance is being derived for. This is
+        either all the branches of a sum type or all the fields of a product
+        type. The implementation of summonAll is inline and uses Dotty's
+        summonInline construct to collect the instances as a List,
+        #+begin_src scala
+          inline def summonAll[T <: Tuple]: List[Eq[_]] = inline erasedValue[T] match {
+            case _: Unit      => Nil
+            case _: (t *: ts) => summonInline[Eq[t]] :: summonAll[ts]
+          }
+        #+end_src
+        with the instances for children in hand the derived method uses an
+        inline match to dispatch to methods which can construct instances for
+        either sums or products (2). Note that because derived is inline the
+        match will be resolved at compile-time and only the left-hand side of
+        the matching case will be inlined into the generated code with types
+        refined as revealed by the match.
+
+      - In the sum case, eqSum, we use the runtime ordinal values of the arguments
+        to eqv to first check if the two values are of the same subtype of the
+        ADT (3) and then, if they are, to further test for equality based on the
+        Eq instance for the appropriate ADT subtype using the auxiliary method
+        check (4).
+        #+begin_src scala
+          def eqSum[T](s: Mirror.SumOf[T], elems: List[Eq[_]]): Eq[T] =
+            new Eq[T] {
+              def eqv(x: T, y: T): Boolean = {
+                val ordx = s.ordinal(x)                            // (3)
+                                    (s.ordinal(y) == ordx) && check(elems(ordx))(x, y) // (4)
+              }
+            }
+        #+end_src
+
+      - In the product case, ~eqProduct~ we test the runtime values of the arguments
+        to ~eqv~ for equality as products based on the ~Eq~ instances for the fields
+        of the data type (5),
+        #+begin_src scala
+          def eqProduct[T](p: Mirror.ProductOf[T], elems: List[Eq[_]]): Eq[T] =
+            new Eq[T] {
+              def eqv(x: T, y: T): Boolean =
+                iterator(x).zip(iterator(y)).zip(elems.iterator).forall {  // (5)
+                  case ((x, y), elem) => check(elem)(x, y)
+                }
+            }
+        #+end_src
+
+      - Pulling this all together we have the following complete implementation,
+        #+begin_src scala
+          import scala.deriving._
+          import scala.compiletime.{erasedValue, summonInline}
+
+          inline def summonAll[T <: Tuple]: List[Eq[_]] = inline erasedValue[T] match {
+            case _: Unit => Nil
+            case _: (t *: ts) => summonInline[Eq[t]] :: summonAll[ts]
+          }
+
+          trait Eq[T] {
+            def eqv(x: T, y: T): Boolean
+          }
+
+          object Eq {
+            given Eq[Int] {
+              def eqv(x: Int, y: Int) = x == y
+            }
+
+            def check(elem: Eq[_])(x: Any, y: Any): Boolean =
+              elem.asInstanceOf[Eq[Any]].eqv(x, y)
+
+            def iterator[T](p: T) = p.asInstanceOf[Product].productIterator
+
+            def eqSum[T](s: Mirror.SumOf[T], elems: List[Eq[_]]): Eq[T] =
+              new Eq[T] {
+                def eqv(x: T, y: T): Boolean = {
+                  val ordx = s.ordinal(x)
+                  (s.ordinal(y) == ordx) && check(elems(ordx))(x, y)
+                }
+              }
+
+            def eqProduct[T](p: Mirror.ProductOf[T], elems: List[Eq[_]]): Eq[T] =
+              new Eq[T] {
+                def eqv(x: T, y: T): Boolean =
+                  iterator(x).zip(iterator(y)).zip(elems.iterator).forall {
+                    case ((x, y), elem) => check(elem)(x, y)
+                  }
+              }
+
+            inline given derived[T](using m: Mirror.Of[T]) as Eq[T] = {
+              val elemInstances = summonAll[m.MirroredElemTypes]
+              inline m match {
+                case s: Mirror.SumOf[T]     => eqSum(s, elemInstances)
+                case p: Mirror.ProductOf[T] => eqProduct(p, elemInstances)
+              }
+            }
+          }
+        #+end_src
+        we can test this relative to a simple ADT like so,
+        #+begin_src scala
+          enum Opt[+T] derives Eq {
+            case Sm(t: T)
+                case Nn
+          }
+
+          object Test extends App {
+            import Opt._
+            val eqoi = summon[Eq[Opt[Int]]]
+            assert(eqoi.eqv(Sm(23), Sm(23)))
+            assert(!eqoi.eqv(Sm(23), Sm(13)))
+            assert(!eqoi.eqv(Sm(23), Nn))
+          }
+        #+end_src
+
+      - In this case the code that is generated by the inline expansion for the
+        derived Eq instance for Opt looks like the following, after a little
+        polishing,
+        #+begin_src scala
+          given derived$Eq[T](using eqT: Eq[T]) as Eq[Opt[T]] =
+            eqSum(summon[Mirror[Opt[T]]],
+                  List(
+                    eqProduct(summon[Mirror[Sm[T]]], List(summon[Eq[T]]))
+                      eqProduct(summon[Mirror[Nn.type]], Nil)
+                  )
+            )
+        #+end_src
+
+      - Alternative approaches can be taken to the way that ~derived~ methods can
+        be defined. For example, more aggressively inlined variants using Dotty
+        macros, whilst being more involved for type class authors to write than
+        the example above, can produce code for type classes like Eq which
+        eliminate all the abstraction artefacts (eg. the ~Lists~ of child
+        instances in the above) and generate code which is indistinguishable
+        from what a programmer might write by hand. As a third example, using a
+        higher level library such as shapeless the type class author could
+        define an equivalent ~derived~ method as,
+        #+begin_src scala
+          given eqSum[A](using inst: => K0.CoproductInstances[Eq, A]) as Eq[A] {
+            def eqv(x: A, y: A): Boolean = inst.fold2(x, y)(false)(
+              [t] => (eqt: Eq[t], t0: t, t1: t) => eqt.eqv(t0, t1)
+            )
+          }
+
+          given eqProduct[A](using inst: K0.ProductInstances[Eq, A]) as Eq[A] {
+            def eqv(x: A, y: A): Boolean = inst.foldLeft2(x, y)(true: Boolean)(
+              [t] => (acc: Boolean, eqt: Eq[t], t0: t, t1: t) => Complete(!eqt.eqv(t0, t1))(false)(true)
+            )
+          }
+
+          inline def derived[A](using gen: K0.Generic[A]) as Eq[A] = gen.derive(eqSum, eqProduct)
+        #+end_src
+
+      - The framework described here enables all three of these approaches without
+        mandating any of them.
+
+      - For a brief discussion on how to use macros to write a type class derived
+        method please read more at How to write a type class derived method using
+        macros.
+
+**** DONE Deriving instances elsewhere
+     CLOSED: [2020-07-07 Tue 21:58]
+     - Sometimes one would like to *derive* a /type class instance/ for an ADT
+       after the ADT is defined, WITHOUT being able to change the code of the ADT
+       itself.
+       + To do this, simply define an instance using the ~derived~ /method/ of
+         the /type class/ as right-hand side.
+
+       + E.g, to implement ~Ordering~ for ~Option~ define,
+         #+begin_src scala
+           given [T: Ordering] as Ordering[Option[T]] = Ordering.derived
+         #+end_src
+
+     - Assuming the ~Ordering.derived~ /method/ has a /context parameter/ of /type/
+       ~Mirror[T]~ it will be satisfied by the compiler generated ~Mirror~ /instance/
+       for ~Option~ and the /derivation/ of the /instance/ will be expanded on the
+       right hand side of this definition in the same way as an instance defined
+       in ADT /companion objects/.
+
+**** TODO Syntax
+**** TODO Discussion
+     - This _/type class/ derivation framework_ is *INTENTIONALLY* very *small* and
+       *low-level*.
+
+     - There are essentially *TWO* pieces of infrastructure in *compiler-generated
+       ~Mirror~ instances*,
+       + /type members/ encoding properties of the /mirrored types/.
+
+       + a MINIMAL value level mechanism for working generically with terms of the
+         /mirrored types/.
+
+     - The ~Mirror~ infrastructure can be seen as an extension of the existing
+       ~Product~ infrastructure for /case classes/: typically ~Mirror~ types
+       will be implemented by the ADTs /companion object/, hence the /type members/
+       and the ~ordinal~ or ~fromProduct~ /methods/ will be members of that object.
+       + The primary motivation for this design decision, and the decision to encode
+         properties via types rather than terms was to keep the bytecode and
+         runtime footprint of the feature small enough to make it possible to
+         provide ~Mirror~ instances *unconditionally*.
+
+     - Whilst ~Mirrors~ encode properties precisely via type members, the value
+       level ~ordinal~ and ~fromProduct~ are somewhat weakly typed (because they
+       are defined in terms of ~MirroredMonoType~) just like the members of ~Product~.
+       This means that code for generic type classes has to ensure that type
+       exploration and value selection proceed in lockstep and it has to assert
+       this conformance in some places using casts. If generic type classes are
+       correctly written these casts will never fail.
+
+     - As mentioned, however, the compiler-provided mechanism is intentionally very
+       low level and it is anticipated that higher level type class derivation
+       and generic programming libraries will build on this and Dotty's other
+       metaprogramming facilities to hide these low-level details from type
+       class authors and general users.
+         _/Type class/ derivation_ in the style of both shapeless and Magnolia are
+       possible (a prototype of shapeless 3, which combines aspects of both
+       shapeless 2 and Magnolia has been developed alongside this language
+       feature) as is a more aggressively inlined style, supported by Dotty's
+       new quote/splice macro and inlining facilities.
 
 *** DONE Multiversal Equality - TODO =RE-READ=
     CLOSED: [2020-05-23 Sat 23:31]
@@ -3275,14 +3848,6 @@
          string (~code~), and *lifts* the result back to an ~Expr[String]~ using
          ~Expr.apply~.
 
-     - Note:
-       Lifting ~String~ to ~Expr[String]~ using ~Expr(code)~ can be ommited by
-       importing an /implicit conversion/ with ~import scala.quoted.autolift._~.
-       + The programmer is able to
-         _declutter_ slightly the code
-         *at the cost of*
-         readable /phase distinction/ between /stages/.
-
 **** TODO Lifting Types - =from Jian= _MECHANISM_
 **** TODO Relationship with ~inline~ _Rationale of Design_
      - First Impression (=from Jian= I add this title):
@@ -3304,8 +3869,9 @@
            inline def assert(inline expr: Boolean): Unit =
              ${ assertImpl('expr) }
 
-           def assertImpl(expr: Expr[Boolean]) =
-             '{ if !($expr) then throw new AssertionError("failed assertion: " + ${expr.show}) }
+           def assertImpl(expr: Expr[Boolean])(using QuoteContext) =
+             val failMsg: Expr[String] = Expr(s"failed assertion: ${expr.show}")
+             '{ if !($expr) then throw new AssertionError($failMsg) }
          }
 
          object App {
@@ -5502,8 +6068,8 @@
 **** Assignment
 
 *** Symbols
-**** ClassSymbol
-**** SymDenotation
+**** ~ClassSymbol~
+**** ~SymDenotation~
 
 ** Debug Macros
 *** position not set
@@ -5516,3 +6082,134 @@
      :PROPERTIES:
      :ID:       b5b2ba1a-6e8d-4f0c-a3c4-14f0e17ee56a
      :END:
+* TODO API
+** dotty
+*** (O) ~DottyPredef~
+
+*** dotty.internal
+**** (O) ~CompileTimeMacros~
+**** (O) ~StringContextMacro~
+
+*** dotty.runtime
+**** (O) ~Arrays~
+**** (O) ~LazyVals~
+
+** scala
+*** (C) ~*:~
+*** (C) ~Conversion~
+*** (O) ~EmptyTuple~
+*** (T) ~Enum~
+*** (T) ~Eql~
+*** (T) ~FunctionXXL~
+*** (T) ~NonEmptyTuple~
+*** (T) ~PolyFunction~
+*** (T) ~Product0~
+*** (T) ~Selectable~
+*** (T) ~Tuple~
+*** (T) ~TupledFunction~
+*** (O) ~deriving~
+*** (C) ~main~
+*** (O) ~opaques~
+
+*** scala.annotation
+**** (T) ~RefiningAnnotation~
+**** (C) ~alpha~
+**** (C) ~constructorOnly~
+**** (C) ~infix~
+**** (C) ~static~
+**** (C) ~superTrait~
+**** (C) ~threadUnsafe~
+
+*** scala.annotation.internal
+**** (C) ~Alias~
+**** (C) ~AnnotationDefault~
+**** (C) ~Body~
+**** (C) ~Child~
+**** (C) ~ContextResultCount~
+**** (C) ~InlineParam~
+**** (C) ~Repeated~
+**** (C) ~SourceFile~
+**** (C) ~WithBounds~
+**** (C) ~sharable~
+**** (C) ~unshared~
+
+*** scala.compiletime.ops
+**** (O) ~any~
+**** (O) ~boolean~
+**** (O) ~int~
+**** (O) ~string~
+
+*** scala.compiletime.testing
+**** (C) ~Error~
+**** (T) ~ErrorKind~
+
+*** scala.implicits
+**** (T) ~LowPriorityNot~
+**** (C) ~Not~
+
+*** scala.internal
+**** (O) ~Chars~
+**** (C) ~MatchCase~
+**** (O) ~TupledFunction~
+**** (C) ~TypeBox~
+**** scala.internal.quoted
+***** (O) ~CompileTime~
+***** (C) ~Expr~
+***** (O) ~Matcher~
+***** (C) ~Type~
+***** (O) ~Unpickler~
+***** (C) ~showName~
+
+*** scala.quoted
+**** (O) ~Const~
+**** (O) ~Consts~
+**** (C) ~Expr~
+**** (O) ~Lambda~
+**** (T) ~Liftable~
+**** (T) ~QuoteContext~
+**** (O) ~Reporting~
+**** (C) ~ScopeException~
+**** (C) ~Type~
+**** (T) ~Unliftable~
+**** (O) ~Unlifted~
+**** (O) ~Varargs~
+**** scala.quoted.show
+***** (T) ~SyntaxHighlight~
+
+**** scala.quoted.unsafe
+***** (O) UnsafeExpr
+
+**** scala.quoted.util
+***** ~ExprMap~
+***** ~Var~
+
+*** scala.reflect
+**** ~Selectable~
+
+*** scala.runtime
+**** ~EnumValue~
+**** ~EnumValues~
+**** ~Tuple~
+**** ~TupleXXL~
+
+*** scala.tasty
+**** (C) ~Reflection~
+**** scala.tasty.reflect
+***** (T) ~CompilerInterface~
+***** (C) ~ExprCastError~
+***** (C) ~ExtractorsPrinter~
+***** (T) ~Printer~
+***** (C) ~SourceCodePrinter~
+***** (T) ~TreeAccumulator~
+***** (T) ~TreeMap~
+***** (T) ~TreeTraverser~
+
+*** scala.util
+**** (O) ~CommandLineParser~
+**** (T) ~FromDigits~
+**** (T) ~FromString~
+**** scala.util.control
+***** (O) ~NonLocalReturns~
+
+** scalaShadowing
+*** (O) ~language~
