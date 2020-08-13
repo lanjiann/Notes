@@ -15,17 +15,16 @@
   CLOSED: [2018-10-28 Sun 12:27]
   - *Shapeless* is a library for /generic programming/ in Scala.
 
-  - *Shapeless* is a large library,
-    we will concentrate on a few compelling use cases
-    and
-    use them to build a picture of the tools and patterns available.
+  - *Shapeless* is a _LARGE_ library, we will
+    1. concentrate on a few compelling use cases
+    2. use them to build a picture of the tools and patterns available.
 
   - Before we start,
     let's talk about *what /generic programming/ is* and *why shapeless is so
     exciting to Scala developers.*
 
 ** DONE 1.1 What is generic programming? - 3
-   CLOSED: [2018-10-28 Sun 12:16]
+   CLOSED: [2020-07-23 Thu 01:43]
    - Background:
      + Q :: What are the pros and cons about /types/?
 
@@ -36,7 +35,7 @@
          - guide us toward solutions when we code.
 
        * con: _TOO specific_
-         Even if some types have same internal structure, for example,
+         Even if some /types/ have same internal structure, for example,
          #+begin_src scala
            case class Employee(name: String, number: Int, manager: Boolean)
            case class IceCream(name: String, numCherries: Int, inCone: Boolean)
@@ -59,49 +58,107 @@
    - =from Jian=
      They are mostly (more 99% situations) NOT considered as the same thing.
      However, Programs is created to solve the real world problem, but you
-     shouldn't always program to simulate real world things (OR redundant info
-     will be mxied in), which often make things unnecessarily complicated.
-
-     This is why we should and we can find generic solution for different things
-     -- they are completely different in the real world, but in an abstraction
-     level we can solve them in the same way -- they have same structure in some
-     problem.
-     =end=
+     shouldn't always program to simulate real world things (IF NOT, redundant
+     info will be mxied in), which often make things unnecessarily complicated.
+       This is why we should and we can find generic solution for different things
+     1. they are completely different in the real world ==> *different /types/*
+     2. BUT *in an abstraction level* we can solve them in the same way -- they
+        have *same structure* in some problem.
 
    - Example:
-     #+BEGIN_SRC scala
-       final case class Employee(name: String, number: Int, manager: Boolean)
-       final case class IceCream(name: String, numCherries: Int, inCone: Boolean)
+     + Without _shapeless_ -- naive way:
+       #+begin_src scala
+         def employeeCsv(e: Employee): List[String] =
+           List(e.name, e.number.toString, e.manager.toString)
 
-       import shapeless._
-       val genericEmployee = Generic[Employee].to(Employee("Dave", 123, false))
-       // genericEmployee: String :: Int :: Boolean :: shapeless.HNil = Dave :: 123 :: false :: HNil
+         def iceCreamCsv(c: IceCream): List[String] =
+           List(c.name, c.numCherries.toString, c.inCone.toString)
+       #+end_src
 
-       val genericIceCream = Generic[IceCream].to(IceCream("Sundae", 1, false))
-       // genericIceCream: String :: Int :: Boolean :: shapeless.HNil = Sundae :: 1 :: false :: HNil
+     + With _shapeless_ -- generic way:
+       #+begin_src scala
+         final case class Employee(name: String, number: Int, manager: Boolean)
+         final case class IceCream(name: String, numCherries: Int, inCone: Boolean)
 
-       def genericCsv(gen: String :: Int :: Boolean :: HNil): List[String] =
-         List(gen(0), gen(1).toString, gen(2).toString)
+         import shapeless._
+         val genericEmployee = Generic[Employee].to(Employee("Dave", 123, false))
+         // genericEmployee: String :: Int :: Boolean :: shapeless.HNil = Dave :: 123 :: false :: HNil
 
-       genericCsv(genericEmployee) // res2: List[String] = List(Dave, 123, false)
-       genericCsv(genericIceCream) // res3: List[String] = List(Sundae, 1, false)
-     #+END_SRC
+         val genericIceCream = Generic[IceCream].to(IceCream("Sundae", 1, false))
+         // genericIceCream: String :: Int :: Boolean :: shapeless.HNil = Sundae :: 1 :: false :: HNil
 
-     + =from Jian=
-       Hao told me this kind of generics is used in compiler implementation!
+         def genericCsv(gen: String :: Int :: Boolean :: HNil): List[String] =
+           List(gen(0), gen(1).toString, gen(2).toString)
+
+         genericCsv(genericEmployee) // res2: List[String] = List(Dave, 123, false)
+         genericCsv(genericIceCream) // res3: List[String] = List(Sundae, 1, false)
+       #+end_src
+       * Here we can see ~Hlist~'s -- /heterogeneous lists/.
+
+       * =from Jian=
+         Hao told me this kind of generics is frequently used in compiler implementation!
 
 ** DONE 1.2 About this book - 5
-   CLOSED: [2018-10-28 Sun 12:27]
+   CLOSED: [2020-07-23 Thu 11:57]
    This book is divided into *TWO* parts.
-   - Part I
-     =TODO= =NOTEs=
+   - Part I :: Introduce *type class derivation*. It consists of _FOUR_ chapters:
+     + Chapter 2
+       Introduce /generic representations/.
+       * ~Generic~ /type class/ of shapeless, which can produce a generic encoding
+         for any /case class/ or /sealed trait/.
 
-   - Part II
-     =TODO= =NOTEs=
+     + Chapter 3
+       Use ~Generic~ to *derive* /instances/ of a custome /type class/.
+       * Create an example /type class/ to _encode_ Scala data as CSV.
+
+       * Introduce ~Lazy~, which let us *HANDLE* _recursive data_ like /lists/
+         and /trees/.
+
+     + Chapter 4
+       Introduce the _theory_ and _programming patterns_ that is needed to
+       *generalise* the techniques from earlier chapters.
+       * Specially Look at
+         - /dependent types/
+         - /dependently typed functions/
+         - /type level programming/.
+
+     + Chapter 5
+       * Introduces ~LabelledGeneric~, a _variant_ of ~Generic~ that *exposes*
+         /field/ and /type/ names as part of its generic representations.
+
+       * Introduces additional _theory_:
+         - /literal types/
+         - /singleton types/
+         - /phantom types/
+         - /type tagging/
+
+       * Demonstrate ~LabelledGeneric~ by creating a JSON encoder that *preserves*
+         /field/ and /type/ names in its output.
+
+   - Part II :: Introduce the _ops_ /type classes/ provided in the ~shapeless.ops~
+     package. /Ops type classes/ form an extensive library of tools for manipulating
+     generic representations. Rather than discuss every op in detail, we provide
+     a theoretical primer in three chapters:
+     + Chapter 6
+       Discuss the general layout of the _ops_ /type classes/ and provide an example
+       that strings several simple _ops_ together to form a powerful *"case class
+       migration" tool*.
+
+     + Chapter 7
+       Introduce /polymorphic functions/, also known as ~Polys~, and show how they
+       are used in _ops_ /type classes/ for /mapping/, /flat mapping/, and /folding/
+       over _generic representations_.
+
+     + Chapter 8
+       Introduce the ~Nat~ /type/ that shapeless uses to _represent natural numbers
+       *at the type level*._ We introduce several related _ops_ /type classes/, and
+       use ~Nat~ to develop our own version of Scalacheck's ~Arbitrary~.
 
 ** DONE 1.3 Source code and examples - 6
-   CLOSED: [2018-10-28 Sun 12:26]
+   CLOSED: [2020-07-23 Thu 12:09]
    - Check the updates in Github or on the Underscore web site.
+     + =from Jian=
+       The repo already use Scala 2.13.1 and SBT 1.3.3
 
    - This book use /shapeless 2.3.2/ and
      + Typelevel Scala 2.11.8+
@@ -121,11 +178,14 @@
      This need /SBT/ 0.13.13+
 
 ** DONE 1.4 Acknowledgements - 8
-   CLOSED: [2018-10-28 Sun 12:26]
+   CLOSED: [2020-07-23 Thu 12:12]
+   - [[http://fommil.com/scalax15/][Shapeless for Mortals]]
+
+   - Tut
 
 * TODO I Type class derivation - 9
 * DONE 2 Algebraic data types and generic representations - 11
-  CLOSED: [2018-10-28 Sun 14:25]
+  CLOSED: [2020-07-26 Sun 02:29]
   - =Summary from Jian=
     We always want to writting a small amount of code,
     and
@@ -135,32 +195,32 @@
     with "generic code", and replace the "problems" above with "types".
 
   - Shapeless provides _TWO_ sets of tools to /generic programming/:
-    1. a set of generic data types that can be inspected, traversed, and manip-
-       ulated at the type level;
+    1. a set of /generic data types/ that can be _inspected_, _traversed_, and
+       _manipulated_ *at the type level*;
 
     2. *automatic mapping*
        BETWEEN
-         /ADTs/ (encoded in Scala as case classes and sealed traits)
+         /ADTs/ (encoded in Scala as /sealed traits/ combined with /case classes/)
        AND
          these /generic representaons/.
 
   - Chapter plan:
     In this chapter we will
-    1. Recap
-       of the theory of ADTs and why they might be familiar to Scala developers.
+    1. *Recap*
+       of _the theory of ADTs_ and why they might be familiar to Scala developers.
 
     2. Look at /generic representations/ used by /shapeless/
        and
        discuss how they map on to CONCRETE /ADTs/.
 
-    3. Introduce a /type class/ called ~Generic~ that provides *automatic mapping
-       back and forth* between /ADTs/ and /generic representations/.
+    3. Introduce a /type class/ called ~Generic~ that provides *AUTOMATIC mapping
+       BACK and FORTH* between /ADTs/ and /generic representations/.
 
     4. We will finish with some _simple examples_ using ~Generic~ to convert
        values from one type to another.
 
 ** DONE 2.1 Recap: algebraic data types - 12
-   CLOSED: [2018-10-28 Sun 13:19]
+   CLOSED: [2020-07-25 Sat 18:08]
    - Example:
      + a shape is a rectangle *or* a circle (/coproduct relation/)
      + a rectangle has a width *and* a height (/product relation/)
@@ -181,25 +241,22 @@
        * represent /products/ using /case classes/
 
    - Q :: Why do we use ADTs?
-
    - A :: They are completely /type safe/.
+     + The compiler has complete knowledge of the /algebras/ we define, so it can
+       help us write *complete*, *correctly typed* /methods/ involving our /types/:
+       #+begin_src scala
+         def area(shape: Shape): Double =
+           shape match {
+             case Rectangle(w, h) => w * h
+             case Circle(r)       => math.Pi * r * r
+           }
 
-          The compiler has complete knowledge of the /algebras/ we define, so it
-          can help us write complete, correctly typed methods involving our
-          types:
-          #+begin_src scala
-            def area(shape: Shape): Double =
-              shape match {
-                case Rectangle(w, h) => w * h
-                case Circle(r)       => math.Pi * r * r
-              }
+         area(rect)
+         // res1: Double = 12.0
 
-            area(rect)
-            // res1: Double = 12.0
-
-            area(circ)
-            // res1: Double = 3.141592653589793
-          #+end_src
+         area(circ)
+         // res1: Double = 3.141592653589793
+       #+end_src
 
      + FOOTNOTE:
        /algebra/ (above) meaning:
@@ -208,7 +265,7 @@
        * _the RULES for manipulating those symbols_, encoded as methods.
 
 *** DONE 2.1.1 Alternative encodings - 13
-    CLOSED: [2018-10-28 Sun 13:19]
+    CLOSED: [2020-07-25 Sat 18:07]
     - /sealed traits/ and /case classes/ are *the most convenient encoding of
       ADT's* in Scala.
 
@@ -246,35 +303,51 @@
       However, people don't always need such _specialized nature_, and the more
       flexible /tuple/ and ~Either~ representation can be convenient in some case.
 
+    - Shapeless gives us the BEST of *BOTH* worlds:
+      we can use friendly /semantic types/ by default and switch to /generic
+      representations/ when we want interoperability (more on this later).
+      + However, instead of using ~Tuple~'s and ~Either~, shapeless uses its *OWN*
+        data types to represent /generic products and coproducts/.
+          We'll introduce these types in the next sections.
+
 ** DONE 2.2 Generic product encodings - 14
-   CLOSED: [2018-10-28 Sun 13:42]
+   CLOSED: [2020-07-26 Sun 01:31]
    - In the previous section we introduced /tuples/ as a generic representation of
      /products/.
 
      UNFORTUNATELY, /Scala's built-in tuples/ have a couple of DISADVANTAGES that
-     make them unsuitable for shapeless' purposes:
+     make them *unsuitable* for shapeless' purposes:
 
-     1. Each size of tuple has a different, unrelated type, making it difficult to
-        write code that abstracts over sizes.
-        =from Jian= /Scala's built-in tuples/ itself is *NOT /generic/ enough*.
+     1. Each size of tuple has a *different*, *unrelated* /type/, making it difficult
+        to write code that abstracts over sizes.
+        + =from Jian=
+          /Scala's built-in tuples/ itself is *NOT /generic/ enough*.
+
+        + =from Jian=
+          Scala 3 ~Tuple~ will use shapeless way to implement.
 
      2. There is *NO type for zero-length tuples*, which are important for represeting
         /products with zero fields/.
-
-        We could arguably use ~Unit~, but *we ideally want all generic representations
+          We could arguably use ~Unit~, but *we ideally want all generic representations
         to have a sensible common supertype*.
           The least upper bound of ~Unit~ and ~Tuple2~ is ~Any~ so a combination of
         the two is IMPRACTICAL.
 
-     For these reasons, shapeless doesn't use /current Scala's built-in tuples/.
-     =from Jian= For the same reasons, future Scala will use shapeless's ~HList~
-     like structure to represent /tupels/.
+   - =from Jian=
+     The above DISADVANTAGES will disappear in Scala 3.
+     Since Dotty 0.25, ~EmptyTuple~ /type/ is added to represent _zero-length tuple_.
 
    - Shapeless uses a different generic encoding for product types called /heterogeneous
      lists/ or ~HList~'s.
 
    - ~HList~'s :: heterogeneous lists
      + _Product_ can be a better name, but there is already on in the standard library.
+
+   - An ~HList~ is either the empty list ~HNil~, or a pair ~::[H, T]~ where ~H~
+     is an arbitrary type and ~T~ is another ~HList~.
+
+   - Because every ~::~ has its own ~H~ and ~T~,
+     the /type/ of each element is encoded separately in the type of the overall list.
 
    - Example:
      #+begin_src scala
@@ -305,35 +378,34 @@
    - Beside preprending operation ~::~,
      shapeless also provides tools for _performing more complex operations_
      such as _mapping_, _filtering_, and _concatenating lists_.
+     + =TODO= We'll discuss these in more detail in Part II.
 
-     =TODO= =TODO= =TODO=
-     We'll discuss these in more detail in Part II.
-
-   - =TODO=
-     The behaviour we get from ~HList~'s isn't magic. We could have achieved all of
-     this functionality using ~(A, B)~ and ~Unit~ as alternatives to ~::~ and ~HNil~.
-
-     =TODO= =???= =???=
-     However, there is an advantage in *keeping our /representation types/ separate
-     from the /semantic types/ used in our applications.*
-     ~HList~ provides this separation. =???= =TODO=
+   - =HOW=
+     The behaviour we get from ~HList~'s isn't magic.
+     We could have achieved all of this functionality using ~(A, B)~ and ~Unit~
+     as alternatives to ~::~ and ~HNil~.
+     + However, there is an advantage in *keeping our /representation types/
+       separate from the /semantic types/ used in our applications.*
+       ~HList~ provides this separation.
 
 *** DONE 2.2.1 Switching representations using ~Generic~ - 16
-    CLOSED: [2018-10-28 Sun 14:22]
-    - Use shapeless ~Generic~ /type class/ to _switch back and forth_ between a
-      concrete ADT and its /generic representation/.
-      =TODO= =???=
-      Some behind-the-scenes /macro/ magic allows us to summon /instances/ of
-      ~Generic~ without boilerplate:
+    CLOSED: [2020-07-26 Sun 01:31]
+    Shapeless provides a /type class/ called ~Generic~ that allows us to
+    *switch back and forth* _BETWEEN_ a concrete _ADT_ and its _generic representation_.
+
+    - Some behind-the-scenes *macro* magic allows us to *summon instances* of
+      ~Generic~ without boilerplate.
       #+begin_src scala
         import shapeless.Generic
 
-        case class IceCream(name: String, numCherries: Int, inCone: Boolean)
+        final case class IceCream(name: String, numCherries: Int, inCone: Boolean)
+
         val iceCreamGen = Generic[IceCream]
-        // iceCreamGen: shapeless.Generic[IceCream]{type Repr = String :: Int :: Boolean :: shapeless.HNil} = anon$macro$4$1@6b9323fe
+        // iceCreamGen: shapeless.Generic[IceCream]{type Repr = String :: Int :: Boolean :: shapeless.HNil} =
+        //   anon$macro$4$1@6b9323fe
       #+end_src
 
-    - /Instances/ of ~Generic~ have _TWO_ /methods:
+    - /Instances/ of ~Generic~ have _TWO_ /methods/ -- ~to~ and ~from~:
       #+begin_src scala
         val iceCream = IceCream("Sundae", 1, false)
         // iceCream: IceCream = IceCream(Sundae,1,false)
@@ -344,12 +416,11 @@
         val iceCream2 = iceCreamGen.from(repr)
         // iceCream2: IceCream = IceCream(Sundae,1,false)
       #+end_src
-
       + ~to~ the ~Repr~ type
       + ~from~ the ~Repr~ type
 
-    - If two ADTs have the same ~Repr~, we can convert back and forth between them
-      using their ~Generic~'s:
+    - If two ADTs have the same ~Repr~, we can *convert back and forth* between
+      them using their ~Generic~'s:
       #+begin_src scala
         case class Employee(name: String, number: Int, manager: Boolean)
 
@@ -368,14 +439,19 @@
         tupleGen.from("Hello" :: 123 :: true :: HNil) // res5: (String, Int, Boolean) = (Hello,123,true)
       #+END_SRC
 
-      Since Scala 2.11, the 22 limitation of /case classes/ has been removed,
-      but the limitation still exists:
-      1. ~Tuple22~ and ~Function22~ limitation still exist
-      2. thus, /case classes/ that have more than 22 fields does NOT have ~tupled~
-         and ~unapply~ /methods/.
+      + Since Scala 2.11, the 22 limitation of /case classes/ has *been removed*.
+        * =from Jian=
+          However, the 22 limitation of they other structures still exists:
+          1. ~Tuple22~ and ~Function22~
+          2. thus, /case classes/ that have more than 22 fields does NOT have
+             ~tupled~ and ~unapply~ /methods/.
+
+        * =from Jian=
+          Another limitation manually written code rarely reach is the 255 parameter
+          limitation of functions in JVM.
 
 ** DONE 2.3 Generic coproducts - 18
-   CLOSED: [2018-10-28 Sun 14:22]
+   CLOSED: [2020-07-26 Sun 02:28]
    Last section we talked about how /shapeless/ deal with /products/.
    This section we'll tal about how /shapeless/ deal with /coproducts/.
 
@@ -392,9 +468,9 @@
 
      + It's easy to guess the meaning.
 
-     + ~:+:~ can be loosely interpreted as ~Either~.
+     + ~:+:~ can be _loosely_ interpreted as ~Either~.
 
-     + The overall type of a /coproduct/ encodes all the possible types in the
+     + The overall /type/ of a /coproduct/ encodes all the possible /types/ in the
        /disjunction/, but each CONCRETE instance contains a value for just ONE
        of the possibilities.
 
@@ -412,18 +488,18 @@
      + Again, it's worth stating that ~Coproduct~'s are _NOT particularly SPECIAL_.
        The functionality above can be achieved using ~Either~ and ~Nothing~ in
        place of ~:+:~ and ~CNil~.
-         There are technical difficulties with using ~Nothing~, =TODO= =???= =???=
-       but we could have used any other UNINHABITED or ARBITRARY /singleton/
-       type in place of ~CNil~.
+         There are technical difficulties with using ~Nothing~, but we could
+       have used any other UNINHABITED or ARBITRARY /singleton/ type in place of
+       ~CNil~.
 
 *** DONE 2.3.1 Switching encodings using ~Generic~ - 19
-    CLOSED: [2018-10-28 Sun 14:22]
-    - ~Coproduct~ types are *difficult to parse* on first glance. =???= =TODO=
+    CLOSED: [2020-07-26 Sun 02:27]
+    ~Coproduct~ types are *difficult to parse* on first glance. =???= =TODO=
 
-      However, we can see how they fit into the larger picture of _generic
-      encodings_. =???= =TODO=
+    However, we can see how they fit into the larger picture of _generic
+    encodings_. =???= =TODO=
 
-      In addition to understanding /case classes/ and /case objects/, shapeless'
+    - In addition to understanding /case classes/ and /case objects/, shapeless'
       ~Generic~ /type class/ also understands /sealed traits/ and /abstract
       classes/:
       #+BEGIN_SRC scala
@@ -434,7 +510,8 @@
         final case class Circle(radius: Double) extends Shape
 
         val gen = Generic[Shape]
-        // gen: shapeless.Generic[Shape]{type Repr = Rectangle :+: Circle :+: shapeless.CNil} = anon$macro$1$1@1dd1a68a
+        // gen: shapeless.Generic[Shape]{type Repr = Rectangle :+: Circle :+: shapeless.CNil} =
+        //   anon$macro$1$1@1dd1a68a
 
         gen.to(Rectangle(3.0, 4.0))
         // res3: gen.Repr = Inl(Rectangle(3.0,4.0))
@@ -443,15 +520,22 @@
         // res4: gen.Repr = Inr(Inl(Circle(1.0)))
       #+END_SRC
 
-    =from Jian= How to use the /coproducts/? In the first glance, the
-    ~Inr(Inl(Circle(1.0)))~ does NOT seem easy to use.
-    =end=
+    - =from Jian=
+      I tried
+      #+begin_src scala
+        sealed trait Shape
+        object Shape {
+          final case class Rectangle(width: Double, height: Double) extends Shape
+          final case class Circle(radius: Double) extends Shape
+        }
+      #+end_src
+      but I can't make ~Generic[Shape]~ work.
 
 ** DONE 2.4 Summary - 19
    CLOSED: [2018-10-28 Sun 14:25]
    - We haven’t yet discussed why generic encodings are so attrractive.
 
-     The one use case we did cover—converting between ADTs—is fun but not
+     The one use case we did cover, converting between ADTs, is fun but not
      tremendously useful.
      =TODO= =READ
 
@@ -471,16 +555,19 @@
   /automatic derivation/ of /type class/ instances.
 
 ** DONE 3.1 Recap: type classes - 21
-   CLOSED: [2018-10-31 Wed 02:37]
-   - Quickly recap on /type classes/ before get into the depths of /instance
-     derivation/.
+   CLOSED: [2020-07-26 Sun 03:09]
+   Quickly recap on /type classes/ before get into the depths of /instance
+   derivation/.
 
-     + In Haskell, /type class/ is a built-in syntax and feature.
+   - In Haskell, /type class/ is a built-in syntax and feature.
 
-     + In Scala, there is no built-in syntax for /type class/.
-       Use /parameterised trait/ and /implicits/ to encode /type classes/.
-       * Here /parameterised trait/ representing some sort of general functionality
-         that we would like to apply to _a wide range of_ /types/.
+   - Scala encodes /type classes/ with
+     + /parameterised trait/
+     + /implicits/
+
+   - =from Jian=
+     Scala /type class/ is more verbose than that in Haskell, but more flexible.
+     You can use import to control the usage of a specific /type class/.
 
    - For example,
      #+BEGIN_SRC scala
@@ -566,7 +653,7 @@
      #+end_src
 
 *** DONE 3.1.1 Resolving instances - 23
-    CLOSED: [2018-10-31 Wed 01:56]
+    CLOSED: [2020-07-26 Sun 02:45]
     /Type classes/ are very flexible
     BUT they REQUIRE us to define /instances/ for *EVERY* /type/ we care about.
 
@@ -605,14 +692,16 @@
              manually pull apart our /case classes/ and /sealed traits/.
              We are required to define /instances for ADTs/ *by hand*.
 
-      + A :: =TODO= =???= =TODO= =???=
+      + A :: =TODO=
              _Shapeless' generic representations change all of this, allowing us
              to *derive instances for any ADT FOR FREE*._
 
-      =from Jian= This is one of the most important point of /Shapeless/!!!
+      + =from Jian=
+        This is one of the most important point of /Shapeless/ -- /type class
+        derivation/.
 
 *** DONE 3.1.2 Idiomatic type class definitions - 24
-    CLOSED: [2018-10-31 Wed 02:36]
+    CLOSED: [2020-07-26 Sun 03:07]
     The commonly accepted *idiomatic style* for _type class definitions_
     INCLUDES _a /companion object/ containing some /standard methods/._
 
@@ -653,9 +742,11 @@
              right thing*. _This is one of the most important reason why we
              think it's worth writing one for *EVERY* /type class/ we create_
 
-    - =TODO=
+    - =from Jian=:
+      Dotty design a new method ~summon~, combine with design of its new ~enum~,
+      I think we no longer need to define the /summoner/ manually.
 
-    - ~the~ =TODO= =TODO= =TODO=
+    - ~the~:
       We can also use a special method from /shapeless/ called ~the~ (more on
       this later =TODO=):
       #+BEGIN_SRC scala
@@ -664,11 +755,10 @@
         the[CsvEncoder[IceCream]]
         // res0: CsvEncoder[IceCream] = $anon$1@4c7483e6
       #+END_SRC
-      =TODO= =???= =???= =???=
 
-    - ~instance~, sometimes named ~pure~, provides a terse syntax for *creating*
-      new /type class instances/, *reducing the boilerplate* of /anonymous
-      class/ syntax:
+    - ~instance~, sometimes named ~pure~, provides a _terse_ syntax for *creating*
+      new /type class instances/, *reducing the boilerplate* of /anonymous class/
+      syntax:
       + Without it:
         #+BEGIN_SRC scala
           implicit val booleanEncoder: CsvEncoder[Boolean] =
@@ -684,45 +774,61 @@
             instance(b => List(if (b) "yes" else "no"))
         #+END_SRC
 
-
-    - Mostly in this book we describe definitions outside of their context in the
-      /companion object/.
-
-      This does _NOT_ mean we prefer that usage. The only reason is the limitation
-      of this book typesetting, which prevent us to write long singletons with
-      method methods.
+      + =from Jian=
+        At least in Scala 2.12, if ~encode~ is the only /abstract method/ in
+        ~CsvEncoder[T]~, you can do
+        #+BEGIN_SRC scala
+          implicit val booleanEncoder: CsvEncoder[Boolean] =
+              b => if(b) List("yes") else List("no")
+        #+END_SRC
 
 ** DONE 3.2 Deriving instances for products - 26
-   CLOSED: [2018-11-01 Thu 22:48]
+   CLOSED: [2020-07-26 Sun 17:59]
    Use /shapeless/ to *derive* /type class instances/ for /product types/ (i.e.
    /case classes/).
 
    - We'll use _two_ *intuitions*:
      1. If we have /type class instances/ for the *head* and *tail* of an ~HList~,
         we can derive an instance for the whole ~HList~.
+        + =from Jian=
+          ~A => HList~
 
      2. If we have a _case class A_, a ~Generic[A]~, and a /type class instance/
         for the generic's ~Repr~,
         _we can combine them to create an /instance/ for ~A~._
+        + =from Jian=
+          ~HList => A~
 
    - Take ~CsvEncoder~ and ~IceCream~ as examples:
-     + ~IceCream~ has a generic ~Repr~ of type
+     + ~IceCream~ has a generic ~Repr~ of /type/
        ~String :: Int :: Boolean :: HNil~.
 
-     + The ~Repr~ is made up of a ~String~, an ~Int~, a ~Boolean~, and an ~HNil~.
-       If we have ~CsvEncoder~'s for these types, we can create an encoder for the
-       whole thing.
+     + The ~Repr~ is made up of
+       * a ~String~,
+       * and then an ~Int~,
+       * and then a ~Boolean~,
+       * and then an ~HNil~.
+
+       If we have ~CsvEncoder~'s for these /types/,
+       we can create an _encoder_ for the whole thing.
 
      + If we can derive a ~CsvEncoder~ for the ~Repr~, we can create one for ~IceCream~.
 
+   - =from Jian=
+     Summary,
+     + Derive a /type class instance/ from a /case class/ directly and manually looks
+       trivial but full of boilerplate.
+
+     + Use the idea of _generic programming_, and if we have a way to convert a
+       /case class/ ~A~ to ~HList~, we can convert a /case class/ to a ~HList~ first,
+       and then find a way to encode it and then the ~CsvEncoder[A]~ can be synthesized.
+
 *** DONE 3.2.1 Instances for ~HList~'s - 27
-    CLOSED: [2018-11-01 Thu 15:56]
+    CLOSED: [2020-07-26 Sun 17:41]
     1. We have the building blocks:
        #+BEGIN_SRC scala
          def createEncoder[A](func: A => List[String]): CsvEncoder[A] =
-           new CsvEncoder[A] {
-             def encode(value: A): List[String] = func(value)
-           }
+           func(_)
 
          implicit val stringEncoder: CsvEncoder[String] =
            createEncoder(str => List(str))
@@ -734,25 +840,24 @@
            createEncoder(bool => List(if (bool) "yes" else "no"))
        #+END_SRC
 
-    2. Combine the building blocks above to create an encoder for our ~HList~.
+    2. Combine the building blocks above to create an _encoder_ for our ~HList~.
        #+BEGIN_SRC scala
          import shapeless.{HList, ::, HNil}
 
          implicit val hnilEncoder: CsvEncoder[HNil] =
-           createEncoder(hnil => Nil)
+           createEncoder(Function.const(Nil))
 
          implicit def hlistEncoder[H, T <: HList](
-           implicit
-             hEncoder: CsvEncoder[H],
-           tEncoder: CsvEncoder[T]
+           implicit hEncoder: CsvEncoder[H],
+                    tEncoder: CsvEncoder[T]
          ): CsvEncoder[H :: T] =
-           createEncoder {
-             case h :: t => hEncoder.encode(h) ++ tEncoder.encode(t)
+           createEncoder { case h :: t =>
+             hEncoder.encode(h) ++ tEncoder.encode(t)
            }
        #+END_SRC
 
 *** DONE 3.2.2 Instances for concrete products - 28
-    CLOSED: [2018-11-01 Thu 22:35]
+    CLOSED: [2020-07-26 Sun 17:57]
     - We can combine
       1. our _derivation rules_ for ~HList~'s
          with
@@ -777,82 +882,83 @@
         // Banana Split, 0, no
       #+END_SRC
 
-    - We can generalize the encoder above to other types.
+    - We can *generalize* the encoder above to OTHER /types/.
       The code is a little tricky.
       + At the beginning, you may want to write:
         #+BEGIN_SRC scala
           implicit def genericEncoder[A](
             implicit
               gen: Generic[A],
-            enc: CsvEncoder[gen.Repr],
-            ): CsvEncoder[A] =
+              enc: CsvEncoder[gen.Repr]): CsvEncoder[A] =
             createEncoder(a => enc.encode(gen.to(a)))
         #+END_SRC
-
-        _You *CAN'T* do this!!!_
-
+        *You _CAN'T_ do this!!!*
         If you try to compile this code, you will see _error message_ about
         /scope/ -- you *CAN'T reference* /type members/ of one parameter from
-        another parameter _in the same block_.
+        another parameter _in the same parameter list_.
 
-      + The _TRICK_ to solving this:
-        * *introduce* a *new* /type parameter/ to our /method/
-          and
-        * *refer to* it in _EACH_ of the /associated value parameters/.
+        * Since in Scala 2, we *can't* have _more than one_ /implicit parameter
+          list/, we *can't* resolve this by putting the second /implicit parameter/
+          in to _another_ /implicit parameter list/.
 
-        #+BEGIN_SRC scala
-          implicit def genericEncoder[A, R](
-            implicit
-              gen: Generic[A] { type Repr = R},
-              enc: CsvEncoder[R],
-            ): CsvEncoder[A] =
-            createEncoder(a => enc.encode(gen.to(a)))
-        #+END_SRC
+        * The _TRICK_ of solving this:
+          - *introduce* a *new* /type parameter/ to our /method/
+            and
+          - *refer to* it in _EACH_ of the /associated value parameters/.
 
-    - xxxxx =TODO=
+          #+BEGIN_SRC scala
+            implicit def genericEncoder[A, R](
+              implicit
+                gen: Generic[A] { type Repr = R},
+                enc: CsvEncoder[R]): CsvEncoder[A] =
+              createEncoder(a => enc.encode(gen.to(a)))
+          #+END_SRC
+          Intuitively, this definition says:
+          #+begin_quote
+          Given a type ~A~ and an ~HList~ type ~R~, an implicit ~Generic~ to map
+          ~A~ to ~R~, and a ~CsvEncoder~ for ~R~, create a ~CsvEncoder~ for ~A~.
+          #+end_quote
 
-    - Check the compiler expansion, you'll see how much these functions do:
+        * Now we have a complete system that handles ANY /case class/.
+          For instance, the compiler *expands* a call like ~writeCsv(iceCreams)~:
+          #+begin_src scala
+            writeCsv(iceCreams)(
+              genericEncoder(
+                Generic[IceCream],
+                hlistEncoder(stringEncoder,
+                             hlistEncoder(intEncoder,
+                                          hlistEncoder(booleanEncoder, hnilEncoder)))))
+          #+end_src
 
-      you may call ~writeCsv(iceCreams)~,
-
-      which is actually (after compiler expansion)
-      #+BEGIN_SRC scala
-        writeCsv(iceCreams)(
-          genericEncoder(
-            Generic[IceCream],
-            hlistEncoder(stringEncoder,
-                         hlistEncoder(intEncoder,
-                                      hlistEncoder(booleanEncoder, hnilEncoder)))))
-      #+END_SRC
-
-      NO ONE wants to write the latter one!!!
+    - Of course, NO ONE wants to write the latter one!!!
+      We must thanks the *implicit inferences*.
 
     - ~Aux~ type aliases
-      ~Generic[A] { type Repr = R }~ is verbose!
+      + ~Generic[A] { type Repr = R }~ is verbose!
+        Give it a type alias:
+        #+begin_src scala
+          package shapeless
 
-      #+BEGIN_SRC scala
-        package shapeless
+          object Generic {
+            type Aux[A, R] = Generic[A] { type Repr = R }
+          }
+        #+end_src
 
-        object Generic {
-          type Aux[A, R] = Generic[A] { type Repr = R }
-        }
-      #+END_SRC
+      + Using this alias we can write more readable code:
+        #+begin_src scala
+          implicit def genericEncoder[A, R](
+            implicit
+              gen: Generic.Aux[A, R]
+              env: CsvEncoder[R]
+          ): CsvEncoder[A] =
+            createEncoder(a => env.encode(gen.to(a)))
+        #+end_src
 
-      Using this alias we can write more readable code:
-      #+BEGIN_SRC scala
-        implicit def genericEncoder[A, R](
-          implicit
-            gen: Generic.Aux[A, R]
-            env: CsvEncoder[R]
-        ): CsvEncoder[A] =
-          createEncoder(a => env.encode(gen.to(a)))
-      #+END_SRC
-
-      NO semantics changes, only create and use a more readable alias.
+      + NO semantics changes, only create and use a more readable alias.
 
 *** DONE 3.2.3 So what are the downsides? - 31
-    CLOSED: [2018-11-01 Thu 22:48]
-    Downside: if things go wrong, the compiler is NOT great at telling us WHY.
+    CLOSED: [2020-07-26 Sun 17:59]
+    *Downside: if things go wrong, the compiler is NOT great at telling us WHY.*
 
     Examples:
     - If you don't have an instance of ~Generic~, the error message is relatively
@@ -862,14 +968,14 @@
       error message.
 
       The reason why it is confusing is that all the compiler knows is it tried
-      a lot of combinations of /implicits/ and could NOT make them work. It has
-      NO idea which combination came closest to the desired result, so it can't
-      tell us where sources(s) of failure lie.
+      a lot of combinations of /implicits/ and could NOT make them work.
+        _It has NO idea which combination came closest to the desired result_, so
+      it can't tell us where sources(s) of failure lie.
 
-    - See Section 3.5 for degugging techniques!!!
+    - =TODO= See Section 3.5 for degugging techniques!!!
 
 ** DONE 3.3 Deriving instances for coproducts - 32
-   CLOSED: [2018-11-02 Fri 00:41]
+   CLOSED: [2020-07-26 Sun 18:50]
    In this section, we'll apply the same patterns in the last section to
    /coproducts/.
 
@@ -880,7 +986,7 @@
      final case class Circle(radius: Double) extends Shape
    #+END_SRC
 
-   - In Section 3.2.2 we defined product encoders for ~Rectangle~ and ~Circle~.
+   - In Section 3.2.2 we defined /product encoders/ for ~Rectangle~ and ~Circle~.
      Now, to write generic ~CsvEncoder~ for ~:+:~ and ~CNil~ (=from Jian= then
      we can complete this /coproduct/ ~Rectangle :+: Circle :+: CNil~), we can
      use the same principles we used for ~HLists~:
@@ -899,15 +1005,10 @@
          case Inr(t) => tEncoder.encode(t)
        }
      #+END_SRC
-
-     Two key points:
      + Because /Coproduct/'s are /disjunctions of types/, the encoder for ~:+:~
-       has to choose whether to encode a left or right value.
+       has to choose whether to encode a _left_ or _right_ value.
          We pattern match on the two subtypes of ~:+:~, which are ~Inl~ for left
        and ~Inr~ for right.
-       =TODO=
-       =TODO= REVIEW /coproduct/ in chapter 2. =TODO=
-       =TODO=
 
      + We can't create values of type ~CNil~, and we can *never* reach the
        /exception/ of the ~cnilEncoder~.
@@ -931,20 +1032,87 @@
      SI-7046 is a a Scala compiler bug that can cause /coproduct generic resolution/
      to *fail*. The bug causes certain parts of the /macro API/.
 
-     =TODO= Details =NOTE=
+     _Use *Lightbend Scala 2.11.9+* or *Typelevel Scala 2.11.8+*._
 
-     Use *Lightbend Scala 2.11.9+* or *Typelevel Scala 2.11.8+*
-
-*** TODO 3.3.1 Aligning CSV output - 34 =TODO=
+*** DONE 3.3.1 Aligning CSV output - 34
+    CLOSED: [2020-07-26 Sun 18:50]
     The examples repo linked in Section 1.3 contains a complete implementation
     of ~CsvEncoder~ that addresses this problem.
-    =TODO=
+    - =from Jian=
+      I can't find it in the source code!!!
 
 ** TODO 3.4 Deriving instances for recursive types - 34
-*** 3.4.1 Implicit divergence - 35
-*** 3.4.2 ~Lazy~ - 36
+   Theoretically we should already have all of the definitions in place to *summon*
+   a _CSV writer_ for this definition. However, calls to ~writeCsv~ *fail* to
+   compile:
+   #+begin_src scala
+     sealed trait Tree[A]
+     final case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+     final case class Leaf[A](value: A)                        extends Tree[A]
 
-** TODO 3.5 Debugging implicit resolution - 37
+     CsvEncoder[Tree[Int]]
+     // <console>:23: error: could not find implicit value for parameter enc: CsvEncoder[Tree[Int]]
+     // CsvEncoder[Tree[Int]]
+     //
+   #+end_src
+   The problem is that *our /type/ is /recursive/.*
+   The compiler senses (=from Jian= this time, not right) an infinite loop applying
+   our /implicits/ and _gives up_.
+
+*** 3.4.1 Implicit divergence - 35 - =TODO= NOTE
+*** DONE 3.4.2 ~Lazy~ - 36
+    CLOSED: [2020-07-26 Sun 19:54]
+    - Implicit divergence would be a show-stopper for libraries like shapeless.
+      Fortunately, shapeless provides a type called Lazy as a workaround. Lazy
+      does two things:
+      1. it *suppresses* /implicit divergence/ at /compile time/ by guarding
+         against the aforementioned *over-defensive* convergence heuristics;
+
+      2. it
+         1) *defers* evaluation of the /implicit parameter/ at runtime,
+         2) *permiting* the derivation of /self-referential implicits/.
+
+    - We use ~Lazy~ by wrapping it around SPECIFIC /implicit parameters/.
+      + *As a rule of thumb*,
+        it is always a good idea to use ~Lazy~ and *WRAP*
+        * the "head" parameter of any ~HList~ or ~Coproduct~ rule
+        * the ~Repr~ parameter of any ~Generic~ rule
+
+    - Use ~Lazy~ to *prevent* the compiler _giving up prematurely_, and *enables*
+      the solution to work on _complex/recursive_ /types/ like ~Tree~:
+      =from Jian= Not only /recursive/, also _COMPLEX_ =???= =TODO=
+      #+begin_src scala
+        implicit def hlistEncoder[H, T <: HList](
+          implicit
+            hEncoder: Lazy[CsvEncoder[H]],  // wrap in `Lazy`
+            tEncoder: CsvEncoder[T]
+        ): CsvEncoder[H :: T] = createEncoder {
+          case h :: t =>
+            hEncoder.value.encode(h) ++ tEncoder.encode(t)
+        }
+
+        implicit def coproductEncoder[H, T <: Coproduct](
+          implicit
+            hEncoder: Lazy[CsvEncoder[H]],  // wrap in `Lazy`
+            tEncoder: CsvEncoder[T]
+        ): CsvEncoder[H :+: T] = createEncoder {
+          case Inl(h) => hEncoder.value.encode(h)
+          case Inr(t) => tEncoder.encode(t)
+        }
+
+        implicit def genericEncoder[A, R](
+          implicit
+            gen: Generic.Aux[A, R],
+            rEncoder: Lazy[CsvEncoder[R]]  // wrap in `Lazy`
+        ): CsvEncoder[A] = createEncoder { value =>
+          rEncoder.value.encode(gen.to(value))
+        }
+      #+end_src
+
+    - =from Jian=
+      What is the ~Lazy~ corresponding feature in Scala 3???
+
+** TODO 3.5 Debugging implicit resolution - 37 - =TODO= NOTE
 *** 3.5.1 Debugging using ~implicitly~ - 38
 *** 3.5.2 Debugging using ~reify~ - 39
 
@@ -1200,15 +1368,13 @@
    =IMPORANT= =TODO=
 
 * TODO 5 Accessing names during implicit derivation - 51
-  - Often, the /type class instances/ we define need access to *more than* just
-    /types/.
-
+  Often, the /type class instances/ we define need access to *more than* just
+  /types/.
     In this chapter we will look at a variant of ~Generic~ called ~LabelledGeneric~
-    that gives us access to /field names/ and /type names/.
+  that gives us access to /field names/ and /type names/.
 
   - Prerequisite: To begin with we have some theory to cover.
-
-    ~LabelledGeneric~ uses some *clever techniques* to expose _name information_ =TODO=
+    ~LabelledGeneric~ uses some _clever_ techniques to expose _name information_
     at the _type level_. To understand these techniques we must discuss
     + /literal types/
     + /singleton types/
@@ -1216,31 +1382,30 @@
     + /type tagging/
 
 ** DONE 5.1 Literal types - 51
-   CLOSED: [2018-11-11 Sun 03:48]
+   CLOSED: [2020-07-26 Sun 20:07]
    - A Scala value may have multiple types.
      =from Jian= consider its the /class/, /superclass/, and /trait(s)/.
 
      For example, "hello" has at least THREE /types/: ~String~, ~AnyRef~, and ~Any~.
      + footnote:
        Here we ignore the ~Serializable~ and ~Comparable~,
-       =from Jian= only mention the most concrete one, and the most general ones.
 
    - Interestingly, ~"hello"~ also has another type:
      a *singleton type* that belongs exclusively to that one value.
-
-     For example,
-     ~object Foo~ has type ~Foo.type~, and ~Foo~ is the only value of type
-     ~Foo.type~.
+     + For example,
+       ~object Foo~ has type ~Foo.type~, and ~Foo~ is the only value of type
+       ~Foo.type~.
 
    - literal type :: /Singleton types/ applied to /literal values/.
 
    - /Literal types/ have existed in Scala for a long me, but we don't normally
      interact with them
-     *BECAUSE the _DEFAULT behaviour_ of the compiler is to "widen" literals to
-     their nearest /non-singleton type/.*
-     =from Jian= NOT only "widen", but "widen" to /non-singleton type/.
+     + *REASON*:
+       The _DEFAULT behaviour_ of the compiler is to *widen* /literal types/ to
+       their nearest /non-singleton type/.
+       =from Jian= NOT only "widen", but "widen" to /non-singleton type/.
 
-     For example, these two expressions are _essentially equivalent_:
+   - *Widen* /types/ examples:
      #+BEGIN_SRC scala
        "hello"  // type is widened
        // res4: String = hello
@@ -1248,6 +1413,7 @@
        ("hello" : String)
        // res4: String = hello
      #+END_SRC
+     These two expressions are _essentially equivalent_
 
    - Shapeless provides a few tools for working with /literal types/.
      + The ~narrow~ /macro/:
@@ -1297,6 +1463,9 @@
        //        math.sqrt(4.0).narrow
        //                       ^
      #+END_SRC
+     + ~narrow~ is a /macro/, and it can work at /compile time/.
+       The value of ~math.sqrt(4)~ need evaluation at /rumtime/, and ~narrow~ can't
+       be applied on it.
 
    - *Literal types in Scala*
      Since Lightbend Scala 2.12.1, Lightbend Scala 2.11.9, and TypeLevel Scala
@@ -1306,35 +1475,29 @@
        val theAnswer: 42 = 42
        // theAnswer: 42 = 42
      #+END_SRC
+     + Here the ~42~ after ~:~ is the same as the ~Int(42)~ after ~:~ we saw.
 
-     Here the ~42~ after ~:~ is the same as the ~Int(42)~ after ~:~ we saw.
-
-     You still see the ~Int(42)~ in output for legacy reasons, but the canonical
-     syntax going forward is 42.
+     + You still see the ~Int(42)~ in output _for legacy reasons_, but the canonical
+       syntax going forward is 42.
 
 ** DONE 5.2 Type tagging and phantom types - 54
-   CLOSED: [2018-11-12 Mon 21:58]
+   CLOSED: [2020-07-30 Thu 18:42]
    - Shapeless uses /literal types/ to *model* the _names_ of _fields_ in /case
      classes/.
-
-     + It does this by “tagging” the types of the fields with the literal types
+     + It does this by "tagging" the /types/ of the /fields/ with the /literal types/
        of their names.
 
-   - phantom type :: types with _NO_ /run-time semantics/.
-     + For example, the ~Serializable~ and ~Cloneable~ in Java.
-
    - Before we see how shapeless does this, we'll do it ourselves to show that
-     there's _no magic (well... minimal magic, at any rate)_.
+     there's _no magic_.
 
      + Suppose we have a number: ~val number = 42~
-       * This number is an ~Int~ in two worlds: =from Jian= Better words???
+       * This number is an ~Int~ in two worlds:
          - /Runtime/:
            the acutual value ~42~ of type ~Int~
 
          - /Compile time/:
            its type is used
            + to calculate which pieces of code work togehter
-             and
            + to search for /implicits/.
 
        * We can modify the type of number at /compile time/ *without modifying*
@@ -1344,9 +1507,11 @@
 
            val numCherries = number.asInstanceOf[Int with Cherries]
          #+END_SRC
+         - phantom type :: types with _NO_ /run-time semantics/.
+           + Other examples, the ~Serializable~ and ~Cloneable~ in Java.
 
-         Shapeless uses this trick to *tag* /fields/ and /subtypes/ in an ADT
-         with the /singleton types/ of their names.
+         - Shapeless uses this trick to *tag* /fields/ and /subtypes/ in an ADT
+           with the /singleton types/ of their names.
 
    - The Shapeless way of doing the _tagging_:
      + The mostly used syntax:
@@ -1372,11 +1537,10 @@
          field[Cherries](123)
          // res11: shapeless.labelled.FieldType[Cherries,Int] = 123
        #+END_SRC
-
-       Here ~FieldType~ is a type alias:
+       Here ~FieldType~ is a /type alias/:
        ~type FieldType[K, V] = V with KeyTag[K, V]~
 
-     =TODO=
+     =TODO= =TODO=
      As we'll see in a moment, shapeless uses this mechanism to *tag* /fields/
      and /subtypes/ with _their names_ in our source code.
      =TODO= =TODO=
@@ -1388,7 +1552,7 @@
    - How to convert /tags/ to values we can use at /runtime/?
      + Answer:
        Use the /type class/ ~Witness~ for this purpose.
-       =TODO= footnote: borrowed fro math - check the wiki page of Witness in Math.
+       =TODO= footnote: borrowed from math - check the wiki page of Witness in Math.
 
      + We can combine ~Withness~ and ~FieldType~ and get something very compelling
        -- the ABILITY to *extract the /field name/ from a /tagged field/.*
@@ -1398,7 +1562,7 @@
          val numCherries = "numCherries" ->> 123
 
          def getFieldName[K, V](value: FieldType[K, V])
-             (implicit witness: Witness.Aux[K]): K =
+                               (implicit witness: Witness.Aux[K]): K =
            witness.value
 
          getFieldName(numCherries)
@@ -1414,14 +1578,14 @@
 
    - (Shapeless) records :: ~HList~ of _tagged elements_.
 
-   - /Records/ has some of the properties of a /map/.
+   - /Records/ has some of the properties of a ~Map~.
      We can
      + *reference* /fields/ _by_ /tag/,
      + *manipulate* and *replace* them,
      + *maintain* ALL of the /type and naming information/ along the way.
 
 *** DONE 5.2.1 Records and ~LabelledGeneric~ - 57
-    CLOSED: [2018-11-12 Mon 21:58]
+    CLOSED: [2020-07-30 Thu 18:42]
     - Repeat:
       /Records/ are ~HList~ of /tagged elements/.
       For example,
@@ -1429,117 +1593,293 @@
         import shapeless.{HList, ::, HNil}
 
         val garfield = {"cat" ->> "Garfield"} :: {"orange" ->> true} :: HNil
+        // garfield: String with shapeless.labelled.KeyTag[String("cat"), String] ::
+        //             Boolean with shapeless.labelled.KeyTag[String("orange "),Boolean] ::
+        //             shapeless.HNil =
+        //   Garfield :: true :: HNil
 
-        // Not from the compiler, just for clarify:
-        //
-        // FieldType["cat",    String]  ::
-        // FieldType["orange", Boolean] ::
-        // HNil
+        /// Not from the compiler, just for clarifying the type:
+        ///
+        /// FieldType["cat",    String]  ::
+        /// FieldType["orange", Boolean] ::
+        /// HNil
       #+END_SRC
 
-    - =TODO=
-      We don't need to go into depth regarding /records/ here;
+    - We don't need to go into depth regarding /records/ here;
       suffice to say that records are the generic representation used by
       ~LabelledGeneric~.
 
-      ~LabelledGeneric~ *tags* EACH item in a /product/ or /coproduct/ with the
+    - ~LabelledGeneric~ *tags* EACH item in a /product/ or /coproduct/ with the
       corresponding /field/ or /type name/ from the concrete ADT (although the
-      names are represented as /Symbols/ , *NOT* /Strings/).
+      names are represented as /Symbols/ , *NOT* /Strings/). =TODO= =???=
 
     - =TODO=
       Shapeless provides a suite of Map-like operations on /records/,
       some of which we'll cover in Section 6.4.
 
     - =TODO=
-      For now, let's derive some /type classes/ suing ~LabelledGeneric~.
+      For now, let's derive some /type classes/ using ~LabelledGeneric~.
 
 ** TODO 5.3 Deriving product instances with ~LabelledGeneric~ - 57
    We'll use a running example of JSON encoding to illustrate ~LabelledGeneric~.
 
-   We'll define a ~JsonEncoder~ /type class/ that converts values to a /JSON
-   AST/.
+   - We'll define a ~JsonEncoder~ /type class/ that converts values to a /JSON AST/.
+       _This is the approach taken by Argonaut, Circe, Play JSON, Spray JSON, and
+     many other Scala JSON libraries._
 
-   _This is the approach taken by Argonaut, Circe, Play JSON, Spray JSON, and
-   many other Scala JSON libraries._
+     1. Define our JSON data type:
+        #+BEGIN_SRC scala
+          sealed trait JsonValue
+          final case class JsonObject(fields: List[(String, JsonValue)]) extends JsonValue
+          final case class JsonArray(items: List[JsonValue])             extends JsonValue
+          final case class JsonString(value: String)                     extends JsonValue
+          final case class JsonNumber(value: Double)                     extends JsonValue
+          final case class JsonBoolean(value: Boolean)                   extends JsonValue
+          case object JsonNull                                           extends JsonValue
+        #+END_SRC
 
-   1. Define our JSON data type:
-      #+BEGIN_SRC scala
-        sealed trait JsonValue
-        case class JsonObject(fields: List[(String, JsonValue)]) extends JsonValue
-        case class JsonArray(items: List[JsonValue]) extends JsonValue
-        case class JsonString(value: String) extends JsonValue
-        case class JsonNumber(value: Double) extends JsonValue
-        case class JsonBoolean(value: Boolean) extends JsonValue
-        case object JsonNull extends JsonValue
-      #+END_SRC
-
-   2. Then the /type class/ for encoding values as JSON:
-      #+BEGIN_SRC scala
-        trait JsonEncoder[A] {
-          def encoding(value: A): JsonValue
-        }
-
-        object JsonEncoder {
-          def apply[A](implicit enc: JsonEncoder[A]): JsonEncoder[A] = enc
-        }
-      #+END_SRC
-
-   3. A few /primitive instances/:
-      #+BEGIN_SRC scala
-        def createEncoder[A](func: A => JsonValue): JsonEncoder[A] =
-          new JsonEncoder[A] {
-            def encode(value: A): JsonValue = func(value)
+     2. Then the /type class/ for encoding values as JSON:
+        #+BEGIN_SRC scala
+          trait JsonEncoder[A] {
+            def encoding(value: A): JsonValue
           }
 
-        implicit val stringEncoder: JsonEncoder[String] =
-          createEncoder(str => JsonEncoder(str))
+          object JsonEncoder {
+            def apply[A](implicit enc: JsonEncoder[A]): JsonEncoder[A] = enc
+          }
+        #+END_SRC
 
-        implicit val intEncoder: JsonEncoder[Int] =
-          createEncoder(num => JsonEncoder(num))
+     3. A few /primitive instances/:
+        #+BEGIN_SRC scala
+          def createEncoder[A](func: A => JsonValue): JsonEncoder[A] =
+            func(_)
 
-        implicit val booleanEncoder: JsonEncoder[Boolean]
-          createEncoder(bool => JsonEncoder(bool))
-      #+END_SRC
+          implicit val stringEncoder: JsonEncoder[String] =
+            createEncoder(str => JsonEncoder(str))
 
-   4. A few /instance combinators/:
-      #+BEGIN_SRC scala
-        implicit def listEncoder[A]
-          (implicit enc: JsonEncoder[A]): JsonEncoder[List[A]] =
-          createEncoder(list => JsonArray(list.map(enc.encode)))
+          implicit val doubleEncoder: JsonEncoder[Double] =
+            createEncoder(num => JsonEncoder(num))
 
-        implicit def optionEncoder[A]
-          (implicit enc: JsonEncoder[A]): JsonEncoder[Option[A]] =
-          createEncoder(opt => opt.map(enc.encode).getOrElse(JsonNull))
-      #+END_SRC
+          implicit val intEncoder: JsonEncoder[Int] =
+            createEncoder(num => JsonEncoder(num))
 
-   5. *IDEALLY*, when we *encode* ADTs *as* JSON, we would like to use the
-      correct _field names_ in the output JSON:
-      #+BEGIN_SRC scala
-        case class IceCream(name: String, numCherries: Int, inCone: Boolean)
-        val iceCream = IceCream("Sundae", 1, false)
+          implicit val booleanEncoder: JsonEncoder[Boolean]
+            createEncoder(bool => JsonEncoder(bool))
+        #+END_SRC
 
-        // Ideally we'd like to produce something like this:
-        val iceCreamJson: JsonValue =
-          JsonObject(List(
-            "name"        -> JsonString("Sundae"),
-            "numCherries" -> JsonNumber(1),
-            "inCone"      -> JsonBoolean(false)
-        ))
-      #+END_SRC
+     4. A few /instance combinators/:
+        #+BEGIN_SRC scala
+          implicit def listEncoder[A](implicit enc: JsonEncoder[A]): JsonEncoder[List[A]] =
+            createEncoder(list => JsonArray(list.map(enc.encode)))
 
-*** 5.3.1 Instances for ~HList~'s - 60
-*** 5.3.2 Instances for concrete products - 62
+          implicit def optionEncoder[A](implicit enc: JsonEncoder[A]): JsonEncoder[Option[A]] =
+            createEncoder(opt => opt.map(enc.encode).getOrElse(JsonNull))
+        #+END_SRC
+
+     5. *IDEALLY*, when we *encode* ADTs *as* JSON, we would like to use the
+        correct _field names_ in the output JSON:
+        #+BEGIN_SRC scala
+          final case class IceCream(name: String, numCherries: Int, inCone: Boolean)
+
+          val iceCream = IceCream("Sundae", 1, false)
+
+          // Ideally we'd like to produce something like this:
+          val iceCreamJson: JsonValue =
+            JsonObject(
+              List("name"        -> JsonString("Sundae"),
+                   "numCherries" -> JsonNumber(1),
+                   "inCone"      -> JsonBoolean(false))
+            )
+        #+END_SRC
+
+     6. This is where ~LabelledGeneric~ comes in.
+        Let's _summon an instance_ for ~IceCream~ and see what kind of representation
+        it produces:
+        #+begin_src scala
+          import shapeless.LabelledGeneric
+
+          val gen = LabelledGeneric[IceCream].to(iceCream)
+          // gen: String with shapeless.labelled.KeyTag[Symbol with shapeless.tag.Tagged[String("name")],String] ::
+          //        Int with shapeless.labelled.KeyTag[Symbol with shapeless.tag.Tagged[String("numCherries")], Int] ::
+          //        Boolean with shapeless.labelled.KeyTag[Symbol with shapeless.tag.Tagged[String("inCone")],Boolean] ::
+          //        shapeless.HNil =
+          //   Sundae :: 1 :: false :: HNil
+
+
+          //// For clarity, the full type of the `HList` is:
+          //
+          //// String  with KeyTag[Symbol with Tagged["name"], String]     ::
+          //// Int     with KeyTag[Symbol with Tagged["numCherries"], Int] ::
+          //// Boolean with KeyTag[Symbol with Tagged["inCone"], Boolean]  ::
+          //// HNil
+        #+end_src
+        The type here is slightly more complex than we have seen.
+        - Instead of representing the with /literal string types/, shapeless is
+          representing _field names_ with /symbols/ *tagged with* /literal
+          string types/, NOT /literal string types/ we used in the illustration
+          examples.
+
+        - The details of the implementation aren't particularly important:
+          we can still use ~Witness~ and ~FieldType~ to extract the tags, but
+          they come out as ~Symbol~'s instead of ~String~'s.
+          + footnote 3:
+            Future versions of shapeless may *switch to* using ~String~'s as tags.
+            =from Jian= Till 2.4.0-M1, shapeless still uses ~Symbol~.
+
+*** TODO 5.3.1 Instances for ~HList~'s - 60
+    Let's _define ~JsonEncoder~ instances_ for ~HNil~ and ~::~. Our /encoders/
+    are going to *generate* and *manipulate* ~JsonObject~'s.
+    1. so we'll introduce a new type of encoder to make that easier:
+       #+begin_src scala
+         trait JsonObjectEncoder[A] extends JsonEncoder[A] {
+           def encode(value: A): JsonObject
+         }
+
+         def createObjectEncoder[A](fun: A => JsonObject): JsonObjectEncoder[A] =
+           fun(_)
+       #+end_src
+
+    2. The definition for ~HNil~ is then straightforward:
+       #+begin_src scala
+         import shapeless.{HList, ::, HNil, Lazy}
+
+         implicit val hnilEncoder: JsonObjectEncoder[HNil] =
+           createObjectEncoder(Function.const(JsonObject(Nil)))
+       #+end_src
+
+    3. The definition of ~hlistEncoder~ involves a few moving parts so we'll go
+       through it piece by piece. We'll start with the definition we might expect
+       if we were using regular ~Generic~:
+       #+begin_src scala
+         implicit def hlistObjectEncoder[H, T <: HList](
+           implicit
+             hEncoder: Lazy[JsonEncoder[H]],
+             tEncoder: JsonObjectEncoder[T]
+         ): JsonEncoder[H :: T] = ???
+       #+end_src
+
+       + ~LabelledGeneric~ will give us an ~HList~ of /tagged types/, so let's
+         start by introducing a NEW /type/ variable for the /key type/:
+         #+begin_src scala
+           import shapeless.Witness
+           import shapeless.labelled.FieldType
+
+           implicit def hlistObjectEncoder[K, H, T <: HList](
+             implicit
+               hEncoder: Lazy[JsonEncoder[H]],
+             tEncoder: JsonObjectEncoder[T]
+           ): JsonObjectEncoder[FieldType[K, H] :: T] = ???
+         #+end_src
+
+       + In the body of our method we're going to need the value associated with
+         ~K~. We'll add an _implicit_ ~Witness~ to do this for us:
+         #+begin_src scala
+           implicit def hlistObjectEncoder[K, H, T <: HList](
+             implicit
+               witness: Witness.Aux[K],
+               hEncoder: Lazy[JsonEncoder[H]],
+               tEncoder: JsonObjectEncoder[T]
+           ): JsonObjectEncoder[FieldType[K, H] :: T] = {
+             val fieldName = witness.value
+             ???
+           }
+         #+end_src
+
+       + We can access the value of ~K~ using ~witness.value~, but the compiler has
+         no way of knowing what type of tag we're going to get. ~LabelledGeneric~
+         uses ~Symbols~ for tags, so we'll put a type bound on K and use ~symbol.name~
+         to convert it to a ~String~:
+         #+begin_src scala
+           implicit def hlistObjectEncoder[K <: Symbol, H, T <: HList](
+             implicit
+               witness: Witness.Aux[K],
+               hEncoder: Lazy[JsonEncoder[H]],
+               tEncoder: JsonObjectEncoder[T]
+           ): JsonObjectEncoder[FieldType[K, H] :: T] = {
+             val fieldName: String = witness.value.name
+             ???
+           }
+         #+end_src
+
+       + The rest of the definition uses the principles we covered in Chapter 3:
+         #+begin_src scala
+           implicit def hlistObjectEncoder[K <: Symbol, H, T <: HList](
+             implicit
+               witness: Witness.Aux[K],
+               hEncoder: Lazy[JsonEncoder[H]],
+               tEncoder: JsonObjectEncoder[T]
+           ): JsonObjectEncoder[FieldType[K, H] :: T] = {
+             val fieldName: String = witness.value.name
+             createObjectEncoder { hlist =>
+               val head = hEncoder.value.encode(hlist.head)
+               val tail = tEncoder.encode(hlist.tail)
+               JsonObject((fieldName, head) :: tail.fields)
+             }
+           }
+         #+end_src
+
+*** TODO 5.3.2 Instances for concrete products - 62
+    Finally let’s turn to our /generic instance/. This is identical to the
+    definitions we've seen before, except that we're using ~LabelledGeneric~
+    instead of ~Generic~:
+    #+begin_src scala
+      import shapeless.LabelledGeneric
+
+      implicit def genericObjectEncoder[A, H](
+        implicit
+          generic: LabelledGeneric.Aux[A, H],
+          hEncoder: Lazy[JsonObjectEncoder[H]]
+      ): JsonEncoder[A] =
+        createObjectEncoder { value =>
+          hEncoder.value.encode(generic.to(value))
+        }
+    #+end_src
+
+    - And that's all we need! With these definitions in place we can serialize
+      instances of any case class and retain the field names in the resulting
+      JSON:
+      #+begin_src scala
+        JsonEncoder[IceCream].encode(iceCream)
+        // res14: JsonValue = JsonObject(List((name,JsonString(Sundae)),
+        //                                    (numCherries,JsonNumber(1.0)),
+        //                                    (inCone,JsonBoolean(false))))
+      #+end_src
 
 ** TODO 5.4 Deriving coproduct instances with ~LabelledGeneric~ - 63
 ** TODO 5.5 Summary - 65
 
 * II Shapeless ops - 67
 * TODO 6 Working with ~HList~'s and ~Coproduct~'s - 69
-  In Part I we discussed /methods/ for *deriving* /type class instances/ for
-  /algebraic data types/.
-    We can use /type class derivation/ to augment almost ANY /type class/,
-  although in more complex cases we may have to write a lot of supporting code
-  for manipulating ~HList~'s and ~Coproduct~'s.
+  - In Part I
+    we discussed /methods/ for *deriving* /type class instances/ for /algebraic
+    data types/.
+      We can use /type class derivation/ to augment almost ANY /type class/,
+    although in more complex cases we may have to write a lot of supporting code
+    for manipulating ~HList~'s and ~Coproduct~'s.
+
+  - In Part II
+    we'll look at the ~shapeless.ops~ package, which *provides* a set of helpful
+    tools that we can use as _building blocks_. Each _op_ comes in *two* parts:
+    + a /type class/ that we can use _DURING implicit resolution_,
+    + /extension methods/ that we can call on ~HList~ and ~Coproduct~.
+
+  - There are three general sets of ops, available from three packages:
+    + ~shapeless.ops.hlist~ defines /type classes/ for ~HList~'s.
+        These can be used directly via /extension methods/ on ~HList~, defined in
+      ~shapeless.syntax.hlist~.
+
+    + ~shapeless.ops.coproduct~ defines /type classes/ for ~Coproduct~'s.
+        These can be used directly via /extension methods/ on ~Coproduct~, defined
+      in ~shapeless.syntax.coproduct~.
+
+    + ~shapeless.ops.record~ defines /type classes/ for /shapeless records/
+      (~HList~'s containing _tagged_ elements—Section 5.2).
+        These can be used via /extension methods/ on ~HList~, imported from
+      ~shapeless.record~, and defined in ~shapeless.syntax.record~.
+
+  - *Rather than* provide an exhaustive guide, we will touch on the *MAJOR*
+    theoretical and structural points and show you how to extract further
+    information from the shapeless codebase.
 
 ** TODO 6.1 Simple ops examples - 70
    #+BEGIN_SRC scala
@@ -1547,8 +1887,8 @@
      package syntax
 
      implicit class HListOps[L <: HList](l: L) {
-       def last(implicit last: Last[L]): last.Out = last.apply(l)
-       def init(implicit init: Init[L]): init.Out = init.apply(l)
+       def last(implicit _last: Last[L]): _last.Out = _last.apply(l)
+       def init(implicit _init: Init[L]): _init.Out = _init.apply(l)
      }
    #+END_SRC
 
