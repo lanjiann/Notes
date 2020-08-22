@@ -1,9 +1,11 @@
 #+TITLE: Hands-on Scala
+#+SUBTITLE: Learn The Scala Language in A Practical, Project-Based Way
 #+AUTHOR: Haoyi Li
 #+VERSION: 2020-06-01
 #+STARTUP: entitiespretty
 
-* Foreword - 3
+* DONE Foreword - 3
+  CLOSED: [2020-08-02 Sun 08:22]
 * Author's Note - 5
 * TODO Part I: Introduction to Scala - 13
 ** DONE Chapter 1: Hands-on Scala - 15
@@ -130,29 +132,90 @@
 **** TODO 4.2.4 Immutable Maps - 70
 **** TODO 4.2.5 Immutable Lists - 71
 
-*** 4.3 Mutable Collections - 70
+*** TODO 4.3 Mutable Collections - 70
 **** 4.3.1 Mutable ArrayDeques - 71
 **** 4.3.2 Mutable Sets - 74
 **** 4.3.3 Mutable Maps - 75
 **** 4.3.4 In-Place Operations - 76
 
-*** 4.4 Common Interfaces - 77
-*** 4.5 Conclusion - 78
-
-** TODO Chapter 5: Notable Scala Features - 81
-*** 5.1 Case Classes and Sealed Traits - 82
-**** 5.1.1 Case Classes - 82
+*** TODO 4.4 Common Interfaces - 77
+*** TODO 4.5 Conclusion - 78
+    
+** TODO 5 Notable Scala Features - 81
+   #+begin_src scala
+     def getDayMonthYear(s: string): Unit = {
+       val found = s match {
+         case s"$day-$month-$year" => s"found day: $day, month: $month, year: $year"
+         case _                    => "not a date"
+       }
+       println(found)
+     }
+   #+end_src
+ 
+   - In Dotty we can do:
+     #+begin_src scala
+       def getDayMonthYear(s: string): Unit =
+         s match {
+           case s"$day-$month-$year" => s"found day: $day, month: $month, year: $year"
+           case _                    => "not a date"
+         } pipe println
+     #+end_src
+     + https://contributors.scala-lang.org/t/give-the-pipe-method-of-scala-util-chainingops-an-operator-representation/4462/3
+       explains, for performance reason,
+       why we should do this in Scala 2, but we can do this in Scala 3
+   
+*** DONE 5.1 Case Classes and Sealed Traits - 82
+    CLOSED: [2020-08-02 Sun 21:00]
+**** DONE 5.1.1 Case Classes - 82
+     CLOSED: [2020-08-02 Sun 20:29]
 **** 5.1.2 Sealed Traits - 83
-**** 5.1.3 Use Cases for Normal v.s. Sealed Traits - 83
+**** DONE 5.1.3 Use Cases for Normal v.s. Sealed Traits - 83
+     CLOSED: [2020-08-02 Sun 21:00]
+     - Normal ~trait~'s and ~sealed trait~'s make different things easy:
+       + Normal ~trait~'s:
+         * Easy to add additional /sub-classes/
+           Just _define_ your /class/ and _implement_ the necessary /methods/.
+
+         * Difficult to add new /methods/:
+           A new /method/ needs to be added to all existing /subclasses/,
+           of which there _may be many_.
+
+       + ~sealed trait~'s:
+         * Easy to add new methods:
+           A new /method/ can simply /pattern match/ on each /sub-class/.
+
+         * Difficult to add new /sub-classes/:
+           Go to all existing /pattern matches/,
+           and add the ~case~ to handle your new /sub-class/.
+           
+     - In general, ~sealed trait~ are good for
+       *modeling hierachies where you expect the number of sub-classes to change
+       very little or not-at-all*.
+       + Example: JSON
+         * The JSON value can be enumerated, and not many -- 6
+
+         * The JSON has not changed in 20 years -- it is unlikely that anyone will
+           need to extends our JSON ~trait~.
+           
+         * While the set of /sub-classes/ is fixed,
+           the range of operations that can be applied on a JSON blob is _unbounded_:
+           - parse it
+           - serialize it
+           - pretty-print it
+           - minify it
+           - santitize it
+           - etc.
      
-*** 5.2 Pattern Matching - 85
-**** 5.2.1 Match - 85
+*** DONE 5.2 Pattern Matching - 85
+    CLOSED: [2020-08-02 Sun 21:00]
+**** DONE 5.2.1 Match - 85
+     CLOSED: [2020-08-02 Sun 21:25]
 ***** 5.2.1.1 Matching on ~Int~'s
 ***** 5.2.1.2 Matching on ~String~'s
 ***** 5.2.1.3 Matching on tuple ~(Int, Int)~'s
 ***** 5.2.1.4 Matching on tuple ~(Boolean, Boolean)~'s
 ***** 5.2.1.5 Matching on Case Classes
-***** TODO 5.2.1.6 Matching on String Patterns
+***** 5.2.1.6 Matching on String Patterns
       =from Jian= Only be supported by Scala 2.13+
       #+begin_src scala
         def splitDate(s: String): String = s match {
@@ -175,16 +238,28 @@
           Find a exact decription about when to use this /simple glob-like patterns/,
           and when to use ~Regex~.
       
-**** 5.2.2 Nested Matches - 86
-**** 5.2.3 Loops and Vals - 87
-**** TODO 5.2.4 Pattern Matching on Sealed Traits and Case Classes - 88
+**** DONE 5.2.2 Nested Matches - 86
+     CLOSED: [2020-08-02 Sun 21:23]
+**** DONE 5.2.3 Loops and Vals - 87
+     CLOSED: [2020-08-02 Sun 21:23]
+     - =from Jian=
+       A better title is:
+       ~for~ loops/comprehensions and ~val~'s
+
+     - =from Jian=
+       About the ~for~ loops/comprehensions, this book not mention the filtering
+       effect of /pattern matching/ in the expression follows ~for~:
+       + /Pattern matching/ in the expression follows ~for~ is not a simple /pattern
+         matching/, and it also means the not matched cases will be dropped, or say
+         filtered out -- like the ~if~ guard functionality in ~for~.
+     
+**** DONE 5.2.4 Pattern Matching on Sealed Traits and Case Classes - 88
+     CLOSED: [2020-08-02 Sun 21:24]
      =from Jian= =TODO=
      Not mention /exhaustive check/. I think it should mention it when talking
      about sealed traits case classes /pattern matching/.
      
-***** TODO 5.2.4.1 Stringifying Our Expressions - 88
-      =TODO= bad string interpolation highlight!!!
-      
+***** 5.2.4.1 Stringifying Our Expressions - 88
 ***** 5.2.4.2 Evaluating Our Expressions - 89
 
 *** TODO 5.3 By-Name Parameters - 90
@@ -192,7 +267,7 @@
 **** TODO 5.3.2 Wrapping Evaluation - 91 - =IMPORTANT=
 **** TODO 5.3.3 Repeating Evaluation - 92 - =IMPORTANT=
      
-*** 5.4 Implicit Parameters - 93
+*** TODO 5.4 Implicit Parameters - 93
     - /Implicit parameters/ are SIMILAR TO the /default values/ of _function
       parameters_.
       + SAME:
@@ -212,7 +287,7 @@
 **** 5.4.1 Passing ExecutionContext to Futures - 94
 **** 5.4.2 Dependency Injection via Implicits - 95
 
-*** 5.5 Typeclass Inference - 96 - =RE-READ=
+*** TODO 5.5 Typeclass Inference - 96 - =RE-READ=
 **** 5.5.1 Problem Statement: Parsing Command Line Arguments - 96
      A _first sketch_ may be writing a /generic method/ to parse the values.
      The signature might look something like this:
@@ -322,10 +397,85 @@
 
 * TODO Part II: Local Development - 105
 ** TODO Chapter 6: Implementing Algorithms in Scala - 107
-*** 6.1 Merge Sort - 108
-**** 6.1.1 Generic Merge Sort - 110
+   #+begin_src scala
+     // 6.1
+     import scala.collection.mutable
 
-*** 6.2 Prefix Tries- 112
+     def breadthFirstSearch[T](start: T, graph: Map[T, Seq[T]]): Set[T] = {
+       val seen = mutable.Set(start)
+       val queue = mutable.ArrayDeque(start)
+
+       while (queue.nonEmpty) {
+         val current = queue.removeHead()
+         for (next <- graph(current) if !seen(next)) {
+           seed.add(next)
+           queue.append(next)
+         }
+       }
+       seen.toSet
+     }
+   #+end_src
+   
+*** DONE 6.1 Merge Sort - 108
+    CLOSED: [2020-07-21 Tue 18:46]
+    #+begin_src scala
+      def mergeSort(items: Array[Int]): Array[Int] =
+        if items.length <= 1
+        then items
+        else
+          val (left, right) = items.splitAt(items.length / 2)
+          val (sortedLeft, sortedRight) = (mergeSort(left), mergeSort(right))
+          var (leftIdx, rightIdex) = (0, 0)
+          val output = Array.newBuilder[Int]
+
+          lazy val (l, r) = (leftIdx < sortedLeft.length, rightIdx < sortedRight.length)
+          while l || r
+            val takeLeft = (l, r) match
+              case (true, false) => true
+              case (false, true) => false
+              case (true, true)  => sortedLeft(leftIdx) < sortedRight(rightIdx)
+
+            if takeLeft
+            then
+              output += sortedLeft(leftIdx)
+              leftIdx += 1
+            else
+              output += sortedRight(rightIdx)
+              rightIdx += 1
+
+          output.result()
+    #+end_src
+
+**** 6.1.1 Generic Merge Sort - 110
+     #+begin_src scala
+       def mergeSort[T: Ordering](items: IndexedSeq[T]): IndexedSeq[T] =
+         if items.length <= 1
+         then items
+         else
+           val (left, right) = items.splitAt(items.length / 2)
+           val (sortedLeft, sortedRight) = (mergeSort(left), mergeSort(right))
+           var (leftIdx, rightIdex) = (0, 0)
+           val output = IndexedSeq.newBuilder[T]
+
+           lazy val (l, r) = (leftIdx < sortedLeft.length, rightIdx < sortedRight.length)
+           while l || r
+             val takeLeft = (l, r) match
+               case (true, false) => true
+               case (false, true) => false
+               case (true, true)  => Ordering[T].lt(sortedLeft(leftIdx), sortedRight(rightIdx))
+
+             if takeLeft
+             then
+               output += sortedLeft(leftIdx)
+               leftIdx += 1
+             else
+               output += sortedRight(rightIdx)
+               rightIdx += 1
+
+           output.result()
+     #+end_src
+
+*** TODO 6.2 Prefix Tries - 112
 **** 6.2.1 Trie Set Operations - 112
 ***** 6.2.1.1 ~Trie.add~ - 113
 ***** 6.2.1.2 ~Trie.contains~ - 114
