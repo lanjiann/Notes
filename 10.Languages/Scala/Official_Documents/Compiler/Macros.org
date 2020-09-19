@@ -33,8 +33,8 @@
     /macros/ enable new and unique ways to use pre-existing language features.
 
 * TODO Blackbox Vs Whitebox
-  _SEPARATION_ of /macros/ into /blackbox/ ones and /whitebox/ ones is a feature
-  of Scala 2.11.x and Scala 2.12.x.
+  _SEPARATION_ of /macros/ into *blackbox* ones and *whitebox* ones is a feature
+  of Scala 2.11+.
 
   - The blackbox/whitebox separation is *NOT supported* _in Scala 2.10.x._
 
@@ -113,22 +113,276 @@
        /macros in 2.10/ should be possible in 2.11 and 2.12.
 
 * TODO Def Macros
-** Intuition
-*** Generic macros
+** DONE Intuition
+   CLOSED: [2020-09-16 Wed 21:57]
+   Here is a prototypical macro definition:
+   #+begin_src scala
+     def m(x: T): R = macro implRef
+   #+end_src
 
-** A complete example
-** Tips and tricks
-*** Using macros with the command-line Scala compiler
-*** Using macros with Maven or sbt
-*** Using macros with Scala IDE or Intellij IDEA
-*** Debugging macros
-*** Inspecting generated code
-*** Macros throwing unhandled exceptions
-*** Reporting warnings and errors
-*** Writing bigger macros
+   - Example:
+     Here ~<[ expr ]>~ denotes the ast that represents the expression ~expr~, and
+     this notation is not real Scala code. In reality, the syntax trees would be
+     constructed from the /types/ in /trait/ ~scala.reflect.api.Trees~.
+     #+begin_src scala
+       def assert(cond: Boolean, msg: Any) = macro Asserts.assertImpl
 
-* Quasiquotes
+       // TODO: use `whitebox.Context` or `blackbox.Context`
+       //       `scala.reflect.macros.Context` is already deprecated.
+       import scala.reflect.macros.Context
+       import scala.language.experimental.macros
+
+       object Asserts {
+         def raise(msg: Any) = throw new AssertionError(msg)
+
+         def assertImpl(c: Context)
+                       (cond: c.Expr[Boolean], msg: c.Expr[Any]) : c.Expr[Unit] =
+           if (assertionsEnabled)
+             <[ if (!cond) raise(msg) ]>
+           else
+             <[ () ]>
+       }
+     #+end_src
+
+*** DONE Generic macros
+    CLOSED: [2020-09-16 Wed 21:57]
+    - /Macro definitions/ and /macro implementations/ may both be /generic/.
+      /Type parameters/ in an implementation may come with ~WeakTypeTag~ /context
+      bounds/.
+
+    - The following code snippet declares a /macro definition/ ~Queryable.map~
+      that references a /macro implementation/ ~QImpl.map~:
+      #+begin_src scala
+        class Queryable[T] {
+          def map[U](p: T => U): Queryable[U] = macro QImpl.map[T, U]
+        }
+
+        object QImpl {
+          def map[T: c.WeakTypeTag, U: c.WeakTypeTag](c: Context)
+                                                     (p: c.Expr[T => U]): c.Expr[Queryable[U]] = ...
+        }
+      #+end_src
+      + Expansion of ~q.map[Int](_.length)~
+        #+begin_src scala
+          QImpl.map(c)(<[ s => s.length ]>)
+                      (implicitly[WeakTypeTag[String]], implicitly[WeakTypeTag[String]])
+        #+end_src
+
+** DONE A complete example
+   CLOSED: [2020-09-17 Thu 01:32]
+   An end-to-end implementation of a ~printf~ macro, which validates and applies
+   the format string at compile-time
+
+   - For the sake of simplicity the discussion uses console Scala compiler, but
+     as explained below macros are also supported by Maven and sbt.
+
+   - A /macro definition/ represents the facade of the /macro/.
+     #+begin_src scala
+       import scala.language.experimental.macros
+
+       def printf(format: String, params: Any*): Unit = macro printf_impl
+     #+end_src
+     As mentioned above, to define a macro one needs to
+     + *import* ~scala.language.experimental.macros~
+       OR
+     + *enable* a special compiler switch, =-language:experimental.macros=.
+
+   - /Macro implementation/ must correspond to /macro definitions/ that use it
+     (typically there's only one, but there might also be many).
+     #+begin_src scala
+       import scala.reflect.macros.Context
+
+       def printf_impl(c: Context)
+                      (format: c.Expr[String], params: c.Expr[Any]*): c.Expr[Unit] = ...
+     #+end_src
+     + EVERY _parameter of type_ ~T~ in the signature of a /macro definition/ MUST
+       correspond to a _parameter of type_ ~c.Expr[T]~ in the /signature/ of a
+       /macro implementation/.
+
+   - Compiler API is exposed in ~scala.reflect.macros.blackbox.Context~ or
+     ~scala.reflect.macros.whitebox.Context~.
+       Its most important part, reflection API, is accessible via ~c.universe~.
+     It's customary to import ~c.universe._~, because it includes a lot of
+     _routinely used_ /functions/ and /types/
+     #+begin_src scala
+       import c.universe._
+     #+end_src
+
+   - First of all, the /macro/ ~printf~ needs to *parse* the provided _format string_.
+     #+begin_src scala
+       val Literal(Constant(s_format: String)) = format.tree
+     #+end_src
+     + /Macros/ run during the /compile-time/, so *they operate on /trees/, NOT
+        on /values/.* This means
+       * the /format parameter/ of the ~printf~ /macro/ will be a /compile-time
+         literal/, *NOT* an /object/ of ~type java.lang.String~.
+
+       * the code below *WON'T work* for ~printf(get_format(), ...)~,
+         because in that case format _WON'T_ be a /string literal/, BUT rather an
+         AST that represents a /function application/.
+
+   - Typical macros (and this macro is not an exception) need to create ASTs which
+     represent Scala code. To learn more about generation of Scala code, take a
+     look at the overview of reflection.
+
+     Along with creating ASTs the code provided below also manipulates types.
+     Note how we get a hold of Scala types that correspond to ~Int~ and ~String~.
+     Reflection overview linked above covers type manipulations in detail.
+     The final step of code generation combines all the generated code into a
+     Block. Note the call to ~reify~, which provides a shortcut for creating
+     ASTs.
+     #+begin_src scala
+       val evals = mutable.ListBuffer.empty[ValDef]
+
+       def precompute(value: Tree, tpe: Tree): Ident = {
+         val freshName = TermName(c.freshName("eval$"))
+         evals += ValDef(NoMods, freshName, TypeTree(tpe), value)
+         Ident(freshName)
+       }
+
+       val paramsStack = mutable.Stack[Tree]((params.map(_.tree)): _*)
+       val refs = s_format.split() map {
+         case "%d" => precompute(paramsStack.pop, typeOf[Int])
+         case "%s" => precompute(paramsStack.pop, typeOf[String])
+         case "%%" => Literal(Constant("%"))
+         case part => Literal(Constant(part))
+       }
+
+       val stats = evals ++ refs.map(ref => reify(print(c.Expr[Any](ref).splice)).tree)
+       c.Expr[Unit](Block(stats.toList, Literal(Constant(()))))
+     #+end_src
+
+   - The snippet below represents a complete definition of the ~printf~ /macro/.
+     To follow the example, create an empty directory and copy the code to a new
+     file named =Macros.scala=.
+     #+begin_src scala
+       import scala.reflect.macros.Context
+       import scala.collection.mutable
+
+       object Macros {
+         def printf(format: String, params: Any*): Unit = macro printf_impl
+
+         def printf_impl(c: Context)
+                        (format: c.Expr[String], params: c.Expr[Any]*): c.Expr[Unit] = {
+           import c.universe._
+           val Literal(Constant(s_format: String)) = format.tree
+
+           val evals = mutable.ListBuffer.empty[ValDef]
+           def precompute(value: Tree, tpe: Type): Ident = {
+             val freshName = TermName(c.freshName("eval$"))
+             evals += ValDef(NoMods, freshName, TypeTree(tpe), value)
+             Ident(freshName)
+           }
+
+           val paramsStack = mutable.Stack[Tree]((params map (_.tree)): _*)
+           val refs = s_format.split("(?<=%[\\w%])|(?=%[\\w%])") map {
+             case "%d" => precompute(paramsStack.pop, typeOf[Int])
+             case "%s" => precompute(paramsStack.pop, typeOf[String])
+             case "%%" => Literal(Constant("%"))
+             case part => Literal(Constant(part))
+           }
+
+           val stats = evals ++ refs.map(ref => reify(print(c.Expr[Any](ref).splice)).tree)
+           c.Expr[Unit](Block(stats.toList, Literal(Constant(()))))
+         }
+       }
+     #+end_src
+     + Call the /macro definition/:
+       #+begin_src scala
+         object Test extends App {
+           import Macros._
+           printf("hello %s!", "world")
+         }
+       #+end_src
+       * An important aspect of macrology is *SEPARATE compilation*.
+         /Macros/ must be compiled _BEFORE_ the main compilation!
+         - =from Jian=
+           How to config SBT to do manage the order of compiling IF I DON'T want
+           to put all macros in a separate subproject?
+
+** TODO Tips and tricks
+*** DONE Using macros with the command-line Scala compiler
+    CLOSED: [2020-09-18 Fri 01:37]
+    If you use REPL, then it's even better, because REPL processes every line in
+    a *separate* _compilation run_, so you'll be able to define a macro and use it
+    right away.
+
+*** DONE Using macros with Maven or sbt
+    CLOSED: [2020-09-18 Fri 01:42]
+    - /Macros/ work fine with Maven and sbt.
+
+    - In a nutshell you only need to know _TWO_ things:
+      + /Macros/ needs =scala-reflect.jar= in library dependencies.
+
+      + The /separate compilation/ restriction requires macros to be placed in a
+        *separate* project.
+
+*** DONE Using macros with Scala IDE or Intellij IDEA
+    CLOSED: [2020-09-18 Fri 01:38]
+    Both in Scala IDE and in Intellij IDEA macros are known to work fine, given
+    they are moved to a *separate* project.
+
+*** DONE Debugging macros - =TODO=
+    CLOSED: [2020-09-18 Fri 02:08]
+    - Debugging macros (i.e. the logic that drives macro expansion) is fairly
+      straightforward: *Since macros are expanded within the compiler, all that
+      you need is to run the compiler under a debugger.* To do that, you need to:
+      1. add *ALL* (!) the libraries from the lib directory in your Scala home
+         (which include such jar files as =scala-library.jar=, =scala-reflect.jar=
+         and =scala-compiler.jar=) to the /classpath/ of your debug configuration,
+
+      2. set ~scala.tools.nsc.Main~ as an entry point -- *"Main class"* in IntelliJ,
+
+      3. provide the ~-Dscala.usejavacp=true~ system property for the JVM (very
+         important!) -- *"VM options"* in IntelliJ,
+
+         *"Program arguments"* in IntelliJ,
+      4. set command-line arguments for the compiler as
+         ~-cp <path to the classes of your macro> Test.scala~,
+         where =Test.scala= stands for a test file _CONTAINING_ *macro invocations*
+         to be /expanded/.
+           After all that is done, you should be able to put a /breakpoint/ inside
+         your /macro implementation/ and launch the debugger.
+         + In IntelliJ, if *"use classpath of Module"* is given a proper value
+           that includes the being tested /macros/, only the =Test.scala= need to
+           be specified.
+
+         + *TODO* =from Jian= *TODO*
+           Learn to debug Scala macros
+           * with VS Code (Metals plugin should be installed),
+           * without any IDE.
+
+    - What really requires special support in tools is debugging the results of
+      /macro expansion/ (i.e. the code that is *generated by* a /macro/). Since
+      this code is never written out manually, you _CANNOT_ set /breakpoints/ there,
+      and you won't be able to step through it.
+        Scala IDE and Intellij IDEA teams will _probably add support_ for this in
+      their debuggers at some point, but for now the only way to debug /macro
+      expansions/ are diagnostic prints: =-Ymacro-debug-lite= (as described below),
+      which prints out the code emitted by macros, and println to trace the
+      execution of the generated code.
+
+*** DONE Inspecting generated code
+    CLOSED: [2020-09-18 Fri 02:15]
+    - =-Ymacro-debug-lite= can show
+      + pseudo-Scala representation of the code generated by macro expansion
+        * USEFUL for surface analysis
+
+      + raw AST representation of the expansion
+        * invaluable for fine-grained debugging
+
+    - In IntelliJ, add =-Ymacro-debug-lite= to the "Program arguments".
+
+    - Run =scalac -Ymacro-debug-lite Test.scala=, and =from Jian= check this doc
+      webpage to see the output.
+
+*** TODO Macros throwing unhandled exceptions
+*** TODO Reporting warnings and errors
+*** TODO Writing bigger macros
+
+* TODO Quasiquotes
   Quasiquote guide has been moved to /overviews/quasiquotes/intro.html.
+  =from Jian= Notes are in a separate file.
 
 * Macro Bundles
 ** Macro bundles

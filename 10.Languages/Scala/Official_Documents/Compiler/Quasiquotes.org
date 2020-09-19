@@ -1,35 +1,471 @@
 #+TITLE: Quasiquotes
 #+VERSION: 2.13.3
+#+AUTHOR: Denys Shabalin
 #+STARTUP: entitiespretty
 
-* Dependencies and setup
-** Scala 2.11
-** Scala 2.10
-** sbt cross-compile
+* DONE Dependencies and setup
+  CLOSED: [2020-09-19 Sat 04:05]
+** DONE Scala 2.11 - =TODO= =ADDITIONAL NOTE=
+   CLOSED: [2020-09-19 Sat 04:04]
+   Add dependency =scala-reflect.jar=
 
-* Introduction
-** Interpolators
-** Splicing
+   - All examples and code snippets in this guide are run under in 2.11 REPL with
+     one extra line: ~import scala.reflect.runtime.universe._~
+     *All of the examples will assume this import.*
 
-* Lifting
-** Bring your own
-** Standard Liftables
-** Reusing Liftable implementation between universes
+   - A wildcard import from a ~universe~ is all that's needed to use /quasiquotes/.
+     All of the examples will assume that import.
+     + Here the ~universe~ can be
+       * a /runtime reflection/ ~universe~ (like examples in this section);
+       * a /compile-time reflection (macros)/ ~universe~.
 
-* Unlifting
+   - Additionally some examples that use ToolBox API will need a few more lines
+     to get things rolling:
+     #+begin_src scala
+       // For `ToolBox`
+       import scala.reflection.runtime.currentMirror
+       import scala.tools.reflect.ToolBox
+
+       // For `Quasiquote` and functions that can show the tree
+       import scala.reflection.runtime.universe.{Quasiquote, showCode, showRaw}
+
+       object macros {
+
+         val toolbox = currentMirror.mkToolBox()
+         val C = q"class C"
+         // C: universe.ClassDef =
+         // class C extends scala.AnyRef {
+         //   def <init>() = {
+         //     super.<init>();
+         //     ()
+         //   }
+         // }
+
+
+         println(showCode(C))
+         println(showRaw(C))
+       }
+     #+end_src
+
+** DONE Scala 2.10
+   CLOSED: [2020-09-19 Sat 04:01]
+   - In Scala 2.10, /quasiquotes/ are ONLY available via the _macro paradise
+     compiler plugin_. Adding
+     + a single ~addCompilerPlugin~ line to your _sbt build_ for the _macro paradise
+       plugin_ that *enables* /quasiquotes/
+
+     + an additional ~libraryDependencies~ line for the supporting library
+       (=scala-reflect.jar=) that is necessary for /quasiquotes/ to function in
+       Scala 2.10.
+
+   - New ~showCode~ pretty printer is NOT available under 2.10.
+
+** DONE sbt cross-compile - =RE-READ= and =Try=
+   CLOSED: [2020-09-19 Sat 04:04]
+   Here's a neat sbt snippet taken from _Spire_ that allows you to use /quasiquotes/
+   and /cross-compile/ against BOTH Scala 2.10 and 2.11:
+   #+begin_src scala
+     libraryDependencies := {
+       CrossVersion.partialVersion(scalaVersion.value) match {
+         // if scala 2.11+ is used, quasiquotes are merged into scala-reflect
+         case Some((2, scalaMajor)) if scalaMajor >= 11 =>
+           libraryDependencies.value
+
+         // in Scala 2.10, quasiquotes are provided by macro paradise
+         case Some((2, 10)) =>
+           libraryDependencies.value ++ Seq(
+             compilerPlugin("org.scalamacros" % "paradise" % "2.0.0" cross CrossVersion.full),
+             "org.scalamacros" %% "quasiquotes" % "2.0.0" cross CrossVersion.binary)
+       }
+     }
+   #+end_src
+
+* DONE Introduction
+  CLOSED: [2020-09-19 Sat 05:28]
+  Quasiquotes are a neat notation that lets you manipulate Scala syntax trees with ease.
+
+  - Example:
+    #+begin_src scala
+      object macros {
+        val tree = q"i am { a quasiquote }"
+        // tree: universe.Tree = i.am(a.quasiquote)
+      }
+    #+end_src
+
+  - The code snippet you wrap into a ~q"..."~ will become a /AST tree/ that
+    represents the given code snippet.
+
+  - It is clear that /quasiquote/ syntax is just another usage of extensible
+    /string interpolation/, introduced in 2.10.
+
+  - The same syntax can be used to match /trees/ as /patterns/:
+    #+begin_src scala
+      object macros {
+        println(tree match { case q"i am { a quasiquote }" => "it worked!" })
+        //// it worked!
+      }
+    #+end_src
+
+  - WHENEVER you match a /tree/ with a /quasiquote/ it will match whenever the
+    structure of a given /tree/ is equivalent to the one you've provided as a
+    pattern.
+      You can check for structural equality manually with the help of
+    ~equalsStructure~ /method/:
+    #+begin_src scala
+      object macros {
+        println(q"foo + bar" equalsStructure q"foo.+(bar)")
+        //// true
+      }
+    #+end_src
+
+  - You can also put things into /quasiquotation/ with the help of ~$~:
+    #+begin_src scala
+      object macros {
+        val aquasiquote = q"a quasiquote"
+        // aquasiquote: universe.Select = a.quasiquote
+
+        val tree = q"i am { $aquasiquote }"
+        // tree: universe.Tree = i.am(a.quasiquote)
+      }
+    #+end_src
+
+  - This operation (~$~) is also known as /unquoting/.
+    Whenever you /unquote/ an expression of type ~Tree~ in a /quasiquote/ it
+    will STRUCTURALLY *substitute* that /tree/ into that location.
+      *MOST of the time* such substitutions between /quotes/ is *equivalent* to a
+    _textual substitution_ of the source code.
+
+  - Similarly, one can STRUCTURALLY *deconstruct* a /tree/ using /unquoting/ in
+    /pattern matching/:
+    #+begin_src scala
+      object macros {
+        val q"i am $what" = q"i am { a quasiquote }"
+        // what: universe.Tree = a.quasiquote
+      }
+    #+end_src
+
+** DONE Interpolators
+   CLOSED: [2020-09-19 Sat 05:27]
+   Scala is a language with rich syntax that *differs* greatly _depending on_ the
+   /syntactical context/
+   #+begin_src scala
+     object macros {
+       val x = q"""
+         val x: List[Int] = List(1, 2) match {
+           case List(a, b) => List(a + b)
+         }
+       """
+       // x: universe.ValDef =
+       //   val x: List[Int] = List(1, 2) match {
+       //     case List((a @ _), (b @ _)) => List(a.$plus(b))
+       //   }
+     }
+   #+end_src
+
+   - In this example we see three primary contexts being used:
+     1. ~List(1, 2)~ and ~List(a + b)~ are /expressions/
+     2. ~List[Int]~ is a /type/
+     3. ~List(a, b)~ is a /pattern/
+
+   - Each of these /contexts/ is covered by a *SEPARATE* /interpolator/:
+     |---------------------+---------------------------------------|
+     | interpolator prefix | Used for                              |
+     |---------------------+---------------------------------------|
+     | ~q~                 | expressions, definitions, and imports |
+     | ~tq~                | types                                 |
+     | ~pq~                | patterns                              |
+     |---------------------+---------------------------------------|
+     + Syntactical similarity between different contexts doesn't imply similarity
+       between underlying trees:
+       #+begin_src scala
+         object macros {
+           q"List[Int]" equalsStructure tq"List[Int]"  // false
+         }
+       #+end_src
+
+     + If we peek under the hood we’ll see that trees are, indeed different:
+       #+begin_src scala
+         object macros {
+
+           println(showRaw(q"List[Int]"))
+           // TypeApply(Ident(TermName("List")), List(Ident(TypeName("Int"))))
+
+           println(showRaw(tq"List[Int]"))
+           // AppliedTypeTree(Ident(TypeName("List")), List(Ident(TypeName("Int"))))
+
+         }
+       #+end_src
+
+     + Similarly, patterns and expressions are also not equivalent:
+       #+begin_src scala
+         object macros {
+           pq"List(a, b)" equalsStructure q"List(a, b)"  // false
+         }
+       #+end_src
+
+   - It's extremely important to use the RIGHT /interpolator/ for the job in order
+     to construct a VALID syntax tree.
+
+   - Additionally there are two auxiliary interpolators that let you work with minor
+     areas of scala syntax:Additionally there are two auxiliary interpolators
+     that let you work with minor areas of scala syntax:
+     |------------------------------+---------------------|
+     | Auxiiary Interpolator Prefix | Used for            |
+     |------------------------------+---------------------|
+     | ~cq~                         | case clause         |
+     | ~fq~                         | for loop enumerator |
+     |------------------------------+---------------------|
+     See the section *syntax summary* section for details.
+
+** DONE Splicing
+   CLOSED: [2020-09-19 Sat 05:07]
+   - /Unquote splicing/ is a way to *unquote* _a *variable number* of elements_:
+     #+begin_src scala
+       object macros {
+         val ab = List(q"a", q"b")
+         val fab = q"f(..$ab)"
+         // fab: universe.Tree = f(a, b)
+       }
+     #+end_src
+     + _Dots before the unquotee annotate_ indicate _a *degree* of flattening_ and
+       are called a /splicing rank/.
+       + ~..$~ expects the argument to be an ~Iterable[Tree]~
+       + ~...$~ expects an ~Iterable[Iterable[Tree]]~.
+
+   - /Splicing/ can easily be _combined with_ regular /unquotation/:
+     #+begin_src scala
+       object macros {
+
+         val c = q"c"
+         val fabc = q"f(..$ab, $c)"
+         // fabc: universe.Tree = f(a, b, c)
+
+         val fcab = q"f($c, ..$ab)"
+         // fcab: universe.Tree = f(c, a, b)
+
+         val fabcab = q"f(..$ab, $c, ..$ab)"
+         // fabcab: universe.Tree = f(a, b, c, a, b)
+
+       }
+     #+end_src
+
+   - If you want to abstract over applications even further, you can use ~...$~:
+     #+begin_src scala
+       object macros {
+
+         val argss = List(ab, List(c))
+         // arglists: List[List[universe.Ident]] = List(List(a, b), List(c))
+
+         val fargss = q"f(...$argss)"
+         // fargss: universe.Tree = f(a, b)(c)
+
+       }
+     #+end_src
+     + At the moment ~...$~ /splicing/ is *ONLY* supported for /function applications/
+       and /parameter lists/ _in ~def~ and ~class~ definitions_.
+
+   - Similarly to *construction*
+     one can also use ~..$~ and ~...$~ to *TEAR /trees/ apart*:
+     #+begin_src scala
+       object macros {
+
+         val q"f(..$args)" = q"f(a, b)"
+         // args: List[universe.Tree] = List(a, b)
+
+         val q"f(...$argss)" = q"f(a, b)(c)"
+         // argss: List[List[universe.Tree]] = List(List(a, b), List(c))
+
+       }
+     #+end_src
+
+   - There are some limitations in the way you can combine /splicing/ with regular
+     ~$~ variable extraction:
+     #+begin_src scala
+       case q"f($first, ..$rest)" => // ok
+       case q"f(..$init, $last)"  => // ok
+       case q"f(..$a, ..$b)"      => // not allowed
+     #+end_src
+
+   - So, in general, *ONLY one* ~..$~ is allowed per given list.
+     Similar _restrictions_ also apply to ~...$~:
+     #+begin_src scala
+       case q"f(..$first)(...$rest)" => // ok
+       case q"f(...$init)(..$first)" => // ok
+       case q"f(...$a)(...$b)"       => // not allowed
+     #+end_src
+
+   - In this section we only worked with /function arguments/ BUT the same
+     _splicing rules_ are true for ALL syntax forms with a _variable number_ of
+     elements.
+       Syntax summary and the corresponding details sections demonstrate how you
+     can use /splicing/ with other syntactic forms.
+     =TODO= =TODO= =TODO=
+
+* DONE Lifting
+  CLOSED: [2020-09-19 Sat 07:15]
+  Lifting is an extensible way to /unquote/ custom data types in /quasiquotes/.
+
+  - The primary use-case of /lifting/ is support *unquoting* of /literal values/
+    and a number of /reflection primitives/ as /trees/:
+    #+begin_src scala
+      object macros {
+
+        val two = 1 + 1
+        // two: Int = 2
+
+        val four = q"$two + $two"
+        // four: universe.Tree = 2.$plus(2)
+
+      }
+    #+end_src
+    + =from Jian=
+      /Lifting/ implicitly convert the value passed to it to a /tree/ and then
+      /unquote/ it -- remember: is only consider explicit operations, the type of
+      values that can be *unquoted* MUST BE a /tree/.
+
+    + This code above runs successfully because ~Int~ is considered to be ~Liftable~
+      _by default_. The ~Liftable~ /type/ is just a /trait/ with a *SINGLE abstract
+      method* that defines _a *mapping* of a given type *to* /tree/:_
+      #+begin_src scala
+        trait Liftable[T] {
+          def apply(value: T): Tree
+        }
+      #+end_src
+      This is a /type class pattern/.
+
+  - A number of /data types/ that are *supported natively* by /quasiquotes/ will
+    never trigger the usage of a ~Liftable~ representation, even if it's
+    available: /subtypes/ of ~Tree~, ~Symbol~, ~Name~, ~Modifiers~ and ~FlagSet~.
+    =from Jian= What is the ~FlagSet~??? =TODO=
+
+  - One can also combine /lifting/ and /unquote splicing/:
+    #+begin_src scala
+      object macros {
+
+        val ints = List(1, 2, 3)
+        val f123 = q"f(..$ints)"
+        // f123: universe.Tree = f(1, 2, 3)
+
+        val intss = List(List(1, 2, 3), List(4, 5), List(6))
+        val f123456 = q"f(...$intss)"
+        // f123456: universe.Tree = f(1, 2, 3)(4, 5)(6)
+
+      }
+    #+end_src
+
+** DONE Bring your own
+   CLOSED: [2020-09-19 Sat 07:05]
+   To define /tree/ representation for YOUR OWN /data type/ just provide an
+   /implicit instance/ of ~Liftable~ for it:
+   #+begin_src scala
+     package points
+
+     import scala.reflect.runtime.universe._
+
+     final case class Point(x: Int, y: Int)
+     object Point {
+       implicit val lift = Liftable[Point] { p =>
+         q"_root_.points.Point(${p.x}, ${p.y})"
+       }
+     }
+   #+end_src
+   This way, whenever a value of type ~Point~ is /unquoted/ at /runtime/ it will
+   be automatically transformed into a /case class constructor/ call. In this
+   example there are _THREE_ important points you should consider:
+   1. The ~Liftable~ /companion/ contains a helper ~apply~ /method/ to simplify
+      the creation of ~Liftable~ /instances/. It takes a single /type parameter/
+      ~T~ and a ~T => Tree~ /function/ as a _single value parameter_ and returns
+      a ~Liftable[T]~.
+
+   2. Here we only defined ~Liftable~ for /runtime reflection/. It won't be found
+      if you try to use it from a /macro/ due to the fact that *EACH* ~universe~
+      contains its *OWN* ~Liftable~, which is *NOT compatible* with the others.
+        This problem is caused by the /path-dependent/ nature of the current
+      reflection API. (see "reusing liftable implementation between universes")
+
+   3. Due to a *lack* of /hygiene/,
+      the reference to ~Point~'s /companion/ has to be *fully qualified* to
+      _ENSURE_ the correctness of this tree in *EVERY* possible _context_.
+      + Another way to _workaround_ this reference issue is to *use /symbols/ instead*:
+        #+begin_src scala
+          object macros {
+            val PointSym = symbolOf[Point].companionModule
+
+            implicit val lift = Liftable[Point] { p =>
+              q"$PointSym(${p.x}, ${p.y})"
+            }
+          }
+        #+end_src
+
+** DONE Standard Liftables - =RE-READ= =reference=
+   CLOSED: [2020-09-19 Sat 07:05]
+** DONE Reusing Liftable implementation between universes
+   CLOSED: [2020-09-19 Sat 07:14]
+   Due to the /path dependent/ nature of the CURRENT reflection API, it is
+   *non-trivial to SHARE* the same ~Liftable~ definition BETWEEN the /macro/ and
+   the /runtime universes/.
+     One possible way to do this is _to *define* ~Liftable~ implementations in a
+   /trait/ and *instantiate* it for EACH ~universe~ SEPARATELY_:
+   #+begin_src scala
+     import scala.reflect.api.Universe
+     import scala.reflect.macros.blackbox
+
+     trait LiftableImpls {
+       val universe: Universe
+       import universe._
+
+       implicit val liftPoint = Liftable[points.Point] { p =>
+         q"_root_.points.Point(${p.x}, ${p.y})"
+       }
+     }
+
+     object RuntimeLiftableImpls extends LiftableImpls {
+       val universe: universe.type = scala.reflect.runtime.universe
+     }
+
+     trait MacroLiftableImpls extends LiftableImpls {
+       val c: Context
+       val universe: c.universe.type = c.universe
+     }
+
+     // macro impls defined as a bundle
+     class MyMacro(val c: blackbox.Context) extends MacroLiftableImpls {
+       // ...
+     }
+   #+end_src
+   =from Jian=  What does this comment "// macro impls defined as a bundle" mean???
+
+   So, in practice, it's much easier to just define a ~Liftable~ for given
+   ~universe~ at hand:
+   #+begin_src scala
+     import scala.reflect.macros.blackbox
+
+     // macro impls defined as a macro bundle
+     class MyMacros(c: blackbox.Context) {
+       import c.universe._
+
+       implicit val liftPoint = Liftable[points.Point] { p =>
+         q"_root_.points.Point(${p.x}, ${p.y})"
+       }
+
+       // ...
+     }
+   #+end_src
+
+* TODO Unlifting
 ** Bring your own
 ** Standard Unliftables
 
-* Hygiene
+* TODO Hygiene
 ** Referential transparency
 ** Hygiene in the narrow sense
 
-* Use cases
+* TODO Use cases
 ** AST manipulation in macros and compiler plugins
 ** Just in time compilation
 ** Offline code generation
 
-* Syntax summary
+* TODO Syntax summary
 ** Expressions
 ** Types
 ** Patterns
@@ -37,7 +473,7 @@
 ** Auxiliary
 ** Abbreviations
 
-* Expression details
+* TODO Expression details
 ** Empty
 ** Literal
 ** Identifier and Selection
@@ -60,7 +496,7 @@
 ** New
 ** Import
 
-* Type details
+* TODO Type details
 ** Empty Type
 ** Type Identifier
 ** Singleton Type
@@ -72,7 +508,7 @@
 ** Tuple Type
 ** Function Type
 
-* Pattern details
+* TODO Pattern details
 ** Wildcard Pattern
 ** Literal Pattern
 ** Binding Pattern
@@ -81,7 +517,7 @@
 ** Alternative Pattern
 ** Tuple Pattern
 
-* Definition and import details
+* TODO Definition and import details
 ** Modifiers
 ** Templates
 ** Val and Var Definitions
@@ -95,5 +531,5 @@
 ** Package Definition
 ** Package Object Definition
 
-* Terminology summary
-* Future prospects
+* TODO Terminology summary
+* TODO Future prospects

@@ -387,7 +387,7 @@
         the standard library).
 
 * DONE Environment, Universes, and Mirrors
-  CLOSED: [2020-07-02 Thu 02:16]
+  CLOSED: [2020-09-13 Sun 22:39]
   - Contributors:
     + ashawley
     + marconilanna
@@ -430,7 +430,8 @@
    - A /universe/ provides an interface to all the principal concepts used in
      reflection, such as ~Type~'s, ~Tree~'s, and ~Annotation~'s.
 
-** TODO Mirrors
+** DONE Mirrors
+   CLOSED: [2020-09-13 Sun 22:39]
    - *ALL* information provided by /reflection/ is _made accessible_ *through*
      /mirrors/.
      + Depending on the type of information to be obtained, or the reflective action
@@ -471,172 +472,179 @@
 
     - Examples of _HOW these two types of /mirrors/ INTERACT_ are available below.
 
-*** TODO Types of Mirrors, Their Use Cases & Examples
+*** DONE Types of Mirrors, Their Use Cases & Examples
+    CLOSED: [2020-09-13 Sun 22:35]
     INSERT ~import scala.reflect.runtime.{universe => ru}~ in ALL the code
     snippets below.
 
-    - ~ReflectiveMirror~
-      + Be used for
-        * *loading* symbols *by* name,
-          *as* an /entry point/ into /invoker mirrors/.
+    1. ~ReflectiveMirror~
+       + Be used for
+         * *loading* symbols *by* name,
+           *as* an /entry point/ into /invoker mirrors/.
 
-      + Entry point:
-        ~val m = ru.runtimeMirror(<classloader>)~.
+       + Entry point:
+         ~val m = ru.runtimeMirror(<classloader>)~.
 
-      + Example:
-        #+begin_src scala
-          val m = ru.runtimeMirror(getClass.getClassLoader)
-          // m: scala.reflect.runtime.universe.Mirror = JavaMirror ...
-        #+end_src
+       + Example:
+         #+begin_src scala
+           val m = ru.runtimeMirror(getClass.getClassLoader)
+           // m: scala.reflect.runtime.universe.Mirror = JavaMirror ...
+         #+end_src
 
-    - ~InstanceMirror~
-      + Be used for
-        *creating* /invoker mirrors/ for /methods/, /fields/, and for /inner
-        classes/ and /inner objects/ (modules).
+    2. ~InstanceMirror~
+       + Be used for
+         *creating* /invoker mirrors/ for
+         * /methods/
+         * /fields/
+         * /inner classes/ and /inner objects/ (modules).
 
-      + Entry point:
-        ~val im = m.reflect(<value>)~.
+       + Entry point:
+         ~val im = m.reflect(<value>)~.
 
-      + Example:
-        #+begin_src scala
-          class C { def x = 2 }
+       + Example:
+       #+begin_src scala
+           class C { def x = 2 }
 
-          val im = m.reflect(new C)
-          // im: scala.reflect.runtime.universe.InstanceMirror = instance mirror for C@3442299e
-        #+end_src
+           val im = m.reflect(new C)
+           // im: scala.reflect.runtime.universe.InstanceMirror = instance mirror for C@3442299e
+         #+end_src
 
-    - ~MethodMirror~
-      + Be used for
-        *invoking* /instance methods/ (Scala ONLY has /instance methods/ -- methods
-        of objects are instance methods of object instances, obtainable via
-        ~ModuleMirror.instance~).
+    3. ~MethodMirror~
+       + Be used for =TODO= =RE-READ=
+         *invoking* /instance methods/
+         * Scala ONLY has /instance methods/ -- /methods/ of /objects/ are /instance
+           methods/ of /object instances/, obtainable via ~ModuleMirror.instance~.
 
-      + Entry point:
-        ~val mm = im.reflectMethod(<method symbol>)~.
+       + Entry point:
+         ~val mm = im.reflectMethod(<method symbol>)~.
 
-      + Example:
-        #+begin_src scala
-          object methodMirrorShow {
-            val methodX = ru.typeOf[C].decl(ru.TermName("x")).asMethod
-            // methodX: scala.reflect.runtime.universe.MethodSymbol = method x
+       + Example:
+         #+begin_src scala
+           object methodMirrorShow {
+             val methodX = ru.typeOf[C].decl(ru.TermName("x")).asMethod
+             // methodX: scala.reflect.runtime.universe.MethodSymbol = method x
 
-            val mm = im.reflectMethod(methodX)
-            // mm: scala.reflect.runtime.universe.MethodMirror =
-            //   method mirror for C.x: scala.Int (bound to C@3442299e)
+             val mm = im.reflectMethod(methodX)
+             // mm: scala.reflect.runtime.universe.MethodMirror =
+             //   method mirror for C.x: scala.Int (bound to C@3442299e)
 
-            mm()
-            // res0: Any = 2
-          }
-        #+end_src
+             mm()
+             // res0: Any = 2
+           }
+         #+end_src
 
-    - ~FieldMirror~
-      + Be used for *getting/setting* /instance fields/ (like methods, Scala ONLY
-        has /instance fields/, see above).
+    4. ~FieldMirror~ =TODO= =TODO= =TODO=
+       + Be used for *getting/setting* /instance fields/ (like /methods/, Scala ONLY
+         has /instance fields/, see above).
 
-      + Entry point:
-        ~val fm = im.reflectField(<field or accessor symbol>)~.
+       + Entry point:
+         ~val fm = im.reflectField(<field or accessor symbol>)~.
 
-      + Example:
-        #+begin_src scala
-          object fieldMirrorShow {
-            final class C { val x = 2; var y = 3 }
+       + Example:
+         #+begin_src scala
+           object fieldMirrorShow {
+             final class C { val x = 2; var y = 3 }
 
-            val m = ru.runtimeMirror(getClass.getClassLoader)
-            // m: scala.reflect.runtime.universe.Mirror = JavaMirror ...
+             val m = ru.runtimeMirror(getClass.getClassLoader)
+             // m: scala.reflect.runtime.universe.Mirror = JavaMirror ...
 
-            val im = m.reflect(new C)
-            // im: scala.reflect.runtime.universe.InstanceMirror = instance mirror for C@5f0c8ac1
+             val im = m.reflect(new C)
+             // im: scala.reflect.runtime.universe.InstanceMirror = instance mirror for C@5f0c8ac1
 
-            val fieldX = ru.typeOf[C].decl(ru.TermName("x")).asTerm.accessed.asTerm
-            // fieldX: scala.reflect.runtime.universe.TermSymbol = value x
+             val fieldX = ru.typeOf[C].decl(ru.TermName("x")).asTerm.accessed.asTerm
+             // fieldX: scala.reflect.runtime.universe.TermSymbol = value x
 
-            val fmX = im.reflectField(fieldX)
-            // fmX: scala.reflect.runtime.universe.FieldMirror = field mirror for C.x (bound to C@5f0c8ac1)
+             val fmX = im.reflectField(fieldX)
+             // fmX: scala.reflect.runtime.universe.FieldMirror = field mirror for C.x (bound to C@5f0c8ac1)
 
-            fmX.get
-            // res0: Any = 2
+             fmX.get
+             // res0: Any = 2
 
-            fmX.set(3)
+             fmX.set(3)
 
-            val fieldY = ru.typeOf[C].decl(ru.TermName("y")).asTerm.accessed.asTerm
-            // fieldY: scala.reflect.runtime.universe.TermSymbol = variable y
+             val fieldY = ru.typeOf[C].decl(ru.TermName("y")).asTerm.accessed.asTerm
+             // fieldY: scala.reflect.runtime.universe.TermSymbol = variable y
 
-            val fmY = im.reflectField(fieldY)
-            // fmY: scala.reflect.runtime.universe.FieldMirror = field mirror for C.y (bound to C@5f0c8ac1)
+             val fmY = im.reflectField(fieldY)
+             // fmY: scala.reflect.runtime.universe.FieldMirror = field mirror for C.y (bound to C@5f0c8ac1)
 
-            fmY.get
-            // res1: Any = 3
+             fmY.get
+             // res1: Any = 3
 
-            fmY.set(4)
+             fmY.set(4)
 
-            fmY.get
-            // res2: Any = 4
-          }
-        #+end_src
+             fmY.get
+             // res2: Any = 4
+           }
+         #+end_src
+         * =from Jian=
+           =TODO=
+           Need more explanation about ~accessed~!!!
+           In the current example code, even after removing ~accessed~, the code also works.
 
-    - ~ClassMirror~
-      + Be used for
-        *creating* /invoker mirrors/ for /constructors/.
+    5. ~ClassMirror~
+       + Be used for
+         *creating* /invoker mirrors/ for /constructors/.
 
-      + Entry points:
-        * for /static classes/ ~val cm1 = m.reflectClass(<class symbol>)~,
-        * for /inner classes/ ~val mm2 = im.reflectClass(<class symbol>)~.
+       + Entry points:
+         * for /static classes/ ~val cm1 = m.reflectClass(<class symbol>)~,
+         * for /inner classes/ ~val mm2 = im.reflectClass(<class symbol>)~.
 
-      + Example:
-        #+begin_src scala
-          object classMirrorShow {
-            final case class C(x: Int)
+       + Example:
+         #+begin_src scala
+           object classMirrorShow {
+             final case class C(x: Int)
 
-            val m = ru.runtimeMirror(getClass.getClassLoader)
-            // m: scala.reflect.runtime.universe.Mirror = JavaMirror ...
+             val m = ru.runtimeMirror(getClass.getClassLoader)
+             // m: scala.reflect.runtime.universe.Mirror = JavaMirror ...
 
-            val classC = ru.typeOf[C].typeSymbol.asClass
-            // classC: scala.reflect.runtime.universe.Symbol = class C
+             val classC = ru.typeOf[C].typeSymbol.asClass
+             // classC: scala.reflect.runtime.universe.Symbol = class C
 
-            val cm = m.reflectClass(classC)
-            // cm: scala.reflect.runtime.universe.ClassMirror = class mirror for C (bound to null)
+             val cm = m.reflectClass(classC)
+             // cm: scala.reflect.runtime.universe.ClassMirror = class mirror for C (bound to null)
 
-            val ctorC = ru.typeOf[C].decl(ru.termNames.CONSTRUCTOR).asMethod
-            // ctorC: scala.reflect.runtime.universe.MethodSymbol = constructor C
+             val ctorC = ru.typeOf[C].decl(ru.termNames.CONSTRUCTOR).asMethod
+             // ctorC: scala.reflect.runtime.universe.MethodSymbol = constructor C
 
-            val ctorm = cm.reflectConstructor(ctorC)
-            // ctorm: scala.reflect.runtime.universe.MethodMirror =
-            //   constructor mirror for C.<init>(x: scala.Int): C (bound to null)
+             val ctorm = cm.reflectConstructor(ctorC)
+             // ctorm: scala.reflect.runtime.universe.MethodMirror =
+             //   constructor mirror for C.<init>(x: scala.Int): C (bound to null)
 
-            ctorm(2)
-            // res0: Any = C(2)
-          }
-        #+end_src
+             ctorm(2)
+             // res0: Any = C(2)
+           }
+         #+end_src
 
-    - ~ModuleMirror~
-      + Be used for
-        *accessing* /instances/ of /singleton objects/.
+    6. ~ModuleMirror~
+       + Be used for
+         *accessing* /instances/ of /singleton objects/.
 
-      + Entry points:
-        * for /static objects/ ~val mm1 = m.reflectModule(<module symbol>)~,
-        * for /inner objects/ ~val mm2 = im.reflectModule(<module symbol>)~.
+       + Entry points:
+         * for /static objects/ ~val mm1 = m.reflectModule(<module symbol>)~,
+         * for /inner objects/ ~val mm2 = im.reflectModule(<module symbol>)~.
 
-      + Example:
-        #+begin_src scala
-          object moduleMirrorShow {
-            object C { def x = 2 }
+       + Example:
+         #+begin_src scala
+           object moduleMirrorShow {
+             object C { def x = 2 }
 
-            val m = ru.runtimeMirror(getClass.getClassLoader)
-            // m: scala.reflect.runtime.universe.Mirror = JavaMirror ...
+             val m = ru.runtimeMirror(getClass.getClassLoader)
+             // m: scala.reflect.runtime.universe.Mirror = JavaMirror ...
 
-            val objectC = ru.typeOf[C.type].termSymbol.asModule
-            // objectC: scala.reflect.runtime.universe.ModuleSymbol = object C
+             val objectC = ru.typeOf[C.type].termSymbol.asModule
+             // objectC: scala.reflect.runtime.universe.ModuleSymbol = object C
 
-            val mm = m.reflectModule(objectC)
-            // mm: scala.reflect.runtime.universe.ModuleMirror = module mirror for C (bound to null)
+             val mm = m.reflectModule(objectC)
+             // mm: scala.reflect.runtime.universe.ModuleMirror = module mirror for C (bound to null)
 
-            val obj = mm.instance
-            // obj: Any = C$@1005ec04
-          }
-        #+end_src
+             val obj = mm.instance
+             // obj: Any = C$@1005ec04
+           }
+         #+end_src
 
 *** DONE Compile-Time Mirrors
-    CLOSED: [2020-07-02 Thu 11:21]
+    CLOSED: [2020-09-13 Sun 22:39]
     /Compile-time mirrors/ make use of *only* /classloader mirrors/ to
     *LOAD /symbols/ _by name_.*
 
@@ -667,13 +675,15 @@
           }
         }
       #+end_src
-      - Of note:
+      + Of note:
         There are several high-level alternatives that one can use to avoid having
         to manually lookup symbols. For example, ~typeOf[Location.type].termSymbol~
         (or ~typeOf[Location].typeSymbol~ if we needed a ~ClassSymbol~), which are
         typesafe since we don't have to use strings to lookup the symbol.
+        =TODO= =TODO= =TODO=
 
-* TODO Symbols, Trees, and Types
+* DONE Symbols, Trees, and Types
+  CLOSED: [2020-09-14 Mon 01:48]
   - Contributors:
     + nogurenn
     + Philippus
@@ -686,34 +696,35 @@
     + heathermiller
 
 ** DONE Symbols
-   CLOSED: [2020-07-04 Sat 04:01]
+   CLOSED: [2020-09-14 Mon 00:38]
    - /Symbols/ are used to *establish bindings* BETWEEN a *name* AND the *entity*
      it refers to, such as a /class/ or a /method/.
 
-   - Anything you define and _can give a NAME to_ in Scala has an associated /symbol/.
+   - ANYTHING you define and _can give a NAME to_ in Scala has an associated /symbol/.
 
    - /Symbols/ contain *ALL* available information about the declaration of
-     + an entity (~class~ / ~object~ / ~trait~ etc.)
+     + an _entity_ (~class~ / ~object~ / ~trait~ etc.)
        or
-     + a member (~val~'s / ~var~'s / ~def~'s etc.),
+     + a _member_ (~val~'s / ~var~'s / ~def~'s etc.),
 
      and as such are an integral abstraction central to both /runtime reflection/
      and /compile-time reflection (macros)/.
 
    - A /symbol/ can provide a wealth of information
-     ranging from
-     + the basic name method available on all /symbols/
-       to other, more involved, concepts
-     + such as getting the ~baseClasses~ from ~ClassSymbol~.
+     ranging
+     + _FROM_ the basic ~name~ method available on all /symbols/
+
+     + _TO_ other, more involved, concepts such as getting the
+       ~baseClasses~ from ~ClassSymbol~.
 
    - Other common use cases of /symbols/ include
-     * inspecting members' signatures,
-     * getting type parameters of a class,
-     * getting the parameter type of a method
-     * finding out the type of a field.
+     * *inspecting* /members' signatures/,
+     * *getting* /type parameters/ of a /class/,
+     * *getting* the /parameter type/ of a /method/
+     * *finding out* the /type/ of a /field/.
 
 *** DONE The ~Symbol~ Owner Hierarchy
-    CLOSED: [2020-07-03 Fri 23:07]
+    CLOSED: [2020-09-14 Mon 00:38]
     - /Symbols/ are organized in a hierarchy.
       + For example,
         * a /symbol/ that represents a parameter of a method is *owned* by the
@@ -726,16 +737,20 @@
     - If a /symbol/ does _NOT have an owner,_ for example, because it refers to a
       _top-level entity_, such as a top-level package, then its owner is the
       special ~NoSymbol~ /singleton object/. Representing a _MISSING symbol_,
-      + ~NoSymbol~ is commonly used in the API to denote an empty or default value.
-        _Accessing the owner of ~NoSymbol~ throws an exception._
+      + ~NoSymbol~ is commonly used in the API to denote an EMPTY or DEFAULT value.
+        _Accessing the ~owner~ of ~NoSymbol~ throws an exception._
 
 *** DONE ~TypeSymbol~'s
-    CLOSED: [2020-07-03 Fri 23:15]
-    A ~TypeSymbol~ represents /type, class, and trait declarations/, as well as
-    /type parameters/.
+    CLOSED: [2020-09-13 Sun 23:42]
+    - ~TypeSymbol~ :: it represents declarations of
+      + ~type~
+      + ~class~
+      + ~trait~
+      + /type parameters/
 
     - Interesting members that *do _NOT apply_ to the more specific ~ClassSymbol~'s,*
-      include ~isAbstract~, ~isContravariant~, and ~isCovariant~.
+      include ~isAbstract~ (=from Jian= ~isAbstractType~ in this doc),
+      ~isContravariant~, and ~isCovariant~.
       + =from Jian=
         Here _NOT apply_ means always return ~false~.
 
@@ -743,34 +758,37 @@
         Current version uses ~isAbstractType~, which is _DEPRECATED_.
         Should use ~isAbstract~.
 
-    - ~ClassSymbol~:
-      Provides access to all information contained in a /class or trait
-      declaration/, e.g., ~name~, modifiers (~isFinal~, ~isPrivate~, ~isProtected~,
-      ~isAbstractClass~, etc.), ~baseClasses~, and ~typeParams~.
+      + ~ClassSymbol~:
+        Provides access to all information contained *in* a /class or trait
+        declaration/, e.g., ~name~, modifiers (~isFinal~, ~isPrivate~, ~isProtected~,
+        ~isAbstractClass~, etc.), ~baseClasses~, and ~typeParams~.
 
 *** DONE ~TermSymbol~'s
-    CLOSED: [2020-07-04 Sat 00:05]
-    The /type/ of /term symbols/ representing _val_, _var_, _def_, and _object_
-    declarations as well as _packages_ and _value parameters_.
-    - ~MethodSymbol~:
-      Represent /def declarations/.
-      + /subclass/ of ~TermSymbol~
-      + It supports queries like checking
-        - whether a /method/ is a (primary) constructor,
-        - whether a /method/ supports /variable-length argument lists/.
+    CLOSED: [2020-09-14 Mon 00:33]
+    - The /type/ of ~TermSymbol~ representing declarations of
+      + ~val~
+      + ~var~
+      + ~def~
+      + ~object~
+      + ~package~
+      + _value parameters_
 
-    - ~ModuleSymbol~:
-      =TODO= =TODO= =TODO= =TODO= =TODO= =TODO=
-      =from Jian= Examples??????? =from Jian=
-      Represent /object declarations/.
-      + It allows *looking up* the /class/ implicitly associated with the object
-        definition via member ~moduleClass~.
-      + The opposite look up is also possible.
-        One can go back from a /module class/ to the associated /module symbol/ by
-        inspecting its ~selfType.termSymbol~.
+    - ~TermSymbol~ has TWO /subclasses/:
+      + ~MethodSymbol~ :: Represent ~def~ _declarations_.
+        * It supports queries like checking
+          - whether a /method/ is a (primary) constructor,
+          - whether a /method/ supports /variable-length argument lists/.
+
+      + ~ModuleSymbol~ :: Represent ~object~ _declarations_.
+        * It allows *looking up* the /class/ implicitly associated with the object
+          definition via member ~moduleClass~. =TODO= =???= =TODO=
+
+        * The opposite look up is also possible.
+          One can go back from a /module class/ to the associated /module symbol/ by
+          inspecting its ~selfType.termSymbol~. =TODO= =???= =TODO=
 
 *** DONE ~Symbol~ Conversions
-    CLOSED: [2020-07-04 Sat 00:24]
+    CLOSED: [2020-09-14 Mon 00:35]
     - It's possible to _CONVERT_ the MORE GENERAL ~Symbol~ type obtained _TO_ the
       SPECIFIC, MORE SPECIALIZED /symbol type/ needed.
 
@@ -791,8 +809,8 @@
         }
       #+end_src
 
-*** DONE Free symbols
-    CLOSED: [2020-07-04 Sat 04:00]
+*** DONE Free symbols - =TODO= =NEED-EXAMPLES=
+    CLOSED: [2020-09-14 Mon 00:38]
     - The _TWO_ /symbol/ types ~FreeTermSymbol~ and ~FreeTypeSymbol~ have a special
       status, in the sense that they refer to symbols whose available information
       is not complete.
@@ -818,7 +836,7 @@
         by using ~-Xlog-free-types~.
 
 ** DONE Types
-   CLOSED: [2020-07-04 Sat 04:46]
+   CLOSED: [2020-09-14 Mon 00:56]
    - ~Type~: a instance of ~Type~ represents information about a type of a
      corresponding /symbol/.
 
@@ -832,19 +850,19 @@
    - Types also PROVIDE operations to *test* for _type conformance or equivalence_.
 
 *** DONE Instantiating Types
-    CLOSED: [2020-07-04 Sat 04:20]
+    CLOSED: [2020-09-14 Mon 00:47]
     - In general, there are three ways to instantiate a Type.
       1. via method ~typeOf~ on ~scala.reflect.api.TypeTags~, which is mixed into
          ~Universe~ (_simplest and most common_).
 
-      2. Standard Types, such as ~Int~, ~Boolean~, ~Any~, or ~Unit~ are accessible
+      2. /Standard Types/, such as ~Int~, ~Boolean~, ~Any~, or ~Unit~ are accessible
          through the available /universe/.
 
-      4. Manual instantiation using factory methods such as ~typeRef~ or ~polyType~
-         on ~scala.reflect.api.Types~, (_NOT recommended_).
+      4. Manual instantiation using /factory methods/ such as ~typeRef~ or ~polyType~
+         on ~scala.reflect.api.Types~ (_NOT recommended_).
 
 **** DONE Instantiating Types With ~typeOf~
-     CLOSED: [2020-07-04 Sat 04:20]
+     CLOSED: [2020-09-14 Mon 00:47]
      - To *instantiate* a /type/, most of the time,
        the ~scala.reflect.api.TypeTags#typeOf~ /method/ can be used.
        + For example:
@@ -899,7 +917,7 @@
        For more details, see the =TypeTags= section of this guide.
 
 **** DONE Standard Types
-     CLOSED: [2020-07-02 Thu 23:11]
+     CLOSED: [2020-09-14 Mon 00:47]
      - /Standard types/, such as ~Int~, ~Boolean~, ~Any~, or ~Unit~, are accessible
        through a /universe/'s definitions member.
 
@@ -915,14 +933,14 @@
        ~scala.reflect.api.StandardDefinitions~.
 
 *** DONE Common Operations on Types
-    CLOSED: [2020-07-04 Sat 04:46]
+    CLOSED: [2020-09-14 Mon 00:56]
     - ~Type~'s are typically used for /type conformance tests/ or /are queried for
       members/.
 
     - The three main classes of operations performed on types are:
       1. *Checking* the /subtyping relationship/ between two types.
       2. *Checking* for /equality/ between two types.
-      3. *Querying* a given type for certain members or inner types. =TODO= =???=
+      3. *Querying* a given type for certain members or inner types.
 
 **** DONE Subtyping Relationships
      CLOSED: [2020-07-04 Sat 04:30]
@@ -993,7 +1011,7 @@
          #+end_src
 
 **** DONE Type Equality
-     CLOSED: [2020-07-04 Sat 04:34]
+     CLOSED: [2020-09-14 Mon 00:50]
      - Similar to /type conformance/, one can easily *check* the /equality of two
        types/.
          That is, given two arbitrary types, one can use method ~=:=~ to see if
@@ -1029,20 +1047,24 @@
        #+end_src
 
 **** DONE Querying Types for Members and Declarations
-     CLOSED: [2020-07-04 Sat 04:46]
-     - Given a ~Type~, one can also query it for specific members or declarations.
-       A ~Type~'s members include all /fields/, /methods/, /type aliases/, /abstract
-       types/, _nested classes / objects / traits_, etc.
+     CLOSED: [2020-09-14 Mon 00:56]
+     - Given a ~Type~, one can also *query* it for specific _members_ or
+       _declarations_.
+       + A ~Type~'s _members_ include all /fields/, /methods/, /type aliases/,
+         /abstract types/, _nested classes / objects / traits_, etc.
 
-     - A ~Type~'s declarations are only those members that were declared (*NOT
-       inherited*) in the class/trait/object definition which the given Type
-       represents.
+       + A ~Type~'s _declarations_ are only those members that were declared (*NOT
+         inherited*) in the class/trait/object definition which the given ~Type~
+         represents.
 
-     - To obtain a ~Symbol~ for some specific member or declaration, one need only
-       to use methods members or ~decls~ which provide the list of definitions
-       associated with that type. There also exists singular counterparts for
-       each, methods ~member~ and ~decl~ as well. The signatures of all four are
-       shown below: =TODO= =EXAMPLE= =TRY= =TODO=
+     - To obtain a ~Symbol~ for some specific /member/ or /declaration/,
+       + one need only to use methods ~members~ or ~decls~ which provide the list
+         of definitions associated with that type.
+
+       + There also exists singular counterparts for each, methods ~member~ and
+         ~decl~ as well. The signatures of all four are shown below:
+
+     - Info of ~members~, ~decls~, ~member~, and ~decl~:
        #+begin_src scala
          /** The member with given name, either directly declared or inherited, an
            * `OverloadedSymbol` if several exist, `NoSymbol` if none exist. */
@@ -1061,9 +1083,9 @@
 
          /** A `Scope` containing the members declared directly on this type. */
          def decls: Universe.MemberScope // MemberScope is a type of
-                                                // Traversable, use higher-order
-                                                // functions such as map,
-                                                // filter, foreach to query!
+                                         // Traversable, use higher-order
+                                         // functions such as map,
+                                         // filter, foreach to query!
        #+end_src
 
      - For example, to look up the ~map~ method of ~List~, one can do:
@@ -1099,7 +1121,8 @@
            // method iterateUntilEmpty
          #+end_src
 
-** TODO Trees
+** DONE Trees
+   CLOSED: [2020-09-14 Mon 01:48]
    - ~Tree~, a structure in /Scala reflection/, is the concrete representation of
      Scala's abstract syntax. They are also called AST.
 
@@ -1218,22 +1241,26 @@
         // res1: String = Block(List(ClassDef(Modifiers(), TypeName("Flower"), List(), Template(List(Ident(TypeName("AnyRef"))), emptyValDef, List(DefDef(Modifiers(), termNames.CONSTRUCTOR, List(), List(List()), TypeTree(), Block(List(Apply(Select(Super(This(typeNames.EMPTY), typeNames.EMPTY), termNames.CONSTRUCTOR), List())), Literal(Constant(())))), DefDef(Modifiers(), TermName("name"), List(), List(), TypeTree(), Literal(Constant("Rose"))))))), Literal(Constant(())))
       #+end_src
 
-*** TODO Traversing Trees
+*** DONE Traversing Trees
+    CLOSED: [2020-09-14 Mon 01:48]
     After one understands the structure of a given /tree/, typically the next step
     is to extract info from it. This is accomplished by *traversing* the /tree/,
     and it can be done in one of _TWO_ ways:
     - *Traversal* via /pattern matching/.
+
     - Using a /subclass/ of ~Traverser~
 
-**** TODO Traversal via Pattern Matching
-     - Traversal via /pattern matching/ is the SIMPLEST and MOST COMMON way to
-       *traverse* a /tree/.
+**** DONE Traversal via Pattern Matching
+     CLOSED: [2020-09-14 Mon 01:37]
+     Traversal via /pattern matching/ is the SIMPLEST and MOST COMMON way to
+     *traverse* a /tree/.
 
      - Typically, one _traverses_ a /tree/ via /pattern matching/ when they are
        interested in the state of a given /tree/ at a *single* /node/.
 
-     - For example, say we simply want to obtain the function and the argument of
-       the only ~Apply~ /node/ in the following tree:
+     - For example,
+       say we simply want to obtain the function and the argument of
+       the only ~Apply~ /node/ in the following /tree/:
        #+begin_src scala
          import scala.reflect.runtime.universe._
 
@@ -1247,8 +1274,9 @@
        #+end_src
 
      - Note that ~Tree~'s can TYPICALLY be *quite complex*, with /nodes/ _nested
-       arbitrarily deep_ within other /nodes/. A simple illustration would be if we were to add
-       a second ~Apply~ node to the above tree which serves to add 3 to our sum:
+       arbitrarily deep_ within other /nodes/.
+         A simple illustration would be if we were to add a second ~Apply~ node
+       to the above tree which serves to add 3 to our sum:
        #+begin_src scala
          val tree = Apply(Select(Apply(Select(Ident(TermName("x")), TermName("$plus")),
                                        List(Literal(Constant(2)))),
@@ -1257,8 +1285,8 @@
          // tree: scala.reflect.runtime.universe.Apply = x.$plus(2).$plus(3)
        #+end_src
 
-     - If we apply the same npatternn match as above, we obtain the outer ~Apply~
-       node which contains as its function the entire tree representing ~x.$plus(2)~
+     - If we apply the same patternn match as above, we obtain the outer ~Apply~
+       node which contains as its function the entire /tree/ representing ~x.$plus(2)~
        that we saw above:
        #+begin_src scala
          val Apply(fun, arg :: Nil) = tree
@@ -1272,24 +1300,25 @@
        #+end_src
 
      - In cases where one must do some richer task, such as
-       + *traversing* an ENTIRE /tree/ without stopping at a SPECIFIC /node/,
+       + *traversing* an ENTIRE /tree/ WITHOUT STOPPING at a SPECIFIC /node/,
          or
        + *collecting* and *inspecting* ALL /nodes/ of a SPECIFIC /type/, using
          ~Traverser~ for traversal might be more advantageous.
 
-**** TODO Traversal via ~Traverser~
-     - In situations where it's necessary to traverse an entire tree from top to
-       bottom, using traversal via pattern matching would be infeasible -- to do
-       it this way, one must individually handle every type of node that we
-       might come across in the pattern match. Thus, in these situations,
-       typically class ~Traverser~ is used.
+**** DONE Traversal via ~Traverser~
+     CLOSED: [2020-09-14 Mon 01:48]
+     In situations where it's necessary to *traverse an ENTIRE tree* from top to
+     bottom, using traversal via /pattern matching/ would be *infeasible* -- to do
+     it this way, one must individually handle every type of node that we might
+     come across in the pattern match.
+       *Thus, in these situations, typically class ~Traverser~ is used.*
 
      - ~Traverser~ makes sure to visit *every* /node/ in a given /tree/,
        in a _depth-first search_.
 
      - To use a ~Traverser~, simply subclass ~Traverser~ and _override_ /method/
-       ~traverse~. In doing so, you can simply provide custom logic to handle
-       only the cases you're interested in.
+       ~traverse~. In doing so, you can simply provide custom logic to *handle
+       ONLY the cases you're interested in*.
        + For example, if, given our ~x.$plus(2).$plus(3)~ /tree/ from the previous
          section, we would like to collect all Apply nodes, we could do:
          #+begin_src scala
@@ -1317,26 +1346,23 @@
      - In the above, we intend to construct a list of ~Apply~ /nodes/ that we find in
        our given /tree/.
 
-     - We achieve this by in effect adding a special case to the already /depth-first
-       traverse/ method defined in /superclass/ ~Traverser~, via /subclass/
-       ~traverser~'s _overridden_ ~traverse~ /method/.
-         Our special case affects only nodes that match the pattern ~Apply(fun, args)~,
-       where fun is some function (represented by a ~Tree~) and args is a list of
-       arguments (represented by a list of ~Tree~'s).
+     - We achieve this by in effect ADDING _a SPECIAL case_ TO the already
+       /depth-first traverse/ method defined in /superclass/ ~Traverser~, via
+       /subclass/ ~traverser~'s _overridden_ ~traverse~ /method/.
+         Our special case affects ONLY nodes that match the pattern ~Apply(fun, args)~,
+       where ~fun~ is some /function/ (represented by a ~Tree~) and ~args~ is a list of
+       /arguments/ (represented by a list of ~Tree~'s).
 
      - When a /tree/ matches the pattern (i.e., when we have an ~Apply~ /node/),
        we simply add it to our ~List[Apply]~, ~applies~, and continue our _traversal_.
 
-     - Note that, in our match, we call ~super.traverse~ on the function fun wrapped
-       in our ~Apply~, and we call ~super.traverseTrees~ on our argument list args
-       (essentially the same as ~super.traverse~, but for ~List[Tree]~ rather than a
-       single ~Tree~). In both of these calls, our objective is simple– we want to
-       make sure that we use the default traverse method in Traverser because we
-       don't know whether the Tree that represents fun contains our ~Apply~ pattern–
-       that is, we want to traverse the entire sub-tree. Since the ~Traverser~
-       /superclass/ calls ~this.traversve~, passing in every nested sub- tree,
-       eventually our custom traverse method is guaranteed to be called for each
-       sub-tree that matches our ~Apply~ pattern.
+     - Q :: WHY do we
+       + call ~super.traverse~ on ~fun~?
+       + call ~super.traverseTrees~ on ~args~? (=from Jian= more details in this doc)
+
+     - A :: The ~Traverser~ /superclass/ calls ~this.traversve~, passing in every
+            nested sub-tree, eventually our custom ~traverse~ method is guaranteed
+            to be called for each sub-tree that matches our ~Apply~ pattern.
 
      - To trigger the /traverse/ and to see the resulting ~List~ of matching ~Apply~
        /nodes/, simply do:
@@ -1348,7 +1374,7 @@
        #+end_src
 
 *** DONE Creating Trees
-    CLOSED: [2020-07-04 Sat 22:35]
+    CLOSED: [2020-09-14 Mon 01:32]
     - When working with /runtime reflection/, one *need NOT construct* /trees/
       manually.
 
@@ -1362,7 +1388,7 @@
       *use* /trees/ as their _program representation medium_.
 
     - In these cases, there are three recommended ways to create /trees/:
-      + Via /method/ ~reify~ (should be preferred wherever possible).
+      + Via /method/ ~reify~ (should be *PREFERRED* wherever possible).
       + Via /method/ ~parse~ on ~ToolBox~'es.
       + Manual construction (*NOT recommended*).
 
@@ -1389,7 +1415,7 @@
            code that defines its own ~println~, it wouldn't affect the behavior
            of the snippet.
 
-       + This way of creating trees is thus /hygenic/,
+       + *This way of creating trees is thus /hygenic/,*
          in the sense that it *PRESERVES* _bindings of identifiers._
 
 ***** DONE Splicing Trees
@@ -1399,9 +1425,10 @@
 
       - Note:
         ~Expr~ is ~reify~'s /return type/.
-        It can be thought of as a simple wrapper which contains a typed ~Tree~, a
-        ~TypeTag~ and a handful of _reification-relevant methods_, such as ~splice~.
-        For more information about ~Expr~'s, see the relevant section of this guide.
+        It can be _thought of as_ a simple wrapper which contains
+        + a typed ~Tree~
+        + a ~TypeTag~
+        + a handful of _reification-relevant methods_, such as ~splice~
 
       - For example, let's try to construct a tree representing ~println(2)~ using
         ~splice~:
@@ -1489,19 +1516,22 @@
          #+end_src
 
 ***** Typechecking with ~ToolBox~'es
-      - As earlier alluded to, ~ToolBox~'es enable one to do more than just
-        constructing trees from strings. They can also be used to typecheck,
-        compile, and execute trees.
+      - As earlier alluded to,
+        ~ToolBox~'es enable one to do _more than just_ constructing trees from strings.
+        + They can also be used to
+          * typecheck
+          * compile
+          * execute trees
 
-      - In addition to outlining the structure of the program, trees also hold
-        important information about the semantics of the program encoded in ~symbol~
-        (a symbol assigned to trees that introduce or reference definitions), and
-        ~tpe~ (the type of the tree). By default these fields are empty, but
-        typechecking fills them in.
+      - _IN ADDITION TO_ outlining the structure of the program,
+        /trees/ _ALSO_ hold important information about the /semantics/ of the
+        program encoded in ~symbol~ (a /symbol/ assigned to /trees/ that introduce
+        or reference definitions), and ~tpe~ (the /type/ of the /tree/).
+          *By default these fields are empty, but typechecking fills them in.*
 
       - When using the runtime reflection framework, typechecking is implemented by
-        ~ToolBox.typeCheck~. When using macros, at compile time one can use the
-        ~Context.typeCheck~ method.
+        ~ToolBox.typeCheck~.
+        When using macros, at compile time one can use the ~Context.typeCheck~ method.
         #+begin_src scala
           import scala.reflect.runtime.universe._
 
@@ -1533,9 +1563,9 @@
      If all else fails, one can manually construct /trees/.
 
      - It is obvious that manual construction of a ~Tree~
-       + is the most _low-level_ way to create /trees/,
+       + is the MOST _low-level_ way to create /trees/,
 
-       + should _only_ be attempted if _no other approach_ works.
+       + should _ONLY_ be attempted if _no other approach_ works.
 
        + sometimes offers
          * *greater flexibility* when compared with ~parse~,
@@ -1552,13 +1582,13 @@
      - The canonical use case for this technique is when the target /tree/ _needs
        to be assembled from dynamically created parts_, which do _NOT_ make sense
        in isolation from one another.
-       + In that case, =TODO=
+       + In that case,
          * ~reify~ will most likely be inapplicable, because it requires its argument
            to be typeable.
 
          * ~parse~ might not work either, since quite often, /trees/ are assembled
            on _sub-expression level_, with individual parts being *INEXPRESSIBLE
-           as Scala sources*. =from Jian= Need Examples!!!
+           as Scala sources*.
 
 * TODO Annotations, Names, Scopes, and More
   - Contributors:
