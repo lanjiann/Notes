@@ -4806,6 +4806,48 @@
     #+END_SRC
 
 ** TODO 15.8 A larger example - 332
+   Write an expression formatter that displays an arithmetic expression in a
+   two-dimensional layout.
+   - Example:
+     + "x / (x + 1)" should be printed vertically like:
+       #+begin_src text
+           x
+         -----
+         x + 1
+       #+end_src
+
+     + "((a / (b * c) + 1 / n) / 3)" should be printed vertically like:
+       #+begin_src text
+           a     1
+         ----- + -
+         b * c   n
+         ---------
+             3
+       #+end_src
+
+   - The /class/ we will create is ~ExprFormatter~.
+
+   - A useful first step is to concentrate on _HORIZONTAL layout_.
+     A structured expression like:
+     #+begin_src scala
+       BinOp("+",
+             BinOp("*",
+                   BinOp("+", Var("x"), Var("y")),
+                   Var("z")),
+             Number(1))
+     #+end_src
+     should print
+     #+begin_src text
+       (x + y) * z + 1
+     #+end_src
+     Note:
+     + /Parentheses/ are *mandatory* around ~x + y~,
+       BUT would be *optional* around (x + y) * z.
+
+     + To keep the layout as legible as possible, your goal should be
+       * to *omit* parentheses wherever they are _REDUNDANT_,
+       * while ensuring that all necessary parentheses are present.
+
 ** DONE 15.9 Conclusion - 340
    CLOSED: [2017-10-23 Mon 23:28]
    - If you want to use /pattern matching/ on one of your classes, but you do NOT
