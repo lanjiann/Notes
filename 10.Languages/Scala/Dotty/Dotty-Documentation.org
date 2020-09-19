@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.27.0-bin-20200731-bb23fea-NIGHTLY
+#+VERSION: 0.27.0-bin-20200731-bb23fea-NIGHTLY -> 0.28.0-bin-20200918-333ab8e-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 
@@ -540,9 +540,9 @@
          object/???
 
 **** DONE Compatibility with Java Enums
-     CLOSED: [2020-07-10 Fri 21:53]
-     If you want to use a enum in Scala in Java, you need to extends
-     ~java.lang.Enum[T]~, where ~T~ is your _enum type name_.
+     CLOSED: [2020-08-22 Sat 22:10]
+     If you want to use the Scala-defined enums as Java enums, you can do so by
+     extending ~java.lang.Enum~ class as follows:
      - Example
        #+begin_src scala
          enum Color extends java.lang.Enum[Color] { case Red, Green, Blue }
@@ -555,9 +555,9 @@
          Java API docs) to ~java.lang.Enum~ when extending it – _the compiler will
          GENERATE them AUTOMATICALLY._
 
-     - For a more in-depth example of using Scala 3 /enums/ from Java, see this
-       test (in GITHUB dotty project repo) -- the /enums/ are defined in the
-       ~MainScala.scala~ file and used from a Java source, ~Test.java~.
+     - For a more in-depth example of using Scala 3 /enums/ from Java, see
+       [[https://github.com/lampepfl/dotty/tree/master/tests/run/enum-java][this test]]. In this test, the /enums/ are defined in the ~MainScala.scala~
+       file and used from a Java source, ~Test.java~.
 
 **** DONE Implementation
      CLOSED: [2020-07-10 Fri 23:56]
@@ -673,6 +673,10 @@
           case Mix(mix: int) extends Color(mix)
         }
       #+end_src
+
+
+**** TODO Parameter Variance of Enums
+     =New added in 2020-09-18=
 
 **** DONE Syntax of Enums
      CLOSED: [2019-07-02 Tue 13:27]
@@ -843,11 +847,11 @@
          /ordinal number/ and /name/.
          This /method/ can be thought as being defined as follows:
          #+begin_src scala
-           private of $new(_$ordinal: Int, $name: String) = new E {
+           private def $new(_$ordinal: Int, $name: String) = new E with runtime.EnumValue {
              def $ordinal = $_ordinal
-
-             override def toString = $name
-
+             def enumLabel = $name
+             override def productPrefix = enumLabel  // if not overridden in `E`
+             override def toString = $name           // if not overridden in `E`
              $values.register(this)  // register enum value so that `valueOf` and `values` can return it.
            }
          #+end_src
@@ -6848,18 +6852,22 @@
 **** TODO References
 
 ** TODO OTHER CHANGED FEATURES
-*** TODO Numeric Literals
-    - In Scala 2, /numeric literals/ were *confined* to the /primitive numeric
+*** DONE Numeric Literals
+    CLOSED: [2020-08-23 Sun 01:25]
+    - *OLD*:
+      In Scala 2, /numeric literals/ were *confined* to the /primitive numeric
       types/:
       + ~Int~
       + ~Long~
       + ~Float~
       + ~Double~
 
-    - Scala 3 allows to write /numeric literals/ also for /user defined types/.
+    - *NEW*:
+      Scala 3 allows to write /numeric literals/ also for /user defined types/.
       Example:
       #+begin_src scala
         val x: Long = -10_000_000_000
+
         val y: BigInt = 0x123_abc_789_def_345_678_901
         val z: BigDecimal = 110_222_799_799.99
 
@@ -6867,10 +6875,13 @@
           case 123_456_789_012_345_678_901 =>
         }
       #+end_src
-      The _syntax_ of /numeric literals/ is the same as before,
-      *except* there are *NO* _pre-set limits how large they can be_.
 
-**** TODO Meaning of Numeric Literals
+    - (In Scala 3)
+      The _syntax_ of /numeric literals/ is the same as before,
+      + *EXCEPT* there are *NO pre-set limits* _how large they can be_.
+
+**** DONE Meaning of Numeric Literals
+     CLOSED: [2020-08-23 Sun 00:10]
      - The meaning of a numeric literal is determined as follows:
        + If the literal ends with ~l~ or ~L~,
          it is a ~Long~ /integer/ (and *must fit* in its legal /range/).
@@ -6897,25 +6908,31 @@
           decimal point or an exponent), or as an ~Int~ /literal/ (if not).
           (This last possibility is again as in Scala 2 or Java.)
 
-     - With these rules, the definition =FIX-DOC=
-       ~val x: Long = -10_000_000_000~
-       is legal by rule 1., since the _expected type_ is ~Long~. The definitions
-       #+begin_src scala
-         val y: BigInt = 0x123_abc_789_def_345_678_901
-         val z: BigDecimal = 111222333444.55
-       #+end_src
-       are legal by rule 2., since both ~BigInt~ and ~BigDecimal~ have ~FromDigits~
-       instances (which implement the ~FromDigits~ subclasses ~FromDigits.WithRadix~
-       and ~FromDigits.Decimal~, respectively). On the other hand,
-       ~val x = -10_000_000_000~
-       gives a type error, since without an _expected type_ ~-10_000_000_000~ is
-       treated by rule (3) as an ~Int~ literal, but it is too large for that type.
+     - With these rules, =FIX-DOC= =(wrong syntax highlight)=
+       + The definition ~val x: Long = -10_000_000_000~ is legal by *rule 1*,
+         since the _expected type_ is ~Long~.
 
-**** TODO The ~FromDigits~ Trait
+       + The definitions
+         #+begin_src scala
+           val y: BigInt = 0x123_abc_789_def_345_678_901
+           val z: BigDecimal = 111222333444.55
+         #+end_src
+         are legal by *rule 2*, since both ~BigInt~ and ~BigDecimal~ have ~FromDigits~
+         instances (which implement the ~FromDigits~ /subclasses/ ~FromDigits.WithRadix~
+         and ~FromDigits.Decimal~, respectively).
+
+
+       + On the other hand,
+         ~val x = -10_000_000_000~ gives a type error, since without an _expected
+         type_ ~-10_000_000_000~ is treated by *rule 3* as an ~Int~ literal, but
+         it is _too large_ for ~Int~.
+
+**** DONE The ~FromDigits~ Trait
+     CLOSED: [2020-08-23 Sun 00:10]
      To allow /numeric literals/, a /type/ simply has to define a /given instance/
      of the ~scala.util.FromDigits~ /type class/, or one of its /subclasses/.
 
-     - ~FromDigits~ is defined as follows:
+     - ~FromDigits~:
        #+begin_src scala
          trait FromDigits[T] {
            def fromDigits(digits: String): T
@@ -6928,12 +6945,18 @@
          * digits between 0 and 9,
          * possibly preceded by a sign ("+" or "-").
 
-       + Number separator characters _ are filtered out before the string is
+       + Number separator characters _ are *filtered out* _BEFORE_ the string is
          passed to ~fromDigits~.
 
+       + =from Jian=
+         Process _decimal point_ and _exponent_ is *NOT* a duty of ~FromDigits~.
+         This is why they are not mentioned above. /Sub-traits/ of ~FromDigits~
+         will handle _decimal point_ and _exponent_. See below!
+
      - The /companion object/ ~FromDigits~ also defines /subclasses/ of ~FromDigits~
-       for /whole numbers/ with a given _radix_, for _numbers with a decimal point_,
-       and for _numbers that can have both a decimal point and an exponent_: =FIX-DOC=
+       + for /whole numbers/ with a given _radix_,
+       + for _numbers with a decimal point_,
+       + for _numbers that can have both a decimal point and an exponent_:
        #+begin_src scala
          object FromDigits {
 
@@ -6963,10 +6986,12 @@
        the compiler that hexadecimal numbers, decimal points, or exponents are
        also accepted in literals for this type.
 
-**** TODO Error Handling
+**** DONE Error Handling
+     CLOSED: [2020-08-23 Sun 00:34]
      ~FromDigits~ implementations can signal errors by throwing /exceptions/ of some
-     /subtype/ of ~FromDigitsException~. ~FromDigitsException~ is defined with _THREE_
-     /subclasses/ in the ~FromDigits~ /object/ as follows:
+     /subtype/ of ~FromDigitsException~.
+       ~FromDigitsException~ is defined with _THREE_ /subclasses/ in the ~FromDigits~
+     /object/ as follows:
      #+begin_src scala
        abstract class FromDigitsException(msg: String) extends NumberFormatException(msg)
 
@@ -6975,8 +7000,145 @@
        class MalformedNumber(msg: String = "malformed number literal") extends FromDigitsException(msg)
      #+end_src
 
-**** TODO Example
-**** TODO Compile-Time Errors
+**** DONE Example
+     CLOSED: [2020-08-23 Sun 00:52]
+     As a fully worked out example, here is an implementation of a new numeric
+     class, ~BigFloat~, that accepts /numeric literals/. ~BigFloat~ is defined in
+     terms of a ~BigInt~ /mantissa/ and an ~Int~ /exponent/:
+     #+begin_src scala
+       case class BigFloat(mantissa: BigInt, exponent: Int) {
+         override def toString = s"${mantissa}e${exponent}"
+       }
+     #+end_src
+     - ~BigFloat~ /literals/ can have a /decimal point/ as well as an /exponent/.
+       E.g. the following expression should produce the ~BigFloat~ number
+       ~BigFloat(-123, 997)~: ~-0.123E+1000: BigFloat~
+
+     - The /companion object/ of ~BigFloat~ defines an apply /constructor method/
+       to construct a ~BigFloat~ from a _digits string_.
+       Here is a possible implementation:
+       #+begin_src scala
+         object BigFloat {
+           import scala.util.FromDigits
+
+           def apply(digits: String): BigFloat = {
+             val (mantissaDigits, givenExponent) = digits.toUpperCase.split('E') match {
+               case Array(mantissaDigits, edigits) =>
+                 val expo =
+                   try FromDigits.intFromDigits(edigits)
+                   catch {
+                     case ex: FromDigits.NumberTooLarge =>
+                       throw FromDigits.NumberTooLarge(s"exponent too large: $edigits")
+                   }
+                 (mantissaDigits, expo)
+
+               case Array(mantissaDigits) =>
+                 (mantissaDigits, 0)
+             }
+
+             val (intPart, exponent) = mantissaDigits.split('.') match {
+               case Array(intPart, decimalPart) =>
+                 (intPart ++ decimalPart, givenExponent - decimalPart.length)
+
+               case Array(intPart) =>
+                 (intPart, givenExponent)
+             }
+
+             BigFloat(BigInt(intPart), exponent)
+           }
+
+           given FromDigits as FromDigits.Floating[BigFloat] {
+             def fromDigits(digits: String) = apply(digits)
+           }
+         }  // end BigFloat
+       #+end_src
+       + To accept ~BigFloat~ /literals/, all that's needed in addition is a
+         /given instance/ of type ~FromDigits.Floating[BigFloat]~
+
+       + Note that the ~apply~ method does *NOT check* the format of the digits
+         argument. It is assumed that only VALID arguments are passed:
+         For calls coming from the compiler that assumption is valid, since the
+         compiler will FIRST check whether a /numeric literal/ has the correct
+         format BEFORE it gets passed on to a conversion method.
+
+**** DONE Compile-Time Errors
+     CLOSED: [2020-08-23 Sun 01:25]
+     - With the setup of the previous section, a literal like
+       #+begin_src scala
+         1e10_0000_000_000: BigFloat
+       #+end_src
+       would be expanded by the compiler to
+       #+begin_src scala
+         BigFloat.FromDigits.fromDigits("1e100000000000")
+       #+end_src
+       Evaluating this expression throws a ~NumberTooLarge~ /exception/ at /runtime/.
+
+     - Required enhancement ::
+       We would like it to produce a compile-time error instead.
+
+     - Solution ::
+       We can achieve this by tweaking the ~BigFloat~ /class/ with a small dose of
+       metaprogramming. The idea is to turn the ~fromDigits~ /method/ into a /macro/,
+       i.e. make it an /inline method/ with a /splice/ as right hand side.
+         To do this, replace the ~FromDigits~ /instance/ in the ~BigFloat~ /object/
+       by the following two definitions:
+       #+begin_src scala
+         object BigFloat {
+           // ...
+
+           class FromDigits extends FromDigits.Floating[BigFloat] {
+             def fromDigits(digits: String) = apply(digits)
+           }
+
+           given FromDigits {
+             override inline def fromDigits(digits: String) = ${
+               fromDigitsImpl('digits)
+             }
+           }
+
+           private def fromDigitsImpl(digits: Expr[String])
+                                     (using ctx: QuoteContext): Expr[BigFloat] =
+             digits match {
+               case Const(ds) =>
+                 try {
+                   val BigFloat(m, e) = apply(ds)
+                   '{BigFloat(${Expr(m)}, ${Expr(e)})}
+                 }
+                 catch {
+                   case ex: FromDigits.FromDigitsException =>
+                     ctx.error(ex.getMessage)
+                     '{BigFloat(0, 0)}
+                 }
+
+               case digits =>
+                 '{apply($digits)}
+             }
+         }  // end BigFloat
+       #+end_src
+       + The /macro/ implementation takes an argument of /type/ ~Expr[String]~ and
+         yields a result of /type/ ~Expr[BigFloat]~. It tests whether its argument
+         is a _constant string_. If that is the case, it converts the string using
+         the ~apply~ /method/ and lifts the resulting ~BigFloat~ back to ~Expr~
+         level. For _non-constant strings_ ~fromDigitsImpl(digits)~ is simply
+         ~apply(digits)~, i.e. everything is evaluated at /runtime/ in this case.
+         * =from Jian=
+           WHY DO WE NEED THE ~'{BigFloat(0, 0)}~ in the ~catch~ part???
+           I know it want to match the /type/, however, in non-macro definition, we
+           can ignore the dummy value creation in the ~catch~ part. Does this mean
+           /macro/ has this special requirement? Is there a way to drop it???
+
+       + The interesting part is the catch part of the case where digits is constant.
+         If the ~apply~ /method/ throws a ~FromDigitsException~, the exception's message
+         is issued as a /compile time error/ in the ~ctx.error(ex.getMessage)~ call.
+
+       + With this new implementation, a definitiion like
+         ~val x: BigFloat = 1234.45e3333333333~
+         would give a compile time error message:
+         #+begin_src text
+           3 |  val x: BigFloat = 1234.45e3333333333
+             |                    ^^^^^^^^^^^^^^^^^^
+             |                    exponent too large: 3333333333
+         #+end_src
 
 *** TODO Structural Types
     # *Programmatic Structural Types*
@@ -7295,6 +7457,230 @@
 *** TODO Implicit Resolution
     # Changes in Implicit Resolution
 
+    This page describes *changes* to the /implicit resolution/ that apply both to
+    the new ~given~'s and to the old-style ~implicit~'s in Dotty.
+      /Implicit resolution/ uses a new algorithm which *caches* implicit results
+    *more aggressively* for performance. There are also some changes that affect
+    implicits on the language level.
+
+    1. *EXPLICIT types* of /implicits/:
+       #+begin_src scala
+         class C {
+           val ctx: Context = ...  // ok
+
+           /*!*/ implicit val x = ...  // error: type must be given explicitly
+
+           /*!*/ implicit def y = ...  // error: type must be given explicitly
+
+           val y = {
+             implicit val ctx = this.ctx  // ok
+             // ...
+           }
+         }
+       #+end_src
+       + Scala 3:
+         /Types/ of /implicit values/ and /implicit methods (_result types_)/
+         *MUST be explicitly declared* -- no inferred types.
+         * *EXCEPTION*:
+           ONLY values in /local blocks/ where the /type/ may still be inferred.
+
+       + Scala 2:
+         *NO* /EXPLICIT types/ required!
+
+    2. _Nesting_ is NOW _taken into account_ for selecting an /implicit/:
+       #+begin_src scala
+         def f(implicit i: C) = {
+           def g(implicit j: C) = {
+             implicitly[C]
+           }
+         }
+       #+end_src
+       + Scala 3:
+         _Select ~j~, because ~j~ is in the immediate scope that is accessible by
+         ~implicitly[C]~._
+         * _Nesting_ is NOW _taken into account_ for selecting an /implicit/.
+           This is different from Scala 2.
+
+       + Scala 2:
+         _This would have resulted in an *ambiguity error*._
+         The previous possibility of an implicit search failure due to shadowing
+         (where an implicit is hidden by a nested definition) no longer applies.
+
+    3. /Package prefixes/ no longer contribute to the /implicit search scope/ of
+       a /type/. Example:
+       #+begin_src scala
+         package p
+         given a as A
+
+         object o {
+           given b as B
+           type C
+         }
+       #+end_src
+       + Both ~a~ and ~b~ are visible as /impicits/ at the point of the definition
+         of /type/ ~C~.
+           However, a reference to ~p.o.C~ _OUTSIDE of package_ ~p~ will have *ONLY*
+         ~b~ in its /implicit search scope/ but NOT ~a~.
+
+       + In more detail, here are the rules for what contributes the /implicit
+         scope/ of a /type/:
+         * Definition:
+           A reference is an anchor if it refers to an object, a class, a trait,
+           an abstract type, an opaque type alias, or a match type alias.
+             References to packages and package objects are anchors only under
+           =-source:3.0-migration=.
+
+       + Definition:
+         The anchors of a type ~T~ is a set of references defined as follows:
+         1. If ~T~ is a reference to an anchor, ~T~ itself plus, if ~T~ is of the
+            form ~P#A~, the anchors of ~P~.
+
+         2. If ~T~ is an alias of ~U~, the anchors of ~U~.
+
+         3. If ~T~ is a reference to a type parameter, the union of the anchors of
+            both of its bounds.
+
+         4. If ~T~ is a singleton reference, the anchors of its underlying type,
+            plus, if ~T~ is of the form (~P#x~).type, the anchors of ~P~.
+
+         5. If ~T~ is the this-type ~o.this~ of a /static object/ ~o~, the anchors
+            of a term reference ~o.type~ to that object.
+
+         6. If ~T~ is some other type, the union of the anchors of each constituent
+            type of ~T~.
+
+       + Definition:
+         The implicit scope of a type T is the smallest set S of term references
+         such that
+         1. If T is a reference to a class, S includes a reference to the /companion
+            object/ of the class, if it exists, as well as the implicit scopes of all
+            of T's parent classes.
+
+         2. If T is a reference to an object, S includes T itself as well as the
+            implicit scopes of all of T's parent classes.
+
+         3. If T is a reference to an opaque type alias named A, S includes a
+            reference to an object A defined in the same scope as the type, if
+            it exists, as well as the implicit scope of T's underlying type or
+            bounds.
+
+         4. If T is a reference to an an abstract type or match type alias named
+            A, S includes a reference to an object A defined in the same scope
+            as the type, if it exists, as well as the implicit scopes of T's
+            given bounds.
+
+         5. If T is a reference to an anchor of the form p.A then S also includes
+            all term references on the path p.
+
+         6. If T is some other type, S includes the implicit scopes of all anchors
+            of T.
+
+    4. The treatment of ambiguity errors has changed.
+       If an ambiguity is encountered in some recursive step of an implicit
+       search, the ambiguity is propagated to the caller.
+       + Example:
+         #+begin_src scala
+           class A
+           class B extends C
+           class C
+           implicit def a1: A
+           implicit def a2: A
+           implicit def b(implicit a: A): B
+           implicit def c: C
+         #+end_src
+         Try query with ~implicitly[C]~.
+
+       + The treatment of /divergence errors/ has also changed.
+         A _divergent_ implicit is treated as a *normal* failure, after which
+         alternatives are still tried. This also makes sense:
+           Encountering a /divergent implicit/ means that we assume that no finite
+         solution can be found on the corresponding path, but another path can still
+         be tried. By contrast, *most (but not all)* /divergence errors/ in Scala 2
+         would terminate the /implicit search/ as a whole.
+
+    5. In Scala-2
+       /implicit conversions/ with /call-by-name parameters/
+       *has a lower level of priority* relative to
+       /implicit conversions/ with /call-by-value parameters/.
+         Dotty *drops* this distinction. So the following code snippet would be
+       _ambiguous in Dotty_:
+       #+begin_src scala
+         implicit def conv1(x: Int): A = new A(x)
+         implicit def conv2(x: => Int): A = new A(x)
+         def buzz(y: A) = ???
+         buzz(1)  // error: ambiguous
+       #+end_src
+
+    6. The rule for picking a *most specific* alternative among a set of /overloaded/
+       or /implicit alternatives/ is refined to take /context parameters/ into account.
+         All else being equal, an alternative that takes some /context parameters/
+       is taken to be less specific than an alternative that takes none.
+         If both alternatives take /context parameters/, we try to choose between
+       them as if they were methods with _regular parameters_. The following
+       paragraph in the SLS is affected by this change:
+       + Original version:
+         #+begin_quote
+         An alternative ~A~ is more specific than an alternative ~B~ if the relative
+         weight of ~A~ over ~B~ is greater than the relative weight of ~B~ over ~A~.
+         #+end_quote
+
+       + Modified version:
+         An alternative ~A~ is more specific than an alternative ~B~ if
+         * the relative weight of ~A~ over ~B~ is greater than the relative weight
+           of ~B~ over ~A~, or
+
+         * the relative weights are the same, and ~A~ takes NO /implicit parameters/
+           but ~B~ does, or
+
+         * the relative weights are the same, both ~A~ and ~B~ take /implicit
+           parameters/, and ~A~ is more specific than ~B~ if all /implicit parameters/
+           in either alternative are replaced by _regular parameters_.
+
+    7. The previous disambiguation of _implicits based on inheritance depth_ is
+       *refined* to make it /transitive/.
+         /Transitivity/ is important to _GUARANTEE_ that *search outcomes are
+       compilation-order independent*.
+       + Here's a scenario where the *previous rules* VIOLATED /transitivity/:
+         #+begin_src scala
+           class A extends B
+           object A { given a ... }
+
+           class B
+           object B extends C { given b ... }
+
+           class C { given c }
+         #+end_src
+         1. ~a~ is *more specific* than ~b~
+            SINCE the /companion class/ ~A~ is a /subclass/ of the /companion
+            class/ ~B~.
+
+         2. ~b~ is *more specific* than ~c~
+            SINCE /object/ ~B~ /extends/ /class/ ~C~.
+
+         3. But ~a~ is *NOT more specific* than ~c~.
+            This means if ~a~, ~b~, ~c~ are all applicable /implicits/, *it makes
+            a difference in what order they are compared.*
+              If we compare ~b~ and ~c~ first, we keep ~b~ and drop ~c~. Then,
+            comparing ~a~ with ~b~ we keep ~a~. But if we compare ~a~ with ~c~
+            first, we fail with an ambiguity error.
+
+       + The new rules are as follows:
+         An _implicit_ ~a~ defined in ~A~
+         is *more specific* than
+         an _implicit_ ~b~ defined in ~B~ if
+         * ~A~ /extends/ ~B~, or
+
+         * ~A~ is an /object/ and the /companion class/ of ~A~ /extends/ ~B~, or
+
+         * ~A~ and ~B~ are /objects/, =TODO= =???= =TODO=
+           - ~B~ does *not inherit* any /implicit members/ from base /classes/ (*),
+             AND
+           - the /companion class/ of ~A~ /extends/ the /companion class/ of ~B~.
+             + Condition (*) is new.
+               It is necessary to ensure that the defined relation is transitive.
+
+    8. [//]: #todo: expand with precise rules
+
 *** TODO Implicit Conversions
 **** Examples
 
@@ -7305,7 +7691,7 @@
       _instead of_
       just the *first* /argument list/.
 
-    - it can *infer* /parameter types/ of /function values/ *even if they are in
+   - it can *infer* /parameter types/ of /function values/ *even if they are in
       the _FIRST_ /argument list/.*
 
 **** Looking Beyond the First Argument List
