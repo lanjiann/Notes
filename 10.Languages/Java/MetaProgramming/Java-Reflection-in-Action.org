@@ -60,30 +60,33 @@
        of program execution.
 
    - Summary:
-     + Java supplies
-       * a rich set of operations for using metadata
-       * just a few important intercession capabilities
+     + Java *supplies*
+       * _a RICH set_ of operations for using /metadata/
+       * _JUST a FEW_ important /intercession/ capabilities
 
-     + Java avoids
-       many complications by *not allowing* /direct metaobject modification/.
+     + Java *avoids*
+       many complications by *NOT allowing* /direct metaobject modification/.
 
-   - Reflection make your software _flexible_:
-     + Applications programmed with reflection adapt _more easily to CHANGING_
+   - /Reflection/ make your software _flexible_:
+     + Applications programmed with /reflection/ adapt _more easily to CHANGING_
        requirements.
 
      + Reflective components are more likely to be _reused_ flawlessly in other
        applications.
 
    - You must master the subject in order to make your software flexible.
-     It's not enough to just learn the concepts and the use of the API.
-     You must also be able to distinguish between situations when reflection is
-     absolutely required from those when it may be used advantageously from
-     those when it should be shunned.
+     1. It's not enough to just learn the concepts and the use of the API.
+     2. You must also be able to distinguish between situations
+        + when reflection is absolutely required from those
+        + when it may be used advantageously from those
+        + when it should be shunned.
 
-     The examples in this book will help you acquire this skill.
+   - The examples in this book will help you acquire this skill (=from Jian=
+     metioned in the last entry).
 
    - In addition, by the time you reach the end, you will understand the three
-     issues that have thus far impeded the broad use of /reflection/: =IMPORTANT=
+     issues that have thus far impeded the broad use of /reflection/:
+     =IMPORTANT=
      + /security/
      + /code complexity/
      + /runtime performance/
@@ -101,62 +104,97 @@
 
    - This introduction describes /reflection/, but scarcely *reveals its value*.
 
-   - /Reflection—introspection/ followed by behavior change - is the path to flexible
-     software.
+   - /Reflection/ — introspection followed by behavior change - is the path to
+     flexible software.
 
-** TODO 1.2 Enter George the programmer - 4
-   - Q :: Some components have their ~setColor~ /methods/ and accept ~java.awt.Color~
-          parameter. However, they don't have a common /superclass/.
-          How to invoke ~setColor~ no matter what the EXACT /class/ is?
+** DONE 1.2 Enter George the programmer - 4 - =RE-READ=
+   CLOSED: [2020-09-11 Fri 04:29]
+   - Q :: How to invoke ~setColor~ no matter what the EXACT /class/ is?
+     + Then scenario:
+       George's team wants to integrate some components, all of which have ~setColor~
+       /methods/ and accept ~java.awt.Color~ parameter (same signature).
+         However, since those componets comes from different sources, they don't
+       have a common /base class/ who has the ~setColor~ /method/ we expect. Their
+       only /base class/ is ~Object~, which can't tells the compiler all the
+       componets have the ~setColor~ /method/, even though the team knows all the
+       componets they will integrate will always have ~setColor~.
 
-*** TODO 1.2.1 Choosing reflection - 5
+*** DONE 1.2.1 Choosing reflection - 5
+    CLOSED: [2020-09-11 Fri 04:30]
     - Given a component, the team's code must accomplish _TWO_ steps:
       1. Discover a ~setColor~ /method/ supported by the component.
       2. Call that ~setColor~ /method/ with the desired color.
 
     - There are many alternatives for accomplishing these steps manually.
       Let's examine the results of each of these.
-      + If George's team controlled all of the source code, the components could be
-        refactored to implement a common interface that declares ~setColor~.
-          Then, each component could be referenced by that interface type and
-        setColor could be invoked without knowing the concrete type.
+      + _George's team controlled all of the source code_:
+        the components could be refactored to implement a common interface that
+        declares ~setColor~.
+          Then, each component could be referenced by that /interface type/ and
+        ~setColor~ could be invoked without knowing the /concrete type/.
+        * =from Jian= It is rarely happen that all source code are under control.
 
-      + However, the team does NOT control the standard Java components or
-        third-party components. Even if they changed the open source components,
-        the open source project might not accept the change, leaving the team
-        with additional maintenance.
+      + _The team does NOT control the standard Java components or third-party
+        components_:
+        Even if they changed the open source components, the open source project
+        might not accept the change, leaving the team with additional maintenance.
 
-      + Alternatively, the team could implement an adapter for each component. Each
-        such adapter could implement a common interface and delegate the setColor
-        call to the concrete component. However, because of the large number of component
-        classes that the team is using, the solution would cause an explosion in the
-        number of classes to maintain. In addition, because of the large number of component
-        instances, this solution would cause an explosion of the number of objects
-        in the system at runtime. These trade-offs make implementing an adapter an
-        undesirable option.
+        * The team could implement an _ADAPTER_ for each component.
+          Each such adapter could implement a /COMMON interface/ and *delegate* the
+          ~setColor~ call to the concrete component.
+          - Usually people will see the *LIMITATIONS* when a large number of component
+            classes need to be supported -- the problem that George's team need
+            to handle.
+            1. because of the _large number_ of _component CLASSES_ that the team is
+               using, the solution would cause an EXPLOSION in the number of classes
+               to _maintain_.
 
-      + Using instanceof and casting to discover concrete types at runtime is another
-        alternative, but it leaves several maintenance problems for George’s team. First,
-        the code would become bloated with conditionals and casts, making it difficult to
-        read and understand. Second, the code would become coupled with each concrete
-        type. This coupling would make it more difficult for the team to add,
-        remove, or change components. These problems make instanceof and casting an
-        unfavorable alternative.
+            2. because of the _large number_ of _component INSTANCES_, this solution
+               would cause an EXPLOSION of the number of objects in the system _at
+               runtime_.
 
-    - Conclusion:
-      1. EACH of these alternatives involves program changes that *adjust or
-         discover the type of a component*.
+          - Conclusion:
+            These trade-offs make implementing an adapter an *undesirable* option.
+            + =from Jian=
+               *undesirable* means those limitations actually eliminate this solution
+               in the large number of components situations.
 
-      2. George understands that it is ONLY necessary to find a ~setColor~ /method/
-         and call it.
+      + Using ~instanceof~ and *casting* to discover /concrete types/ _at runtime_
+        is another alternative,
+        * BUT it leaves several maintenance problems for George's team.
+          1. The code would become bloated with conditionals and casts, making it
+             difficult to read and understand.
 
-      3. Having studied a little /reflection/, he understands how to query an object's
-         class for a method at runtime.
+          2. The code would become *coupled* with each /concrete type/.
+             This *coupling* would make it more difficult for the team to add,
+             remove, or change components.
 
-      4. Once it is found, he knows that a method can also be invoked using /reflection/.
+        * These problems make ~instanceof~ and *casting* an _unfavorable_ alternative.
+          - =from Jian=
+            *unfavorable* here means even with those limitations this solution is
+            applicable. However, it's not good, and it will lead to a workable, but
+            _hard to maintain_ situation. *Hard to maintain* can also effectively
+            eliminate this solution -- the time spent on it can be to much if compare
+            with the gained benefits.
 
-      /Reflection/ is uniquely suited to solving this problem because it does
-      not over-constrain the solution with type information.
+      + Conclusion:
+        =from Jian=
+        The solutions above all have obvious limitations. HOWEVER, the can
+        provide some insights on solving this problem.
+
+        1. EACH of these alternatives involves program changes that *adjust or
+           discover the type of a component*.
+
+        2. George understands that it is ONLY necessary to find a ~setColor~ /method/
+           and call it.
+
+        3. Having studied a little /reflection/, he understands how to query an object's
+           class for a method at runtime.
+
+        4. Once it is found, he knows that a method can also be invoked using /reflection/.
+
+        5. /Reflection/ is uniquely suited to solving this problem because it does
+           not over-constrain the solution with type information.
 
 *** TODO 1.2.2 Programming a reflective solution - 6
     - Listing 1.1 George's ~setObjectColor~ code:
