@@ -452,28 +452,433 @@
      }
    #+end_src
 
-* TODO Unlifting
-** Bring your own
-** Standard Unliftables
+* DONE Unlifting
+  CLOSED: [2020-09-19 Sat 17:30]
+  /Unlifting/ is the REVERSE OPERATION to *lifting*.
+  It takes a /tree/ and *recovers* a /value/ from it:
+  #+begin_src scala
+    trait Unliftable[T] {
+      def unapply(tree: Tree): Option[T]
+    }
+  #+end_src
 
-* TODO Hygiene
-** Referential transparency
-** Hygiene in the narrow sense
+  - Due to the fact that the /tree/ may NOT be a representation of our /data type/,
+    the /return type/ of ~unapply~ is ~Option[T]~ rather than just ~T~.
+      This signature makes it easy to use ~Unliftable~ /instances/ as /extractors/.
 
-* TODO Use cases
-** AST manipulation in macros and compiler plugins
-** Just in time compilation
-** Offline code generation
+  - WHENEVER an /implicit instance/ of ~Unliftable~ is available for a given /data
+    type/ you can use it for /pattern matching/ with the help of an ascription syntax:
+    #+begin_src scala
+      object macros {
 
-* TODO Syntax summary
-** Expressions
-** Types
-** Patterns
-** Definitions
-** Auxiliary
-** Abbreviations
+        val q"${left: Int} + ${right: Int}" = q"2 + 2"
+        // left: Int = 2
+        // right: Int = 2
 
-* TODO Expression details
+        left + right
+        // res4: Int = 4
+
+      }
+    #+end_src
+    + =from Jian=
+      To implement that /pattern matching/ WITHOUT warnings, import
+      ~universe.Quasiquote~ is NOT enough. Try to learn what else are required to
+      eliminate the warnings. For now, the only fact I know is ~import universe._~
+      works -- I need a more fine grained understanding.
+
+  - It's important to note that /unlifting/ will *NOT* be performed at locations
+    where ~Name~, ~TermName~ or ~Modifiers~ are extracted by default:
+    =TODO= =from Jian= Consider WHY!?!?
+    #+begin_src scala
+      object macros {
+        val q"foo.${bar: Int}" = q"foo.bar"
+        // <console>:29: error: pattern type is incompatible with expected type;
+        //  found   : Int
+        //  required: universe.NameApi
+        //        val q"foo.${bar: Int}" = q"foo.bar"
+        //                         ^
+      }
+    #+end_src
+
+  - One can also successfully *combine* /unquote splicing/ and /unlifting/:
+    #+begin_src scala
+      object macros {
+
+        val q"f(..${ints: List[Int]})" = q"f(1, 2, 3)"
+        // ints: List[Int] = List(1, 2, 3)
+
+        val q"f(...${ints: List[List[Int]]})" = q"f(1, 2, 3)(4, 5)(6)"
+        // intss: List[List[Int]] = List(List(1, 2, 3), List(4, 5), List(6))
+
+      }
+    #+end_src
+    Analogously to /lifting/, this would /unlift/ arguments of the function,
+    _element-wise_ and _wrap_ the result into a ~List~.
+
+** DONE Bring your own
+   CLOSED: [2020-09-19 Sat 17:39]
+   Similarly to /liftables/ one can define your own /unliftables/:
+   #+begin_src scala
+     package Points
+
+     import scala.universe._
+
+     case class Point(x: Int, y: Int)
+     object Point {
+       implicit val unliftPoint = Unliftable[points.Point] {
+         case q"_root_.points.Point(${x: Int}, ${y: Int})" => Point(x, y)
+       }
+     }
+   #+end_src
+
+   - Here one must pay attention to a few _nuances_:
+     1. Similarly to ~Liftable~, ~Unliftable~ defines a helper ~apply~ function
+        in the /companion object/ to SIMPLIFY the creation of ~Unliftable~
+        instances. It take a /type parameter/ ~T~ as well as a /partial function/
+        ~PartialFunction[Tree, T]~ and returns an ~Unliftable[T]~. At all inputs
+        where a /partial function/ is defined it is expected to return an /instance/
+        of ~T~ unconditionally.
+
+     2. (=from Jian= In this example) We've only define ~Unliftable~ for the /runtime
+        universe/, it won't be available in /macros/. (see section *sharing liftable
+        implementations*)
+
+     3. /Patterns/ used in this /unliftable/ will only match a /fully qualified
+        reference/ to ~Point~ that starts with ~_root_~. It won't match other
+        possible shapes of the reference; they have to be specified by hand.
+        *This problem is caused by a LACK of /hygiene/.*
+
+     4. The pattern will _ONLY match_ trees that have *literal* ~Int~ arguments.
+        It won't work for other expressions that might evaluate to ~Int~.
+
+** DONE Standard Unliftables - =RE-READ=
+   CLOSED: [2020-09-19 Sat 16:59]
+
+* DONE Hygiene
+  CLOSED: [2020-09-19 Sat 19:52]
+  - The notion of /hygiene/ has been widely popularized by /macro/ research in Scheme.
+    + A /code generator/ is called /hygienic/
+      if it *ensures* the _absence of /name clashes/ between regular and generated
+      code_, preventing accidental capture of identifiers.
+      * /hygiene/ is of great importance to code generation, because name binding
+        problems are often *non-obvious*, and lack of /hygiene/ might manifest
+        itself in subtle ways.
+
+  - Sophisticated macro systems such as Racket's have mechanisms that make /macros/
+    /hygienic/ _without any effort_ from /macro/ writers.
+      In Scala we *DON'T* have *automatic* /hygiene/ - both of our codegen facilities
+    (_compile-time codegen with macros_ and _runtime codegen with toolboxes_) require
+    programmers to handle /hygiene/ *manually*. You must know how to work around the
+    absence of /hygiene/, which is what this section is about.
+
+  - *PREVENTING name clashes* between regular and generated code means _TWO_ things.
+    1. we must ensure that, regardless of the context in which we put generated
+       code, its meaning will not change (/referential transparency/).
+
+    2. we must make certain that regardless of the context in which we /splice/
+       regular code, its meaning will not change (often called /hygiene/ _in the
+       narrow sense_).
+
+  - Let's see what can be done to this end on a series of examples.
+
+** DONE Referential transparency
+   CLOSED: [2020-09-19 Sat 19:52]
+   What /referential transparency/ means is that /quasiquotes/ should *remember*
+   _the /lexical context/ in which they are defined._
+   - For instance, if there are /imports/ provided at the definition site of the
+     /quasiquote/, then these /imports/ should be used to resolve names in the
+     /quasiquote/.
+       *Unfortunately*, this is *NOT* the case at the moment, and here's an example:
+     #+begin_src scala
+       object macros {
+         import collection.mutable.Map
+
+         def typecheckType(tree: Tree): Type =
+           toolbox.typecheck(tree, toolbox.TYPEmode).tpe
+
+         typecheckType(tq"Map[_, _]") =:= typeOf[Map[_, _]]
+         // false
+
+         typecheckType(tq"Map[_, _]") =:= typeOf[collection.immutable.Map[_, _]]
+         // true
+
+       }
+     #+end_src
+     Here we can see that the /unqualified reference/ to ~Map~ does *NOT* respect
+     our _custom_ /import/ and resolves to DEFAULT ~collection.immutable.Map~
+     instead.
+       Similar problems can arise if references aren’t fully qualified in
+     macros.
+     #+begin_src scala
+       // ---- MyMacro.scala ----
+       package example
+
+       import scala.reflect.macros.blackbox
+       import scala.language.experimental.macros
+
+       object MyMacro {
+         def wrapper(x: Int) = { println(s"wrapped x = $x"); x }
+         def apply(x: Int): Int = macro impl
+         def impl(c: blackbox.Context)(x: c.Tree) = {
+           import c.universe._
+           q"wrapper($x)"
+         }
+       }
+
+       // ---- Test.scala ----
+       package example
+
+       object Test extends App {
+         def wrapper(x: Int) = x
+         MyMacro(2)
+       }
+     #+end_src
+
+     + If we compile both the macro and it's usage, we'll see that ~println~ will
+       *NOT* be called when the application runs. This will happen because, after
+       /macro expansion/, ~Test.scala~ will look like:
+       #+begin_src scala
+         // Expanded Test.scala
+         package example
+
+         object Test extends App {
+           def wrapper(x: Int) = x
+           wrapper(2)
+         }
+       #+end_src
+       * And ~wrapper~ will be resolved to ~example.Test.wrapper~ rather than
+         *intended* ~example.MyMacro.wrapper~. To avoid /referential transparency/
+         gotchas one can use _TWO_ possible workarounds:
+         - *Fully qualify all references*.
+           i.e. we can adapt our /macro/'s implementation to:
+           #+begin_src scala
+             def impl(c: Context)(x: c.Tree) = {
+               import c.universe._
+               q"_root_.example.MyMacro.wrapper($x)"
+             }
+           #+end_src
+           It's important to start with ~_root_~ as otherwise there will still be
+           a chance of name collision if example gets redefined at the _use-site_
+           of the /macro/.
+
+         - *Unquote* /symbols/ INSTEAD of using _plain identifiers_.
+           i.e. we can resolve the reference to ~wrapper~ by hand:
+           #+begin_src scala
+             def impl(c: Context)(x: c.Tree) = {
+               import c.universe._
+               val myMacro = symbolOf[MyMacro.type].asClass.module
+               val wrapper = myMacro.info.member(TermName("wrapper"))
+               q"$wrapper($x)"
+             }
+           #+end_src
+
+** DONE Hygiene in the narrow sense
+   CLOSED: [2020-09-19 Sat 19:51]
+   _"hygiene in the narrow sense"_ means is that /quasiquotes/ *shouldn't mess*
+   with the bindings of /trees/ that are *unquoted* into them.
+
+   - For example, if a /macro argument/ that *unquoted* into a /macro expansion/
+     was originally referring to some variable in the enclosing /lexical context/,
+     then this reference should _REMAIN_ in force _AFTER_ /macro expansion/,
+     regardless of what code was generated for that /macro expansion/.
+       *Unfortunately*, we _DON'T have *automatic* facilities to ENSURE_ this, and
+     that can lead to unexpected situations:
+     #+begin_src scala
+       object macros {
+
+         val originalTree = q"val x = 1; x"
+         // originalTree: universe.Tree = ...
+
+         toolbox.eval(originalTree)
+         // res1: Any = 1
+
+         val q"$originalDefn; $originalRef" = originalTree
+         // originalDefn: universe.Tree = val x = 1
+         // originalRef: universe.Tree = x
+
+         val generatedTree = q"$originalDefn; { val x = 2; println(x); $originalRef }"
+         // generatedTree: universe.Tree = ...
+
+         toolbox.eval(generatedTree)
+         // 2
+         // res2: Any = 2
+
+       }
+     #+end_src
+     + In this example, the definition of ~val x = 2~ *shadows* the binding from
+       ~x~ to ~val x = 1~ established in the ORIGINAL tree, changing the semantics
+       of ~originalRef~ in generated code.
+         In this simple example, shadowing is quite easy to follow, HOWEVER in
+       elaborate /macros/ it can get out of hand quite easily.
+
+     + To resolve this use the ~freshName~ function, which is like Lisp's ~gensym~,
+       that can create unique names that are to be used in generated code.
+       * Lisp's ~gensym~ is a battle-tested workaround from the early days of Lisp
+
+       * /Quasiquotes/ are particularly nice here, because they allow *unquoting*
+         of _generated names_ *DIRECTLY* into _generated code_.
+         =TODO= =???= =TODO=
+
+   - There's a bit of a mixup in our API, though. There is an internal API
+     ~internal.reificationSupport.{ freshTermName, freshTypeName }~ available in
+     _BOTH_ compile-time and runtime universes, _HOWEVER_ *only* at compile-time
+     is there a nice public facade for it, called ~c.freshName~.
+     We plan to fix this in Scala 2.12.
+     #+begin_src scala
+       object macros {
+
+         val xfresh = universe.internal.reificationSupport.freshTermName("x$")
+         // xfresh: universe.TermName = x$1
+
+         val generatedTree = q"$originalDefn; { val $xfresh = 2; println($xfresh); $originalRef }"
+         // generatedTree: universe.Tree = ...
+
+         toolbox.eval(generatedTree)
+         // 2
+         // res2: Any = 1
+
+       }
+     #+end_src
+     + =from Jian=
+        I use Scala 2.13.3,
+        the ~internal.reificationSupport.{ freshTermName, freshTypeName }~ no
+        longer available as expected. We can still see this in Scala 2.11.
+        =TODO= Try to fix this example code in Scala 2.12+. =TODO=
+
+* DONE Use cases
+  CLOSED: [2020-09-20 Sun 02:55]
+** DONE AST manipulation in macros and compiler plugins
+   CLOSED: [2020-09-20 Sun 02:49]
+   /Quasiquotes/ were designed primary as tool for *ast manipulation* in /macros/.
+   - A common workflow is to
+     1. *deconstruct* arguments with /quasiquote patterns/
+     2. *construct* a _rewritten_ result with another /quasiquote/:
+
+   - Example:
+     + Definition in a file:
+       #+begin_src scala
+         // macro that prints the expression code before executing it
+         object debug {
+
+           def apply[T](x: => T): T = macro impl
+
+           def impl(c: black.Context)(x: c.Tree) = {
+             import c.universe._
+             val q"..$stats" = x
+             val loggedStats = stats.flatMap { stat =>
+               val msg = "executing " + showCode(stat)
+               List(q"println($msg)", stat)
+             }
+             q"..$loggedStats"
+           }
+
+         }
+       #+end_src
+
+     + Usage:
+       #+begin_src scala
+         object Test extends App {
+
+           def faulty: Int = throw new Execption
+
+           debug {
+             val x = 1
+             val y = x + faulty
+             x + y
+           }
+
+         }
+
+         /* -- output -- */
+         //// executing val x: Int = 1
+         //// executing val y: Int = x.+(Test.this.faulty)
+         //// java.lang.Exeception
+         //// ...
+       #+end_src
+
+   - To simplify integration with /macros/ we've also made it easier to simply use
+     /trees/ in /macro implementations/ *instead of* _the reify-centric ~Expr~ api_
+     that might be used previously:
+     + Scala 2.10
+       #+begin_src scala
+         object Macro {
+           def apply(x: Int): Int = macro impl
+
+           def impl(c: Context)(x: c.Expr[Int]): c.Expr[Int] = {
+             import c.universe._
+             c.Expr(q"$x + 1")
+           }
+         }
+       #+end_src
+
+     + Scala 2.11
+       You can also do it like that
+       #+begin_src scala
+         object Macro {
+           def apply(x: Int): Int = macro impl
+
+           def impl(c: Context)(x: c.Tree) = {
+             import c.universe._
+             q"$x + 1"
+           }
+         }
+       #+end_src
+       * You _no longer need_ to wrap the return value of a /macro/ with ~c.Expr~,
+         or to specify the /argument types/ twice, and the /return type/ in ~impl~
+         is now optional (=from Jian= always ~c.universe.Tree~).
+         =TODO= =WHY=
+
+       * /Quasiquotes/ can also be used "as is" in /compiler plugins/ as the
+         _reflection API_ is strict subset of the compiler's ~Global~ API.
+         =TODO= =???=
+
+** DONE Just in time compilation
+   CLOSED: [2020-09-20 Sun 02:54]
+   Thanks to _the ~ToolBox~ API_, one can *generate*, *compile* and *run* Scala
+   code at /runtime/:
+   #+begin_src scala
+     object macros {
+       val code = q"""println("compiled and run at runtime!")"""
+       val compiledCode = toolbox.compile(code)
+       val result = compiledCode()
+       // compiled and run at runtime!
+       result: Any = ()
+     }
+   #+end_src
+
+** DONE Offline code generation
+   CLOSED: [2020-09-20 Sun 02:54]
+   Thanks to _the NEW ~showCode~ "pretty printer"_ one can implement an /offline
+   code generator/ that does _AST manipulation_ with the help of /quasiquotes/,
+   and then serializes that into actual source code right before writing it to disk:
+   #+begin_src scala
+     object OfflineCodeGen extends App {
+
+       def generateCode() =
+         q"package mypackage { class MyClass }"
+
+       def saveToFile(path: String, code: Tree) = {
+         val writer = new java.io.PrintWriter(path)
+         try writer.write(showCode(code))
+         finally writer.close()
+       }
+
+       saveToFile("myfile.scala", generateCode())
+
+     }
+   #+end_src
+
+* DONE Syntax summary - =REFERENCE= =RE-READ=
+  CLOSED: [2020-09-20 Sun 02:59]
+** TODO Expressions
+** TODO Types
+** TODO Patterns
+** TODO Definitions
+** TODO Auxiliary
+** TODO Abbreviations
+
+* DONE Expression details - =REFERENCE= =RE-READ=
+  CLOSED: [2020-09-20 Sun 03:00]
 ** Empty
 ** Literal
 ** Identifier and Selection
@@ -496,7 +901,8 @@
 ** New
 ** Import
 
-* TODO Type details
+* DONE Type details - =REFERENCE= =RE-READ=
+  CLOSED: [2020-09-20 Sun 03:07]
 ** Empty Type
 ** Type Identifier
 ** Singleton Type
@@ -508,7 +914,8 @@
 ** Tuple Type
 ** Function Type
 
-* TODO Pattern details
+* DONE Pattern details - =REFERENCE= =RE-READ=
+  CLOSED: [2020-09-20 Sun 03:48]
 ** Wildcard Pattern
 ** Literal Pattern
 ** Binding Pattern
@@ -517,7 +924,7 @@
 ** Alternative Pattern
 ** Tuple Pattern
 
-* TODO Definition and import details
+* TODO Definition and import details - =REFERENCE= =RE-READ=
 ** Modifiers
 ** Templates
 ** Val and Var Definitions
@@ -531,5 +938,49 @@
 ** Package Definition
 ** Package Object Definition
 
-* TODO Terminology summary
-* TODO Future prospects
+* DONE Terminology summary
+  CLOSED: [2020-09-20 Sun 04:11]
+  - Quasiquote (not quasi-quote) :: refer to either the /quasiquote/ library or
+    any usage of one its /interpolators/.
+    + The name is not hyphenated for the sake of consistency with implementations
+      of the same concept in other languages (e.g. Scheme and Racket, Haskell)
+
+  - Tree or AST (Abstract Syntax Tree) :: a representation of a Scala program or
+    a part of it through means of the Scala reflection API's ~Tree~ type.
+
+  - Tree construction :: usages of /quasiquotes/ _as expressions_ to represent
+    *creation* of new /tree/ values.
+
+  - Tree deconstruction :: usages of /quasiquotes/ _as patterns_ to structurally
+    *tear apart* /trees/.
+
+  - Unquoting :: a way of either putting things in or extracting things out of
+    /quasiquotes/.
+    + Can be performed with ~$~ syntax _within_ a /quasiquote/.
+
+  - Unquote splicing (or just splicing) :: another form of *unquoting* that _FLATTENS
+    contents of the unquotee_ *into* a /tree/.
+    + Can be performed with either ~..$~ or ~...$~ syntax.
+
+  - Rank is a /degree/ of flattening of unquotee:
+    - ~rank($) == 0~
+    - ~rank(..$) == 1~
+    - ~rank(...$) == 2~
+
+  - Lifting :: a way to
+    1. *unquote* /non-tree values/
+    2. *transform* them into /trees/ with the help of the ~Liftable~ /typeclass/.
+
+  - Unlifting :: a way to *unquote* /non-tree values/ *out of* /quasiquote patterns/
+    with the help of the ~Unliftable~ /typeclass/.
+
+* DONE Future prospects
+  CLOSED: [2020-09-20 Sun 04:22]
+  - =from Jian=
+    No future, and no further updates are guaranteed. All the tickets about
+    /quasiquote/ are closed. @SethTisue mentioned they can be re-open, but he
+    closed them because of there is long time that no one really worked on them.
+    Consider the status of Scala 3 Macros, put more effort on Scala 2 Quasiquote
+    is not very valuable.
+
+  - =from Jian= The future is the Scala 3 Macros.
