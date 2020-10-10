@@ -2334,21 +2334,21 @@
 ** DONE 9.6 Conclusion - 218
    CLOSED: [2017-10-09 Mon 23:01]
 
-* DONE 10 Composition and Inheritance - 219
+* DONE 10 Composition and Inheritance - 219 - =2020-09=
   CLOSED: [2018-04-05 Thu 02:47]
   - Chapter 6 introduced some basic object-oriented aspects of Scala.
+      This chapter picks up where Chapter 6 left off and dives into Scala's
+    support for object-oriented programming in much greater detail.
 
-    This chapter picks up where Chapter 6 left off and dives into Scala's support
-    for object-oriented programming in much greater detail.
+  - We'll compare two fundamental relationships between /classes/:
+    + /composition/
+    + /inheritance/
 
-  - We'll compare two fundamental relationships between classes:
-    /composition/ and /inheritance/.
+  - Composition :: one /class/ holds a /reference/ to another, using the _referenced
+    class_ to help it fulfill its mission.
 
-    + /Composition/ means one class holds a reference to another, using the
-      referenced class to help it fulfill its mission.
-
-    + /Inheritance/ is the superclass/subclass relationship -- use the inherited
-      members to fulfill its mission.
+  - Inheritance :: the _superclass/subclass_ relationship -- use the _inherited
+    members_ to fulfill its mission.
 
   - We'll also discuss:
     + /abstract classes/
@@ -2362,41 +2362,44 @@
     + /factory objects/ and /factory methods/
 
 ** DONE 10.1 A two-dimensional layout library - 219
-   CLOSED: [2017-10-09 Mon 23:58]
-   As a running example in this chapter, we'll create a /library/ for _building
-   and rendering two-dimensional layout elements_.
+   CLOSED: [2020-09-27 Sun 16:20]
+   As a running example in this chapter, we'll create a /library/ for
+   *building* and *rendering* two-dimensional layout elements.
 
    - /Factory method/ ~elem~ that construct new elements from passed data.
      The corresponding type is ~Element~
-     ~def elem(s: String): Element~
+     #+begin_src scala
+       def elem(s: String): Element
+     #+end_src
 
-   - TODO
-     In this chapter, we’ll define classes that enable element objects to be
-     constructed from arrays, lines, and rectangles. These basic element objects
-     will be the simple parts.
+   - In this chapter, we'll define /classes/ that enable _element objects_ to be
+     constructed from _arrays_, _lines_, and _rectangles_.
+     These basic _element objects_ will be the simple parts.
 
    - We'll also define ~above~ and ~beside~ /methods/ in ~Element~.
+     + Usage Example:
+       #+begin_src scala
+         val column1 = elem("hello") above elem("***")
+         val column2 = elem("***") above elem("world")
+         println(column1 beside column2)
+         // hello ***
+         //  *** world
+       #+end_src
 
-     Usage Example:
-     #+BEGIN_SRC scala
-       val column1 = elem("hello") above elem("***")
-       val column2 = elem("***") above elem("world")
-       println(column1 beside column2)
-       // hello ***
-       //  *** world
-     #+END_SRC
+   - /Layout elements/ are a good example of a system in which
+     objects can be _constructed from simple parts with the aid of *composing
+     operators*._
 
-   - /Layout elements/ are a good example of a system in which objects can be
-     _constructed from simple parts with the aid of *composing operators*._
-
-     The /composing operators/ are also often called /combinators/ because the
-     combine elements of some domain into new elements.
+     + The /composing operators/ are also often called /combinators/ because the
+       combine elements of some domain into new elements.
 
    - *Thinking in terms of /combinators/ is generally a good way to approach
      library design*: it pays to think about the fundamental ways to construct
      objects in an application domain.
 
-   - You can construct a library by answering the questions below:
+   - You can construct a library by answering the questions below.
+     If you have good answers to these questions, your library design is on
+     track:
 
      + What are the simple objects?
 
@@ -2409,23 +2412,25 @@
      + Do they satisfy any interesting laws?
 
 ** DONE 10.2 Abstract classes - 220
-   CLOSED: [2017-10-09 Mon 23:58]
-   _NOTE editing is no longer required!!!_
+   CLOSED: [2020-09-27 Sun 16:32]
+   Let's define /type/ ~Element~, which represents layout elements.
    #+BEGIN_SRC scala
      abstract class Element {
        def contents: Array[String]
      }
    #+END_SRC
-   - A /class/ with /abstract members/ *MUST* itself be declared ~abstract~
+   - Since _elements_ are *two dimensional rectangles* of characters, it makes
+     sense to include a /member/, ~contents~, that refers to the _contents_ of a
+     _layout element_.
+     + The ~contents~ can be REPRESENTED AS _an array of strings_, where
+       _each string represents a line_.
+         Hence, the /type/ of the result returned by ~contents~ will be
+       ~Array[String]~.
 
-   - *UNLIKE* Java, _NO_ ~abstract~ modifier is necessary (or allowed) on /method/
-     declarations.
+   - A /class/ with /abstract members/ *MUST* itself be declared ~abstract~.
 
-   - Here we use two concepts: *declarations* and *definitions*.
-
-     ~Element~
-     + *declares* the /abstract method/ ~contents~,
-     + does NOT *define* /concrete methods/.
+   - *UNLIKE* Java, _NO_ ~abstract~ /modifier/ is necessary (or allowed) on
+     /method declarations/.
 
 ** DONE 10.3 Defining parameterless methods - 221
    CLOSED: [2017-10-10 Tue 00:18]
@@ -2437,34 +2442,43 @@
        def width: Int = if (height == 0) 0 else contents(0).length
      }
    #+END_SRC
-   - We add a _constraint_ that:
-     You cannot create an element with a ~height~ of _zero_ and a _non-zero_
+   - _CONSTRAINT_:
+     You *cannot* create an element with a ~height~ of _zero_ and a _non-zero_
      ~width~.
-
-     The constraint is coded in the implementation of ~width~.
+     + The constraint is coded in the implementation of ~width~.
 
    - The three /methods/ we have now are all /parameterless methods/.
 
    - We can have /parameterless methods/ and /empty-paren methods/.
-
-     We have conventions about where to use them:
+     We have *CONVENTIONS* about where to use them:
      + use /parameterless methods/ when you will do some purely functional
        computation.
 
-     + use /empty-paren methods/
-       * when you do something with /side effect/, which is obvious -- you work
-         with /side effect/ directly.
+     + use /empty-paren methods/ when you do something with /side effect/.
+       This can be
+       * *directly*:
+         this is obvious, just when you write some side-effectful operations in
+         the definition of a fucntion.
 
-       * when you access some ~var~ -- you work with /side effect/ indirectly.
+       * *indirectly*:
+         when you access some ~var~ -- this time you don't manually code some
+         side-effectful operations
 
    - the uniform access principle :: that client code *should not* be affected by
         a decision to implement an /attribute/ as a /field/ or /method/.
 
-     + Since /mutable states/ keep changing, they *CANNOT* be referenced by
-       /fields/ which is pre-computed and cannot keep changing.
+     1. Since /mutable states/ keep changing, they *CANNOT* be referenced by /fields/
+        which is pre-computed and cannot keep changing.
 
-       Therefore, the /the uniform access principle/ is NOT workable to /mutable
-       states/ -- always use this principle with /immutable values/.
+     2. Therefore, the /the uniform access principle/ is NOT workable to /mutable
+        states/ -- always use this principle with /immutable values/.
+
+   - In particular,
+     + you can *override* a /parameterless method/ with an /empty-paren method/,
+       and _vice versa_.
+
+     + You can also *leave off* the _empty parentheses_ on an *invocation* of any
+       _function that takes no arguments_.
 
    - From the performance point of view:
      + A /field/ is pre-computed and no change in the future
@@ -2479,9 +2493,11 @@
    - =From Jian=
      Java use the ~length~ field to access the /length/ of a /immutable object/.
      Java use the ~size~ method to access the /size/ of a /mutable object/.
+     + However, the length of a /string/ is accessed by calling the ~string.length()~
+       /method/ -- Java's inconsistency in design confuses people very much!
 
 ** DONE 10.4 Extending classes - 224
-   CLOSED: [2017-10-10 Tue 04:18]
+   CLOSED: [2020-09-27 Sun 19:03]
    #+BEGIN_SRC scala
      class ArrayElement(conts: Array[String]) extends Element {
        def contents: Array[String] = conts
@@ -2490,89 +2506,84 @@
    - ~scala.AnyRef~ is the default /superclass/ if you leave out an ~extends~.
      It is the same as the /class/ ~java.lang.Object~ in Java platform.
 
-   - ~extends~ clause has two effects:
-     + ~ArrayElement~ /inherited/ *all non-private* members from class ~Element~.
+   - ~extends~ clause has TWO effects:
+     + *RE-USE* code:
+       ~ArrayElement~ /inherited/ ALL *non-private members* from /class/ ~Element~.
 
-     + it makes ~ArrayElement~ the /subclass/ of ~Element~, and, conversely,
+     + *BUILD* /subtyping relation/:
+       it makes ~ArrayElement~ the /subclass/ of ~Element~, and, conversely,
        ~Element~ is the /superclass/ of ~ArrayElement~.
 
-   - /Inheritance/ means that *all members* of the /superclass/ are also members
-     of the subclass, with *TWO exceptions*:
+   - =from Jian=
+     In the point of view of static typed language, _BUILD subtyping relation_
+     is *more important*! In Scala (and most of the OOP), ~extends~ (Scala ~extends~
+     can also cover the functionality of ~implements~ in Java) is the ONLY way
+     to do this.
+       On the other hand, _RE-USE code_ can be done by using other features.
+
+   - /Inheritance/ means that *all members* of the /superclass/ are also /members/
+     of the /subclass/, with *TWO exceptions*:
      1. /private members/
 
      2. /overrideed members/ -- you have new definition, and you won't use the old
         one.
-
-        Implements the abstract method in the subclasss is also a kind of
+          Implements the /abstract method/ in the /subclasss/ is also a kind of
         /override/, though we often use a more specific word /implement/.
-
-        =From Jian= I decide to add some comments to the /implemented method/, to
-        _distinguish them from overriding exist concrete method_.
 
    - footnote 2:
      + One flaw: the returned array is mutable, clients could change it.
        One solution in a real world project: return a /defensive copy/ of the
        array instead. TODO =defensive copy ???=
 
-     + No guarantee to the equal width of the strings in the passed in ~Array~.
-       One solution is to use /precondition/ in the /primary constructor/.
-
-   - /Subtyping/ means that a value of the /subclass/ can be used wherever a
-     value of the /superclass/ is required. For example:
-     ~val e: Element = new ArrayElement(Array("hello"))~
+     + *NO guarantee* to
+       the _equal width_ of the strings in the passed in ~Array~.
+       * One solution is to use /precondition/ in the /primary constructor/.
 
    - /composition/: use a field to hold a reference to other object.
-
-     There is a /composition/ relation between ~ArrayElement~ and ~Array[String]~
-
-     =From Jian=
-     If the ~ArrayElement~ /constructor/ accept an ~Array[String]~ value, and
-     transform it to some other object(s) and save it, it is NOT a /composition/,
-     which is *NOT* the case we met.
+     + For example,
+       there is a /composition/ relation between ~ArrayElement~ and
+       ~Array[String]~
 
 ** DONE 10.5 Overriding methods and fields - 226
-   CLOSED: [2017-10-10 Tue 05:47]
+   CLOSED: [2020-09-27 Sun 19:34]
+   - The /uniform access principle/ is just one aspect
+     where _Scala treats /fields/ and /methods/ *more uniformly than* Java_.
+
    - About /methods/ and /fields/:
      + Scala has /uniform access principle/, and Java does _NOT_ have.
-
-     + In Scala, /fields/ and /methods/ belong to the same namespace, which
-       makes it possible for a /field/ to /override/ a /parameterless method/.
-
-       On the other hand, Java can have a /field/ and a /method/ have the same
-       name, but Scala forbid this.
+     + *In Scala, /fields/ and /methods/ belong to the same namespace*.
 
    - The second point above
      + makes it possible for a /field/ to _override_ a /parameterless method/.
 
-     + forbids define a field and method with the same name in the same class in
-       Scala, whereas this is allowed in Java.
+     + forbids define a /field/ and /method/ with the same name in the same /class/
+       in Scala, whereas this is allowed in Java.
 
-   - Generally, Scala has just _TWO_ namespaces for definitions in place of
-     Java's _FOUR_.
+   - Generally, Scala has just _TWO_ /namespaces/ for definitions in place of
+     Java's _FOUR_. =TODO=
 
-     + Java's four namespaces:
+     + Java's _four_ /namespaces/:
        * fields
        * methods
        * types
        * packages.
 
-     + Scala's two namespaces:
+     + Scala's _two_ /namespaces/:
        * values (fields, methods, packages, and singleton objects)
        * types (class and trait names)
 
    - footnote 4:
-     The reason that /packages/ share the same /namespace/ as /fields/ and
-     /methods/ in Scala is to enable you to import /packages/ (in addition to
-     just the names of types), as well as the /fields/ and /methods/ of
+     The reason that /packages/ share the SAME /namespace/ as /fields/ and
+     /methods/ in Scala is to *enable you to import /packages/ (in addition to
+     just the names of types)*, as well as the /fields/ and /methods/ of
      /singleton objects/.
-
-     TODO
-     This is also something you can't do in Java. It will be described in
-     Section 13.3.
+     * =from Jian=
+       Yes, you can't import a /package/ in Java.
+       For example, ~import java.util~ is _legal in Scala_, but _illegal in Java_.
 
 ** DONE 10.6 Defining parametric fields - 227
-   CLOSED: [2017-10-10 Tue 05:56]
-   - Combine the /default constructor/ with the header of the class declaration:
+   CLOSED: [2020-09-27 Sun 21:10]
+   - Combine the /default constructor/ with the header of the /class declaration/:
      #+BEGIN_SRC scala
      class ArrayElement(val contents: Array[String]) extends Element
      #+END_SRC
@@ -2593,11 +2604,8 @@
        ) extends Cat
      #+END_SRC
 
-     + =From Jian= A better example required!
-       It is wierd that ~Tiger~ is a subclass of ~Cat~!!!
-
 ** DONE 10.7 Invoking superclass constructors - 229
-   CLOSED: [2017-10-10 Tue 06:08]
+   CLOSED: [2020-09-27 Sun 21:30]
    #+BEGIN_SRC scala
      class LineElement(s: String) extends ArrayElements(Array(s)) {
        override def width = s.length
@@ -2605,22 +2613,21 @@
      }
    #+END_SRC
 
-   - Invoke superclass constructors through the syntax
+   - Invoke /superclass constructors/ through the syntax
      ~extends ArrayElement(Array(s))~
 
-** DONE 10.8 Using ~override~ modifiers - 230 =Re-Write some Notes=
-   CLOSED: [2017-10-10 Tue 06:21]
-   - The modifier ~override~
-     + is *optional* if a member /implements/ an /abstract member/ with the same
-       name.
+** DONE 10.8 Using ~override~ modifiers - 230
+   CLOSED: [2020-09-27 Sun 23:02]
+   Scala requires the /modifier/ ~override~ for ALL /members/ that *override* a
+   /CONCRETE member/ in a /parent class/.
 
-     + is *mandatory* if a member /override/ an /concrete member/ with the same
-       name.
+   - The modifier ~override~ is
+     *optional* if a member /implements/ an /abstract member/.
 
    - The rule of how to use ~override~ provides useful information for the
      compiler that helps
-     + avoid some hard-to-catch errors
-       For instnace, if you misspell some names of *overrided* /methods/ or
+     + *avoid some hard-to-catch errors*
+       For instnace, if you _misspell some names_ of *overrided* /methods/ or
        /fields/), you will see an error message like:
        #+BEGIN_SRC text
          .../LineElement.scala:50:
@@ -2628,161 +2635,177 @@
            override def hight = 1
        #+END_SRC
 
-     + makes system evolution safer
-
+     + *makes system evolution safer* (even more important than the last one)
        =From Jian= Re-Write this entry of note in the future, and pay more
        attention to the wording -- make it clearer.
+       * For instance,
+         - A library of 2D drawing /methods/.
+           1. VERSION 0:
+              A public /base class/ ~Shape~ that is widely used, and in this
+              version it has *NO* ~def hidden(): Boolean~ /method/.
 
-       For instance,
-       * System Settings:
-         1. A /base class/ ~A~.
+           2. VERSION 1:
+              You want to add ~def hidden(): Boolean~ /method/ in ~Shape~.
 
-         2. ~B~ is a /subclass/ of ~A~, and it has a /method/
-            ~def hidden: Boolean~ (or ~def hidden(): Unit~).
+         - ~hidden~: a /method/ used by various _drawing_ /methods/ to *determine*
+           whether a shape needs to be drawn -- this could lead to a significant
+           speedup for this drawing system.
 
-       * Now, let's check what will happen to the system consisted by ~A~ and
-         ~B~, after the API evolution of ~A~ -- a public /method/
-         ~def hidden: Boolean~ is added to ~A~. For ~B~ the ~hidden~ in ~A~ is a
-         exist-in-future /method/.
+         - HOWEVER, add ~def hidden(): Boolean~ may break clients' code --
+           clients' code may include their own ~hidden~ /method/ with/without
+           a different signature, and/or a different functionality.
+             These *"accidental overrides"* are the _MOST common_ manifestation
+           of what is called *the "fragile base class" problem*.
 
-         =From Jian= Here I'll use anti-evidence to show why the rule of using
-         ~override~ is useful, especially when ~override~ is *mandatory*:
+           + Thus, add ~def hidden(): Boolean~ without signaling the clients
+             is *dangerous*.
 
-         1. When the two ~hidden~'s in ~A~ and ~B~, by coincidence, have the same
-            meaning and /type signature/, *mandatory* ~override~ is not very
-            useful. How ever, we shouldn't weight this case too much -- is the
-            rare case, *mandatory* ~override~ isi useless, but *mandatory*
-            ~override~ also harmless.
+           + Scala *CANNOT completely solve* the /fragile base class problem/,
+             BUT it _IMPROVES_ on the situation compared to Java by asking for
+             the ~override~ modifier.
+               The clients who upgrade their library version from 0 to 1, will
+             see
+             * If this ~hidden~ in ~Shape~ is /abstract/:
+               - *RESOLVABLE* because of ~override~:
+                 + /Compilation error/ if no implementation.
 
-         2. When the ~hidden~ in ~B~ has the _SAME_ /type signature/ as the one
-            in ~A~, but they have different meaning (this is the most common
-            case), _the lack of *mandatory* ~override~ is *fatal* --_ the
-            implementors forget the different meanings between these two
-            ~hidden~, and the users have no chance to detect this error until
-            they get some wierd results.
+                 + /Compilation error/ if a different signature ~hidden~ is in
+                   lients' code -- still no implementation error.
 
-            - These *accidental overrides* are the most common manifestation of
-              what is called the *fragile base class* problem.
-                The problem is that if you add new members to base classes (which
-              we usually call superclasses) in a class hierarchy, you risk
-              breaking client code.
+               - *NOT RESOLVABLE* because of ~override~:
+                 *NO* /compilation error/ if the /signature/ of clients' ~hidden~
+                 can match the one in ~Shape~.
+                 * *THIS IS BAD!!!* and *NO mechanism can help to avoid this*
+                   Even though they have matching /signature/, they may designed
+                   for to implement different functionalities.
 
-              Scala cannot solve this problem completely, but its _MANDATORY_
-              ~override~ (Java doesn't have this) can help the programmers to
-              solve this problem -- the exist-in-future /methods/ won't have
-              ~override~ modifier! When you change the /base class/, you may need
-              to add ~override~ in the /subclasses/, at this time you have a
-              chance to check if the meaning of ~hidden~ in ~B~ is the same as the
-              meaning of the ~hidden~ in ~A~.
+                 * =from Jian=
+                   Scala *DOES NOT* provide a mechanism to resolve this issue at
+                   /compile time/. If this happens, need to debug it at /runtime/,
+                   which can be tricky -- this time is is a logic/semantics bug.
 
-         3. if the ~hidden~ in ~B~ has the _DIFFERENT_ /type signature/ as the
-            one in ~A~, the lack of *mandatory* ~override~ is NOT a big problem,
-            the compiler will tell you the ~hidden~ in ~B~ has wrong signature,
-            which is a hint that you need to check what does the ~hidden~ in ~B~
-            do!
+             * If this ~hidden~ in ~Shape~ is /concrete/,
+               *all problems we see in the evolution can be resolved by ~override~.*
+               since the clients' code use Version 0 library ~Shape~ could NOT
+               have ~override~, the clients' will see a /compilation error/ when
+               they start using Version 1 library,
+               - no matter what their ~hidden~'s exist or not in their code,
+
+               - no matter what /signature/ the client ~hidden~ are (match the one
+                 in ~Shape~ or not).
 
        * Summary:
-         Without *mandatory* ~override~, 1 and 3 work well. However, they also
-         work well with *mandatory* ~override~.
-
-         Without *mandatory* ~override~, the problem of 2 can be *fatal*, the
-         *mandatory* ~override~ can solve this problem.
-
-         As a summary, the *mandatory* ~override~ is useful!
+         The *mandatory* ~override~ is useful!
 
    - Java introduces ~@Override~ annotation from 1.5 on.
      However, this is *NOT* MANDATORY, and use it is just a good habit.
 
-** DONE 10.9 Polymorphism and dynamic binding - 232
-   CLOSED: [2017-10-10 Tue 06:41]
+** DONE 10.9 Polymorphism and dynamic binding - 232 - =TODO= Chapter 19
+   CLOSED: [2020-09-27 Sun 23:16]
    - The /ploymorphism/ discussed in this section is /subtyping polymorphism/.
 
-     =From Jian= I still remember the discussion between me and Hao Hou that
-     /subtyping polymorphism/ is error prone, and the programmer need pay much
-     attention on it.
-     ------------------ Review, Reflection, and Summary in the future TODO!!!
+     + =From Jian=
+       I still remember the discussion between me and Hao Hou that /subtyping
+       polymorphism/ is error prone, and the programmer need pay much attention
+       on it.
+       ------------------ Review, Reflection, and Summary in the future =TODO=!!!
 
-     =From Jian= Another problem of /subtyping polymorphism/ in Java is that a
-     lot of /casts/ must be insterted. I think Scala does a good job to
-     eliminate manually /casts/ -- /implicts/ and ~this.type~
-     ------------------ Review, Reflection, and Summary in the future TODO!!!
+     + =From Jian=
+       Another problem of /subtyping polymorphism/ in Java is that a lot of
+       /casts/ must be insterted. I think Scala does a good job to eliminate
+       manually /casts/ -- /implicts/ and ~this.type~
+       ------------------ Review, Reflection, and Summary in the future =TODO=!!!
 
-     TODO footnote 7: Chapter 19 discusses /universal polymorphism/.
+     + =TODO=
+       footnote 7:
+       Another kind of /polymorphism/ in Scala called /universal polymorphism/
+       is discussed in Chapter 19.
+       * =from Jian=
+         Wikibook - Introduction to Programming Languages/Universal Polymorphism
+         metions that /universal polymorphism/ includes /subtyping polymorphism/
+         (this section) and /parametric polymorphism/ -- differnt from this book.
+         =TODO= Learn more!!!
 
-   - dynamically bound :: the ACTUAL /method implementation/ *invoked* is
-        _determined at run time_ _based on the /class/ of the object_, NOT the
-        type of the variable or expression.
+   - dynamically bound :: the ACTUAL /method implementation/ *invoked* is _determined
+     by the runtime /class/ of the object_, NOT the /type/ of the variable or
+     expression.
+     #+begin_src scala
+       abstract class Element {
+         def demo() = {
+           println("Element's implementation invoked")
+         }
+       }
+       class ArrayElement extends Element {
+         override def demo() = {
+           println("ArrayElement's implementation invoked")
+         }
+       }
+       class LineElement extends ArrayElement {
+         override def demo() = {
+           println("LineElement's implementation invoked")
+         }
+       }
+         // UniformElement inherits Element's demo
+       class UniformElement extends Element
 
-        #+BEGIN_SRC scala
-          abstract class Element {
-            def demo() = {
-              println("Element's implementation invoked")
-            }
-          }
-          class ArrayElement extends Element {
-            override def demo() = {
-              println("ArrayElement's implementation invoked")
-            }
-          }
-          class LineElement extends ArrayElement {
-            override def demo() = {
-              println("LineElement's implementation invoked")
-            }
-          }
-            // UniformElement inherits Element's demo
-          class UniformElement extends Element
-
-          // Type this method in the interpreter
-          def invokeDemo(e: Element) = {
-            e.demo()
-          }
+       // Type this method in the interpreter
+       def invokeDemo(e: Element) = {
+         e.demo()
+       }
 
 
-          // Invoke and inspect the OUTPUTs:
+       // Invoke and inspect the OUTPUTs:
 
-          // #1
-          invokeDemo(new ArrayElement)
-          // ArrayElement's implementation invoked
+       // #1
+       invokeDemo(new ArrayElement)
+       // ArrayElement's implementation invoked
 
-          // #2
-          invokeDemo(new LineElement)
-          // LineElement's implementation invoked
+       // #2
+       invokeDemo(new LineElement)
+       // LineElement's implementation invoked
 
-          // #3
-          invokeDemo(new UniformElement)
-          // Element's implementation invoked
-        #+END_SRC
+       // #3
+       invokeDemo(new UniformElement)
+       // Element's implementation invoked
+     #+end_src
+     + The /type/ of the /objects/ passed to ~invokeDemo~ is ~Element~, which
+       is required by the definition of ~invokeDemo~.
+         HOWEVER, the behavior is determined by the actually /classes/:
+       ~ArrayElement~, ~LineElement~, or ~UniformElement~.
 
 ** DONE 10.10 Declaring ~final~ members - 234
-   CLOSED: [2017-10-10 Tue 06:50]
-   Use ~final~ to ensure that a member _cannot be overridden_ by /subclasses/.
-   This usage of ~final~ is the same as in Java.
-   - *Forbid* /subclass method overriding/
-     ~final override def demo() = { ...~
+   CLOSED: [2020-09-27 Sun 23:28]
+   - ~final~ can be used to ensure that (these usages are the same as in Java):
+     + *Forbid* /subclass method overriding/
+       ~final override def demo() = { ...~
 
-   - *Forbid* /creating subclass/:
-     ~final class ArrayElement extends Element { ...~
+     + *Forbid* /creating subclass/:
+       ~final class ArrayElement extends Element { ...~
+
+   - =from Jian=
+     This section doesn't mention the inlining functionality of ~final~ when it
+     is applied on a ~val~ whose value is a constant:
+     ~final val v = E~, where ~E~ is a constant.
 
 ** DONE 10.11 Using composition and inheritance - 236
-   CLOSED: [2017-10-10 Tue 07:04]
-   - /Composition/ and /inheritance/ are two ways to
-     _define a new class in terms of another existing class._
+   CLOSED: [2020-09-29 Tue 21:15]
+   /Composition/ and /inheritance/ are TWO ways to _define a new class in terms
+   of another existing class._
 
-   - If what you're after is primarily _code reuse_, you should in general prefer
-     /composition/ to /inheritance/.
-     + Only /inheritance/ suffers from the /fragile base class problem/, in which
+   - If what you're after is PRIMARILY _code reuse_,
+     you should in general *prefer /composition/ to* /inheritance/.
+     + Only /inheritance/ SUFFERS from the /fragile base class problem/, in which
        you can INADVERTENTLY *break* /subclasses/ _by changing a /superclass/._
 
-     + If you want to use /inheritance/, you need to consider two questions:
+     + If you want to use /inheritance/, you need to consider _TWO_ questions:
        1. whether it models an *is-a* relationship.
-          For instance, ~ArrayElement~ *is a* ~Element~.
+          * For instance, ~ArrayElement~ *is a* ~Element~.
+          * footnote 8: Meyers, Effective C++ [Mey91] =TODO=
 
-          footnote 8: Meyers, Effective C++ [Mey91] TODO
-
-       2. whether clients will want to use the subclass type as a superclass type.
-          For instance, use ~ArrayElement~ as an ~Element~
-
-          footnote 9: Eckel, Thinking in Java [Eck98] TODO
+       2. whether clients will *WANT to*
+          use the /subclass type/ as a /superclass type/.
+          * For instance, use ~ArrayElement~ as an ~Element~
+          * footnote 9: Eckel, Thinking in Java [Eck98] =TODO=
 
    - Example:
      In the former section, we define ~LineElement~ as a /subclass/ of
@@ -2796,31 +2819,40 @@
          override def height = 1
        }
      #+END_SRC
-     + If ~LineElement~ extends ~ArrayElement~, this is a /inheritance relation/
-       between these two classes.
+     + In the previous version,
+       ~LineElement~ had an /inheritance relationship/ with /ArrayElement/, from
+       which it *inherited* ~contents~.
 
-     + If ~LineElement~ extends ~Element~ directly, it is more important to
-       forcus on the /composition relation/ between ~LineElement~ and ~Array~.
+     + Now, ~LineElement~ extends ~Element~ directly, it is more important to
+       forcus on the /composition relation/ between ~LineElement~ and ~Array~
+       (through the ~contents~ field).
 
 ** DONE 10.12 Implementing ~above~, ~beside~, and ~toString~ - 237
-   CLOSED: [2017-10-10 Tue 07:11]
-   Simplified Implementation (See complete version in section 10.14):
+   CLOSED: [2020-09-30 Wed 00:02]
+   Over simplified implementation (See complete version in section 10.14):
    #+BEGIN_SRC scala
-     // Save width
-     def above(that: Element): Element =
-       new ArrayElement(this.contents ++ that.contents)
+     abstract class Element {
+       def contents: Array[String]
 
-     // Save height
-     def beside(that: Element): Element = {
-       val newContents =
-         (this.contents zip that.contents) map {
-           case (l1, l2) => l1 + l2
-         }
+       def width: Int =
+         if (height == 0) 0 else contents(0).length
 
-       new ArrayElement(newContents)
+       def height: Int = contents.length
+
+       // Over simplified version: assume same width
+       def above(that: Element): Element =
+         new ArrayElement(this.contents ++ that.contents)
+
+       // Over simplified version: assume same height
+       def beside(that: Element): Element =
+         new ArrayElement(
+           for (
+             (line1, line2) <- this.contents zip that.contents
+           ) yield line1 + line2
+         )
+
+       override def toString = contents.mkString("\n")
      }
-
-     override def toString = contents mkString "\n"
    #+END_SRC
 
    - Both ~above~ and ~beside~ above are simplified versions.
@@ -2828,44 +2860,21 @@
      + Currently, ~beside~ only works for ~Element~'s of same ~height~.
 
 ** DONE 10.13 Defining a factory object - 239
-   CLOSED: [2018-03-06 Tue 14:21]
-   - A /factory object/ contains /methods/ that _construct other objects_.
+   CLOSED: [2020-09-30 Wed 00:06]
+   - A /factory object/ contains /methods/ that *construct* other /objects/.
 
    - An advantage of this approach:
      + /object creation/ can be *centralized*
-     + the details of how objects are represented with /classes/ can be *hidden*.
+
+     + the details of how /objects/ are represented with /classes/ can be *hidden*.
 
        * This hiding will both make your library
          + *simpler for clients to understand*, because less detail is exposed,
 
-         + provide you with _more opportunities to change your library's
-           implementation later_ *WITHOUT breaking client code*.
+         + provide you with _more opportunities to *change* your library's
+           implementation later *WITHOUT breaking client code*._
 
-   - Example of a factory class:
-     #+BEGIN_SRC scala
-       abstract class Element {
-         def contents: Array[String]
-
-         def width: Int =
-           if (height == 0) 0 else contents(0).length
-
-         def height: Int = contents.length
-
-         def above(that: Element): Element =
-           new ArrayElement(this.contents ++ that.contents)
-
-         def beside(that: Element): Element =
-           new ArrayElement(
-             for (
-               (line1, line2) <- this.contents zip that.contents
-             ) yield line1 + line2
-           )
-
-         override def toString = contents mkString "\n"
-       }
-     #+END_SRC
-
-   - Use /companion object/ as a factory:
+   - The /factory object/ for ~Element~ can be its /companion object/:
      #+BEGIN_SRC scala
        object Element {
          def elem(contents: Array[String]): Element =
@@ -2878,101 +2887,101 @@
            new LineElement(line)
        }
      #+END_SRC
-     Later we can use ~import Element.elem~ in the top level of client code.
+     + Later we can use ~import Element.elem~ in the top level of client code.
 
-   - After defining /factory methods/, there is not need to make ~ArrayElement~,
-     ~LineElement~, and ~UniformElement~ public. The usual choice is to put them
-     inside the /companion object/.
+     + Given the /factory methods/, the /subclasses/, ~ArrayElement~, ~LineElement~,
+       and ~UniformElement~, could now be ~private~ because they _no longer need to
+       be accessed directly by clients._
 
 ** DONE 10.14 Heighten and widen - 241
-   CLOSED: [2018-04-05 Thu 01:42]
+   CLOSED: [2020-09-30 Wed 00:14]
    One last enhancement:
    The version of ~Element~ shown in Listing 10.11 is NOT quite sufficient
-   because it does _NOT allow clients to align different size ~Element~'s_.
+   because it does _NOT allow clients to align DIFFERENT SIZE ~Element~'s_.
 
-   Here _"NOT allow"_ means the ~above~ and ~beside~ before this section can't
-   work properly.
+   - Here _"NOT allow"_ means the ~above~ and ~beside~ before this section can't
+     work properly.
 
-   *We should adjust different elements, and make them the same size first.*
+   - *We should adjust different elements, and make them the same size first.*
 
-   *Pad spaces* to ~widen~ and ~heighten~ an element.
+   - ~widen~ and ~heighten~ will do this by centering input elements and padding
+     spaces.
+     #+begin_src scala
+       object Element {
+         private class ArrayElement(
+           val contents: Array[String]
+         ) extends Element
 
-   #+BEGIN_SRC scala
-     object Element {
-       private class ArrayElement(
-         val contents: Array[String]
-       ) extends Element
-
-       private class LineElement(s: String) extends Element {
-         val contents = Array(s)
-         override def width = s.length
-         override def height = 1
-       }
-
-       private class UniformElement(
-         ch: Char,
-         override val width: Int,
-         override val height: Int
-       ) extends Element {
-         private val line = ch.toString * width
-         def contents = Array.fill(height)(line)
-       }
-
-       def elem(contents: Array[String]): Element =
-         new ArrayElement(contents)
-
-       def elem(chr: Char, width: Int, height: Int): Element =
-         new UniformElement(chr, width, height)
-
-       def elem(line: String): Element =
-         new LineElement(line)
-     }
-
-
-     import Element.elem
-
-     abstract class Element {
-       def contents: Array[String]
-       def width: Int = contents(0).length
-       def height: Int = contents.length
-
-       def above(that: Element): Element = {
-         val this1 = this widen that.width
-         val that1 = that widen this.width
-         elem(this1.contents ++ that1.contents)
-       }
-
-       def beside(that: Element): Element = {
-         val this1 = this heighten that.height
-         val that1 = that heighten this.height
-         elem(
-           for ((line1, line2) <- this1.contents zip that1.contents)
-           yield line1 + line2
-         )
-       }
-
-       def widen(w: Int): Element =
-         if (w <= width) this
-         else {
-           val left = elem(' ', (w - width) / 2, height)
-           val right = elem(' ', w - width - left.width, height)
-           left beside this beside right
+         private class LineElement(s: String) extends Element {
+           val contents = Array(s)
+           override def width = s.length
+           override def height = 1
          }
 
-       def heighten(h: Int): Element =
-         if (h <= height) this
-         else {
-           val top = elem(' ', width, (h - height) / 2)
-           val bot = elem(' ', width, h - height - top.height)
-           top above this above bot
+         private class UniformElement(
+           ch: Char,
+           override val width: Int,
+           override val height: Int
+         ) extends Element {
+           private val line = ch.toString * width
+           def contents = Array.fill(height)(line)
          }
 
-       override def toString = contents mkString "\n"
-     }
-   #+END_SRC
+         def elem(contents: Array[String]): Element =
+           new ArrayElement(contents)
+
+         def elem(chr: Char, width: Int, height: Int): Element =
+           new UniformElement(chr, width, height)
+
+         def elem(line: String): Element =
+           new LineElement(line)
+       }
+
+
+       import Element.elem
+
+       abstract class Element {
+         def contents: Array[String]
+         def width: Int = contents(0).length
+         def height: Int = contents.length
+
+         def above(that: Element): Element = {
+           val this1 = this widen that.width
+           val that1 = that widen this.width
+           elem(this1.contents ++ that1.contents)
+         }
+
+         def beside(that: Element): Element = {
+           val this1 = this heighten that.height
+           val that1 = that heighten this.height
+           elem(
+             for ((line1, line2) <- this1.contents zip that1.contents)
+             yield line1 + line2
+           )
+         }
+
+         def widen(w: Int): Element =
+           if (w <= width) this
+           else {
+             val left = elem(' ', (w - width) / 2, height)
+             val right = elem(' ', w - width - left.width, height)
+             left beside this beside right
+           }
+
+         def heighten(h: Int): Element =
+           if (h <= height) this
+           else {
+             val top = elem(' ', width, (h - height) / 2)
+             val bot = elem(' ', width, h - height - top.height)
+             top above this above bot
+           }
+
+         override def toString = contents.mkString("\n")
+       }
+     #+end_src
 
 ** DONE 10.15 Putting it all together - 245 =Re-Read=
-   CLOSED: [2018-04-05 Thu 02:47]
+   CLOSED: [2020-09-30 Wed 00:32]
    #+BEGIN_SRC scala
      import Element.elem
 
@@ -3013,7 +3022,20 @@
      programmer get an idea to write code like this /combinator style/???
 
 ** DONE 10.16 Conclusion - 246
-   CLOSED: [2017-10-11 Wed 18:03]
+   CLOSED: [2020-09-30 Wed 00:35]
+   In this section, you saw more concepts related to /object-oriented programming/
+   in Scala.
+   - Among others, you encountered
+     + abstract classes
+     + inheritance and subtyping
+     + class hierarchies
+     + parametric fields
+     + method overriding.
+
+   - You should have developed a feel for constructing a non-trivial class hierarchy
+     in Scala.
+
+   - =TODO= We'll work with the layout library again in Chapter 14.
 
 * DONE 11 Scala's Hierarchy - 247
   CLOSED: [2017-10-12 Thu 00:16]
@@ -4511,7 +4533,8 @@
 
      + writing them externally in tests.
 
-* TODO 15 Case Classes and Pattern Matching - 307
+* DONE 15 Case Classes and Pattern Matching - 307
+  CLOSED: [2020-09-30 Wed 02:18]
 ** DONE 15.1 A simple example - 307
    CLOSED: [2017-10-21 Sat 20:08]
 *** DONE Case classes - 308
@@ -4805,9 +4828,10 @@
       for (Some(fruit) <- results) println(fruit)
     #+END_SRC
 
-** TODO 15.8 A larger example - 332
-   Write an expression formatter that displays an arithmetic expression in a
-   two-dimensional layout.
+** DONE 15.8 A larger example - 332 - =TODO= =Try to write the example code all by myself=
+   CLOSED: [2020-09-30 Wed 02:18]
+   Write an _EXPRESSION FORMATTER_ that *displays* an _arithmetic expression_ in
+   a two-dimensional layout.
    - Example:
      + "x / (x + 1)" should be printed vertically like:
        #+begin_src text
@@ -4825,7 +4849,7 @@
              3
        #+end_src
 
-   - The /class/ we will create is ~ExprFormatter~.
+   - The /class/ we will create is named as ~ExprFormatter~.
 
    - A useful first step is to concentrate on _HORIZONTAL layout_.
      A structured expression like:
@@ -4842,11 +4866,124 @@
      #+end_src
      Note:
      + /Parentheses/ are *mandatory* around ~x + y~,
-       BUT would be *optional* around (x + y) * z.
+       BUT would be *optional* around ~(x + y) * z~ because of the higher than ~+~
+       precedence of ~*~.
 
      + To keep the layout as legible as possible, your goal should be
        * to *omit* parentheses wherever they are _REDUNDANT_,
        * while ensuring that all necessary parentheses are present.
+
+   - Create _a /precedence/ map_ for operators:
+     #+begin_src scala
+       class ExprFormatter {
+         private val opGroups =
+           Array(
+             Set("|", "||"),
+             Set("&", "&&"),
+             Set("ˆ"),
+             Set("==", "!="),
+             Set("<", "<=", ">", ">="),
+             Set("+", ""),
+             Set("*", "%")
+           )
+
+         // A mapping from operators to their precedence
+         private val precedence = {
+           for {
+             i <- opGroups.indices
+             op <- opGroups(i)
+           } yield op -> i
+         }.toMap
+
+         private val unaryPrecedence = opGroups.length
+         private val fractionPrecedence = -1
+
+         // NOT COMPLETE
+         // TO BE CONTINUE ...
+       }
+     #+end_src
+
+   - ~format~
+     #+begin_src scala
+       class ExprFormatter {
+         // Precedence values are in the above code snippet
+
+         def format(e: Expr): Element = format(e, 0)
+
+         private def format(e: Expr, enclPrec: Int): Element =
+           e match {
+             case Var(name) =>
+               elem(name)
+
+             case Number(num) =>
+               def stripDot(s: String) =
+                 if (s endsWith ".0") s.substring(0, s.length - 2)
+                 else                 s
+
+               elem(stripDot(num.toString))
+
+             case UnOp(op, arg) =>
+               elem(op) beside format(arg, unaryPrecedence)
+
+             case BinOp("/", left, right) =>
+               val frac = {
+                 val top = format(left, fractionPrecedence)
+                 val bot = format(right, fractionPrecedence)
+                 val line = elem('-', top.width max bot.width, 1)
+                 top above line above bot
+               }
+               if (enclPrec != fractionPrecedence) frac
+               else                                elem(" ") beside frac beside elem(" ")
+
+             case BinOp(op, left, right) =>
+               val opPrec = precedence(op)
+               val oper = {
+                 val l = format(left, opPrec)
+                 val r = format(right, opPrec + 1)
+                 l beside elem(s" ${op} ") beside r
+               }
+               if (enclPrec <= opPrec) oper
+               else                    elem("(") beside oper beside elem(")")
+           }
+       }
+     #+end_src
+     + ~stripDot~ clean up the ~.0~ of floating numbers.
+
+     + The ~unaryPrecedence~ (the highest possible precedence) can *promise*
+       if ~arg~ is a binary operation (but not a fraction) it will ALWAYS be
+       displayed *in parentheses*.
+
+     + Without
+       the surrounding ~elem(" ")~ around ~frac~ when ~enclPrec == fractionPrecedence~,
+       the displayed result is ambiguos.
+       * Without the surrounding ~elem(" ")~, both "(a / b) / c" and "a / (b / c)"
+         are displayed as:
+         #+begin_src text
+           a
+           -
+           b
+           -
+           c
+         #+end_src
+
+       * For instance,
+         - "(a / b) / c" SHOULD BE displayed as
+           #+begin_src text
+             a
+             -
+             b
+            ---
+             c
+           #+end_src
+
+         - "a / (b / c)" SHOULD BE displayed as
+           #+begin_src text
+             a
+            ---
+             b
+             -
+             c
+           #+end_src
 
 ** DONE 15.9 Conclusion - 340
    CLOSED: [2017-10-23 Mon 23:28]
@@ -9173,12 +9310,18 @@
 ** 25.3 Conclusion - 630
 
 * DONE 26 Extractors - 631
-  CLOSED: [2017-12-02 Sat 23:56]
-  This chapter explains what /extractors/ are and how you can use them to define
-  patterns that are decoupled from an object's representation.
+  CLOSED: [2020-09-27 Sun 04:29]
+  This chapter explains
+  + what /extractors/ are
+
+  + how you can use them to define patterns that are _decoupled from_ an object's
+    representation.
+    * =from Jian=
+      if the patterns are _not decoupled from_ an object's representation, the
+      default /extractors/ of /case classes/ are enough.
 
 ** DONE 26.1 An example: extracting email addresses - 631
-   CLOSED: [2020-05-29 Sat 12:23]
+   CLOSED: [2020-09-25 Fri 01:01]
    - Compare
      + Access function:
        #+BEGIN_SRC scala
@@ -9192,7 +9335,7 @@
 
      + Pattern matching:
        #+BEGIN_SRC scala
-         toEmail(s) match {
+         s match {
            case EMail(user, domain) => println(user + " AT " + domain)
            case _                   => println("not an email address")
          }
@@ -9201,24 +9344,21 @@
    - More complicated example - find two successive email addresses with the same
      user part:
      + Access function:
+       Assume we have the function given above.
        #+BEGIN_SRC scala
-         def isEMail(s: String): Boolean = ???
-         def domain(s: String): String = ???
-         def user(s: String): String = ???
-
-         val sep: String = ???
-
          val result: Option[List[String]] = ss.
            sliding(2).
-           map(_.split(sep)).
            find { case List(e1, e2) =>
              isEMail(e1) && isEMail(e2) && user(e1) == user(e2)
            }
 
-         if (result.isEmpty)
-           println("not successive email addresses with the same user part")
-         else
-           println(f"Two successive email addresses with the same user part ${user(reslt.get.head)}")
+         (result: @unchecked) match {
+           case None   =>
+             println("not successive email addresses with the same user part")
+
+           case Some(List(e1, e2)) =>
+             println(f"Two successive email addresses with the same user part ${user(e1)}")
+         }
        #+END_SRC
 
      + Pattern matching:
@@ -9226,25 +9366,38 @@
          @annotation.tailrec
          def findSuccessiveSameUser(ss: List[String]): Unit = {
            ss match {
-             case Nil | _ :: Nil                                  => println("not successive email addresses with the same user part")
-             case EMail(u1, d1) :: EMail(u2, d2) :: _ if u1 == u2 => println(f"Two successive email addresses with the same user part ${u1}")
-             case _ :: tl                                         => findSuccessiveSameUser(tl)
+             case Nil | _ :: Nil =>
+               println("not successive email addresses with the same user part")
+
+             case EMail(u1, d1) :: EMail(u2, d2) :: _ if u1 == u2 =>
+               println(f"Two successive email addresses with the same user part ${u1}")
+
+             case _ :: tl =>
+               findSuccessiveSameUser(tl)
            }
          }
 
          findSuccessiveSameUser(ss.sliding(2))
        #+END_SRC
 
-   - Scala's /extractors/ let you define new /patterns/ for _pre-existing_ types,
-     where the /pattern/ need _NOT_ follow the internal representation of the type.
+   - The pattern matching examples above are expressive!
+     + Q :: However, the problem is that strings are NOT /case classes/.
+             How an we use pattern matching code like above.
+
+     + A :: Scala's /extractors/ let you define new /patterns/ for _pre-existing_
+             /types/, where the /pattern/ need *NOT* follow the internal
+             representation of the /type/.
 
 ** DONE 26.2 Extractors - 632
-   CLOSED: [2017-12-02 Sat 05:57]
+   CLOSED: [2020-09-26 Sat 14:26]
    - extractor :: an /object/ that has a /method/ called ~unapply~ as one of its
                   members.
-
-   - The purpose of that ~unapply~ /method/ is to *match* a value and *take it
-     apart*.
+     + The purpose of these ~unapply~ /method/ are used to to *match* a value and
+       *take it apart*.
+       * =from Jian=
+         it doesn't do this, this ~unapply~ /method/ is _not a real_ (not satisfy
+         the purpose of the design idea of /extractors/) /extractor/ in concept,
+         even though they are used when compiler searching for a /extractor/.
 
    - Often,
      the /extractor object/ also defines a _dual_ /method/ ~apply~ for *building*
@@ -9304,78 +9457,65 @@
      #+END_SRC
 
 ** DONE 26.3 Patterns with zero or one variables - 635
-   CLOSED: [2017-12-02 Sat 21:44]
-   - To return just one pattern element:
-     Since there is NO one-tuple in Scala, the ~unapply~ method simply wraps the
-     element itself directly into a ~Some~.
-       This time ~Some(v)~ is NOT ~Some(Tuple1(v))~, which is a special case for
-     ~unapply~, though write it in this way is so much natural.
+   CLOSED: [2020-09-27 Sun 01:06]
+   - Patterns with zero or one variables are special and not covered in the
+     previous section:
+     + Since there is no one-tuple, to return just one pattern element, the
+       ~unapply~ /method/ simply wraps the element itself in a ~Some~.
+       * Example:
+         The /extractor object/ defined for strings that consist of the same
+         substring appearing _twice_ in a row:
+         #+begin_src scala
+           object Twice {
+             def apply(s: String): String = s + s
 
-     Example:
-     #+BEGIN_SRC scala
-       object Twice {
-         def apply(s: String): String = s + s
+             def unapply(s: String): Option[String] = {
+               val length = s.length / 2
+               val half = s.substring(0, length)
+               if (half == s.substring(length)) Some(half) else None
+             }
+           }
+         #+end_src
 
-         def unapply(s: String): Option[String] = {
-           val length = s.length / 2
-           val half = s.substring(0, length)
-           if (half == s.substring(length)) Some(half) else None
+     + It's also possible that an extractor pattern does _NOT bind any_ variables.
+       In this case the corresponding ~unapply~ /method/ returns a ~Boolean~.
+
+       Example:
+       #+BEGIN_SRC scala
+         object UpperCase {
+           def unapply(s: String): Boolean = s.toUpperCase == s
          }
-       }
-     #+END_SRC
+       #+END_SRC
+       In this case, only ~unapply~, NO ~apply~:
+       it would make NO sense to define an ~apply~, as there's _nothing to
+       construct_.
 
-   - It's also possible that an extractor pattern does _NOT bind any_ variables.
-     In this case the corresponding ~unapply~ method returns a boolean.
-
-     Example:
-     #+BEGIN_SRC scala
-       object UpperCase {
-         def unapply(s: String): Boolean = s.toUpperCase == s
-       }
-     #+END_SRC
-     In this case, only ~unapply~, NO ~apply~:
-     it would make NO sense to define an ~apply~, as there's _nothing to
-     construct_.
-
-   - Apply all the previously defined extractors together in its pattern matching
-     code:
+   - Apply all the previously defined /extractors/ together in its /pattern
+     matching/ code:
      #+BEGIN_SRC scala
        def userTwiceUpper(s: String) = s match {
          case EMail(Twice(x @ UpperCase()), domain) =>
-           "match: " + x + " in domain " + domain
+           f"match: $x in domain $domain"
+
          case _ =>
            "no match"
        }
      #+END_SRC
-
-     The pattern here is a little complicated:
-     1. You MUSTN'T omit the empty parameter list in ~UpperCase()~, otherwise the
-        match would test for equality with object UpperCase!
-
-     2. You can consider the code like this:
-     #+BEGIN_SRC scala
-       val unapplyEMail = Email.unapply(s)
-
-       if (unapplyEMail.nonEmpty) {
-         Some(user, domain) = unapplyEMail
-         val unapplyTwice = Twice.unapply(user)
-
-         if (unapplyTwice.nonEmpty && Uppercase.unapply(unapplyTwice.get)) {
-             "match: " + x + " in domain " + domain
-         } else  // the catch all pattern `_`
-             "no match"
-       } else  // the catch all pattern `_`
-           "no match"
-     #+END_SRC
+     You *MUSTN'T omit* the empty parameter list in ~UpperCase()~, otherwise
+     the match would test for equality with /object/ ~UpperCase~!
 
 ** DONE 26.4 Variable argument extractors - 637
-   CLOSED: [2017-12-02 Sat 22:20]
+   CLOSED: [2020-09-27 Sun 01:25]
+   Sometimes, /extractors/ that extract FIXED NUMBER of element values are not
+   flexible enough, and we also have /extractors/ that can support vararg matching
+   -- ~unapplySeq~.
+
    - Use ~unapplySeq~ can do something like
      #+BEGIN_SRC scala
        dom match {
-         case Domain("org", "acm") => println("acm.org")
+         case Domain("org", "acm")         => println("acm.org")
          case Domain("com", "sun", "java") => println("java.sun.com")
-         case Domain("net", _*) => println("a .net domain")
+         case Domain("net", _*)            => println("a .net domain")
        }
      #+END_SRC
 
@@ -9396,7 +9536,7 @@
      #+BEGIN_SRC scala
        def isTomInDotCom(s: String): Boolean = s match {
          case EMail("tom", Domain("com", _*)) => true
-         case _ => false
+         case _                               => false
        }
 
        isTomInDotCom("tom@sun.com")    // true
@@ -9404,37 +9544,38 @@
        isTomInDotCom("tom@acm.org")    // false
      #+END_SRC
 
-   - It's also possible to _return some fixed elements_ from an ~unapplySeq~
-     _together with the variable part_.
+   - It's also possible to
+     RETURN _some fixed elements_ from an ~unapplySeq~
+     TOGETHER WITH the _variable part_.
 
-     This is expressed by returning _all elements in a tuple_, where the variable
-     part comes last, as usual.
+     + *HOWTO*:
+       This is expressed by returning _all elements in a tuple_, where the
+       _variable part_ *comes last*, AS USUAL.
+       * Example:
+         #+begin_src scala
+           object ExpandedEMail {
+             def unapplySeq(email: String): Option[(String, Seq[String])] = {
+               val parts = email split "@"
 
-     Example:
-     #+BEGIN_SRC scala
-       object ExpandedEMail {
-         def unapplySeq(email: String)
-             : Option[(String, Seq[String])] = {
-           val parts = email split "@"
+               if (parts.length == 2)
+                 Some(parts(0), parts(1).split("\\.").reverse)
+               else
+                 None
+             }
+           }
 
-           if (parts.length == 2)
-             Some(parts(0), parts(1).split("\\.").reverse)
-           else
-             None
-         }
-       }
+           val s = "tom@support.epfl.ch"
 
-       val s = "tom@support.epfl.ch"
-
-       val ExpandedEMail(name, topdom, subdoms @ _*) = s
-       // name: String = tom
-       // topdom: String = ch
-       // subdoms: Seq[String] = WrappedArray(epfl, support)
-     #+END_SRC
+           val ExpandedEMail(name, topdom, subdoms @ _*) = s
+           // name: String = tom
+           // topdom: String = ch
+           // subdoms: Seq[String] = WrappedArray(epfl, support)
+         #+end_src
 
 ** DONE 26.5 Extractors and sequence patterns - 640
-   CLOSED: [2017-12-02 Sat 22:24]
-   In the standard library
+   CLOSED: [2020-09-27 Sun 01:38]
+   /Sequence patterns/ are all implemented using /extractors/ in the standard
+   Scala library:
    #+BEGIN_SRC scala
      package scala
 
@@ -9447,39 +9588,45 @@
    Similar to ~Array~
 
 ** DONE 26.6 Extractors versus case classes - 641
-   CLOSED: [2017-12-02 Sat 23:56]
-   - Even though they are very useful, /case classes/ have one _SHORTCOMING_:
-     they _expose the concrete representation of data_.
+   CLOSED: [2020-09-27 Sun 02:24]
+   - Even though they are very useful,
+     /case classes/ have one _SHORTCOMING_:
+     they *expose* _the concrete representation of data_.
+     + This means that the _name_ of the /class/ in a /constructor pattern/
+       *corresponds to* the concrete /representation type/ of the /selector object/.
 
-       This means that the name of the class in a constructor pattern
-     corresponds to the concrete representation type of the selector object.
+   - /Extractors/ *BREAK* this link between /data representations/ and /patterns/,
+     and it provides /representation independence/, which allows you to change an
+     /implementation type/ used in a set of components WITHOUT affecting clients
+     of these components.
 
-   - /Extractors/ _BREAK_
-     this link between /data representations/ and /patterns/.
+   - */Representation independence/ is an important advantage of /extractors/
+     over /case classes/.*
 
-   - /representation independence/ allows you to change an implementation type
-     used in a set of components without affecting clients of these components.
+   - /Case classes/:
+     + *cons*:
+       Since /case classes/ have *NO* /representation independence/, if your component
+       had _defined and exported_ a set of /case classes/, you'd be stuck with them
+       BECAUSE client code could already contain pattern matches against these /case
+       classes/. Renaming some /case classes/ or changing the /class hierarchy/ would
+       affect client code.
 
-   - Since /case classes/ have no /representation independence/, if your
-     component had _defined and exported_ a set of /case classes/, you'd be stuck
-     with them BECAUSE
-     client code could already contain pattern matches against these case classes.
+     + *pros*:
+       * _More concise_
 
-   - /Representation independence/ is an important advantage of /extractors/
-     over /case classes/.
+       * Usually _more efficient_ pattern matches than /extractors/.
+         - The Scala compiler can optimize patterns over /case classes/ much better
+           than patterns over /extractors/ -- the mechanisms of /case classes/ are
+           fixed
 
-   - /Case classes/ have some advantages:
-     + More concise
+         - whereas an ~unapply~ or ~unapplySeq~ method in an /extractor/ could do
+           almost anything, =from Jian= and this flexibility make it hard to do
+           very specific optimization.
 
-     + Usually more efficient pattern matches than extractors.
-         The Scala compiler can optimize patterns over /case classes/ much better
-       than patterns over /extractors/ -- the mechanisms of /case classes/ are
-       fixed, whereas an ~unapply~ or ~unapplySeq~ method in an /extractor/
-       could do almost anything.
+       * /Exhaustiveness check/ can be applied if a set of /case classes/ inherit
+         from /sealed classes/.
 
-     + /Exhaustiveness check/ for /case classes/ inherit from /sealed classes/.
-
-   - Summary: It depends
+   - Summary: *It depends*
      + closed application: you usually prefer /case classes/
 
      + Expose a type to unknown clients: /extractors/ can help you maintain
@@ -9487,24 +9634,21 @@
 
    - If it is NOT clear when you start a new project, you can always start from
      /case classes/, and then, when you think you need /representation
-     independence/, change to /extractors/.
-
-     You can do this because the syntax for /pattern matching/ is always the
-     same, NO MATTER there are /extractors/ or /case classes/.
+     independence/, change to (manually coded) /extractors/.
+     * You can do this because the syntax for /pattern matching/ is always the
+       same, NO MATTER there are /extractors/ or /case classes/.
 
 ** DONE 26.7 Regular expressions - 642
-   CLOSED: [2019-07-22 Mon 15:58]
-   - One particularly useful application area of /extractors/ are /regular
-     expressions/.
+   CLOSED: [2020-09-27 Sun 04:29]
+   One particularly useful application area of /extractors/ are /regular
+   expressions/.
 
-     Like Java, Scala provides /regular expressions/ through a library, but
-     /extractors/ make it much nicer to interact with them.
+   - Like Java, Scala provides /regular expressions/ through a library,
+     BUT /extractors/ make it *much nicer* to interact with them.
 
 *** DONE Forming regular expressions - 642
-    CLOSED: [2017-12-02 Sat 23:13]
-    - Review some basic pattern of Java regex (~java.util.regex.Pattern~)
-      page 632 - 633
-      TODO TODO TODO
+    CLOSED: [2020-09-27 Sun 04:17]
+    - ~java.util.regex.Pattern~
 
     - Scala regex inherits its _regex syntax_ comes from Java, and Java inherits
       most of the regex features of Perl.
@@ -9517,7 +9661,7 @@
       #+end_src
       + A short syntax
         #+begin_src scala
-          val Decimal = """(-)?(\d+)(\.\d*)?"""
+          val Decimal = """(-)?(\d+)(\.\d*)?""".r
         #+end_src
         Here /method/ ~r~ comes from ~StringOps~
 
@@ -9533,8 +9677,12 @@
         }
       #+END_SRC
 
+    - =from Jian=  =TODO= READ
+      StackOverflow question [[https://stackoverflow.com/questions/25632924/whats-the-difference-between-raw-string-interpolation-and-triple-quotes-in-scal][What's the difference between raw string interpolation and triple quotes in scala]]
+      and the answer from *som-snytt*
+
 *** DONE Searching for regular expressions - 644
-    CLOSED: [2017-12-02 Sat 23:13]
+    CLOSED: [2020-09-27 Sun 04:13]
     - ~regex findFirstIn str~
       Return an ~Option~ value
 
@@ -9562,8 +9710,12 @@
       #+END_SRC
 
 *** DONE Extracting with regular expressions - 645
-    CLOSED: [2017-12-02 Sat 23:26]
-    Every Regex in Scala defines an /extractor/.
+    CLOSED: [2020-09-27 Sun 04:11]
+    Every ~Regex~ object in Scala defines an /extractor/.
+      The /extractor/ is used to identify substrings that are matched by the
+    /groups/ of the regular expression. =from Jian= if no group, a /extractor/
+    is a _zero variable pattern_.
+
     #+BEGIN_SRC scala
       val Decimal(sign, integerPart, decimalPart) = "-1.23"
       // sign: String = -
@@ -9588,23 +9740,23 @@
     + *CAUTION*: =From Jian=
       An optional group that is not matched will bind ~null~ to the target variable.
 
-** DONE 26.8 Conclusion - 646
+** DONE 26.8 Conclusion - 646 - =RE-READ=
    CLOSED: [2017-12-02 Sat 23:27]
    In this chapter you saw how to *generalize* /pattern matching/ with /extractors/.
 
    - /Extractors/ let you define your own kinds of patterns, which *need _NOT_
-     correspond to the type of the expressions you select on*.
+     correspond to* the /type/ of the expressions you select on.
      + This gives you more flexibility in the kinds of patterns you can use for
        matching.
 
-     + In effect it’s like *having different possible views on the same data*.
+     + In effect it's like *having DIFFERENT possible VIEWS on the same data*.
 
-     + It also gives you a layer between a /type’s representation/ and _the way
-       clients view it_.
-         *This lets you do pattern matching while maintaining representation
-       independence, a property which is very useful in large software systems.*
+     + It also gives you a layer =IMPORTANT=
+       BETWEEN a /type's representation/ and _the way clients view it_.
+       * This lets you do /pattern matching/ WHILE *maintaining representation
+         independence*, a property which is very useful in large software systems.
 
-   - Extractors are one more element in your tool box that let you define
+   - /Extractors/ are one more element in your tool box that let you define
      flexible library abstractions.
 
 * DONE 27 Annotations - 647 *Learn MORE*
@@ -14212,7 +14364,6 @@
        }
      #+END_SRC
 ** TODO 35.8 Conclusion - 810
-
 
 * DONE Appendix A. Scala Scripts on Unix and Windows - 812
   CLOSED: [2017-10-03 Tue 21:25]

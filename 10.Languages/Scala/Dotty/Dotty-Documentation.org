@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.27.0-bin-20200731-bb23fea-NIGHTLY -> 0.28.0-bin-20200918-333ab8e-NIGHTLY
+#+VERSION: 0.28.0-bin-20200923-af1b4a0-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 
@@ -560,16 +560,21 @@
        file and used from a Java source, ~Test.java~.
 
 **** DONE Implementation
-     CLOSED: [2020-07-10 Fri 23:56]
+     CLOSED: [2020-10-06 Tue 21:32]
      /Enums/ are represented as ~sealed~ /abstract classes/ that extend the
-     ~scala.Enum~ /trait/.
+     ~scala.reflect.Enum~ /trait/.
 
-     - ~scala.Enum~ defines a _SINGLE_ /public method/, ~ordinal~:
+     - ~scala.reflect.Enum~ defines a _SINGLE_ /public method/, ~ordinal~ and
+       ~enumLabel~:
        #+begin_src scala
-         package scala
+         package scala.reflect
 
-         /** A base trait of all enum classes */
-         trait Enum {
+         /** A base trait of all Scala enum definitions */
+         super trait Enum extends Any with Product with Serializable {
+
+           /** A string uniquely identifying a case of an enum */
+           def enumLabel: String
+
            /** A number uniquely identifying a case of an enum */
            def ordinal: Int
          }
@@ -580,11 +585,13 @@
          For instance, the ~Venus~ value above (=from Jian= in Section _User-defined
        members of enums_) would be defined like this:
        #+begin_src scala
-         val Venus: Planet = new Planet(4.869e24, 6.0518e6) {
-           def ordinal: Int = 1
-           override def toString: String = "Venus"
-           // internal code to register value
-         }
+         val Venus: Planet =
+           new Planet(4.869e24, 6.0518e6) {
+             def ordinal: Int = 1
+             def enumLabel: String = "Venus"
+             override def productPrefix: String = enumLabel
+             override def toString: String = enumLabel
+           }
        #+end_src
 
      - /Enum values/ *WITHOUT* ~extends~ /clauses/ all share a single implementation
@@ -828,7 +835,7 @@
              unless that /parameter/ is already a /type parameter/ of the /case/,
              i.e. the parameter name is defined in ~<params>~.
 
-**** DONE Translation of Enumerations
+**** DONE Translation of Enumerations - =TODO=
      CLOSED: [2020-07-11 Sat 03:47]
      - enumerations :: /non-generic enums/ that define one or more *singleton* cases.
 
@@ -851,8 +858,7 @@
              def $ordinal = $_ordinal
              def enumLabel = $name
              override def productPrefix = enumLabel  // if not overridden in `E`
-             override def toString = $name           // if not overridden in `E`
-             $values.register(this)  // register enum value so that `valueOf` and `values` can return it.
+             override def toString = enumLabel       // if not overridden in `E`
            }
          #+end_src
 
@@ -7863,23 +7869,264 @@
 
        + In Scala 3.1+, they will be enabled by default.
 
-*** TODO Pattern Matching - =Further simplification will come, no need to read now=
+*** DONE Pattern Matching - =RE-READ= - =Further simplification will come, no need to read now=
+    CLOSED: [2020-09-25 Fri 00:37]
     # Option-less pattern matching
+    - Dotty implementation of /pattern matching/ was GREATLY *simplified* compared
+      to scalac.
+        From a user perspective, this means that Dotty generated patterns are a
+      lot easier to debug as
+      + _variables_ all show up in debug modes
+      + _positions_ are correctly preserved
+
+    - Dotty supports a *superset* of scalac's /extractors/.
+
     - CAUTION:
       *There are plans for further simplification*,
       in particular to factor out /product match/ and /name-based match/ into a
       SINGLE type of /extractor/.
 
-**** Extractors
-***** Fixed-Arity Extractors
-***** Variadic Extractors
+**** DONE Extractors
+     CLOSED: [2020-09-25 Fri 00:37]
+     /Extractors/ are objects that expose a /method/ ~unapply~ or ~unapplySeq~:
+     - fixed-arity extractors :: /extractor/ for /patterns of fixed arity/:
+       #+begin_src scala
+         def unapply[A](x: T)(using x: B): U
+       #+end_src
 
-**** Boolean Match
-**** Product Match
-**** Single Match
-**** Name-based Match
-**** Sequence Match
-**** Product-Sequence Match
+     - variadic extractors :: /extractor/ for /variadic patterns/:
+       #+begin_src scala
+         def unapplySeq[A](x: T)(using x: B): U
+       #+end_src
+
+***** Fixed-Arity Extractors
+      /Fixed-arity extractors/ expose the following signature:
+      #+begin_src scala
+        def unapply[A](x: T)(using x: B): U
+      #+end_src
+      - The type ~U~ conforms to
+        + one of the following matches:
+          * /Boolean match/
+          * /Product match/
+
+          OR
+
+        + the type ~R~:
+          #+begin_src scala
+            type R = {
+              def isEmpty: Boolean
+
+              def get: S
+            }
+          #+end_src
+          Here ~S~ conforms to one of the following matches:
+          * single match
+          * name-based match
+
+      - *Precedence* of these forms:
+        ~unapply~ form > /single match/ > /name-based match/
+
+      - A usage of a /fixed-arity extractor/ is irrefutable if one of the following
+        condition holds:
+        + ~U~ = ~true~
+        + the /extractor/ is used as a /product match/
+        + ~U~ = ~Some[T]~ *(for Scala2 compatibility)*
+        + ~U <: R~ and ~U <: { def isEmpty: false }~
+
+***** Variadic Extractors
+      Variadic extractors expose the following signature:
+      #+begin_src scala
+        def unapplySeq[A](x: T)(using x: B): U
+      #+end_src
+      - The type U conforms to one of the following matches:
+        + /sequence match/
+        + /product-sequence match/
+
+      - Or ~U~ conforms to the /type/ ~R~:
+        #+begin_src scala
+          type R = {
+            def isEmpty: Boolean
+            def get: S
+          }
+        #+end_src
+        Here ~S~ conforms to one of the _TWO_ /matches/ above.
+
+      - *Precedence* of these forms:
+        ~unapplySeq~ form > /sequence match/ > /product-sequence match/
+
+      - A usage of a /variadic extractor/ is irrefutable if one of the following
+        condition holds:
+        + the /extractor/ is used directly as a
+          * /sequence match/
+            OR
+          * /product-sequence match/
+        + ~U~ = ~Some[T]~ *(for Scala2 compatibility)*
+        + ~U <: R~ and ~U <: { def isEmpty: false }~
+
+**** DONE Boolean Match
+     CLOSED: [2020-09-24 Thu 23:44]
+     - Criterion:
+       + ~U =:= Boolean~
+       + Pattern-matching on exactly *0* patterns
+
+     - Example:
+       #+begin_src scala
+         object Even {
+           def unapply(s: String): Boolean = s.size % 2 == 0
+         }
+
+         "even" match {
+           case s @ Even() => println(s"$s has an even number of characters")
+           case s          => println(s"$s has an odd number of characters")
+         }
+         // even has an even number of characters
+       #+end_src
+
+**** DONE Product Match
+     CLOSED: [2020-09-24 Thu 23:44]
+     - Criterion:
+       + ~U <: Product~
+
+       + N > 0 is the maximum number of consecutive (parameterless ~def~ or ~val~)
+          ~_1: P1~ ... ~_N: PN~ members in ~U~
+
+       + Pattern-matching on EXACTLY *N* patterns with types P1, P2, ..., PN
+
+     - Example:
+       #+begin_src scala
+         class FirstChars(s: String) extends Product {
+           def _1 = s.charAt(0)
+           def _2 = s.charAt(1)
+
+           // Not used by pattern matching: Product is only used as a marker trait.
+           def canEqual(that: Any): Boolean = ???
+           def productArity: Int = ???
+           def productElement(n: Int): Any = ???
+         }
+
+         object FirstChars {
+           def unapply(s: String): FirstChars = new FirstChars(s)
+         }
+
+         "Hi!" match {
+           case FirstChars(char1, char2) =>
+             println(s"First: $char1; Second: $char2")
+         }
+         // First: H; Second: i
+       #+end_src
+
+**** DONE Single Match
+     CLOSED: [2020-09-24 Thu 23:46]
+     - Criterion:
+       If there is exactly *1* pattern, pattern-matching on 1 pattern with type ~U~
+
+     - Example:
+       #+begin_src scala
+         class Nat(val x: Int) {
+           def get: Int = x
+           def isEmpty = x < 0
+         }
+
+         object Nat {
+           def unapply(x: Int): Nat = new Nat(x)
+         }
+
+         5 match {
+           case Nat(n) => println(s"$n is a natural number")
+           case _      => ()
+         }
+         // 5 is a natural number
+       #+end_src
+
+**** DONE Name-based Match
+     CLOSED: [2020-09-24 Thu 23:51]
+     - Criterion:
+       + N > 1 is the maximum number of consecutive (parameterless ~def~ or ~val~)
+          ~_1: P1~ ... ~_N: PN~ members in ~U~
+
+       + Pattern-matching on EXACTLY ~N~ patterns with types P1, P2, ..., PN
+
+     - Example:
+       #+begin_src scala
+         object ProdEmpty {
+           def _1: Int = ???
+
+           def _2: String = ???
+
+           def isEmpty = true
+           def get = this
+
+           def unapply(s: String): this.type = this
+         }
+
+         "" match {
+           case ProdEmpty(_, _) => ???
+           case _               => ()
+         }
+       #+end_src
+
+**** DONE Sequence Match
+     CLOSED: [2020-09-25 Fri 00:30]
+     - Criterion:
+       + ~U <: X~, ~T2~ and ~T3~ conform to ~T1~
+         #+begin_src scala
+           type X = {
+             def lengthCompare(len: Int): Int // or, `def length: Int`
+             def apply(i: Int): T1
+             def drop(n: Int): scala.Seq[T2]
+             def toSeq: scala.Seq[T3]
+           }
+         #+end_src
+
+       + Pattern-matching on EXACTLY *N* simple patterns with types ~T1~, ~T1~, ...,
+          ~T1~, where *N* is the _runtime size_ of the sequence, or
+
+       + Pattern-matching on >= N simple patterns and a /vararg pattern/ (e.g.,
+          ~xs: _*~) with types ~T1~, ~T1~, ..., ~T1~, ~Seq[T1]~, where *N* is the
+          _minimum size_ of the sequence.
+
+     - Example:
+       #+begin_src scala
+         object CharList {
+           def unapplySeq(s: String): Option[Seq[Char]] = Some(s.toList)
+         }
+
+         "example" match {
+           case CharList(c1, c2, c3, c4, _, _, _) =>
+             println(s"$c1,$c2,$c3,$c4")
+
+           case _ =>
+             println("Expected *exactly* 7 characters!")
+         }
+         // e,x,a,m
+       #+end_src
+
+**** DONE Product-Sequence Match
+     CLOSED: [2020-09-25 Fri 00:36]
+     - Criterion:
+       + ~U <: Product~
+
+       + N > 0 is the _maximum number_ of consecutive (parameterless def or val)
+          ~_1: P1~ ... ~_N: PN~ members in ~U~
+
+       + ~PN~ conforms to the signature ~X~ defined in /Seq Pattern/
+
+       + Pattern-matching on EXACTLY *>= N* patterns, the first *N - 1* patterns
+          have types P1, P2, ... P(N-1), the type of the remaining patterns are
+         determined as in /Seq Pattern/.
+
+     - Example:
+       #+begin_src scala
+         class Foo(val name: String, val children: Int*)
+         object Foo {
+           def unapplySeq(f: Foo): Option[(String, Seq[Int])] = Some((f.name, f.children))
+         }
+
+         def foo(f: Foo) = f match {
+           case Foo(name, ns : _*)       => ...
+           case Foo(name, x, y, ns : _*) => ...
+         }
+       #+end_src
 
 *** DONE Eta Expansion
     CLOSED: [2020-05-25 Mon 10:20]
