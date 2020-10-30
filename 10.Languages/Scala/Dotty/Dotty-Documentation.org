@@ -1,7 +1,7 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 0.28.0-bin-20200923-af1b4a0-NIGHTLY
+#+VERSION: 3.0.0-M1-bin-20201016-e56ecae-NIGHTLY ---> 3.0.0-M1-bin-20201027-b5a1715-NIGHTLY
 #+AUTHORS: Dotty Contributors
-#+STARTUP: entitiespretty
+#+STARTUP: entitiespretty, fold
 
 * BLOG
 * DONE USAGE
@@ -28,13 +28,13 @@
        #+begin_src text
          .
          |\under_ bin
-             |\under_ dotc
-             |\under_ dotd
-             |\under_ dotr
+             |\under_ scalac
+             |\under_ scalad
+             |\under_ scala
        #+end_src
-       + dotc is the Dotty compiler
-       + dotd is the Dotty Documentation tool
-       + dotc is the Dotty REPL
+       + scalac is the Dotty compiler
+       + scalad is the Dotty Documentation tool
+       + scala is the Dotty REPL
 
 ** sbt-projects
    # *Using Dotty with sbt*
@@ -564,16 +564,12 @@
      /Enums/ are represented as ~sealed~ /abstract classes/ that extend the
      ~scala.reflect.Enum~ /trait/.
 
-     - ~scala.reflect.Enum~ defines a _SINGLE_ /public method/, ~ordinal~ and
-       ~enumLabel~:
+     - ~scala.reflect.Enum~ defines a _SINGLE_ /public method/ ~ordinal~:
        #+begin_src scala
          package scala.reflect
 
          /** A base trait of all Scala enum definitions */
          super trait Enum extends Any with Product with Serializable {
-
-           /** A string uniquely identifying a case of an enum */
-           def enumLabel: String
 
            /** A number uniquely identifying a case of an enum */
            def ordinal: Int
@@ -588,9 +584,8 @@
          val Venus: Planet =
            new Planet(4.869e24, 6.0518e6) {
              def ordinal: Int = 1
-             def enumLabel: String = "Venus"
-             override def productPrefix: String = enumLabel
-             override def toString: String = enumLabel
+             override def productPrefix: String = "Venus"
+             override def toString: String = "Venus"
            }
        #+end_src
 
@@ -842,8 +837,7 @@
      - /Companion objects/ of /enumerations/ define the following additional
        /synthetic members/.
        + A /method/ ~valueOf(name: String): E~.
-         It returns the /singleton case value/ whose ~toString~ representation is
-         ~name~.
+         It returns the /singleton case value/ whose identifier is ~name~.
 
        + A /method/ ~values~ which returns an ~Array[E]~ of *ALL* /singleton case/
          values in ~E~, _in the *ORDER* of their definitions._
@@ -856,19 +850,22 @@
          #+begin_src scala
            private def $new(_$ordinal: Int, $name: String) = new E with runtime.EnumValue {
              def $ordinal = $_ordinal
-             def enumLabel = $name
-             override def productPrefix = enumLabel  // if not overridden in `E`
-             override def toString = enumLabel       // if not overridden in `E`
+             override def productPrefix = $name  // if not overridden in `E`
+             override def toString = $name       // if not overridden in `E`
            }
          #+end_src
 
      - The /anonymous class/ also implements the /abstract/ ~Product~ /methods/
        that it _inherits_ from ~Enum~.
-       + The ~$ordinal~ /method/ above is used to generate the ~ordinal~ /method/
+       + The ~ordinal~ /method/ above is used to generate the ~ordinal~ /method/
          if the /enum/ does NOT /extend/ a ~java.lang.Enum~ *(as /Scala enums/ do
          NOT /extend/ ~java.lang.Enums~ UNLESS explicitly specified)*.
          In case it does, there is no need to generate ~ordinal~ as ~java.lang.Enum~
          defines it.
+           Similarly there is no need to override ~toString~ as that is defined in
+         terms of ~name~ in ~java.lang.Enum~. Finally, ~productPrefix~ will call
+         ~this.name~ when ~E~ extends ~java.lang.Enum~.
+         *
          * =from Jian=
            This is the reason why NOT define ~ordinal~ directly instead.
 
@@ -7456,9 +7453,12 @@
     *Type Checking*
     - [//]:# todo: fill in
 
-*** TODO Type Inference - =No Doc till now=
+*** DONE Type Inference - =TODO= - =WATCH=
+    CLOSED: [2020-10-12 Mon 17:51]
     *Changes in Type Inference*
-    - [//]:# todo: fill in
+    See
+    - https://www.youtube.com/watch?v=lMvOykNQ4zs
+    - https://www.youtube.com/watch?v=VV9lPg3fNl8
 
 *** TODO Implicit Resolution
     # Changes in Implicit Resolution
