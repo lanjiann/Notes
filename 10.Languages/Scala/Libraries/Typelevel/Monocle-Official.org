@@ -1,7 +1,9 @@
 #+TITLE: Optics library for Scala
 #+Maintainers and contributors: Julien Truffaut, Ilan Godik, Naoki Aoyama, Kenji Yoshida, Ken Scambler
-#+Date: 2019
+#+Version: --> 2.0.3 (2.1.0)
+#+Date: 2020
 #+STARTUP: entitiespretty
+#+STARTUP: fold
 
 * DONE Overview
   CLOSED: [2019-05-10 Fri 00:10]
@@ -14,28 +16,32 @@
     set, modify, ...) IMMUTABLE objects_.
 
 ** DONE Getting started
-   CLOSED: [2019-05-10 Fri 00:52]
-   - Monocle is published to Maven Central and cross-built for _Scala 2.10, 2.11,
-     and 2.12_ so you can just add the following to your build:
+   CLOSED: [2020-10-18 Sun 02:38]
+   - Monocle is published to Maven Central and cross-built for _Scala 2.12,
+     and 2.13_ so you can just add the following to your build:
      #+begin_src scala
-       val monocleVersion = "1.5.0"  // 1.5.0-cats based on cats 1.0.x
+       val monocleVersion = "2.1.0"
 
        libraryDependencies ++= Seq(
          "com.github.julien-truffaut" %%  "monocle-core"  % monocleVersion,
          "com.github.julien-truffaut" %%  "monocle-macro" % monocleVersion,
-         "com.github.julien-truffaut" %%  "monocle-law"   % monocleVersion % "test"
+         "com.github.julien-truffaut" %%  "monocle-law"   % monocleVersion % Test
        )
      #+end_src
 
-   - =TODO=
-     If you want to use /macro annotations/ such as ~@Lenses~, you will also need
+   - If you want to use /macro annotations/ such as ~@Lenses~, you will also need
      to include:
-     #+begin_src scala
-       addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
-     #+end_src
-     + =from Jian=
-       This plugin will be included in the compiler since 2.13.x (still marked
-       "experimental" -- we will have stable macro in Scala 3).
+     + Scala 2.12:
+       _macro paradise_ plugin
+       #+begin_src scala
+         addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full)
+       #+end_src
+
+     + Scala 2.13:
+       The compiler flag ~-Ymacro-annotations~ instead
+       #+begin_src scala
+         scalacOptions in Global += -Ymacro-annotations
+       #+end_src
 
 ** DONE Motivation
    CLOSED: [2019-05-10 Fri 00:52]
@@ -112,55 +118,7 @@
      =TODO=
      Please consult the documentation or the scaladoc for more details and examples.
 
-* DONE Modules
-  CLOSED: [2019-05-10 Fri 00:16]
-  - In an attempt to be modular, Monocle _is broken up into several modules_:
-    + ~core~ - contains optics (e.g. ~Lens~, ~Prism~, ~Traversal~) and type class
-      definitions (e.g. ~Index~, ~Each~, ~Plated~) and type class instances for
-      standard library types and scalaz data types
-
-    + ~macro~
-      /macros/ to SIMPLIFY the _generation of optics_
-
-    + ~laws~
-      /laws/ for the /optics/ and /type classes/
-
-    + ~generic~
-      /optics/ and /type class instances/ for ~HList~ and ~Coproduct~ from /shapeless/
-
-    + ~state~
-      conversion between /optics/ and ~State~ or ~Reader~
-
-    + ~refined~
-      /optics/ and /type class instances/ using _refinement types_ from
-      ~refined~
-
-    + ~unsafe~ =TODO=
-      /optics/ that *do not fully satisfy* /laws/
-      _but that are very convenient_. More details here =TODO=
-
-    + ~tests~ - tests that check /optics/ and /type class instances/ satisfy /laws/
-
-    + ~bench~ - *benchmarks* using *jmh* to measure optics _performances_
-
-    + ~docs~ - source for this website
-
-  - You can add a module to your build by adding the following line to ~libraryDependencies~:
-    ~"com.github.julien-truffaut"  %%  "monocle-${module}" % ${version}~
-    Here is the complete list of published artifacts:
-    #+begin_src scala
-      libraryDependencies ++= Seq(
-        "com.github.julien-truffaut"  %%  "monocle-core"    % ${version},
-        "com.github.julien-truffaut"  %%  "monocle-generic" % ${version},
-        "com.github.julien-truffaut"  %%  "monocle-macro"   % ${version},
-        "com.github.julien-truffaut"  %%  "monocle-state"   % ${version},
-        "com.github.julien-truffaut"  %%  "monocle-refined" % ${version},
-        "com.github.julien-truffaut"  %%  "monocle-unsafe"  % ${version},
-        "com.github.julien-truffaut"  %%  "monocle-law"     % ${version} % "test"
-      )
-    #+end_src
-    You need to replace ${version} with the version of Monocle you want to use.
-
+** DONE Copyright and license
 * TODO Optics
   - Here is a diagram to visualise how optics relate to each other:
     ~Fold~ <---\             /--> ~Setter~
@@ -169,10 +127,13 @@
    ~Getter~      ~Traversal~
      /|\             /|\
       |               |
-      |- ~Lens~--> ~Optional~ <--~Prism~
-         /|\                       /|\
-          |                         |
-          \-------- ~Iso~ ----------/
+      |        |--> ~Optional~ <--|  
+      |        |                  |       
+      |        |                  |      
+      |-~Lens~-|                  |- ~Prism~
+         /|\                           /|\
+          |                             |
+          \-------- ~Iso~ --------------/
 
   - Optic Composition Table
     _Almost all_ /optics/ *compose* with the OTHER /optics/.
@@ -187,6 +148,9 @@
       * ~Setter~ and ~Getter~
 
 ** TODO Iso =NOTE=
+*** TODO Iso Generation
+*** TODO Laws
+    
 ** DONE Lens
    CLOSED: [2019-05-10 Fri 18:12]
    A ~Lens~ is an optic used to zoom inside a ~Product~, e.g. ~case class~,
@@ -286,6 +250,7 @@
           // res12: Person = Person(John,20,Address(2,High Street))
         #+end_src
 
+*** Other Ways of Lens Composition
 *** Lens Generation
     - ~Lens~ creation is rather full of boilerplates but we developed a few /macros/ to
       generate them automatically. All /macros/ are defined in a separate module
@@ -367,10 +332,6 @@
 ** TODO Traversal
 *** Laws
 
-** TODO Setter
-** TODO Getter
-** TODO Fold
-
 * DONE Typeclasses
   CLOSED: [2019-05-10 Fri 00:51]
   Monocle defines /typeclasses/ to *fetch* /generic optics/ *implicitly*.
@@ -431,6 +392,55 @@
 
       * like ~Snoc~ BUT for types that have *always* an _init_ and a _last_ element,
         e.g. a /non empty list/.
+
+* DONE Modules
+  CLOSED: [2019-05-10 Fri 00:16]
+  - In an attempt to be modular, Monocle _is broken up into several modules_:
+    + ~core~ - contains optics (e.g. ~Lens~, ~Prism~, ~Traversal~) and type class
+      definitions (e.g. ~Index~, ~Each~, ~Plated~) and type class instances for
+      standard library types and scalaz data types
+
+    + ~macro~
+      /macros/ to SIMPLIFY the _generation of optics_
+
+    + ~laws~
+      /laws/ for the /optics/ and /type classes/
+
+    + ~generic~
+      /optics/ and /type class instances/ for ~HList~ and ~Coproduct~ from /shapeless/
+
+    + ~state~
+      conversion between /optics/ and ~State~ or ~Reader~
+
+    + ~refined~
+      /optics/ and /type class instances/ using _refinement types_ from
+      ~refined~
+
+    + ~unsafe~ =TODO=
+      /optics/ that *do not fully satisfy* /laws/
+      _but that are very convenient_. More details here =TODO=
+
+    + ~tests~ - tests that check /optics/ and /type class instances/ satisfy /laws/
+
+    + ~bench~ - *benchmarks* using *jmh* to measure optics _performances_
+
+    + ~docs~ - source for this website
+
+  - You can add a module to your build by adding the following line to ~libraryDependencies~:
+    ~"com.github.julien-truffaut"  %%  "monocle-${module}" % ${version}~
+    Here is the complete list of published artifacts:
+    #+begin_src scala
+      libraryDependencies ++= Seq(
+        "com.github.julien-truffaut"  %%  "monocle-core"    % ${version},
+        "com.github.julien-truffaut"  %%  "monocle-generic" % ${version},
+        "com.github.julien-truffaut"  %%  "monocle-macro"   % ${version},
+        "com.github.julien-truffaut"  %%  "monocle-state"   % ${version},
+        "com.github.julien-truffaut"  %%  "monocle-refined" % ${version},
+        "com.github.julien-truffaut"  %%  "monocle-unsafe"  % ${version},
+        "com.github.julien-truffaut"  %%  "monocle-law"     % ${version} % "test"
+      )
+    #+end_src
+    You need to replace ${version} with the version of Monocle you want to use.
 
 * DONE Examples
   CLOSED: [2019-05-10 Fri 15:56]
@@ -568,7 +578,11 @@
 ** TODO Which imports are required to use typeclass based optics such as at, each, headOption?
 ** TODO What is the difference between at and index? When should I use one or the other?
 * TODO Release Notes
+** 2.0.1
+** 2.0.0 (cats only)
+** 1.6.0 (scalaz only, last major release with scalaz)
 ** 1.5.0 and 1.5.0-cats
+** etc.
 
 * TODO Learning Resources
 ** Presentations
@@ -577,6 +591,3 @@
 ** Resources in Japanese
 ** Resources in Korean
 
-* TODO Adopters
-* TODO Unsafe Module
-** UnsafeSelect
