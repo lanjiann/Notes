@@ -1,6 +1,7 @@
 #+TITLE: Learning Python
 #+SUBTITLE: Powerful Object-Oriented Programming
 #+VERSION: 5th (Updated for 3.3 and 2.7)
+#+USE: 3.8
 #+AUTHOR: Mark Lutz
 #+STARTUP: overview
 #+STARTUP: entitiespretty
@@ -835,52 +836,204 @@
 *** Test Your Knowledge: Quiz 884
 *** Test Your Knowledge: Answers 885
 
-** 30. Operator Overloading - 887
-*** The Basics 887
-**** Constructors and Expressions: =__init__= and =__sub__= 888
-**** Common Operator Overloading Methods 888
+** TODO 30. Operator Overloading - 887
+*** The Basics - 887
+**** Constructors and Expressions: =__init__= and =__sub__= - 888
+**** Common Operator Overloading Methods - 888
 
-*** Indexing and Slicing: =__getitem__= and =__setitem__= 890
-**** Intercepting Slices 891
-**** Slicing and Indexing in Python 2.X 893
-**** But 3.X’s =__index__= Is Not Indexing! 894
+*** Indexing and Slicing: ~__getitem__~ and ~__setitem__~ - 890
+**** Intercepting Slices - 891
+**** Slicing and Indexing in Python 2.X - 893
+**** But 3.X’s ~__index__~ Is Not Indexing! - 894
 
-*** Index Iteration: =__getitem__= 894
-*** Iterable Objects: =__iter__= and =__next__= 895
-**** User-Defined Iterables 896
-**** Multiple Iterators on One Object 899
-**** Coding Alternative: =__iter__= plus yield 902
+*** Index Iteration: ~__getitem__~ - 894
+*** Iterable Objects: ~__iter__~ and ~__next__~ - 895
+**** User-Defined Iterables - 896
+**** Multiple Iterators on One Object - 899
+**** Coding Alternative: ~__iter__~ plus yield - 902
 
-*** Membership: =__contains__=, =__iter__=, and =__getitem__= 906
-*** Attribute Access: =__getattr__= and =__setattr__= 909
-**** Attribute Reference 909
-**** Attribute Assignment and Deletion 910
-**** Other Attribute Management Tools 912
-**** Emulating Privacy for Instance Attributes: Part 1 912
+*** Membership: ~__contains__~, ~__iter__~, and ~__getitem__~ - 906
+*** Attribute Access: ~__getattr__~ and ~__setattr__~ - 909
+**** Attribute Reference - 909
+**** Attribute Assignment and Deletion - 910
+**** Other Attribute Management Tools - 912
+**** Emulating Privacy for Instance Attributes: Part 1 - 912
 
-*** String Representation: =__repr__= and =__str__= 913
-**** Why Two Display Methods? 914
-**** Display Usage Notes 916
+*** DONE String Representation: ~__repr__~ and ~__str__~ - 913
+    CLOSED: [2020-11-04 Wed 02:00]
+    As we've learned, the _DEFAULT display_ of /instance objects/ for a /class/
+    like this is _NEITHER generally useful_ _NOR aesthetically pretty_:
 
-*** Right-Side and In-Place Uses: =__radd__= and =__iadd__= 917
+**** DONE Why Two Display Methods? - 914
+     CLOSED: [2020-11-04 Wed 01:37]
+     - Python provides _TWO_ /display methods/ to support alternative displays *for
+       DIFFERENT audiences*:
+       1. ~__str__~
+          + The *first choice* of (~__repr__~ is the fallback)
+            * the ~print~ function
+            * the built-in ~str~ function (the internal equivalent of which ~print~ runs)
+
+          + It generally should return a *user-friendly display*.
+
+       2. ~__repr__~
+          + *Be used in ALL OTHER contexts*:
+            * for interactive echoes,
+            * the built-in ~repr~ function,
+            * nested appearances,
+            * by ~print~ and ~str~ *if NO* ~__str__~ is present.
+
+          + It should generally return an *as-code string* that
+            * could be used to *re-create the object*,
+              OR
+            * a *detailed display for developers*.
+     
+     - ~__repr__~ is the fallback of ~__str__~,
+       and the INVERSE is *NOT* true.
+
+     - That is, ~__repr__~ is used *EVERYWHERE*,
+       *EXCEPT* by ~print~ and ~str~ when a ~__str__~ is defined.
+
+     - _If you code either, the other is available for an additional display_:
+       + As noted in Chapter 28, 
+         (In practice) general tools may also *prefer* ~__str__~ to leave other
+         /classes/ the option of adding an alternative ~__repr__~ display for use in
+         other contexts, as long as ~print~ and ~str~ displays suffice for the tool.
+       
+       + Conversely, a general tool that codes a ~__repr__~ still leaves clients the
+         option of adding alternative displays with a ~__str__~ for ~print~ and ~str~.
+
+     - Because of this, ~__repr__~ may be best if you want a single display for
+       all contexts. 
+       
+     - Example:
+       #+begin_src python
+         class addboth(adder):
+             def __str__(self):  # User-friendly string
+                 return f"[Value: {self.data}]"
+
+             def __repr__(self):  # As-code string
+                 return f"addboth({self.data})"
+
+
+         x = addboth(4)
+         x + 1
+
+         x
+         # addboth(5)
+
+         print(x)
+         # [Value: 5]
+
+         str(x), repr(x)
+         # ('[Value: 5]', 'addboth(5)')
+       #+end_src
+     
+**** DONE Display Usage Notes - 916
+     CLOSED: [2020-11-04 Wed 01:59]
+     - Though generally simple to use, there are
+       _THREE usage notes_ regarding these methods here:
+
+       1. ~__str__~ and ~__repr__~ *must* both return /strings/;
+          other result types are not converted and raise errors,
+          + so be sure to run them through a _to-string converter_
+            if the the initial value you construct is not a string.
+
+       2. Depending on a container's string-conversion logic,
+          #+begin_src python
+            class Printer:
+                def __init__(self, val):
+                    self.val = val
+
+                def __str__(self):
+                    return str(self.val)
+
+            objs = [Printer(2), Printer(3)]
+            for x in objs:
+                print(x)
+            # 2
+            # 3
+
+            print(objs)
+            # [<__main__.Printer object at 0x000000000297AB38>, <__main__.Printer obj...etc...>]
+
+            objs
+            # [<__main__.Printer object at 0x000000000297AB38>, <__main__.Printer obj...etc...>]
+          #+end_src
+          + the ~__str__~ might ONLY apply
+            when /objects/ appear *at the top level* of a print operation;
+
+          + _objects nested in larger objects_ might still print with their ~__repr__~
+            or its default. The following illustrates both of these points:
+
+          + To ensure that a custom display is run in all contexts regardless of the
+            container, code ~__repr__~, *not* ~__str__~:
+            #+begin_src python
+              class Printer:
+                  def __init__(self, val):
+                      self.val = val
+
+                  def __repr__(self):       # `__repr__` used by print if no `__str__`
+                      return str(self.val)  # `__repr__` used if echoed or nested
+
+
+              objs = [Printer(2), Printer(3)]
+              for x in objs:
+                  print(x)  # No `__str__`; runs `__repr__`
+              # 2
+              # 3
+
+
+              print(objs)  # Runs `__repr__`, not `__str__`
+              # [2, 3]
+
+              objs
+              # [2, 3]
+            #+end_src
+
+       3. *CAUTION* (perhaps *most SUBTLE*):
+          *the /display methods/ also have the potential to trigger infinite recursion
+          loops in rare contexts* -- because some objects' displays include displays
+          of other objects, it's not impossible that a display may trigger a display
+          of an object being displayed, and thus loop. This is rare and obscure enough
+          to skip here, but watch for an example of this looping potential to
+          appear for these methods in a note near the end of the next chapter in
+          its =listinherited.py= example’s class, where ~__repr__~ can loop.
+          =TODO= =TODO= =TODO= =TODO= =TODO= =TODO= =TODO=
+
+     - Summary:
+       In practice,
+       + ~__str__~, and its more inclusive relative ~__repr__~, seem to be the second
+         most commonly used operator overloading methods in Python scripts, behind
+         ~__init__~.
+       
+       + For additional examples of these tools at work and the design tradeoffs
+         they imply, see
+         * Chapter 28’s case study,
+
+         * Chapter 31’s class lister mix-ins,
+
+         * their role in Chapter 35’s exception classes,
+           where ~__str__~ is required over ~__repr__~.
+     
+*** Right-Side and In-Place Uses: ~__radd__~ and ~__iadd__~ - 917
 **** Right-Side Addition 917
 **** In-Place Addition 920
 
-*** Call Expressions: =__call__= 921
-**** Function Interfaces and Callback-Based Code 923
+*** TODO Call Expressions: ~__call__~ - 921
+**** Function Interfaces and Callback-Based Code - 923
 
-*** Comparisons: =__lt__=, =__gt__=, and Others 925
-**** The =__cmp__= Method in Python 2.X 926
+*** TODO Comparisons: ~__lt__~, ~__gt__~, and Others - 925
+**** The ~__cmp__~ Method in Python 2.X - 926
 
-*** Boolean Tests: =__bool__= and =__len__= 927
+*** Boolean Tests: ~__bool__~ and ~__len__~ - 927
 **** Boolean Methods in Python 2.X 928
 
-*** Object Destruction: =__del__= 929
+*** Object Destruction: ~__del__~ - 929
 **** Destructor Usage Notes 930
 
-*** Chapter Summary 931
-*** Test Your Knowledge: Quiz 931
-*** Test Your Knowledge: Answers 931
+*** Chapter Summary - 931
+*** Test Your Knowledge: Quiz - 931
+*** Test Your Knowledge: Answers - 931
 
 ** 31. Designing with Classes - 933
 *** Python and OOP 933
@@ -967,56 +1120,56 @@
 *** Test Your Knowledge: Quiz 1071
 *** Test Your Knowledge: Answers 1071
 *** Test Your Knowledge: Part VI Exercises 1072
-
+    
 * Part VII. Exceptions and Tools
 ** 33. Exception Basics - 1081
-*** Why Use Exceptions? 1081
-**** Exception Roles 1082
+*** Why Use Exceptions? - 1081
+**** Exception Roles - 1082
 
-*** Exceptions: The Short Story 1083
-**** Default Exception Handler 1083
-**** Catching Exceptions 1084
-**** Raising Exceptions 1085
-**** User-Defined Exceptions 1086
-**** Termination Actions 1087
+*** Exceptions: The Short Story - 1083
+**** Default Exception Handler - 1083
+**** Catching Exceptions - 1084
+**** Raising Exceptions - 1085
+**** User-Defined Exceptions - 1086
+**** Termination Actions - 1087
 
-*** Chapter Summary 1089
-*** Test Your Knowledge: Quiz 1090
-*** Test Your Knowledge: Answers 1090
+*** Chapter Summary - 1089
+*** Test Your Knowledge: Quiz - 1090
+*** Test Your Knowledge: Answers - 1090
 
 ** 34. Exception Coding Details - 1093
-*** The ~try~ / ~except~ / ~else~ Statement 1093
-**** How ~try~ Statements Work 1094
-**** try Statement Clauses 1095
-**** The try else Clause 1098
-**** Example: Default Behavior 1098
-**** Example: Catching Built-in Exceptions 1100
+*** The ~try~ / ~except~ / ~else~ Statement - 1093
+**** How ~try~ Statements Work - 1094
+**** try Statement Clauses - 1095
+**** The try else Clause - 1098
+**** Example: Default Behavior - 1098
+**** Example: Catching Built-in Exceptions - 1100
 
-*** The ~try~ / ~finally~ Statement 1100
-**** Example: Coding Termination Actions with ~try~ / ~finally~ 1101
+*** The ~try~ / ~finally~ Statement - 1100
+**** Example: Coding Termination Actions with ~try~ / ~finally~ - 1101
 
-*** Unified ~try~ / ~except~ / ~finally~ 1102
-**** Unified ~try~ Statement Syntax 1104
-**** Combining ~finally~ and ~except~ by Nesting 1104
-**** Unified ~try~ Example 1105
+*** Unified ~try~ / ~except~ / ~finally~ - 1102
+**** Unified ~try~ Statement Syntax - 1104
+**** Combining ~finally~ and ~except~ by Nesting - 1104
+**** Unified ~try~ Example - 1105
 
-*** The ~raise~ Statement 1106
-**** Raising Exceptions 1107
-**** Scopes and ~try~ ~except~ Variables 1108
-**** Propagating Exceptions with ~raise~ 1110
-**** Python 3.X Exception Chaining: ~raise from~ 1110
+*** The ~raise~ Statement - 1106
+**** Raising Exceptions - 1107
+**** Scopes and ~try~ ~except~ Variables - 1108
+**** Propagating Exceptions with ~raise~ - 1110
+**** Python 3.X Exception Chaining: ~raise from~ - 1110
 
-*** The ~assert~ Statement 1112
-**** Example: Trapping Constraints (but Not Errors!) 1113
+*** The ~assert~ Statement - 1112
+**** Example: Trapping Constraints (but Not Errors!) - 1113
 
-*** ~with~ / ~as~ Context Managers 1114
-**** Basic Usage 1114
-**** The Context Management Protocol 1116
-**** Multiple Context Managers in 3.1, 2.7, and Later 1118
+*** ~with~ / ~as~ Context Managers - 1114
+**** Basic Usage - 1114
+**** The Context Management Protocol - 1116
+**** Multiple Context Managers in 3.1, 2.7, and Later - 1118
 
-*** Chapter Summary 1119
-*** Test Your Knowledge: Quiz 1120
-*** Test Your Knowledge: Answers 1120
+*** Chapter Summary - 1119
+*** Test Your Knowledge: Quiz - 1120
+*** Test Your Knowledge: Answers - 1120
 
 ** 35. Exception Objects - 1123
 *** Exceptions: Back to the Future 1124
@@ -1830,7 +1983,8 @@
     - By contrast, /properties/ and /descriptors/ catch /get/, /set/, and /delete/
       operations by design.
 
-**** TODO The Basics - 1238
+**** DONE The Basics - 1238
+     CLOSED: [2020-10-30 Fri 18:32]
      - Functionalities of /methods/:
        #+begin_src python
          def __getattr__(self, name):        # On undefined attribute fetch [obj.name]
@@ -1932,26 +2086,27 @@
         /properties/ that are NOT physically stored in the instance's ~__dict__~
         namespace dictionary.
 
-**** TODO A First Example - 1241
+**** DONE A First Example - 1241
+     CLOSED: [2020-10-31 Sat 00:50]
      #+BEGIN_SRC python
        class Person:                            # Portable: 2.X or 3.X
            def __init__(self, name):            # On [Person()]
                self._name = name                # Triggers __setattr__!
 
-           def __getattr__(self, attr):         # On [obj.undefined]
+           def __getattr__(self, attr):         # On [obj.undefined_attr]
                print('get: ' + attr)
                if attr == 'name':               # Intercept name: not stored
                    return self._name            # Does not loop: real attr
                else: # Others are errors
                    raise AttributeError(attr)
 
-           def __setattr__(self, attr, value):  # On [obj.any = value]
+           def __setattr__(self, attr, value):  # On [obj.any_attr = value]
                print('set: ' + attr)
                if attr == 'name':
                    attr = '_name'               # Set internal name
                self.__dict__[attr] = value      # Avoid looping here
 
-           def __delattr__(self, attr):         # On [del obj.any]
+           def __delattr__(self, attr):         # On [del obj.any_attr]
                print('del: ' + attr)
                if attr == 'name':
                    attr = '_name'               # Avoid looping here too
@@ -1959,35 +2114,240 @@
 
 
        bob = Person('Bob Smith')                # bob has a managed attribute
+       ## set: _name
+
        print(bob.name)                          # Runs __getattr__
+       ## get: name
+       ## Bob Smith
+
        bob.name = 'Robert Smith'                # Runs __setattr__
+       ## set: name
+
        print(bob.name)                          # Runs __getattr__
+       ## get: name
+       ## Robert Smith
+
        del bob.name                             # Runs __delattr__
+       ## del: name
 
        print('-'*20)
 
        sue = Person('Sue Jones') # sue inherits property too
+       ## set: _name
+
        print(sue.name)
-       #print(Person.name.__doc__) # No equivalent here
+       ## get: name
+       ## Sue Jones
+
+       # print(Person.name.__doc__) # No equivalent here
      #+END_SRC
+     - The /attribute assignment/ in the ~__init__~ /constructor/
+       TRIGGERS
+       ~__setattr__~ too -- this method catches *every* /attribute assignment/,
+       even those anywhere within the class itself.
+
+     - (To compare with /properties/ and /descriptors/, we have the last commented
+       line in the above example code)
+       *UNLIKE* with /properties/ and /descriptors/,
+       there's NO direct notion of specifying _documentation_ for our attribute here;
+       + /managed attributes/ exist *within* the code of our /interception methods/,
+         not as DISTINCT /objects/.
 
 ***** Using ~__getattribute__~
-      xx
+      To achieve exactly the same results with ~__getattribute__~, replace the
+      ~__getattr__~ in the example with
+      #+begin_src python
+        def __getattribute__(self, attr):               # On [obj.any]
+            print(f"get: {attr}"
+            if attr == 'name':                          # Intercept all names
+                attr = '_name'                          # Map to internal name
+            return object.__getattribute__(self, attr)  # Avoid looping here!!!!!!!!!!!
+      #+end_src
 
-**** TODO Computed Attributes - 1243
-**** TODO ~__getattr__~ and ~__getattribute__~ Compared - 1245
+      - *CAUTION*:
+        Because ~__getattribute__~ catches _ALL_ /attributes fetches/,
+        + this version must be careful to
+          *AVOID* LOOPING *BY* passing new fetches to /superclass/,
+          AND
+        + it _CAN'T_ generally assume UNKNOWN names are errors.
+
+      - Try with this new version ~Person~:
+        #+begin_src python
+          bob = Person('Bob Smith')                # bob has a managed attribute
+          ## set: _name
+          ## get: __dict__
+
+          print(bob.name)                          # Runs __getattr__
+          ## get: name
+          ## Bob Smith
+
+          bob.name = 'Robert Smith'                # Runs __setattr__
+          ## set: name
+          ## get: __dict__
+
+          print(bob.name)                          # Runs __getattr__
+          ## get: name
+          ## Robert Smith
+
+          del bob.name                             # Runs __delattr__
+          ## del: name
+          ## get: __dict__
+
+          print('-'*20)
+
+          sue = Person('Sue Jones')
+          ## set: _name
+          ## get: __dict__
+
+          print(sue.name)
+          ## get: name
+          ## Sue Jones
+        #+end_src
+        
+**** DONE Computed Attributes - 1243
+     CLOSED: [2020-10-31 Sat 02:08]
+     Nothing special than /properties/ and /descriptors/:
+     #+begin_src python
+       class AttrSquare:
+           def __init__(self, start):
+               self.value = start                  # Triggers __setattr__!
+
+           def __getattr__(self, attr):            # On undefined attr fetch
+               if attr == 'X':
+                   return self.value ** 2
+               else:                               # value is not undefined
+                   raise AttributeError(attr)
+
+           def __setattr_(self, attr, value):      # On all attr assignments
+               if attr == 'X':
+                   attr = 'value'
+               self.__dict__[attr] = value
+     #+end_src
+     
+***** Using ~__getattribute__~ - 1244
+      To use ~__getattribute__~, besides replace ~__getattr__~ with ~__getattribute__~,
+      changes the ~__setattr__~ assignment method to *avoid looping* _BY_ using /direct
+      superclass method/ calls instead of ~__dict__~ keys:
+      #+begin_src python
+        class AttrSquare:                           # Add (object) for 2.X
+            def __init__(self, start):
+                self.value = start                  # Triggers __setattr__!
+
+            def __getattribute__(self, attr):       # On all attr fetches
+                if attr == 'X':
+                    return self.value ** 2          # Triggers __getattribute__ again!
+                else:
+                    return object.__getattribute__(self, attr)
+
+            def __setattr__(self, attr, value):     # On all attr assignments
+                if attr == 'X':
+                    attr = 'value'
+                object.__setattr__(self, attr, value)
+      #+end_src
+      - Notice, the implicit *routing* going on inside this class's methods:
+        + ~self.vlaue = start~ inside the /constructor/ TRIGGERS ~__setattr__~
+        + ~self.vlaue~ inside ~_getattribute_~ TRIGGERS ~__getattribute__~ again
+
+      - In fact, ~__getattribute__~ is run *twice* each time we fetch /attribute/ ~X~.
+        + This does *NOT happen* in the ~__getattr__~ version, because the ~value~
+          attribute is _not undefined_.
+
+        + If you care about speed and want to avoid this, change ~__getattribute__~
+          to use the /superlcass/ to fetch ~value~ as well:
+          #+begin_src python
+            def __getattribute__(self, attr):
+                if attr == 'X':
+                    return object.__getattribute__(self, 'value') ** 2
+          #+end_src
+          This *STILL* incurs a call to the /superclass method/,
+          BUT *NOT* an additional recursive call before we get there.
+          Add ~print~ calls to these methods to trace how and when they run.
+     
+**** DONE ~__getattr__~ and ~__getattribute__~ Compared - 1245
+     CLOSED: [2020-10-31 Sat 02:26]
+     #+begin_src python
+       class GetAttr:
+           attr1 = 1
+
+           def __init__(self):
+               self.attr2 = 2
+
+           def __getattr__(self, attr):  # On undefined attrs only
+               print(f"get: {attr}")     # Not on attr1: inherited from class
+               if attr == 'attr3':       # Not on attr2: stored on instance
+                   return 3
+               else:
+                   raise AttributeError(attr)
+
+
+       x = GetAttr()
+
+       print(x.attr1)
+       ## 1
+
+       print(x.attr2)
+       ## 2
+
+       print(x.attr3)
+       ## 3
+
+
+       class GetAttribute:
+           attr1 = 1
+
+           def __init__(self):
+               self.attr2 = 2
+
+           def __getattribute__(self, attr):  # On all attr fetches
+               print(f"get: {attr}")          # Use superclass to avoid looping here
+               if attr == 'attr3':
+                   return 3
+               else:
+                   return object.__getattribute__(self, attr)
+
+       y = GetAttr()
+
+       print(y.attr1)
+       ## get: attr1
+       ## 1
+
+       print(y.attr2)
+       ## get: attr2
+       ## 2
+
+       print(y.attr3)
+       ## get: attr3
+       ## 3
+     #+end_src
+     - To summarize the coding differences between ~__getattr__~ and ~__getattribute__~,
+       the following example uses both to implement _THREE_ /attributes/:
+       + ~attr1~: a /class attribute/
+       + ~attr2~: an /instance attribute/
+       + ~attr3~: a VIRTUAL /managed attribute/ computed when fetched.
+
+     - Although ~__getattribute__~ can catch *MORE* /attribute fetches/ *than*
+       ~__getattr__~, in practice they are often just variations on a theme --
+       if /attributes/ are *NOT* _physically stored_,
+       the two have the *same* effect.
+     
 **** TODO Management Techniques Compared - 1246
 **** TODO Intercepting Built-in Operation Attributes - 1249
+***** Delegation-based managers revisited - 1253
 
 *** TODO Example: Attribute Validations 1256
 **** TODO Using Properties to Validate - 1256
+***** TODO Testing code - 1258
+      
 **** TODO Using Descriptors to Validate - 1259
+***** Option 1: Validating with shared descriptor instance state - 1259
+***** Option 2: Validating with per-client-instance state - 1261
+      
 **** TODO Using ~__getattr__~ to Validate - 1263
 **** TODO Using ~__getattribute__~ to Validate - 1265
 
-*** TODO Chapter Summary 1266
-*** TODO Test Your Knowledge: Quiz 1266
-*** TODO Test Your Knowledge: Answers 1267
+*** TODO Chapter Summary - 1266
+*** TODO Test Your Knowledge: Quiz - 1266
+*** TODO Test Your Knowledge: Answers - 1267
 
 ** TODO 39. Decorators - 1269
 *** DONE What's a Decorator? - 1269
@@ -2078,17 +2438,516 @@
        + /Decorators/ are about /callable objects/ *managing* /callable objects/.
 
 *** TODO The Basics - 1273
-**** TODO Function Decorators - 1273
-***** Usage - 1273
-***** Implementation - 1274
-***** Supporting method decoration - 1275
+    Most of the magic of /decorators/ boils down to an *automatic rebinding*
+    operation
+
+**** DONE Function Decorators - 1273
+     CLOSED: [2020-10-31 Sat 03:36]
+     - /Function decorators/ have been available in Python *since version 2.4.*
+
+     - /Function decorators/ are largely just /syntactic sugar/ that
+       1. _runs one /function/ through another_ at the end of a ~def~ statement, and
+       2. *rebinds* the _ORIGINAL function name_ to the result.
+
+***** DONE Usage - 1273
+      CLOSED: [2020-10-31 Sat 03:37]
+      - A /function decorator/ is a kind of /runtime declaration/ about the function
+        whose definition follows.
+
+      - The /decorator/ is coded on _a line *just before* the ~def~ statement_ that
+        defines a /function/ or /method/, and it consists of
+        1. the ~@~ symbol
+           followed by
+        2. a reference to a /metafunction/ -- a function (or other /callable object/)
+           that *manages another function*.
+
+      - Example:
+        #+begin_src python
+          @decorator  # Decorate function
+          def f(arg):
+              ...
+
+          f(99)       # Call function
+        #+end_src
+        
+        This is EQUIVALENT TO
+        
+        #+begin_src python
+          def f(arg):
+              ...
+
+          f = decorator(f)  # Rebind function name to decorator result
+
+          f(99)             # Essentially calls `decorator(F)(99)`
+        #+end_src
+
+      - This *AUTOMATIC name rebinding* works on any ~def~ statement, whether it's for
+        a simple /function/ or a /method within a class/.
+
+      - This *AUTOMATIC name rebinding* accounts for the /static method/ and
+        /property decoration/ syntax we met earlier in the book:
+        #+begin_src python
+          class C:
+              @staticmethod
+              def meth(...): ...   # meth = staticmethod(meth)
+
+
+          class C:
+              @property
+              def name(self): ...  # name = property(name)
+        #+end_src
+
+***** DONE Implementation - 1274
+      CLOSED: [2020-10-31 Sat 20:23]
+      - A /decorator/ itself is a *callable* that returns a *callable*.
+
+      - That is, it returns the object to be called later when the /decorated
+        function/ is invoked through its _ORIGINAL name_:
+        + EITHER a /wrapper object/ to intercept later calls,
+        + OR the _ORIGINAL function augmented_ in some way.
+        
+      - In fact, /decorators/
+        1. _CAN BE_
+           *ANY type* of /callable/
+           AND
+        2. _RETURN_
+           *ANY type* of /callable/:
+
+      - *ANY COMBINATION* of /functions/ and /classes/ may be used,
+        though some are better suited to certain contexts.
+
+      - For example,
+        to tap into the /decoration protocol/ in order to manage a function just
+        after it is created, we might code a decorator of this form:
+        #+begin_src python
+          def decorator(f):
+              # Process function `f`
+              return f
+
+          @decorator
+          def func():  # func = decorator(func)
+              ...
+        #+end_src
+        + Because the _ORIGINAL decorated function_ is *ASSIGNED BACK* to its name,
+          this simply _ADDS *a post-creation step* TO function definition._
+          * Such a structure might be used to
+            - *register* a /function/ *to an API*,
+            - *assign* /function attributes/,  =TODO= =???= /function attributes/???
+            - and so on.
+
+      - In more typical use, to insert logic that intercepts later calls to a
+        function, we might code a /decorator/ to return a different object than
+        the original function -- a proxy for later calls:
+        #+begin_src python
+          def decorator(f):
+              # Save or use function `f`
+              # Return a different callable: nested `def`, `class` with `__call__`, etc.
+
+          @decorator
+          def func(): # func = decorator(func)
+              ...
+        #+end_src
+        + This /decorator/ is invoked AT DECORATION TIME, and the /callable/ it
+          returns is invoked when the _ORIGINAL function name_ is later called.
+
+        + The /decorator/ itself RECEIVES the /decorated function/;
+
+        + _the /callable/ returned_ receives *whatever arguments are later passed
+          to* _the decorated function's name_.
+
+        + When coded properly, this works the same for /class-level methods/:
+          the implied /instance object/ simply shows up in the first argument of
+          the returned /callable/.
+          =TODO= =Can be improper???= =TODO=
+
+      - In skeleton terms, here's one common coding pattern that captures this
+        idea -- the /decorator/ returns a /wrapper/ that retains the _ORIGINAL
+        function_ in an enclosing scope:
+        #+begin_src python
+          def decorator(f):        # On @ decoration
+              def wrapper(*args):  # On wrapped function call
+                  # Use `f` and args
+                  # F(*args) calls original function
+
+              return wrapper
+
+          @decorator       # `func = decorator(func)`
+          def func(x, y):  # `func` is passed to decorator's `f`
+              ...
+
+          func(6, 7)  # 6, 7 are passed to wrapper's *args
+        #+end_src
+        + When the name ~func~ is later called, it really invokes the ~wrapper~
+          function returned by ~decorator~; the ~wrapper~ function can then run
+          the ORIGINAL ~func~ because it is still available in an /enclosing scope/.
+          * When coded this way, each decorated function produces a new scope to
+            retain state.
+
+        + To do the same with /classes/, we can overload ~__call__~ and use /instance
+          attributes/ instead of /enclosing scopes/:
+          #+begin_src python
+            class decorator:
+                def __init__(self, func):  # On @ decoration
+                    self.func = func
+
+                def __call__(self, *args):  # On wrapped function call
+                    # Use `self.func` and `args`
+                    # `self.func(*args)` calls original function
+
+
+            @decorator
+            def func(x, y):  # `func = decorator(func)`
+                ...          # `func` is passed to `_init_`
+
+            func(6, 7)
+          #+end_src
+          * Call ~func~ will actually invokes the ~__call__~ /method/ of the
+            /instance/ created by ~decorator~; the ~__call__~ /method/ can then
+            run the ORIGINAL ~func~ because it is still available in an /instance
+            attribute/.
+
+          * When coded this way, each /decorated function/ produces a *NEW*
+            /instance/ to *retain state*.
+
+***** DONE Supporting method decoration - 1275
+      CLOSED: [2020-10-31 Sat 20:39]
+      One subtle point about the prior class-based coding is that while it works
+      to intercept simple function calls, it does not quite work when applied to
+      class-level method functions:
+      #+begin_src python
+        class decorator:
+            def __init__(self, func):          # `func` is method without instance
+                self.func = func
+
+            def __call__(self, *args):         # `self` is decorator instance
+                # `self.func(*args)` fails!    # C instance not in args!
+
+
+        class C:
+            @decorator
+            def method(self, x, y):  # `method = decorator(method)`
+                ...                  # Rebound to decorator instance
+      #+end_src
+      When coded this way, the /decorated method/ is *rebound* to /an instance of the
+      decorator class/, *instead of* a simple function -- =TODO= not as usual
+      expectation, though this is NOT a reasonable expectation as explained below.
+
+      - The problem with this is that the ~self~ in the decorator's ~__call__~ receives
+        /the ~decorator~ class instance/ when the /method/ is later run, and the
+        /instance/ of /class/ ~C~ is never included in ~*args~. This makes it
+        impossible to dispatch the call to the ORIGINAL /method/ -- the /decorator
+        object/ retains the original method function, but it has no instance to
+        pass to it.
+
+      - To support _BOTH_ /functions/ and /methods/, the /nested function/ alternative
+        works better:
+        #+begin_src python
+          def decorator(f):        # `f` is function or method without instance
+              def wrapper(*args):  # class instance in `args[0]` for method
+                  ...              # `f(*args)` runs function or method
+
+              return wrapper
+
+
+          @decorator
+          def func(x, y):  # `func = decorator(func)`
+              ...
+
+          func(6, 7)       # Really calls `wrapper(6, 7)`
+
+
+          class C:
+              @decorator
+              def method(self, x, y):  # `method = decorator(method)`
+                  ...                  # Rebound to simple function
+
+
+          x = C()
+          x.method(6, 7)               # Really calls wrapper(x, 6, 7)
+        #+end_src
+        When coded this way ~wrapper~ receives the ~C~ /class instance/ in its first
+        argument, so it can dispatch to the ORGINAL /method/ and *access state
+        information*.
+
+        + Technically, this /nested-function/ version works because
+          * Python creates a /bound method object/ and thus passes the /subject
+            class instance/ to the ~self~ argument only when a method attribute
+            references a simple function;
+
+          * when it references an instance of a /callable class/ instead, the /callable
+            class's instance/ is passed to ~self~ to give the /callable class/ access
+            to its own state information. We'll see how this subtle difference
+            can matter in more realistic examples later in this chapter.
+
+      - Also *NOTE* that
+        1. /nested functions/ are perhaps the *most straightforward way* to SUPPORT
+           /decoration/ of *both* /functions/ and /methods/,
+
+        2. BUT *NOT necessarily the ONLY way*.
+           The prior chapter's /descriptors/, for example, receive _BOTH_ the
+           /descriptor/ and /subject class instance/ when called.
+           =TODO= =TODO= =TODO=
+           Though more complex, later in this chapter we'll see how this tool
+           can be leveraged in this context as well.
 
 **** TODO Class Decorators - 1277
-***** Usage - 1277
-***** Implementation - 1277
-***** Supporting method decoration - 1279
+     - /Function decorators/ proved so useful that the model was extended to allow
+       /class decoration/ as of _Python 2.6 and 3.0_.
+       1. They were *initially resisted*
+          BECAUSE of *role overlap* with /metaclasses/;
+
+       2. In the end, though, they were adopted
+          BECAUSE they provide a *SIMPLER* way to achieve many of the same goals.
+
+     - /Class decorators/ are strongly related to /function decorators/:
+       + same syntax
+       + very similar coding patterns.
+
+     - _RATHER THAN_ wrapping INDIVIDUAL /functions/ or /methods/, though,
+       /class decorators/ are a way to
+       + manage /classes/, or
+       + wrap up /instance construction calls/ with _extra logic_ that
+         _MANAGES_ or _AUGMENTS_ instances created from a class.
+
+     - In the latter role above, they may manage *FULL* object interfaces.
+       
+***** DONE Usage - 1277
+      CLOSED: [2020-11-01 Sun 19:21]
+      Syntactically, /class decorators/ appear just before _class definition_, in
+      the same way that /function decorators/ appear just before _funciton/method
+      definition_.
+      
+      - In symbolic terms, for a /decorator/ that *MUST be* a /one-argument callable/
+        that returns a /callable/.
+        + The net effect:
+          calling the _class name_ later to create an /instance/ winds up triggering
+          the callable returned by the /decorator/, which may or may NOT call the
+          _ORIGINAL class_ itself.
+
+***** DONE Implementation - 1277
+      CLOSED: [2020-11-01 Sun 19:51]
+      - New /class decorators/ are coded with many of the same techniques used for
+        /function decorators/, though some may involve *two levels of augmentation*
+        -- to manage both /instance construction/ calls, as well as /instance
+        interface access/. Because a /class decorator/ is also a /callable/ that
+        returns a /callable/, most combinations of /functions/ and /classes/
+        suffice.
+
+      - Usages:
+        + Simply MANAGE a /class/ just after it is created, return the _ORIGINAL
+          class_ itself:
+          #+begin_src python
+            def decorator(C):
+                # Process class C
+                return C
+
+            @decorator
+            class C:  # `C = decorator(C)`
+                ...
+          #+end_src
+
+        + Do more works, and return a *different* callable object:
+          #+begin_src python
+            def decorator(C):
+                # Save or use class C
+                # Return a different callable: nested `def`, class with `__call__`, etc.
+
+            @decorator
+            class C:  # `C = decorator(C)`
+                ...
+          #+end_src
+          * For example,
+            the following inserts an /object/ that intercepts *UNDEFINED* /attributes/
+            of a /class instance/:
+            #+begin_src python
+              def decorator(cls):                   # On @ decoration
+                  class Wrapper:
+                      def __init__(self, *args):    # On instance creation
+                          self.wrapped = cls(*args)
+
+                      def __getattr__(self, name):  # On attribute fetch
+                          return getattr(self.wrapped, name)
+
+                  return Wrapper
+
+              @decorator
+              class C:                       # C = decorator(C)
+                  def __init__(self, x, y):  # Run by Wrapper.__init__
+                      self.attr = 'spam'
+
+              x = C(6, 7)    # Really calls Wrapper(6, 7)
+              print(x.attr)  # Runs Wrapper.__getattr__, prints "spam"
+            #+end_src
+            In this example, the decorator rebinds the class name to another
+            class, which retains the original class in an enclosing scope and
+            creates and embeds an instance of the original class when it’s
+            called. When an attribute is later fetched from the instance, it is
+            intercepted by the wrapper’s ~__getattr__~ and delegated to the
+            embedded instance of the original class. Moreover, each decorated
+            class creates a new scope, which remembers the original class. We’ll
+            flesh out this example into some more useful code later in this
+            chapter. =TODO= =???= =TODO= =???= =TODO=
+
+      - Like /function decorators/, /class decorators/ are commonly coded as either
+        _"factory" functions_ that *create* and *return* /callables/, /classes/
+        that use ~__init__~ or ~__call__~ /methods/ to *intercept* _call operations_,
+        or some combination thereof.
+        + /Factory functions/ typically retain /state/ in
+          * _enclosing scope references_, and
+          * _classes in attributes_.
+        
+***** TODO Supporting method decoration - 1279
+      As for /function decorators/, some /callable type/ COMBINATIONS work better
+      for /class decorators/ than others. Consider the following invalid
+      alternative to the /class decorator/ of the prior example:
+      #+begin_src python
+        class Decorator:                      # On `@` decoration
+            def __init__(self, C):
+                self.C = C
+
+            def __call__(self, *args):        # On instance creation
+                self.wrapped = self.C(*args)
+                return self
+
+            def __getattr__(self, attrname):  # On attribute fetch
+                return getattr(self.wrapped, attrname)
+
+
+        @Decorator
+        class C:     # `C = Decorator(C)`
+            ...
+
+        x = C()
+        y = C()      # Overwrites `x`!
+      #+end_src
+      
+      - This code handles MULTIPLE /decorated classes/ (each makes a new ~Decorator~
+        instance) and will *intercept* _instance creation calls_ (each runs ~__call__~).
+        
+      - UNLIKE the prior version, however, this version *FAILS to* handle _MULTIPLE
+        instances_ of a given /class/ -- each _instance creation call_ *overwrites*
+        the prior saved /instance/.
+          The original version does support multiple instances, because each
+        _instance creation call_ makes a new *independent wrapper object*. More
+        generally, either of the following patterns supports multiple wrapped
+        instances:
+        #+begin_src python
+          def decorator(C):                    # On @ decoration
+              class Wrapper:
+                  def __init__(self, *args):   # On instance creation: new Wrapper
+                      self.wrapped = C(*args)  # Embed instance in instance
+
+              return Wrapper
+
+
+          class Wrapper:
+              ...
+
+
+          def decorator(C):                 # On `@` decoration
+              def onCall(*args):            # On instance creation: new `Wrapper`
+                  return Wrapper(C(*args))  # Embed instance in instance
+
+              return onCall
+        #+end_src
+
+      - We'll study this phenomenon in a more realistic context later in the chapter
+        too; in practice, though, we must be careful to combine callable types properly
+        to support our intent, and choose state policies wisely.
 
 **** TODO Decorator Nesting - 1279
+     Sometimes ONE /decorator/ isn't enough.
+     A combination of multiple /decorators/ is required.
+     
+     - /Decorator/ syntax allows you to add multiple layers of wrapper logic to a
+       decorated function or method.
+       + When this feature is used, *EACH /decorator/ must appear on a line of its
+         own*:
+         #+begin_src python
+           @A
+           @B
+           @C
+           def f(...):
+               ...
+         #+end_src
+         runs the same as the following:
+         #+begin_src python
+           def f(...):
+               ...
+
+
+           f = A(B(C(f)))
+         #+end_src
+
+     - If all the decorators insert wrappers, the net effect is that when the
+       original function name is called, three different layers of wrapping
+       object logic will be invoked, to augment the original function in three
+       different ways. The last decorator listed is the first applied, and is
+       the most deeply nested when the original function name is later called
+       (insert joke about Python “interior decorators” here).
+
+     - Just as for functions, multiple class decorators result in multiple nested
+       function calls, and possibly multiple levels and steps of wrapper logic
+       around instance creation calls. For example, the following code:
+       #+begin_src python
+         @spam
+         @eggs
+         class C:
+             ...
+
+
+         x = C()
+       #+end_src
+
+     - Again, each decorator is free to return either the original class or an
+       inserted wrapper object. With wrappers, when an instance of the original
+       C class is finally requested, the call is redirected to the wrapping
+       layer objects provided by both the spam and eggs decorators, which may
+       have arbitrarily different roles—they might trace and validate attribute
+       access, for example, and both steps would be run on later requests.
+       + For instance, the following do-nothing decorators simply return the
+         /decorated function/:
+         #+begin_src python
+           def d1(F): return F
+           def d2(F): return F
+           def d3(F): return F
+
+           @d1
+           @d2
+           @d3
+           def func(): # func = d1(d2(d3(func)))
+               print('spam')
+
+
+           func() # Prints "spam"
+         #+end_src
+
+     - The same syntax works on classes, as do these same do-nothing decorators.
+
+     - When decorators insert wrapper function objects, though, they may augment
+       the original function when called—the following concatenates to its
+       result in the decorator layers, as it runs the layers from inner to
+       outer:
+       #+begin_src python
+         def d1(F): return lambda: 'X' + F()
+         def d2(F): return lambda: 'Y' + F()
+         def d3(F): return lambda: 'Z' + F()
+
+         @d1
+         @d2
+         @d3
+         def func(): # func = d1(d2(d3(func)))
+             return 'spam'
+
+
+         print(func()) # Prints "XYZspam"
+       #+end_src
+       We use lambda functions to implement wrapper layers here (each retains
+       the wrapped function in an enclosing scope); in practice, wrappers can
+       take the form of functions, callable classes, and more. When designed
+       well, decorator nesting allows us to combine augmentation steps in a wide
+       variety of ways.
+
 **** TODO Decorator Arguments - 1281
 **** TODO Decorators Manage Functions and Classes, Too - 1282
 
@@ -2172,49 +3031,144 @@
 **** TODO Test Your Knowledge: Answers - 1345
 
 ** 40. Metaclasses - 1355
-*** To Metaclass or Not to Metaclass - 1356
+   - In a sense, /metaclasses/ simply *extend* the _code-insertion model of
+     /decorators/._
+     + As we learned, /function decorators/ and /class decorators/ allow us to
+       *intercept and augment*
+       /function calls/ and /class instance creation calls/.
+
+     + In a similar spirit, /metaclasses/ allow us to *intercept and augment*
+       _class creation_ -- they provide an API for inserting extra logic to be
+       run at the conclusion of a class statement, albeit _in different ways than
+       /decorators/._
+       * Accordingly, they provide a _general protocol_ for managing /class objects/
+         in a program.
+
+   - In practice, /metaclasses/ allow us to gain a high level of control over how
+     a set of /classes/ works.
+
+   - On the other hand, /metaclasses/ open the door to a variety of coding patterns
+     that may be difficult or impossible to achieve otherwise, and they are
+     especially of interest to programmers seeking to write _flexible APIs_ or
+     programming tools for others to use.
+   
+   - Also /metaclasses/ can teach you much about /Python's class model/ in general
+     (as we'll see, they even impact inheritance), and are prerequisite to
+     understanding code that employs them.
+
+*** TODO To Metaclass or Not to Metaclass - 1356
 **** Increasing Levels of "Magic" - 1357
+     Most of this book has focused on straightforward application-coding techniques—the
+     modules, functions, and classes that most programmers spend their time writing to
+     achieve real-world goals. The majority of Python’s users may use classes and make
+     instances, and might even do a bit of operator overloading, but they probably won’t
+     get too deep into the details of how their classes actually work.
+
+     However, in this book we’ve also seen a variety of tools that allow us to control Python’s
+     behavior in generic ways, and that often have more to do with Python internals or tool
+     building than with application-programming domains. As a review, and to help us place
+     metaclasses in the tools spectrum:
+
+     - Introspection attributes and tools
+       ~__class__~ and ~__dict__~
+       ~dir~ and ~getattr~
+
+     - Operator overloading methods
+       ~__str__~ and ~__add__~
+
+     - Attribute interception methods
+       ~__getattr__~, ~__setattr__~, ~__delattr__~, and ~__getattribute__~
+
+     - Class properties
+       ~property~
+
+     - Class attribute descriptors
+       ~property~
+       ~__get__~, ~__set__~, and ~__delete__~
+
+     - Function and class decorators
+       ~@callable~
+
+     - Metaclass
+       
 **** A Language of Hooks - 1358
 **** The Downside of "Helper" Functions - 1359
 **** Metaclasses Versus Class Decorators: Round 1 - 1361
 
-*** The Metaclass Model - 1364
-**** Classes Are Instances of type - 1364
-**** Metaclasses Are Subclasses of Type - 1366
-**** Class Statement Protocol - 1367
+*** TODO The Metaclass Model - 1364
+    Pre-knowledge of understanding /metaclasses/:
+    - Python's type model
+    - What happens at the end of a ~class~ statement
+    
+**** TODO Classes Are Instances of type - 1364
+     - As we've seen, /instances/ of /classes/
+       + have some _state information attributes_ of their own,
+       + but they also _inherit behavioral attributes_ from the /classes/ from
+         which they are made.
 
-*** Declaring Metaclasses - 1368
+     - While we can get a lot done with such /instance objects/, /Python's type
+       model/ turns out to be a bit richer than I've formally described.
+
+       + Really, there's a hole in the model we've seen thus far:
+         * Q :: if /instances/ are created from /classes/, what is it that creates
+           our /classes/?
+
+         * A :: It turns out that /classes/ are /instances/ of something, too:
+           - In Python 3.X,
+             /user-defined class objects/ are /instances/ of the object named ~type~,
+             which is itself a /class/.
+
+           - In Python 2.X,
+             * /new-style classes/ inherit from ~object~, which is a /subclass/ of ~type~;
+
+             * /classic classes/
+               + are /instances/ of ~type~ and
+               + are NOT created from a /class/.
+
+     - =TODO=
+     - =TODO=
+     - =TODO=
+     - =TODO=
+     - =TODO=
+     - =TODO=
+     - =TODO=
+     - =TODO=
+
+**** TODO Metaclasses Are Subclasses of Type - 1366
+**** TODO Class Statement Protocol - 1367
+
+*** TODO Declaring Metaclasses - 1368
 **** Declaration in 3.X - 1369
 **** Declaration in 2.X - 1369
 **** Metaclass Dispatch in Both 3.X and 2.X - 1370
 
-*** Coding Metaclasses - 1370
+*** TODO Coding Metaclasses - 1370
 **** A Basic Metaclass - 1371
 **** Customizing Construction and Initialization - 1372
 **** Other Metaclass Coding Techniques - 1373
 
-*** Inheritance and Instance - 1378
+*** TODO Inheritance and Instance - 1378
 **** Metaclass Versus Superclass - 1381
 **** Inheritance: The Full Story - 1382
 
-*** Metaclass Methods - 1388
+*** TODO Metaclass Methods - 1388
 **** Metaclass Methods Versus Class Methods - 1389
 **** Operator Overloading in Metaclass Methods - 1390
 
-*** Example: Adding Methods to Classes - 1391
+*** TODO Example: Adding Methods to Classes - 1391
 **** Manual Augmentation - 1391
 **** Metaclass-Based Augmentation - 1393
 **** Metaclasses Versus Class Decorators: Round 2 - 1394
 
-*** Example: Applying Decorators to Methods - 1400
+*** TODO Example: Applying Decorators to Methods - 1400
 **** Tracing with Decoration Manually - 1400
 **** Tracing with Metaclasses and Decorators - 1401
 **** Applying Any Decorator to Methods - 1403
 **** Metaclasses Versus Class Decorators: Round 3 (and Last) - 1404
 
-*** Chapter Summary - 1407
-*** Test Your Knowledge: Quiz - 1407
-*** Test Your Knowledge: Answers - 1408
+*** TODO Chapter Summary - 1407
+*** TODO Test Your Knowledge: Quiz - 1407
+*** TODO Test Your Knowledge: Answers - 1408
 
 ** 41. All Good Things - 1409
 *** The Python Paradox - 1409
