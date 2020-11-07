@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M1-bin-20201016-e56ecae-NIGHTLY ---> 3.0.0-M1-bin-20201027-b5a1715-NIGHTLY
+#+VERSION: 3.0.0-M1-bin-20201016-e56ecae-NIGHTLY ---> 3.0.0-M2-bin-20201106-312a420-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty, fold
 
@@ -8,9 +8,12 @@
   CLOSED: [2019-11-04 Mon 16:17]
 ** Getting Started
    # *Getting Started: Users*
+   
 *** Trying out Dotty
 **** In your web browser
-     The online Scala playground [[https://scastie.scala-lang.org][Scastie]] -- a project of _Scala Center_.
+     The online Scala playground [[https://scastie.scala-lang.org][Scastie]]
+     - an easy way to try Dotty without installing anything;
+     - =from Jian= a project of _Scala Center_.
 
 **** sbt
      Use sbt (1.1.4+)
@@ -27,10 +30,10 @@
      - Releases include _THREE_ executables:
        #+begin_src text
          .
-         |\under_ bin
-             |\under_ scalac
-             |\under_ scalad
-             |\under_ scala
+         |_ bin
+             |_ scalac
+             |_ scalad
+             |_ scala
        #+end_src
        + scalac is the Dotty compiler
        + scalad is the Dotty Documentation tool
@@ -40,12 +43,18 @@
    # *Using Dotty with sbt*
    A redirect link to the sbt subsection in the -Getting Started- section.
 
-** IDE support for Dotty
-*** Prerequisites
-    Follow the instructions for the dotty-example-project in github under lampepfl.
+** TODO IDE support for Dotty
+   Dotty comes *built-in* with the /Dotty Language Server/, an implementation of
+   the /Language Server Protocol/, which means that any editor that implements the
+   LSP can be used as a Dotty IDE.
+   - Currently, the only IDE we officially support is Visual Studio Code.
 
+*** Prerequisites
+    Follow the instructions for the [[https://github.com/lampefl/dotty-example-project][dotty-example-project]].
+    
 *** Usage
-    Install _Visual Studio Code_, and use command ~sbt launchIDE~.
+    Install _Visual Studio Code_, and run command ~sbt launchIDE~ in a Dotty
+    project.
 
 *** TODO Status
 **** Fully supported features
@@ -56,16 +65,70 @@
 *** Feedback
 
 ** TODO Worksheet mode in Dotty IDE
+   Worksheet use the extension .sc
+   
 *** How to use the worksheets
 *** TODO Implementation details
     More details in [[https://dotty.epfl.ch/docs/usage/worksheet-mode-implementation-details.html][Worksheet mode - Implementation details]]
 
-** TODO Language Versions
-** cbt-projects
-   # *Using Dotty with cbt*
+** DONE Language Versions
+   CLOSED: [2020-11-06 Fri 11:31]
+   - The default Scala language version currently supported by the Dotty compiler
+     is 3.0.
+     There are also other language versions that can be specified instead:
+     + 3.1 ::
+       A preview of changes introduced in the next version after 3.0.
+       _Some Scala-2 specific idioms will be *dropped* in this version._
+       The feature set supported by this version will be refined over time as we
+       approach its release.
 
-** DONE Dottydoc
-   CLOSED: [2020-02-15 Sat 02:33]
+     + 3.0-migration ::
+       Same as 3.0 but with a Scala 2 compatibility mode that helps moving
+       Scala 2.13 sources over to Scala 3. In particular, it
+       * *flags* some Scala 2 constructs that are _DISALLOWED in Scala 3_ as
+         _migration warnings_ instead of hard errors,
+
+       * *changes* some rules to be _MORE LENIENT and BACKWARDS COMPATIBLE with
+         Scala 2.13_
+
+       * gives some _additional warnings_ where the semantics has changed between
+         Scala 2.13 and 3.0
+
+       * in conjunction with ~-rewrite~, offer code rewrites _from Scala 2.13 to 3.0_.
+
+     + 3.1-migration ::
+       Same as 3.1 but with additional helpers to migrate from 3.0.
+       * Similarly to the helpers available under 3.0-migration, these include
+         _migration warnings_ and _optional rewrites_.
+   
+   - There are _TWO ways_ to *specify* a _language version_.
+     + With a ~-source~ command line setting, e.g.
+       #+begin_src bash
+         scalac -source 3.0-migration ........
+       #+end_src
+
+     + With a ~scala.language~ _import_ at the top of a compilation unit, e.g:
+       #+begin_src scala
+         package p
+
+         import scala.language.`3.1`
+
+         class C {
+           ...
+         }
+       #+end_src
+
+   - _Language imports_ *supersede* _command-line settings_ in the /compilation
+     units/ where they are specified.
+     + *Only one* _language import_ is allowed in a /compilation unit/, and it
+       MUST come before any definitions in that unit.
+   
+** DONE cbt-projects
+   CLOSED: [2020-11-06 Fri 11:32]
+   # *Using Dotty with cbt*
+   =from Jian=: We can ignore this section
+
+** TODO Dottydoc
 *** Using existing Templates and Layouts
 *** Blog
 *** Includes
@@ -91,14 +154,126 @@
 * TODO REFERENCE
 ** Overview
 *** Goals
-*** Essential Foundations
-*** Simplifications
-*** Restrictions
-*** Dropped Constructs
-*** Changes
-*** New Constructs
-*** Metaprogramming
-*** See Also
+    - The language REDESIGN was guided by _THREE_ main goals:
+      * Strengthen Scala's foundations.
+        Make the full programming language compatible with the foundational work
+        on the /DOT calculus/ and apply the lessons learned from that work.
+
+      * Make Scala *easier* and *safer* to use.
+        + Tame powerful constructs such as /implicits/ to provide a gentler
+          learning curve.
+
+        + Remove warts and puzzlers.
+
+      * Further IMPROVE the *consistency* and *expressiveness* of Scala's language
+        constructs.
+
+    - Corresponding to these goals, the language changes fall into _SEVEN_
+      categories: =TODO= =TODO= =TODO=
+      1. Core constructs to strengthen foundations,
+
+      2. simplifications and
+
+      3. restrictions, to make the language easier and safer to use,
+
+      4. dropped constructs to make the language smaller and more regular,
+
+      5. changed constructs to remove warts, and increase consistency and usability,
+
+      6. new constructs to fill gaps and increase expressiveness,
+
+      7. a new, principled approach to metaprogramming that replaces today's
+         experimental macros.
+    
+*** TODO Essential Foundations - =RE-READ= =TODO=
+    These new constructs directly model core features of /DOT/, /higher-kinded
+    types/, and the /SI calculus for implicit resolution/.
+    - /Intersection types/, replacing /compound types/,
+
+    - /Union types/,
+
+    - /Type lambdas/, replacing encodings using /structural types/ and
+      /type projection/.
+
+    - /Context Functions/, offering abstraction over /given parameters/.
+    
+*** TODO Simplifications - =RE-READ= =TODO=
+    - These constructs replace existing constructs with the aim of making the
+      language safer and simpler to use, and to promote uniformity in code style.
+      * _Trait Parameters_ replace _early initializers_ with a more generally
+        useful construct.
+
+      * _Given Instances_ replace _implicit objects and defs_,
+        focussing on intent over mechanism.
+
+      * _Using Clauses_ replace _implicit parameters_,
+        avoiding their ambiguities.
+
+      * _Extension Methods_ replace _implicit classes_ with a clearer and simpler
+        mechanism.
+
+      * _Opaque Type Aliases_ replace most uses of _value classes_
+        while guaranteeing absence of /boxing/.
+
+      * _Toplevel definitions_ replace _package objects_,
+        dropping syntactic boilerplate.
+
+      * _Export clauses_ provide a simple and general way to express aggregation,
+        which can replace the previous facade pattern of package objects
+        inheriting from classes.
+
+      * _Vararg patterns_ now use the form ~: _*~ instead of ~@ _*~,
+        mirroring /vararg expressions/,
+
+      * _Creator applications_ allow using _simple function call syntax_ instead
+        of ~new~ expressions.
+        + ~new~ expressions stay around as a fallback for the cases
+          where creator applications cannot be used. =TODO= =???= =TODO=
+    
+    - With the EXCEPTION of /early initializers/ and /old-style vararg patterns/,
+      all superseded constructs *continue to be available in Scala 3.0.*
+      The plan is to deprecate and phase them out later.
+
+    - _Value classes_ (superseded by /opaque type aliases/) are a special case.
+      There are currently no deprecation plans for /value classes/, since we
+      might want to bring them back in a more general form if they are supported
+      natively by the JVM as is planned by project Valhalla.
+      =TODO= =TODO= =TODO= =FUTURE=
+      
+*** DONE Restrictions
+    CLOSED: [2020-11-07 Sat 00:18]
+    - These constructs are restricted to make the language safer.
+      * _Implicit Conversions_:
+        there is only one way to define implicit conversions instead of many,
+        and potentially surprising /implicit conversions/ require a language
+        import.
+
+      * _Given Imports_:
+        implicits now require a special form of import, to make the import
+        clearly visible.
+
+      * _Type Projection_: =TODO= =LEARN MORE=
+        only /classes/ can be used as prefix ~C~ of a /type projection/ ~C#A~.
+        /Type projection/ on /abstract types/ is *no longer supported* since it
+        is unsound.
+
+      * _Multiversal Equality_ implements an "opt-in" scheme to rule out nonsensical
+        comparisons with ~==~ and ~!=~.
+
+      * ~@infix~ and ~@alpha~ make method application syntax uniform across code bases
+        and require /alphanumeric aliases/ for /all symbolic names/ (proposed, not
+        implemented).
+
+    - UNRESTRICTED /implicit conversions/ continue to be available in Scala 3.0,
+      _BUT_ will *be deprecated and removed later*.
+        Unrestricted versions of the other constructs in the list above are
+      available only under ~-source 3.0-migration~.
+      
+*** TODO Dropped Constructs
+*** TODO Changes
+*** TODO New Constructs
+*** TODO Metaprogramming
+*** TODO See Also
 
 ** DONE NEW TYPES
    CLOSED: [2020-03-08 Sun 21:34]
@@ -1645,7 +1820,7 @@
 
         object B {
           import A._
-          import A.{given _}
+          import A.given
           // ...
         }
       #+end_src
@@ -1654,10 +1829,10 @@
           ~import A._~
 
         * Import *ALL givens*:
-          ~import A.{given _}~
+          ~import A.given~
 
         * Import *everything* in ~A~:
-          ~import A.{given _, _}~
+          ~import A.{given, _}~
 
     - There are *TWO* main _benefits_ arising from these rules:
       + It is MADE CLEARER where /givens/ in scope are coming from.
@@ -7375,8 +7550,8 @@
          * The thrid line ~???~ doesn't have a legal following operand -- ~match~
            is not a token that can start an expression.
 
-*** DONE Wildcard Types - =RE-READ=
-    CLOSED: [2020-05-25 Mon 12:50]
+*** DONE Wildcard Types - =IMPORTANT= =Migration is COMPLICATED=
+    CLOSED: [2020-11-07 Sat 00:44]
     # Wildcard Arguments in Types
     - The syntax of /wildcard arguments in types/ has *changed* FROM ~_~ TO ~?~.
 
@@ -7392,20 +7567,20 @@
      ~?~ in both Java and Scala has the same semantics.
 
      - We would like to use the underscore syntax ~_~ to stand for an /anonymous
-       type parameter/, *aligning* it with its meaning in value parameter lists.
-       So, just as ~f(_)~ is a shorthand for the lambda ~x => f(x)~ (we current
+       type parameter/, *aligning* it with its meaning in /value parameter lists/.
+       So, just as ~f(\under{})~ is a shorthand for the lambda ~x => f(x)~ (we current
        have this in Scala 2), _in the future_ ~C[_]~ will be _a shorthand for the
        /type lambda/ ~[X] =>> C[X]~._
-       + TODO This makes higher-kinded types easier to use. TODO
+       + This makes /higher-kinded types/ easier to use.
 
      - The new ~_~ semantics also *removes the wart* that,
        + used AS a /type parameter/, ~F[_]~ means ~F~ is a /type constructor/
 
        + WHEREAS used AS a /type/, ~F[_]~ means it is a /wildcard (i.e. existential)
          type/.
-         =from Jian= this will become ~F[?]~ TODO ??? TODO
 
-     - In the future, ~F[_]~ will mean the same thing, no matter where it is used.
+     - In the future, ~F[_]~ will always mean the one thing,
+       no matter where it is used.
 
      - We pick ~?~ as a _REPLACEMENT syntax_ for /wildcard types/, since it
        _ALIGNS WITH Java's syntax._
@@ -7453,8 +7628,7 @@
     *Type Checking*
     - [//]:# todo: fill in
 
-*** DONE Type Inference - =TODO= - =WATCH=
-    CLOSED: [2020-10-12 Mon 17:51]
+*** TODO Type Inference - =TODO: WATCH=
     *Changes in Type Inference*
     See
     - https://www.youtube.com/watch?v=lMvOykNQ4zs
@@ -7687,9 +7861,106 @@
 
     8. [//]: #todo: expand with precise rules
 
-*** TODO Implicit Conversions
-**** Examples
+*** DONE Implicit Conversions
+    CLOSED: [2020-11-07 Sat 02:25]
+    - An /implicit conversion/, also called /view/, is a conversion that is applied
+      by the compiler in several situations:
+      1. When an expression ~e~ of type ~T~ is encountered, but the compiler needs
+         an expression of type ~S~.
 
+      2. When an expression ~e.m~ where ~e~ has type ~T~ but ~T~ defines no member
+         ~m~ is encountered.
+      
+    - In those cases, the compiler LOOKS in the /implicit scope/ FOR a conversion
+      (declared as ~given~ in Scala 3 or ~implicit~ in Scala 2 or Scala 3.0)
+      that can convert an expression of type ~T~
+      * to an expression of /type/ ~S~ to the first case above
+        OR
+      * to a /type/ that defines a /member/ ~m~ in the second case above.
+      
+    - This conversion can be either:
+      1. An ~implicit def~ of type ~T => S~ or ~(=> T) => S~
+      2. An /implicit value/ of type ~scala.Conversion[T, S]~
+
+    - Defining an implicit conversion will emit a warning unless
+      * the ~import scala.language.implicitConversions~ is _in scope_, =FIX=
+        OR 
+      * the _flag_ ~-language:implicitConversions~ is given to the compiler.
+
+    - =from Jian=
+      Like other features that are considered should be restricted, and can be
+      switched on by _flag_ or _import_, *use _import_ is always the preferred
+      way* because of its *flexibility* -- limit the usage to a single file, or
+      even a smaller scope.
+      
+**** Examples
+     - The first example is taken from ~scala.Predef~. Thanks to this /implicit
+       conversion/, it is possible to pass a ~scala.Int~ to a /Java method/ that
+       expects a ~java.lang.Integer~
+       #+begin_src scala
+         import scala.language.implicitConversions
+
+         implicit def int2Integer(x: Int): java.lang.Integer =
+           x.asInstanceOf[java.lang.Integer]
+       #+end_src
+       * =from Jian=
+         The above code use the legacy syntax because it tries to only emphasise
+         the ~import scala.language.implicitConversions~ and the ~Conversion~.
+         If re-write it in the new syntax, we have:
+         #+begin_src scala
+           import scala.language.implicitConversions
+
+           given int2Integer as Conversion[Int, java.lang.Integer] =
+             java.lang.Integer.valueOf(_)
+         #+end_src
+
+     - The second example shows how to use ~Conversion~ to define an ~Ordering~
+       for an _ARBITRARY_ /type/, given existing ~Ordering~'s for other /types/:
+       #+begin_src scala
+         import scala.language.implicitConversions
+
+         implicit def ordT[T, S](
+           implicit conv: Conversion[T, S],
+                    ordS: Ordering[S]
+         ): Ordering[T] = {
+           // `ordS` compares values of type `S`, but we can convert from `T` to `S`
+           (x: T, y: T) => ordS.compare(x, y)
+         }
+
+         class A(val x: Int)  // The type for which wewant an `Ordering`
+
+         // Convert `A` to a type for which an `Ordering` is available:
+         implicit val AToInt: Conversion[A, Int] = _.x
+
+         implicitly[Ordering[Int]]  // Ok, exists in the standard library
+         implicitly[Ordering[A]]    // Ok, will use the implicit conversion from
+                                    // `A` to `Int` and the `Ordering` for `Int`.
+       #+end_src
+       * =from Jian=
+         The above code use the legacy syntax because it tries to only emphasise
+         the ~import scala.language.implicitConversions~ and the ~Conversion~.
+         If re-write it in the new syntax, we have:
+         #+begin_src scala
+           import scala.language.implicitConversions
+
+           given ordT[T, S](
+             using conv: Conversion[T, S],
+                   ordS: Ordering[S]
+           ): Ordering[T] = {
+             // `ordS` compares values of type `S`, but we can convert from `T` to `S`
+             (x: T, y: T) => ordS.compare(x, y)
+           }
+
+           class A(val x: Int)  // The type for which wewant an `Ordering`
+
+           // Convert `A` to a type for which an `Ordering` is available:
+           given AToInt as Conversion[A, Int] = _.x
+
+           summon[Ordering[Int]]  // Ok, exists in the standard library
+           summon[Ordering[A]]    // Ok, will use the implicit conversion from
+                                  // `A` to `Int` and the `Ordering` for `Int`.
+         #+end_src
+         
 *** TODO Overload Resolution - TODO =READING=
     # Changes in Overload Resolution
     /Overload resolution/ in Dotty *improves* on Scala 2 in _TWO_ ways.
