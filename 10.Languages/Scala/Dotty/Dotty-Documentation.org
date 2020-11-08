@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M1-bin-20201016-e56ecae-NIGHTLY ---> 3.0.0-M2-bin-20201106-312a420-NIGHTLY
+#+VERSION: 3.0.0-M2-bin-20201107-5c84e42-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty, fold
 
@@ -1960,23 +1960,24 @@
         #+end_src
 
 **** DONE Translation of Extension Methods
-     CLOSED: [2020-07-19 Sun 01:08]
+     CLOSED: [2020-11-08 Sun 13:44]
      - extension methods :: /methods/ that have a parameter clause in front of the
        defined identifier.
 
-     - An /extension method/ named ~f~ translates to /method/ named ~extension_f~
-       that TAKES the _leading parameter_ section AS its _first argument list_.
+     - An /extension method/ translates to a /specially labelled method/ that
+       TAKES the _leading parameter_ section AS its _first argument list_.
+       + The label, expressed as <extension> HERE, is compiler-internal.
 
-     - So, the definition of ~circumference~ above translates to the plain
-       method, and can also be invoked as such:
+     - So, the definition of ~circumference~ above translates to the _PLAIN_
+       /method/, and can also be invoked as such:
        #+begin_src scala
-         def extension_circumference(c: Circle): Double = c.radius * math.Pi * 2
+         <extension> def circumference(c: Circle): Double = c.radius * math.Pi * 2
 
          assert(circle.circumference == circumference(circle))
        #+end_src
 
 **** DONE Operators
-     CLOSED: [2020-07-19 Sun 01:12]
+     CLOSED: [2020-11-08 Sun 13:44]
      - Use /extension method syntax/ to define /operators/.
        + This case is indicated by *omitting the period* between the leading
          parameter list and the operator.
@@ -2003,9 +2004,9 @@
 
        + The translations:
          #+begin_src scala
-           def extension_<(x: String)(y: String): Boolean = ...
-           def extension_+:(xs: Seq[Elem])(x: Elem): Seq[Elem] = ...
-           @infix def extension_min(x: Number)(y: Number): Number = ...
+           <extension> def <(x: String)(y: String): Boolean = ...
+           <extension> def +:(xs: Seq[Elem])(x: Elem): Seq[Elem] = ...
+           @infix <extension> def min(x: Number)(y: Number): Number = ...
          #+end_src
          * =IMPORTANT= =!!!= =IMPORTANT=
            Remember that in Scala ~:~ suffixed operators are all /right associative/!!!
@@ -3414,12 +3415,12 @@
 
        11. More on /multiversal equality/ is found in a [[https://www.scala-lang.org/blog/2016/05/06/multiversal-equality.html][blog post]] and a [[https://github.com/lampepfl/dotty/issues/1247][GitHub issue]].
 
-*** DONE Context Functions - =TODO= =RE-READ=
+*** DONE Context Functions
     CLOSED: [2020-07-14 Tue 02:39]
     - Context functions :: functions with *ONLY* /context parameters/.
       + Their /types/ are /context function types/.
       + /Context functions/ are written using ~?=>~ as the "arrow" sign, which is
-        different from /Non-context functions/.
+        DIFFERENT from /Non-context functions/.
       + Example:
         #+begin_src scala
           type Executable[T] = ExecutionContext ?=> T
@@ -3435,21 +3436,21 @@
         #+end_src
 
     - Conversely,
-      + IF ::
+      + *IF*
         * An expression ~e~ show up in a position that the *EXPECTED* /type/ should
           be a /context function type/ ~(T_1, ..., T_n) ?=> U~
 
         * ~e~ *is NOT ALREADY* an /context function literal/ with the /context type/
           ~(T_1, ..., T_n) ?=> U~
 
-      + THEN ::
+      + *THEN*
         ~e~ *is converted to* a /context function literal/ by *rewriting it to*
         #+begin_src scala
           (using x_1: T1, ..., x_n: Tn) => e
         #+end_src
         where the NAMES ~x_1, ..., x_n~ are ARBITRARY.
         * This expansion is performed *before* the expression ~e~ is typechecked,
-          which means _that ~x_1, ..., x_n~ are available as /givens/ that ~e~
+          which means _that ~x_1, ..., x_n~ are AVAILABLE as /givens/ that ~e~
           can use._
 
         * =from Jian= CAUTION:
@@ -3466,8 +3467,8 @@
               g((using ctx: ExecutionContext) => f(22)(using ctx))  // is left as it is
             #+end_src
 
-**** DONE Example: Builder Pattern - =TODO= RE-READ
-     CLOSED: [2020-07-14 Tue 00:02]
+**** DONE Example: Builder Pattern
+     CLOSED: [2020-11-08 Sun 14:40]
      /Context function types/ have considerable *EXPRESSIVE power*.
 
      - For instance,
@@ -3509,7 +3510,8 @@
        boilerplate that would otherwise be necessary.
        #+begin_src scala
          def table(init: Table ?=> Unit) = {
-           given t as Table // note the use of a creator application; same as: given t as Table = new Table
+           // note the use of a creator application; same as: given t as Table = new Table
+           given t as Table
            init
            t
          }
@@ -3540,8 +3542,8 @@
          }
        #+end_src
 
-**** DONE Example: Postconditions - =TODO= RE-READ
-     CLOSED: [2020-07-14 Tue 02:39]
+**** DONE Example: Postconditions
+     CLOSED: [2020-11-08 Sun 14:41]
      Define constructs for _checking arbitrary postconditions_ using an /extension
      method/ *ensuring* so that the checked result can be referred to simply by
      ~result~.
@@ -3601,6 +3603,23 @@
            required /using clauses/) that _can't be inlined_, comparing to this write
            by hand code, there are *two extra function call cost* in the /context
            function/ implementation.
+           - My guess of the expansion:
+             #+begin_src scala
+               val s = List(1, 2, 3).sum.ensuring(result == 6)
+
+               val s = List(1, 2, 3).sum.ensuring(WrappedResult[Int] ?=> result == 6)
+
+               // Maybe not legal syntax, just a illustration
+               val s = List(1, 2, 3).sum
+                                    .ensuring { (using r: WrappedResult[Int]) =>
+                                      result == 6
+                                    }
+
+               val s = List(1, 2, 3).sum
+                                    .ensuring { (using r: WrappedResult[Int]) =>
+                                      result(using r) == 6
+                                    }
+             #+end_src
 
 **** TODO Reference
 
@@ -3690,8 +3709,8 @@
     CLOSED: [2020-05-23 Sat 00:01]
     =from Jian= This section discussion the /LAZY context parameters/.
 
-    - /Context parameters/ can be DECLARED /by-name/ to *avoid* a /divergent inferred
-      expansion/.
+    /Context parameters/ can be DECLARED /by-name/ to *avoid* a /divergent
+    inferred expansion/.
 
     - Example:
       #+begin_src scala
@@ -3703,13 +3722,13 @@
 
         given optionCodec[T](using ev: => Codec[T]) as Codec[Option[T]] {
           def write(xo: Option[T]) = xo match {
-            case Some(x) => ev.while(x)
+            case Some(x) => ev.write(x)
             case None    =>
           }
 
-          // TODO: from Jian: can this work for "by-name context parameters"
+          // TODO: from Jian: can this work for "by-name context parameters"?
           // def write(xo: Option[T]) =
-          //  xo.map(ev.write)
+          //   xo.foreach(ev.write)
         }
 
         val s = summon[Codec[Option[Int]]]
@@ -3717,26 +3736,28 @@
         s.write(Some(33))
         s.write(None)
       #+end_src
-      + As is the case for a normal (non-context parameter) /by-name parameter/,
+      * As is the case for a normal (non-context parameter) /by-name parameter/,
         the argument for the /context parameter/ ~ev~ is evaluated on demand.
-          In the example above, if the ~xo~ is ~None~, it is *NOT* evaluated at all.
 
-    - TODO ??? TODO -- =Try to understand this=
+      * In the example above, if the ~xo~ is ~None~, it is *NOT* evaluated at all.
+
+    - =TODO= =???= =TODO=
+      =Try to understand this=
       The /synthesized argument/ for a /context parameter/
       is backed by a _LOCAL_ ~val~
       if this is necessary to prevent an otherwise /diverging expansion/.
 
     - The precise steps for /synthesizing an argument/ for a /by-name context
-      parameter/ of type ~=> T~ are as follows: TODO ??? TODO
+      parameter/ of type ~=> T~ are as follows: =TODO= =???= =TODO=
       1. Create a new /given/ of type ~T~:
          #+begin_src scala
            given lv as T = ???
          #+end_src
          where ~lv~ is an arbitrary fresh name.
 
-      2. This /given/ is not immediately available as candidate for argument
-         inference (making it immediately available could result in a loop in
-         the synthesized computation). But it becomes available in all nested
+      2. This /given/ is NOT immediately available as candidate for /argument
+         inference/ (making it immediately available could result in a loop in
+         the _synthesized computation_). But it becomes available in all nested
          contexts that look again for an argument to a /by-name context parameter/.
 
       3. If this search succeeds with expression ~E~, and ~E~ contains references
@@ -3746,7 +3767,7 @@
          #+end_src
          Otherwise, return ~E~ unchanged.
 
-    - In the example above, the definition of s would be *EXPANDED* as follows.
+    - In the example above, the definition of ~s~ would be *EXPANDED* as follows.
       #+begin_src scala
         val s = summon[Test.Codec[Option[Int]]](
           optionCodec[Int](using intCodec)
