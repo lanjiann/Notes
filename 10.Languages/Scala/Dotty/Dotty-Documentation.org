@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M2-bin-20201107-5c84e42-NIGHTLY
+#+VERSION: 3.0.0-M2-bin-20201111-306e4fc-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty, fold
 
@@ -260,9 +260,7 @@
       * _Multiversal Equality_ implements an "opt-in" scheme to rule out nonsensical
         comparisons with ~==~ and ~!=~.
 
-      * ~@infix~ and ~@alpha~ make method application syntax uniform across code bases
-        and require /alphanumeric aliases/ for /all symbolic names/ (proposed, not
-        implemented).
+      * ~@infix~ make method application syntax uniform across code bases.
 
     - UNRESTRICTED /implicit conversions/ continue to be available in Scala 3.0,
       _BUT_ will *be deprecated and removed later*.
@@ -739,12 +737,13 @@
      /Enums/ are represented as ~sealed~ /abstract classes/ that extend the
      ~scala.reflect.Enum~ /trait/.
 
+     - =FIX=
      - ~scala.reflect.Enum~ defines a _SINGLE_ /public method/ ~ordinal~:
        #+begin_src scala
          package scala.reflect
 
          /** A base trait of all Scala enum definitions */
-         super trait Enum extends Any with Product with Serializable {
+         @mixin trait Enum extends Any with Product with Serializable {
 
            /** A number uniquely identifying a case of an enum */
            def ordinal: Int
@@ -1425,7 +1424,7 @@
             BE UPDATED.
 
 *** DONE Given Instances
-    CLOSED: [2020-07-17 Fri 03:46]
+    CLOSED: [2020-11-09 Mon 11:54]
     /Given instances/ (or, simply, "givens") define "canonical" values of certain
     /types/ that serve for /synthesizing arguments/ to /context parameters/ (=from
     Jian= through /using clause/).
@@ -1562,6 +1561,29 @@
        _type of its right hand side_, which can be a proper /subtype/ of the declared
        /result type/ ~Annotations[A, T]~.
 
+**** DONE Pattern-Bound Given Instances
+     CLOSED: [2020-11-09 Mon 11:54]
+     /Given instances/ can also appear as /pattern bound-variables/.
+
+     - Examples:
+       * /Anonymous given instances/ for /class/ ~Context~ are established by
+         enumerating over ~applicationContexts~:
+         #+begin_src scala
+           for given Context <- applicationContexts do
+             ...
+         #+end_src
+
+       * A /given ~Context~ instance/ named ~ctx~ is established by matching
+         against the first half of the pair selector.
+         #+begin_src scala
+           pair match
+             case (ctx as given Context, y) => ...
+         #+end_src
+
+       * In each case, a /pattern-bound given instance/ consists of /given/ and
+         a /type/ ~T~. The /pattern matches/ exactly the same selectors as the
+         /type ascription pattern/ ~_: T~.
+     
 **** DONE Given Instance Initialization
      CLOSED: [2020-07-11 Sat 22:31]
      - A /given instance/
@@ -1960,24 +1982,23 @@
         #+end_src
 
 **** DONE Translation of Extension Methods
-     CLOSED: [2020-11-08 Sun 13:44]
+     CLOSED: [2020-07-19 Sun 01:08]
      - extension methods :: /methods/ that have a parameter clause in front of the
        defined identifier.
 
-     - An /extension method/ translates to a /specially labelled method/ that
-       TAKES the _leading parameter_ section AS its _first argument list_.
-       + The label, expressed as <extension> HERE, is compiler-internal.
+     - An /extension method/ named ~f~ translates to /method/ named ~extension_f~
+       that TAKES the _leading parameter_ section AS its _first argument list_.
 
-     - So, the definition of ~circumference~ above translates to the _PLAIN_
-       /method/, and can also be invoked as such:
+     - So, the definition of ~circumference~ above translates to the plain
+       method, and can also be invoked as such:
        #+begin_src scala
-         <extension> def circumference(c: Circle): Double = c.radius * math.Pi * 2
+         def extension_circumference(c: Circle): Double = c.radius * math.Pi * 2
 
          assert(circle.circumference == circumference(circle))
        #+end_src
 
 **** DONE Operators
-     CLOSED: [2020-11-08 Sun 13:44]
+     CLOSED: [2020-07-19 Sun 01:12]
      - Use /extension method syntax/ to define /operators/.
        + This case is indicated by *omitting the period* between the leading
          parameter list and the operator.
@@ -2004,9 +2025,9 @@
 
        + The translations:
          #+begin_src scala
-           <extension> def <(x: String)(y: String): Boolean = ...
-           <extension> def +:(xs: Seq[Elem])(x: Elem): Seq[Elem] = ...
-           @infix <extension> def min(x: Number)(y: Number): Number = ...
+           def extension_<(x: String)(y: String): Boolean = ...
+           def extension_+:(xs: Seq[Elem])(x: Elem): Seq[Elem] = ...
+           @infix def extension_min(x: Number)(y: Number): Number = ...
          #+end_src
          * =IMPORTANT= =!!!= =IMPORTANT=
            Remember that in Scala ~:~ suffixed operators are all /right associative/!!!
@@ -3415,12 +3436,12 @@
 
        11. More on /multiversal equality/ is found in a [[https://www.scala-lang.org/blog/2016/05/06/multiversal-equality.html][blog post]] and a [[https://github.com/lampepfl/dotty/issues/1247][GitHub issue]].
 
-*** DONE Context Functions
+*** DONE Context Functions - =TODO= =RE-READ=
     CLOSED: [2020-07-14 Tue 02:39]
     - Context functions :: functions with *ONLY* /context parameters/.
       + Their /types/ are /context function types/.
       + /Context functions/ are written using ~?=>~ as the "arrow" sign, which is
-        DIFFERENT from /Non-context functions/.
+        different from /Non-context functions/.
       + Example:
         #+begin_src scala
           type Executable[T] = ExecutionContext ?=> T
@@ -3436,21 +3457,21 @@
         #+end_src
 
     - Conversely,
-      + *IF*
+      + IF ::
         * An expression ~e~ show up in a position that the *EXPECTED* /type/ should
           be a /context function type/ ~(T_1, ..., T_n) ?=> U~
 
         * ~e~ *is NOT ALREADY* an /context function literal/ with the /context type/
           ~(T_1, ..., T_n) ?=> U~
 
-      + *THEN*
+      + THEN ::
         ~e~ *is converted to* a /context function literal/ by *rewriting it to*
         #+begin_src scala
           (using x_1: T1, ..., x_n: Tn) => e
         #+end_src
         where the NAMES ~x_1, ..., x_n~ are ARBITRARY.
         * This expansion is performed *before* the expression ~e~ is typechecked,
-          which means _that ~x_1, ..., x_n~ are AVAILABLE as /givens/ that ~e~
+          which means _that ~x_1, ..., x_n~ are available as /givens/ that ~e~
           can use._
 
         * =from Jian= CAUTION:
@@ -3467,8 +3488,8 @@
               g((using ctx: ExecutionContext) => f(22)(using ctx))  // is left as it is
             #+end_src
 
-**** DONE Example: Builder Pattern
-     CLOSED: [2020-11-08 Sun 14:40]
+**** DONE Example: Builder Pattern - =TODO= RE-READ
+     CLOSED: [2020-07-14 Tue 00:02]
      /Context function types/ have considerable *EXPRESSIVE power*.
 
      - For instance,
@@ -3510,8 +3531,7 @@
        boilerplate that would otherwise be necessary.
        #+begin_src scala
          def table(init: Table ?=> Unit) = {
-           // note the use of a creator application; same as: given t as Table = new Table
-           given t as Table
+           given t as Table // note the use of a creator application; same as: given t as Table = new Table
            init
            t
          }
@@ -3542,8 +3562,8 @@
          }
        #+end_src
 
-**** DONE Example: Postconditions
-     CLOSED: [2020-11-08 Sun 14:41]
+**** DONE Example: Postconditions - =TODO= RE-READ
+     CLOSED: [2020-07-14 Tue 02:39]
      Define constructs for _checking arbitrary postconditions_ using an /extension
      method/ *ensuring* so that the checked result can be referred to simply by
      ~result~.
@@ -3603,23 +3623,6 @@
            required /using clauses/) that _can't be inlined_, comparing to this write
            by hand code, there are *two extra function call cost* in the /context
            function/ implementation.
-           - My guess of the expansion:
-             #+begin_src scala
-               val s = List(1, 2, 3).sum.ensuring(result == 6)
-
-               val s = List(1, 2, 3).sum.ensuring(WrappedResult[Int] ?=> result == 6)
-
-               // Maybe not legal syntax, just a illustration
-               val s = List(1, 2, 3).sum
-                                    .ensuring { (using r: WrappedResult[Int]) =>
-                                      result == 6
-                                    }
-
-               val s = List(1, 2, 3).sum
-                                    .ensuring { (using r: WrappedResult[Int]) =>
-                                      result(using r) == 6
-                                    }
-             #+end_src
 
 **** TODO Reference
 
@@ -3709,8 +3712,8 @@
     CLOSED: [2020-05-23 Sat 00:01]
     =from Jian= This section discussion the /LAZY context parameters/.
 
-    /Context parameters/ can be DECLARED /by-name/ to *avoid* a /divergent
-    inferred expansion/.
+    - /Context parameters/ can be DECLARED /by-name/ to *avoid* a /divergent inferred
+      expansion/.
 
     - Example:
       #+begin_src scala
@@ -3722,13 +3725,13 @@
 
         given optionCodec[T](using ev: => Codec[T]) as Codec[Option[T]] {
           def write(xo: Option[T]) = xo match {
-            case Some(x) => ev.write(x)
+            case Some(x) => ev.while(x)
             case None    =>
           }
 
-          // TODO: from Jian: can this work for "by-name context parameters"?
+          // TODO: from Jian: can this work for "by-name context parameters"
           // def write(xo: Option[T]) =
-          //   xo.foreach(ev.write)
+          //  xo.map(ev.write)
         }
 
         val s = summon[Codec[Option[Int]]]
@@ -3736,28 +3739,26 @@
         s.write(Some(33))
         s.write(None)
       #+end_src
-      * As is the case for a normal (non-context parameter) /by-name parameter/,
+      + As is the case for a normal (non-context parameter) /by-name parameter/,
         the argument for the /context parameter/ ~ev~ is evaluated on demand.
+          In the example above, if the ~xo~ is ~None~, it is *NOT* evaluated at all.
 
-      * In the example above, if the ~xo~ is ~None~, it is *NOT* evaluated at all.
-
-    - =TODO= =???= =TODO=
-      =Try to understand this=
+    - TODO ??? TODO -- =Try to understand this=
       The /synthesized argument/ for a /context parameter/
       is backed by a _LOCAL_ ~val~
       if this is necessary to prevent an otherwise /diverging expansion/.
 
     - The precise steps for /synthesizing an argument/ for a /by-name context
-      parameter/ of type ~=> T~ are as follows: =TODO= =???= =TODO=
+      parameter/ of type ~=> T~ are as follows: TODO ??? TODO
       1. Create a new /given/ of type ~T~:
          #+begin_src scala
            given lv as T = ???
          #+end_src
          where ~lv~ is an arbitrary fresh name.
 
-      2. This /given/ is NOT immediately available as candidate for /argument
-         inference/ (making it immediately available could result in a loop in
-         the _synthesized computation_). But it becomes available in all nested
+      2. This /given/ is not immediately available as candidate for argument
+         inference (making it immediately available could result in a loop in
+         the synthesized computation). But it becomes available in all nested
          contexts that look again for an argument to a /by-name context parameter/.
 
       3. If this search succeeds with expression ~E~, and ~E~ contains references
@@ -3767,7 +3768,7 @@
          #+end_src
          Otherwise, return ~E~ unchanged.
 
-    - In the example above, the definition of ~s~ would be *EXPANDED* as follows.
+    - In the example above, the definition of s would be *EXPANDED* as follows.
       #+begin_src scala
         val s = summon[Test.Codec[Option[Int]]](
           optionCodec[Int](using intCodec)
@@ -5606,56 +5607,64 @@
 **** TODO Reference
      For more info, see _Scala SIP 25_.
 
-*** DONE Super Traits
-    CLOSED: [2020-06-10 Wed 23:46]
+*** DONE Mixin Traits
+    CLOSED: [2020-11-10 Tue 16:27]
     - /Traits/ are used in _TWO_ roles:
-      + As *mixins* for other /classes/ and /traits/
-      + As *types* of ~vals~, ~defs~, or ~parameters~
+      * As *mixins* for other /classes/ and /traits/
+      * As *types* of ~vals~, ~defs~, or ~parameters~
 
-    - /Super traits/ is designed to address the topic:
-      Some /traits/ are used primarily in the _first role_,
-      and we usually do *NOT* want to see them in /inferred types/.
-      + Example:
+    - Some /traits/ are used primarily in the first role, and we usually *do not
+      want to see* them in /inferred types/.
+      * Example:
+        The ~Product~ /trait/ that the compiler adds as a /mixin trait/ to every
+        /case class/ or /case object/.
+          In Scala 2, this /parent trait/ sometimes makes /inferred types/ more
+        complicated than they should be.
+
+    - /Mixin traits/ is designed to address the topic of hiding /mixin traits/ from
+      /inferred types/.
+      * Example:
         #+begin_src scala
           trait Kind
           case object Var extends Kind
           case object Val extends Kind
           val x = Set(if condition then Val else Var)
         #+end_src
-        The inferred type of ~x~ in Scala 2 is ~Set[Kind & Product & Serializable]~
+        The /inferred type/ of ~x~ in Scala 2 is ~Set[Kind & Product & Serializable]~
         whereas one would have hoped it to be ~Set[Kind]~.
         * The reasoning for this particular type to be inferred is as follows:
           1. The /type/ of the conditional above is the /union type/ ~Val | Var~
-             (in concept -- we don't actually have the union type syntax in Scala 2).
+             (this is just in concept -- we don't actually have the /union type/
+              syntax in Scala 2).
 
           2. A /union type/ is widened in /type inference/ to the *least supertype*
              that is _NOT_ a /union type/.
                In the example, this type is ~Kind & Product & Serializable~
-             since all THREE /traits/ are /supertraits/ of both ~Val~ and ~Var~.
-             So that type becomes the inferred element type of the set.
+             since *ALL THREE* /traits/ are /supertraits/ of both ~Val~ and ~Var~.
+             So that /type/ becomes the /inferred element type/ of the /set/.
 
-    - Scala 3 allows one to mark a /trait/ as a ~super~ /trait/, which means that
+    - Scala 3 allows one to mark a /trait/ as a ~@mixin~ /trait/, which means that
       it can be suppressed in /type inference/.
       #+begin_src scala
         // In Scala 3
-        super trait S
+        @mixin trait S
         trait Kind
-        case object Var extends Kind
-        case object Val extends Kind
+        case object Var extends Kind, S
+        case object Val extends Kind, S
         val x = Set(if condition then Val else Var)
       #+end_src
-      Now ~x~ has /inferred type/ ~Set[Kind]~ -- the common /super trait/ ~S~ does
+      Now ~x~ has /inferred type/ ~Set[Kind]~ -- the common /mixin trait/ ~S~ does
       _NOT_ appear in the /inferred type/.
 
-**** Super Traits
-     - The traits ~scala.Product~, ~java.lang.Serializable~ and ~java.lang.Comparable~
-       are *treated _AUTOMATICALLY_ as /super traits/.*
-         Other /traits/ can _be turned into_ /super traits/, by adding the keyword
-       ~super~ in front of /trait/, as shown above.
+**** Mixin Traits
+     - The /traits/ ~scala.Product~, ~java.lang.Serializable~ and ~java.lang.Comparable~
+       are *treated _AUTOMATICALLY_ as /mixin traits/.*
+       * Other /traits/ can be _TURNED INTO_ /mixin traits/,
+         _BY ADDING_ the /annotation/ ~@mixin~ in front of ~trait~, as shown above.
 
-     - Every /trait/ *can be* declared as a /super trait/.
+     - Every /trait/ *can be* declared as a /mixin trait/.
 
-     - Typically /super traits/ are /traits/ that influence the implementation of
+     - Typically /mixin traits/ are /traits/ that influence the implementation of
        inheriting /classes/ and /traits/ and that are _NOT usually used as types by
        themselves._
        + Two examples from the standard collection library:
@@ -5667,54 +5676,38 @@
            efficient indexing.
 
      - =IMPORTANT=
-       Generally, any /trait/ that is _extended recursively_ is a good candidate
-       to be declared a /super trait/.
+       Generally, _ANY_ /trait/ that is _extended RECURSIVELY_ is a good candidate
+       to be declared a /mixin trait/.
 
-**** Retro-Fitting Scala 2 Libraries
-     - To allow cross-building between Scala 2 and 3,
-       ~super~ /traits/ can also be introduced by adding the ~@superTrait~
-       annotation, which is _defined in package ~scala.annotation~._
-
-     - Example:
-       #+begin_src scala
-         import scala.annotation.superTrait
-
-         @superTrait trait StrictOptimizedSeqOps[+A, +CC[_], +C] ...
-       #+end_src
-
-     - The ~@superTrait~ annotation *will be deprecated and removed in some later
-       version* of Scala _when cross-building with Scala 2 will NO LONGER be a
-       concern._
-
-**** TODO Rules for Inference
+**** Rules for Inference - =TODO= =RE-READ= =NEED-FIX???=
      - /Super traits/ *can be* given as /explicit types/ as usual.
-       But they are often elided when types are inferred.
+       But they are often ELIDED when types are inferred.
          Roughly, the rules for /type inference/ say that /super traits/ _are
-       DROPPED from intersections WHERE POSSIBLE._
+       DROPPED from intersections *WHERE POSSIBLE*._
 
-     - The precise rules are NOT follows:
-       + When inferring a type of a type variable, or the type of a ~val~, or the
-         /return type/ of a ~def~,
+     - The precise rules are as follows: =TODO= =???= =TODO=
+       * When *inferring* a /type/ of
+         a /type variable/, or
+         the /type/ of a ~val~, or
+         the /return type/ of a ~def~,
 
-       + where that type is not higher-kinded,
+       * where that /type/ is *NOT* /higher-kinded/,
 
-       + and where ~B~ is its known /upper bound/ or ~Any~ if none exists:
+       * and where ~B~ is its known /upper bound/ or ~Any~ if none exists:
 
-       + If the /type inferred/ so far is of the form ~T1 & ... & Tn~ where n >= 1,
+       * If the /type inferred/ so far is of the form ~T1 & ... & Tn~ where n >= 1,
          replace the maximal number of ~Ti~'s by ~Any~, while ensuring that the
-         resulting type is still a subtype of the bound ~B~.
+         resulting type is still a /subtype/ of the bound ~B~.
 
        + However, do NOT perform this /widening/ if all types ~Ti~ can get replaced
          in that way.
 
      - The _last clause_ *ensures* that
-       a single /super trait/ instance such as ~Product~ is not widened to
+       a single /mixin trait/ instance such as ~Product~ is not widened to
        ~Any~.
        + =IMPORTANT= =SUMMARY=
-         /Super trait/ instances are _ONLY dropped_ when they appear _in conjunction
+         /Mixin trait/ instances are _ONLY dropped_ when they appear _in conjunction
          with some other type._
-
-**** Syntax
 
 *** DONE Creator Applications
     CLOSED: [2020-07-14 Tue 13:33]
@@ -6505,6 +6498,77 @@
        }
      #+end_src
 
+*** TODO ~targetName~ Annotation
+    - ~@targetName~ annotation :: it is applied on a /method definition/ defines
+      an _alternate name_ for the implementation of that method.
+
+    - Example: =TODO= =FIX-DOC=
+      #+begin_src scala
+        object VecOps {
+          @targetName("append") def (xs: Vec[T]) ++= [T] (ys: Vec[T]): Vec[T] =  // ...
+        }
+      #+end_src
+      * The ~++=~ operation is implemented (in bytecode or native code) under
+        the name ~append~.
+
+    - The /implementation name/
+      * affects the code that is generated
+      * is the name under which code _from OTHER languages_ can call the method.
+        *ONLY from OTHER languages! You can't use the name in Scala.*
+        For instance, ~++=~ could be invoked from Java like this:
+        #+begin_src java
+          VecOps.append(vec1, vec2)
+        #+end_src
+
+    - An ~@targetName~ /annotation/ will be *MANDATORY*
+      _if the /method name/ is symbolic_!!!
+      + Symbolic name methods without ~@targetName~ annotation are *DEPRECATED*.
+
+***** Details
+      1. Syntax:
+         ~@scala.annotation.targetName(externalName)~.
+         ~externalName~ is a string.
+
+      2. An ~@targetName~ annotation can be given for all kinds of definitions.
+         _NOT ONLY for symbolic method._
+
+      3. ~externalName~ must be a legal name on the host platform.
+
+      4. Lack of an ~@targetName~ annotation will raise a _deprecation warning_.
+
+      5. Definitions with names in backticks that are not legal host platform
+         names should have an ~@targetName~ annotation. Lack of such an annotation
+         will raise a deprecation warning.
+         =from Jian= TODO EXAMPLE???
+
+      6. ~@targetName~ annotations must agree:
+         *There must be a one-to-one relationship between external and internal
+         names*
+         
+***** Relationship with Overriding
+      - ~@targetName~ annotations are significant for matching two method definitions
+        to decide whether they conflict or override each other. Two method definitions
+        match if they have the same name, signature, and erased name. Here,
+        * The signature of a definition consists of the names of the erased types
+          of all (value-) parameters and the method's result type.
+
+        * The erased name of a method definition is its target name if a ~@targetName~
+          annotation is given and its defined name otherwise.
+
+      - This means that @targetName annotations can be used to disambiguate two
+        method definitions that would otherwise clash. For instance.
+        #+begin_src scala
+          def f(x: => String): Int = x.length
+
+          def f(x: => Int): Int = x + 1  // error: double definition
+        #+end_src
+         
+      - The two definitions above clash since their erased parameter types are
+        both Function0, which is the type of the translation of a
+        by-name-parameter. Hence they have the same names and signatures. But we
+        can avoid the clash by adding a @targetName annotation to either method
+        or to both of them. E.g.
+        
 *** DONE New Control Syntax
     CLOSED: [2020-07-22 Wed 03:04]
     #+begin_src scala
@@ -7400,60 +7464,15 @@
 *** DONE Operators
     CLOSED: [2020-01-18 Sat 16:07]
     *Rules for Operators*
-**** DONE The ~@alpha~ Annotation
-     CLOSED: [2020-01-18 Sat 14:52]
-     - ~@alpha~ annotation :: it is applied on a /method definition/ defines an
-       _alternate name_ for the implementation of that method.
+    - The rules for infix operators have changed in some parts:
+      1. an alphanumeric method can be used as an infix operator only if its
+         definition carries an @infix annotation.
 
-     - Example: =TODO= =FIX-DOC=
-       #+begin_src scala
-         object VecOps {
-           @alpha("append") extension [T](xs: Vec[T])
-             def ++= (ys: Vec[T]): Vec[T] = // ...
-         }
-       #+end_src
-       + The ~++=~ operation is implemented (in bytecode or native code) under
-         the name ~append~.
+      2. it is recommended (but not enforced) to augment definitions of symbolic
+         operators with @targetName annotations.
 
-     - The /implementation name/
-       + affects the code that is generated
-       + is the name under which code _from OTHER languages_ can call the method.
-         *ONLY from OTHER languages! You can't use the name in Scala.*
-         For instance, ~++=~ could be invoked from Java like this:
-         #+begin_src java
-           VecOps.append(vec1, vec2)
-         #+end_src
-
-     - An ~@alpha~ /annotation/ will be *MANDATORY*
-       _if the /method name/ is symbolic_!!!
-       + Symbolic name methods without ~@alpha~ annotation are *DEPRECATED*.
-
-***** Motivation
-      The ~@alpha~ annotation serves a dual purpose:
-      + It helps *interoperability* between Scala and other languages.
-      + It serves _as a documentation tool_ by providing an alternative regular
-        name as an alias of a symbolic operator.
-
-***** Details
-      1. Syntax:
-         ~@scala.annotation.alpha(externalName)~.
-         ~externalName~ is a string.
-
-      2. An ~@alpha~ annotation can be given for all kinds of definitions.
-         _NOT ONLY for symbolic method._
-
-      3. ~externalName~ must be a legal name on the host platform.
-
-      4. Lack of an ~@alpha~ annotation will raise a _deprecation warning_.
-
-      5. Definitions with names in backticks that are not legal host platform
-         names should have an ~@alpha~ annotation. Lack of such an annotation
-         will raise a deprecation warning.
-         =from Jian= TODO EXAMPLE???
-
-      6. ~@alpha~ annotations must agree:
-         *There must be a one-to-one relationship between external and internal
-         names*
+      3. Finally, a syntax change allows infix operators to be written on the
+         left in a multi-line expression.
 
 **** DONE The ~@infix~ Annotation
      CLOSED: [2020-01-18 Sat 15:23]
@@ -7542,6 +7561,36 @@
          deprecated from Scala 3.1 onwards, or if the ~-strict~ option is given
          in Dotty/Scala 3.
 
+**** DONE The ~@targetName~ Annotation
+     - It is *RECOMMENDED* that
+       definitions of /symbolic operators/ carry a ~@targetName~ annotation (there
+       is a "~@targetName~ annotation" in this document) that provides an encoding
+       of the _operator with an ALPHANUMERIC NAME._
+       
+     - This has several benefits:
+       * It helps *interoperability* between Scala and other languages.
+         One can CALL a /Scala-defined symbolic operator/ FROM another language
+         using its target name, which avoids having to remember the low-level
+         encoding of the /symbolic name/.
+         + If an _ALPHANUMERIC NAME_ is not provided, the compiler will use its 
+           own rule to create an _ALPHANUMERIC NAME_ -- then you need to remember
+           this naming details when calling this function/method in other languages.
+           If you provide an _ALPHANUMERIC NAME_, you don't need to remember this
+           _translation rule_.
+
+       * It helps legibility of /stacktraces/ and OTHER /runtime diagnostics/, where
+         the /user-defined alphanumeric name/ will be shown instead of the low-level
+         encoding.
+
+       * It serves *as a documentation tool* by providing an _alternative regular
+         name_ as an alias of a /symbolic operator/.
+         + This makes the definition also *easier to find in a search*.
+     
+     - =from Jian=
+       The above list mentioned multiple times of *low-level encoding*.
+       _ALPHANUMERIC NAMEs_ are much more widely accepted by other languages,
+       and tools.
+       
 **** DONE Syntax Change
      CLOSED: [2020-01-18 Sat 16:07]
      Infix operators can now appear at the start of lines in a multi-line expression.
