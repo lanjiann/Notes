@@ -423,20 +423,237 @@
          content by running ~Get-Help about_Preference_Variables~.
          =TODO= =TODO= =TODO=
      
-** TODO Data Types - 19
-*** TODO Boolean Values - 20
-*** TODO Integers and Floating Points - 20
-**** Integer Types - 20
-**** Floating-Point Types - 21
+** DONE Data Types - 19
+   CLOSED: [2020-11-14 Sat 03:42]
+*** DONE Boolean Values - 20
+    CLOSED: [2020-11-14 Sat 02:58]
+    In PowerShell, /booleans/ are called /bools/.
+
+    - The _TWO_ /boolean values/ are represented by the /automatic variables/
+      ~$true~ and ~$false~.
+
+    - These /automatic variables/ are hardcoded into PowerShell and *can't be
+      changed*.
+    
+    - Example:
+      #+begin_src powershell
+        $isOn = $true
+        $isOne
+        # True
+      #+end_src
+    
+*** DONE Integers and Floating Points - 20
+    CLOSED: [2020-11-14 Sat 03:36]
+    Represent numbers in PowerShell in _two main ways_:
+    - via /integer/
+    - via /floating-point data types/
+    
+**** DONE Integer Types - 20
+     CLOSED: [2020-11-14 Sat 03:22]
+     - /Integer data types/ hold ONLY /whole numbers/ and will *round* any /decimal/
+       input to the _nearest_ (=???=) /integer/. /Integer data types/ come in
+       /signed and unsigned types/.
+
+     - By default, PowerShell stores /integers/ by using the /32-bit signed ~Int32~
+       type/.
+       
+     - ~Int32~: -2,147,483,648 to 2,147,483,647.
+
+     - ~Int64~: –9,223,372,036,854,775,808 to 9,223,372,036,854,775,807.
+       * For numbers outside that range of ~Int32~, you can use the /64-bit signed
+         ~Int64~ type/, which has a range of
+       
+
+     - Example (~Int32~ type):
+       #+begin_src powershell
+         $num = 1
+         $num
+         # 1
+
+         $num.GetType().name
+         # Int32
+
+         $num = 1.5
+         $num.GetType().name
+         # Double
+
+         [Int32]$num
+         # 2
+       #+end_src
+       * You can see the /casting/ syntax, and it *rounds the value up*.
+
+**** DONE Floating-Point Types - 21
+     CLOSED: [2020-11-14 Sat 03:36]
+     - The ~Double~ type belongs to the broader class of variables known as
+       /floating-point variables/.
+       * Although they can be used to represent /whole numbers/, /floating-point
+         variables/ are most often used to represent /decimals/.
+
+     - The other main /type/ of /floating-point variable/ is ~Float~.
+       * This book won't go into the /internal representation/ of the ~Float~ and
+         ~Double~ /types/.
+
+     - Example:
+       #+begin_src powershell
+         $num = 0.1234567910
+         $num.GetType().name
+         # Double
+
+         $num + $num
+         # 0.2469135782
+
+         [Float]$num + [Float]$num
+         # 0.246913582086563
+       #+end_src
+       As you can see, PowerShell uses the ~Double~ /type/ _by default_.
+       But notice what happens when you add ~$num~ to itself but *cast* both as a
+       ~Float~ -- you get a strange answer.
+       * Again, the reasons are beyond the scope of this book, but be aware that
+         errors like this can happen when using ~Float~ and ~Double~.
+         =TODO= =???= =TODO=
+         =TODO= =???= =TODO=
+         =TODO= =???= =TODO=
      
-*** TODO Strings - 21
+*** DONE Strings - 21
+    CLOSED: [2020-11-14 Sat 03:42]
+    Single and double quotes, both are the delimiter of string values, are
+    _DIFFERENT_ in PowerShell.
+    
 **** Combining Strings and Variables - 22
+     #+begin_src powershell
+       $sentence = "Today, you learned that PowerShell loves the color blue"
+       $sentence
+       # Today, you learned that PowerShell loves the color blue
+
+       $language = 'PowerShell'
+       $color = 'blue'
+       $sentence = "Today, you learned that $language loves the color $color"
+       $sentence
+       # Today, you learned that PowerShell loves the color blue
+
+
+       $sentence = 'Today, you learned that $language loves the color $color'
+       $sentence
+       # Today, you learned that $language loves the color $color
+     #+end_src
+       
 **** Using Double vs. Single Quotes - 22
+     If a string is delimited by _double quotes_, /variable interpolations/, or
+     /variable expansion/, can be done.
      
 ** TODO Objects - 23
+   *In PowerShell, everything is an /object/.*
+
+   - In technical terms, an /object/ is an individual instance of a specific
+     template, called a /class/.
+
+   - A /class/ specifies the kinds of things an /object/ will contain.
+
+   - An /object/'s /class/ determines its /methods/, or /actions/ that can be
+     taken on that /object/.
+       Likewise, an /object/'s /class/ determines its /properties/, the /object's
+     variables/.
+
 *** TODO Inspecting Properties - 24
+    First, let’s make a simple object so you can dissect it and uncover the
+    various facets of a PowerShell object.
+    #+begin_src powershell
+      $color = 'red'
+      $color
+      # red
+    #+end_src
+    
+    - Notice that when you call ~$color~, you get ONLY the _variable's value_.
+      _BUT_ typically, because they're /objects/, /variables/ have MORE
+      information than just their value.
+      * They also have /properties/.
+
+    - To look at an /object's properties/,
+      you'll use _the ~Select-Object~ command_ and _the ~Property~ /parameter/._
+      You'll pass the ~Property~ an /asterisk argument/, to tell PowerShell to
+      return *everything* it finds.
+      #+begin_src powershell
+        Select-Object -InputObject $color -Property *
+
+        # Length
+        # ------
+        #      3
+      #+end_src
+      * As you can see, the ~$color~ /string/ has *ONLY* a single /property/,
+        called ~Length~.
+
+      * You can directly reference the ~Length~ /property/ by using /dot notation/:
+        ~$color.Length~
+
 *** TODO Using the Get-Member cmdlet - 25
+    Using Select-Object, you discovered that the $color string has only a single
+    property. But recall that objects sometimes have methods as well. To take a
+    look at all the methods and properties that exist on this string object, you can
+    use the Get-Member cmdlet (Listing 2-20); this cmdlet will be your best friend
+    for a long time. It’s an easy way to quickly list all of a particular object’s properties
+    and methods, collectively referred to as an object’s members.
+    
+    - Example:
+      #+begin_src powershell
+
+      #+end_src
+      Now we’re talking! It turns out that your simple string object has quite a
+      few methods associated with it. There are lots more to explore, but not all
+      are shown here. The number of methods and properties an object will have
+      depends on its parent class.
+    
 *** TODO Calling Methods - 25
+    You can reference methods with dot notation. However, unlike a property, a
+    method will always end in a set of opening and closing parentheses and can
+    take one or more parameters.
+    
+    - For example, suppose you want to remove a character in your ~$color~ variable.
+      You can remove characters from a string by using the ~Remove()~ method.
+      Let’s isolate /$color/'s ~Remove()~ method with the code in Listing 2-21.
+      #+begin_src powershell
+        Get-Member -InputObject $color –Name Remove
+        # Name   MemberType Definition
+        # ----   ---------- ----------
+        # Remove Method     string Remove(int startIndex, int count), string Remove(int startIndex)
+      #+end_src
+
+    - As you can see, there are two definitions. This means you can use the method
+      in two ways: either with ~startIndex~ and the ~count~ parameter, or with just
+      ~startIndex~.
+
+    - So to remove the second character in $color, you specify the place of the
+      character where you’d like to start removing, which we call the index.
+      Indexes start from 0, so the first letter has a starting place of 0, the
+      second an index of 1, and so on. Along with an index, you can provide the
+      number of characters you’d like to remove by using a comma to separate the
+      parameter arguments, as in Listing 2-22.
+      #+begin_src powershell
+        $color.Remove(1, 1)
+        # Rd
+
+        $color
+        # red
+      #+end_src
+
+    - Using an index of 1, you’ve told PowerShell that you want to remove
+      characters starting with the string’s second character; the second argument
+      tells PowerShell to remove just one character. So you get Rd. But notice that
+      the Remove() method doesn’t permanently change the value of a string variable.
+      If you’d like to keep this change, you’d need to assign the output of
+      the Remove() method to a variable, as shown in Listing 2-23.
+      #+begin_src powershell
+        $newColor = $color.Remove(1,1)
+        $newColor
+        # Rd
+      #+end_src
+
+    - NOTE:
+      If you need to know whether a method returns an object (as ~Remove()~ does)
+      or modifies an existing object, you can check its description. As you can
+      see in Listing 2-21, ~Remove()~'s definition has the word ~string~ in front
+      of it; this means that the function returns a new string. Functions with the
+      word ~void~ in front typically modify existing objects. Chapter 6 covers
+      this topic in more depth.
     
 ** TODO Data Structures - 26
 *** TODO Arrays - 26
@@ -679,23 +896,32 @@
 ** Summary - 212
     
 * PART III: BUILDING YOUR OWN MODULE - 213
-* 15 PROVISIONING A VIRTUAL ENVIRONMENT - 217
-** PowerLab Module Prerequisites - 218
-** Creating the Module - 219
+* TODO 15 PROVISIONING A VIRTUAL ENVIRONMENT - 217
+** TODO PowerLab Module Prerequisites - 218
+** TODO Creating the Module - 219
 *** Creating a Blank Module - 219
 *** Creating a Module Manifest - 219
 *** Using Built-In Prefixes for Function Names - 220
 *** Importing the New Module - 220
     
-** Automating Virtual Environment Provisioning - 221
+** TODO Automating Virtual Environment Provisioning - 221
 *** Virtual Switches - 221
+**** Creating Virtual Switch Manually - 221
+**** Automating VM Switch Creation - 222
+     
 *** Creating Virtual Machines - 223
+**** Creating a VM Manually - 223
+**** Automating VM Creation - 224
+     
 *** Virtual Hard Disks - 225
+**** Creating a VHD Manually - 225
+**** Automating VHD Creation - 226
+**** Executing the New-PowerLabVhd Function - 228
+     
+** TODO Testing the New Functions with Pester - 228
+** TODO Summary - 229
     
-** Testing the New Functions with Pester - 228
-** Summary - 229
-    
-* 16 INSTALLING AN OPERATING SYSTEM - 231
+* TODO 16 INSTALLING AN OPERATING SYSTEM - 231
 ** Prerequisites - 231
 ** OS Deployments - 232
 *** Creating the VHDX - 232
@@ -707,18 +933,21 @@
 ** Pester Tests - 239
 ** Summary - 240
     
-* 17 DEPLOYING ACTIVE DIRECTORY - 241
+* TODO 17 DEPLOYING ACTIVE DIRECTORY - 241
 ** Prerequisites - 242
 ** Creating an Active Directory Forest - 242
 ** Building the Forest - 242
 *** Saving Secure Strings to Disk - 243
 *** Automating Forest Creation - 244
 *** Populating the Domain - 246
-    
+**** Handling Your Object Spreadsheet - 246
+**** Creating a Plan - 247
+**** Creating the AD Objects - 248
+     
 ** Building and Running Pester Tests - 250
 ** Summary - 252
     
-* 18 CREATING AND CONFIGURING A SQL SERVER - 253
+* TODO 18 CREATING AND CONFIGURING A SQL SERVER - 253
 ** Prerequisites - 253
 ** Creating the Virtual Machine - 254
 ** Installing the Operating System - 254
@@ -737,13 +966,15 @@
 ** TODO Using Parameter Sets - 269
 ** TODO Summary - 272
     
-* 20 CREATING AND CONFIGURING AN IIS WEB SERVER - 275
+* TODO 20 CREATING AND CONFIGURING AN IIS WEB SERVER - 275
 ** Prerequisites - 275
 ** Installation and Setup - 276
 ** Building Web Servers from Scratch - 277
 ** The WebAdministration Module - 277
 *** Websites and Application Pools - 278
-    
+**** Websites - 279
+**** Application Pools - 280
+
 ** Configuring SSL on a Website - 281
 ** Summary - 284
     

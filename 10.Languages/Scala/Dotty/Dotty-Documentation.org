@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M2-bin-20201112-462a72f-NIGHTLY 
+#+VERSION: 3.0.0-M2-bin-20201113-6b9796c-NIGHTLY 
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty, fold
 
@@ -715,10 +715,11 @@
 **** DONE Compatibility with Java Enums
      CLOSED: [2020-08-22 Sat 22:10]
      If you want to use the Scala-defined enums as Java enums, you can do so by
-     extending ~java.lang.Enum~ class as follows:
+     extending the class ~java.lang.Enum~, which is imported by default, as follows:
+
      - Example
        #+begin_src scala
-         enum Color extends java.lang.Enum[Color] { case Red, Green, Blue }
+         enum Color extends Enum[Color] { case Red, Green, Blue }
 
          // Use `Color` as you would use a Java enum:
          Color.Red.compareTo(Color.Green)
@@ -7003,7 +7004,7 @@
 **** TODO Variant: Indentation Marker ~:~
      NOT STABLE -- Learn when this feature is stable!!!
 
-*** TODO Explicit Nulls
+*** TODO Explicit Nulls - =RE-DO= =TODO=
     Explicit nulls is an /opt-in feature/ that _modifies the Scala type system_,
     which *makes /reference types/ (anything that extends ~AnyRef~) non-nullable.*
 
@@ -7111,7 +7112,7 @@
 
 **** TODO Binary Compatibility
 
-*** TODO Safe Initialization
+*** TODO Safe Initialization - =TODO= =START=
     Dotty implements *experimental* /safe initialization check/, which can be
     enabled by the compiler option ~-Ycheck-init~.
 
@@ -7228,45 +7229,48 @@
        + *Instantiate* /inner class/ and *call* /methods/ on such /instances/
        + *Capture* /fields/ in /functions/
 
-         
-**** TODO (Deprecated, Updated by spliting this to two parts) Principles and Rules
+**** TODO Principles
      - To achieve the goals, we uphold _THREE_ *fundamental principles*:
-       + stackability
-       + monotonicity
-       + scopability
+       * stackability
+       * monotonicity
+       * scopability
 
      - Stackability ::
        objects are initialized in /stack order/:
        if the /object/ ~b~ is created during the initialization of /object/ ~a~,
        then all /fields/ of ~b~ should become *initialized BEFORE* OR *at the same
        time* as ~a~.
-       + Scala enforces this property _in syntax_ by demanding that all /fields/
+       * Scala enforces this property _in syntax_ by demanding that all /fields/
          are *initialized at the end* of the /primary constructor/,
-         *EXCEPT* for the language feature below: ~var x: T = _~
+         *EXCEPT* for the language feature below:
+         #+begin_src scala
+           var x: T = _
+         #+end_src
 
-       + /Control effects/ such as /exceptions/ may *break* this property, as the
+       * /Control effects/ such as /exceptions/ may *break* this property, as the
          following example shows:
          #+begin_src scala
-           class B {
-             throw new MyException(this)
-             val a: Int = 1
-           }
-
            class MyException(val b: B) extends Exception("")
 
            class A {
              val b = try { new B } catch { case myEx: MyException => myEx.b }
              println(b.a)
            }
+
+           class B {
+             throw new MyException(this)
+             val a: Int = 1
+           }
+
          #+end_src
-         * In the code above, the _control effect_ *teleport* the _uninitialized
+         + In the code above, the _control effect_ *teleport* the _uninitialized
            value_ wrapped in an /exception/.
              In the implementation, we avoid the problem by ensuring that the
            values that are thrown *MUST BE* /transitively initialized/.
 
            - transitively initialized :: =TODO= ??? =TODO= NO in the Docs
 
-         * =from Jian= not in the official doc
+         + =from Jian= not in the official doc
            *WARNING* message:
            #+begin_src text
              [warn]  2 |  throw new MyException(this)
@@ -7292,69 +7296,151 @@
            def report(msg: String) = file.write(msg)
          }
        #+end_src
-       + In the code above,
+       * In the code above,
          *SUPPOSE* ~ctx~ points to a /transitively initialized object/.
-         * Now the assignment at line 3 makes ~this~, which is *not* _fully
+         + Now the assignment at line 3 makes ~this~, which is *not* _fully
            initialized_, reachable from ~ctx~.
              This makes /field/ usage *DANGEROUS*, as it may INDIRECTLY reach
            /uninitialized fields/.
 
-       + /Monotonicity/ is based on a well-known technique called /heap monotonic
+       * /Monotonicity/ is based on a well-known technique called /heap monotonic
          typestate/ to *ensure* /soundness/ in the presence of aliasing [1].
            Otherwise, either /soundness/ will be compromised or we have to *disallow*
          the usage of /ALREADY initialized fields/.
 
      - Scopability :: =TODO= =START=
-       an expression may *ONLY* access existing objects via /formal parameters/ and
-       ~this~. More precisely, given any environment ~ρ~ (which are the value
-       bindings for method parameters and this) and heap ~σ~ for evaluating an
-       expression ~e~, if the resulting value reaches an object ~o~ pre-existent in
-       ~σ~, then ~o~ is reachable from ~ρ~ in ~σ~. Control effects like coroutines,
-       delimited control, resumable exceptions may break the property, as they
-       can transport a value upper in the stack (not in scope) to be reachable
-       from the current scope. Static fields can also serve as a teleport thus
-       breaks this property. In the implementation, we need to enforce that
-       teleported values are transitively initialized.
+       access to /partially constructed objects/ should be *controlled by* /static
+       scoping/.
+       * _Control effects_ like /coroutines/, /delimited control/, /resumable
+         exceptions/ may *break* the property, as they can transport a value upper
+         in the stack (not in scope) to be reachable from the current scope.
+       
+       * /Static fields/ can also serve as a teleport thus *breaks* this property.
+         In the implementation, we need to _enforce_ that teleported values are
+         /transitively initialized/.
 
-     - With the established principles and design goals, following rules are imposed:
-       1. In an assignment o.x = e, the expression e may only point to transitively initialized objects.
+     - The principles enable /local reasoning/ of initialization,
+       which means _An INITIALIZED ENVIRONMENT can *only* produce INITIALIZED VALUES._
+       
+       * For example,
+         + if the arguments to an ~new~-expression are /transitively initialized/,
+           so is the result.
 
-          This is how monotonicity is enforced in the system. Note that in an
-          initialization val f: T = e, the expression e may point to an object
-          under initialization. This requires a distinction between mutation and
-          initialization in order to enforce different rules. Scala has
-          different syntax for them, it thus is not an issue.
-
-       2. References to objects under initialization may not be passed as arguments
-          to method calls or constructors.
-
-          Escape of this in the constructor is commonly regarded as an
-          anti-pattern, and it's rarely used in practice. This rule is simple
-          for the programmer to reason about initialization and it simplifies
-          implementation. The theory supports safe escape of this with the help
-          of annotations, we delay the extension until there is a strong need.
-
-       3. Local definitions may only refer to transitively initialized objects.
-
-          It means that in a local definition val x: T = e, the expression e may
-          only evaluate to transitively initialized objects. The same goes for
-          local lazy variables and methods. This rule is again motivated for
-          simplicity in reasoning about initialization: programmers may safely
-          assume that all local definitions only point to transitively
-          initialized objects.
-          
-**** TODO Principles
+         + if the receiver and arguments in a /method call/ are /transitively
+           initialized/, so is the result.
+       
 **** TODO Rules
+     With the established principles and design goals, following rules are imposed:
+     1. In an /assignment/ ~o.x = e~, the expression ~e~ may only point to
+        /transitively initialized objects/.
+        - This is how /monotonicity/ is enforced in the system.
+          Note that in an /initialization/ ~val f: T = e~, the expression ~e~ may
+          point to an /object/ _under initialization_.
+            This requires a _DISTINCTION_ between /mutation/ and /initialization/
+          in order to enforce different rules.
+          * Scala has different syntax for them, it thus is not an issue.
+
+     2. /References/ to /objects/ under /initialization/ may *NOT* be passed as
+        /arguments/ to /method calls/ or /constructors/.
+          *Escape of this in the /constructor/ is commonly regarded as an anti-pattern,
+        and it's rarely used in practice.*
+        - This rule is simple for the programmer to REASON about /initialization/
+          and it SIMPLIFIES implementation.
+          
+        - The theory supports _safe escape_ of this with the help of /annotations/,
+          we delay the extension until there is a strong need.
+
+     3. /Local definitions/ may *ONLY* refer to /transitively initialized/ /objects/.
+          It means that in a /local definition/ ~val x: T = e~, the expression ~e~
+        may *only* evaluate to /transitively initialized objects/.
+        - The same goes for /local lazy variables and methods/.
+
+        - This rule is again motivated for simplicity in reasoning about
+          /initialization/:
+          programmers may safely assume that all /local definitions/ *only* point to
+          /transitively initialized objects/.
      
 **** TODO Modularity (considered)
+     - Currently, the analysis works _across project boundaries_ based on TASTy.
+       The following is a proposal to make the checking *MORE* /modular/.
+       * *The feedback from the community is welcome.*
+
+     - For /modularity/,
+       we need to forbid subtle initialization interaction beyond project
+       boundaries. For example, the following code passes the check when the two
+       classes are defined in the same project:
+       #+begin_src scala
+         class Base {
+           private val map: mutable.Map[Int, String] =
+             mutable.Map.empty
+
+           def enter(k: Int, v: String) =
+             map(k) = v
+         }
+
+         class Child extends Base {
+           enter(1, "one")
+           enter(2, "two")
+         }
+       #+end_src
+       However, when the class ~Base~ and ~Child~ are defined in two different
+       projects, the check can emit a warning for the calls to enter in the /class/
+       ~Child~.
+         This *restricts* _SUBTLE_ initialization within /project boundaries/,
+       and *avoids* accidental violation of contracts across library versions.
+       
+     - We can impose the following rules to enforce /modularity/:
+       1. A /class/ or /trait/ that may be extended in another project should NOT
+          call /virtual methods/ on this in its template/mixin evaluation,
+          _directly_ or _indirectly_.
+
+       2. The method call ~o.m(args)~ is forbidden if ~o~ is *NOT* /transitively
+          initialized/ and the target of ~m~ is defined in an /external project/.
+
+       3. The expression ~new p.C(args)~ is forbidden, if ~p~ is not transitively
+          initialized and ~C~ is defined in an external project.
+
 **** TODO Theory
-**** TODO Back Doors
-**** TODO Caveats
+**** DONE Back Doors
+     CLOSED: [2020-11-14 Sat 02:23]
+     - Requirement:
+       Occasionally you may want to *suppress warnings* reported by the checker.
+     
+     - Solution:
+       * Either write ~e: @unchecked~ to tell the checker to *skip* checking for
+         the expression ~e~, or
+
+       * Use the old trick: mark some /fields/ as ~lazy~.
+     
+**** DONE Caveats
+     CLOSED: [2020-11-14 Sat 02:24]
+     The system
+     - *cannot* handle /static fields/,
+
+     - *nor* does it provide _safety guarantee_ when extending /Java or Scala 2
+        classes/.
+     
+     - Calling /methods of Java or Scala 2/ is always *safe*.
+     
 **** TODO References
+     - Fähndrich, M. and Leino, K.R.M., 2003, July. Heap monotonic typestates.
+       In International Workshop on Aliasing, Confinement and Ownership in
+       object-oriented programming (IWACO).
+
+     - Lucassen, J.M. and Gifford, D.K., 1988, January. Polymorphic effect systems.
+       In Proceedings of the 15th ACM SIGPLAN-SIGACT symposium on Principles of
+       programming languages (pp. 47-57). ACM.
 
 ** TODO OTHER CHANGED FEATURES
 *** DONE Numeric Literals
-    CLOSED: [2020-08-23 Sun 01:25]
+    CLOSED: [2020-11-18 Wed 05:01]
+    - *NOTE*:
+      This feature is _NOT yet_ part of the Scala 3 language definition.
+      It can be made available by a language import:
+      #+begin_src scala
+        import scala.language.experimental.genericNumberLiterals
+      #+end_src
+
     - *OLD*:
       In Scala 2, /numeric literals/ were *confined* to the /primitive numeric
       types/:

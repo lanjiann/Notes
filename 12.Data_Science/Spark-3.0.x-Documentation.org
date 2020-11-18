@@ -1,19 +1,38 @@
 #+TITLE: Spark Official Documentation
 #+COMMENT: Programming Guides
-#+VERSION: 3.0.0
+#+VERSION: 3.0.0 -> 3.0.1
 #+STARTUP: entitiespretty
+#+STARTUP: folded
 
+* TODO Spark Overview
+** Security
+** Downloading
+** Running the Examples and Shell
+** Launching on a Cluster
+** Where to Go from Here
+*** Programming Guides
+*** API Docs
+*** Deployment Guides
+*** Other Documents
+*** External Resources
+    
 * TODO Quick Start
-** TODO Security
-** Interactive Analysis with the Spark Shell
+** DONE Security
+   CLOSED: [2020-11-13 Fri 09:46]
+   *Security* in Spark is *OFF* _by default_.
+   This could mean you are *vulnerable* to attack _by default_.
+   Please see "Spark Security" before running Spark.
+   
+** TODO Interactive Analysis with the Spark Shell
 *** DONE Basics
     CLOSED: [2018-10-10 Wed 01:43]
+    ~spark-shell~
+
     - Spark's _primary abstraction_ is a _distributed collection of items_ called
       a ~Dataset~.
 
     - ~Dataset~'s can be created from
       + /Hadoop InputFormats/ (such as HDFS files)
-        OR
       + by transforming other ~Dataset~'s.
 
     - Create ~Dataset~'s from the ="README.md"= file.
@@ -27,7 +46,7 @@
         /// res0: Long = 126
 
         // scala>
-        textFile.first()  // TODO: ??? ???
+        textFile.first()
         /// res1: String = # Apache Spark
 
         // scala>
@@ -43,16 +62,16 @@
     CLOSED: [2018-10-10 Wed 01:52]
     #+BEGIN_SRC scala
       // scala>
-      textFile.map(line => line.split(" ").size).reduce((a, b) => math.max(a, b))  // action
+      textFile.map(_.split(" ").size).reduce((a, b) => if (a > b) a else b)  // action
       /// res4: Long = 15
 
       // scala> /// Use Java library
       import java.lang.Math
-      textFile.map(line => line.split(" ").size).reduce((a, b) => Math.max(a, b))  // action
+      textFile.map(_.split(" ").size).reduce((a, b) => Math.max(a, b))  // action
       /// res5: Int = 15
 
       // scala>
-      val wordCounts = textFile.flatMap(line => line.split(" ")).groupByKey(identity).count() // transformation
+      val wordCounts = textFile.flatMap(_.split(" ")).groupByKey(identity).count() // transformation
       /// wordCounts: org.apache.spark.sql.Dataset[(String, Long)] = [value: string, count(1): bigint]
 
       // scala>
@@ -87,7 +106,7 @@
      import org.apache.spark.sql.SparkSession
 
      object SimpleApp {
-       def main(args: Array[String]) {
+       def main(args: Array[String]): Unit = {
          val logFile = "YOUR_SPARK_HOME/README.md" // Should be some file on your system
          val spark = SparkSession.builder.appName("Simple Application").getOrCreate()
          val logData = spark.read.textFile(logFile).cache()
@@ -98,6 +117,8 @@
        }
      }
    #+END_SRC
+   - *Note*: Applications should define a ~main()~ method _instead of_ extending ~scala.App~.
+             /Subclasses/ of ~scala.App~ *may not work correctly*. =WHY=???
 
    - =build.sbt=
      #+BEGIN_SRC scala
@@ -105,9 +126,9 @@
 
        version := "1.0"
 
-       scalaVersion := "2.11.8"
+       scalaVersion := "2.12.10"
 
-       libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.3.2"
+       libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.0.1"
      #+END_SRC
 
    - For sbt to work correctly, we'll need to layout =SimpleApp.scala= and =build.sbt=
@@ -125,26 +146,22 @@
        ## ./src/main/scala/SimpleApp.scala
 
        ### Package a jar containing your application
-
        # $
        sbt package
        ## ...
-       ## [info] Packaging {..}/{..}/target/scala-2.11/simple-project_2.11-1.0.jar
+       ## [info] Packaging {..}/{..}/target/scala-2.12/simple-project_2.12-1.0.jar
 
        ## Use spark-submit to run your application
        # $
        ${SPARK_HOME}/bin/spark-submit \
          --class "SimpleApp" \
          --master local[4] \
-         target/scala-2.11/simple-project_2.11-1.0.jar
+         target/scala-2.12/simple-project_2.12-1.0.jar
        ## ...
        ## Lines with a: 46, Lines with b: 23
      #+END_SRC
      We can create a JAR package containing the application's code, then use the
      ~spark-submit~ script to run our program.
-
-     * =from Jian= =???=
-       What does the =--master local[4]= mean???
 
 ** DONE Where to Go from Here
    CLOSED: [2018-10-10 Wed 01:58]
