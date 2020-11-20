@@ -1,7 +1,8 @@
 #+TITLE: Scala Cookbook
-#+VERSION: 1st, 2013
+#+VERSION: 1st, 2013 -> 2nd, 2021
 #+AUTHOR: Alvin Alexander
 #+STARTUP: entitiespretty
+#+STARTUP: folded
 
 * TODO Preface - 15
 ** The Scala Language - xiii
@@ -17,8 +18,7 @@
 ** How to Contact Us - xxiii
 ** Acknowledgements - xxiii
 
-* DONE 1. Strings - 1
-  CLOSED: [2018-05-20 Sun 22:44]
+* TODO 1. Strings - 1
 ** DONE Introduction - 1
    CLOSED: [2018-03-01 Thu 19:36]
    - Scala ~String~ is Java ~String~
@@ -74,6 +74,7 @@
    CLOSED: [2018-03-01 Thu 19:44]
 *** DONE Problem - 6
     CLOSED: [2018-03-01 Thu 19:40]
+    
 *** DONE Solution - 6
     CLOSED: [2018-03-01 Thu 19:40]
     Use _three double quotes_:
@@ -233,7 +234,153 @@
 
 *** TODO See Also - 13
 
-** DONE 1.5. Processing a String One Character at a Time - 13
+** DONE 1.5. Formatting String Output - 13
+   CLOSED: [2020-11-19 Thu 01:21]
+*** DONE Problem
+    CLOSED: [2020-11-19 Thu 00:50]
+    Format string output, including strings that contain
+    - integers
+    - floats
+    - doubles
+    - characters
+
+*** DONE Solution
+    CLOSED: [2020-11-19 Thu 01:13]
+    Use ~printf~-style formatting strings with /the ~f~ interpolator/.
+    
+    - Many configuration options are shown in the following examples.
+
+    - Note:
+      Data/time formatting - Recipe 2.12
+
+**** DONE FORMATTING STRINGS
+     CLOSED: [2020-11-19 Thu 00:50]
+     #+begin_src scala
+       val h = "Hello"
+
+       f"'${h}%s'"       // 'Hello'
+       f"'${h}%10s'"     // '     Hello'
+       f"'${h}%-10s'"    // 'Hello     '
+     #+end_src
+     The ~{}~'s here are optional, they are there only for better readability.
+     
+**** DONE FORMATTING FLOATING-POINT NUMBERS
+     CLOSED: [2020-11-19 Thu 00:53]
+     /Floating-point numbers/ are printed with the ~%f~ /format specifier/.
+     Here are several examples that show the effects of formatting
+     floating-point numbers, including ~Double~ and ~Float~ values:
+     #+begin_src scala
+       val a = 10.3456         // a: Double = 10.3456
+       val b = 101234567.3456  // b: Double = 1.012345673456E8
+
+       f"'${a}%.1f'"     // '10.3'
+       f"'${a}%.2f'"     // '10.35'
+       f"'${a}%8.2f'"    // '   10.35'
+       f"'${a}%8.4f'"    // ' 10.3456'
+       f"'${a}%08.2f'"   // '00010.35'
+       f"'${a}%-8.2f'"   // '10.35   '
+
+       f"'${b}%-2.2f'"   // '101234567.35'
+       f"'${b}%-8.2f'"   // '101234567.35'
+       f"'${b}%-14.2f'"  // '101234567.35  '
+     #+end_src
+     The same syntax as above works with ~Float~ values.
+     
+**** DONE INTEGER FORMATTING
+     CLOSED: [2020-11-19 Thu 00:56]
+     /Integers/ are printed with /the ~%d~ format specifier/.
+     #+begin_src scala
+       val ten = 10
+       f"'${ten}%d"    // '10'
+       f"'${ten}%5d"   // '   10'
+       f"'${ten}%-5d"  // '10   '
+
+       val maxInt = Int.MaxValue
+       f"'${maxInt}%5d"  // '2147483647'
+
+       val maxLong = Long.MaxValue
+       f"'${maxLong}%5d'"    // '9223372036854775807'
+       f"'${maxLong}%22d'"   // '   9223372036854775807'
+     #+end_src
+     
+**** DONE ZERO-FILL INTEGER OPTIONS
+     CLOSED: [2020-11-19 Thu 01:04]
+     #+begin_src scala
+       val zero = 0
+       val one = 1
+       val negTen = -10
+       val bigPos = 12345
+       val bigNeg = -12345
+       val maxInt = Int.MaxValue
+
+       // non-negative integers
+       f"${zero}%03d"      // 000
+       f"${one}%03d"       // 001
+       f"${bigPos}%03d"    // 12345
+       f"${bigPos}%08d"    // 00012345
+       f"${maxInt}%08d"    // 2147483647
+       f"${maxInt}%012d"   // 002147483647
+
+       // negative integers
+       f"${negTen}%03d"    // -10
+       f"${negTen}%05d"    // -0010
+       f"${bigNeg}%03d"    // -12345
+       f"${bigNeg}%08d"    // -0012345
+     #+end_src
+     
+**** DONE CHARACTER FORMATTING
+     CLOSED: [2020-11-19 Thu 01:06]
+     /Characters/ are printed with /the ~%c~ format specifier/.
+     #+begin_src scala
+       val s = 's'
+       f"|${s}%c|"    // |s|
+       f"|${s}%5c|"   // |    s|
+       f"|${s}%-5c|"  // |s    |
+     #+end_src
+     
+**** DONE ~f~ WORKS WITH MULTILINE STRINGS
+     CLOSED: [2020-11-19 Thu 01:12]
+     It's important to note that /the ~f~ interpolator/ works with _multiline
+     strings_, as shown in this example:
+     #+begin_src scala
+       val n = "Al"
+       val w = 200.0
+       val s = f"""Hi, my name is ${n}
+         |and I weigh ${w}%.1f pounds.
+         |""".stripMargin.replaceAll("\n", " ")
+
+       println(s)
+       // Hi, my name is Al and I weigh 200.0 pounds.
+     #+end_src
+     As noted in Recipe 1.2, there is no need to escape single- and double-quotes
+     when using multiline strings (triple-quoted).
+     
+*** DONE Discussion
+    CLOSED: [2020-11-19 Thu 01:18]
+    - Table 1-1. Common printf style format specifiers
+      Not mentioned before this section:
+      * ~%e~: Exponential floating-point number 
+
+      * ~%i~: Integer (base 10)
+      * ~%o~: Octal number (base 8)
+      * ~%x~: Hexadecimal number (base 16)
+
+      * ~%u~: Unsigned decimal (integer) number
+      
+    - Escape ~%~, ~$~, and ~\~ inside a string with /the ~f~ interpolator/:
+      #+begin_src scala
+        f"%%"  // %
+        f"$$"  // $
+        f"\\"  // \
+      #+end_src
+
+    - Table 1-2 shows special characters you can use when formatting string output.
+      
+*** TODO See Also
+    The The ~java.util.Formatter~ /class/ documentation shows all of the
+    available /formatting characters/.
+
+** DONE 1.6. Processing a String One Character at a Time - 13
    CLOSED: [2018-03-01 Thu 01:08]
 *** DONE Problem - 13
     CLOSED: [2018-02-28 Wed 22:22]
@@ -260,7 +407,7 @@
 
 *** TODO See Also - 17
 
-** DONE 1.6. Finding Patterns in Strings - 18
+** DONE 1.7. Finding Patterns in Strings - 18
    CLOSED: [2018-03-01 Thu 22:20]
 *** DONE Problem - 18
     CLOSED: [2018-03-01 Thu 22:16]
@@ -283,7 +430,7 @@
 
 *** TODO See Also- 20
 
-** DONE 1.7. Replacing Patterns in Strings - 21
+** DONE 1.8. Replacing Patterns in Strings - 21
    CLOSED: [2018-03-01 Thu 22:27]
 *** DONE Problem - 21
     CLOSED: [2018-03-01 Thu 22:22]
@@ -315,7 +462,7 @@
 
 *** TODO See Also - 21
 
-** DONE 1.8. Extracting Parts of a String That Match Patterns - 22
+** DONE 1.9. Extracting Parts of a String That Match Patterns - 22
    CLOSED: [2018-03-01 Thu 22:39]
 *** DONE Problem - 22
     CLOSED: [2018-03-01 Thu 22:32]
@@ -332,7 +479,7 @@
     CLOSED: [2018-03-01 Thu 22:39]
 *** TODO See Also - 24
 
-** DONE 1.9. Accessing a Character in a String - 24
+** DONE 1.10. Accessing a Character in a String - 24
    CLOSED: [2018-03-01 Thu 22:41]
 *** DONE Problem - 24
     CLOSED: [2018-03-01 Thu 22:39]
@@ -344,8 +491,7 @@
     Scala actully call the ~apply~ method.
     ~"hello"(0)~ is converted to ~"hello".apply(0)~ in the background.
 
-** DONE 1.10. Add Your Own Methods to the String Class - 25
-   CLOSED: [2018-05-20 Sun 22:44]
+** =DEPRECATED= 1.10. Add Your Own Methods to the String Class - 25
 *** DONE Problem - 25
     CLOSED: [2018-05-20 Sun 22:07]
 *** DONE Solution - 25
@@ -487,8 +633,119 @@
 **** DONE Returning other types - 29
      CLOSED: [2018-05-20 Sun 22:44]
 
-* DONE 2. Numbers - 31
-  CLOSED: [2018-02-28 Wed 18:05]
+** TODO 1.11. How to Create Your Own String Interpolator - ???
+*** DONE Problem
+    CLOSED: [2020-11-19 Thu 01:45]
+    Create your own /string interpolator/.
+    
+*** TODO Solution
+    To create _YOUR OWN_ /string interpolator/, create an /implicit class/ that
+    adds your /method/ to the ~StringContext~ /class/.
+
+    - Your /class/ will take a ~StringContext~ /constructor parameter/, and define
+      a /method/ that handles the behavior you want.
+      To demonstrate this I'll share a string interpolator I wrote.
+    
+**** TODO BACKGROUND
+**** TODO UNDERSTANDING THE SOLUTION
+**** TODO SOURCE CODE FOR THE SOLUTION
+     - Implementation: =TODO= =TRY-THIS-CODE=
+       #+begin_src scala
+         object QInterpolator {
+           extension (sc: StringContext)
+           def Q(expressions: Any*): Seq[String] = {
+             // for my purpose I can just put the original string back together
+             // by calling the `s` interpolator
+             val originalString: String = sc.s(expressions: _*)
+             originalString.split("\n")
+               .toVector
+               .map(_.trim)
+               .filter(_ != "")
+           }
+         }
+       #+end_src
+       Here's an explanation of this code:
+       The code adds a NEW /method/ named ~Q~ to the ~StringContext~ /class/.
+       * As shown in the earlier source code, the StringContext constructor takes
+         a variable number of parameters. While it’s not shown in this current
+         code, those parameters are embedded in the sc input parameter that
+         QHelper receives. (You can see the strings that sc contains by calling
+         sc.parts, which returns a Seq[String].)
+         =TODO= =???= =TODO=
+       
+       * The ~expressions~ variable contains a sequence of the /expressions/ that
+         were in the _original string_.
+           Note that these /expressions/ have *ALREADY* been evaluated *BEFORE*
+         they're passed in here.
+       
+       * For the purposes of ~Q~, I take a simple solution and put the original
+         string back together by calling /the ~s~ interpolator/ of the
+         ~StringContext~ /instance/ ~sc~.
+       
+       * In the ~sc.s(expressions: _*)~ code, the ~_*~ operator converts ~expressions~,
+         which is a ~WrappedArray~, into a list of _SEPARATE_ /arguments/, because the
+         ~s~ method requires a ~String*~ /varargs parameter/.
+       
+       * After that initial processing work the final line of code that includes
+         ~split~, ~toVector~, ~map~, and ~filter~ is run.
+       
+     - In the ~listOfFruits~ example, by the time the final line of code receives
+       ~originalString~, it's a _multiline string_ that looks like this:     
+       #+begin_src scala
+         """
+             apple
+             banana
+             cherry
+         """
+       #+end_src
+     
+*** TODO Discussion
+*** TODO See Also
+
+
+** DONE 1.12. Create Random Strings - ???
+   CLOSED: [2020-11-19 Thu 01:41]
+*** DONE Problem
+    CLOSED: [2020-11-19 Thu 01:41]
+    When you try to generate a /random string/ using the ~nextString~ /method/ of
+    the ~Random~ /class/ you see a lot of unusual output or ~?~ characters.
+    For instance:
+    #+begin_src scala
+      val r = new scala.util.Random
+      // val r: scala.util.Random = scala.util.Random@360d41d0
+      
+      r.nextString(10)
+      // res0: String = ??????????
+    #+end_src
+    
+*** DONE Solution
+    CLOSED: [2020-11-19 Thu 01:41]
+    What's happening with ~nextString~ is that it returns /Unicode characters/,
+    which may or may _not display well on your system_.
+      To generate *only* _alphanumeric characters_ — the letters ~[A-Za-z]~ and
+    the numbers ~[0-9]~ — use this approach:
+    #+begin_src scala
+      import scala.util.Random
+
+      Random.alphanumeric.take(10).mkString  // 7qowB9jjPt
+      Random.alphanumeric.take(10).mkString  // a0WylvJKmX
+    #+end_src
+    ~Random.alphanumeric~ returns a ~LazyList~.
+    
+*** DONE Discussion
+    CLOSED: [2020-11-19 Thu 01:35]
+    If you want a *wider range* of characters, the ~nextPrintableChar~ /method/
+    returns values in _the ASCII range 33-126_.
+
+    - This includes almost every simple character on your keyboard, including
+      * letters
+      * numbers
+      * characters like !, -, +, ], >, etc.
+
+    - See http://www.asciitable.com/ or a similar website for the complete list
+      of characters in that range.
+
+* TODO 2. Numbers and Dates - 31
 ** DONE Introduction - 31
    CLOSED: [2018-02-28 Wed 17:31]
    - In Scala, all the /numeric types/ are /objects/, including ~Byte~, ~Char~,
@@ -706,7 +963,7 @@
 
 *** TODO See Also - 43
 
-** DONE 2.6. Handling Very Large Numbers - 43
+** DONE 2.6. Handling Large Numbers - 43
    CLOSED: [2018-02-28 Wed 17:25]
 *** DONE Problem - 43
     CLOSED: [2018-02-28 Wed 17:19]
@@ -786,7 +1043,7 @@
 
 *** TODO See Also - 47
 
-** DONE 2.8. Creating a ~Range~, ~List~, or ~Array~ of Numbers - 47
+** DONE 2.8. Creating a ~Range~ or Sequence of Numbers - 47
    CLOSED: [2018-02-28 Wed 15:46]
 *** DONE Problem - 47
     CLOSED: [2018-02-28 Wed 15:43]
@@ -897,12 +1154,17 @@
 *** TODO See Also - 51
     - JSR 354
 
-* DONE 3. Control Structures - 53
-  CLOSED: [2018-03-01 Thu 23:53]
+** DONE 2.10. Creating New Date and Time Instances - ???
+** DONE 2.11. Calculating The Difference Between Two Dates - ???
+** DONE 2.12. Formatting Dates - ???
+** DONE 2.13. Parsing Strings Into Dates - ???
+** DONE 2.14. Converting To/From Legacy Date/Time Classes - ???
+   
+* TODO 3. Control Structures - 53
 ** DONE Introduction - 53
    CLOSED: [2018-03-01 Thu 23:36]
-** DONE 3.1. Looping with ~for~ and ~foreach~ - 54
-   CLOSED: [2017-07-18 Tue 13:40]
+** =DEPRECATED= 3.1. Looping with ~for~ and ~foreach~ - 54
+** TODO 3.1. Looping Over Data Structures with ~for~ - 54
    =54=
 *** DONE Problem
     CLOSED: [2017-07-18 Tue 12:03]
@@ -1019,8 +1281,8 @@
 *** Problem
 *** Solution
 *** Discussion
-** DONE 3.4. Creating a for Comprehension (for/yield Combination) - 63
-   CLOSED: [2017-07-18 Tue 13:50]
+** =DEPRECATED=  3.4. Creating a for Comprehension (for/yield Combination) - 63
+** TODO 3.4. Create a New Collection From an Existing Collection With ~for~ / ~yield~ - 63
 *** Problem
 *** Solution
 *** Discussion
@@ -1220,7 +1482,7 @@
 *** Problem
 *** Solution
 *** Discussion
-** DONE 3.7. Using a Match Expression Like a switch Statement - 72
+** DONE 3.7. Using a Match Expression Like a ~switch~ Statement - 72
    CLOSED: [2017-07-19 Wed 02:07]
 *** DONE Problem
     CLOSED: [2017-07-19 Wed 02:03]
@@ -1439,7 +1701,7 @@
 *** Solution
 *** Discussion
 
-** DONE 3.14. Using a Match Expression Instead of isInstanceOf - 88
+** DONE 3.14. Using a Match Expression Instead of ~isInstanceOf~ - 88
    CLOSED: [2017-07-19 Wed 02:31]
 *** DONE Problem
     CLOSED: [2017-07-19 Wed 02:28]
@@ -1480,7 +1742,7 @@
 *** Solution
 *** Discussion
 
-** DONE 3.16. Matching One or More Exceptions with try/catch - 91
+** DONE 3.16. Matching One or More Exceptions with ~try~ / ~catch~ - 91
    CLOSED: [2017-07-19 Wed 02:43]
 *** DONE Problem
     CLOSED: [2017-07-19 Wed 02:32]
@@ -1528,7 +1790,7 @@
         }
     #+END_SRC
 
-** DONE 3.17. Declaring a Variable Before Using It in a try/catch/finally Block - 92
+** DONE 3.17. Declaring a Variable Before Using It in a ~try~ / ~catch~ / ~finally~ Block - 92
    CLOSED: [2017-07-19 Wed 02:53]
 *** Problem
 *** Solution
@@ -1862,7 +2124,7 @@
 **** Case classes - 107
      For /case classes/, ~val~ is the default.
 
-** DONE 4.3. Defining Auxiliary Constructors - 108 - =RE-READ=
+** DONE 4.3. Defining Auxiliary Constructors for Classes - 108 - =RE-READ=
    CLOSED: [2019-05-29 Wed 14:55]
 *** Problem - 108
     How to define _ONE or MORE_ /auxiliary constructors/ for a /class/?
@@ -1942,7 +2204,8 @@
     - Recipe 4.5, "Providing Default Values for Constructor Parameters"
     - Recipe 4.14, "Generating Boilerplate Code with Case Classes"
 
-** DONE 4.4. Defining a Private Primary Constructor - 112
+** TODO 4.4. Defining Auxiliary Constructors for Case Classes - ???
+** DONE 4.5. Defining a Private Primary Constructor - 112
    CLOSED: [2019-05-29 Wed 15:13]
 *** Problem - 112
     How to make the /primary constructor/ of a /class/ *private*, such as to
@@ -1994,7 +2257,7 @@
      =IMPORTANT= =TODO=
      Find out the use cases of /private constructors/ in Scala!!!!!!!!!!!!!!!
 
-** DONE 4.5. Providing Default Values for Constructor Parameters - 114 - =2020=
+** DONE 4.6. Providing Default Values for Constructor Parameters - 114 - =2020=
    CLOSED: [2020-04-30 Thu 03:40]
 *** Problem - 114
 *** Solution - 114
@@ -2050,7 +2313,7 @@
     Recipe 4.3, "Defining Auxiliary Constructors", for more information on
     creating /auxiliary class constructors/
 
-** DONE 4.6. Overriding Default Accessor - 116 - =2020=
+** DONE 4.7. Overriding Default Accessor and Mutators - 116 - =2020=
    CLOSED: [2020-04-30 Thu 04:08]
 *** Problem - 116
 *** Solution - 116
@@ -2157,8 +2420,7 @@
          }
        #+end_src
 
-** DONE 4.7. Preventing Getter and Setter Methods from Being Generated - 119 - =2020=
-   CLOSED: [2020-04-30 Thu 10:50]
+** =DEPRECATED= 4.7. Preventing Getter and Setter Methods from Being Generated - 119 - =2020=
 *** Problem - 119
     - We know
       + when we define a class field as a ~var~, a /getter/ and a /setter/ will be generated.
@@ -2222,14 +2484,15 @@
          * The compiler will also not do /variance check/ for the _object private_
            /method/, though we don't care about this under the topic of this section.
 
-** DONE 4.8. Assigning a Field to a Block or Function - 121
+** TODO 4.8. Preventing Accessor and Mutator Methods from Being Generated - 119
+** DONE 4.9. Assigning a Field to a Block or Function - 121
    CLOSED: [2019-07-23 Tue 15:27]
 *** Problem - 121
 *** Solution - 121
 *** Discussion - 121
     When it makes sense, define a field like this to be ~lazy~.
 
-** DONE 4.9. Setting Uninitialized var Field Types - 122 - =2020=
+** DONE 4.10. Setting Uninitialized var Field Types - 122 - =2020=
    CLOSED: [2020-04-30 Thu 12:12]
 *** Problem - 122
 *** Solution - 123
@@ -2237,7 +2500,7 @@
 *** Discussion - 124
 *** See Also - 124
 
-** DONE 4.10. Handling Constructor Parameters When Extending a Class - 124 - =2020=
+** DONE 4.11. Handling Constructor Parameters When Extending a Class - 124 - =2020=
    CLOSED: [2020-04-30 Thu 12:15]
 *** Problem - 124
 *** Solution - 124
@@ -2270,7 +2533,7 @@
       because for ~Empolyee~ you declare them without ~var~ or ~val~ and
       ~Employee~ inherits them from ~Person~.
 
-** DONE 4.11. Calling a Superclass Constructor - 127 - =2020=
+** DONE 4.12. Calling a Superclass Constructor - 127 - =2020=
    CLOSED: [2020-05-01 Fri 01:24]
 *** Problem - 127
     How to control the /superclass constructor/ that's called when you create
@@ -2360,106 +2623,24 @@
          }
        #+end_src
 
-** DONE 4.12. When to Use an Abstract Class - 129 - =2020=
-   CLOSED: [2020-05-06 Wed 10:40]
-*** Problem - 129
-    - The reason why we have this question:
-        In most cases, _a Scala /trait/ is *more flexible* than an /abstract
-      class/._
-      There must be some exceptions, or why does the /abstract class/ exists?
-      + =from Jian=
-        Scala 3 ~trait~ can have parameters. It seems there is no longer any reason
-        to to use /abstract class/. *NOT SURE!!!* TODO
+** DONE 4.13. Generating Boilerplate Code with Case Classes - 136 - =2020= - =RE-READ=
+   CLOSED: [2020-05-07 Thu 02:31]
+*** Problem - 136
+*** Solution - 136
+*** TODO Discussion - 138
+**** TODO Generated code - 138
 
-    - Q :: When should I use an /abstract class/?
+*** TODO See Also - 140
 
-*** Solution - 129
-    - There are _TWO main reasons_ to use an /abstract class/ in Scala:
-      + You want to create a /base class/ that requires /constructor arguments/.
-        =from Jian= This reason will disappear in Scala 3.
+** TODO 4.14. Defining an equals Method (Object Equality) - 140
+*** Problem - 140
+*** Solution - 140
+*** Discussion - 141
+**** Theory - 142
 
-      + The code will be *called FROM Java code*.
-        =from Jian= TODO Scala 2 ~trait~ powered by JDK8+ also eliminate this reason??? TODO
+*** See Also - 143
 
-    - Regarding the SECOND reason, if you're writing code that needs to be
-      accessed from Java, you'll find that /Scala traits/ WITH /implemented methods/
-      can't be called from Java code.
-      TODO
-      If you run into this situation, see
-      _Recipe 17.7, “Wrapping Traits with Implementations”_, for solutions to that problem.
-      TODO
-      + =from Jian=
-        Is this still an issue when use Scala 2.12+ and JDK 8+?
-
-*** Discussion - 129
-    - Use an /abstract class/ whenever a base behavior *must* have /constructor
-      parameters/.
-      + =from Jian=
-        Here is a case that is NOT "MUST", thought the /trait/ version works,
-        the /abstract class/ way is conciser!
-        * If the a constructor parameter is ~val~ or ~var~:
-          #+begin_src scala
-            abstract class Animal(val name: String)
-          #+end_src
-
-          Can be defined in /trait/ as
-
-          #+begin_src scala
-          trait Animal {
-            val name: String
-          }
-          #+end_src
-          - To extend the /abstract class/ version ~Animal~, we can do:
-            #+begin_src scala
-              class Dog(name: String) extends Animal(name)
-            #+end_src
-
-          - To extend the /trait/ version ~Animal~, we can do:
-            #+begin_src scala
-              class Dog(_name: String) extends Animal {
-                val name = _name
-              }
-            #+end_src
-
-        * If the a constructor parameter is passed in but not marked ~val~ or
-          ~var~ (in this case, the construction through /trait/ is more error-prone;
-          it need manually call the ~a_static_method~. The same job can be done
-          with the /abstract class/ in its /constructor/):
-          #+begin_src scala
-            abstract class Animal(nm: String) {
-              val name = a_static_method(nm)
-            }
-          #+end_src
-
-          Can be defined in /trait/ as
-
-          #+begin_src scala
-            trait Animal {
-              val name
-            }
-          #+end_src
-          - To extend the /abstract class/ version ~Animal~, we can do:
-            #+begin_src scala
-              class Dog(_name: String) extends Animal(_name)
-            #+end_src
-
-          - To extend the /trait/ version ~Animal~, we can do:
-            #+begin_src scala
-              class Dog(_name: String) extends Animal {
-                val name = a_static_method(_name)
-              }
-            #+end_src
-
-          #+begin_src scala
-            class Dog(nm: String) extends Animal(nm + "_X")
-          #+end_src
-
-    - Because a /class/ can extend *only one* /abstract class/,
-      _WHEN_ you're trying to decide whether to use a /trait/ or /abstract class/,
-      _ALWAYS_ use a /trait/, _UNLESS_ you have this /specific need/ (TODO ???
-      TODO) to have /constructor arguments/ in your base implementation.
-
-** DONE 4.13. Defining Properties in an Abstract Base Class (or Trait) - 131 - =2020=
+** =DEPRECATED= 4.14. Defining Properties in an Abstract Base Class (or Trait) - 131 - =2020=
    CLOSED: [2020-05-06 Wed 23:25]
 *** Problem - 131
     - Q :: How to define _abstract or concrete properties_ in an /abstract base
@@ -2571,23 +2752,106 @@
 
 *** TODO See Also - 136
 
-** DONE 4.14. Generating Boilerplate Code with Case Classes - 136 - =2020= - =RE-READ=
-   CLOSED: [2020-05-07 Thu 02:31]
-*** Problem - 136
-*** Solution - 136
-*** TODO Discussion - 138
-**** TODO Generated code - 138
+** =DEPRECATED= 4.12. When to Use an Abstract Class - 129 - =2020=
+   CLOSED: [2020-05-06 Wed 10:40]
+*** Problem - 129
+    - The reason why we have this question:
+        In most cases, _a Scala /trait/ is *more flexible* than an /abstract
+      class/._
+      There must be some exceptions, or why does the /abstract class/ exists?
+      + =from Jian=
+        Scala 3 ~trait~ can have parameters. It seems there is no longer any reason
+        to to use /abstract class/. *NOT SURE!!!* TODO
 
-*** TODO See Also - 140
+    - Q :: When should I use an /abstract class/?
 
-** TODO 4.15. Defining an equals Method (Object Equality) - 140
-*** Problem - 140
-*** Solution - 140
-*** Discussion - 141
-**** Theory - 142
+*** Solution - 129
+    - There are _TWO main reasons_ to use an /abstract class/ in Scala:
+      + You want to create a /base class/ that requires /constructor arguments/.
+        =from Jian= This reason will disappear in Scala 3.
 
-*** See Also - 143
+      + The code will be *called FROM Java code*.
+        =from Jian= TODO Scala 2 ~trait~ powered by JDK8+ also eliminate this reason??? TODO
 
+    - Regarding the SECOND reason, if you're writing code that needs to be
+      accessed from Java, you'll find that /Scala traits/ WITH /implemented methods/
+      can't be called from Java code.
+      TODO
+      If you run into this situation, see
+      _Recipe 17.7, “Wrapping Traits with Implementations”_, for solutions to that problem.
+      TODO
+      + =from Jian=
+        Is this still an issue when use Scala 2.12+ and JDK 8+?
+
+*** Discussion - 129
+    - Use an /abstract class/ whenever a base behavior *must* have /constructor
+      parameters/.
+      + =from Jian=
+        Here is a case that is NOT "MUST", thought the /trait/ version works,
+        the /abstract class/ way is conciser!
+        * If the a constructor parameter is ~val~ or ~var~:
+          #+begin_src scala
+            abstract class Animal(val name: String)
+          #+end_src
+
+          Can be defined in /trait/ as
+
+          #+begin_src scala
+          trait Animal {
+            val name: String
+          }
+          #+end_src
+          - To extend the /abstract class/ version ~Animal~, we can do:
+            #+begin_src scala
+              class Dog(name: String) extends Animal(name)
+            #+end_src
+
+          - To extend the /trait/ version ~Animal~, we can do:
+            #+begin_src scala
+              class Dog(_name: String) extends Animal {
+                val name = _name
+              }
+            #+end_src
+
+        * If the a constructor parameter is passed in but not marked ~val~ or
+          ~var~ (in this case, the construction through /trait/ is more error-prone;
+          it need manually call the ~a_static_method~. The same job can be done
+          with the /abstract class/ in its /constructor/):
+          #+begin_src scala
+            abstract class Animal(nm: String) {
+              val name = a_static_method(nm)
+            }
+          #+end_src
+
+          Can be defined in /trait/ as
+
+          #+begin_src scala
+            trait Animal {
+              val name
+            }
+          #+end_src
+          - To extend the /abstract class/ version ~Animal~, we can do:
+            #+begin_src scala
+              class Dog(_name: String) extends Animal(_name)
+            #+end_src
+
+          - To extend the /trait/ version ~Animal~, we can do:
+            #+begin_src scala
+              class Dog(_name: String) extends Animal {
+                val name = a_static_method(_name)
+              }
+            #+end_src
+
+          #+begin_src scala
+            class Dog(nm: String) extends Animal(nm + "_X")
+          #+end_src
+
+    - Because a /class/ can extend *only one* /abstract class/,
+      _WHEN_ you're trying to decide whether to use a /trait/ or /abstract class/,
+      _ALWAYS_ use a /trait/, _UNLESS_ you have this /specific need/ (TODO ???
+      TODO) to have /constructor arguments/ in your base implementation.
+
+** DONE 4.15. Writing an ~unapply~ Method (Extractor) - ???
 ** DONE 4.16. Creating Inner Classes - 143 - =2020=
    CLOSED: [2020-05-08 Fri 01:12]
 *** Problem - 143
@@ -2726,8 +2990,7 @@
 
 *** See Also - 145
 
-* DONE 5. Methods - 147 =Re-Read Some Parts=
-  CLOSED: [2018-05-20 Sun 23:50]
+* TODO 5. Methods - 147
 ** DONE Introduction - 147
    CLOSED: [2018-02-28 Wed 00:27]
    - Difference syntax between Scala and Java in declaring /methods/.
@@ -2747,7 +3010,7 @@
 
      This chapter demonstrates all of these method-related features.
 
-** DONE 5.1. Controlling Method Scope - 148 =re-read=
+** DONE 5.1. Controlling Method Scope (Access Modifiers) - 148 =re-read=
    CLOSED: [2018-02-28 Wed 00:57]
 *** DONE Problem - 148
     CLOSED: [2018-02-28 Wed 00:55]
@@ -3249,8 +3512,8 @@
 
 *** TODO See Also - 170
 
-* DONE 6. Objects - 171
-  CLOSED: [2018-05-23 Wed 15:22]
+** TODO 5.10. Adding New Methods to Closed Classes (Extension Methods) - ???
+* TODO 6. Objects - 171
   /object/ has two meanings in Scala:
   - An instance of a class
 
@@ -3426,7 +3689,7 @@
 *** DONE Discussion - 180
     CLOSED: [2018-05-23 Wed 14:10]
 
-** DONE 6.6. Creating Static Members with Companion Objects - 180
+** DONE 6.6. Creating "Static" Members with Companion Objects - 180
    CLOSED: [2018-02-21 Wed 21:04]
 *** DONE Problem - 180
     CLOSED: [2018-02-21 Wed 21:04]
@@ -3493,8 +3756,7 @@
            }
          #+END_SRC
 
-** DONE 6.7. Putting Common Code in Package Objects - 182
-   CLOSED: [2018-05-23 Wed 14:32]
+** =DEPRECATED= 6.7. Putting Common Code in Package Objects - 182
 *** DONE Problem - 182
     CLOSED: [2018-05-23 Wed 14:32]
 *** DONE Solution - 182
@@ -3504,7 +3766,7 @@
 *** DONE See Also - 184
     CLOSED: [2018-05-23 Wed 14:32]
 
-** DONE 6.8. Creating Object Instances Without Using the ~new~ Keyword - 185
+** DONE 6.7. Creating Object Instances Without Using the ~new~ Keyword - 185
    CLOSED: [2018-05-23 Wed 15:07]
 *** DONE Problem - 185
     CLOSED: [2018-05-23 Wed 14:44]
@@ -3573,8 +3835,7 @@
 
      + However, they also make the /case class/ a heavy non-zero cost abstraction!
 
-** DONE 6.9. Implement the Factory Method in Scala with ~apply~ - 189
-   CLOSED: [2018-05-23 Wed 15:22]
+** TODO 6.9. Implement a Static Factory with ~apply~ - ???
 *** DONE Problem - 189
     CLOSED: [2018-05-23 Wed 15:16]
 *** DONE Solution - 189
@@ -3625,8 +3886,7 @@
 
 *** TODO See Also - 190
 
-* DONE 7. Packaging and Imports - 191
-  CLOSED: [2019-07-23 Tue 18:26]
+* TODO 7. Packaging and Imports - 191
 ** DONE Introduction - 191
    CLOSED: [2019-07-23 Tue 17:38]
    - Instead of Java way, you can also use a /curly brace packaging style/,
@@ -3700,7 +3960,7 @@
         // meaningful in logic.
       #+end_src
 
-** DONE 7.5. Using Static Imports - 197
+** DONE 7.5. Using "Static" Members - 197
    CLOSED: [2019-07-23 Tue 18:24]
 *** Problem - 197
 *** Solution - 197
@@ -3712,8 +3972,7 @@
 *** Solution - 199
 *** Discussion - 200
 
-* DONE 8. Traits - 203
-  CLOSED: [2020-05-08 Fri 02:11]
+* TODO 8. Traits - 203
 ** DONE 8.1. Using a Trait as an Interface - 203
    CLOSED: [2020-05-08 Fri 02:11]
 *** Problem - 203
@@ -3734,7 +3993,7 @@
       /single object instance/ _with_ a /trait/, like this: ~val f = new Foo with Trait1~
       TODO See Recipe 8.8, "Adding a Trait to an Object Instance".
 
-** DONE 8.2. Using Abstract and Concrete Fields in Traits - 206
+** DONE 8.2. Using Abstract Fields in Traits - 206
    CLOSED: [2020-05-08 Fri 02:11]
 *** Problem - 206
 *** Solution - 206
@@ -3753,7 +4012,7 @@
 *** Discussion - 207
 *** See Also - 208
 
-** DONE 8.4. Using Traits as Simple Mixins - 208 - =2020= - =READ Tips=
+** DONE 8.4. Using Traits as Mixins - 208 - =2020= - =READ Tips=
    CLOSED: [2020-05-08 Fri 01:46]
 *** Problem - 208
 *** TODO Solution - 208
@@ -3766,7 +4025,29 @@
 
 *** See Also - 209
 
-** DONE 8.5. Limiting Which Classes Can Use a Trait by Inheritance - 209
+** DONE 8.5. Marking Traits So They Can Only Be Used by Subclasses of a Certain Type - 211
+   CLOSED: [2020-05-08 Fri 02:00]
+*** Problem - 211
+*** Solution - 211
+    #+begin_src scala
+      trait MyTrait { this: BaseType =>
+      }
+    #+end_src
+*** Discussion - 212
+*** See Also - 213
+
+** DONE 8.6. Ensuring a Trait Can Only Be Added to a Type That Has a Specific Method - 213
+   CLOSED: [2020-05-08 Fri 01:59]
+*** Problem - 213
+*** Solution - 213
+    #+begin_src scala
+      trait WrapCore { this: { def ejectWrapCore(password: String): Boolean } =>
+      }
+    #+end_src
+*** Discussion - 214
+*** See Also - 214
+
+** DONE 8.7. Limiting Which Classes Can Use a Trait by Inheritance - 209
    CLOSED: [2020-05-08 Fri 02:10]
 *** Problem - 209
 *** Solution - 209
@@ -3802,30 +4083,11 @@
 
 *** See Also - 211
 
-** DONE 8.6. Marking Traits So They Can Only Be Used by Subclasses of a Certain Type - 211
-   CLOSED: [2020-05-08 Fri 02:00]
-*** Problem - 211
-*** Solution - 211
-    #+begin_src scala
-      trait MyTrait { this: BaseType =>
-      }
-    #+end_src
-*** Discussion - 212
-*** See Also - 213
-
-** DONE 8.7. Ensuring a Trait Can Only Be Added to a Type That Has a Specific Method - 213
-   CLOSED: [2020-05-08 Fri 01:59]
-*** Problem - 213
-*** Solution - 213
-    #+begin_src scala
-      trait WrapCore { this: { def ejectWrapCore(password: String): Boolean } =>
-      }
-    #+end_src
-*** Discussion - 214
-*** See Also - 214
-
-** DONE 8.8. Adding a Trait to an Object Instance - 215
-   CLOSED: [2020-05-08 Fri 01:58]
+** DONE 8.8. Using Trait Parameters - ???
+** DONE 8.9. Parameterized Traits - ???
+** DONE 8.10. Resolving Method Name Conflicts and Understanding super - ???
+** DONE 8.11. Using Traits to Create Modules - ???
+** =DEPRECATED= 8.8. Adding a Trait to an Object Instance - 215
 *** Problem - 215
 *** Solution - 215
 *** Discussion - 215
@@ -3844,8 +4106,7 @@
       val problemChild = new ProblemChild with Debugger
     #+end_src
 
-** DONE 8.9. Extending a Java Interface Like a Trait - 216
-   CLOSED: [2020-05-08 Fri 01:54]
+** =DEPRECATED= 8.9. Extending a Java Interface Like a Trait - 216
 *** Problem - 216
 *** Solution - 216
     *Trivial*
@@ -3878,14 +4139,38 @@
 
 *** See Also - 225
 
-** DONE 9.4. More Complex Functions - 226
-   CLOSED: [2020-05-08 Fri 03:14]
+** TODO 9.4. Declaring More Complex Higher-Order Functions - 226
 *** Problem - 226
 *** Solution - 226
 *** Discussion - 226
 **** Passing in a function with other parameters - 227
 
-** TODO 9.5. Using Closures - 229
+** TODO 9.5. Using Partially Applied Functions - 234
+*** Problem - 234
+*** Solution - 234
+*** Discussion - 235
+
+** TODO 9.6. Creating a Function That Returns a Function - 236
+*** Problem - 236
+*** Solution - 236
+*** Discussion - 237
+**** Another example - 237
+
+*** See Also - 238
+
+** TODO 9.7. Creating Partial Functions - ???
+** TODO 9.8. How to Reify Traits as Objects - ???
+** TODO 9.9. Real-World Example: Newton's Method - ???
+*** Problem - 238
+*** Solution - 238
+**** The ~PartialFunction~ explained - 239
+**** ~orElse~ and ~andThen~ - 240
+
+*** Discussion - 241
+*** See Also - 242
+
+** TODO 9.9. Real-World Example: Data and Functions - ???
+** =DEPRECATED= 9.5. Using Closures - 229
 *** Problem - 229
 *** Solution - 229
 *** Discussion - 230
@@ -3895,32 +4180,10 @@
 
 *** See Also - 234
 
-** TODO 9.6. Using Partially Applied Functions - 234
-*** Problem - 234
-*** Solution - 234
-*** Discussion - 235
-
-** TODO 9.7. Creating a Function That Returns a Function - 236
-*** Problem - 236
-*** Solution - 236
-*** Discussion - 237
-**** Another example - 237
-
-*** See Also - 238
-
-** TODO 9.9. A Real-World Example - 242
-*** Problem - 238
-*** Solution - 238
-**** The ~PartialFunction~ explained - 239
-**** ~orElse~ and ~andThen~ - 240
-
-*** Discussion - 241
-*** See Also - 242
-
 * TODO 10. Collections - 245
 ** TODO Introduction - 245
 *** A Few Important Concepts - 245
-
+    
 ** TODO 10.1. Understanding the Collections Hierarchy - 246
 *** DONE Problem - 246
     CLOSED: [2018-02-19 Mon 11:40]
@@ -3948,11 +4211,11 @@
 ** TODO 10.3. Choosing a Collection Method to Solve a Problem - 255
 ** TODO 10.4. Understanding the Performance of Collections - 261
 ** TODO 10.5. Declaring a Type When Creating a Collection - 264
-** TODO 10.6. Understanding Mutable Variables with Immutable Collections - 265
-** TODO 10.7. Make ~Vector~ Your "Go To" Immutable Sequence - 266
-** TODO 10.8. Make ~ArrayBuffer~ Your "Go To" Mutable Sequence - 268
+** TODO 10.6. How to Randomize a Sequence, of Get a Random Element - ???
+** TODO 10.7. Understanding Mutable Variables with Immutable Collections - 265
+** TODO 10.8. Make ~Vector~ Your "Go To" Immutable Sequence - 266
 ** TODO 10.9. Looping over a Collection with ~foreach~ - 270
-** TODO 10.10. Looping over a Collection with a ~for~ Loop - 272
+** TODO 10.10. Looping over a Collection with a ~for~ Loop (TODO) - 272
 ** TODO 10.11. Using ~zipWithIndex~ or ~zip~ to Create Loop Counters - 276
 ** TODO 10.12. Using ~Iterator~'s - 278
 ** TODO 10.13. Transforming One Collection to Another with ~for/yield~ - 279
@@ -3967,12 +4230,17 @@
 ** TODO 10.22. Merging Sequential Collections - 302
 ** TODO 10.23. Merging Two Sequential Collections into Pairs with ~zip~ - 304
 ** TODO 10.24. Creating a Lazy View on a Collection - 306
-** TODO 10.25. Populating a Collection with a Range - 309
-** TODO 10.26. Creating and Using Enumerations - 311
-** TODO 10.27. Tuples, for When You Just Need a Bag of Things - 312
-** TODO 10.28. Sorting a Collection - 315
-** TODO 10.29. Converting a Collection to a String with ~mkString~ - 318
+** TODO 10.25. Sorting a Collection - ???
+** TODO 10.26. Converting a Collection to a String with ~mkString~ - ???
+** =DEPRECATED???=
+** =DEPRECATED???= 10.8. Make ~ArrayBuffer~ Your "Go To" Mutable Sequence - 268
+** =DEPRECATED???= 10.25. Populating a Collection with a Range - 309
+** =DEPRECATED???= 10.26. Creating and Using Enumerations - 311
+** =DEPRECATED???= 10.27. Tuples, for When You Just Need a Bag of Things - 312
+   
 
+
+* Still Version 1   
 * TODO 11. List, Array, Map, Set (and More) - 321 - TODO complete contents
   - *Introduction*
   - ~List~
