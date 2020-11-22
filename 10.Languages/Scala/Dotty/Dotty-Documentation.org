@@ -6480,7 +6480,7 @@
              (x: GArgs) => tf.tupled(f)(tg.tupled(g)(x))
        #+end_src
 
-*** TODO TypeTest
+*** TODO TypeTest (HIDDEN)
 **** ~TypeTest~
      - When /pattern matching/ there are *TWO* situations where were a /runtime
        type/ test *MUST* be performed.
@@ -6659,7 +6659,7 @@
      #+end_src
 
 *** DONE ~targetName~ Annotation
-    CLOSED: [2020-11-12 Thu 00:10]
+    CLOSED: [2020-11-22 Sun 04:16]
     - ~@targetName~ annotation :: it is applied on a /method definition/ defines
       an _alternate name_ for the implementation of that /method/.
 
@@ -6671,21 +6671,26 @@
           @targetName("append") def (xs: Vec[T]) ++= [T] (ys: Vec[T]): Vec[T] =  // ...
         }
       #+end_src
-      * The ~++=~ operation is implemented (in bytecode or native code) under
-        the name ~append~.
+      1. The ~++=~ operation is
+         implemented (in /bytecode/ or /native code/) _under the name_ ~append~.
+        
+      2. We call the name mentioned in the ~@targetName~ /implementation name/.
+         + A /implementation name (external name)/ affects the code that is generated
 
-    - The /implementation name/
-      * affects the code that is generated
-      * is the _NAME_ under which code _from OTHER languages_ can call the /method/.
-        For instance, ~++=~ could be invoked from Java like this:
-        #+begin_src java
-          VecOps.append(vec1, vec2)
-        #+end_src
-        =IMPORTANT= *ONLY from OTHER languages! You can't use the name in Scala.*
+         + A /implementation name (external name)/ is the _NAME_ under which code
+           _from OTHER languages_ can call the /method/.
+           - For instance,
+             ~++=~ could be invoked from Java like this (use its /implementation
+             name (external name)/):
+            #+begin_src scala
+              VecOps.append(vec1, vec2)
+            #+end_src
+            =IMPORTANT=
+            *ONLY* from _OTHER_ languages! You *can't* use the /implementation
+            name/ _in Scala_.
 
 ***** Details
-      1. ~@targetName~ is defined in package ~scala.annotation~.
-         It takes a _single argument_ of /type/ ~String~.
+      1. ~scala.annotation.targetName~ takes a _SINGLE argument_ of /type/ ~String~.
          That string is called the /external name/ of the definition that's annotated.
          #+begin_src scala
            import scala.annotation.targetName
@@ -6694,54 +6699,58 @@
            // method definition
          #+end_src
 
-      2. An ~@targetName~ annotation can be given for *ALL* kinds of definitions.
-         =from Jian= *NOT ONLY* for symbolic name method.
+      2. An ~@targetName~ annotation can be given for *ALL kinds* of definitions.
+         =from Jian=
+         TO BE VERIFIED:
+         *NOT ONLY* for symbolic name; not only /methods/ or /funcitons/.
 
-      3. The given /external name/ must be a legal name for the defined entities
-         on the host platform.
+      3. The given /external name/ *must* be a _legal name_ for the defined
+         entities on the _host platform_.
+         =TODO= =???= =???= =???= =TODO=
+         TO BE VERIFIED:
+         * Legal JVM name for (JVM based) Scala???
+         * Legal (???) name for (Native) Scala???
+         * etc. ???
 
       4. It is *RECOMMENDED* that definitions with /symbolic names/ have a
-         ~@targetName~ annotation. This will establish an _alternate name_ that
-         * is EASIER TO *search for*
-           and
-         * will avoid cryptic encodings in runtime diagnostics.
+         ~@targetName~ annotation.
+         * This will establish an _alternate name_ that
+           + is *EASIER* (than symbolic name) TO *SEARCH for*
+           + will *avoid* cryptic encodings in _runtime diagnostics_
 
-      5. Definitions with _names in backticks_ that are *NOT legal* _host platform names_
-         *should* also have a ~@targetName~ annotation.
+      5. Definitions with _names in backticks_ that are *NOT legal* _host platform
+         names_ *should* also have a ~@targetName~ annotation.
 
-      6. =REMOVED= =TODO=
-         =from Jian= WHY this is removed??? =???= =TODO=
-         ~@targetName~ annotations must agree:
-         *There must be a one-to-one relationship between external and internal
-         names*
-         
-***** Relationship with Overriding - =RE-READ= =TODO=
-      - ~@targetName~ annotations are significant for matching _TWO_ /method
+***** Relationship with Overriding
+      - ~@targetName~ annotations are SIGNIFICANT for matching _TWO_ /method
         definitions/ to decide whether they _conflict_ or /override/ each other:
-        TWO /method dfinitions/ *match* IF they have the SAME _name_, /signature/,
-        and /erased name/. Here,
-        * The /signature/ of a definition consists of
-          + the _names_ of
-            _the /erased types/ of all (value-) parameters_ and
-
+        TWO /method dfinitions/ *match* _IF they have the SAME /name/, /signature/,
+        and /erased name/._ Here,
+        * The /signature/ of a definition consists of the _names_ of
+          + the /erased types/ of all (value-) parameters
+             [ =TODO= what does this "(value-)" mean??? ]
+            AND
           + the /method/'s /result type/.
 
         * The _erased name_ of a /method definition/ is
-          its /target name/ IF a ~@targetName~ annotation is given
-          and 
-          its _defined name_ OTHERWISE.
+          IF a ~@targetName~ annotation is give
+          THEN /target name/
+          ELSE its _defined name_
 
-      - This means that ~@targetName~ annotations can be used to *disambiguate*
-        TWO /method definitions/ that would otherwise clash. For instance.
+      - *CAN*
+        This (the second point above) means that ~@targetName~ annotations can be
+        used to *disambiguate* two /method definitions/ that would otherwise clash.
+        For instance,
         #+begin_src scala
           def f(x: => String): Int = x.length
 
           def f(x: => Int): Int = x + 1  // error: double definition
         #+end_src
         The two definitions above clash since their _erased parameter types_ are
-        both ~Function0~, which is the /type/ of the translation of a /by-name-parameter/.
-          Hence they have the _SAME names and signatures_. But we can avoid the
-        clash by adding a ~@targetName~ annotation to either /method/ or to both
+        both ~Function0~, which is the /type/ of the translation of a
+        /by-name-parameter/.
+          Hence they have the _SAME names and signatures_. *But we can _AVOID_ the
+        clash* BY adding a ~@targetName~ annotation to either /method/ or to both
         of them. E.g.
         #+begin_src scala
           @targetName("f_string")
@@ -6749,60 +6758,118 @@
 
           def f(x: => Int): Int = x + 1  // OK
         #+end_src
-        * This will produce methods ~f_string~ and ~f~ in the generated code.
+        * This will produce /methods/ ~f_string~ and ~f~ in the generated code.
 
-      - However, ~@targetName~ annotations are *NOT allowed to BREAK* /overriding
+        * =from Jian=
+          + This is not very useful if the Scala code that is NOT written for being
+            called by other languages:
+            - Use different names will be a better solution.
+            - No one want to, IN PUER SCALA, use methods designed for different
+               purposes with same name and indistinguishable if no /external name/.
+
+          + The only exception is machine generated code.
+            If the code is not written by human, this kind of issue may happen.
+              However, generate proper distinguishable names is already resolved in
+            all /hygienic macro systems/, and the solution can be borrowed to there.
+            This makes this distinguish functions by /external names/ are by no means
+            a good solution, except the scenarios that =Jian= I can't imagine by now.
+
+      - *CAN'T*
+        However, ~@targetName~ annotations are *NOT allowed* to BREAK /overriding
         relationships/ between two definitions that have otherwise the _SAME names
-        and types_. So the following would be in error:
+        and types_. So the following would be in error (=from Jian= modified by me):
         #+begin_src scala
           import annotation.targetName
 
           class A:
-            def f(): Int = 1
+            def f: Int = 1
 
           class B extends A:
-            @targetName("g") def f(): Int = 2
+            @targetName("g") def f: Int = 2
         #+end_src
-        The compiler reports here:
+        The compiler reports here (=from Jian= modified by me):
         #+begin_src text
           -- Error: test.scala:6:23 ------------------------------------------------------
-          6 |  @targetName("g") def f(): Int = 2
+          6 |  @targetName("g") def f: Int = 2
             |                       ^
-            |error overriding method f in class A of type (): Int;
-            |  method f of type (): Int should not have a @targetName annotation since the overridden member hasn't one either
+            |              error overriding method f in class A of type => Int;
+            |                method f of type => Int should not have a @targetName annotation since the overridden member hasn't one either
         #+end_src
+        * =IMPORTANT= =NEED FIX???= =FIXME= =???=
+          =from Jian= I don't quite understand "the same /types/" at the end of each points. =TODO=
+          The relevant _overriding rules_ can be summarized as follows:
+          + Two members can *override* each other if their /names/ and /signatures/
+            are the same, and they either have the same /erased names/ or the same
+            /types/.
 
-      - The relevant _overriding rules_ can be summarized as follows:
-        * Two members can *override* each other if their names and /signatures/ are
-          the same, and they either have the same /erased names/ or the same /types/.
+          + If two members *override*, then both their _erased names_ and their /types/
+            *must* be the same.
+            
+        * =from Jian=
+          =Re-Write=
+          The relevant _overriding rules_ can be summarized as follows:
+          #+begin_quote
+          Two /memebers/ *CAN* /override/ each other if their /names/ and
+          /signatures/ are the _SAME_. When this is guaranteed, there are two
+          scenarios:
+          + If two members *override* and both don't have ~@targetName~'s, no other
+            requirement, and this is just like before, before we introduce
+            ~@targetName~ into Scala 3.
 
-        * If two members *override*, then both their _erased names_ and their /types/
-          *must* be the same.
+          + If two members *override* and both have ~@targetName~'s, their /erased
+            names/ must be the same.
+          #+end_quote
 
-      - As usual, any /overriding relationship/ in the _generated code_ *must also be
-        present* in the _original code_. So the following example would also be in error:
-        #+begin_src scala
-          import annotation.targetName
+        * =from Jian=
+          By the rules above, we know the error in the above not compilable code
+          example. Since ~f~ in ~B~ have the same /name/ and /signature/ as the
+          ~f~ in ~A~, ~f~ in ~B~ *SHOULD* /override/ the one in ~A~, but two things
+          are wrong (assume we don't change the name ~f~ that can be invoked in
+          Scala):
+          1. ~override~ is missing.
+            We can first ignore ~@targetName~, only consider the code can be used in Scala.
+            This is easy to be found out.
+            Since this is Scala code, the requirements in Scala must be first guaranteed.
+            
+          2. (This should be considerd after adding ~override~ mentioned in 1.),
+             ~@targetName("g")~ is missing for the ~f~ in ~A~.
+             #+begin_src scala
+               import annotation.targetName
 
-          class A:
-            def f(): Int = 1
+               class A:
+                 def f: Int = 1
 
-          class B extends A:
-            @targetName("f") def g(): Int = 2
-        #+end_src
-        Here, the ORIGINAL methods ~g~ and ~f~ _do NOT *override* each other_ since
-        they have _DIFFERENT names_. BUT once we switch to /target names/, there
-        is a clash that is reported by the compiler:
-        #+begin_src text
-          -- [E120] Naming Error: test.scala:4:6 -----------------------------------------
-          4 |class B extends A:
-            |      ^
-            |      Name clash between defined and inherited member:
-            |      def f(): Int in class A at line 3 and
-            |      def g(): Int in class B at line 5
-            |      have the same name and type after erasure.
-          1 error found
-        #+end_src
+               class B extends A:
+                 @targetName("g") override def f: Int = 2
+             #+end_src
+             If this code is legal, one unreasonable thing will happen:
+             The /override relationships/ are different in Scala and in other languages.
+             This is not acceptable.
+
+        * As usual, any /overriding relationship/ in the _generated code_ *must also be
+          present* in the _original code_. So the following example would also be in error:
+          #+begin_src scala
+            import annotation.targetName
+
+            class A:
+              def f: Int = 1
+
+            class B extends A:
+              @targetName("f") def g: Int = 2
+          #+end_src
+          Here, the ORIGINAL methods ~g~ and ~f~ _do NOT *override* each other_
+          since they have _DIFFERENT names_. BUT once we switch to /target names/,
+          there is a clash that is reported by the compiler:
+          #+begin_src text
+            -- [E120] Naming Error: test.scala:4:6 -----------------------------------------
+            4 |class B extends A:
+              |      ^
+              |      Name clash between defined and inherited member:
+              |      def f: Int in class A at line 3 and
+              |      def g: Int in class B at line 5
+              |      have the same name and type after erasure.
+            1 error found
+          #+end_src
         
 *** DONE New Control Syntax
     CLOSED: [2020-07-22 Wed 03:04]
