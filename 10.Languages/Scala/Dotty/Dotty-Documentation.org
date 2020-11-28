@@ -1,7 +1,8 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M2-bin-20201113-6b9796c-NIGHTLY 
+#+VERSION: 3.0.0-RC1-bin-20201125-1c3538a-NIGHTLY
 #+AUTHORS: Dotty Contributors
-#+STARTUP: entitiespretty, fold
+#+STARTUP: entitiespretty
+#+STARTUP: folded
 
 * BLOG
 * DONE USAGE
@@ -275,7 +276,7 @@
 
 ** DONE NEW TYPES
    CLOSED: [2020-03-08 Sun 21:34]
-*** DONE Intersection types
+*** DONE Intersection Types
     CLOSED: [2019-11-10 Sun 17:47]
     The ~&~ operator creates an /intersection type/.
 
@@ -378,7 +379,7 @@
         *interpreted as* ~A & B~, _but its usage as a type (as opposed to in a
         ~new~ or ~extends~ clause) will be *deprecated* and *removed* in the future._
 
-*** DONE Union types
+*** DONE Union Types
     CLOSED: [2019-07-01 Mon 15:49]
     A ~A | B~ value can be _any value_ of type ~A~ _and_ also _any value_ of
     type ~B~.
@@ -476,7 +477,7 @@
 ***** Exhaustivity checking
 ***** TODO Erasure
 
-*** DONE Type lambdas
+*** DONE Type Lambdas
     CLOSED: [2019-07-01 Mon 15:55]
     A /type lambda/ lets one express a /higher-kinded type/ directly, *WITHOUT*
     a /type definition/.
@@ -496,7 +497,7 @@
     - TODO
       _More details_ link
 
-*** DONE Match types - TODO _mechanism_
+*** DONE Match Types - =TODO= _mechanism_
     CLOSED: [2020-03-08 Sun 21:34]
     - A /match type/ reduces to one of a number of right hand sides, depending on
       a /scrutinee type/. Example:
@@ -862,7 +863,7 @@
 **** TODO Reference
      For more info, see [[https://github.com/lampepfl/dotty/issues/1970][Issue #1970]].
 
-*** DONE Translation
+*** DONE Translation of Enums and ADTs
     CLOSED: [2020-07-11 Sat 04:07]
     # *Translation of Enum and ADTs*
     - In Scala 3, /enums/ are CONVENIENT /syntactic sugar/,
@@ -1826,9 +1827,8 @@
        ContextBound    ::= ':' Type
      #+end_src
 
-*** DONE Given Imports
+*** DONE Importing Givens
     CLOSED: [2020-07-18 Sat 21:33]
-    # Importing Givens
     =from Jian= The /given imports syntax/ can be applied as syntax for ~export~.
 
     A _special form_ of /import wildcard selector/ is used to *import /given
@@ -3119,12 +3119,12 @@
       _BUT_ it is also dangerous since it *undermines* /type safety/.
 
     - /Multiversal equality/ is an _opt-in way_ to make /universal equality/ SAFER.
-        It uses a /binary type class/ ~Eql~ to indicate that values of *two* given
+        It uses a /binary type class/ ~CanEqual~ to indicate that values of *two* given
       /types/ can be compared with each other.
 
     - If we want to disable /universal equality/ check for ~T~, we can do
       #+begin_src scala
-        class T derives Eql
+        class T derives CanEqual
       #+end_src
       Then if we compare an object of ~T~ with the other /types/, the error can
       be catched:
@@ -3134,10 +3134,10 @@
         x == y       // can't typecheck because T drevies the type class Eql
       #+end_src
 
-    - Alternatively, one can also provide an ~Eql~ /given instance/ directly,
+    - Alternatively, one can also provide an ~CanEqual~ /given instance/ directly,
       like this:
       #+begin_src scala
-        given Eql[T, T] = Eql.derived
+        given CanEqual[T, T] = CanEqual.derived
       #+end_src
       This definition effectively says that values of /type/ ~T~ can (only) be compared
       to other values of type ~T~ when using ~==~ or ~!=~.
@@ -3148,67 +3148,68 @@
           - ~==~ always maps to ~equals~
           - ~!=~ always maps to the negation of ~equals~
 
-      + The right hand side ~Eql.derived~ of the definition is a value that has
-        any ~Eql~ instance as its type.
+      + The right hand side ~CanEqual.derived~ of the definition is a value that has
+        any ~CanEqual~ instance as its type.
 
-      + Here is the definition of /class/ ~Eql~ and its /companion object/:
+      + Here is the definition of /class/ ~CanEqual~ and its /companion object/:
        #+begin_src scala
          package scala
          import annotation.implicitNotFound
 
          @implicitNotFound("Values of types ${L} and ${R} cannot be compared with == or !=")
-         sealed trait Eql[-L, -R]
+         sealed trait CanEqual[-L, -R]
 
-         object Eql {
-           object derived extends Eql[Any, Any]
+         object CanEqual {
+           object derived extends CanEqual[Any, Any]
          }
        #+end_src
 
-    - One can have *several* ~Eql~ /given instances/ for *one* /type/.
+    - One can have *several* ~CanEqual~ /given instances/ for *one* /type/.
       + Example:
         If we define
         #+begin_src scala
-          given Eql[A, A] = Eql.derived
-          given Eql[B, B] = Eql.derived
-          given Eql[A, B] = Eql.derived
-          given Eql[B, A] = Eql.derived
+          given CanEqual[A, A] = CanEqual.derived
+          given CanEqual[B, B] = CanEqual.derived
+          given CanEqual[A, B] = CanEqual.derived
+          given CanEqual[B, A] = CanEqual.derived
         #+end_src
         , then only values of type ~A~ can be compared with values of type ~B~.
 
-    - The ~scala.Eql~ object defines a number of ~Eql~ /given instances/ that
-      together define a rule book for what /standard types/ can be compared.
-      =from Jian= More details in the section "Predefined ~Eql~ Instances".
+    - The ~scala.CanEqual~ object defines a number of ~CanEqual~ /given instances/
+      that together define a rule book for what /standard types/ can be compared.
+      =from Jian= More details in the section "Predefined ~CanEqual~ Instances".
 
     - For *backward compatibility*,
-      There's also a *"FALLBACK"* /instance/ named ~eqlAny~ that allows comparisons
-      over *ALL* /types/ that do *NOT themselves have an ~Eql~ /given/.*
-      + The *primary motivation* for having ~eqlAny~ is _backwards compatibility_.
-        If no concern, on can disable ~eqlAny~ by enabling the language feature
+      There's also a *"FALLBACK"* /instance/ named ~canEqualAny~ that allows
+      comparisons over *ALL* /types/ that do *NOT themselves have an ~CanEqual~
+      /given/.*
+      + The *primary motivation* for having ~canEqualAny~ is _backwards compatibility_.
+        If no concern, on can disable ~canEqualAny~ by enabling the language feature
         *strictEquality* by:
         * Command line option: =-language:strictEquality=
         * imports: ~import scala.language.strictEquality~
 
-      + ~eqlAny~ is defined as follows:
+      + ~canEqualAny~ is defined as follows:
         #+begin_src scala
-          def eqlAny[L, R]: Eql[L, R] = Eql.derived
+          def canEqualAny[L, R]: CanEqual[L, R] = CanEqual.derived
         #+end_src
 
-      + Even though ~eqlAny~ is _NOT_ declared a ~given~,
-        the compiler will *still* construct an ~eqlAny~ instance as answer to an
-        /implicit search/ for the type ~Eql[L, R]~, _UNLESS_:
-        * ~L~ or ~R~ have ~Eql~ instances defined on them,
+      + Even though ~canEqualAny~ is _NOT_ declared a ~given~,
+        the compiler will *still* construct an ~canEqualAny~ instance as answer to an
+        /implicit search/ for the type ~CanEqual[L, R]~, _UNLESS_:
+        * ~L~ or ~R~ have ~CanEqual~ instances defined on them,
           OR
         * the language feature ~strictEquality~ is _enabled_
 
-**** DONE Deriving ~Eql~ Instances
+**** DONE Deriving ~CanEqual~ Instances
      CLOSED: [2020-07-20 Mon 01:35]
      #+begin_src scala
-       class Box[T](x: T) derives Eql
+       class Box[T](x: T) derives CanEqual
      #+end_src
      - By the usual rules of /type class derivation/, this _generates_ the following
-       ~Eql~ /instance/ in the /companion object/ of ~Box~:
+       ~CanEqual~ /instance/ in the /companion object/ of ~Box~:
        #+begin_src scala
-         given [T, U](using Eql[T, U]) as Eql[Box[T], Box[U]] = Eql.derived
+         given [T, U](using CanEqual[T, U]) as CanEqual[Box[T], Box[U]] = CanEqual.derived
        #+end_src
 
      - Examples:
@@ -3218,13 +3219,13 @@
          new Box(1) == 1             // error: can't compare
        #+end_src
        =from Jian=
-       See next subsection to know WHY "there is an instance for ~Eql[Int, Long]~"
+       See next subsection to know WHY "there is an instance for ~CanEqual[Int, Long]~"
 
 **** DONE Precise Rules for Equality Checking - =TODO= _Verify my understanding to rule 2!!!_
      CLOSED: [2020-07-20 Mon 01:53]
      - If the ~strictEquality~ feature is enabled then a comparison using
        ~x \equal{}\equal{} y~ or ~x != y~ between values ~x: T~ and ~y: U~ is _legal iff there
-       is a given of type ~Eql[T, U]~._
+       is a given of type ~CanEqual[T, U]~._
        + =from Jian=
          This doc use "if" in ths paragraph, and in this note I replace it with
          "iff", which I think is better because it's right and more strict!
@@ -3235,7 +3236,7 @@
           OR
        2. one of ~T~, ~U~ is a /subtype/ of the /lifted version of the other type/,
           OR
-       3. neither ~T~ nor ~U~ have a reflective ~Eql~ instance.
+       3. neither ~T~ nor ~U~ have a reflective ~CanEqual~ instance.
 
      - Explanations:
        + /lifting/ a type ~S~ means
@@ -3247,11 +3248,11 @@
          * *replacing* ALL /refinement types/ in /covariant positions/ of ~S~ by
            _their parent_.
 
-       + a /type/ ~T~ has a _reflexive_ ~Eql~ /instance/
-         if the _implicit search_ for ~Eql[T, T]~ succeeds.
+       + a /type/ ~T~ has a _reflexive_ ~CanEqual~ /instance/
+         if the _implicit search_ for ~CanEqual[T, T]~ succeeds.
 
      - =from Jian= =TODO= =TODO=
-       + Why ~Eql[-T, -U]~ is /contravariant/ for ~T~ or ~U~.
+       + Why ~CanEqual[-T, -U]~ is /contravariant/ for ~T~ or ~U~.
 
        + I don't quite understand the rule 2.
 
@@ -3263,9 +3264,9 @@
        + In the "Explanations" above:
          * Q :: WHY "covariant"? WHY NOT "contravariant" or "invariant"?
 
-**** DONE Predefined ~Eql~ Instances
+**** DONE Predefined ~CanEqual~ Instances
      CLOSED: [2020-07-20 Mon 02:28]
-     - The ~Eql~ object defines instances for comparing
+     - The ~CanEqual~ object defines instances for comparing
        + the /primitive types/
          * ~Byte~
          * ~Short~
@@ -3285,7 +3286,7 @@
        + ~scala.collection.Set~
 
      - Instances are defined so that *every* one of the /types/ mentioned above
-       has /a *reflexive* ~Eql~ instance/, and the following holds:
+       has /a *reflexive* ~CanEqual~ instance/, and the following holds:
        + /Primitive numeric types/ can be compared with _each other_.
 
        + /Primitive numeric types/ can be compared with *subtypes* of
@@ -3306,21 +3307,21 @@
        + Any /subtype/ of ~AnyRef~ can be compared with ~Null~ (and _vice versa_).
 
      - =from Jian=
-       /a *reflexive* ~Eql~ instance/ for each /types/ mentioned above means
+       /a *reflexive* ~CanEqual~ instance/ for each /types/ mentioned above means
        any type ~A~ that is mentioned above *can't be compared* to any type ~B~
-       if ~Eql[A, B]~ is *not* defined. This is true even when ~strictEquality~ is
+       if ~CanEqual[A, B]~ is *not* defined. This is true even when ~strictEquality~ is
        disabled. This is mentioned in the above subsection "Precise Rules for
        Equality Checking".
        + When ~strictEquality~ is *enabled*,
-         if there is no ~Eql[A, B]~, values of ~A~ and ~B~ can't be compared.
+         if there is no ~CanEqual[A, B]~, values of ~A~ and ~B~ can't be compared.
 
        + When ~strictEquality~ is *turned off*,
-         if there is NO ~Eql[A, B]~, because of the /*reflexive* ~Eql~ instance/
-         and *rule 3*, ~A~ and ~B~ can't be compared.
+         if there is NO ~CanEqual[A, B]~, because of the /*reflexive* ~CanEqual~
+         instance/ and *rule 3*, ~A~ and ~B~ can't be compared.
          * *Note*:
-           In this case, when there is no /*reflexive* ~Eql~ instance/, even
-           without ~Eql[A, B]~, values of ~A~ and ~B~ can be compared because of
-           ~eqlAny~.
+           In this case, when there is no /*reflexive* ~CanEqual~ instance/, even
+           without ~CanEqual[A, B]~, values of ~A~ and ~B~ can be compared because of
+           ~canEqualAny~.
 
 **** TODO Why Two Type Parameters? - =START=
      - One particular feature of the Eql type is that it takes two type parameters,
@@ -3367,11 +3368,11 @@
           (Scala 2.13) version of ~List~. It looks different but it admits exactly
           the same applications as the ~contains(x: Any)~ definition we started with.
 
-       4. Make it _more useful (i.e. restrictive)_ by adding an ~Eql~ parameter:
+       4. Make it _more useful (i.e. restrictive)_ by adding an ~CanEqual~ parameter:
           #+begin_src scala
             class List[+T] {
               // ...
-              def contains[U >: T](x: U)(using Eql[T, U]): Boolean
+              def contains[U >: T](x: U)(using CanEqual[T, U]): Boolean
             }
           #+end_src
           This version of ~contains~ is *equality-safe*!
@@ -3382,20 +3383,20 @@
           simple equality and pattern matching to arbitrary user-defined
           operations gets lost if we restrict ourselves to an equality class
           with a single type parameter. Consider the following signature of
-          contains with a hypothetical Eql1[T] type class:
+          contains with a hypothetical ~CanEqual1[T]~ /type class/:
           #+begin_src scala
-            def contains[U >: T](x: U)(using Eql1[U]): Boolean
+            def contains[U >: T](x: U)(using CanEqual1[U]): Boolean
           #+end_src
 
        6. This version could be applied just as widely as the original ~contains(x: Any)~
-          method, since the ~Eql1[Any]~ fallback is always available! So we have gained
-          nothing. What got lost in the transition to a single parameter /type
-          class/ was the original rule that ~Eql[A, B]~ is available only if
-          neither ~A~ nor ~B~ have a reflexive ~Eql~ /instance/. That rule simply
-          cannot be expressed if there is a single type parameter for ~Eql~.
+          method, since the ~CanEqual1[Any]~ fallback is always available! So we
+          have gained nothing. What got lost in the transition to a single parameter
+          /type class/ was the original rule that ~CanEqual[A, B]~ is available only
+          if neither ~A~ nor ~B~ have a reflexive ~CanEqual~ /instance/. That rule
+          simply cannot be expressed if there is a single type parameter for ~CanEqual~.
 
        7. The situation is different under ~-language:strictEquality~.
-          In that case, the ~Eql[Any, Any]~ or ~Eql1[Any]~ /instances/ would
+          In that case, the ~CanEqual[Any, Any]~ or ~CanEqual1[Any]~ /instances/ would
           *never be available*, and both the single and two-parameter versions
           would indeed _coincide_ for most practical purposes.
           + =from Jian=
@@ -3404,20 +3405,20 @@
        8. But assuming ~-language:strictEquality~ immediately and everywhere poses
           migration problems which might well be unsurmountable.
           Consider again ~contains~, which is in the standard library.
-          + Parameterizing it with the ~Eql~ /type class/ as in 1) is an immediate
+          + Parameterizing it with the ~CanEqual~ /type class/ as in 1) is an immediate
             win since it rules out non-sensical applications while still allowing
             all sensible ones. So it can be done almost at any time, modulo binary
             compatibility concerns.
 
-          + On the other hand, parameterizing ~contains~ with ~Eql1~ as in would
-            make ~contains~ unusable for all /types/ that have not yet declared an
-            ~Eql1~ /instance/, including all types coming from Java. This is clearly
-            unacceptable. It would lead to a situation where, rather than
-            migrating existing libraries to use safe equality, the only upgrade
-            path is to have parallel libraries, with the new version only
-            catering to types deriving ~Eql1~ and the old version dealing with
-            everything else. Such a split of the ecosystem would be very
-            problematic, which means the cure is likely to be worse than the
+          + On the other hand, parameterizing ~contains~ with ~CanEqual1~ as in
+            would make ~contains~ unusable for all /types/ that have not yet
+            declared an ~CanEqual1~ /instance/, including all types coming from
+            Java. This is clearly unacceptable. It would lead to a situation
+            where, rather than migrating existing libraries to use safe equality,
+            the only upgrade path is to have parallel libraries, with the new
+            version only catering to types deriving ~CanEqual1~ and the old version
+            dealing with everything else. Such a split of the ecosystem would be
+            very problematic, which means the cure is likely to be worse than the
             disease.
 
        9. For these reasons, it looks like a two-parameter type class is the only
@@ -3428,10 +3429,10 @@
        10. In applications where ~-language:strictEquality~ is the default one could
            also introduce a *one-parameter type alias* such as
            #+begin_src scala
-             type Eq[-T] = Eql[T, T]
+             type Eq[-T] = CanEqual[T, T]
            #+end_src
            Operations needing safe equality could then use this alias instead of
-           the _two-parameter ~Eql~ class_. But it would *only work under
+           the _two-parameter ~CanEqual~ class_. But it would *only work under
            ~-language:strictEquality~,* since otherwise the universal ~Eq[Any]~
            instance would be available everywhere.
 
@@ -3468,7 +3469,7 @@
       + THEN ::
         ~e~ *is converted to* a /context function literal/ by *rewriting it to*
         #+begin_src scala
-          (using x_1: T1, ..., x_n: Tn) => e
+          (x_1: T1, ..., x_n: Tn) ?=> e
         #+end_src
         where the NAMES ~x_1, ..., x_n~ are ARBITRARY.
         * This expansion is performed *before* the expression ~e~ is typechecked,
@@ -3482,11 +3483,11 @@
             #+begin_src scala
               def g(arg: Executable[Int]) =  // ...
 
-              g(22)    // is expanded to g((using ev: ExecutionContext) => 22)
-              g(f(2))  // is expanded to g((using ev: ExecutionContext) => f(2)(using ev))
+              g(22)    // is expanded to g((ev: ExecutionContext) ?=> 22)
+              g(f(2))  // is expanded to g((ev: ExecutionContext) ?=> f(2)(using ev))
 
-              g(ExecutionContext ?=> f(3))  // is expanded to g((using ev: ExecutionContext) => f(3)(using ev))
-              g((using ctx: ExecutionContext) => f(22)(using ctx))  // is left as it is
+              g((ctx: ExecutionContext) ?=> f(3))  // is expanded to g((using ev: ExecutionContext) => f(3)(using ev))
+              g((ctx: ExecutionContext) ?=> f(22)(using ctx))  // is left as it is
             #+end_src
 
 **** DONE Example: Builder Pattern - =TODO= RE-READ
@@ -4124,12 +4125,12 @@
        binary format in =.tasty= files. /TASTy inspection/ allows to _load_
        these files and _analyze_ their content's tree structure.
 
-*** DONE Inline
-    CLOSED: [2020-05-26 Tue 04:23]
+*** DONE Inline - =TODO= =FIX= apply the universal access rule and eliminate useless empty parentheses
+    CLOSED: [2020-11-24 Tue 03:48]
 **** DONE Inline Definitions
-     CLOSED: [2020-03-11 Wed 00:43]
+     CLOSED: [2020-11-24 Tue 01:27]
      - ~inline~ :: a new /soft modifier/ that *guarantees* that a definition will
-                   be inlined at the point of use.
+                   be /inlined/ at the point of use.
      - Example:
        #+begin_src scala
          object Config {
@@ -4139,7 +4140,7 @@
          object Logger {
            private var indent = 0
 
-           inline def log[T](msg: String, indentMargin: =>Int)(op: => T): T =
+           inline def log[T](msg: String, indentMargin: => Int)(op: => T): T =
              if (Config.logging) {
                println(s"${"  " * indent}start $msg")
                indent += indentMargin
@@ -4151,20 +4152,22 @@
              else op
          }
        #+end_src
-       + The ~Config~ object contains a definition of the /inline value/ ~logging~.
+       * The ~Config~ object contains a definition of the /inline value/ ~logging~.
          This means that ~logging~ is treated as a _constant value_, equivalent to
-         its RHS ~false~. The RHS of such an ~inline val~ must itself be a
-         /constant expression/.
-         * Used in this way, ~inline~ is *equivalent to* Java and Scala 2's ~final~.
+         its RHS ~false~. The RHS of such an ~inline val~ *must itself be a /constant
+         expression/.*
+         + Used in this way, ~inline~ is *equivalent to* Java and Scala 2's ~final~.
+           =IMPORTANT=
+           =IMPORTANT=
            =IMPORTANT=
            Note that ~final~, meaning /inlined constant/,
            - is still supported in Dotty,
            - but *will be Phased Out*.
 
-       + The ~Logger~ object contains a definition of the /inline method/ ~log~.
-         This method will always _be inlined at the point of call_.
+       * The ~Logger~ object contains a definition of the /inline method/ ~log~.
+         This method will *ALWAYS be inlined* _at the point of call._
 
-       + Usage and re-write:
+       * Usage and re-write:
          #+begin_src scala
            var indentSetting = 2
 
@@ -4175,18 +4178,24 @@
              }
            }
          #+end_src
-
-         - With current definition ~inline val logging = false~,
-           The usage code will be re-written as
+         + IF ~inline val logging = false~, the usage code will be re-written as
            #+begin_src scala
              def factorial(n: BigInt): BigInt = {
                if (n == 0) 1
                else        n * factorial(n - 1)
              }
            #+end_src
+           1. Since _NEITHER_ ~msg~ _OR_ ~indentMargin~ were used, they do *NOT*
+              appear in the _generated code_ for ~factorial~.
 
-         - If the example code define ~inline val logging = true~, then the
-           usage code will be re-written as
+           2. The ~else~- part reduces to just an ~op~.
+              In the _generated code_ we do *NOT* generate any /closures/
+              because we _ONLY refer to a /by-name parameter/ ONCE._
+
+           3. *CONSEQUENTLY*, the code was /inlined/ directly and the call was
+              /beta-reduced/.
+
+         + IF ~inline val logging = true~, the usage code will be re-written as
            #+begin_src scala
              def factorial(n: BigInt): BigInt = {
                val msg = s"factorial($n)"
@@ -4200,21 +4209,23 @@
                result
              }
            #+end_src
-           NOTE:
-           + The /by-value parameter/ ~msg~ is _evaluated only once_,
+           - The /by-value parameter/ ~msg~ is _evaluated only once_,
              per the usual Scala semantics, by binding the value and reusing the
              ~msg~ through the body of ~factorial~.
 
-           + The special handling of the assignment to the ~private var indent~.
-             It is achieved by *generating* a /setter method/ ~def
-             inline$indent_=~ and calling it instead.
+           - The special handling of the assignment to the ~private var indent~:
+             It is achieved by *generating* a /setter method/ ~def inline$indent_=~
+             and calling it instead.
+             =from Jian= =TODO= =TODO= =TODO=
+             WHY MUST WE DO THIS???
 
 **** DONE Recursive Inline Methods
-     CLOSED: [2020-05-25 Mon 18:22]
+     CLOSED: [2020-11-25 Wed 15:57]
      /Inline methods/ can be *recursive*.
-     - For instance, when called with a *constant* exponent ~n~, the following method
-       for ~power~ will be implemented by straight inline code *WITHOUT ANY
-       /loop/ or /recursion/.*
+     - For instance,
+       when called with a *constant* exponent ~n~, the following /method/ for
+       ~power~ will be implemented by straight _inline code_ *WITHOUT ANY /loop/
+       or /recursion/.*
        #+begin_src scala
          inline def power(x: Double, n: Int): Double = {
            if (n == 0) 1.0
@@ -4235,17 +4246,17 @@
          //    y3 * y3          // ^10
        #+end_src
 
-     - There also can be /inline parameters/.
-       - =from Jian=
-         The /by-name parameters/ in the context of this whole document is actually
-         /by-need parameters/. This is the common implementation in all the practical
-         programming languages.
+     - *Parameters of inline methods* can have an ~inline~ modifier as well.
+       * Atual arguments to these /inline parameters/ will be *inlined* in the
+         body of the ~inline def~.
 
-       - =from Jian=
-         /Inline parameters/ have call semantics *equivalent* to /naive by-name parameters/
-         -- no caching.
-           It is usually useful when /constant values/ need to be propagated to
-         allow further optimizations/reductions. TODO ??? TODO
+       * /inline parameters/ have _call semantics_ *EQUIVALENT TO* /by-name
+         parameters/
+         BUT ALLOW for DUPLICATION of the code in the argument.
+
+       * It is usually useful when /constant values/ need to be propagated to
+         allow further optimizations/reductions.
+         =TODO= =TODO= =???= =TODO= =TODO=
 
      - The difference in translation between /by-value/, /by-name/, and ~inline~
        parameters:
@@ -4253,7 +4264,7 @@
          inline def funkyAssertEquals(actual: Double,
                                       expected: =>Double,
                                       inline delta: Double): Unit =
-           if ((actual - expected).abs > delta)
+           if (actual - expected).abs > delta then
              throw new AssertionError(s"difference between ${expected} and ${actual} was larger than ${delta}")
 
          funkyAssertEquals(computeActual(), computeExpected(), computeDelta())
@@ -4264,17 +4275,14 @@
          //    if (actual - expected).abs > computeDelta() then
          //      throw new AssertionError(s"difference between ${expected} and ${actual} was larger than ${computeDelta()}")
        #+end_src
-       + You can see the ~inline~ parameter here is actually a /NAIVE by-name
-         parameter/. The /by-name parameter/ here is a /non-naive by-name parameter/,
-         and people often call it /by-need parameter/.
-         =from Jian= this manual doesn't mention the term /by-name parameter/.
 
 **** DONE Rules for Overriding
-     CLOSED: [2020-05-25 Mon 18:41]
+     CLOSED: [2020-11-24 Tue 01:41]
      /Inline methods/ can *override* other /non-inline methods/.
+     
      The rules are as follows:
-     1. If an /inline method/ ~f~ implements or *overrides* another, /non-inline
-        method/, the /inline method/ *can also be invoked at /runtime/.*
+     1. If an /inline method/ ~f~ *implements* or *overrides* another, /non-inline
+        method/, the /inline method/ *CAN ALSO be invoked at /runtime/.*
         For instance, consider the scenario:
         #+begin_src scala
           abstract class A {
@@ -4291,12 +4299,12 @@
           val a: A = b
 
           // inlined invocations
-          assert(b.f() == 22)
-          assert(b.g() == 33)
+          assert(b.f == 22)
+          assert(b.g == 33)
 
           // dynamic invocations
-          assert(a.f() == 22)
-          assert(a.g() == 33)
+          assert(a.f == 22)
+          assert(a.g == 33)
         #+end_src
         The /inlined invocations/ and the /dynamically dispatched invocations/
         give the _SAME_ results.
@@ -4321,49 +4329,62 @@
         #+end_src
 
 **** DONE Relationship to ~@inline~
-     CLOSED: [2020-05-25 Mon 19:11]
+     CLOSED: [2020-11-24 Tue 02:07]
      - Scala also defines a ~@inline~ annotation which is used as _a *hint* for the
        BACKEND to inline._
 
      - The ~inline~ modifier is a _MORE POWERFUL_ than the ~@inline~ annotation.
-       + ~@inline~ annotation ::
-         * A _hint_
+       * ~@inline~ annotation ::
+         + A _hint_
            - _Hint_ here means _try with *BEST EFFORT*, *but NOTHING guaranteed*!_
 
-         * The _hint_ is for the *backend*
+         + The _hint_ is for the *backend*
 
 
-       + ~inline~ /modifier/ ::
-         * A _command_
+       * ~inline~ /modifier/ ::
+         + A _command_
            - _Command_ here means _GUARANTEED!_
 
-         * The _command_ is for the *frontend*
+         + The _command_ is for the *frontend*
 
-         * it also applies to /recursive methods/.
+         + it also applies to /recursive methods/.
 
-       + Cross compilation between Dotty and Scala 2:
-         + Introduce ~@forceInline~ in Dotty.
-           * For dotc it is the same as ~inline~.
-           * For scalac it will be ignored.
+       * Cross compilation between =FIX= Dotty (=BY= Scala 3) and Scala 2:
+         + Introduce ~@forceInline~ in =FIX= Dotty (=BY= Scala 3).
+           - For Scala 3 it is the same as ~inline~.
+           - For scala 2 it will be ignored.
 
          + Usage:
            Always use ~@forceInline @inline~ if cross compilation between Dotty
            and Scala 2 is required. This can make
-           * Scala 2 ignores the ~@forceInline~ annotation, so one must use both
+           - Scala 2 ignores the ~@forceInline~ annotation, so one must use both
              annotations o guarantee inlining for Dotty and at the same time hint
-             inline for Scala 2 (i.e. ~@forceInline @inline~)
-             - =from Jian=
-               My understanding: TODO ??? TODO =re-read= this summary
-               When the ~@forceInline~ show up in Dotty code, it is considered as
-               ~inline~. However, this is not enough if we want use this code from
-               Scala 2 with _inline_ applied -- Scala 2 ignores ~@forceInline~.
-                 This means it's better to use ~@forceInline @inline~ in Dotty, if
-               you want to use this code can be used in Scala 2.
-                 Still with ~@forceInline @inline~, it is possbile that the code
-               at the Scala 2 call sites may not be _inlined_.
+             /inline/ for Scala 2 (i.e. ~@forceInline @inline~)
+             * =from Jian=
+               My understanding:
+               Scala 2 can't understand the ~inline~ in Scala 3, and to make the
+               cross-compilation work, use ~@forceInline~. It has the same semantics
+               as ~inline~ in Scala 3, but it will be ignored in Scala 2.
+                 This means for Scala 2, ~@forceInline~ is nothing. To make it try
+               its best to /inline/ code, ~@forceInline @inline~ is the best choice.
+                 However, it seems ~@forceInline~ can help cross-compilation, and 
+               ~@forceInline @inline~ can make Scala 2 work hard to /inline/ code,
+               BUT none of them can make Scala 2 guarantee the inline operation.
+               STILL only HINT, no COMMAND.
+               + Q ::
+                 DOES this mean this is just a workable choice, and still there
+                 is *no way* to ask the Scala 2 compiler GUARANTEE /inline/
+                 operations.
+                 
+               + It seems, no /inline/ COMMAND can only affect the performance of
+                 Scala 2, not semantics. Thus, this is acceptable, though not the
+                 best solution.
 
 ***** The definition of constant expression
-      Scala Language Specification 2.13 - _6.24 Constant Expressions_
+      Scala Language Specification 2.13 - _6.24 Constant Expressions_, including
+      _platform-specific extensions_ such as /constant folding/ of pure numeric
+      computations.
+
       - An /inline value/ *must* have a /literal type/ such as ~1~ or ~true~.
         #+begin_src scala
           inline val four = 4
@@ -4374,7 +4395,7 @@
         #+end_src
 
       - It is also possible to have _inline vals_ of /types/ that do not have a
-        syntax, such as ~Short(4)~.
+        specific syntax, such as ~Short(4)~.
         #+begin_src scala
           trait InlineConstant {
             inline val myShort: Short
@@ -4384,9 +4405,14 @@
             inline val myShort/*: Short(4)*/ = 4
           }
         #+end_src
+        =from Jian=
+        * ~inline val myShort: Short = 4~ is illegal
 
+        * ~inline val myShort: Short(4) = 4~ is legal, but the /term-dependent types/
+          must be enabled with a ~experimental.dependent~ language ~import~ or setting.
+  
 **** DONE Transparent Inline Methods
-     CLOSED: [2020-05-25 Mon 19:21]
+     CLOSED: [2020-11-24 Tue 02:13]
      /Inline methods/ can additionally be declared ~transparent~.
        This means that the /return type/ of the /inline method/ can be
      *SPECIALIZED to a more precise type* upon expansion.
@@ -4396,17 +4422,17 @@
          class A
 
          class B extends A {
-           def m() = true
+           def m = true
          }
 
          transparent inline def choose(b: Boolean): A =
-           if b then new A() else new B()
+           if b then (new A) else (new B)
 
          val obj1 = choose(true)  // static type is A
          val obj2 = choose(false) // static type is B
 
-         // obj1.m() // compile-time error: `m` is not defined on `A`
-         obj2.m()    // OK
+         // obj1.m // compile-time error: `m` is not defined on `A`
+         obj2.m    // OK
        #+end_src
 
      - A *non-transparent* /inline method/ is a *"blackbox"* in the sense that
@@ -4421,21 +4447,21 @@
        type/ ~0~ permitting the addition to be ascribed with the correct
        /singleton type/ ~1~.
        #+begin_src scala
-         transparent inline def Zero: Int = 0
-         val one: 1 = zero() + 1
+         transparent inline def zero: Int = 0
+         val one: 1 = zero + 1
        #+end_src
 
 **** DONE Inline Conditionals
-     CLOSED: [2020-05-26 Tue 00:44]
+     CLOSED: [2020-11-24 Tue 02:17]
      #+begin_src scala
        inline def update(delta: Int) =
          inline if (delta >= 0) increaseBy(delta)
                 else            decreaseBy(-delta)
      #+end_src
      - If the /condition/ of an /if-then-else expressions/ is a /constant expression/
-       then it _simplifies to the selected branch._ -- *NOT guaranteed*.
+       then _it *SIMPLIFIES* to the selected branch._ -- *NOT guaranteed*.
 
-     - Prefix an /if-then-else expression/ with ~inline~ *enforces* that the
+     - An ~inline~ prefixed /if-then-else expression/ *enforces* that the
        /condition/ has to be a /constant expression/, and thus *guarantees* that
        the conditional _will *always* simplify_.
 
@@ -4457,14 +4483,14 @@
        #+end_src
 
 **** DONE Inline Matches
-     CLOSED: [2020-05-26 Tue 02:06]
+     CLOSED: [2020-11-24 Tue 02:23]
      - A /match expression/ _in the body_ of an /inline method definition/ _may be_
        prefixed by the ~inline~ modifier.
-       + If there is *ENOUGH* _STATIC information_ to _unambiguously take a branch_,
+       * If there is *ENOUGH* _STATIC information_ to _unambiguously take a branch_,
          the expression is *reduced* to that branch and the type of the result
          is taken.
 
-       + If not, a /compile-time error/ is raised that reports that the match cannot
+       * If not, a /compile-time error/ is raised that reports that the match cannot
          be reduced.
 
      - The example below defines an /inline method/ with a single /inline match
@@ -4483,10 +4509,9 @@
        *reduced* accordingly returning the corresponding value (with the /type
        specialized/ because ~g~ is declared ~transparent~).
 
-     - The /type/ can have a _richer_ structure like the _simple_ /ADT/ below.
+     - The /type/ can have a RICHER structure like the _simple_ /ADT/ below.
        ~toInt~
        1. _matches_ the structure of a number in /Church-encoding/
-          AND
        2. _computes_ the corresponding integer.
        #+begin_src scala
          enum Nat {
@@ -4502,15 +4527,22 @@
          inline val natTwo = toInt(Nat.Succ(Nat.Succ(Nat.Zero)))
          val intTwo: 2 = natTwo
        #+end_src
-       ~natTwo~ is inferred to have the /singleton type/ ~2~
-       (=from Jian= since here we have the ~transparent~)
+       ~natTwo~ can be inferred to have the /singleton type/ ~2~ because of ~transparent~.
+       =IMPORTANT= =GOOD EXAMPLE=
+       =IMPORTANT= =GOOD EXAMPLE=
+       =IMPORTANT= =GOOD EXAMPLE=
 
 **** DONE The ~scala.compiletime~ Package
-     CLOSED: [2020-05-26 Tue 02:27]
+     CLOSED: [2020-11-24 Tue 03:07]
      The ~scala.compiletime~ package contains _helper definitions_ that provide
      support for /compile time/ OPERATIONS over _values_.
      They are described in the following.
-***** ~constValue~, ~constValueOpt~, and the ~S~ combinator
+     
+***** DONE ~constValue~, ~constValueOpt~, and the ~S~ combinator
+      CLOSED: [2020-11-24 Tue 02:37]
+      ~constValue~ is a function that produces *the _constant value_ represented
+      by a /type/.*
+
       - ~constValue[T]~ generate a _constant value_ of the /singleton type/ ~T~
         #+begin_src scala
           import scala.compiletime.{constValue, S}
@@ -4529,11 +4561,15 @@
 
       - ~S~ is the type of the *successor* of some /singleton type/.
         For example, ~S[1]~ is the /singleton type/ ~2~.
-        + =from Jian=
+        * =from Jian=
           How can we make a type of values can have /successor/, and how do
           these successors generate???
+          =IMPORTANT= =TODO=
+          =IMPORTANT= =TODO=
+          =IMPORTANT= =TODO=
 
-***** ~erasedValue~
+***** DONE ~erasedValue~
+      CLOSED: [2020-11-24 Tue 02:37]
       - The ~erasedValue[T]~ function in ~scala.comiletime.erasedValue~ is not
         implemented -- it would always raise a ~NotImplementedError~ exception
         when called.
@@ -4561,19 +4597,21 @@
           val dInt:     Some[Int]     = defaultValue[Int]
           val dDouble:  Some[Double]  = defaultValue[Double]
           val dBoolean: Some[Boolean] = defaultValue[Boolean]
-          val dAny:     Any.type      = defaultValue[Any]
+          val dAny:     None.type     = defaultValue[Any]
         #+end_src
 
       - Another example:
         #+begin_src scala
-          inline def toIntT[N <: Nat] <: Int = inline erasedValue[N] match {
-            case _: Zero.type => 0
-            case _: Succ[n]   => toIntT[n] + 1
-          }
+          transparent inline def toIntT[N <: Nat]: Int =
+            inline erasedValue[N] match {
+              case _: Zero.type => 0
+              case _: Succ[n]   => toIntT[n] + 1
+            }
 
           final val two = toIntT[Succ[Succ[Zero.type]]]
         #+end_src
-        + =from Jian= I think the ~final~ here is not the best practice!!!
+        * =from Jian=
+          I think the ~final~ here is not the best practice!!! =FIX=
           #+begin_quote
           Used in this way, inline is equivalent to Java and Scala 2's final.
           Note that ~final~, meaning /inlined constant/,
@@ -4581,31 +4619,13 @@
                               -- from "Inline Definitions" subsection in this doc
           #+end_quote
 
-        + =from Jian=
-          Better implementation:
-          #+begin_src scala
-            enum Nat {
-              case Zero
-              case Succ[N <: Nat](n: N)
-            }
-
-            import Nat._
-
-            transparent inline def toIntT[N <: Nat]: Int =
-              inline scala.compiletime.erasedValue[N] match {
-                case _: Zero.type => 0
-                case _: Succ[n]   => toIntT[n] + 1
-              }
-
-            inline val two = toIntT[Succ[Succ[Zero.type]]]
-          #+end_src
-
       - ~erasedValue~ is /an ~erased~ method/ so *it _CANNOT be used_ and _has NO_
         /runtime behavior/.*
           Since ~toIntT~ performs /static checks/ over the /static type/ of ~N~
         we can safely use it to scrutinize its return type (~S[S[Z]]~ in this case).
 
-***** ~error~
+***** DONE ~error~
+      CLOSED: [2020-11-24 Tue 02:41]
       The ~error~ /method/ is used to produce _user-defined_ /compile errors/
       *DURING /inline expansion/.* It has the following signature:
       #+begin_src scala
@@ -4614,11 +4634,11 @@
 
       - If an /inline expansion/ results in a call ~error(msgStr)~ the compiler
         produces an _error message_ containing the given ~msgStr~.
+        =FIX= Romove redundant curly parentheses
         + Example 1
           #+begin_src scala
-            inline def fail() = {
+            inline def fail() =
               error("failed for a reason")
-            }
 
             fail()  // error: failed for a reason
           #+end_src
@@ -4627,16 +4647,16 @@
 
         + Example 2
           #+begin_src scala
-            inline def fail(p1: => Any) = {
+            inline def fail(p1: => Any) =
               error(code"failed on: $p1")
-            }
 
             fail(indentity("foo"))  // error: failed on: indentity("foo")
           #+end_src
-
-***** The ~scala.compiletime.ops~ package
-      - The ~scala.compiletime.ops~ package contains types that provide support for
-        *primitive operations on /singleton types/.*
+          
+***** DONE The ~scala.compiletime.ops~ package
+      CLOSED: [2020-11-24 Tue 03:07]
+      The ~scala.compiletime.ops~ package contains types that provide support for
+      *primitive operations on /singleton types/.*
 
       - When all arguments to a type in ~scala.compiletime.ops~ are /singleton types/,
         the compiler can *evaluate* the result of the operation.
@@ -4649,17 +4669,17 @@
           val conjunction: true && true = true
           val multiplication: 3 * 5 = 15
         #+end_src
-        + ~scala.compiletime.ops.int.*~ provides support for _multiplying TWO
+        * ~scala.compiletime.ops.int.*~ provides support for _multiplying TWO
           /singleton ~Int~ types/,_
 
-        + ~scala.compiletime.ops.boolean.&&~ for the _conjunction of TWO ~Boolean~
+        * ~scala.compiletime.ops.boolean.&&~ for the _conjunction of TWO ~Boolean~
           types._
 
       - Many of these /singleton operation types/ are meant to be used _infix_
         (as in SLS § 3.2.8), and are annotated with ~@infix~ accordingly.
 
-      - Since /type aliases/ have the *SAME* /precedence/ rules as their term-level
-        equivalents, the operations _COMPOSE with the *EXPECTED* /precedence/ rules_:
+      - *Since /type aliases/ have the SAME /precedence/ rules as their term-level
+        equivalents,* the operations _COMPOSE with the EXPECTED /precedence/ rules_:
         #+begin_src scala
           import scala.compiletime.ops.int._
           val x: 1 + 2 * 3 = 7
@@ -4667,11 +4687,16 @@
 
       - The /operation types/ are *located in* /packages/ named after the /type/
         of the *left-hand side* parameter.
-        + ~scala.compiletime.ops.int.+~ represents _addition of two numbers_,
-        + ~scala.compiletime.ops.string.+~ represents _string concatenation_.
+        * ~scala.compiletime.ops.int.+~ represents _addition of two numbers_,
+        * ~scala.compiletime.ops.string.+~ represents _string concatenation_.
 
       - To _use both_ and _distinguish the two types from each other_,
         a /match type/ can dispatch to the correct implementation:
+        =IMORTANT=
+        =IMORTANT=
+        =from Jian= this is not a problem for values of non-singleton types. Am I right?
+        =IMORTANT=
+        =IMORTANT=
         #+begin_src scala
           import scala.compiletime.ops._
           import scala.annotation.infix
@@ -4685,20 +4710,23 @@
           val addition: 1 + 1 = 2
         #+end_src
 
-**** DONE Summoning Implicits Selectively - =TODO= =RE-READ=
-     CLOSED: [2020-05-26 Tue 04:23]
-     - It is foreseen that *many areas* of /typelevel programming/ *can be* done
-       with _REWRITE_ methods *instead of* /implicits/.
-       *BUT* _sometimes /implicits/ are *UNAVOIDABLE*._
+**** DONE Summoning Implicits Selectively - =TODO= =RE-NOTE=
+     CLOSED: [2020-11-24 Tue 03:42]
+     It is foreseen that *many areas* of /typelevel programming/ *can be* done
+     with _REWRITE_ methods *instead of* /implicits/.
+     *BUT* _sometimes /implicits/ are *UNAVOIDABLE*._
 
      - The problem so far was that the /Prolog-like programming style/ of /implicit
-       search/ becomes _viral_:
+       search/ becomes *viral*:
        *Once some construct depends on implicit search it has to be written as a
-       logic program itself.* TODO ??? TODO
+       logic program itself.*
 
      - Consider for instance the problem of creating a ~TreeSet[T]~ or a ~HashSet[T]~
        depending on whether ~T~ _has an ~Ordering~ or not._
        We can create a set of /given definitions/ like this:
+       =TODO= 
+       =TODO= 
+       =TODO= 
        #+begin_src scala
          trait SetFor[T, S <: Set[T]]
 
@@ -4712,7 +4740,7 @@
        #+end_src
        + =from Jian=
          I don't know the complete form of this example.
-         I try to complete it:
+         I try to complete it (Of course, this is too verbose!!!):
          #+begin_src scala
            trait SetFor[T, S <: Set[T]] {
              val set: S
@@ -4725,7 +4753,7 @@
            }
 
            object SetFor extends LowPriority {
-             given def treeSetFor[T: Ordering] as SetFor[T, TreeSet[T]] {
+             given treeSetFor[T: Ordering] as SetFor[T, TreeSet[T]] {
                val set =  new TreeSet
              }
            }
@@ -4763,28 +4791,35 @@
          on logic programming. -- =from Jian= _and they are NOT adopted._
 
      - _By contrast_,
-       the NEW ~scala.compiletime.summonFrom~ construct makes /implicit search/ available
-       _in a functional context_ -- =from Jian= rather than a logic programming cotext. TODO ??? TODO
+       the NEW ~scala.compiletime.summonFrom~ construct makes /implicit search/
+       available _in a functional context_.
        #+begin_src scala
          import scala.compiletime.summonFrom
 
          inline def setFor[T]: Set[T] = summonFrom {
-           case given ord: Ordering[T] => new TreeSet[T]
-           case _                      => new HashSet[T]
+           case ord: Ordering[T] => new TreeSet[T](using ord)
+           case _                => new HashSet[T]
          }
        #+end_src
        + A ~summonFrom~ /call/ takes a /pattern matching closure/ as argument.
-           All patterns in the /closure/ are /type ascriptions/ of the form
+           *All* patterns in the /closure/ are /type ascriptions/ of the form
          ~identifier : Type~.
 
        + Patterns are tried *in sequence* (=from Jian= This help us avoiding using
          inheritance to solve the _implicit search priority issue_).
          * The first case with a pattern ~x: T~ such that an /given value/ of type
-           ~T~ can be *summoned* is chosen. TODO ??? TODO
+           ~T~ can be *summoned* is chosen.
 
          * If the pattern is _PREFIXED_ with ~given~, the variable ~x~ is bound to
-           the /given value/ *for the remainder of the case.* -- =from Jian= natural
-           and reasonable, just like the other existing pattern boundings.
+           the /given value/ *for the remainder of the case.*
+           #+begin_src scala
+             import scala.compiletime.summonFrom
+
+             inline def setFor[T]: Set[T] = summonFrom {
+               case given ord: Ordering[T] => new TreeSet[T]
+               case _                      => new HashSet[T]
+             }
+           #+end_src
 
        + ~summonFrom~ application *must be reduced at /compile time/.*
 
@@ -4819,10 +4854,10 @@
       - =from Jian=
         Need example and use case.
 
-**** DONE Reference
-     CLOSED: [2020-05-26 Tue 02:28]
+**** DONE Reference - =RE-READ=
+     CLOSED: [2020-11-24 Tue 03:47]
      For more info, see
-     - =PR #4768=, which explains how ~summonFrom~'s predecessor (/implicit matches/)
+     - =PR #4768=, which explains how ~summonFrom~'s _predecessor_ (/implicit matches/)
        can be used for /typelevel programming/ and /code specialization/
 
      - =PR #7201= which explains the _NEW ~summonFrom~ syntax._
@@ -4867,20 +4902,20 @@
          inline def assert(inline expr: Boolean): Unit =
            ${ assertImpl('expr) }
 
-         def assertImpl(expr: Expr[Boolean])(using QuoteContext) = '{
+         def assertImpl(expr: Expr[Boolean])(using Quotes) = '{
            if (!$expr)
              throw new AssertionError(s"failed assertion: ${${ showExpr(expr) }}")
          }
 
-         def showExpr(expr: Expr[Boolean])(using QuoteContext): Expr[String] =
+         def showExpr(expr: Expr[Boolean])(using Quotes): Expr[String] =
            '{ "<some source code>" }  // Better implementation later in this document
        #+end_src
        + =IMPORTANT= =IMPORTANT= =IMPORTANT=
          =from Jian=
          The ~inline~ method with /top level splice/
-         can provide a /given ~QuoteContext~ instance/, which, in syntax, is NOT
+         can provide a /given ~Quotes~ instance/, which, in syntax, is NOT
          be written out explicitly! This is why the signature of the above ~asset~
-         does *NOT* have a ~(using QuoteContext)~ parameter list.
+         does *NOT* have a ~(using Quotes)~ parameter list.
 
      - /Quotations/ can have _spliced_ parts in them; in this case the embedded /splices/
        _are evaluated and embedded as part of_ the formation of the /quotation/.
@@ -4985,10 +5020,10 @@
 
      - The conversions can be implemented as follows:
        #+begin_src scala
-         def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
+         def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using Quotes): Expr[T => R] =
            '{ (x: T) => ${ f('x) } }
 
-         def from[T: Type, R: Type](f: Expr[T => R])(using QuoteContext): Expr[T] => Expr[R] =
+         def from[T: Type, R: Type](f: Expr[T => R])(using Quotes): Expr[T] => Expr[R] =
            (x: Expr[T]) => '{ $f($x) }
        #+end_src
        - This decorator gives ~Expr~ the ~apply~ operation of an /applicative functor/.
@@ -5001,7 +5036,7 @@
            * the reference to ~x~ is legal because it is /spliced/, then /quoted/.
 
      - Example:
-       =from Jian= =TODO= Need to create a /given instance/ of ~QuoteContext~
+       =from Jian= =TODO= Need to create a /given instance/ of ~Quotes~
        #+begin_src scala
          // '{ (x: Int) => x.toString }
          val f1: Expr[Int => String] = to((x: Expr[Int]) => '{ $x.toString })
@@ -5012,17 +5047,17 @@
        #+end_src
        + =from Jian=
          To make the code above runnable, they must be used in a scope with a
-         given ~QuoteContext~ instance. To satisfy this, there are two ways:
+         given ~Quotes~ instance. To satisfy this, there are two ways:
          * Compile Time Macro:
            #+begin_src scala
              import scala.quoted._
 
              inline def runf1: Int => String = ${ mcrImpl1 }
-             def mcrImpl1(using QuoteContext): Expr[Int => String] =
+             def mcrImpl1(using Quotes): Expr[Int => String] =
                to((x: Expr[Int]) => '{ $x.toString })
 
              inline def runf2: String = ${ mcrImpl2 }
-             def mcrImpl2(using QuoteContext): Expr[String] = {
+             def mcrImpl2(using Quotes): Expr[String] = {
                val f2: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
                f2('{2})
              }
@@ -5056,7 +5091,7 @@
        it does _NOT_ \beta{}-reduce when a lambda is called immediately
        #+begin_src scala
          inline def resultOfFrom: String = ${ resultOfFromImpl }
-         def resultOfFromImpl(using QuoteContext): Expr[String] = {
+         def resultOfFromImpl(using Quotes): Expr[String] = {
            val f: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
            Expr(f('{2}).show)
          }
@@ -5069,7 +5104,7 @@
          #+begin_src scala
            inline def forBetaReduceExample: String = ${ forBetaReduceExampleImpl }
 
-           def forBetaReduceExampleImpl(using QuoteContext): Expr[String] = {
+           def forBetaReduceExampleImpl(using Quotes): Expr[String] = {
              val afterBetaReduction = Expr.betaReduce('{ (x: Int) => x.toString })('{2})
              Expr(afterBetaReduction.show)
            }
@@ -5098,7 +5133,7 @@
            ~T~ and its usage. But the code can be rewritten by adding a binding
            of a ~Type[T]~ tag:
            #+begin_src scala
-             def to[T, R: Type](f: Expr[T] => Expr[R])(using t: Type[T])(using QuoteContext): Expr[T => R] =
+             def to[T, R: Type](f: Expr[T] => Expr[R])(using t: Type[T])(using Quotes): Expr[T => R] =
                '{ (x: $t) => ${ f('x) } }
            #+end_src
            - In this version of ~to~, the type of ~x~ is now the result of /splicing/
@@ -5113,14 +5148,14 @@
         (automatically) ~${summon[Type[T]] }~.
        + For instance, the user-level definition of ~to~:
          #+begin_src scala
-           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
+           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using Quotes): Expr[T => R] =
              '{ (x: T) => ${ f('x) } }
          #+end_src
 
          would be *rewritten* to
 
          #+begin_src scala
-           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using QuoteContext): Expr[T => R] =
+           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using Quotes): Expr[T => R] =
              '{ (x: ${ summon[Type[T]] }) => ${ f('x) } }
          #+end_src
          * The summon query succeeds because
@@ -5158,7 +5193,7 @@
        #+begin_src scala
          import scala.quoted._
 
-         def compile(e: Exp, env: Map[String, Expr[Int]])(using QuoteContext): Expr[Int] = e match {
+         def compile(e: Exp, env: Map[String, Expr[Int]])(using Quotes): Expr[Int] = e match {
            case Num(n)          => Expr(n)
            case Plus(e1, e2)    => '{ ${ compile(e1, env) } + ${ compile(e2, env) } }
            case Var(x)          => env(x)
@@ -5193,7 +5228,7 @@
 
          object Expr {
            /** Lift a value into an expression containing the construction of that value */
-           def apply[T: Liftable](x: T)(using QuoteContext): Expr[T] =
+           def apply[T: Liftable](x: T)(using Quotes): Expr[T] =
              summon[Liftable[T]].toExpr(x)
 
            // ...
@@ -5265,7 +5300,7 @@
      - Using /lifting/, we can now give the missing definition of ~showExpr~ in
        the introductory example:
        #+begin_src scala
-         def showExpr[T](expr: Expr[T])(using QuoteContext): Expr[String] = {
+         def showExpr[T](expr: Expr[T])(using Quotes): Expr[String] = {
            val code: String = expr.show
            Expr(code)
          }
@@ -5295,7 +5330,7 @@
            inline def assert(inline expr: Boolean): Unit =
              ${ assertImpl('expr) }
 
-           def assertImpl(expr: Expr[Boolean])(using QuoteContext) =
+           def assertImpl(expr: Expr[Boolean])(using Quotes) =
              val failMsg: Expr[String] = Expr(s"failed assertion: ${expr.show}")
              '{ if !($expr) then throw new AssertionError($failMsg) }
          }
@@ -5368,13 +5403,13 @@
            inline def power(x: Double, inline n: Int) =
              ${ powerCode('x, 'n) }
 
-           private def powerCode(x: Expr[Double], n: Expr[Int])(using QuoteContext): Expr[Double] =
+           private def powerCode(x: Expr[Double], n: Expr[Int])(using Quotes): Expr[Double] =
              n.unlift match {
                case Some(m) => powerCode(x, m)
                case None    => '{ Math.pow($x, $y) }
              }
 
-           private def powerCode(x: Expr[Double], n: Int)(using QuoteContext): Expr[Double] =
+           private def powerCode(x: Expr[Double], n: Int)(using Quotes): Expr[Double] =
              if      (n == 0)     '{ 1.0 }
              else if (n == 1)     x
              else if (n % 2 == 0) '{ val y = $x * $x; ${ powerCode('y, n / 2) } }
@@ -5444,7 +5479,7 @@
        #+begin_src scala
          object Macros {
            def map[T](arr: Expr[Array[T]], f: Expr[T] => Expr[Unit])
-                     (using t: Type[T], qctx: QuoteContext): Expr[Unit] = '{
+                     (using t: Type[T], quotes: Quotes): Expr[Unit] = '{
              var i: Int = 0
              while (i < ($arr).length) {
                val element: $t = ($arr)(i)
@@ -5453,7 +5488,7 @@
              }
            }
 
-           def sum(arr: Expr[Array[Int]])(using QuoteContext): Expr[Int] = '{
+           def sum(arr: Expr[Array[Int]])(using Quotes): Expr[Int] = '{
              var sum = 0
              ${ map(arr, x => '{sum += $x}) }
              sum
@@ -5471,7 +5506,7 @@
        import scala.quoted._
        inline def setFor[T]: Set[T] = ${ setForExpr[T] }
 
-       def setForExpr[T: Type](using QuoteContext): Expr[Set[T]] = {
+       def setForExpr[T: Type](using Quotes): Expr[Set[T]] = {
          Expr.summon[Ordering[T]] match {
            case Some(ord) => '{ new TreeSet[T]()($ord) }
            case _         => '{ new HashSet[T] }
@@ -5479,7 +5514,7 @@
        }
      #+end_src
 
-**** TODO Relationship with Whitebox ~Inline~
+**** TODO Relationship with Whitebox ~inline~
      =from Jian= *I don't quite understand!!!*
      ~Inline~ documents inlining.
      The code below introduces a /whitebox inline method/ that can calculate
@@ -5488,7 +5523,7 @@
        transparent inline def defaultOf(inline str: String) =
          ${ defaultOfImpl('str) }
 
-       def defaultOfImpl(strExpr: Expr[String])(using QuoteContext): Expr[Any] =
+       def defaultOfImpl(strExpr: Expr[String])(using Quotes): Expr[Any] =
          strExpr.unliftOrError match {
            case "int"    => '{1}
            case "string" => '{"a"}
@@ -5527,11 +5562,11 @@
 **** TODO Pattern matching on quoted expressions
 ***** TODO Quoted patterns
 ***** TODO Recovering precise types using patterns
+***** TODO Open code patterns
 
 **** TODO More details
 
-*** TODO Staging
-    # *Multi-Stage Programming*
+*** TODO Multi-Stage Programming
 **** API
 **** Create a new Dotty project with staging enabled
 **** Example
@@ -5608,8 +5643,8 @@
 **** TODO Reference
      For more info, see _Scala SIP 25_.
 
-*** DONE Mixin Traits
-    CLOSED: [2020-11-10 Tue 16:27]
+*** DONE Transparent Traits
+    CLOSED: [2020-11-27 Fri 02:42]
     - /Traits/ are used in _TWO_ roles:
       * As *mixins* for other /classes/ and /traits/
       * As *types* of ~vals~, ~defs~, or ~parameters~
@@ -5622,8 +5657,6 @@
           In Scala 2, this /parent trait/ sometimes makes /inferred types/ more
         complicated than they should be.
 
-    - /Mixin traits/ is designed to address the topic of hiding /mixin traits/ from
-      /inferred types/.
       * Example:
         #+begin_src scala
           trait Kind
@@ -5633,7 +5666,7 @@
         #+end_src
         The /inferred type/ of ~x~ in Scala 2 is ~Set[Kind & Product & Serializable]~
         whereas one would have hoped it to be ~Set[Kind]~.
-        * The reasoning for this particular type to be inferred is as follows:
+        + The reasoning for this particular type to be inferred is as follows:
           1. The /type/ of the conditional above is the /union type/ ~Val | Var~
              (this is just in concept -- we don't actually have the /union type/
               syntax in Scala 2).
@@ -5644,11 +5677,11 @@
              since *ALL THREE* /traits/ are /supertraits/ of both ~Val~ and ~Var~.
              So that /type/ becomes the /inferred element type/ of the /set/.
 
-    - Scala 3 allows one to mark a /trait/ as a ~@mixin~ /trait/, which means that
-      it can be suppressed in /type inference/.
+    - Scala 3 allows one to mark a /trait/ as a ~transparent~, which means it can
+      be suppressed in /type inference/.
       #+begin_src scala
         // In Scala 3
-        @mixin trait S
+        transparent trait S
         trait Kind
         case object Var extends Kind, S
         case object Val extends Kind, S
@@ -5657,17 +5690,18 @@
       Now ~x~ has /inferred type/ ~Set[Kind]~ -- the common /mixin trait/ ~S~ does
       _NOT_ appear in the /inferred type/.
 
-**** Mixin Traits
+**** Transparent Traits
      - The /traits/ ~scala.Product~, ~java.lang.Serializable~ and ~java.lang.Comparable~
-       are *treated _AUTOMATICALLY_ as /mixin traits/.*
-       * Other /traits/ can be _TURNED INTO_ /mixin traits/,
-         _BY ADDING_ the /annotation/ ~@mixin~ in front of ~trait~, as shown above.
+       are *treated _AUTOMATICALLY_ as ~transparent~.*
+       * /Scala 2 traits/ can also be made /transparent/ by adding a
+         ~@transparentTrait~ annotation, which is defined in ~scala.annotation~.
+         + It _WILL BE_ /deprecated/ and phased out once Scala 2/3 interopability
+           is no longer needed.
 
-     - Every /trait/ *can be* declared as a /mixin trait/.
-
-     - Typically /mixin traits/ are /traits/ that influence the implementation of
-       inheriting /classes/ and /traits/ and that are _NOT usually used as types by
-       themselves._
+     - Typically, ~transparent trait~'s are /traits/
+       that influence the implementation of inheriting /classes/ and /traits/
+       AND
+       that are _NOT usually used as types by themselves._
        + Two examples from the standard collection library:
          * ~IterableOps~,
            which provides method implementations for an ~Iterable~
@@ -5678,13 +5712,13 @@
 
      - =IMPORTANT=
        Generally, _ANY_ /trait/ that is _extended RECURSIVELY_ is a good candidate
-       to be declared a /mixin trait/.
+       to be declared /transparent/.
 
-**** Rules for Inference - =TODO= =RE-READ= =NEED-FIX???=
-     - /Super traits/ *can be* given as /explicit types/ as usual.
+**** Rules for Inference - =TODO= =RE-READ=
+     - /Transparent traits/ *can be* given as /explicit types/ as usual.
        But they are often ELIDED when types are inferred.
-         Roughly, the rules for /type inference/ say that /super traits/ _are
-       DROPPED from intersections *WHERE POSSIBLE*._
+         Roughly, the rules for /type inference/ say that /transparent traits/
+       _are DROPPED from intersections *WHERE POSSIBLE*._
 
      - The precise rules are as follows: =TODO= =???= =TODO=
        * When *inferring* a /type/ of
@@ -5694,21 +5728,21 @@
 
        * where that /type/ is *NOT* /higher-kinded/,
 
-       * and where ~B~ is its known /upper bound/ or ~Any~ if none exists:
+       * and where ~B~ is its known /upper bound/ or ~Any~ if none exists: (=FIX= this : ???)
 
        * If the /type inferred/ so far is of the form ~T1 & ... & Tn~ where n >= 1,
          replace the maximal number of ~Ti~'s by ~Any~, while ensuring that the
          resulting type is still a /subtype/ of the bound ~B~.
 
-       + However, do NOT perform this /widening/ if all types ~Ti~ can get replaced
-         in that way.
+       + However, do NOT perform this /widening/ if all /transparent traits/ ~Ti~
+         can get replaced in that way.
 
      - The _last clause_ *ensures* that
-       a single /mixin trait/ instance such as ~Product~ is not widened to
+       a single ~transparent trait~ instance such as ~Product~ is not widened to
        ~Any~.
        + =IMPORTANT= =SUMMARY=
-         /Mixin trait/ instances are _ONLY dropped_ when they appear _in conjunction
-         with some other type._
+         ~transparent trait~ instances are _ONLY dropped_
+         WHEN they appear _in conjunction with some other /type/._
 
 *** DONE Creator Applications
     CLOSED: [2020-07-14 Tue 13:33]
@@ -6384,7 +6418,7 @@
       AND
       it can be disabled under /compiler flag/ (i.e. =-Yno-kind-polymorphism=).
 
-*** DONE Tupled Function - =TODO= =RE-READ=
+*** DONE _HIDDEN_ - Tupled Function - =TODO= =RE-READ=
     CLOSED: [2020-07-14 Tue 15:15]
     # Subtitle "Tupled Function" should be removed!!! =FIX-DOC=
     =from Jian= =Rephrase=
@@ -6480,7 +6514,7 @@
              (x: GArgs) => tf.tupled(f)(tg.tupled(g)(x))
        #+end_src
 
-*** TODO TypeTest (HIDDEN)
+*** TODO _HIDDEN_ - TypeTest
 **** ~TypeTest~
      - When /pattern matching/ there are *TWO* situations where were a /runtime
        type/ test *MUST* be performed.
@@ -6658,7 +6692,7 @@
        }
      #+end_src
 
-*** DONE ~targetName~ Annotation
+*** DONE The ~@targetName~ Annotation
     CLOSED: [2020-11-22 Sun 04:16]
     - ~@targetName~ annotation :: it is applied on a /method definition/ defines
       an _alternate name_ for the implementation of that /method/.
@@ -7751,7 +7785,7 @@
            }
 
            private def fromDigitsImpl(digits: Expr[String])
-                                     (using ctx: QuoteContext): Expr[BigFloat] =
+                                     (using ctx: Quotes): Expr[BigFloat] =
              digits match {
                case Const(ds) =>
                  try {
@@ -7794,8 +7828,7 @@
              |                    exponent too large: 3333333333
          #+end_src
 
-*** TODO Structural Types
-    # *Programmatic Structural Types*
+*** TODO Programmatic Structural Types
     - Some usecases are more awkward in statically typed languages than in
       dynamically typed languages
 
@@ -7852,9 +7885,8 @@
 **** TODO Relation with ~scala.Dynamic~
      TODO =from Jian= I need to learn more about ~scala.Dynamic~
 
-*** DONE Operators
+*** DONE Rules of Operators
     CLOSED: [2020-01-18 Sat 16:07]
-    *Rules for Operators*
     - The rules for infix operators have changed in some parts:
       1. an alphanumeric method can be used as an infix operator only if its
          definition carries an @infix annotation.
@@ -8011,9 +8043,8 @@
          * The thrid line ~???~ doesn't have a legal following operand -- ~match~
            is not a token that can start an expression.
 
-*** DONE Wildcard Types - =IMPORTANT= =Migration is COMPLICATED=
+*** DONE Wildcard Arguments in Types - =IMPORTANT= =Migration is COMPLICATED=
     CLOSED: [2020-11-07 Sat 00:44]
-    # Wildcard Arguments in Types
     - The syntax of /wildcard arguments in types/ has *changed* FROM ~_~ TO ~?~.
 
     - Examples:
@@ -8085,18 +8116,15 @@
      - These rules make it possible to cross build between Scala 2 using the
        /kind projector/ plugin and Scala 3.0 - 3.2 using option ~-Ykind-projector~.
 
-*** TODO Type Checking - =No Doc till now=
-    *Type Checking*
+*** TODO Changes in Type Checking - =No Doc till now=
     - [//]:# todo: fill in
 
-*** TODO Type Inference - =TODO: WATCH=
-    *Changes in Type Inference*
+*** TODO Changes in Type Inference - =TODO: WATCH=
     See
     - https://www.youtube.com/watch?v=lMvOykNQ4zs
     - https://www.youtube.com/watch?v=VV9lPg3fNl8
 
-*** TODO Implicit Resolution
-    # Changes in Implicit Resolution
+*** TODO Changes in Implicit Resolution
 
     This page describes *changes* to the /implicit resolution/ that apply both to
     the new ~given~'s and to the old-style ~implicit~'s in Dotty.
@@ -8422,8 +8450,7 @@
                                   // `A` to `Int` and the `Ordering` for `Int`.
          #+end_src
          
-*** TODO Overload Resolution - TODO =READING=
-    # Changes in Overload Resolution
+*** TODO Changes in Overload Resolution - =TODO= =READING=
     /Overload resolution/ in Dotty *improves* on Scala 2 in _TWO_ ways.
     - it takes *ALL* /argument lists/ into account
       _instead of_
@@ -8601,9 +8628,9 @@
 
        + In Scala 3.1+, they will be enabled by default.
 
-*** DONE Pattern Matching - =RE-READ= - =Further simplification will come, no need to read now=
+*** DONE Option-less Pattern Matching - =RE-READ= - =Further simplification will come, no need to read now=
     CLOSED: [2020-09-25 Fri 00:37]
-    # Option-less pattern matching
+
     - Dotty implementation of /pattern matching/ was GREATLY *simplified* compared
       to scalac.
         From a user perspective, this means that Dotty generated patterns are a
@@ -8868,7 +8895,7 @@
      - /pattern/ ~x @ X()~ for an unapply that takes an /abstract type/ requires a
        ~TypeTest~ _in scope_
 
-*** DONE Eta Expansion
+*** DONE Automatic Eta Expansion
     CLOSED: [2020-05-25 Mon 10:20]
     # Automatic Eta Expansion
     The _conversion of METHODS into FUNCTIONS_ has been improved and happens
@@ -8903,9 +8930,7 @@
        + _Automatic ~()~ insertion_ is _limited_ (see "Dropped: Auto-Application)
          in Dotty, but the fundamental ambiguity remains.
 
-*** TODO Compiler Plugins
-    # Changes in Compiler Plugins
-
+*** TODO Changes in Compiler Plugins
 **** Using Compiler Plugins
 **** Writing a Standard Compiler Plugin
 **** Writing a Research Compiler Plugin
@@ -8917,7 +8942,7 @@
 **** Reference
      - SIP-20
 
-*** DONE Main Functions
+*** DONE Main Methods
     CLOSED: [2020-05-24 Sun 22:31]
     Scala 3 offers a new way to define programs that can be invoked from the command line:
     _A ~@main~ /annotation/ on a /method/ turns this /method/ into an executable program._
@@ -9034,56 +9059,68 @@
         ~Array[String]~ argument instead.
 
 ** TODO DROPPED FEATURES
-*** DelayedInit
-    # *Dropped: DelayedInit*
+*** DONE Dropped: ~DelayedInit~
+    CLOSED: [2020-11-24 Tue 08:24]
+    The special handling of the ~DelayedInit~ trait is _NO LONGER SUPPORTED_.
 
-*** Macros
+    - Consequence:
+      the ~App~ /class/, which used ~DelayedInit~ is now partially *BROKEN*.
+      * ~App~ still can be used as an easy and concise way to set up a _main program_.
+        + However, the code is now run in the initializer of the object, which on
+          some JVM's means that it will only be interpreted. So, better not use
+          it for benchmarking!
+          =from Jian= =TODO= =TODO= =TODO=
+          Learn more!!!
+          
+        + Also, if you want to access the /command line arguments/, you need to use
+          an *EXPLICIT* ~main~ method for that.
+          =from Jian=
+          The point of *can't access* the /command line arguments/ is similar to the
+          ~Application~, which had been dropped since Scala 2.11.
+
+*** DONE Dropped: Scala 2 Macros
+    CLOSED: [2020-11-22 Sun 21:59]
     # *Dropped: Scala 2 Macros*
+    1. The previous, _experimental macro system_ has been dropped.
 
-*** Existential Types
-    # *Dropped: Existential Types*
+    2. Instead, there is a _cleaner_, _more restricted_ system.
+       * This system is based on two complementary concepts: ~inline~ and
+         ~'{ ... }~ / ~${ ... }~ code generation.
+         + ~'{ ... }~ (/quotes/) delays the compilation of the code and produces
+           an object containing the code,
 
-*** Type Projection
-    # *Dropped: General Type Projection*
+         + *DUALLY* ~${ ... }~ (/splice/) evaluates an expression which produces
+           code and inserts it in the surrounding ~${ ... }~.
 
-*** Do-While
-    # *Dropped: Do-While*
+       * In this setting, a definition marked as /inlined/ containing a ~${ ... }~
+         is a /macro/, the code inside the ~${ ... }~ is executed _at compile-time_
+         and produces code in the form of ~'{ ... }~.
 
-*** Procedure Syntax
-    # *Dropped: Procedure Syntax*
+       * Additionally,
+         the contents of code can be inspected and created with a *more complex*
+         /reflection API (TASTy Reflect)/ *as an extension* of ~'{ ... }~ / ~${ ... }~
+         framework.
 
-*** Package Objects
-    # *Dropped: Package Objects*
-
-*** Early Initializers
-    # *Dropped: Early Initializers*
-
-*** Class Shadowing
+*** TODO Dropped: Existential Types
+*** TODO Dropped: General Type Projection
+*** TODO Dropped: Do-While
+*** TODO Dropped: Procedure Syntax
+*** TODO Dropped: Package Objects
+*** TODO Dropped: Early Initializers
+*** TODO Dropped: Class Shadowing
+*** TODO Dropped: Limit 22
     # *Dropped: Class Shadowing*
 
-*** TODO Limit 22
-    # *Dropped: Class Shadowing*
-
-*** XML Literals
-    # *Dropped: XML Literals*
-
-*** TODO Symbol Literals
-    # *Dropped: Symbol Literals*
-
-*** Auto-Application
-    # *Dropped: Auto-Application*
+*** TODO Dropped: XML Literals
+*** TODO Dropped: Symbol Literals
+*** TODO Dropped: Auto-Application
 **** Migrating code
 **** Reference
 
-*** Weak Conformance
-    # *Dropped: Weak Conformance*
-
-*** Nonlocal Returns
-    # *Deprecated: Nonlocal Returns*
-
-*** DONE ~[this]~ Quanlifier
+*** TODO Dropped: Weak Conformance
+*** TODO Deprecated: Nonlocal Returns
+*** DONE Dropped: ~private[this]~ and ~protected[this]~
     CLOSED: [2020-04-30 Thu 12:49]
-    # *Dropped: ~private[this]~ and ~protected[this]~*
     The ~private[this]~ and ~protected[this]~ /access modifiers/ are *deprecated*
     and will be phased out.
 
@@ -9296,133 +9333,144 @@
      :ID:       b5b2ba1a-6e8d-4f0c-a3c4-14f0e17ee56a
      :END:
 * TODO API
-** dotty
+** ~dotty~
 *** (O) ~DottyPredef~
 
-*** dotty.internal
-**** (O) ~CompileTimeMacros~
-**** (O) ~StringContextMacro~
+** ~dotty.runtime~
+*** (O) ~LazyVals~
+*** (O) ~Arrays~
+    
+** ~dotty.tools.tasty~
+*** Classlikes
+**** (C) ~TastyHeaderUnpickler~
+**** (C, O) ~TastyBuffer~
+**** (C) ~UnpickleException~
+**** (O) ~TastyHash~
+**** (O) ~TastyFormat~
+**** (C) ~TastyReader~
 
-*** dotty.runtime
-**** (O) ~Arrays~
-**** (O) ~LazyVals~
+** ~dotty.tools.tasty.util~
+*** Classlikes
+**** (O) ~Util~
 
-** scala
-*** (C) ~*:~
-*** (C) ~Conversion~
-*** (O) ~EmptyTuple~
-*** (T) ~Enum~
-*** (T) ~Eql~
-*** (T) ~FunctionXXL~
-*** (T) ~NonEmptyTuple~
-*** (T) ~PolyFunction~
-*** (T) ~Product0~
-*** (T) ~Selectable~
-*** (T) ~Tuple~
-*** (T) ~TupledFunction~
-*** (O) ~deriving~
-*** (C) ~main~
-*** (O) ~opaques~
+** ~scala~
+*** Types
+**** ~type EmptyTuple = EmptyTuple.type~
+**** ~type IArray[+T] = IArray[T]~
+     
+*** Classlikes
+**** (O) ~EmptyTuple~
+**** (O) ~IArray~
+**** (sT, O) ~Tuple~
+**** (C) ~main~ extends ~Annotation~
+**** (O) ~opaques~
+**** (T) ~PolyFunction~
+**** (sT, O) ~CanEqual[-L, -R]~
+**** (aC) ~Conversion~
+**** (T, O) ~Selectable~
+**** (sT) ~NonEmptyTuple~
+**** (aC, O) ~*:[+H, +T <: Tuple]~
 
-*** scala.annotation
-**** (T) ~RefiningAnnotation~
-**** (C) ~alpha~
-**** (C) ~constructorOnly~
-**** (C) ~infix~
-**** (C) ~static~
-**** (C) ~superTrait~
-**** (C) ~threadUnsafe~
+** ~scala.annotation~
+*** Classlikes
+**** (fC) ~transparentTrait~ extends ~StaticAnnotation~
+**** (fC) ~threadUnsafe~ extends ~StaticAnnotation~
+**** (fC) ~alpha~ extends ~StaticAnnotation~ - (deprecated, use ~targetName~)
+**** (T) ~RefiningAnnotation~ extends ~StaticAnnotation~
+**** (C) ~constructorOnly~ extends ~StaticAnnotation~
+**** (fC) ~static~ extends ~StaticAnnotation~
+**** (fC) ~targetName~ extends ~StaticAnnotation~
 
-*** scala.annotation.internal
-**** (C) ~Alias~
-**** (C) ~AnnotationDefault~
-**** (C) ~Body~
-**** (C) ~Child~
-**** (C) ~ContextResultCount~
-**** (C) ~InlineParam~
-**** (C) ~Repeated~
-**** (C) ~SourceFile~
-**** (C) ~WithBounds~
-**** (C) ~sharable~
-**** (C) ~unshared~
+** ~scala.annotation.internal~
+*** Classlikes
+**** (C) ~ContextResultCount~ extends ~StaticAnnotation~
+**** (C) ~AnnotationDefault~ extends ~Annotation~
+**** (fC) ~Body~ extends ~Annotation~
+**** (C) ~SourceFile~ extends ~Annotation~
+**** (C) ~Alias~ extends ~Annotation~
+**** (C) ~unshared~ extends ~Annotation~
+**** (C) ~sharable~ extends ~Annotation~
+**** (fC) ~InlineParam~ extends ~Annotation~
+**** (C) ~Child[T]~ extends ~Annotation~
+**** (fC) ~Repeated~ extends ~Annotation~
 
-*** scala.compiletime.ops
+** ~scala.compiletime~
+*** Types
+**** ~Widen[Tup <: Tuple]~
+**** ~S[N <: Int] <: Int~
+    
+** ~scala.compiletime.ops~
+*** Classlikes
 **** (O) ~any~
-**** (O) ~boolean~
-**** (O) ~int~
 **** (O) ~string~
+**** (O) ~int~
+**** (O) ~boolean~
 
-*** scala.compiletime.testing
-**** (C) ~Error~
-**** (T) ~ErrorKind~
+** ~scala.compiletime.testing~
+*** Classlikes
+**** (fcC) ~Error~
+**** (sT, O) ~ErrorKind~
 
-*** scala.implicits
-**** (T) ~LowPriorityNot~
-**** (C) ~Not~
+** ~scala.deriving~
+*** Classlikes
+**** (sT, O) ~Mirror~
+**** IGNORE _deprecated_
 
-*** scala.internal
-**** (O) ~Chars~
-**** (C) ~MatchCase~
-**** (O) ~TupledFunction~
-**** (C) ~TypeBox~
-**** scala.internal.quoted
-***** (O) ~CompileTime~
-***** (C) ~Expr~
-***** (O) ~Matcher~
-***** (C) ~Type~
-***** (O) ~Unpickler~
-***** (C) ~showName~
-
-*** scala.quoted
-**** (O) ~Const~
-**** (O) ~Consts~
-**** (C) ~Expr~
-**** (O) ~Lambda~
-**** (T) ~Liftable~
-**** (T) ~QuoteContext~
-**** (O) ~Reporting~
-**** (C) ~ScopeException~
-**** (C) ~Type~
-**** (T) ~Unliftable~
+** ~scala.quoted~
+*** Classlikes
 **** (O) ~Unlifted~
+**** (O) ~report~
+**** (T) ~ExprMap~
 **** (O) ~Varargs~
-**** scala.quoted.show
-***** (T) ~SyntaxHighlight~
+**** (aC, O) ~Type[T <: AnyKine]~
+**** (O) ~Const~
+**** (T, O) ~Liftable[T]~
+**** (O) ~Consts~
+**** (T) ~Quotes~
+**** (T, O) ~Unliftable[T]~
+**** (aC, O) ~Expr[+T]~
+    
+** ~scala.quoted.runtime~
+*** Classlikes
+**** (T) ~QuoteMatching~
+**** (T) ~QuoteUnpickler~
+**** (O) ~Patterns~ with ~@compileTimeOnly("Illegal reference to `scala.quoted.runtime.Patterns`")~
+**** (C) ~SplicedType~ with ~@compileTimeOnly("Illegal reference to `scala.quoted.runtime.SplicedType`")~
+**** (C) ~StopMacroException~
+**** (C) ~Expr~ with ~@compileTimeOnly("Illegal reference to `scala.quoted.runtime.Expr`")~
 
-**** scala.quoted.unsafe
-***** (O) UnsafeExpr
+** ~scala.reflect~
+*** Types
+**** (T) ~Typeable[T]~
+     
+*** Classlikes
+**** (T, O) ~TypeTest[-S, T]~
+**** (tT) ~Enum~
+**** (T, O) ~Selectable~
 
-**** scala.quoted.util
-***** ~ExprMap~
-***** ~Var~
-
-*** scala.reflect
-**** ~Selectable~
-
-*** scala.runtime
-**** ~EnumValue~
-**** ~EnumValues~
-**** ~Tuple~
-**** ~TupleXXL~
-
-*** scala.tasty
-**** (C) ~Reflection~
-**** scala.tasty.reflect
-***** (T) ~CompilerInterface~
-***** (C) ~ExprCastError~
-***** (C) ~ExtractorsPrinter~
-***** (T) ~Printer~
-***** (C) ~SourceCodePrinter~
-***** (T) ~TreeAccumulator~
-***** (T) ~TreeMap~
-***** (T) ~TreeTraverser~
-
-*** scala.util
-**** (O) ~CommandLineParser~
-**** (T) ~FromDigits~
-**** (T) ~FromString~
-**** scala.util.control
-***** (O) ~NonLocalReturns~
-
-** scalaShadowing
-*** (O) ~language~
+** ~scala.runtime~
+*** Classlikes
+**** (faC) ~MatchCase[Pat, +Body]~
+**** (o) ~Tuple~
+**** (tT) ~EnumValues~
+**** (fac) ~TypeBox[-L <: U, +U]~
+**** (fC, O) ~TupleXXL~
+**** (T) ~FunctionXXL~
+**** (O) ~Scala3RunTime~
+     
+** ~scala.runtime.stdLibPatches~
+*** Classlikes
+**** (O) ~language~
+**** (O) ~Predef~
+     
+** ~scala.util~
+*** (T, O) ~FromDigits[T]~
+*** (T) ~LowPriorityNot~
+*** (O) ~CommandLineParser~
+*** (fC, O) ~Not[+T]~
+    
+** ~scala.util.control~
+*** (O) ~NonLocalReturns~
+    
+** ~scalaShadowing~
+*** (C) ~D_u_m_m_y~

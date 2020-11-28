@@ -4,6 +4,7 @@
 #+AUTHOR: Joshua D. Suereth
 #+Foreword by: Martin Odersky
 #+STARTUP: entitiespretty
+#+STARTUP: folded
 
 * DONE foreword - xi
   CLOSED: [2018-02-07 Wed 15:44]
@@ -301,13 +302,145 @@
 
 ** TODO 3.4 Always mark overridden methods - 55
 ** TODO 3.5 Annotate for expected optimizations - 60
+   The Scala compiler provides _several *optimizations* of functional style code_
+   into performant runtime /bytecoes/.
+
+   - The compiler will _OPTIMIZE_ /tail recursion/ to execute
+     AS a /looping construct/ at /runtime/,
+     RATHER THAN a /recursive function call/.
+     * /Tail call optimization/ is *NOT*
+       as much about improving speed
+       as preventing stack overflow errors.
+
+   - The compiler can also _OPTIMIZE_ a /pattern match/ that _looks LIKE_ a /Java
+     ~switch~ statement/ to _act LIKE_ _a ~switch~ statement at /runtime/._
+     * The compiler can figure out
+       _IF_ it's more efficient and still correct to use a /branch lookup table/.
+
+       + The compiler will then emit a ~tableswitch~ bytecode for this /pattern
+         match/.
+         - The ~tableswitch~ bytecode is a branching statement that can be _more
+           efficient_ than /multiple comparison branch statements/.
+
+   - _The /switch/ and /tail recursion/ optimizations_ come with /OPTIONAL
+     annotations/.
+     * The annotations will ensure
+       + the *optimization* is applied where expected
+         OR
+       + an *error* is issued.
+     
 *** TODO 3.5.1 Using the ~tableswitch~ optimization - 61
     Sometimes, you can TREAT /pattern matching/ AS a Java ~switch~ statement.
 
-    - ~tableswitch~ optimization tries to COMPILE a /pattern match/ INTO a /branch
-      table/ RATHER THAN a /decision tree/.
+    - ~tableswitch~ Optimization:
+      TRY TO compile a /pattern match/ into a /branch table/ _RATHER THAN_ a
+      /decision tree (based comparison)/.
 
-    - =TODO=
+      * In a /branch table/, the JVM can then jump directly to the appropriate
+        code by look up a label. _This whole process is done in a *single*
+        bytecode,_ the ~tableswitch~ operation.
+        + In Java, the ~switch~ statement can be compiled into a ~tableswitch~ operation.
+
+        + In Scala, the compiler can
+          OPTIMIZE a /pattern match/ into a single ~tableswitch~ operation
+          _IF_ all the stars align, or at least the right conditions apply.
+
+    - For Scala to apply the ~tableswitch~ optimization, the following has to hold
+      true:
+      * The matched value *must be* a known /integer/.
+
+      * Every match expression must be "simple."
+        + It *can't* contain any
+          - /type checks/,
+          - ~if~ statements or /extractors/.
+
+        + The expression must also have its /value/ _AVAILABLE at /compile time/:_
+          The /value/ of the expression *must not* be computed at /runtime/
+          but instead always be the same value.
+
+      * There should be *more than _TWO_ ~case~ statements*,
+        otherwise the optimization is unneeded.
+
+    - Let's take a quick look at some successfully optimized code and what operations
+      will break it.
+      1. Let's start off with a simple _switch on an /integer/._
+         #+begin_src scala
+           def unannotated(x: Int): String =
+             x match {
+               case 1 => "One"
+               case 2 => "Two!"
+               case z => z + "?"
+             }
+         #+end_src
+         The compiler is able to optimize this to a ~tableswitch~, as you can
+         see in the bytecode. Here’s the Java output:
+         #+begin_src text
+           public java.lang.String unannotated(int);
+             Code:
+               0:  iload_1
+               1:  istore_2
+               2:  iload_2
+               3:  tableswitch   {  // 1 to 2
+                                 1: 51;
+                                 2: 56;
+                           default: 24 }
+           // ...
+         #+end_src
+         What you're seeing here are the /bytecode instructions/ for the _unannotated
+         method_:
+         * The instruction at ~label 2~: shows us loading the first argument as
+           an integer (~iload_2~).
+
+         * The next instruction is our ~tableswitch~.
+           The ~tableswitch~ instruction is made up of
+           *mappings* of _integer values_ *to* /bytecode instruction labels/ (or
+           line numbers).
+           
+      2. It's fairly easy to mess this up.
+         Let's look at a few ways to do this.
+
+         * we can include a type check in the pattern match.
+           This can be _SURPRISING_, as you might expect the /type check/ would be
+           superfluous, and _NOT_ change the compiled code. Let's take our original
+           function and add a /type check/ for ~Int~ on one of the /case statements/.
+           #+begin_src scala
+             def notOptimised(x: Int) = x match {
+               case 1      => "One"
+               case 2      => "Two!"
+               case i: Int => "Other"
+             }
+           #+end_src
+           The difference between this example and the previous one is the type
+           check on the 3rd /case statement/: ~i : Int~.
+             Although the type of the variable is already known to be an ~Int~,
+           the compiler will still create a /type check/ in the /pattern match/
+           and this will *prevent* it from using a ~tableswitch~ bytecode. Let's
+           look at the bytecode (shortened to fit here):
+            #+begin_src text
+              public java.lang.String notOptimised(int);
+                Code:
+                 0: iload_1
+                 1: istore_3
+                 2: iconst_1
+                 3: iload_3
+                 4: if_icmpne 10
+                 ...
+                 16: iconst_2
+                 17: iload_3
+                 12: if_icmpne 20
+                 ...
+                 20: iload_1
+                 21: invokestatic #43;
+                       //Method scala/runtime/BoxesRunTime.boxToInteger:
+                       (I)Ljava/lang/Integer;
+                 24: instanceof #85; //class java/lang/Integer
+                 27: ifeq 33
+                 30: ldc #87; //String Other
+                 // ...
+                 32: areturn
+                 33: new #89; //class scala/MatchError
+            #+end_src
+            Scala 2.13.4 compiler will by default *optimize out* the ~instanceof~.
 
 *** DONE 3.5.2 Using the tail recursion optimization - 64
     CLOSED: [2019-01-03 Thu 18:35]
@@ -396,29 +529,55 @@
 
 * TODO 4 Utilizing object orientation - 68
   - In this chapter
-    + Object initialization
-    + Abstract methods
-    + Composition and Inheritance
-    + Abstract interfaces
-    + Type inference and public APIs
+    * Object initialization
+    * Abstract methods
+    * Composition and Inheritance
+    * Abstract interfaces
+    * Type inference and public APIs
 
-  - 
+  - Scala is a rich object-oriented language.
+    /Objects/ are CORE to everything in Scala, and understanding the details of
+    how they work is important for using Scala.
 
-** 4.1 Limit code inside an object or trait's body to initialization logic - 69
-*** Delayed construction - 69
-*** And then there's multiple inheritance - 70
+  - In Scala,
+    * EVERY /value/ is an /object/.
+      Even /operators/ are /method calls/ against the /class/ of an /object/.
 
-** 4.2 Provide empty implementations for abstract methods on traits - 72
-** 4.3 Composition can include inheritance - 76
-*** Member composition by inheritance - 78
-*** Classic constructors with a twist - 80
+    * Scala offers /mixin inheritance/ through the use of /traits/.
 
-** 4.4 Promote abstract interface into its own trait - 82
-*** Interfaces you can talk to - 84
-*** Learning from the past - 85
+  - /Object/, /class/, and /traits/ are used to define public APIs for libraries.
+    The /initialization/, /comparison/, and /composition/ of /objects/ are most
+    fundamental and import parts of Scala development.
+    * *INITIALIZATION* is important because of
+      + /mixin inheritance/ and
+        AND
+      + the way /objects/ *get instantiated* in various locations
 
-** 4.5 Provide return types in your public APIs - 86
-** 4.6 Summary - 88
+    * *COMPARING two objects for equality* is CRITICAL and can be made _trickier_
+      when /inheritance/ gets in the mix.
+      =from Jian= Identity is always important!!!
+    
+    * *COMPOSITION of functionality* is how code *reuse* is accomplished,
+      and Scala provides _a few NEW ways_ to compose objects.
+      =from Jian= Not _few_ actually!!!
+
+** TODO 4.1 Limit code inside an object or trait's body to initialization logic - 69
+*** 4.1.1 Delayed construction - 69
+*** 4.1.2 And then there's multiple inheritance - 70
+
+** TODO 4.2 Provide empty implementations for abstract methods on traits - 72
+   - *Class linearization*
+     
+** TODO 4.3 Composition can include inheritance - 76
+*** 4.3.1 ember composition by inheritance - 78
+*** 4.3.2 Classic constructors with a twist - 80
+
+** TODO 4.4 Promote abstract interface into its own trait - 82
+*** 4.4.1 Interfaces you can talk to - 84
+*** 4.4.2 Learning from the past - 85
+
+** TODO 4.5 Provide return types in your public APIs - 86
+** TODO 4.6 Summary - 88
 
 * 5 Using implicits to write expressive code - 89
   - In this chapter

@@ -3,6 +3,7 @@
 #+VERSION: 4th
 #+AUTHOR: Martin Odersky, Lex Spoon, Bill Venners
 #+STARTUP: entitiespretty
+#+STARTUP: folded
 
 * Contents - xi
 * List of Figures - xxi
@@ -2322,14 +2323,26 @@
      #+END_SRC
 
 ** DONE 9.5 By-name parameters - 215
-   CLOSED: [2017-10-09 Mon 22:05]
+   CLOSED: [2020-11-26 Thu 01:02]
     - Use /by-name type/, put ~=>~ in front of a normal type.
 
     - A by-name type, in which the empty parameter list, ~()~, is left out, is
-      only allowed for parameters.
+      *only allowed* for /parameters/.
+      * There is *NO such thing* as a _by-name variable_ or a _by-name field_.
 
-      There is NO such thing as a by-name variable or a by-name field.
-      (=From Jian= but there is ~lazy~ keyword, right???) TODO
+    - *CAUTION* (=from Jian=):
+      In some other languages or context, people often use /by-name parameter or value/
+      to represent /by-need parameter or value/. This is *NOT* the case in Scala.
+      * Scala ~lazy val~ is the /by-need value/, and Scala does *not have* /by-needs
+        parameter/.
+        
+      * /by-needs parameter/ can be *dangerous* if the parameter evaluation includes
+        /side effect/. If Scala doesn't have a system to detect all /side effects/,
+        support /by-needs parameter/ can't be a good design.
+        
+      * =TODO= Verify by bytecode =TODO= =IMPORTANT=
+        Can the combination of ~lazy val~ and /by-name parameter/ guarantee or
+        partially guarantee only evauation once??? Or at least reduce some overhead???
 
 ** DONE 9.6 Conclusion - 218
    CLOSED: [2017-10-09 Mon 23:01]
