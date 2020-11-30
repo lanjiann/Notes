@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-RC1-bin-20201125-1c3538a-NIGHTLY
+#+VERSION: 3.0.0-RC1-bin-20201128-928e01a-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -261,7 +261,7 @@
       * _Multiversal Equality_ implements an "opt-in" scheme to rule out nonsensical
         comparisons with ~==~ and ~!=~.
 
-      * ~@infix~ make method application syntax uniform across code bases.
+      * ~infix~ make method application syntax uniform across code bases.
 
     - UNRESTRICTED /implicit conversions/ continue to be available in Scala 3.0,
       _BUT_ will *be deprecated and removed later*.
@@ -2007,6 +2007,7 @@
        + This syntax _mirrors_ the way the /operator/ is applied.
 
      - Examples:
+       =FIX=
        #+begin_src scala
          extension (x: String)
            def < (y: String): Boolean = ...
@@ -2015,20 +2016,19 @@
            def +: (xs: Seq[Elem]): Seq[Elem] = ...
 
          extension (x: Number)
-           @infix def min (y: Number): Number = ...
+           infix def min (y: Number): Number = ...
 
          "ab" < "c"
          1 +: List(2, 3)
          x min 3
        #+end_src
-       + For /alphanumeric extension operators/ like ~min~ an ~@infix~ annotation
-         is *implied*.
+       + For /alphanumeric extension operators/, like ~min~, an ~infix~ is *implied*.
 
        + The translations:
          #+begin_src scala
-           def extension_<(x: String)(y: String): Boolean = ...
-           def extension_+:(xs: Seq[Elem])(x: Elem): Seq[Elem] = ...
-           @infix def extension_min(x: Number)(y: Number): Number = ...
+           <extension> def < (x: String)(y: String): Boolean = ...
+           <extension> def +: (xs: Seq[Elem])(x: Elem): Seq[Elem] = ...
+           infix <extension> def min(x: Number)(y: Number): Number = ...
          #+end_src
          * =IMPORTANT= =!!!= =IMPORTANT=
            Remember that in Scala ~:~ suffixed operators are all /right associative/!!!
@@ -4676,7 +4676,7 @@
           types._
 
       - Many of these /singleton operation types/ are meant to be used _infix_
-        (as in SLS § 3.2.8), and are annotated with ~@infix~ accordingly.
+        (as in SLS § 3.2.8), and are annotated accordingly woth ~infix~ /modifiers/.
 
       - *Since /type aliases/ have the SAME /precedence/ rules as their term-level
         equivalents,* the operations _COMPOSE with the EXPECTED /precedence/ rules_:
@@ -4699,9 +4699,8 @@
         =IMORTANT=
         #+begin_src scala
           import scala.compiletime.ops._
-          import scala.annotation.infix
 
-          @infix type +[X <: Int | String, Y <: Int | String] = (X, Y) match {
+          infix type +[X <: Int | String, Y <: Int | String] = (X, Y) match {
             case (Int, Int)       => int.+[X, Y]
             case (String, String) => string.+[X, Y]
           }
@@ -4864,7 +4863,7 @@
 
 *** TODO Macros
 **** DONE Macros: Quotes and Splices
-     CLOSED: [2020-06-21 Sun 22:43]
+     CLOSED: [2020-11-30 Mon 02:31]
      - Macros are built on _TWO_ well-known fundamental operations:
        + quotation :: ~'{...}~ for /expressions/;
                       ~'[...]~ for /types/.
@@ -4875,12 +4874,13 @@
        we can /quote/ or /splice/ _identifiers_ *directly* (i.e. ~'e~ and ~$e~).
 
      - Readers may notice the _RESEMBLANCE_ of the two aforementioned syntactic
-       schemes with the familiar /string interpolation syntax/. /Quotes/ and
-       /splices/ in this section allow us to treat code in a similar way,
-       effectively supporting /macros/.
+       schemes with the familiar /string interpolation syntax/.
        #+begin_src scala
          println(s"Hello, $name, here is the result of 1 + 1 = ${1 + 1}")
        #+end_src
+       /Quotes/ and /splices/ in this section allow us to treat code in a similar
+       way, effectively supporting /macros/.
+       
        In string interpolation we /quoted/ a string and then we /spliced/ into it,
        two others.
        1. ~name~, is a reference to a value of type string,
@@ -4920,7 +4920,7 @@
      - /Quotations/ can have _spliced_ parts in them; in this case the embedded /splices/
        _are evaluated and embedded as part of_ the formation of the /quotation/.
 
-       - /Quotes/ and /splices/ can also be applied *DIRECTLY* to _identifiers_.
+       * /Quotes/ and /splices/ can also be applied *DIRECTLY* to _identifiers_.
          + An /identifier/ ~$x~ starting with a ~$~ that appears _INSIDE_ a /quoted
            expression or type/ is _treated as_ a /splice/ ~${x}~.
 
@@ -4937,7 +4937,7 @@
        #+end_src
 
 **** DONE Types for Quotations
-     CLOSED: [2020-05-30 Sat 15:39]
+     CLOSED: [2020-11-30 Mon 02:33]
      - The /type signatures/ of /quotes/ and /splices/ can be described using
        _TWO_ _FUNDAMENTAL /types/:_
        + ~Expr[T]~: /abstract syntax trees/ representing /expressions/ of /type/ ~T~
@@ -4981,7 +4981,7 @@
        + We assume
          * ALL _imports_ are fully expanded
          * ~_root_~ is *NOT* a /free variable/.
-         So /references/ to /global definitions/ are allowed everywhere.
+         So /references/ to /global definitions/ are *allowed everywhere*.
 
      - The /phase consistency principle/ can _be motivated as follows_:
        1. Suppose the result of a program _P_ is some /quoted text/ ~'{ ... x ... }~
@@ -5013,7 +5013,7 @@
          accesses involve serialization. _However, this does not constitute a
          fundamental gain in expressiveness._
 
-**** DONE From ~Expr~'s to Functions and Back
+**** DONE From ~Expr~'s to Functions and Back - =RE-READ=
      CLOSED: [2020-06-22 Mon 01:49]
      It is possible to
      CONVERT _back and forth_ any ~Expr[T => R]~ into ~Expr[T] => Expr[R]~!
@@ -5120,7 +5120,7 @@
            Expr.betaReduce(_): Expr[(T1, ..., Tn) => R] => ((Expr[T1], ..., Expr[Tn]) => Expr[R])
          #+end_src
 
-**** DONE Lifting Types
+**** DONE Lifting Types - =READING= =START=
      CLOSED: [2020-06-09 Tue 03:04]
      - */Types/ are _NOT_ directly affected by the /phase consistency principle/.*
        + *It is possible to use /types/ defined at any level in any other level.*
@@ -5133,8 +5133,9 @@
            ~T~ and its usage. But the code can be rewritten by adding a binding
            of a ~Type[T]~ tag:
            #+begin_src scala
-             def to[T, R: Type](f: Expr[T] => Expr[R])(using t: Type[T])(using Quotes): Expr[T => R] =
-               '{ (x: $t) => ${ f('x) } }
+             def to[T, R](f: Expr[T] => Expr[R])
+                         (using Type[T], Type[R], Quotes): Expr[T => R] =
+               '{ (x: T) => ${ f('x) } }
            #+end_src
            - In this version of ~to~, the type of ~x~ is now the result of /splicing/
              the ~Type~ value ~t~.
@@ -5145,20 +5146,22 @@
       - *To _AVOID_ clutter* (=MOTIVATION= of /lifting types/),
        the Scala implementation tries to _CONVERT *ANY* /type reference/ to a type
        ~T~ *in subsequent phases* to a /type-splice/,_ by *rewriting* ~T~ to
-        (automatically) ~${summon[Type[T]] }~.
+        (automatically) ~summon[Type[T]].Underlying~.
        + For instance, the user-level definition of ~to~:
          #+begin_src scala
-           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using Quotes): Expr[T => R] =
+           def to[T, R](f: Expr[T] => Expr[R])
+                       (using t: Type[T], r: Type[R], Quotes): Expr[T => R] =
              '{ (x: T) => ${ f('x) } }
          #+end_src
 
          would be *rewritten* to
 
          #+begin_src scala
-           def to[T: Type, R: Type](f: Expr[T] => Expr[R])(using Quotes): Expr[T => R] =
-             '{ (x: ${ summon[Type[T]] }) => ${ f('x) } }
+           def to[T, R](f: Expr[T] => Expr[R])
+                       (using t: Type[T], r: Type[R], Quotes): Expr[T => R] =
+             '{ (x: t.Underlying) => ${ f('x) } }
          #+end_src
-         * The summon query succeeds because
+         * The ~summon~ query succeeds because
            - there is a /given instance/ of type ~Type[T]~ available
            - _the reference to that value is phase-correct._
 
@@ -7886,51 +7889,52 @@
      TODO =from Jian= I need to learn more about ~scala.Dynamic~
 
 *** DONE Rules of Operators
-    CLOSED: [2020-01-18 Sat 16:07]
-    - The rules for infix operators have changed in some parts:
-      1. an alphanumeric method can be used as an infix operator only if its
-         definition carries an @infix annotation.
+    CLOSED: [2020-11-30 Mon 02:18]
+    - The rules for /infix operators/ have changed in some parts:
+      1. a _method with alphanumeric named_ can be used as an /infix operator/
+         *ONLY if* its definition carries an ~infix~ /modifier/.
 
-      2. it is recommended (but not enforced) to augment definitions of symbolic
-         operators with @targetName annotations.
+      2. it is recommended (but not enforced) to augment definitions of /symbolic
+         operators/ with ~@targetName~ /annotations/.
 
-      3. Finally, a syntax change allows infix operators to be written on the
+      3. Finally, a syntax change allows /infix operators/ to be written on the
          left in a multi-line expression.
 
-**** DONE The ~@infix~ Annotation
-     CLOSED: [2020-01-18 Sat 15:23]
-     - ~@infix~ annotation :: it is applied on a /method definition/ allows using
-       the method as an _infix operation_.
+**** DONE The ~infix~ Modifier
+     CLOSED: [2020-11-30 Mon 02:07]
+     - An ~infix~ modifier on a /method definition/ allows using the method as an
+       _infix operation_.
 
      - Example:
        #+begin_src scala
          trait MultiSet[T] {
-           @infix
-           def union(other: MultiSet[T]): MultiSet[T]
+           infix def union(other: MultiSet[T]): MultiSet[T]
 
            def difference(other: MultiSet[T]): MultiSet[T]
 
-           @alpha("intersection")
+           @targetName("intersection")
            def *(other: MultiSet[T]): MultiSet[T]
          }
 
          val s1, s2: MultiSet[Int]
 
-         s1 union s2   // OK
-         s1.union(s2)  // also OK
+         s1 union s2     // OK
+         s1 `union` s2   // also OK, but unusual
+         s1.union(s2)    // also OK
 
          s1.difference(s2)   // OK
-         s1 `difference` s2  // OK
+         s1 `difference` s2  // also OK, but unusual
          s1 difference s2    // gives a deprecation warning
 
-         s1 * s2   // OK
-         s1.*(s2)  // also OK, but unusual
+         s1 * s2    // OK
+         s1 `*` s2  // also OK, but unusual
+         s1.*(s2)   // also OK, but unusual
        #+end_src
        + *Infix operations involving alphanumeric operators are deprecated*,
          unless one of the following conditions holds:
-         * the operator definition carries an ~@infix~ annotation, or
+         * the operator definition carries an ~infix~ /modifier/, or
          * the operator was compiled with Scala 2, or
-         * the operator is followed by an opening brace. TODO ??? TODO
+         * the operator is followed by an opening brace. =TODO= =???= =TODO=
 
      - alphanumeric operator :: an operator *consisting ENTIRELY* of
        + letters
@@ -7941,64 +7945,67 @@
          returns ~true~.
 
      - /Infix operations/ involving /symbolic operators/ are *ALWAYS* allowed, so
-       ~@infix~ is redundant for methods with _symbolic names_.
+       ~infix~ is *redundant* for methods with _symbolic names_.
 
-     - The ~@infix~ annotation can also _be given to a /type/:_
+     - The ~infix~ /modifier/ can also _be given to a /type/:_
        #+begin_src scala
-         @infix type or[X, Y]
+         infix type or[X, Y]
          val x: String or Int
        #+end_src
 
 ***** Motivation
-      The purpose of the @infix annotation is to achieve consistency across a
+      The purpose of the ~infix~ /modifier/ is to achieve consistency across a
       code base in how a method or type is applied. The idea is that the author
       of a method decides whether that method should be applied as an infix
       operator or in a regular application. Use sites then implement that
       decision consistently.
 
 ***** Details
-      1. ~@scala.annotation.infix~
+      1. ~infix~ is a /soft modifier/.
 
-      2. ~@infix~ annotations must agree when overriding.
+      2. If a method override another, their ~infix~ /modifiers/ must agree --
+         EITHER both or NONE
 
-      3. The first non-receiver parameter list of an ~@infix~ method must define
-         exactly one parameter. For example,
+      3. ~infix~ can be given to a /method defintions/.
+         The *first* /non-receiver parameter list/ of an ~infix~ method *must* define
+         *exactly one* parameter. For example,
          #+begin_src scala
-           @infix def op(x: S): R                  // OK
-           @infix def op[T](x: T)(y: S): R         // OK
-           @infix def op[T](x: T, y: S): R         // error: two parameters
+           infix def op(x: S): R                  // OK
+           infix def op[T](x: T)(y: S): R         // OK
+           infix def op[T](x: T, y: S): R         // error: two parameters
 
-           @infix extension (x: A) def op (y: B): R          // OK
-           @infix extension (x: A) def op (y1: B, y2: B): R  // error: two parameters
+           infix def (x: A) op (y: B): R          // OK
+           infix def (x: A) op (y1: B, y2: B): R  // error: two parameters
          #+end_src
 
-      4. ~@infix~ annotations can also be given to /type/, /trait/ or /class/
-         definitions that have exactly _two type parameters_. An /infix type/
-         like
+      4. ~infix~ can also be given to /type, trait or class definitions/
+         that have *exactly two* /type parameters/. An /infix type/ like
          #+begin_src scala
-           @infix type op[X, Y]
+           infix type op[X, Y]
          #+end_src
          can be applied using infix syntax, i.e. ~A op B~
 
       5. To smooth migration to Scala 3.0, alphanumeric operations will only be
-         deprecated from Scala 3.1 onwards, or if the ~-strict~ option is given
-         in Dotty/Scala 3.
+         deprecated from Scala 3.1 onwards, or if the ~-source 3.1~ option is
+         given in Dotty/Scala 3.
 
 **** DONE The ~@targetName~ Annotation
+     CLOSED: [2020-11-30 Mon 02:18]
      - It is *RECOMMENDED* that
        definitions of /symbolic operators/ carry a ~@targetName~ annotation (there
-       is a "~@targetName~ annotation" in this document) that provides an encoding
-       of the _operator with an ALPHANUMERIC NAME._
+       is an independent "~@targetName~ annotation" entry in this document) that
+       provides an encoding of the _operator with an ALPHANUMERIC NAME._
        
      - This has several benefits:
        * It helps *interoperability* between Scala and other languages.
          One can CALL a /Scala-defined symbolic operator/ FROM another language
-         using its target name, which avoids having to remember the low-level
+         using its /target name/, which avoids having to remember the low-level
          encoding of the /symbolic name/.
          + If an _ALPHANUMERIC NAME_ is not provided, the compiler will use its 
            own rule to create an _ALPHANUMERIC NAME_ -- then you need to remember
            this naming details when calling this function/method in other languages.
-           If you provide an _ALPHANUMERIC NAME_, you don't need to remember this
+
+         + If you provide an _ALPHANUMERIC NAME_, you don't need to remember this
            _translation rule_.
 
        * It helps legibility of /stacktraces/ and OTHER /runtime diagnostics/, where
@@ -8009,38 +8016,49 @@
          name_ as an alias of a /symbolic operator/.
          + This makes the definition also *easier to find in a search*.
      
-     - =from Jian=
-       The above list mentioned multiple times of *low-level encoding*.
-       _ALPHANUMERIC NAMEs_ are much more widely accepted by other languages,
-       and tools.
-       
 **** DONE Syntax Change
-     CLOSED: [2020-01-18 Sat 16:07]
-     Infix operators can now appear at the start of lines in a multi-line expression.
-     Thanks to the change of semicolon inference.
+     CLOSED: [2020-11-30 Mon 02:18]
+     /Infix operators/ can now APPEAR *at the START OF LINES in a multi-line expression.*
+     
+     Examples:
+     #+begin_src scala
+       val str = "hello"
+         ++ " world"
+         ++ "!"
+
+       def condition =
+         x > 0
+           || xs.exists(_ > 0)
+           || xs.isEmpty
+     #+end_src
+
+     - Thanks to the *change* of /semicolon inference/.
+       If NOT, lines in the example that start with /infix operators/ will be
+       considered as SEPARATE sentence.
 
      - Illustrate by examples:
-       + The leading infix operator should be followed by at least one space
+       * The leading /infix operator/ should be followed by at least one space
          character (=from Jian= and then another operand).
          #+begin_src scala
-           freezing
+             freezing
            | boiling
          #+end_src
 
-       + No space, no infix operation
+       * No space, no infix operation
          #+begin_src scala
            freezing
            !boiling
          #+end_src
 
-       + No following legal operand
+       * No following legal operand
          #+begin_src scala
            println("hello")
-           ???
-           ??? match { case 0 => 1 }
+             ???
+             ??? match { case 0 => 1 }
          #+end_src
-         * The second line ~???~ doesn't have a following operand.
-         * The thrid line ~???~ doesn't have a legal following operand -- ~match~
+         + The second line ~???~ doesn't have a following operand.
+
+         + The thrid line ~???~ doesn't have a legal following operand -- ~match~
            is not a token that can start an expression.
 
 *** DONE Wildcard Arguments in Types - =IMPORTANT= =Migration is COMPLICATED=
