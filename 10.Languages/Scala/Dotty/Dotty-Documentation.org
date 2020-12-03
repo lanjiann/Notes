@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-RC1-bin-20201130-b2a09d3-NIGHTLY
+#+VERSION: 3.0.0-M3-bin-20201202-11f53c7-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -1444,12 +1444,11 @@
           extension (x: T) def > (y: T) = compare(x, y) > 0
         }
 
-        given intOrd as Ord[Int] {
+        given intOrd: Ord[Int] with
           def compare(x: Int, y: Int) =
             if (x < y) -1 else if (x > y) +1 else 0
-        }
 
-        given listOrd[T](using ord: Ord[T]) as Ord[List[T]] {
+        given listOrd[T](using ord: Ord[T]): Ord[List[T]] with
           def compare(xs: List[T], ys: List[T]): Int = (xs, ys) match {
             case (Nil, Nil) => 0
             case (Nil, _)   => -1
@@ -1458,7 +1457,6 @@
               val fst = ord.compare(x, y)
               if (fst != 0) fst else compare(xs1, ys1)
           }
-        }
       #+end_src
       This code defines a /trait/ ~Ord~ (type class) with two /given instances/.
 
@@ -1466,8 +1464,8 @@
      CLOSED: [2020-07-17 Fri 02:28]
      The name of a /given instance/ *can be left out*.
      #+begin_src scala
-       given Ord[Int] { /* ... */ }
-       given [T](using Ord[T]) as Ord[List[T]] { /* ... */ }
+       given Ord[Int] with { /* ... */ }
+       given [T](using Ord[T]): Ord[List[T]] with { /* ... */ }
      #+end_src
      If the name of a /given/ is missing,
      the compiler will _synthesize a name_ from the implemented type(s).
@@ -1489,15 +1487,15 @@
        _publicly available libraries_ *should prefer* /named instances/.
        =IMPORTANT= =!!!= =IMPORTANT=
 
-**** DONE Alias Givens - =IMPROVE DOC=
+**** DONE Alias Givens - =IMPROVE and FIX DOC=
      CLOSED: [2020-07-17 Fri 03:44]
      An alias can be used to define a /given instance/ that is equal to some
      expression. E.g.:
      (=FIX-DOC= =IMPROVE-DOC= Here it's better to use the same example as below,
      then people can compare their syntax)
      #+begin_src scala
-       given global as ExecutioinContext = new ForkJoinPool()
-       given factory(using config: Config) as Factory = MemoizingFactory(config)
+       given global: ExecutioinContext = new ForkJoinPool()
+       given factory(using config: Config): Factory = MemoizingFactory(config)
      #+end_src
      - When the first time ~global~ is accessed, the RHS is evaludated, which is
        then returned for _this and ALL subsequent_ accesses to ~global~.
@@ -1511,7 +1509,7 @@
        then people can compare their syntax)
        #+begin_src scala
          given ExecutioinContext = new ForkJoinPool()
-         given (using config: Config) as Factory = MemoizingFactory(config)
+         given (using config: Config): Factory = MemoizingFactory(config)
        #+end_src
 
      - An /alias given/ can have /type parameters/ and /context parameters/ just
@@ -1525,10 +1523,10 @@
            // - `Bc` and `Mn` are type constructors
 
            // Legal:
-           given [T](using config: Bc[T]) as Lmn = ...
+           given [T](using config: Bc[T]): Lmn = ...
 
            // Illegal:
-           given [T](using config: Abc) as Mn[T] = ...
+           given [T](using config: Abc): Mn[T] = ...
          #+end_src
          * RATIONALE (=from Jian= my understanding, may be not comprehensive):
            - _Given instance syntax_ is a kind of _definition syntax_,
@@ -1555,13 +1553,13 @@
      /Given aliases/ can have the ~inline~ and ~transparent~ modifiers.
      - Example:
        #+begin_src scala
-         transparent inline given mkAnnotations[A, T] as Annotations[A, T] = ${
+         transparent inline given mkAnnotations[A, T]: Annotations[A, T] = ${
            // code producing a value of a subtype of Annotations
          }
        #+end_src
-       Since ~mkAnnotations~ is ~transparent~, the /type/ of an application is the
-       _type of its right hand side_, which can be a proper /subtype/ of the declared
-       /result type/ ~Annotations[A, T]~.
+       Since ~mkAnnotations~ is ~transparent~, the /type/ of an application is
+       the _type of its right hand side_, which can be a proper /subtype/ of the
+       declared /result type/ ~Annotations[A, T]~.
 
 **** DONE Pattern-Bound Given Instances
      CLOSED: [2020-11-09 Mon 11:54]
@@ -1598,21 +1596,24 @@
          created _for EACH reference_. --- =from Jian= common sense
 
 **** DONE Syntax
-     CLOSED: [2020-07-17 Fri 03:46]
+     CLOSED: [2020-12-01 Tue 22:32]
      #+begin_src text
-       TmplDef  ::= ...
-                 |  'given' GivenDef
+       TmplDef             ::= ...
+                            |  ‘given’ GivenDef
 
-       GivenDef ::= [GivenSig] Type '=' Expr  // Comment: this is the "alias givens" syntax
-                 |  [GivenSig] ConstrApps [TemplateBody]
+       GivenDef            ::=  [GivenSig] StructuralInstance
+                            |   [GivenSig] Type ‘=’ Expr
+                            |   [GivenSig] Type
 
-       GivenSig ::= [id] [DefTypeParamClause] {UsingParamClause} 'as'
+       GivenSig            ::= [id] [DefTypeParamClause] {UsingParamClause} ‘:’
+
+       StructuralInstance  ::=  ConstrApp {‘with’ ConstrApp} ‘with’ TemplateBody
      #+end_src
 
 *** DONE Using Clauses
     CLOSED: [2020-07-17 Fri 04:19]
-    - Functional programming tends to _express most dependencies_ AS _simple function
-      parameterization_.
+    - Functional programming tends to _express most dependencies_ AS
+      _simple function parameterization_.
       + Pros:
         clean and powerful,
 
@@ -1726,9 +1727,9 @@
        Example:
        #+begin_src scala
          object global extends Universe { type Context = ... }
-         given ctx  as global.Context { type Symbol = ...; type Kind = ... }
-         given sym  as ctx.Symbol
-         given kind as ctx.Kind
+         given ctx : global.Context with { type Symbol = ...; type Kind = ... }
+         given sym : ctx.Symbol
+         given kind: ctx.Kind
        #+end_src
        Then the following calls are all valid (and normalize to the last one)
        #+begin_src scala
@@ -1837,7 +1838,7 @@
       #+begin_src scala
         object A {
           class TC
-          given tc as TC
+          given tc: TC = ???
           def f(using TC) = ???
         }
 
@@ -1910,10 +1911,10 @@
        + Example code:
          #+begin_src scala
            object Instances {
-             given intOrd as Ordering[Int]
-             given listOrd[T: Ordering] as Ordering[List[T]]
-             given ec as ExecutionContext = ...
-             given im as Monoid[Int]
+             given intOrd: Ordering[Int] = ...
+             given listOrd[T: Ordering]: Ordering[List[T]] = ...
+             given ec: ExecutionContext = ...
+             given im: Monoid[Int] = ...
            }
 
            import A.{given Ordering[?], given ExecutionContext}
@@ -2027,7 +2028,7 @@
          #+begin_src scala
            <extension> def < (x: String)(y: String): Boolean = ...
            <extension> def +: (xs: Seq[Elem])(x: Elem): Seq[Elem] = ...
-           infix <extension> def min(x: Number)(y: Number): Number = ...
+           <extension> infix def min(x: Number)(y: Number): Number = ...
          #+end_src
          * =IMPORTANT= =!!!= =IMPORTANT=
            Remember that in Scala ~:~ suffixed operators are all /right associative/!!!
@@ -2189,7 +2190,7 @@
 
        + Example of rule 2 above:
          #+begin_src scala
-           given ops1 as IntOps  // brings safeMod into scope
+           given ops1: IntOps with {}  // brings safeMod into scope
 
            1.safeMod(2)
          #+end_src
@@ -2203,7 +2204,7 @@
              extension [T](xs: List[List[T]])
                def flatten: List[T] = xs.foldLeft(Nil: List[T])(_ ++ _)
 
-             given [T: Ordering] as Ordering[List[T]]:
+             given [T: Ordering]: Ordering[List[T]] with
                extension (xs: List[T])
                  def < (ys: List[T]): Boolean = ...
            end List
@@ -2428,7 +2429,7 @@
 
 ***** ~List~
       #+begin_src scala
-        given listMonad as Monad[List]:
+        given listMonad: Monad[List] with
           def pure[A](x: A): List[A] =
             List(x)
 
@@ -2439,7 +2440,7 @@
 
 ***** ~Option~
       #+begin_src scala
-        given optionMonad as Monad[Option]:
+        given optionMonad: Monad[Option] with
           def pure[A](x: A): Option[A] =
             Option(x)
 
@@ -2509,7 +2510,7 @@
 
         2. The /monad instance/ will look like this:
            #+begin_src scala
-             given configDependentMonad as Monad[ConfigDependent]:
+             given configDependentMonad: Monad[ConfigDependent] with
 
                def pure[A](x: A): ConfigDependent[A] =
                  config => x
@@ -2529,7 +2530,7 @@
         #+begin_src scala
           type ConfigDepdenent = [Result] =>> Config => Result
 
-          given configDependentMonad as Monad[[Result] =>> Config => Result]:
+          given configDependentMonad: Monad[[Result] =>> Config => Result] with
 
             def pure[A](x: A): Config => A =
               config => x
@@ -2546,7 +2547,7 @@
           The ~Reader~ /monad/ allows us to *abstract away* ~Config~ as a /type
         parameter/, named ~Ctx~ in the following definition:
         #+begin_src scala
-          given readerMonad[Ctx] as Monad[[X] =>> Ctx => X]:
+          given readerMonad[Ctx]: Monad[[X] =>> Ctx => X] with
 
             def pure[A](x: A): Ctx => A =
               ctx => x
@@ -2619,9 +2620,9 @@
       + _The ~derives~ clause_ *generates* the following /given instances/ for the
         ~Eq~, ~Ordering~ and ~Show~ /type classes/ _in the /companion object/ of ~Tree~,_
         #+begin_src scala
-          given [T: Eq]       as Eq[Tree[T]]    = Eq.derived
-          given [T: Ordering] as Ordering[Tree] = Ordering.derived
-          given [T: Show]     as Show[Tree]     = Show.derived
+          given [T: Eq]      : Eq[Tree[T]]    = Eq.derived
+          given [T: Ordering]: Ordering[Tree] = Ordering.derived
+          given [T: Show]    : Show[Tree]     = Show.derived
         #+end_src
 
       + We say that
@@ -2865,7 +2866,7 @@
 
       - Here is a possible implementation,
         #+begin_src scala
-          inline given derived[T](using m: Mirror.Of[T]) as Eq[T] = {
+          inline given derived[T](using m: Mirror.Of[T]): Eq[T] = {
             val elemInstances = summonAll[m.MirroredElemType]          // (1)
             inline m match {                                           // (2)
               case s: Mirror.SumOf[T]     => eqSum(s, elemInstances)
@@ -2932,7 +2933,7 @@
           import scala.compiletime.{erasedValue, summonInline}
 
           inline def summonAll[T <: Tuple]: List[Eq[_]] = inline erasedValue[T] match {
-            case _: Unit => Nil
+            case _: Unit      => Nil
             case _: (t *: ts) => summonInline[Eq[t]] :: summonAll[ts]
           }
 
@@ -2950,7 +2951,7 @@
 
             def iterator[T](p: T) = p.asInstanceOf[Product].productIterator
 
-            def eqSum[T](s: Mirror.SumOf[T], elems: List[Eq[_]]): Eq[T] =
+            def eqSum[T](s: Mirror.SumOf[T], elems: => List[Eq[_]]): Eq[T] =
               new Eq[T] {
                 def eqv(x: T, y: T): Boolean = {
                   val ordx = s.ordinal(x)
@@ -2958,7 +2959,7 @@
                 }
               }
 
-            def eqProduct[T](p: Mirror.ProductOf[T], elems: List[Eq[_]]): Eq[T] =
+            def eqProduct[T](p: Mirror.ProductOf[T], elems: => List[Eq[_]]): Eq[T] =
               new Eq[T] {
                 def eqv(x: T, y: T): Boolean =
                   iterator(x).zip(iterator(y)).zip(elems.iterator).forall {
@@ -2966,7 +2967,7 @@
                   }
               }
 
-            inline given derived[T](using m: Mirror.Of[T]) as Eq[T] = {
+            inline given derived[T](using m: Mirror.Of[T]): Eq[T] = {
               val elemInstances = summonAll[m.MirroredElemTypes]
               inline m match {
                 case s: Mirror.SumOf[T]     => eqSum(s, elemInstances)
@@ -2995,7 +2996,7 @@
         derived Eq instance for Opt looks like the following, after a little
         polishing,
         #+begin_src scala
-          given derived$Eq[T](using eqT: Eq[T]) as Eq[Opt[T]] =
+          given derived$Eq[T](using eqT: Eq[T]): Eq[Opt[T]] =
             eqSum(summon[Mirror[Opt[T]]],
                   List(
                     eqProduct(summon[Mirror[Sm[T]]], List(summon[Eq[T]]))
@@ -3014,19 +3015,19 @@
         higher level library such as shapeless the type class author could
         define an equivalent ~derived~ method as,
         #+begin_src scala
-          given eqSum[A](using inst: => K0.CoproductInstances[Eq, A]) as Eq[A] {
+          given eqSum[A](using inst: => K0.CoproductInstances[Eq, A]): Eq[A] {
             def eqv(x: A, y: A): Boolean = inst.fold2(x, y)(false)(
               [t] => (eqt: Eq[t], t0: t, t1: t) => eqt.eqv(t0, t1)
             )
           }
 
-          given eqProduct[A](using inst: K0.ProductInstances[Eq, A]) as Eq[A] {
+          given eqProduct[A](using inst: K0.ProductInstances[Eq, A]): Eq[A] {
             def eqv(x: A, y: A): Boolean = inst.foldLeft2(x, y)(true: Boolean)(
               [t] => (acc: Boolean, eqt: Eq[t], t0: t, t1: t) => Complete(!eqt.eqv(t0, t1))(false)(true)
             )
           }
 
-          inline def derived[A](using gen: K0.Generic[A]) as Eq[A] = gen.derive(eqSum, eqProduct)
+          inline def derived[A](using gen: K0.Generic[A]): Eq[A] = gen.derive(eqSum, eqProduct)
         #+end_src
 
       - The framework described here
@@ -3048,7 +3049,7 @@
 
      - E.g, to implement ~Ordering~ for ~Option~ define,
        #+begin_src scala
-         given [T: Ordering] as Ordering[Option[T]] = Ordering.derived
+         given [T: Ordering]: Ordering[Option[T]] = Ordering.derived
        #+end_src
 
      - Assuming the ~Ordering.derived~ /method/ has a /context parameter/ of /type/
@@ -3208,7 +3209,7 @@
      - By the usual rules of /type class derivation/, this _generates_ the following
        ~CanEqual~ /instance/ in the /companion object/ of ~Box~:
        #+begin_src scala
-         given [T, U](using CanEqual[T, U]) as CanEqual[Box[T], Box[U]] = CanEqual.derived
+         given [T, U](using CanEqual[T, U]): CanEqual[Box[T], Box[U]] = CanEqual.derived
        #+end_src
 
      - Examples:
@@ -3447,7 +3448,7 @@
         #+begin_src scala
           type Executable[T] = ExecutionContext ?=> T
 
-          given ec as ExecutionContext = ...
+          given ec: ExecutionContext = ...
 
           def f(x: Int): ExecutionContext ?=> Int = ...
           // could be written as follows with the type alias from above
@@ -3532,13 +3533,13 @@
        boilerplate that would otherwise be necessary.
        #+begin_src scala
          def table(init: Table ?=> Unit) = {
-           given t as Table // note the use of a creator application; same as: given t as Table = new Table
+           given t: Table = new Table
            init
            t
          }
 
          def row(init: Row ?=> Unit)(using t: Table) = {
-           given r as Row
+           given r: Row = new Row
            init
            t.add(r)
          }
@@ -3661,7 +3662,7 @@
 **** Examples
      1. In ~Predef~
         #+begin_src scala
-          given int2Integer as Conversion[Int, java.lang.Integer] =
+          given int2Integer: Conversion[Int, java.lang.Integer] =
             java.lang.Integer.valueOf(_)
         #+end_src
 
@@ -3684,9 +3685,9 @@
               //
               //   CompletionArg.fromStatusCode(statusCode)
 
-              given fromString     as Conversion[String, CompletionArg]               = Error(_)
-              given fromFuture     as Conversion[Future[HttpResponse], CompletionArg] = Response(_)
-              given fromStatusCode as Conversion[Future[StatusCode], CompletionArg]   = Status(_)
+              given fromString    : Conversion[String, CompletionArg]               = Error(_)
+              given fromFuture    : Conversion[Future[HttpResponse], CompletionArg] = Response(_)
+              given fromStatusCode: Conversion[Future[StatusCode], CompletionArg]   = Status(_)
             }
 
             import CompletionArg._
@@ -3722,18 +3723,16 @@
           def write(x: T): Unit
         }
 
-        given intCodec as Codec[Int] = ???
+        given intCodec: Codec[Int] = ???
 
-        given optionCodec[T](using ev: => Codec[T]) as Codec[Option[T]] {
-          def write(xo: Option[T]) = xo match {
+        given optionCodec[T](using ev: => Codec[T]): Codec[Option[T]] with
+          def write(xo: Option[T]) = xo match
             case Some(x) => ev.while(x)
             case None    =>
-          }
 
           // TODO: from Jian: can this work for "by-name context parameters"
           // def write(xo: Option[T]) =
           //  xo.map(ev.write)
-        }
 
         val s = summon[Codec[Option[Int]]]
 
@@ -3753,7 +3752,7 @@
       parameter/ of type ~=> T~ are as follows: TODO ??? TODO
       1. Create a new /given/ of type ~T~:
          #+begin_src scala
-           given lv as T = ???
+           given lv: T = ???
          #+end_src
          where ~lv~ is an arbitrary fresh name.
 
@@ -3765,7 +3764,7 @@
       3. If this search succeeds with expression ~E~, and ~E~ contains references
          to ~lv~, replace ~E~ by
          #+begin_src scala
-           { given lv as T = E; lv }
+           { given lv: T = E; lv }
          #+end_src
          Otherwise, return ~E~ unchanged.
 
@@ -3800,20 +3799,21 @@
         1. /Given instances without parameters/ ---> /implicit objects/.
            #+begin_src scala
              // Dotty
-             given intOrd as Ord[Int] { ... }
+             given intOrd: Ord[Int] with { ... }
 
              // Scala 2
-             implicit object IntOrd extends Ord[Int] { ... }
+             implicit object intOrd extends Ord[Int] { ... }
            #+end_src
 
-        2. /Parameterized givens/ ---> COMBINATIONS of /classes/ and /implicit methods/.
+        2. /Parameterized givens/ ---> COMBINATIONS of /classes/ and /implicit
+           methods/.
            #+begin_src scala
              // Dotty
-             given listOrd[T](using ord: Ord[T]) as Ord[List[T]] { ... }
+             given listOrd[T](using ord: Ord[T]): Ord[List[T]] with { ... }
 
              // Scala 2
-             class ListOrd[T](implicit ord: Ord[T]) extends Ord[List[T]] { ... }
-             final implicit def ListOrd[T](implicit ord: Ord[T]): ListOrd[T] = new ListOrd[T]
+             class listOrd[T](implicit ord: Ord[T]) extends Ord[List[T]] { ... }
+             final implicit def listOrd[T](implicit ord: Ord[T]): listOrd[T] = new listOrd[T]
            #+end_src
 
         3. /Alias givens/ map to /implicit methods/ OR /implicit lazy vals/.
@@ -3821,7 +3821,7 @@
            =from Jian= Remember! Here the "alias" means assignment.
            #+begin_src scala
              // Dotty
-             given global as ExecutionContext = new ForkJoinContext()
+             given global: ExecutionContext = new ForkJoinContext()
 
              val ctx: Context = ...
              given Context = ctx
@@ -3854,11 +3854,11 @@
         #+begin_src scala
           given Ord[Int] { ... }
           //// dotc generate:
-          // given given_Ord_Int as Ord[Int] { ... }
+          // given given_Ord_Int: Ord[Int] with { ... }
 
-          given [T](using ord: Ord[T]) as Ord[List[T]] { ... }
+          given [T](using ord: Ord[T]): Ord[List[T]] with { ... }
           //// dotc generate:
-          // given given_Ord_List_T[T](using ord: Ord[T]) as Ord[List[T]] { ... }
+          // given given_Ord_List_T[T](using ord: Ord[T]): Ord[List[T]] with { ... }
         #+end_src
 
       - The SYNTHESIZED _type names_ are formed from =TODO= =FIX-DOC=
@@ -3986,13 +3986,12 @@
         instead of ~implicit def stringToToken(str: String): Token = new Keyword(str)~
          one can write
          #+begin_src scala
-           given stringToToken as Conversion[String, Token] {
+           given stringToToken: Conversion[String, Token] with
              def apply(str: String): Token = KeyWord(str)
-           }
 
            // OR
 
-           given stringToToken as Conversion[String, Token] = KeyWord(_)
+           given stringToToken: Conversion[String, Token] = KeyWord(_)
          #+end_src
 
 ***** DONE Implicit Classes
@@ -4675,7 +4674,7 @@
           types._
 
       - Many of these /singleton operation types/ are meant to be used _infix_
-        (as in SLS § 3.2.8), and are annotated accordingly woth ~infix~ /modifiers/.
+        (as in SLS § 3.2.8).
 
       - *Since /type aliases/ have the SAME /precedence/ rules as their term-level
         equivalents,* the operations _COMPOSE with the EXPECTED /precedence/ rules_:
@@ -4699,7 +4698,9 @@
         #+begin_src scala
           import scala.compiletime.ops._
 
-          infix type +[X <: Int | String, Y <: Int | String] = (X, Y) match {
+          import scala.annotation.infx._  // TODO: infix ???
+
+          type +[X <: Int | String, Y <: Int | String] = (X, Y) match {
             case (Int, Int)       => int.+[X, Y]
             case (String, String) => string.+[X, Y]
           }
@@ -5277,12 +5278,11 @@
      - Since ~Liftable~ is a /type class/, its instances can be conditional.
        For example, a ~List~ is /liftable/ _if its element type is_:
        #+begin_src scala
-         given [T: Liftable : Type] as Liftable[List[T]] {
+         given [T: Liftable : Type]: Liftable[List[T]] with
            def toExpr(xs: List[T]) = xs match {
              case head :: tail => '{ ${ Expr(head) } :: ${ Expr(tail) } }
              case Nil          => '{ Nil: List[T] }
            }
-         }
        #+end_src
 
      - *In the end, ~Liftable~ _RESEMBLES_ very much a serialization framework.*
@@ -5651,16 +5651,15 @@
      It is possible to deconstruct or extract values out of Expr using pattern matching.
      
      - ~scala.quoted~ contains objects that can help extracting values from ~Expr~: 
-       * ~scala.quoted.Const~ / ~scala.quoted.Consts~:
-         matches an expression of a literal value (or list of values) and
-         returns the value (or list of values).
-
        * ~scala.quoted.Unlifted~:
          matches an expression of a value (or list of values) and returns the
          value (or list of values).
 
+       * ~scala.quoted.Const~ / ~scala.quoted.Consts~:
+         Same as ~Unlifted~ but only works on primitive values.
+
        * ~scala.quoted.Varargs~:
-         matches an explicit sequence of expresions and returns them. These
+         matches an explicit sequence of expressions and returns them. These
          sequences are useful to get individual ~Expr[T]~ out of a varargs
          expression of type ~Expr[Seq[T]]~.
          
@@ -5670,21 +5669,14 @@
          inline def sum(inline args: Int*): Int =
            ${ sumExpr('args) }
 
-         private def sumExpr(argsExpr: Expr[Seq[Int]])(using Quotes): Expr[Int] = argsExpr match {
-           case Varargs(Consts(args)) => // args is of type Seq[Int]
+         private def sumExpr(argsExpr: Expr[Seq[Int]])
+                            (using Quotes): Expr[Int] = argsExpr match {
+           case Varargs(Unlifted(args)) => // args is of type Seq[Int]
              Expr(args.sum) // precompute result of sum
 
            case Varargs(argExprs) => // argExprs is of type Seq[Expr[Int]]
-             val staticSum: Int = argExprs.map {
-               case Const(arg) => arg
-               case _          => 0
-             }.sum
-
-             val dynamicSum: Seq[Expr[Int]] = argExprs.filter {
-               case Const(_) => false
-               case arg      => true
-             }
-
+             val staticSum: Int = argExprs.map(_.unlift.getOrElse(0))
+             val dynamicSum: Seq[Expr[Int]] = argExprs.filter(_.unlift.isEmpty)
              dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
 
            case _ =>
@@ -5692,7 +5684,7 @@
          }
        #+end_src
     
-***** TODO Quoted patterns
+**** TODO Quoted patterns
       Quoted pattens allow deconstructing complex code that contains a precise
       structure, types or methods. Patterns ~'{ ... }~ can be placed in any
       location where Scala expects a pattern.
@@ -5724,16 +5716,8 @@
 
             val args2 = args1.flatMap(flatSumArgs)
 
-            val staticSum: Int = args2.map {
-              case Const(arg) => arg
-              case _          => 0
-            }.sum
-
-            val dynamicSum: Seq[Expr[Int]] = args2.filter {
-              case Const(_) => false
-              case arg      => true
-            }
-
+            val staticSum: Int = args2.map(_.unlift.getOrElse(0)).sum
+            val dynamicSum: Seq[Expr[Int]] = args2.filter(_.unlift.isEmpty)
             dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
         }
       #+end_src
@@ -5812,9 +5796,10 @@
                 // body: Expr[Int => Int] where the argument represents references to y
                 evalExpr(Expr.betaReduce(body)(evalExpr(x)))
 
-              case '{ ($x: Int) * ($y: Int) } => (x, y) match
-                case (Const(a), Const(b)) => Expr(a * b)
-                case _                    => e
+              case '{ ($x: Int) * ($y: Int) } =>
+                (x.unlift, y.unlift) match
+                  case (Some(a), Some(b)) => Expr(a * b)
+                  case _                  => e
 
               case _ => e
             }
@@ -7971,39 +7956,33 @@
        to construct a ~BigFloat~ from a _digits string_.
        Here is a possible implementation:
        #+begin_src scala
-         object BigFloat {
+         object BigFloat:
            import scala.util.FromDigits
 
-           def apply(digits: String): BigFloat = {
-             val (mantissaDigits, givenExponent) = digits.toUpperCase.split('E') match {
+           def apply(digits: String): BigFloat =
+             val (mantissaDigits, givenExponent) = digits.toUpperCase.split('E') match
                case Array(mantissaDigits, edigits) =>
                  val expo =
                    try FromDigits.intFromDigits(edigits)
-                   catch {
-                     case ex: FromDigits.NumberTooLarge =>
-                       throw FromDigits.NumberTooLarge(s"exponent too large: $edigits")
-                   }
+                   catch case ex: FromDigits.NumberTooLarge =>
+                     throw FromDigits.NumberTooLarge(s"exponent too large: $edigits")
                  (mantissaDigits, expo)
 
                case Array(mantissaDigits) =>
                  (mantissaDigits, 0)
-             }
 
-             val (intPart, exponent) = mantissaDigits.split('.') match {
+             val (intPart, exponent) = mantissaDigits.split('.') match
                case Array(intPart, decimalPart) =>
                  (intPart ++ decimalPart, givenExponent - decimalPart.length)
 
                case Array(intPart) =>
                  (intPart, givenExponent)
-             }
 
              BigFloat(BigInt(intPart), exponent)
-           }
 
-           given FromDigits as FromDigits.Floating[BigFloat] {
+           given FromDigits: FromDigits.Floating[BigFloat] with
              def fromDigits(digits: String) = apply(digits)
-           }
-         }  // end BigFloat
+         end BigFloat
        #+end_src
        + To accept ~BigFloat~ /literals/, all that's needed in addition is a
          /given instance/ of type ~FromDigits.Floating[BigFloat]~
@@ -8051,8 +8030,8 @@
 
            private def fromDigitsImpl(digits: Expr[String])
                                      (using ctx: Quotes): Expr[BigFloat] =
-             digits match {
-               case Const(ds) =>
+             digits.unlift match {
+               case Some(ds) =>
                  try {
                    val BigFloat(m, e) = apply(ds)
                    '{BigFloat(${Expr(m)}, ${Expr(e)})}
@@ -8063,7 +8042,7 @@
                      '{BigFloat(0, 0)}
                  }
 
-               case digits =>
+               case None =>
                  '{apply($digits)}
              }
          }  // end BigFloat
@@ -8405,7 +8384,6 @@
     - https://www.youtube.com/watch?v=VV9lPg3fNl8
 
 *** TODO Changes in Implicit Resolution
-
     This page describes *changes* to the /implicit resolution/ that apply both to
     the new ~given~'s and to the old-style ~implicit~'s in Dotty.
       /Implicit resolution/ uses a new algorithm which *caches* implicit results
@@ -8459,10 +8437,10 @@
        a /type/. Example:
        #+begin_src scala
          package p
-         given a as A
+         given a: A = A()
 
          object o {
-           given b as B
+           given b: B = B()
            type C
          }
        #+end_src
@@ -8679,7 +8657,7 @@
          #+begin_src scala
            import scala.language.implicitConversions
 
-           given int2Integer as Conversion[Int, java.lang.Integer] =
+           given int2Integer: Conversion[Int, java.lang.Integer] =
              java.lang.Integer.valueOf(_)
          #+end_src
 
@@ -8723,7 +8701,7 @@
            class A(val x: Int)  // The type for which wewant an `Ordering`
 
            // Convert `A` to a type for which an `Ordering` is available:
-           given AToInt as Conversion[A, Int] = _.x
+           given AToInt: Conversion[A, Int] = _.x
 
            summon[Ordering[Int]]  // Ok, exists in the standard library
            summon[Ordering[A]]    // Ok, will use the implicit conversion from
@@ -9617,8 +9595,9 @@
 *** (O) ~DottyPredef~
 
 ** ~dotty.runtime~
-*** (O) ~LazyVals~
-*** (O) ~Arrays~
+*** Classlikes
+**** (O) ~LazyVals~
+**** (O) ~Arrays~
     
 ** ~dotty.tools.tasty~
 *** Classlikes
@@ -9635,8 +9614,8 @@
 
 ** ~scala~
 *** Types
-**** ~type EmptyTuple = EmptyTuple.type~
-**** ~type IArray[+T] = IArray[T]~
+**** (T) ~EmptyTuple~
+**** (T) ~IArray[+T]~
      
 *** Classlikes
 **** (O) ~EmptyTuple~
@@ -9699,7 +9678,6 @@
 ** ~scala.quoted~
 *** Classlikes
 **** (O) ~Unlifted~
-**** (O) ~report~
 **** (T) ~ExprMap~
 **** (O) ~Varargs~
 **** (aC, O) ~Type[T <: AnyKine]~
@@ -9717,7 +9695,7 @@
 **** (O) ~Patterns~ with ~@compileTimeOnly("Illegal reference to `scala.quoted.runtime.Patterns`")~
 **** (C) ~SplicedType~ with ~@compileTimeOnly("Illegal reference to `scala.quoted.runtime.SplicedType`")~
 **** (C) ~StopMacroException~
-**** (C) ~Expr~ with ~@compileTimeOnly("Illegal reference to `scala.quoted.runtime.Expr`")~
+**** (O) ~Expr~ with ~@compileTimeOnly("Illegal reference to `scala.quoted.runtime.Expr`")~
 
 ** ~scala.reflect~
 *** Types
