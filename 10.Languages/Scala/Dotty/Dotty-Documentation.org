@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M3-bin-20201202-11f53c7-NIGHTLY
+#+VERSION: 3.0.0-M3-bin-20201203-222fe0b-NIGHTLY --> ???
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -3061,7 +3061,21 @@
         objects/.
 
 **** DONE Syntax
-     CLOSED: [2020-07-12 Sun 22:47]
+     CLOSED: [2020-12-04 Fri 12:53]
+     - Note:
+       To align ~extends~ clauses and ~derives~ clauses, Scala 3 also allows
+       multiple extended types to be separated by commas. So the following is
+       now legal:
+       #+begin_src scala
+         class A extends B, C { ... }
+       #+end_src
+     
+       It is equivalent to the *OLD* form
+       
+       #+begin_src scala
+         class A extends B with C { ... }
+       #+end_src
+       
 **** DONE Discussion
      CLOSED: [2020-07-12 Sun 23:06]
      - This _/type class/ derivation framework_ is *INTENTIONALLY* very *small* and
@@ -5216,7 +5230,7 @@
      - =from Jian=
        From the Q&A above we know it's better to find an easy way to _lift a value
        of ~T~ to ~Expr[T]~ with enough information hiding_. A good API for this is
-       already hinted above -- use ~Expr.apply[T: Liftable](v: T)~ to do this.
+       already hinted above -- use ~Expr.apply[T: ToExpr](v: T)~ to do this.
        We'll talk about the knowledge about ~Expr.apply~ below.
 
      - The ~Expr.apply~ method is defined in package ~quoted~:
@@ -5225,30 +5239,30 @@
 
          object Expr {
            /** Lift a value into an expression containing the construction of that value */
-           def apply[T: Liftable](x: T)(using Quotes): Expr[T] =
-             summon[Liftable[T]].toExpr(x)
+           def apply[T: ToExpr](x: T)(using Quotes): Expr[T] =
+             summon[ToExpr[T]].toExpr(x)
 
            // ...
          }
        #+end_src
-       * This method says that values of types implementing the ~Liftable~ /type
+       * This method says that values of types implementing the ~ToExpr~ /type
          class/ can be converted ("lifted") to ~Expr~ values using ~Expr.apply~.
 
-     - Dotty comes with /given instances/ of ~Liftable~ for several types including
+     - Dotty comes with /given instances/ of ~ToExpr~ for several types including
        ~Boolean~, ~String~, and /ALL primitive number types/.
        * For example,
          ~Int~ values can be converted to ~Expr[Int]~ values by wrapping the value
          in a ~Literal~ /tree node/ (=from Jian= actually ~Literal(Constant(n))~).
            This makes use of the underlying /tree representation/ in the compiler
          *for efficiency*.
-         + _BUT_ the ~Liftable~ instances are nevertheless NOT magic in the sense
+         + _BUT_ the ~ToExpr~ instances are nevertheless NOT magic in the sense
            that they could all be defined in a user program *without knowing
            anything about the representation of ~Expr~ trees* (=from Jian= this
-           can be done is because the fundamental types /given ~Liftable~ instances/
+           can be done is because the fundamental types /given ~ToExpr~ instances/
            are provided by Scala).
-           - For instance, here is a possible instance of ~Liftable[Boolean]~:
+           - For instance, here is a possible instance of ~ToExpr[Boolean]~:
              #+begin_src scala
-               given Liftable[Boolean] {
+               given ToExpr[Boolean] {
                  def toExpr(b: Boolean) =
                    if (b) '{ true } else '{ false }
                }
@@ -5256,10 +5270,10 @@
 
      - Once we can lift bits, we can work our way up.
        For instance, here is a possible implementation (=from Jian= of course,
-       not the best way!) of ~Liftable[Int]~ that _does *NOT* use the underlying
+       not the best way!) of ~ToExpr[Int]~ that _does *NOT* use the underlying
        tree machinery_:
        #+begin_src scala
-         given Liftable[Int] {
+         given ToExpr[Int] {
            def toExpr(n: Int): Expr[Int] = n match {
              case Int.MinValue    => '{ Int.MinValue }
              case _ if n < 0      => '{ - ${ toExpr(-n) } }
@@ -5275,17 +5289,17 @@
          violation to PCP. We can see they other 3 branches includes /free
          variables/ and follow PCP!
 
-     - Since ~Liftable~ is a /type class/, its instances can be conditional.
+     - Since ~ToExpr~ is a /type class/, its instances can be conditional.
        For example, a ~List~ is /liftable/ _if its element type is_:
        #+begin_src scala
-         given [T: Liftable : Type]: Liftable[List[T]] with
+         given [T: ToExpr : Type]: ToExpr[List[T]] with
            def toExpr(xs: List[T]) = xs match {
              case head :: tail => '{ ${ Expr(head) } :: ${ Expr(tail) } }
              case Nil          => '{ Nil: List[T] }
            }
        #+end_src
 
-     - *In the end, ~Liftable~ _RESEMBLES_ very much a serialization framework.*
+     - *In the end, ~ToExpr~ _RESEMBLES_ very much a serialization framework.*
        Like the latter it can be derived systematically for all /collections/,
        /case classes/ and /enums/.
 
@@ -5422,8 +5436,8 @@
 
      - To get values out of expressions containing constants ~Expr~ provides the
        /methods/
-       + ~unlift[T]~: return a value of ~Option[T]~
-       + ~unliftOrError[T]~: return a value of ~T~
+       + ~value[T]~: return a value of ~Option[T]~
+       + ~valueOrError[T]~: return a value of ~T~
 
      - Wanted: avoid having incidental ~val~ bindings generated by the /inlining/
                of the ~def~
@@ -5435,7 +5449,7 @@
              ${ powerCode('x, 'n) }
 
            private def powerCode(x: Expr[Double], n: Expr[Int])(using Quotes): Expr[Double] =
-             n.unlift match {
+             n.value match {
                case Some(m) => powerCode(x, m)
                case None    => '{ Math.pow($x, $y) }
              }
@@ -5612,7 +5626,7 @@
          ${ defaultOfImpl('str) }
 
        def defaultOfImpl(strExpr: Expr[String])(using Quotes): Expr[Any] =
-         strExpr.unliftOrError match {
+         strExpr.valueOrError match {
            case "int"    => '{1}
            case "string" => '{"a"}
          }
@@ -5651,12 +5665,12 @@
      It is possible to deconstruct or extract values out of Expr using pattern matching.
      
      - ~scala.quoted~ contains objects that can help extracting values from ~Expr~: 
-       * ~scala.quoted.Unlifted~:
+       * ~scala.quoted.Expr~ / ~scala.quoted.Exprs~:
          matches an expression of a value (or list of values) and returns the
          value (or list of values).
 
        * ~scala.quoted.Const~ / ~scala.quoted.Consts~:
-         Same as ~Unlifted~ but only works on primitive values.
+         Same as ~Expr~ / ~Exprs~ but only works on primitive values.
 
        * ~scala.quoted.Varargs~:
          matches an explicit sequence of expressions and returns them. These
@@ -5675,8 +5689,8 @@
              Expr(args.sum) // precompute result of sum
 
            case Varargs(argExprs) => // argExprs is of type Seq[Expr[Int]]
-             val staticSum: Int = argExprs.map(_.unlift.getOrElse(0))
-             val dynamicSum: Seq[Expr[Int]] = argExprs.filter(_.unlift.isEmpty)
+             val staticSum: Int = argExprs.map(_.value.getOrElse(0))
+             val dynamicSum: Seq[Expr[Int]] = argExprs.filter(_.value.isEmpty)
              dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
 
            case _ =>
@@ -5716,8 +5730,8 @@
 
             val args2 = args1.flatMap(flatSumArgs)
 
-            val staticSum: Int = args2.map(_.unlift.getOrElse(0)).sum
-            val dynamicSum: Seq[Expr[Int]] = args2.filter(_.unlift.isEmpty)
+            val staticSum: Int = args2.map(_.value.getOrElse(0)).sum
+            val dynamicSum: Seq[Expr[Int]] = args2.filter(_.value.isEmpty)
             dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
         }
       #+end_src
@@ -5797,7 +5811,7 @@
                 evalExpr(Expr.betaReduce(body)(evalExpr(x)))
 
               case '{ ($x: Int) * ($y: Int) } =>
-                (x.unlift, y.unlift) match
+                (x.value, y.value) match
                   case (Some(a), Some(b)) => Expr(a * b)
                   case _                  => e
 
@@ -7156,7 +7170,7 @@
           #+end_src
         
 *** DONE New Control Syntax
-    CLOSED: [2020-07-22 Wed 03:04]
+    CLOSED: [2020-12-04 Fri 13:03]
     #+begin_src scala
       if x < 0 then
         "negative"
@@ -7177,23 +7191,36 @@
         y <- ys
       do
         println(x + y)
+
+      try body
+      catch case ex: IOException => handle
     #+end_src
     - =from Jian= The rules in details are listed in the docs.
 
     - The rules in details:
-      + Two choices for new ~if~ syntax:
-        * with a ~then~ that FOLLOWS the ~if~-condition
-        * with proper INDENTATION
+      (=from Jian=
+       proper INDENTATION is always required for the _new control syntax_, and
+       we won't repeat here).
+      * New ~if~ syntax:
+        + with a ~then~ that FOLLOWS the ~if~-condition
 
-      + ~while~-loop with ~do~ following the ~while~-condition
+      * ~while~-loop with ~do~ following the ~while~-condition
         =from Jian=
         Remember:
-        ~do ... while~ syntax is _removed_ from Scala 3.
+        *No* ~do ... while~ syntax is Scala 3.
         In Scala 3, ~do~ will only show up in the _new control syntax_.
 
-      + For the enumerators of ~for~-expression,
-        * /comprehensions/ still use ~yield~
-        * /side effect loops/ use ~do~
+      * For the enumerators of ~for~-expression,
+        + /comprehensions/ still use ~yield~
+        + /side effect loops/ use ~do~
+
+      * New ~catch~ syntax:
+        + _SINGLE_ case
+          can be on the _same line_ as ~catch~.
+
+        + _MULTIPLE_ cases
+          these have to be appear within braces (just like in Scala-2) or an
+          indented block.
 
 **** Rewrites
      The Dotty compiler _can rewrite_ source code bidirectionally
@@ -8030,7 +8057,7 @@
 
            private def fromDigitsImpl(digits: Expr[String])
                                      (using ctx: Quotes): Expr[BigFloat] =
-             digits.unlift match {
+             digits.value match {
                case Some(ds) =>
                  try {
                    val BigFloat(m, e) = apply(ds)
@@ -9682,10 +9709,10 @@
 **** (O) ~Varargs~
 **** (aC, O) ~Type[T <: AnyKine]~
 **** (O) ~Const~
-**** (T, O) ~Liftable[T]~
+**** (T, O) ~ToExpr[T]~
 **** (O) ~Consts~
 **** (T) ~Quotes~
-**** (T, O) ~Unliftable[T]~
+**** (T, O) ~FromExpr[T]~
 **** (aC, O) ~Expr[+T]~
     
 ** ~scala.quoted.runtime~
