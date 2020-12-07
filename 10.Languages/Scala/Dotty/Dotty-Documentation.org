@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M3-bin-20201203-222fe0b-NIGHTLY --> ???
+#+VERSION: 3.0.0-M3-bin-20201206-d199fd3-NIGHTLY -> ..
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -745,7 +745,7 @@
          package scala.reflect
 
          /** A base trait of all Scala enum definitions */
-         @mixin trait Enum extends Any with Product with Serializable {
+         transparent trait Enum extends Any with Product with Serializable {
 
            /** A number uniquely identifying a case of an enum */
            def ordinal: Int
@@ -5661,7 +5661,8 @@
        3. In case *ALL* files are *suspended* due to /cyclic dependencies/ the
           compilation will *FAIL* with an error.
 
-**** TODO Pattern matching on quoted expressions
+**** DONE Pattern matching on quoted expressions
+     CLOSED: [2020-12-06 Sun 00:16]
      It is possible to deconstruct or extract values out of Expr using pattern matching.
      
      - ~scala.quoted~ contains objects that can help extracting values from ~Expr~: 
@@ -5680,16 +5681,17 @@
      - These could be used in the following way to optimize any call to sum that
        has statically known values.
        #+begin_src scala
-         inline def sum(inline args: Int*): Int =
-           ${ sumExpr('args) }
+         inline def sum(inline args: Int*): Int = ${ sumExpr('args) }
 
          private def sumExpr(argsExpr: Expr[Seq[Int]])
                             (using Quotes): Expr[Int] = argsExpr match {
-           case Varargs(Unlifted(args)) => // args is of type Seq[Int]
-             Expr(args.sum) // precompute result of sum
+           case Varargs(args @ Exprs(argValues)) =>
+             // args is of type Seq[Expr[Int]]
+             // argValues is of type Seq[Int]
+             Expr(argValues.sum) // precompute result of sum
 
            case Varargs(argExprs) => // argExprs is of type Seq[Expr[Int]]
-             val staticSum: Int = argExprs.map(_.value.getOrElse(0))
+             val staticSum: Int = argExprs.map(_.value.getOrElse(0)).sum
              val dynamicSum: Seq[Expr[Int]] = argExprs.filter(_.value.isEmpty)
              dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
 
@@ -5698,49 +5700,55 @@
          }
        #+end_src
     
-**** TODO Quoted patterns
-      Quoted pattens allow deconstructing complex code that contains a precise
-      structure, types or methods. Patterns ~'{ ... }~ can be placed in any
-      location where Scala expects a pattern.
-      For example,
-      #+begin_src scala
-        optimize {
-          sum(sum(1, a, 2), 3, b)
-        } // should be optimized to 6 + a + b
-
-        def sum(args: Int*): Int = args.sum
-
-        inline def optimize(inline arg: Int): Int = ${ optimizeExpr('arg) }
-
-        private def optimizeExpr(body: Expr[Int])(using Quotes): Expr[Int] = body match {
-          // Match a call to sum without any arguments
-          case '{ sum() }                     => Expr(0)
-          // Match a call to sum with an argument $n of type Int. n will be the Expr[Int] representing the argument.
-          case '{ sum($n) }                   => n
-          // Match a call to sum and extracts all its args in an `Expr[Seq[Int]]`
-          case '{ sum(${Varargs(args)}: _*) } => sumExpr(args)
-          case body                           => body
-        }
-
-        private def sumExpr(args1: Seq[Expr[Int]])(using Quotes): Expr[Int] = {
-            def flatSumArgs(arg: Expr[Int]): Seq[Expr[Int]] = arg match {
-              case '{ sum(${Varargs(subArgs)}: _*) } => subArgs.flatMap(flatSumArgs)
-              case arg => Seq(arg)
-            }
-
-            val args2 = args1.flatMap(flatSumArgs)
-
-            val staticSum: Int = args2.map(_.value.getOrElse(0)).sum
-            val dynamicSum: Seq[Expr[Int]] = args2.filter(_.value.isEmpty)
-            dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
-        }
-      #+end_src
+***** DONE Quoted patterns
+      CLOSED: [2020-12-06 Sun 16:43]
+       /Quoted pattens/ allow deconstructing complex code that contains a precise
+       structure, types or methods.
       
-***** TODO Recovering precise types using patterns
+       - Patterns ~'{ ... }~ can be placed in any location where Scala expects a
+         pattern.
+         * For example,
+           #+begin_src scala
+             optimize {
+               sum(sum(1, a, 2), 3, b)
+             } // should be optimized to 6 + a + b
+           #+end_src
+          
+           #+begin_src scala
+             def sum(args: Int*): Int = args.sum
+
+             inline def optimize(inline arg: Int): Int = ${ optimizeExpr('arg) }
+
+             private def optimizeExpr(body: Expr[Int])(using Quotes): Expr[Int] = body match {
+               // Match a call to sum without any arguments
+               case '{ sum() }                     => Expr(0)
+               // Match a call to sum with an argument $n of type Int. n will be the Expr[Int] representing the argument.
+               case '{ sum($n) }                   => n
+               // Match a call to sum and extracts all its args in an `Expr[Seq[Int]]`
+               case '{ sum(${Varargs(args)}: _*) } => sumExpr(args)
+               case body                           => body
+             }
+
+             private def sumExpr(args1: Seq[Expr[Int]])(using Quotes): Expr[Int] = {
+                 def flatSumArgs(arg: Expr[Int]): Seq[Expr[Int]] = arg match {
+                   case '{ sum(${Varargs(subArgs)}: _*) } => subArgs.flatMap(flatSumArgs)
+                   case arg => Seq(arg)
+                 }
+
+                 val args2 = args1.flatMap(flatSumArgs)
+
+                 val staticSum: Int = args2.map(_.value.getOrElse(0)).sum
+                 val dynamicSum: Seq[Expr[Int]] = args2.filter(_.value.isEmpty)
+                 dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
+             }
+           #+end_src
+      
+***** DONE Recovering precise types using patterns
+      CLOSED: [2020-12-07 Mon 10:07]
       Sometimes it is necessary to get a more precise type for an expression.
       This can be achived using the following pattern match.
       #+begin_src scala
-        def f(exp: Expr[Any])(using Quotes) =
+        def f(expr: Expr[Any])(using Quotes) =
           expr match
             case '{ $x: t } =>
               // If the pattern match succeeds, then there is some type `t` such that
@@ -5759,10 +5767,11 @@
           argsExpr match {
             case Varargs(argExprs) =>
               val argShowedExprs = argExprs.map {
-                case '{ $arg: t } =>
-                  Expr.summon[Show[t]] match {
+                case '{ $arg: tp } =>
+                  val showTp = Type.of[Show[tp]] 
+                  Expr.summon(using showTp) match {
                     case Some(showExpr) => '{ $showExpr.show($arg) }
-                    case None           => report.error(s"could not find implicit for ${showTp.show}", arg); '{???}
+                    case None           => report.error(s"could not find implicit for ${Type.show[Show[tp]]}", arg); '{???}
                   }
               }
               val newArgsExpr = Varargs(argShowedExprs)
@@ -5808,7 +5817,7 @@
             e match {
               case '{ val y: Int = $x; $body(y): Int } =>
                 // body: Expr[Int => Int] where the argument represents references to y
-                evalExpr(Expr.betaReduce(body)(evalExpr(x)))
+                evalExpr(Expr.betaReduce('{$body(${evalExpr(x)})}))
 
               case '{ ($x: Int) * ($y: Int) } =>
                 (x.value, y.value) match
@@ -5820,7 +5829,7 @@
           }
 
           eval {  // expands to the code: (16: Int)
-            val x: Int =4
+            val x: Int = 4
             x * x
           }
         #+end_src
