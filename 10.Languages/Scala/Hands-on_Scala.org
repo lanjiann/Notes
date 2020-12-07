@@ -3,6 +3,7 @@
 #+AUTHOR: Haoyi Li
 #+VERSION: 2020-06-01
 #+STARTUP: entitiespretty
+#+STARTUP: fold
 
 * DONE Foreword - 3
   CLOSED: [2020-08-02 Sun 08:22]
@@ -491,45 +492,479 @@
 *** 6.5 Conclusion - 124
 
 ** TODO Chapter 7: Files and Subprocesses - 127
-*** 7.1 Paths - 128
-**** 7.1.1 Constructing Paths - 128
-**** 7.1.2 Relative Paths - 129
-**** 7.1.3 Sub Paths - 130
+   #+name: Snippet 7.1: a short Scala code snippet to find the five largest file in a directory tree
+   #+begin_src scala
+     os.walk(os.pwd).filter(os.isFile).map(p => (os.size(p), p)).sortBy(-_._1).take(5)
+   #+end_src
+   
+   - This chapter will walk you through how to perform basic file and subprocess operations in Scala.
 
-*** 7.2 Filesystem Operations - 130
-**** 7.2.1 Queries - 131
+   - This chapter finishes with two small projects:
+     * Build a simple file synchronizer
+     * Build a streaming subprocess pipeline
+
+   - This chapter will form the basis for
+     * Chapter 17: Multi-Process Applications
+     * Chapter 18: Building a Real-time File Synchronizer
+
+   - This chapter uses:
+     * OS-Lib library
+     * Ammonite (OS-Lib comes bundled with Ammonite, and can be used within the
+       REPL and =*.sc= script files)
+   
+*** DONE 7.1 Paths - 128
+    CLOSED: [2020-10-17 Sat 03:10]
+    - Two subtypes of ~os.Path~:
+      + ~os.RelPath~ 
+      + ~os.SubPath~ 
+
+    - Three built-in paths of ~os~:
+      + ~os.pwd~
+      + ~os.root~
+      + ~os.home~
+
+    - Get /path segement(s)/:
+      + ~.segements~ -- All segments (~Iterator~)
+      + ~.last~ -- Last segments
+
+**** DONE 7.1.1 Constructing Paths - 128
+     CLOSED: [2020-10-17 Sat 02:47]
+     Concatenate /path segments/ (~os.PathChunk~) with the ~/~ operator.
+
+     - *CAUTION*:
+       The ~os.PathChunk~ can't contains /, and because of implicits, the passed
+       in /path segments/ can be a string instead of the exact ~os.PathChunk~.
+    
+     - ~os.up~, combine with a /path/ and ~/~, lets you move up one level.
+       #+begin_src scala
+         os.pwd / os.up
+         os.pwd / os.up / os.up
+       #+end_src
+
+     - ~os.Path(...)~ is used to *parse* ~os.Path~'s from strings.
+       + BY DEFAULT, only /absolute paths/ are supported.
+
+       + With the help of an EXTRA base path parameter ~base~, a /relative path/
+         string can be parsed.
+         #+begin_src scala
+           os.Path("post", base = os.pwd)
+
+           os.Path("../Ammonite", base = os.pwd)
+         #+end_src
+     
+**** DONE 7.1.2 Relative Paths - 129
+     CLOSED: [2020-10-17 Sat 03:10]
+     To work with /relative paths/ on disk, you can use ~os.RelPath~:
+     #+begin_src scala
+       os.RelPath("post")            // res13: os.RelPath = post
+       os.RelPath("../hello/world")  // res14: os.RelPath = ../hello/world
+     #+end_src
+       
+     - This helps ensure you
+       *do not mix up*
+       ~os.Path~'s which are always /absolute/
+       AND
+       ~os.RelPath~'s which are always /relative/.
+
+     - Combination rules:
+       Use ~/~, and ~os.Path~ can't be the RHS of a relative ~os.RelPath~.
+       This will be identified as a /compile error/.
+
+     - Examples:
+       #+begin_src scala
+         val helloRelPath = os.RelPath("../hello")
+
+         os.home / helloRelPath  // res16: os.Path = /Users/hello
+
+         helloRelPath / os.RelPath("post")  // res17: os.RelPath = ../hello/post
+       #+end_src
+
+     - Use ~relativeTo~ to get the /relative path/ between two /absolute paths/.
+       #+begin_src scala
+         val githubPath = os.Path("/Users/lihaoyi/Github")
+         val usersPath = os.Path("/Users")
+
+         githubPath.relativeTo(usersPath)  // res19: os.RelPath = lihaoyi/Github
+         usersPath.relativeTo(githubPath)  // res20: os.RelPath = ../..
+       #+end_src
+       
+**** DONE 7.1.3 Sub Paths - 130
+     CLOSED: [2020-10-17 Sat 02:57]
+     ~os.SubPath~'s are a special case of /relative paths/, where there CANNOT be
+     any ~..~ segments at the start.
+
+     - Similar to /relative paths/, sub-paths can be created between absolute
+       ~os.Path~'s using ~.subRelativeTo~.
+       #+begin_src scala
+         os.SubPath("post")
+         // res21: os.SubPath = post
+
+         val p1 = os.Path("/Users/lihaoyi/Github")
+
+         val p2 = os.Path("/Users")
+
+         p1.subRelativeTo(p2)
+         // res25: os.SubPath = lihaoyi/Github
+       #+end_src
+
+     - ~os.SubPath~ is useful for cases where you have a /relative path/ that should
+       always be "within" a particular base folder.
+       + This can help _RULE OUT a whole class of /directory traversal ATTACKS/_
+         where an unexpected ~..~ in a /relative path/ allows the attacks to
+         read your =/etc/passwd= or some other sensitive files.
+         =TODO= =???= =TODO= =???=
+
+*** DONE 7.2 Filesystem Operations - 130
+    CLOSED: [2020-10-17 Sat 04:23]
+    Most filesystem operations only accept absolute path ~os.Path~'s.
+
+**** DONE 7.2.1 Queries - 131
+     CLOSED: [2020-10-17 Sat 03:58]
 ***** 7.2.1.1 ~os.list~ - 131
+      List direct children of a folder
+      #+begin_src scala
+        os.list(os.pwd)
+        // res26: IndexedSeq[os.Path] = ArraySeq(
+        //   /Users/lihaoyi/test/.gitignore,
+        //   /Users/lihaoyi/test/post
+        // )
+      #+end_src
+
 ***** 7.2.1.2 ~os.walk~ - 131
+      List children of a folder recursively
+      #+begin_src scala
+        os.walk(os.pwd)
+        // res27: IndexedSeq[os.Path] = ArraySeq(
+        //   /Users/lihaoyi/test/.gitignore,
+        //   /Users/lihaoyi/test/post,
+        //   /Users/lihaoyi/test/post/Interview.md,
+        //   /Users/lihaoyi/test/post/Hub,
+        //   /Users/lihaoyi/test/post/Hub/Search.png,
+        //   ...
+        // )
+      #+end_src
+
 ***** 7.2.1.3 ~os.stat~ - 131
+      Fetch the filesystem metadata for an individual file or folder.
+      #+begin_src scala
+        os.stat(os.pwd / ".gitignore")
+        // res28: os.StatInfo = StatInfo(
+        //   129L,
+        //   2019-09-27T08:04:35.292056Z,
+        //   2019-12-15T22:23:01.462598Z,
+        //   2019-09-27T08:04:35Z,
+        //   File
+        // )
+      #+end_src
+
+      - Other useful queries:
+        + ~os.isFile~
+        + ~os.isDir~
+        + ~os.mtime~
+        + ~os.size~
       
-**** 7.2.2 Actions - 132
+**** DONE 7.2.2 Actions - 132
+     CLOSED: [2020-10-17 Sat 04:15]
 ***** 7.2.2.1 ~os.read~, ~os.write~ - 132
+      - ~os.write~ can write any datatype implementing the ~Writable~ interface:
+        + ~String~
+        + ~Array[Byte]~
+        + even the ~ujson.Value~ (will mention in Chapter 8)
+      
+      - ~os.read~ reads a file as a ~String~.
+      - ~os.read.lines~ reads the lines of a file as a ~IndexedSeq[String]~.
+      - ~os.read.bytes~ reads a file as a ~Array[Byte]~.
+
+      - Examples:
+        #+begin_src scala
+          os.write(os.pwd / "new.txt", "Hello")
+
+          os.list(os.pwd)
+          // res30: IndexedSeq[os.Path] = ArraySeq(
+          //   /Users/lihaoyi/test/.gitignore,
+          //   /Users/lihaoyi/test/post,
+          //   /Users/lihaoyi/test/new.txt
+          // )
+
+          os.read(os.pwd / "new.txt")
+          // res31: String = "Hello"
+        #+end_src
+        
 ***** 7.2.2.2 ~os.move~ - 132
+      #+begin_src scala
+        os.move(
+          os.pwd / "new.txt",
+          os.pwd / "newer.txt"
+        )
+
+        os.list(os.pwd)
+        // res32: IndexedSeq[os.Path] = ArraySeq(
+        //    /Users/lihaoyi/test/.gitignore,
+        //    /Users/lihaoyi/test/post,
+        //    /Users/lihaoyi/test/newer.txt
+        // )
+      #+end_src
+      
 ***** 7.2.2.3 ~os.copy~ - 132
+      #+begin_src scala
+        os.copy(
+          os.pwd / "newer.txt",
+          os.pwd / "newer-2.txt"
+        )
+
+        os.list(os.pwd)
+        // res32: IndexedSeq[os.Path] = ArraySeq(
+        //    /Users/lihaoyi/test/.gitignore,
+        //    /Users/lihaoyi/test/post,
+        //    /Users/lihaoyi/test/newer-2.txt,
+        //    /Users/lihaoyi/test/newer.txt
+        // )
+      #+end_src
+      
 ***** 7.2.2.4 ~os.remove~ - 132
+      #+begin_src scala
+        os.remove(os.pwd / "newer.txt")
+
+        os.list(os.pwd)
+        // res32: IndexedSeq[os.Path] = ArraySeq(
+        //    /Users/lihaoyi/test/.gitignore,
+        //    /Users/lihaoyi/test/post,
+        //    /Users/lihaoyi/test/newer-2.txt
+        // )
+      #+end_src
+      
 ***** 7.2.2.5 ~os.makeDir~ - 132
+      #+begin_src scala
+        os.makeDir(os.pwd / "new-folder")
 
-**** 7.2.3 Combining Operations - 133
-**** 7.2.4 Streaming - 133
-**** 7.2.5 Transforming Streams - 134
+        os.list(os.pwd)
+        // res32: IndexedSeq[os.Path] = ArraySeq(
+        //    /Users/lihaoyi/test/.gitignore,
+        //    /Users/lihaoyi/test/post,
+        //    /Users/lihaoyi/test/new-folder,
+        //    /Users/lihaoyi/test/newer-2.txt
+        // )
+      #+end_src
 
-*** 7.3 Folder Syncing - 135
-**** 7.3.1 Walking the Filesystem - 135
-**** 7.3.2 Copying New Files Over - 136
-**** 7.3.3 Updating Files - 137
-**** 7.3.4 Testing Our File Syncer - 138
+**** DONE 7.2.3 Combining Operations - 133
+     CLOSED: [2020-10-17 Sat 04:15]
+     #+begin_src scala
+       os.walk(os.pwd).filter(os.isFile).map(p => (os.size(p), p)).sortBy(-_._1).take(5)
+     #+end_src
+   
+     - One limitation:
+       This snippet loads all files into an in-memory data structure before filtering and
+       transforming it.
+       + Next section use ~.stream~ variant to resolve this.
+       
+**** DONE 7.2.4 Streaming - 133
+     CLOSED: [2020-10-17 Sat 04:22]
+     ~os.read.lines.stream~ and ~os.walk.stream~
+     #+begin_src scala
+       os.read.lines.stream(os.pwd / ".gitignore").foreach(println)
+       // target/
+       // *.iml
+       // .idea
+       // .settings
+       // ...
 
-*** 7.4 Simple Subprocess Invocations - 139
+       os.walk.stream(os.pwd).foreach(println)
+       // /Users/lihaoyi/test/.gitignore
+       // /Users/lihaoyi/test/post
+       // /Users/lihaoyi/test/post/Programming Interview.md
+       // /Users/lihaoyi/test/post/Hub
+       // /Users/lihaoyi/test/post/Hub/Search.png
+     #+end_src
+     
+     - The return type of ~.stream~ operations is ~Generator~, which is like
+       /iterators/, but *it ensure that resources are always released after
+       processing.*
+       + Most collection operations like ~.foreach~, ~.map~, ~.filter~, ~toArray~,
+         etc. are available on ~Generator~'s.
+         
+**** DONE 7.2.5 Transforming Streams - 134
+     CLOSED: [2020-10-17 Sat 04:23]
+
+*** DONE 7.3 Folder Syncing - 135
+    CLOSED: [2020-11-18 Wed 04:10]
+    Let us start by defining the /method signature/ of our folder synchronizer:
+    #+begin_src scala
+      def sync(src: os.Path, dest: os.Path): Unit = ???
+    #+end_src
+    
+    - Assumptions: =todo= =???= =todo=
+      + We will *ignore* /deletions/ and /symbolic links/.
+        * Ignore /deletions/ means assume all the files in ~dest~ are always in
+          ~src~.
+
+      + We will not use the too inefficient way like remove the destination folder
+        contents completely, and re-copy source folder contents to it.
+    
+**** DONE 7.3.1 Walking the Filesystem - 135
+     CLOSED: [2020-10-17 Sat 04:40]
+     #+begin_src scala
+       def sync(src: os.Path, dest: os.Path): Unit =
+         for (srcSubPath <- os.walk(src)) {
+           val subPath = srcSubPath.subRelativeTo(src)
+           val destSubPath = dest / subPath
+           println((os.isDir(srcSubPath), os.isDir(destSubPath)))
+         }
+     #+end_src
+     
+     - Running this on our source folder with files and destination folder WITHOUT
+       files ~sync(os.pwd / "post", os.pwd / "post-copy")~, we get the following:
+       #+begin_src text
+         (false, false)
+         (true, false)
+         (false, false)
+         (false, false)
+         ...
+       #+end_src
+       For now, the destination folder doesn't exist, so ~isDir~ returns ~false~
+       on all of the paths.
+     
+**** DONE 7.3.2 Copying New Files Over - 136
+     CLOSED: [2020-11-18 Wed 01:37]
+     The next step is to start syncing over files.
+     We walk over the =src= and the corresponding paths in =dest= together, and
+     if they differ, copy the source sub-path over the destination sub-path:
+     #+begin_src scala
+       def sync(src: os.Path, dest: os.Path): Unit =
+         for (srcSubPath <- os.walk(src)) {
+           val subPath = srcSubPath.subRelativeTo(src)
+           val destSubPath = dest / subPath
+           (os.isDir(srcSubPath), os.isDir(destSubPath)) match {
+             case (false, true) | (true, false) =>
+               os.copy.over(srcSubPath, destSubPath, createFolders = true)
+        
+             case _ =>  // do nothing
+           }
+         }
+     #+end_src
+     
+     - Since ~isDir~ returns ~false~ both
+       when the path refers to a file as well as
+       if the path is empty,
+       the above snippet uses ~copy.over~ to *delete* the _destination path_ and
+       *copy over* the contents of the source in the following circumstances:
+       * source path contains a _file_, destination path contains a _folder_
+       * source path contains a _folder_, destination path contains a _file_
+       * source path contains a _folder_, destination path is _empty_
+     
+     - There are _THREE_ cases the above code does NOT support:
+       * If
+         + the source path is empty,
+         + the destination path contains a folder
+         This is a "delete" which we will ignore for now;
+         =TODO= =LATER= supporting this is left as an exercise for the reader
+
+       * If
+         + the source path is a folder 
+         + the destination path is a folder
+         Do nothing is fine: ~os.walk~ will enter the _source path_ folder and
+                             process all the files within it recursively
+
+       * If
+         + the source path is a file
+         + the destination path is a file
+         + they have DIFFERENT contents
+       
+     - We will handle the last case next. =TODO= =NOW=      
+       
+**** DONE 7.3.3 Updating Files - 137
+     CLOSED: [2020-11-18 Wed 01:37]
+     Handle the last case mentioned in the last section is handle the ~(false, false)~
+     case in our /pattern match/, but only if the _destination path is empty_ or
+     _the destination path has a file with different contents than the source path_:
+     #+begin_src scala
+       def sync(src: os.Path, dest: os.Path): Unit =
+         for (srcSubPath <- os.walk(src)) {
+           val subPath = srcSubPath.subRelativeTo(src)
+           val destSubPath = dest / subPath
+           (os.isDir(srcSubPath), os.isDir(destSubPath)) match {
+             case (false, true) | (true, false) =>
+               os.copy.over(srcSubPath, destSubPath, createFolders = true)
+
+             case (false, false)
+                 if !os.exists(destSubPath)
+                 ||!os.read.bytes(srcSubPath).sameElements(os.read.bytes(destSubPath)) =>
+               os.copy.over(srcSubPath, destSubPath, createFolders = true)
+
+             case _ =>  // do nothing
+           }
+         }
+     #+end_src
+     - We still use ~os.copy.over~ in the ~(false, false)~ case.
+       A more fine-grained file syncer may want to update the file in place if only
+       part of it has changed.
+       * Use ~.sameElements~, which can take into order account, rather than ~==~
+         to compare the elements of ~Array~'s.
+
+     - For now we *ignore* the /race condition/ (when we do operation, related
+       files or folders are changing) and assume that the file system is static
+       while the ~sync~ is ongoing.
+       * =TODO=
+         Dealing with concurrent modification will be the topic of Chapter 18
+     
+**** DONE 7.3.4 Testing Or File Syncer - 138
+     CLOSED: [2020-11-18 Wed 04:10]
+     - After running ~sync~, use ~os.walk~ to verify:
+       #+begin_src scala
+         sync(os.pwd / "post", os.pwd / "post-copy")
+
+         os.walk(os.pwd / "post-copy")
+         // res51: IndexedSeq[os.Path] = ArraySeq(
+         //   /Users/lihaoyi/test/post-copy/Optimizing Scala.md,
+         //   /Users/lihaoyi/test/post-copy/Programming Interview.md,
+         // ...
+       #+end_src
+
+     - Test incremental updates by adding one entry to source path, and re-~sync~:
+       #+begin_src scala
+         os.write(os.pwd / "post" / "ABC.txt", "Hello World")
+
+         sync(os.pwd / "post", os.pwd / "post-copy")
+
+         os.exists(os.pwd / "post-copy" / "ABC.txt")
+         // res54: Boolean = true
+
+         os.read(os.pwd / "post-copy" / "ABC.txt")
+         // res55: String = "Hello World"
+       #+end_src
+
+     - Test incremental updates by appending some content to one of the files in
+       source path, and re-~sync~:
+       #+begin_src scala
+         os.write.append(os.pwd / "post" / "ABC.txt", "\nI am Cow")
+
+         sync(os.pwd / "post", os.pwd / "post-copy")
+
+         os.read(os.pwd / "post-copy" / "ABC.txt")
+         // res58: String = """Hello World
+         // I am Cow"""
+       #+end_src
+
+     - The example is greatly simplified:
+       * we do not consider
+         + deletions
+         + permissions
+         + symbolic links
+         + concurrency/parallelism concerns
+
+       * our file synchronizer runs in-process on a _single_ computer, and *cannot
+         be easily* used to synchronize files over a network.
+         
+*** TODO 7.4 Simple Subprocess Invocations - 139
 **** 7.4.1 Use Case: remove non-current branches from a Git repo - 140
 **** 7.4.2 Use Case: Curl to a local file - 141
 **** 7.4.3 Streaming Gzip - 142
 
-*** 7.5 Interactive and Streaming Subprocesses - 142
+*** TODO 7.5 Interactive and Streaming Subprocesses - 142
 **** 7.5.1 Interacting with a Subprocess - 143
 **** 7.5.2 Streaming distinct contributors in a Git repo history - 144
 **** 7.5.3 Streaming Subprocess Pipelines - 144
 
-*** 7.6 Conclusion - 146
+*** TODO 7.6 Conclusion - 146
 
 ** TODO Chapter 8: JSON and Binary Data Serialization - 147
 *** 8.1 Manipulating JSON - 148
