@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M3-bin-20201206-d199fd3-NIGHTLY -> ..
+#+VERSION: 3.0.0-M3-bin-20201208-f334e3f-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -186,7 +186,8 @@
       7. a new, principled approach to metaprogramming that replaces today's
          experimental macros.
     
-*** TODO Essential Foundations - =RE-READ= =TODO=
+*** DONE Essential Foundations
+    CLOSED: [2020-12-09 Wed 00:34]
     These new constructs directly model core features of /DOT/, /higher-kinded
     types/, and the /SI calculus for implicit resolution/.
     - /Intersection types/, replacing /compound types/,
@@ -198,7 +199,8 @@
 
     - /Context Functions/, offering abstraction over /given parameters/.
     
-*** TODO Simplifications - =RE-READ= =TODO=
+*** DONE Simplifications
+    CLOSED: [2020-12-09 Wed 00:34]
     - These constructs replace existing constructs with the aim of making the
       language safer and simpler to use, and to promote uniformity in code style.
       * _Trait Parameters_ replace _early initializers_ with a more generally
@@ -239,7 +241,9 @@
       There are currently no deprecation plans for /value classes/, since we
       might want to bring them back in a more general form if they are supported
       natively by the JVM as is planned by project Valhalla.
-      =TODO= =TODO= =TODO= =FUTURE=
+      =FUTURE=
+      * =from Jian=
+        Don't use it in Scala 3 before project Valhalla is done.
       
 *** DONE Restrictions
     CLOSED: [2020-11-07 Sat 00:18]
@@ -253,20 +257,21 @@
         implicits now require a special form of import, to make the import
         clearly visible.
 
-      * _Type Projection_: =TODO= =LEARN MORE=
+      * _Type Projection_:
         only /classes/ can be used as prefix ~C~ of a /type projection/ ~C#A~.
         /Type projection/ on /abstract types/ is *no longer supported* since it
         is unsound.
+        =TODO= =LEARN MORE about this unsoundness=
 
-      * _Multiversal Equality_ implements an "opt-in" scheme to rule out nonsensical
-        comparisons with ~==~ and ~!=~.
+      * _Multiversal Equality_ implements an "opt-in" scheme to rule out
+        nonsensical comparisons with ~==~ and ~!=~.
 
       * ~infix~ make method application syntax uniform across code bases.
 
     - UNRESTRICTED /implicit conversions/ continue to be available in Scala 3.0,
       _BUT_ will *be deprecated and removed later*.
         Unrestricted versions of the other constructs in the list above are
-      available only under ~-source 3.0-migration~.
+      *available only under ~-source 3.0-migration~.*
       
 *** TODO Dropped Constructs
 *** TODO Changes
@@ -585,7 +590,7 @@
 **** TODO Related Work
 
 *** DONE Dependent Function Types
-    CLOSED: [2019-07-01 Mon 16:10]
+    CLOSED: [2020-12-08 Tue 22:49]
     - A /dependent function type/ describes functions where the _result type_ may
       DEPEND ON the _function's parameter values_. Example:
       #+begin_src scala
@@ -595,11 +600,10 @@
         }
 
         def extractKey(e: Entry): e.Key = e.key          // a dependent method
+
         val extractor: (e: Entry) => e.Key = extractKey  // a dependent function value
-        //           ||                   ||
-        //           ||     Dependent     ||
-        //           ||   Function Type   ||
-        //           =======================
+        //             ^^^^^^^^^^^^^^^^^^^
+        //             a dependent function type
       #+end_src
 
       - Scala _ALREADY_ has /dependent methods/.
@@ -620,6 +624,98 @@
 
 **** More details
 
+*** DONE Polymorphic Function Types
+    CLOSED: [2020-12-09 Wed 00:28]
+    - polymorphic function type :: a /function type/ which accepts /type parameters/.
+
+    - For example:
+      #+begin_src scala
+        // A polymorphic method:
+        def foo[A](xs: List[A]): List[A] = xs.reverse
+
+        // A polymorphic function value:
+        val bar: [A] => List[A] => List[A] = [A] => (xs: List[A]) => foo[A](xs)
+        //       ^^^^^^^^^^^^^^^^^^^^^^^^^
+        //       a polymorphic function type
+      #+end_src
+      
+    - Scala already has /polymorphic methods/, i.e. /methods/ which accepts /type
+      parameters/. Method ~foo~ above is an example, accepting a /type parameter/
+      ~A~.
+      1. So far, it was not possible to turn such /methods/ into /polymorphic
+         function values/ like ~bar~ above, which can be _passed as parameters_
+         to other functions, or _returned as results_.
+
+      2. In Dotty this is now possible.
+         The type of the bar value above is
+         #+begin_src scala
+           [A] => List[A] => List[A]
+         #+end_src
+         This /type/ describes /function values/ which
+         take a /type/ ~A~ as a parameter,
+         then take a list of /type/ ~List[A]~, and
+         return a list of the same type ~List[A]~.
+    
+**** DONE Example Usage
+     CLOSED: [2020-12-09 Wed 00:27]
+     /Polymorphic function type/ are _particularly useful_
+     WHEN callers of a /method/ are required to provide a function which has to
+     be polymorphic, meaning that it should accept arbitrary types as part of
+     its inputs.
+
+     - For instance,
+       consider the situation where we have a data type to represent the
+       expressions of a simple language (consisting only of variables and
+       function application) in a strongly-typed way:
+       #+begin_src scala
+         enum Expr[A]:
+           case Var(name: String)
+           case Apply[A, B](fun: Expr[B => A], arg: Expr[B]) extends Expr[A]
+       #+end_src
+       * =from Jian=
+         In the code below, add ~import Expr._~ to make them workable.
+
+       * *REQUIREMENT*
+         Provide a way for users to _map a function over all immediate
+         subexpressions of a given ~Expr~._
+         + This requires the given function to be polymorphic.
+
+       * *SOLUTION*
+          using /polymorphic function types/:
+         #+begin_src scala
+           def mapSubexpressions[A](e: Expr[A])
+                                   (f: [B] => Expr[B] => Expr[B]): Expr[A] =
+             e match
+               case Apply(fun, arg) => Apply(f(fun), f(arg))
+               case Var(n)          => Var(n)
+         #+end_src
+         + And here is how to use this function to _wrap each subexpression in a
+           given expression_ with a call to some ~wrap~ function, defined as a
+           variable:
+           #+begin_src scala
+             val e0 = Apply(Var("f"), Var("a"))
+
+             val e1 = mapSubexpressions(e0)(
+               [B] => (se: Expr[B]) => Apply(Var[B => B]("wrap"), se)
+             )
+
+             println(e1)  // Apply(Apply(Var(wrap), Var(f)), Apply(Var(wrap), Var(a)))
+           #+end_src
+       
+**** DONE Relationship With Type Lambdas
+     CLOSED: [2020-12-08 Tue 23:58]
+     - /Polymorphic function types/ are NOT to be confused with /type lambdas/.
+       * While the _FORMER_ describes the /type of a polymorphic value/,
+       * the _LATTER_ is an actual /function value at the type level/.
+
+     - A good way of understanding the difference is to notice that /type lambdas/
+       are applied in /types/, whereas /polymorphic functions/ are applied in
+       /terms/:
+         One would call the function ~bar~ above by passing it a /type argument/
+       ~bar[Int]~ within a /method body/. On the other hand, given a /type lambda/
+       such as ~type F = [A] =>> List[A]~, one would call ~F~ _withing a /type
+       expression/,_ as in ~type Bar = F[Int]~.
+   
 ** DONE ENUMS
    CLOSED: [2020-07-11 Sat 04:07]
 *** DONE Enumerations
@@ -1098,7 +1194,7 @@
            }
          #+end_src
 
-** DONE CONTEXTUAL ABSTRACTIONS - =READING=
+** DONE CONTEXTUAL ABSTRACTIONS
    CLOSED: [2020-07-19 Sun 03:32]
 *** DONE Overview
     CLOSED: [2020-07-17 Fri 02:07]
@@ -4875,7 +4971,8 @@
 
      - =PR #7201= which explains the _NEW ~summonFrom~ syntax._
 
-*** TODO Macros
+*** DONE Macros
+    CLOSED: [2020-12-07 Mon 11:18]
 **** DONE Macros: Quotes and Splices
      CLOSED: [2020-11-30 Mon 02:31]
      - Macros are built on _TWO_ well-known fundamental operations:
@@ -5662,7 +5759,7 @@
           compilation will *FAIL* with an error.
 
 **** DONE Pattern matching on quoted expressions
-     CLOSED: [2020-12-06 Sun 00:16]
+     CLOSED: [2020-12-07 Mon 11:18]
      It is possible to deconstruct or extract values out of Expr using pattern matching.
      
      - ~scala.quoted~ contains objects that can help extracting values from ~Expr~: 
@@ -5789,10 +5886,12 @@
         }
       #+end_src
 
-***** TODO Open code patterns
-      Quote pattern matching also provides higher-order patterns to match open
-      terms. If a quoted term contains a definition, then the rest of the quote
-      can refer to this definition.
+***** DONE Open code patterns
+      CLOSED: [2020-12-07 Mon 11:18]
+      /Quote pattern matching/ also provides higher-order patterns to match _open
+      terms_.
+        If a quoted term contains a definition, then the rest of the quote can
+      refer to this definition.
       #+begin_src scala
         '{
           val x: Int = 4
@@ -5805,37 +5904,40 @@
         refer to this definition.
         ~case '{ val y: Int = $x; $body(y): Int } =>~
         
-      - Here ~$x~ will match any closed expression while ~$body(y)~ will match an
-        expression that is closed under ~y~. Then the subexpression of type
-        ~Expr[Int]~ is bound to ~body~ as an ~Expr[Int => Int]~. The extra argument
-        represents the references to ~y~. Usually this expression is used in
-        combination with ~Expr.betaReduce~ to replace the extra argument.
-        #+begin_src scala
-          inline def eval(inline e: Int): Int = ${ evalExpr('e) }
+        * Here
+          ~$x~ will match any closed expression while
+          ~$body(y)~ will match an expression that is closed under ~y~.
+          Then the subexpression of type ~Expr[Int]~ is bound to ~body~ as an
+          ~Expr[Int => Int]~.
+          The extra
+          argument represents the references to ~y~. Usually this expression is
+          used in combination with ~Expr.betaReduce~ to replace the extra argument.
+          #+begin_src scala
+            inline def eval(inline e: Int): Int = ${ evalExpr('e) }
 
-          private def evalExpr(e: Expr[Int])(using Quotes): Expr[Int] = {
-            e match {
-              case '{ val y: Int = $x; $body(y): Int } =>
-                // body: Expr[Int => Int] where the argument represents references to y
-                evalExpr(Expr.betaReduce('{$body(${evalExpr(x)})}))
+            private def evalExpr(e: Expr[Int])(using Quotes): Expr[Int] = {
+              e match {
+                case '{ val y: Int = $x; $body(y): Int } =>
+                  // body: Expr[Int => Int] where the argument represents references to y
+                  evalExpr(Expr.betaReduce('{$body(${evalExpr(x)})}))
 
-              case '{ ($x: Int) * ($y: Int) } =>
-                (x.value, y.value) match
-                  case (Some(a), Some(b)) => Expr(a * b)
-                  case _                  => e
+                case '{ ($x: Int) * ($y: Int) } =>
+                  (x.value, y.value) match
+                    case (Some(a), Some(b)) => Expr(a * b)
+                    case _                  => e
 
-              case _ => e
+                case _ => e
+              }
             }
-          }
 
-          eval {  // expands to the code: (16: Int)
-            val x: Int = 4
-            x * x
-          }
-        #+end_src
-        We can also close over several bindings using ~$b(a1, a2, ..., an)~. To
-        match an actual application we can use braces on the function part
-        ~${b}(a1, a2, ..., an)~.
+            eval {  // expands to the code: (16: Int)
+              val x: Int = 4
+              x * x
+            }
+          #+end_src
+          We can also close over several bindings using ~$b(a1, a2, ..., an)~. To
+          match an actual application we can use braces on the function part
+          ~${b}(a1, a2, ..., an)~.
 
 **** TODO More details
 
@@ -9398,21 +9500,120 @@
 *** TODO Dropped: Existential Types
 *** TODO Dropped: General Type Projection
 *** TODO Dropped: Do-While
-*** TODO Dropped: Procedure Syntax
+*** DONE Dropped: Procedure Syntax
+    CLOSED: [2020-12-09 Wed 01:50]
+    Procedure syntax ~def f() { ... }~ *has been dropped*.
+    
+    - Should use
+      #+begin_src scala
+        def f() = { ... }
+
+        def f(): Unit = { ... }
+      #+end_src
+
+    - Dotty *will accept* the _old syntax_ under the =-source:3.0-migration= option.
+      * If the =-migration= option is set, it can _even *rewrite* OLD syntax to
+        NEW_.
+
+      * The _ScalaFix tool_ also can *rewrite* /procedure syntax/ to make it
+        Dotty-compatible.
+    
 *** TODO Dropped: Package Objects
 *** TODO Dropped: Early Initializers
 *** TODO Dropped: Class Shadowing
-*** TODO Dropped: Limit 22
-    # *Dropped: Class Shadowing*
+*** DONE Dropped: Limit 22 - =FIXME=
+    CLOSED: [2020-12-09 Wed 02:12]
+    _The limits of 22_ for the _maximal number of parameters_ of /function types/
+    and the _maximal number of fields_ in /tuple types/ have been *dropped*.
 
-*** TODO Dropped: XML Literals
-*** TODO Dropped: Symbol Literals
+    - _Both of these are *IMPLEMENTED using /arrays/._
+
+    - =???= =FIXME=
+      The location of ~FunctionXXL~ and ~TupleXXL~ descried in the entries after
+      this.
+      =from Jian=
+      I can't find ~scala.FunctionXXL~ and ~scala.TupleXXL~.
+      I can see them in package ~scala.runtime~.
+
+    - /Functions/ can now have an *ARBITRARY NUMBER of parameters*.
+      * /functions/ beyond ~Function22~ are erased to a *NEW* /trait/
+        ~scala.FunctionXXL~;
+
+    - /Tuples/ can also have an arbitrary number of fields.
+      * /tuples/ beyond ~Tuple22~ are erased to a *NEW* /trait/ ~scala.TupleXXL~.
+        (=FIXME= =by Jian= =MOVE this=)
+
+      * Furthermore, they support /generic operation/ such as *concatenation* and
+        *indexing*.
+        + =from Jian=
+          #+begin_src scala
+            // Concatenation:
+            val t = 1 *: "Str" *: EmptyTuple
+
+            // the RHS is equivalent to
+
+            (1, "Str")
+
+
+            // Indexing:
+            t(0)  // 1
+            t(1)  // "Str"
+          #+end_src
+          - Index from 0,
+            and the syntax ~t._1~ and ~t._2~ is *no longer supported*.
+      
+*** DONE Dropped: XML Literals
+    CLOSED: [2020-12-09 Wed 01:46]
+    /XML Literals/ are _still supported_,
+    BUT will _be *dropped* in the near future_,
+    to be *REPLACED* with /XML string interpolation/:
+    #+begin_src scala
+      xml""" ... """
+    #+end_src
+    
+*** DONE Dropped: Symbol Literals
+    CLOSED: [2020-12-09 Wed 01:43]
+    /Symbol literals/ are *no longer supported*.
+    - The ~scala.Symbol~ /class/ _still exists_, so a literal translation of the
+      /symbol literal/ ~'xyz~ is ~Symbol("xyz")~.
+
+    - However, it is _recommended_ to use a /plain string literal/ ~"xyz"~ instead.
+      * The ~Symbol~ /class/ will _be *deprecated* and *removed* in the future_. 
+    
 *** TODO Dropped: Auto-Application
 **** Migrating code
 **** Reference
 
 *** TODO Dropped: Weak Conformance
-*** TODO Deprecated: Nonlocal Returns
+*** DONE Deprecated: Nonlocal Returns - =FIXME: SHOULD BE Deprecated --> Dropped=
+    CLOSED: [2020-12-09 Wed 01:31]
+    Returning from /nested anonymous functions/ has been deprecated.
+
+    - /Nonlocal returns/ are implemented by throwing and catching
+      ~scala.runtime.NonLocalReturnException~'s.
+      _This is rarely what is intended by the programmer._
+      
+    - /Nonlocal returns/ can be *problematic*
+      * BECAUSE OF *the hidden performance cost* of _throwing and catching
+        exceptions._
+
+      * Furthermore, it is a /leaky implementation/:
+        a catch-all exception handler can intercept a ~NonLocalReturnException~.
+      
+    - A drop-in library replacement is provided in
+      ~scala.util.control.NonLocalReturns~:
+      #+begin_src scala
+        import scala.util.control.NonLocalReturns._
+
+        returning { ... throwReturn(x) ... }
+      #+end_src
+
+    - =from Jian=
+      See also
+      * https://github.com/lampepfl/dotty/issues/4240
+
+      * https://tpolecat.github.io/2014/05/09/return.html
+      
 *** DONE Dropped: ~private[this]~ and ~protected[this]~
     CLOSED: [2020-04-30 Thu 12:49]
     The ~private[this]~ and ~protected[this]~ /access modifiers/ are *deprecated*
@@ -9439,7 +9640,7 @@
         do /variance checks/, which is already been pointed out that it is unsound!
         Therefore, the requirement is not real.
 
-    - TODO
+    - =TODO=
       =from Jian=
       Learn more about this. There are more discussion about this topic.
 
@@ -9766,5 +9967,3 @@
 ** ~scala.util.control~
 *** (O) ~NonLocalReturns~
     
-** ~scalaShadowing~
-*** (C) ~D_u_m_m_y~
