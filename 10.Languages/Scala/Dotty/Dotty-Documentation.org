@@ -1680,6 +1680,36 @@
          a /type/ ~T~. The /pattern matches/ exactly the same selectors as the
          /type ascription pattern/ ~_: T~.
      
+**** DONE Negated Givens
+     Scala 2's somewhat puzzling behavior with respect to ambiguity has been
+     exploited to implement the analogue of a "negated" search in implicit
+     resolution, where _a query ~Q1~ fails if some other query ~Q2~ succeeds and
+     ~Q1~ succeeds if ~Q2~ fails._
+       With the new cleaned up behavior these techniques no longer work.
+       BUT there is now a new special type ~scala.util.NotGiven~ which implements
+     negation directly.
+
+     - For any query /type/ ~Q~, ~NotGiven[Q]~ *succeeds*
+       iff the /implicit search/ for ~Q~ *fails*,
+       for example:
+       #+begin_src scala
+         import scala.util.NotGiven
+
+         trait Tagged[A]
+
+         case class Foo[A](value: Boolean)
+         object Foo:
+             given fooTagged[A](using Tagged[A]): Foo[A] = Foo(true)
+             given fooNotTagged[A](using NotGiven[Tagged[A]]): Foo[A] = Foo(false)
+
+         @main def test() =
+           given Tagged[Int] with {}
+           assert(sommon[Foo[Int]].value)      // fooTagged is found
+           assert(!sommon[Foo[String]].value)  // fooNotTagged is found
+       #+end_src
+       =FIXME= =IMRPOVE ME=
+       Replace ~implicitly~ with ~summon~.
+     
 **** DONE Given Instance Initialization
      CLOSED: [2020-07-11 Sat 22:31]
      - A /given instance/
