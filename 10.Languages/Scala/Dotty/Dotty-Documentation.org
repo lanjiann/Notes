@@ -7,9 +7,8 @@
 * BLOG
 * DONE USAGE
   CLOSED: [2019-11-04 Mon 16:17]
-** Getting Started
-   # *Getting Started: Users*
-   
+** DONE Getting Started: Users
+   CLOSED: [2020-12-09 Wed 23:14]
 *** Trying out Dotty
 **** In your web browser
      The online Scala playground [[https://scastie.scala-lang.org][Scastie]]
@@ -19,10 +18,10 @@
 **** sbt
      Use sbt (1.1.4+)
      - Dotty project:
-       ~sbt new lampepfl/dotty.g8~
+       ~sbt new scala/scala3.g8~
 
      - Dotty project that _cross compiles_ with Scala 2:
-       ~sbt new lampepfl/dotty-cross.g8~
+       ~sbt new scala/scala3-cross.g8~
 
 **** IDE support
      Check the *IDE support for Dotty* section.
@@ -40,39 +39,56 @@
        + scalad is the Dotty Documentation tool
        + scala is the Dotty REPL
 
-** sbt-projects
-   # *Using Dotty with sbt*
-   A redirect link to the sbt subsection in the -Getting Started- section.
+** DONE Using Dotty with sbt
+   CLOSED: [2020-12-09 Wed 23:15]
+   A redirect link to the sbt subsection in the _Getting Started: Users_
+   section.
 
-** TODO IDE support for Dotty
+** DONE IDE support for Dotty
+   CLOSED: [2020-12-09 Wed 23:21]
    Dotty comes *built-in* with the /Dotty Language Server/, an implementation of
    the /Language Server Protocol/, which means that any editor that implements the
    LSP can be used as a Dotty IDE.
    - Currently, the only IDE we officially support is Visual Studio Code.
 
-*** Prerequisites
-    Follow the instructions for the [[https://github.com/lampefl/dotty-example-project][dotty-example-project]].
+*** DONE Prerequisites
+    CLOSED: [2020-12-09 Wed 23:18]
+    Follow the instructions for the [[https://github.com/scala/scala3-example-project][scala3-example-project]]    
     
-*** Usage
+*** DONE Usage
+    CLOSED: [2020-12-09 Wed 23:18]
     Install _Visual Studio Code_, and run command ~sbt launchIDE~ in a Dotty
     project.
 
-*** TODO Status
+*** DONE Status - =WATCHING=
+    CLOSED: [2020-12-09 Wed 23:20]
+    =from Jian=
+    I don't think current description below is update to date!
+    It has been there for a very long time without significant changes.
+    
 **** Fully supported features
 **** Partial working features
 **** Unimplemented features
 **** Current limitations, to be fixed
 
-*** Feedback
+*** TODO Feedback
 
-** TODO Worksheet mode in Dotty IDE
-   Worksheet use the extension .sc
+** DONE Worksheet mode in Dotty IDE
+   CLOSED: [2020-12-09 Wed 23:25]
+   - Worksheet use the extension .sc
+
+*** DONE How to use the worksheets
+    CLOSED: [2020-12-09 Wed 23:23]
+   - On top of the buffer, the message "Run this worksheet" appears.
+     Click it to evaluate the code of the worksheet.
+
+   - The option "Run Worksheet On Save" can be turned on and off.
+     =from Jian= Assume Visual Studio Code and LSP are being used.
    
-*** How to use the worksheets
 *** TODO Implementation details
     More details in [[https://dotty.epfl.ch/docs/usage/worksheet-mode-implementation-details.html][Worksheet mode - Implementation details]]
 
-** DONE Language Versions
+** DONE Language Versions - =RE-READ=
    CLOSED: [2020-11-06 Fri 11:31]
    - The default Scala language version currently supported by the Dotty compiler
      is 3.0.
@@ -124,12 +140,18 @@
      + *Only one* _language import_ is allowed in a /compilation unit/, and it
        MUST come before any definitions in that unit.
    
-** DONE cbt-projects
+** DONE Using Dotty with cbt
    CLOSED: [2020-11-06 Fri 11:32]
    # *Using Dotty with cbt*
    =from Jian=: We can ignore this section
 
-** TODO Dottydoc
+** TODO Scala3doc
+** DONE Dottydoc [Legacy] - =Ignore=
+   CLOSED: [2020-12-09 Wed 23:27]
+   =from Jian=
+   Since this is the legacy one, and currently Dotty already start using Scala3doc,
+   this section can be ignored.
+   
 *** Using existing Templates and Layouts
 *** Blog
 *** Includes
@@ -153,8 +175,9 @@
 *** Default Includes
 
 * TODO REFERENCE
-** Overview
-*** Goals
+** TODO Overview
+*** DONE Goals - =RE-READ=
+    CLOSED: [2020-12-09 Wed 23:44]
     - The language REDESIGN was guided by _THREE_ main goals:
       * Strengthen Scala's foundations.
         Make the full programming language compatible with the foundational work
@@ -170,7 +193,7 @@
         constructs.
 
     - Corresponding to these goals, the language changes fall into _SEVEN_
-      categories: =TODO= =TODO= =TODO=
+      categories:
       1. Core constructs to strengthen foundations,
 
       2. simplifications and
@@ -188,14 +211,18 @@
     
 *** DONE Essential Foundations
     CLOSED: [2020-12-09 Wed 00:34]
-    These new constructs directly model core features of /DOT/, /higher-kinded
-    types/, and the /SI calculus for implicit resolution/.
+    These new constructs directly *model*
+    core features of /DOT/,
+    /higher-kinded types/, and
+    the /SI calculus for implicit resolution/.
+
     - /Intersection types/, replacing /compound types/,
 
     - /Union types/,
 
     - /Type lambdas/, replacing encodings using /structural types/ and
       /type projection/.
+      * =from Jian= Learn more about this replaced Scala 2 way.
 
     - /Context Functions/, offering abstraction over /given parameters/.
     
@@ -203,42 +230,59 @@
     CLOSED: [2020-12-09 Wed 00:34]
     - These constructs replace existing constructs with the aim of making the
       language safer and simpler to use, and to promote uniformity in code style.
-      * _Trait Parameters_ replace _early initializers_ with a more generally
-        useful construct.
 
-      * _Given Instances_ replace _implicit objects and defs_,
-        focussing on intent over mechanism.
+      * /Trait Parameters/
+        REPLACE
+        /early initializers/ with a more generally useful construct.
 
-      * _Using Clauses_ replace _implicit parameters_,
-        avoiding their ambiguities.
+      * /Given Instances/
+        REPLACE
+        /implicit objects and defs/, focussing on intent over mechanism.
 
-      * _Extension Methods_ replace _implicit classes_ with a clearer and simpler
-        mechanism.
+      * /Using Clauses/
+        REPLACE
+        /implicit parameters/,
+        AVOIDING
+        their ambiguities.
 
-      * _Opaque Type Aliases_ replace most uses of _value classes_
+      * /Extension Methods/
+        REPLACE
+        /implicit classes/ with a clearer and simpler mechanism.
+
+      * /Opaque Type Aliases/
+        REPLACE
+        _most uses_ of /value classes/
         while guaranteeing absence of /boxing/.
 
-      * _Toplevel definitions_ replace _package objects_,
-        dropping syntactic boilerplate.
+      * _Toplevel definitions_
+        REPLACE
+        _package objects_,
+        DROPPING
+        syntactic boilerplate.
 
-      * _Export clauses_ provide a simple and general way to express aggregation,
-        which can replace the previous facade pattern of package objects
-        inheriting from classes.
+      * /Export clauses/
+        provide a simple and general way to EXPRESS
+        _aggregation_, which can replace the previous facade pattern of /package
+        objects inheriting from classes/.
 
-      * _Vararg patterns_ now use the form ~: _*~ instead of ~@ _*~,
-        mirroring /vararg expressions/,
+      * /Vararg patterns/
+        NOW USE
+        the form ~: _*~ instead of ~@ _*~,
+        MIRRORING
+        /vararg expressions/,
 
-      * _Creator applications_ allow using _simple function call syntax_ instead
-        of ~new~ expressions.
+      * /Creator applications/
+        ALLOW USING
+        _simple function call syntax_ instead of ~new~ expressions.
         + ~new~ expressions stay around as a fallback for the cases
-          where creator applications cannot be used. =TODO= =???= =TODO=
+          where creator applications cannot be used. =TODO= =Example???= =TODO=
     
-    - With the EXCEPTION of /early initializers/ and /old-style vararg patterns/,
+    - With the _EXCEPTION_ of /early initializers/ and /old-style vararg patterns/,
       all superseded constructs *continue to be available in Scala 3.0.*
-      The plan is to deprecate and phase them out later.
+      * The plan is to _deprecate and phase them out_ later.
 
-    - _Value classes_ (superseded by /opaque type aliases/) are a special case.
-      There are currently no deprecation plans for /value classes/, since we
+    - /Value classes/ (superseded by /opaque type aliases/) are a special case.
+      There are *currently NO deprecation* plans for /value classes/, since we
       might want to bring them back in a more general form if they are supported
       natively by the JVM as is planned by project Valhalla.
       =FUTURE=
@@ -248,36 +292,138 @@
 *** DONE Restrictions
     CLOSED: [2020-11-07 Sat 00:18]
     - These constructs are restricted to make the language safer.
-      * _Implicit Conversions_:
-        there is only one way to define implicit conversions instead of many,
+      * /Implicit Conversions/:
+        there is only one way to define /implicit conversions/ instead of many,
         and potentially surprising /implicit conversions/ require a language
-        import.
+        /import/.
 
-      * _Given Imports_:
-        implicits now require a special form of import, to make the import
-        clearly visible.
+      * /Given Imports/:
+        implicits now require a _special form_ of /import/,
+        to _make the /import/ clearly visible_.
 
-      * _Type Projection_:
+      * /Type Projection/:
         only /classes/ can be used as prefix ~C~ of a /type projection/ ~C#A~.
         /Type projection/ on /abstract types/ is *no longer supported* since it
         is unsound.
         =TODO= =LEARN MORE about this unsoundness=
 
-      * _Multiversal Equality_ implements an "opt-in" scheme to rule out
-        nonsensical comparisons with ~==~ and ~!=~.
+      * /Multiversal Equality/:
+        implements an "opt-in" scheme to rule out nonsensical comparisons with
+        ~==~ and ~!=~.
 
-      * ~infix~ make method application syntax uniform across code bases.
+      * ~infix~:
+        makes method application syntax uniform *across* code bases.
 
     - UNRESTRICTED /implicit conversions/ continue to be available in Scala 3.0,
       _BUT_ will *be deprecated and removed later*.
         Unrestricted versions of the other constructs in the list above are
-      *available only under ~-source 3.0-migration~.*
+      *available only under ~-source 3.0-migration~.* =from Jian= Avoid using it!
       
-*** TODO Dropped Constructs
+*** DONE Dropped Constructs - =RE-READ= =LEARN MORE=
+    CLOSED: [2020-12-10 Thu 00:07]
+    - These constructs are proposed to be dropped without a new construct replacing
+      them. The motivation for dropping these constructs is to simplify the
+      language and its implementation.
+      * DelayedInit,
+      * Existential types,
+      * Procedure syntax,
+      * Class shadowing,
+      * XML literals,
+      * Symbol literals,
+      * Auto application,
+      * Weak conformance,
+      * Compound types,
+      * Auto tupling (implemented, but not merged).
+        + https://github.com/lampepfl/dotty/pull/4311
+          At the end of this pull, Martin mentioned that "To be revived for 3.1".
+    
+    - The date when these constructs are dropped *varies*.
+      The current status is:
+      * Not implemented at all:
+        + DelayedInit =TODO=
+        + existential types =TODO=
+        + weak conformance
+
+      * Supported under =-source 3.0-migration=:
+        + procedure syntax
+        + class shadowing =TODO=
+        + symbol literals
+        + auto application =TODO=
+        + auto tupling in a restricted form =???= =TODO=
+
+      * Supported in 3.0,
+        to be deprecated and phased out later:
+        + XML literals =TODO=
+        + compound types =???= =TODO=
+      
 *** TODO Changes
 *** TODO New Constructs
-*** TODO Metaprogramming
-*** TODO See Also
+*** DONE Metaprogramming
+    CLOSED: [2020-12-10 Thu 00:25]
+    The following constructs together aim to put /metaprogramming/ in Scala on a
+    *new basis*.
+    
+    - So far (=from Jian= Scala 2), /metaprogramming/ was achieved
+      by _a *combination* of /macros/ and /libraries/ such as Shapeless_ that were
+      in turn based on some _key_ /macros/.
+      * Current Scala 2 macro mechanisms are a thin veneer on top the current
+        Scala 2 compiler, which makes them fragile and in many cases impossible
+        to port to Scala 3.
+        + =from Jian=
+          Both the desing of /Scala 2 macros/ and its FOUNDATION are considerd not
+          good enough.
+    
+    - However, Scala 2 macros are widely used!!!
+      Under an =-experimental= flag.
+
+    - To enable porting most uses of /macros/, we are experimenting with the
+      advanced language constructs listed below.
+      * /Match Types/:
+        ALLOW _computation_ on /types/.
+
+      * ~inline~:
+        + PROVIDES by itself
+          a straightforward implementation of some _SIMPLE_ /macros/
+          
+        + IS at the same time
+          an essential _building block_
+          for the implementation of _COMPLEX_ /macros/.
+
+      * /Quotes/ and /Splices/:
+        PROVIDE
+        a *principled way* to
+        express /macros/ and /staging/ _with a UNIFIED SET of abstractions._
+
+      * /Type class/ derivation:
+        PROVIDES
+        an in-language implementation of the ~Gen~ /macro/ in Shapeless and other
+        foundational libraries.
+        + The new implementation is *more robust, efficient and easier to use*
+          than the /macro/.
+
+      * /implicit by-name parameters/:
+        PROVIDE
+        a _more robust_ _in-language_ implementation of the ~Lazy~ /macro/ in
+        Shapeless.
+      
+    - The designs above are
+      _more *provisional* than the rest_ of the proposed language constructs for
+      Scala 3.0.
+      * There might still be some changes until the final release.
+
+      * *Stabilizing* the feature set needed for metaprogramming is our
+        *FIRST priority*.
+      
+*** TODO See Also - =IMPORTANT= =READ=
+    A [[https://dotty.epfl.ch/docs/reference/features-classification.html][classification of proposed language features]] is an *expanded version* of
+    this page that
+    - _ADDS the status_ (i.e.
+      * relative importance to be a part of Scala 3, and
+      * relative urgency when to decide this)
+        
+        AND
+
+    - _EXPECTED migration cost_ of each language construct.
 
 ** DONE NEW TYPES
    CLOSED: [2020-03-08 Sun 21:34]
@@ -9610,11 +9756,136 @@
     - However, it is _recommended_ to use a /plain string literal/ ~"xyz"~ instead.
       * The ~Symbol~ /class/ will _be *deprecated* and *removed* in the future_. 
     
-*** TODO Dropped: Auto-Application
-**** Migrating code
-**** Reference
+*** DONE Dropped: Auto-Application - =TODO= =RE-NOTE=
+    CLOSED: [2020-12-10 Thu 01:08]
+    - Previously an /empty argument list/ ~()~ was *IMPLICITLY inserted*
+      when calling a /nullary method/ *without arguments*. E.g.
+      #+begin_src scala
+        def next(): T = ...
+        next  // is expanded to `next()`
+      #+end_src
+      * In Dotty, this idiom is an error.
+        #+begin_src scala
+          next
+          ^
+          missing arguments for method next
+        #+end_src
 
-*** TODO Dropped: Weak Conformance
+    - In Dotty, the /application syntax/ has to *follow EXACTLY the /parameter
+      syntax/.*
+      * *EXCLUDED from this rule* are /methods/ that are defined in Java or that
+        override methods defined in Java.
+          The reason for being more lenient with such methods is that otherwise
+        everyone would have to write ~xs.toString().length()~ instead of
+        ~xs.toString.length~.
+
+    - The latter is idiomatic Scala because it conforms to the /uniform access
+      principle/.
+      * Uniform Access Principle ::
+        One should be able to *change* an object member
+        _FROM_ a /field/ _TO_ a /non-side-effecting method/ and _BACK_
+        *WITHOUT affecting* clients that access the member.
+
+    - For reasons of /backwards compatibility/,
+      * Dotty *for the moment* also auto-inserts ~()~ for /nullary methods/ that
+        are defined in Scala 2, or that *override* a /method defined in Scala 2/.
+
+      * It turns out that, because the correspondence between definition and call
+        was _NOT enforced in Scala so far,_ there are quite a few /method
+        definitions/ in Scala 2 libraries that use ~()~ in an inconsistent way.
+        For instance, we find in ~scala.math.Numeric~
+        #+begin_src scala
+          def toInt(): Int
+        #+end_src
+        whereas ~toInt~ is written without parameters everywhere else.
+        1. ENFORCING /strict parameter/ correspondence for references to such
+          /methods/ would project the inconsistencies to client code, which is
+          undesirable.
+
+        2. So Dotty opts for more leniency
+           when *type-checking* references to such /methods/ until most core
+           libraries in Scala 2 have been cleaned up.
+
+    - Stricter conformance rules also apply to *overriding* of /nullary methods/.
+      It is _NO LONGER allowed_ to *override* a /parameterless method/ by a /nullary
+      method/ or vice versa.
+        Instead, both /methods/ *must agree exactly* in their /parameter lists/.
+      #+begin_src scala
+        class A {
+          def next(): Int
+        }
+
+        class B extends A {
+          def next: Int  // overriding error: incompatible type
+        }
+      #+end_src
+      *Methods overriding* /Java or Scala-2 methods/ are again *exempted from*
+      this requirement.
+
+**** DONE Migrating code
+     CLOSED: [2020-12-10 Thu 00:51]
+     Existing Scala code with inconsistent parameters can still be compiled in
+     Dotty under =-source 3.0-migration=.
+     - When *paired with* the =-rewrite= option,
+       the code will be _AUTOMATICALLY rewritten_ to conform to Dotty's
+       *stricter checking*.
+     
+**** TODO Reference
+     From more info, see [[https://github.com/lampepfl/dotty/issues/2570][Issue #2570]] and [[https://github.com/lampepfl/dotty/pull/2716][PR #2716]].
+
+*** DONE Dropped: Weak Conformance
+    CLOSED: [2020-12-10 Thu 00:45]
+    - =from Jian=
+      At end of the node for this section, you can see the *conclusion*!
+
+    - In some situations, Scala used a /weak conformance relation/
+      WHEN *testing* /type compatibility/ or *computing* the /least upper bound/
+      of a set of /types/.
+
+    - The _PRINCIPAL motivation_ behind /weak conformance/ was to
+      make an expression like this have type ~List[Double]~:
+      #+begin_src scala
+        List(1.0, math.sqrt(3.0), 0, -3.3)  // : List[Double]
+      #+end_src
+      * It's "obvious" that this should be a ~List[Double]~.
+        However, _WITHOUT_ some special provision, the /least upper bound/ of the
+        lists's /element types/ ~(Double, Double, Int, Double)~ would be ~AnyVal~,
+        hence the list expression would be given type ~List[AnyVal]~.
+
+    - A _LESS obvious_ example is the following one, which was also typed as a
+      ~List[Double]~, using the /weak conformance relation/.
+      #+begin_src scala
+        val n: Int = 3
+        val c: Char = 'X'
+        val d: Double = math.sqrt(3.0)
+
+        // used to be: `List[Double]`,
+        // now, after dropping Weak Conformance: `List[AnyVal]`
+        List(n, c, d)
+      #+end_src
+      * Here, it is less clear why the type should be widened to ~List[Double]~,
+        a ~List[AnyVal]~ seems to be an equally valid -- and more principled --
+        choice.
+
+    - /Weak conformance/ applies to ALL "numeric" types (including ~Char~), and
+      independently of whether the expressions are /literals/ or NOT.
+      * However, in hindsight,
+        + the *ONLY intended use case* is for /integer literals/ to be adapted to
+          the /type/ of the _OTHER_ expressions.
+        
+        + OTHER /types of numerics/ have an *EXPLICIT* /type annotation/ embedded
+          in their syntax (~f~, ~d~, ~.~, ~L~ or ~'~ for ~Char~'s) which ensures
+          that their author really meant them to have that specific type).
+
+          
+    - Therefore, Dotty drops the general notion of /weak conformance/, and instead
+      keeps one rule:
+      ~Int~ /literals/ are adapted to *OTHER* /numeric types/ if necessary.
+      =IMPORTANT= =HERE IS THE CONCLUSION=
+
+    - [[https://dotty.epfl.ch/docs/reference/dropped-features/weak-conformance-spec.html][More details]]
+      * Detailed rules are listed in this linked page.
+      
 *** DONE Deprecated: Nonlocal Returns - =FIXME: SHOULD BE Deprecated --> Dropped=
     CLOSED: [2020-12-09 Wed 01:31]
     Returning from /nested anonymous functions/ has been deprecated.
