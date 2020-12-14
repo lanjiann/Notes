@@ -642,12 +642,35 @@
   - Nearly every VCS has some form of branching support.
 
   - _Many of their /branching/ is EXPENSIVE._
-    One of the "killer feature" of Git is that it branches is incredibly
+
+  - One of the "killer feature" of Git is that it branches is incredibly
     _lightweight_.
 
-  - Git enourages workflows that branch and merge often.
+  - Git *ENOURAGES* workflows that /branch/ and /merge/ *often*.
 
 ** TODO 3.1 Branches in a Nutshell - 64
+   - Review _how Git stores its data_ (in the "What is Git?" section):
+     Git *doesn't* store data as a series of changesets or _differences_,
+     *BUT instead* as a series of _snapshots_.
+
+   - When you make a commit, Git stores a commit object that contains a pointer
+     to the snapshot of the content you staged. This object also contains the
+     author’s name and email address, the message that you typed, and pointers
+     to the commit or commits that directly came before this commit (its parent
+     or parents): zero parents for the initial commit, one parent for a normal
+     commit, and multiple parents for a commit that results from a merge of two
+     or more branches.
+
+   - To visualize this, let’s assume that you have a directory containing three
+     files, and you stage them all and commit. Staging the files computes a checksum
+     for each one (the SHA-1 hash we mentioned in What is Git?), stores that version
+     of the file in the Git repository (Git refers to them as blobs), and adds
+     that checksum to the staging area:
+     #+begin_src bash
+       git add READ test.rb LICENSE
+       git commit -m 'Initial commit'
+     #+end_src
+
 *** TODO Creating a New Branch - 66
 *** TODO Switching Branches - 67
 
@@ -827,7 +850,6 @@
 
 ** TODO 6.6 Summary - 220
 
-   
    
 * TODO 7. Git Tools - 221
 ** TODO 7.1 Revision Selection - 221

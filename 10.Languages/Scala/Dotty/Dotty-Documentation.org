@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M3-bin-20201208-f334e3f-NIGHTLY
+#+VERSION: 3.0.0-M3-bin-20201213-3c18f6b-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -8,7 +8,7 @@
 * DONE USAGE
   CLOSED: [2019-11-04 Mon 16:17]
 ** DONE Getting Started: Users
-   CLOSED: [2020-12-09 Wed 23:14]
+   CLOSED: [2020-12-11 Fri 11:22]
 *** Trying out Dotty
 **** In your web browser
      The online Scala playground [[https://scastie.scala-lang.org][Scastie]]
@@ -38,6 +38,23 @@
        + scalac is the Dotty compiler
        + scalad is the Dotty Documentation tool
        + scala is the Dotty REPL
+
+     - Ignore Mac related setup
+
+**** Scala 3 for Scripting
+     - If the =scala= executable on your ~PATH~, you can run =*.scala= files as
+       _scripts_. Given a source named =Test.scala=:
+       #+begin_src scala
+         @main def Test(name: String): Unit =
+           println(s"Hello ${name}!")
+       #+end_src
+       You can run: =scala Test.scala World= to get an output =Hello World!=.
+
+     - A "script" is an _ORDINARY_ Scala file which contains a /main method/.
+       The semantics of the =scala Script.scala= command is as follows:
+       * *Compile* =Script.scala= with =scalac= into a temporary directory.
+       * *Detect* the /main method/ in the =*.class= files produced by the compilation.
+       * *Execute* the /main method/.  
 
 ** DONE Using Dotty with sbt
    CLOSED: [2020-12-09 Wed 23:15]
@@ -1832,8 +1849,8 @@
      resolution, where _a query ~Q1~ fails if some other query ~Q2~ succeeds and
      ~Q1~ succeeds if ~Q2~ fails._
        With the new cleaned up behavior these techniques no longer work.
-       BUT there is now a new special type ~scala.util.NotGiven~ which implements
-     negation directly.
+       BUT the new special type ~scala.util.NotGiven~ now implements negation
+     directly.
 
      - For any query /type/ ~Q~, ~NotGiven[Q]~ *succeeds*
        iff the /implicit search/ for ~Q~ *fails*,
@@ -1985,7 +2002,7 @@
        // maximum(xs)(using descending(using listOrd(using intOrd)))
      #+end_src
 
-**** DONE Multiple Using Clauses
+**** DONE Multiple ~using~ Clauses
      CLOSED: [2020-07-17 Fri 04:15]
      There can be SEVERAL /using clauses/ in a definition and /using clauses/ can be
      freely mixed with normal parameter clauses.
@@ -2099,7 +2116,7 @@
        TypeParamBounds ::= [SubtypeBounds] {ContextBound}
        ContextBound    ::= ':' Type
      #+end_src
-
+     
 *** DONE Importing Givens
     CLOSED: [2020-07-18 Sat 21:33]
     =from Jian= The /given imports syntax/ can be applied as syntax for ~export~.
@@ -7067,8 +7084,8 @@
 
 *** TODO _HIDDEN_ - TypeTest
 **** ~TypeTest~
-     - When /pattern matching/ there are *TWO* situations where were a /runtime
-       type/ test *MUST* be performed.
+     - When /pattern matching/ there are *TWO* situations where a /runtime type/
+       test *MUST* be performed.
        * _an /explicit type/ test_ using the /ascription pattern notation/.
          #+begin_src scala
            (x: X) match
@@ -9033,7 +9050,7 @@
 
 **** Looking Beyond the First Argument List
      - Example:
-       Code legal in Dotty, while it results in an ambiguous overload error in Scala 2:
+       Code legal in Scala 3, while it results in an ambiguous overload error in Scala 2:
        + Example 1:
          #+begin_src scala
            def f(x: Int)(y: String): Int = 0
@@ -9166,7 +9183,7 @@
        + Use ~@unchecked~ to avoid the error:
          ~val first :: rest : @unchecked = elems~
 
-**** Pattern Bindings in For Expressions
+**** Pattern Bindings in ~for~ Expressions
      - In Scala 2, /pattern bindings/ in ~for~ expressions do _implicit filtering_,
        and filter out data that are not matched.
        + In Scala 3, apply this _implicit filtering_ *ONLY when* a ~case~ shows up
@@ -9204,13 +9221,13 @@
     CLOSED: [2020-09-25 Fri 00:37]
 
     - Dotty implementation of /pattern matching/ was GREATLY *simplified* compared
-      to scalac.
-        From a user perspective, this means that Dotty generated patterns are a
+      to Scala 2.
+        From a user perspective, this means that Scala 3 generated patterns are a
       lot easier to debug as
       + _variables_ all show up in debug modes
       + _positions_ are correctly preserved
 
-    - Dotty supports a *superset* of scalac's /extractors/.
+    - Dotty supports a *superset* of Scala 2 /extractors/.
 
     - CAUTION:
       *There are plans for further simplification*,
@@ -9261,7 +9278,7 @@
         condition holds:
         + ~U~ = ~true~
         + the /extractor/ is used as a /product match/
-        + ~U~ = ~Some[T]~ *(for Scala2 compatibility)*
+        + ~U~ = ~Some[T]~ *(for Scala 2 compatibility)*
         + ~U <: R~ and ~U <: { def isEmpty: false }~
 
 ***** Variadic Extractors
@@ -9286,12 +9303,12 @@
         ~unapplySeq~ form > /sequence match/ > /product-sequence match/
 
       - A usage of a /variadic extractor/ is irrefutable if one of the following
-        condition holds:
+        conditions holds:
         + the /extractor/ is used directly as a
           * /sequence match/
             OR
           * /product-sequence match/
-        + ~U~ = ~Some[T]~ *(for Scala2 compatibility)*
+        + ~U~ = ~Some[T]~ *(for Scala 2 compatibility)*
         + ~U <: R~ and ~U <: { def isEmpty: false }~
 
 **** DONE Boolean Match
@@ -9450,7 +9467,8 @@
        #+begin_src scala
          class Foo(val name: String, val children: Int*)
          object Foo {
-           def unapplySeq(f: Foo): Option[(String, Seq[Int])] = Some((f.name, f.children))
+           def unapplySeq(f: Foo): Option[(String, Seq[Int])] =
+             Some((f.name, f.children))
          }
 
          def foo(f: Foo) = f match {
@@ -9945,35 +9963,52 @@
       =from Jian=
       Learn more about this. There are more discussion about this topic.
 
-* CONTRIBUTING
-** Contribute Knowledge
+* TODO Scala 3 Syntax Summary
+** Lexical Syntax
+** Keywords
+*** Regular keywords
+*** Soft keywords
+    
+** Context-free Syntax
+*** Literals and Paths
+*** Types
+*** Expressions
+*** Type and Value Parameters
+*** Bindings and Imports
+*** Declarations and Definitions
+    
+* TODO CONTRIBUTING
+** TODO Contribute Knowledge
 *** Contribute Internals-related Knowledge
 
-** Getting Started
+** TODO Getting Started
+   =FIXME= =Unify md style=
 *** Requirements
 *** Compiling and Running
 *** Starting a REPL
+*** Publish to local repository
 *** Generating Documentation
 
-** Workflow
-*** Compiling files with dotc
+** TODO Workflow
+*** Compiling files with scalac
 *** Inspecting Trees with Type Stealer
 *** Pretty-printing
 *** SBT Commands Cheat Sheet
 
-** Testing
+** TODO Testing in Dotty
 *** Unit tests
 **** Testing with checkfiles
 
 *** Integration tests
 **** Bootstrapped-only tests
 **** From TASTy tests
+**** SemanticDB tests
 
-** Debugging
+** TODO Debugging Techniques
 *** Setting up the playground
 *** Show for human readable output
 *** How to disable color
-*** Reporting as a non-intrusive println
+*** Reporting as a non-intrusive ~println~
 *** Printing out trees after phases
 *** Printing out stack traces of compile time errors
 *** Configuring the printer output
@@ -9986,12 +10021,13 @@
 **** Tracing
 **** Reporter
 
-** IDEs and Tools
-*** Mill
-*** Scalafix
+** TODO IDEs and Tools
+*** Basic Operations with Mill
+*** Working with Scalafix
+    =FIXME= =DELETE TITLE=
 
-** Procedures
-*** Release Model
+** TODO Procedures
+*** Release Procedure
 **** Model
 **** Example
 ***** At the Dotty Repo
@@ -10006,16 +10042,16 @@
 
 **** Procedure in Bash Scripts
 
-*** Modifying the Test framework
-    *Test Vulpix Framework*
+*** Test Vulpix Framework
+    =FIXME= =DELETE TITLE=
 
-* INTERNALS
-** Backend
+* TODO INTERNALS
+** Backend Internals
 *** Data Flow
 *** Architecture
 **** (a) The queue subsystem
 **** (b) Bytecode-level types, ~BType~
-**** (c) Utilities offering a more "high-level" API to bytecode emission
+**** (c) Utilities offering a more "" API to bytecode emission
 **** (d) Mapping between type-checker types and ~BType~'s
 **** (e) More "high-level" utilities for bytecode emission
 **** (f) Building an ASM ~ClassNode~ given an AST ~TypeDef~
@@ -10032,8 +10068,7 @@
 *** In other phases
 *** Using contexts
 
-** Dotc vs Scalac
-   # Differences between Dotc and Scalac
+** Differences between Dotc and Scalac
 *** Denotation
 **** Denotation vs. SymDenotation
 **** Implicit Conversion
@@ -10043,7 +10078,7 @@
 *** Tree
 *** Type
 
-** Higher-Kinded Types
+** Higher-Kinded Types in Dotty
    *This page is out of date and preserved for posterity. Please see
    Implementing Higher-Kinded Types in Dotty for a more up to date version*
 
@@ -10060,17 +10095,13 @@
 **** Full example
 **** Status of ~#~
 
-** Overall Structure
-   # Dotty Overall Structure
+** Dotty Overall Structure
 *** Package Structure
 *** Contexts
 *** Compiler Phases
 
-** Periods
-   # Dotc's concept of time*
-
-** Syntax
-   # Scala Syntax Summary
+** Dotc's concept of time
+** Scala Syntax Summary
 *** Lexical Syntax
 *** Keywords
 **** Regular keywords
@@ -10121,64 +10152,137 @@
 *** position not set
 *** unresolved symbols in pickling
 
-* RESOURCES
+* TODO RESOURCES
 *** Talks
 **** Talks on Dotty
 **** Deep Dive with Dotty
-     :PROPERTIES:
-     :ID:       b5b2ba1a-6e8d-4f0c-a3c4-14f0e17ee56a
-     :END:
+     
 * TODO API
 ** ~dotty~
 *** (O) ~DottyPredef~
 
 ** ~dotty.runtime~
-*** Classlikes
-**** (O) ~LazyVals~
-**** (O) ~Arrays~
+*** Type members
+**** Classlikes
+***** (O) ~LazyVals~
+***** (O) ~Arrays~
     
 ** ~dotty.tools.tasty~
-*** Classlikes
-**** (C) ~TastyHeaderUnpickler~
-**** (C, O) ~TastyBuffer~
-**** (C) ~UnpickleException~
-**** (O) ~TastyHash~
-**** (O) ~TastyFormat~
-**** (C) ~TastyReader~
+*** Type memebers
+**** Classlikes
+***** (C) ~TastyHeaderUnpickler~
+***** (C, O) ~TastyBuffer~
+***** (C) ~UnpickleException~
+***** (O) ~TastyHash~
+***** (O) ~TastyFormat~ - =FIXME= =DOC=
+***** (C) ~TastyReader~
 
 ** ~dotty.tools.tasty.util~
-*** Classlikes
-**** (O) ~Util~
+*** Type members
+**** Classlikes
+***** (O) ~Util~
 
 ** ~scala~
-*** Types
-**** (T) ~EmptyTuple~
-**** (T) ~IArray[+T]~
-     
-*** Classlikes
-**** (O) ~EmptyTuple~
-**** (O) ~IArray~
-**** (sT, O) ~Tuple~
-**** (C) ~main~ extends ~Annotation~
-**** (O) ~opaques~
-**** (T) ~PolyFunction~
-**** (sT, O) ~CanEqual[-L, -R]~
-**** (aC) ~Conversion~
-**** (T, O) ~Selectable~
-**** (sT) ~NonEmptyTuple~
-**** (aC, O) ~*:[+H, +T <: Tuple]~
+*** Type members
+**** Types
+***** (T) ~EmptyTuple~
+***** (T) ~IArray[+T]~
+***** (T) ~Cloneable~
+***** (T) ~Serializable~
+***** (T) ~Throwable~
+***** (T) ~Exception~
+***** (T) ~Error~
+***** (T) ~RuntimeException~
+***** (T) ~NullPointerException~
+***** (T) ~ClassCastException~
+***** (T) ~IndexOutOfBoundsException~
+***** (T) ~ArrayIndexOutOfBoundsException~
+***** (T) ~StringIndexOutOfBoundsException~
+***** (T) ~UnsupportedOperationException~
+***** (T) ~IllegalArgumentException~
+***** (T) ~NumberFormatException~
+***** (T) ~AbstractMethodError~
+***** (T) ~InterruptedException~
+***** (T) ~IterableOnce[+A]~
+***** (T) ~Iterable[+A]~
+***** (T) ~Seq[+A]~
+***** (T) ~IndexedSeq[+A]~
+***** (T) ~Iterator[+A]~
+***** (T) ~List[+A]~
+***** (T) ~::[+A]~
+***** (T) ~LazyList[+A]~
+***** (T) ~Vector[+A]~
+***** (T) ~StringBuilder~
+***** (T) ~Range~
+***** (T) ~BigDecimal~
+***** (T) ~BigInt~
+***** (T) ~Equiv[T]~
+***** (T) ~Fractional[T]~
+***** (T) ~Integral[T]~
+***** (T) ~Numeric[T]~
+***** (T) ~Ordered[T]~
+***** (T) ~Ordering[T]~
+***** (T) ~PartialOrdering[T]~
+***** (T) ~PartiallyOrdered[T]~
+***** (T) ~Either[+A, +B]~
+***** (T) ~Left[+A, +B]~
+***** (T) ~Right[+A, +B]~
+      
+**** TODO Classlikes
+***** (O) ~EmptyTuple~
+***** (O) ~IArray~
+***** (O) ~#::~
+***** (O) ~language~
+***** (sT, O) ~Tuple~
+***** (C) ~main~ extends ~Annotation~
+***** (O) ~opaques~
+***** (T) ~PolyFunction~
+***** (sT, O) ~CanEqual[-L, -R]~
+***** (aC) ~Conversion~
+***** (T, O) ~Selectable~
+***** (sT) ~NonEmptyTuple~
+***** (aC, O) ~*:[+H, +T <: Tuple]~
 
-** ~scala.annotation~
-*** Classlikes
-**** (fC) ~transparentTrait~ extends ~StaticAnnotation~
-**** (fC) ~threadUnsafe~ extends ~StaticAnnotation~
-**** (fC) ~alpha~ extends ~StaticAnnotation~ - (deprecated, use ~targetName~)
-**** (T) ~RefiningAnnotation~ extends ~StaticAnnotation~
-**** (C) ~constructorOnly~ extends ~StaticAnnotation~
-**** (fC) ~static~ extends ~StaticAnnotation~
-**** (fC) ~targetName~ extends ~StaticAnnotation~
+*** Value members
+**** Defined value memebers
+***** (v) ~AnyRef: Specializable~
+***** (v) ~Iterable: Iterable~
+***** (v) ~Seq: Seq~
+***** (v) ~IndexedSeq: IndexedSeq~
+***** (v) ~Iterator: Iterator~
+***** (v) ~List: List~
+***** (v) ~Nil: Nil~
+***** (v) ~::: ::~
+***** (v) ~+:: +:~
+***** (v) ~:+: :+~
+***** (v) ~LazyList: LazyList~
+***** (v) ~Vector: Vector~
+***** (v) ~StringBuilder: StringBuilder~
+***** (v) ~Range: Range~
+***** (v) ~BigDecimal: BigDecimal~
+***** (v) ~BigInt: BigInt~
+***** (v) ~Equiv: Equiv~
+***** (v) ~Fractional: Fractional~
+***** (v) ~Integral: Integral~
+***** (v) ~Numeric: Numeric~
+***** (v) ~Ordered: Ordered~
+***** (v) ~Ordering: Ordering~
+***** (v) ~Either: Either~
+***** (v) ~Left: Left~
+***** (v) ~Right: Right~
+    
+** TODO ~scala.annotation~
+*** Type members
+**** Classlikes
+***** (fC) ~transparentTrait~ extends ~StaticAnnotation~
+***** (fC) ~threadUnsafe~ extends ~StaticAnnotation~
+***** (fC) ~alpha~ extends ~StaticAnnotation~ - (deprecated, use ~targetName~)
+***** (T) ~RefiningAnnotation~ extends ~StaticAnnotation~
+***** (C) ~constructorOnly~ extends ~StaticAnnotation~
+***** (fC) ~static~ extends ~StaticAnnotation~
+***** (fC) ~targetName~ extends ~StaticAnnotation~
 
-** ~scala.annotation.internal~
+** TODO ~scala.annotation.internal~
 *** Classlikes
 **** (C) ~ContextResultCount~ extends ~StaticAnnotation~
 **** (C) ~AnnotationDefault~ extends ~Annotation~
@@ -10191,6 +10295,21 @@
 **** (C) ~Child[T]~ extends ~Annotation~
 **** (fC) ~Repeated~ extends ~Annotation~
 
+** TODO ~scala.annotation.meta~
+** DONE ~scala.annotation.unchecked~
+   CLOSED: [2020-12-11 Fri 11:13]
+*** Type members
+**** Classlikes
+***** (fC) ~uncheckedVariance~
+***** (fC) ~uncheckedStable~
+      
+** DONE ~scala.beans~
+   CLOSED: [2020-12-11 Fri 11:14]
+*** Type members
+**** Classlikes
+***** (fC) ~BooleanBeanProperty~
+***** (fC) ~BeanProperty~
+   
 ** ~scala.compiletime~
 *** Types
 **** ~Widen[Tup <: Tuple]~
