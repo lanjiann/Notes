@@ -702,8 +702,135 @@
 *** Advanced variance annotations - 141
 
 ** 6.5 Existential types - 144
-*** The formal syntax of existential types - 146
+   - xxx
 
+   - xxx
+
+   - xxx
+
+   - xxx
+
+   - Example:
+     #+begin_src java
+       interface List<E> extends Collection<E> {
+           E get(int idx);
+       }
+     #+end_src
+     The /interface/ has a /type parameter/ ~E~ which is used to specify the
+     type of elements in the list. The ~get~ /method/ is defined using this
+     /type parameter/ for its _return value_.
+
+     * The strangeness begins when we look at the _backward compatibility_.
+       The older ~List~ /interface/ in Java was designed WITHOUT /generic
+       types/. Code written for this OLD /interface/ is still compatible with
+       /Java Generics/. For example:
+       #+begin_src java
+         List foo = ...
+         System.out.println(foo.get(0));
+       #+end_src
+
+     * The type returned in the REPL is ~java.util.List[_]~.
+       Scala provides a _convenience syntax_ for creating /existential types/ that
+       uses the _underscore_ in the place of a /type parameter/.
+       
+       + We'll cover the full syntax shortly; but this shorthand is more commonly
+         found in production code. This ~_~ can be considered a _place holder_ for
+         a single valid type.
+
+       + The ~_~ is _DIFFERENT from_ /closure syntax/
+         because it isn't a placeholder for a /type argument/,
+         but rather is *a HOLE in the /type/.*
+
+       + The compiler *isn't sure* what the SPECIFIC /type parameter/ is, but it
+         knows that there is one.
+         You *can't substitute* a /type parameter/ later; *the HOLE remains.*
+
+   - *DEVIATION FROM JAVA*
+     * In Scala,
+       We *can't add* things to a ~List[_]~
+       UNLESS the compiler can determine that they're of the SAME type as the
+       list.
+         This means we can't add new values to the list without some form of
+       /casting/.
+     
+     * In Java,
+       this operation would compile and an *Unchecked* WARNING would be issued.
+
+   - /Existential types/ can also have /upper and lower bounds/ in Scala.
+     This can be done by treating the ~_~ as if it were a /type parameter/.
+     Let's take a look:
+     #+begin_src scala
+       def foo(x: List[_ >: Int]) = x
+     #+end_src
+     The ~foo~ /method/ is defined to accept a ~List~ of some parameter that has
+     a lower bound of ~Int~. _This parameter could have ANY type;_ the compiler
+     doesn't care which type, as long as it's ~Int~ or one of its /super types/.
+     We can call this /method/ with a value of type ~String~, because ~Int~ and
+     ~String~ share a parent, ~Any~. Let's look.
+     #+begin_src scala
+       foo(List("Hi"))
+       // res9: List[Any] = List(Hi)
+     #+end_src
+     When calling the ~foo~ /method/ with a ~List("Hi")~ the call succeeds, as
+     expected.
+     
+*** 6.5.1 The formal syntax of existential types - 146
+    Scala's _formal syntax_ for /existential types/ uses the ~forSome~ keyword.
+    
+    - Here's the excerpt explaining the syntax from the Scala Language Specification:
+      * *SCALA LANGUAGE SPECIFICATION -- EXCERPT FROM SECTION 3.2.10*
+        An /existential type/ has the form ~T forSome {Q}~ where ~Q~ is _a
+        sequence of type declarations_.
+    
+      * In the preceding definition, the ~Q~ block is _a set of /type declarations/._
+        + /Type declarations/, in the Scala Language Specification COULD BE
+          /abstract type statements/ or /abstract val statements/.
+
+        + The declarations in the ~Q~ block are /existential/ -- the compiler
+          *knows* that there's some type that meets these definitions,
+          *but doesn't remember* what that type is specifically.
+        
+        + The /type/ declared in the ~T~ section can then use these /existential
+          identifiers/ directly.
+
+    - Example:
+      This is easiest to see by
+      CONVERTING _the convenient syntax_
+      INTO the _formal syntax_.
+      Let's take a look:
+      #+begin_src scala
+        val y: List[_] = Nil
+        // y: List[_] = List()
+
+        val x: List[X forSome { type X }] = y
+        // x: List[X forSome { type X} ] = List()
+      #+end_src
+      In ~x~ value, the /type/ ~X~ is /existential/ and acts the *SAME* as the
+      ~_~ in the ~y~'s type.
+
+    - A more complicated scenario occurs when the /existential type/ has a /lower
+      or upper bound restriction/.
+        In that case, the entire /lower bound/ or /upper bound/ is translated
+      into the ~forSome~ block:
+      #+begin_src scala
+        val y: List[_ <: AnyRef] = Nil
+        // y: List[_ <: AnyRef] = List()
+
+        val x: List[X forSome { type X <: AnyRef }] = y
+        // x: List[X forSome { type X <: AnyRef }] = List()
+      #+end_src
+      * The first value, ~y~, has the type ~List[_ <: AnyRef]~.
+        + The /existential/ ~_ <: AnyRef~ is translated to type ~X <: AnyRef~ in
+          the ~forSome~ section.
+      
+        + Remember that all type declarations in the ~forSome~ blocks are treated
+          as /existential/ that can be used in the left hand side type.
+      
+        + In this case, the left-hand side type is ~X~.
+      
+        + The ~forSome~ block could be used for any kind of /type declaration/,
+          including values or other /existential types/.
+      
 ** 6.6 Summary - 149
 
 * 7 Using implicits and types together - 150
