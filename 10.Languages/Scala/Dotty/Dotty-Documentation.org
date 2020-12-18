@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M3-bin-20201213-3c18f6b-NIGHTLY
+#+VERSION: 3.0.0-M3-bin-20201216-c8fb1fa-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -6312,10 +6312,12 @@
          ~transparent trait~ instances are _ONLY dropped_
          WHEN they appear _in conjunction with some other /type/._
 
-*** DONE Creator Applications
+*** DONE Universal Apply Methods
     CLOSED: [2020-07-14 Tue 13:33]
-    - creator applications :: use simple _function call syntax_ to *create*
-      /instances/ of a /class/, even if there is no ~apply~ /method/ implemented.
+    Scala /case classes/ *generate* ~apply~ /methods/, so that values of /case
+    classes/ can be created using simple /function application/, *WITHOUT*
+    needing to write ~new~.
+      Scala 3 *generalizes* this scheme to *all* *concrete* /classes/.
 
     - Example:
       #+begin_src scala
@@ -6326,33 +6328,45 @@
         StringBuilder("abc")  // same as `new StringBuilder("abc")`
         StringBuilder()       // same as `new StringBuilder()`
       #+end_src
+      This works since a /companion object/ with TWO ~apply~ /methods/ are =FIXME=
+      _generated together with_ the /class/. The /companion object/ looks like:
+      #+begin_src scala
+        object StringBuilder {
+          inline def apply(s: String): StringBuilder = new StringBuilder(s)
+          inline def apply(): StringBuilder = new StringBuilder()
+        }
+      #+end_src
+      The _synthetic object_ ~StringBuilder~ and its ~apply~ /methods/ are called
+      /constructor proxies/.
 
-    - /Creator applications/ generalize a functionality provided _so far only for_
-      /case classes/, but the mechanism how this is achieved is different.
-        Instead of generating an ~apply~ /method/, the compiler adds a new possible
-      interpretation to a function call ~f(args)~. The previous rules are:
-      + Given a function call ~f(args)~,
-        * if ~f~ is a /method/ applicable to ~args~,
-          typecheck ~f(args)~ *UNCHANGED*,
+    - /Constructor proxies/ are generated _even for_ /Java classes/ and /classes/
+      comming from Scala 2.
+      * The precise rules are as follows:
+        1. A /constructor proxy/ /companion object/ =FIXME= ~C~ is created for a
+           _concrete_ /class/ ~C~, provided
+           + the /class/ does *not* have already a companion
+           + there is also *no* other /value/ or /method/ named ~C~
+              _defined_ or _inherited_ in the scope where ~C~ is defined.
 
-        * otherwise, if ~f~ has an ~apply~ /method/ applicable to ~args~ as a member,
-          continue with ~f.apply(args)~,
+        2. /Constructor proxy/ ~apply~ /methods/ are *generated* for a _concrete_
+           /class/ provided
+           + the /class/ has a /companion object/ (which might have been generated in
+              step 1), and
+           + that /companion object/ does *NOT already* define a member named ~apply~.
 
-        * otherwise, if ~f~ is of the form ~p.m~ and there is an /implicit conversion/
-          ~c~ applicable to ~p~ so that ~c(p).m~ is applicable to ~args~, continue with
-          ~c(p).m(args)~
+    - Each generated ~apply~ /method/ *forwards* to *one* /constructor/ of the
+      /class/.
+      * It has the *same* /type/ and /value parameters/ as the /constructor/.
 
-      + There's now a fourth rule following these rules:
-        * if ~f~ is syntactically a /stable identifier/, and ~new f~ where ~f~ is
-          interpreted as a /type identifier/ is applicable to ~args~, continue
-          with ~new f(args)~.
+    - /Constructor proxy companions/ *cannot* be used as values by themselves.
+      A /proxy companion object/ must be selected with ~apply~ (or be applied to
+      arguments, in which case the ~apply~ is implicitly inserted).
 
-    - Analogously, the possible interpretations of a /function call with type arguments
-      ~f[targs]~ syntax/ are augmented with the following interpretation as a _FINAL
-      fallback_:
-      + if ~f~ is syntactically a /stable identifier/, and ~new f[targs]~ where ~f~
-        is interpreted as a /type identifier/ is _well-typed_, continue with ~new
-        f[targs]~.
+    - /Constructor proxies/ are also *NOT allowed to shadow* NORMAL definitions.
+      * That is, if
+        an identifier resolves to a /constructor proxy/, and
+        the same identifier is also defined or imported in some other scope,
+        _an ambiguity is reported._
 
 **** Motivation
      - Leave out ~new~ *hides* an implementation detail _and_
@@ -6370,19 +6384,6 @@
               though define a /case class/ only for its ~apply~ is not the right
               way to use /case classes/ -- /case classes/ are HEAVY because of
               tens of generated methods. However, people keep doing this.
-
-**** Discussion
-     An alternative design would auto-generate ~apply~ /methods/ for _non /case
-     classes/._
-     - =from Jian= From the first glance, this alternative design has one good
-       point -- NO need to add new (fallback) rule for the interpretation of
-       /function call syntax/.
-
-     - However, this alternative design can *cause numerous problems*:
-       + overloading ambiguities =TODO= Example???
-       + overriding errors =TODO= Example???
-       + shadowing of user-defined ~apply~ /methods/ by more specific auto-generated ones.
-         =TODO= Example???
 
 *** DONE Export Clauses -- =TODO= _Elaboration of Export Clauses_
     CLOSED: [2020-05-18 Mon 02:46]
@@ -6986,6 +6987,120 @@
       AND
       it can be disabled under /compiler flag/ (i.e. =-Yno-kind-polymorphism=).
 
+*** DONE The Matchable Trait
+    CLOSED: [2020-12-15 Tue 20:57]
+    A new /trait/ ~Matchable~ controls the ability to /pattern match/.
+    
+**** The Problem
+     The _Scala 3 standard library_ has a type ~IArray~ for /immutable arrays/
+     that is defined like this:
+     #+begin_src scala
+       opaque type IArray[+T] = Array[_ <: T]
+     #+end_src
+     The ~IArray~ type offers /extension methods/ for ~length~ and ~apply~,
+     BUT _not_ for ~update~; hence it _SEEMS_ values of type ~IArray~ *cannot be
+     updated*.
+
+     - "SEEMS" is not enough -- for /immutable arrays/, /update/ *should be
+       forbidden*.
+     
+     - However, there is a _potential hole_ due to /pattern matching/.
+       Consider:
+       #+begin_src scala
+         val imm: IArray[Int] = ...
+         imm match
+           case a: Array[Int] => a(0) = 1
+       #+end_src
+       1. The test will _SUCCEED at runtime_
+          SINCE ~IArray~'s are represented as ~Array~'s at runtime.
+
+       2. But if we allowed it,
+          it would *break* the fundamental abstractn of immutable arrays.
+
+       3. *Aside*:
+          One could also achieve the same by casting:
+          ~imm.asInstanceOf[Array[Int]](0) = 1~
+          But that is not as much of a problem since in Scala ~asInstanceOf~ is
+          understood to be _low-level_ and _unsafe_.
+            By contrast, a /pattern match/ that compiles _without warning or error_
+          *should NOT break abstractions.*
+
+     - Note also that the problem is *NOT tied to* /opaque types/ as /match
+       selectors/.
+         The following slight variant with a value of /parametric type/ ~T~ as
+       /match selector/ leads to the same problem:
+       #+begin_src scala
+         def f[T](x: T) = x match
+           case a: Array[Int] => a(0) = 0
+
+         f(imm)
+       #+end_src
+     
+**** The Solution
+     - There is a *new* /type/ ~scala.Matchable~ that controls /pattern matching/.
+     
+       1. When typing a /pattern match/ of a /constructor pattern/ ~C(...)~ or a
+          /type pattern/ ~_: C~ it is required that the /selector type/ conforms
+          to ~Matchable~.
+
+       2. If that's NOT the case a WARNING is issued.
+
+     - For instance when compiling the example at the start of this section we
+       get:
+       #+begin_src bash
+         sc ../new/test.scala -source 3.1
+         # -- Warning: ../new/test.scala:4:12 ---------------------------------------------
+         # 4 |    case a: Array[Int] => a(0) = 0
+         #   |            ^^^^^^^^^^
+         #   |            pattern selector should be an instance of Matchable,
+         #   |            but it has unmatchable type IArray[Int] instead
+       #+end_src
+       * To allow
+         _migration from_ Scala 2 and cross-compiling _between_ Scala 2 and 3
+         the warning is _turned on *only* for =-source 3.1-migration= or higher_.
+     
+     - ~Matchable~ is a ~universal trait~ with ~Any~ as its /parent class/.
+       * It is extended by both ~AnyVal~ and ~AnyRef~.
+
+       * Since ~Matchable~ is a /supertype/ of _EVERY concrete value_ or /reference
+         class/
+         it means that /instances/ of such /classes/ _can be matched_ *as before*.
+         
+       * However, /match selectors/ of the following types will produce a *warning*:
+         + Type ~Any~:
+           if pattern matching is required one should use Matchable instead.
+
+         + Unbounded type parameters and abstract types:
+           If pattern matching is required they should have an upper bound Matchable.
+
+         + /Type parameters/ and /abstract types/ that are ONLY bounded by some
+           /universal trait/:
+           Again, ~Matchable~ should be added as a /bound/.
+         
+     - Here is the hierarchy of _toplevel_ /classes/ and /traits/ with their
+       /defined methods/:
+       #+begin_src scala
+         abstract class Any:
+           def getClass
+           def isInstanceOf
+           def asInstanceOf
+           def ==
+           def !=
+           def ##
+           def equals
+           def hashCode
+           def toString
+
+         trait Matchable extends Any
+
+         class AnyVal extends Any, Matchable
+         class Object extends Any, Matchable
+       #+end_src
+       1. ~Matchable~ is currently a /marker trait/ _WITHOUT any methods_.
+
+       2. Over time we might migrate /methods/ ~getClass~ and ~isInstanceOf~ to
+          it, since these are closely related to pattern-matching.
+       
 *** DONE _HIDDEN_ - Tupled Function - =TODO= =RE-READ=
     CLOSED: [2020-07-14 Tue 15:15]
     # Subtitle "Tupled Function" should be removed!!! =FIX-DOC=
@@ -9692,8 +9807,62 @@
          framework.
 
 *** TODO Dropped: Existential Types
-*** TODO Dropped: General Type Projection
-*** TODO Dropped: Do-While
+*** DONE Dropped: General Type Projection
+    CLOSED: [2020-12-16 Wed 21:56]
+    Scala so far allowed /general type projection/ ~T#A~
+    where ~T~ is an ARBITRARY /type/ and ~A~ names a /type member/ of ~T~.
+
+    - Scala 3 *disallows* this if ~T~ is an /abstract type/ (/class types/ and
+      /type aliases/ are fine).
+      * This change was made _because /unrestricted type projection/ is *unsound*._
+        https://github.com/lampepfl/dotty/issues/1050
+
+    - This restriction *rules out* the _type-level encoding of a combinator calculus_.
+      * [[https://michid.wordpress.com/2010/01/29/scala-type-level-encoding-of-the-ski-calculus][Scala type level encoding of the SKI calculus]]
+
+    - To rewrite code using /type projections on abstract types/,
+      consider using
+      * /path-dependent types/
+        OR
+      * /implicit parameters/
+    
+*** DONE Dropped: Do-While
+    CLOSED: [2020-12-16 Wed 22:08]
+    The /syntax construct/ ~do <body> while <cond>~ is *no longer supported*.
+    
+    - The recommended way is:
+      ~while ({ <body>; <cond> }) ()~
+      * Under the new syntax rules, this code can be written also without the
+        awkward ~({...})~ bracketing like this:
+        #+begin_src scala
+          while {
+            i += 1
+            f(i) == 0
+          } do ()
+        #+end_src
+
+    - The idea to
+      *use a block as the condition* of a ~while~
+      also gives a solution to the "loop-and-a-half" problem.
+      For instance:
+      #+begin_src scala
+        while {
+          val x: Int = iterator.next()
+          x >= 0
+        } do print(".")
+      #+end_src
+      
+**** Why Drop The Construct?
+     - do-while is used *relatively rarely*
+       and
+       it can expressed faithfully using just ~while~.
+       * So there seems to be little point in having it as a separate syntax
+         construct.
+
+     - Under the *NEW syntax rules* ~do~ is used AS a _statement continuation_,
+       which would clash with its meaning AS a _statement introduction_ (in ~do
+       ... while~).
+    
 *** DONE Dropped: Procedure Syntax
     CLOSED: [2020-12-09 Wed 01:50]
     Procedure syntax ~def f() { ... }~ *has been dropped*.
@@ -9712,9 +9881,121 @@
       * The _ScalaFix tool_ also can *rewrite* /procedure syntax/ to make it
         Dotty-compatible.
     
-*** TODO Dropped: Package Objects
-*** TODO Dropped: Early Initializers
-*** TODO Dropped: Class Shadowing
+*** DONE Dropped: Package Objects
+    CLOSED: [2020-12-16 Wed 21:28]
+    /Package objects/ will be dropped.
+    
+    - /Package objects/ are still available in Scala 3.0, but will be deprecated
+      and removed afterwards. =from Jian= Not clear, 3.1 or ???
+      
+    - /Package objects/ are no longer needed
+      since _all kinds of definitions can now be written at the top-level._
+
+    - There may be *SEVERAL* _source files_ in a /package/ containing such /toplevel
+      definitions/, and
+      _source files_ can freely mix TOPLEVEL /value/, /method/, and /type definitions/
+      with /classes/ and /objects/.
+
+    - The compiler *generates* /synthetic objects/ that wrap toplevel definitions
+      falling into one of the following categories:
+      * *ALL* /pattern/, /value/, /method/, and /type definitions/,
+      * /implicit classes and objects/,
+      * /companion objects of opaque type aliases/.
+
+    - If a source file =src.scala= contains such toplevel definitions, they will
+      be put in a /synthetic object/ named =src$package=.
+      * The wrapping is *transparent*, HOWEVER.
+      * The definitions in =src= can still be accessed as members of the ENCLOSING
+        package.
+
+    - Note 1:
+      This means that the *name* of a _source file_ containing WRAPPED /toplevel
+      definitions/ *is relevant for* /binary compatibility/:
+      *If the name changes,*
+      so does the name of the generated /object/ and its /class/.
+
+    - Note 2:
+      A TOPLEVEL ~main~ /method/ ~def main(args: Array[String]): Unit = ...~ is
+      wrapped as any other /method/.
+      * If it appears in a _source file_ =src.scala=, it could be invoked from
+        the command line using a command like =scala src$package=.
+
+      * Since _the "program name" is mangled_
+        it is recommended to always put ~main~ /methods/ in /EXPLICITLY NAMED
+        objects/.
+        
+    - Note 3:
+      The notion of ~private~ is independent of whether a definition is wrapped or
+      not.
+        A ~private~ /toplevel definition/ is ALWAYS _visible from everywhere in the
+      enclosing package._
+
+    - Note 4:
+      If SEVERAL /toplevel definitions/ are /overloaded variants/ with the SAME
+      NAME, *they must all come from the _SAME_ source file.*
+    
+*** DONE Dropped: Early Initializers
+    CLOSED: [2020-12-16 Wed 20:14]
+    /Early initializers/ of the form
+    #+begin_src scala
+      class C extends { ... } with SuperClass ...
+    #+end_src
+    have been *dropped*.
+    
+    - They were rarely used, and mostly to _COMPENSATE for the lack of /trait
+      parameters/,_ which are now directly supported in Scala 3.
+
+    - =TODO=
+      Learn more about the usages of /early Initializers/ in Scala 2.
+    
+*** DONE Dropped: Class Shadowing
+    CLOSED: [2020-12-16 Wed 20:05]
+    Scala 2 so far *allows* patterns like this:
+    #+begin_src scala
+      class Base {
+        class Ops {
+        }
+      }
+
+      class Sub extends Base {
+        class Ops {
+        }
+      }
+    #+end_src
+    
+    Scala 3 *rejects* this with the error message:
+    #+begin_src text
+      6 |      class Ops {  }
+        |            ^
+        |class Ops cannot have the same name as class Ops in class Base -- class definitions cannot be overridden
+    #+end_src
+
+    - The issue is that the _TWO_ ~Ops~ /classes/ _look like one overrides_ the other,
+      BUT *classes in Scala 2 _CANNOT_ be overridden.*
+
+    - To _keep things clean_ (and its internal operations consistent)
+      the Scala 3 compiler _FORCES_ you to *rename* the /inner classes/ so that
+      their names are different.
+    
+**** More Details
+     - Spec diff:
+       in section _5.1.4 Overriding_, =FIXME= - =link to 2.13 instead of 2.12=
+       *add* M' must NOT be a /class/.
+
+     - Q :: Why do we want to make this change to the language?
+     - A :: /Class shadowing/ is *irregular* compared to other types of overrides.
+            Indeed, /inner classes/ are *NOT* _actually overriden_ *but* _simply
+            shadowed_.
+
+     - Q :: How much existing code is going to be affected?
+     - A :: The only instance in Dotty is in its stdlib, and it was accidental.
+
+     - Q :: How exactly is existing code going to be affected?
+     - A :: Stop compiling.
+
+     - Q :: Is this change going to be migratable automatically?
+     - A :: No.
+    
 *** DONE Dropped: Limit 22 - =FIXME=
     CLOSED: [2020-12-09 Wed 02:12]
     _The limits of 22_ for the _maximal number of parameters_ of /function types/
