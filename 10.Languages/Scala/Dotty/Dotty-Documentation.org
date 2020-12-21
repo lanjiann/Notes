@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-M3-bin-20201216-c8fb1fa-NIGHTLY
+#+VERSION: 3.0.0-RC1-bin-20201219-3926860-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -2613,7 +2613,7 @@
     - Some examples of common type classes are in the next subsections.
 
 **** DONE Semigroups and monoids
-     CLOSED: [2020-07-19 Sun 22:34]
+     CLOSED: [2020-12-20 Sun 18:58]
      #+begin_src scala
        trait SemiGroup[T]:
          extension (x: T) def combine (y: T): T
@@ -2621,17 +2621,16 @@
        trait Monoid[T] extends SemiGroup[T]:
          def unit: T
 
-       object Monoid {
+       object Monoid:
          def apply[T](using m: Monoid[T]) = m
-       }
 
        // For `String`
-       given Monoid[String]:
+       given Monoid[String] with
          extension (x: String) def combine (y: String): String = x.concat(y)
          def unit: String = ""
 
        // For `Int`
-       given Monoid[Int]:
+       given Monoid[Int] with
          extension (x: Int) def combine (y: Int): Int = x + y
          def unit: Int = 0
 
@@ -2644,7 +2643,7 @@
      #+end_src
 
 **** DONE Functors
-     CLOSED: [2020-07-19 Sun 22:40]
+     CLOSED: [2020-12-20 Sun 18:59]
      - Functor :: a type provides the ability for its values to be "mapped over".
 
      - We can represent all types that can be "mapped over" with ~F~ -- a /type
@@ -2658,7 +2657,7 @@
            trait Functor[F[_]]:
              def [A, B](x: F[A]).map(mapper: A => B): F[B]
 
-           given Functor[List]:
+           given Functor[List] with
              def map[A, B](x: List[A], f: A => B): List[B] =
                x.map(f)  // `List` already has a `map` method
 
@@ -2679,7 +2678,7 @@
              extension [A, B](x: F[A])
                def map(f: A => B): F[B]
 
-           given Functor[List]:
+           given Functor[List] with
              extension [A, B](xs: List[A])
                def map(f: A => B): List[B] =
                  xs.map(f) // List already has a `map` method
@@ -3150,8 +3149,8 @@
             def eqv(x: T, y: T): Boolean
           }
         #+end_src
-        we need to implement a method Eq.derived on the companion object of Eq
-        that produces a given instance for Eq[T] given a Mirror[T].
+        we need to implement a method Eq.derived on the companion object of ~Eq~
+        that produces a given instance for ~Eq[T]~ given a ~Mirror[T]~.
 
       - Here is a possible implementation,
         #+begin_src scala
@@ -3230,6 +3229,7 @@
             def eqv(x: T, y: T): Boolean
           }
 
+          // TODO: FIXME
           object Eq {
             given Eq[Int] {
               def eqv(x: Int, y: Int) = x == y
@@ -3942,10 +3942,10 @@
       #+end_src
 
     - Example:
+      =FIXME=
       #+begin_src scala
-        given Conversion[String, Token] {
+        given Conversion[String, Token] with
           def apply(str: String): Token = new KeyWord(str)
-        }
       #+end_src
       + Express more concisely as:
         #+begin_src scala
@@ -4155,7 +4155,7 @@
 
       - Examples:
         #+begin_src scala
-          given Ord[Int] { ... }
+          given Ord[Int] with { ... }
           //// dotc generate:
           // given given_Ord_Int: Ord[Int] with { ... }
 
@@ -5049,13 +5049,13 @@
            }
 
            class LowPriority {
-             given hashSetFor[T] as SetFor[T, HashSet[T]] {
+             given hashSetFor[T]: SetFor[T, HashSet[T]] with {
                val set =  new HashSet
              }
            }
 
            object SetFor extends LowPriority {
-             given treeSetFor[T: Ordering] as SetFor[T, TreeSet[T]] {
+             given treeSetFor[T: Ordering]: SetFor[T, TreeSet[T]] with {
                val set =  new TreeSet
              }
            }
@@ -5396,6 +5396,7 @@
          Example that shows the immediate result which is not the result of automatic \beta{}-reduce:
          #+begin_src scala
            inline def resultOfFrom: String = ${ resultOfFromImpl }
+
            def resultOfFromImpl(using Quotes): Expr[String] = {
              val f: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
              Expr(f('{2}).show)
@@ -5551,19 +5552,20 @@
            can be done is because the fundamental types /given ~ToExpr~ instances/
            are provided by Scala).
            - For instance, here is a possible instance of ~ToExpr[Boolean]~:
+             =FIXME=
              #+begin_src scala
-               given ToExpr[Boolean] {
+               given ToExpr[Boolean] with
                  def toExpr(b: Boolean) =
                    if (b) '{ true } else '{ false }
-               }
              #+end_src
 
      - Once we can lift bits, we can work our way up.
        For instance, here is a possible implementation (=from Jian= of course,
        not the best way!) of ~ToExpr[Int]~ that _does *NOT* use the underlying
        tree machinery_:
+       =FIXME=
        #+begin_src scala
-         given ToExpr[Int] {
+         given ToExpr[Int] with
            def toExpr(n: Int): Expr[Int] = n match {
              case Int.MinValue    => '{ Int.MinValue }
              case _ if n < 0      => '{ - ${ toExpr(-n) } }
@@ -5571,7 +5573,6 @@
              case _ if n % 2 == 0 => '{ ${ toExpr(n / 2) } * 2 }
              case _               => '{ ${ toExpr(n / 2) } * 2 + 1 }
            }
-         }
        #+end_src
        * =from Jian=
          Since the PCP is only for /free variables/, and ~'{ Int.MinValue }~ and
@@ -8468,11 +8469,11 @@
              def fromDigits(digits: String) = apply(digits)
            }
 
-           given FromDigits {
+           // TODO: FIXME
+           given FromDigits with
              override inline def fromDigits(digits: String) = ${
                fromDigitsImpl('digits)
              }
-           }
 
            private def fromDigitsImpl(digits: Expr[String])
                                      (using ctx: Quotes): Expr[BigFloat] =
@@ -10439,15 +10440,6 @@
 **** Deep Dive with Dotty
      
 * TODO API
-** ~dotty~
-*** (O) ~DottyPredef~
-
-** ~dotty.runtime~
-*** Type members
-**** Classlikes
-***** (O) ~LazyVals~
-***** (O) ~Arrays~
-    
 ** ~dotty.tools.tasty~
 *** Type memebers
 **** Classlikes
@@ -10552,29 +10544,33 @@
 ***** (v) ~Left: Left~
 ***** (v) ~Right: Right~
     
-** TODO ~scala.annotation~
+** ~scala.annotation~
 *** Type members
 **** Classlikes
-***** (fC) ~transparentTrait~ extends ~StaticAnnotation~
-***** (fC) ~threadUnsafe~ extends ~StaticAnnotation~
-***** (fC) ~alpha~ extends ~StaticAnnotation~ - (deprecated, use ~targetName~)
+***** (aC) ~Annotation~
+***** (T) ~ClassfileAnnotation~ extends ~ConstantAnnotation~
+***** (T) ~ConstantAnnotation~ extends ~StaticAnnotation~
 ***** (T) ~RefiningAnnotation~ extends ~StaticAnnotation~
+***** (T) ~StaticAnnotation~ extends ~Annotation~
+***** (T) ~TypeConstraint~ extends ~Annotation~
+***** (fC) ~alpha(externalName: String)~ extends ~StaticAnnotation~ - (deprecated, use ~@targetName~ instead)
+***** (fC) ~compileTimeOnly(message: String)~ extends ~StaticAnnotation~
 ***** (C) ~constructorOnly~ extends ~StaticAnnotation~
+***** (fC) ~elidable(val level: Int)~ extends ~StaticAnnotation~
+***** (fC) ~implicitAmbiguous(msg: String)~ extends ~StaticAnnotation~
+***** (fC) ~implicitNotFound(msg: String)~ extends ~StaticAnnotation~
+***** (C) ~nowarn(value: String)~ extends ~ConstantAnnotation~
+***** (C) ~showAsInfix(enabled: Boolean)~ extends ~StaticAnnotation~
 ***** (fC) ~static~ extends ~StaticAnnotation~
+***** (C) ~strictfp~ extends ~StaticAnnotation~
+***** (fC) ~switch~ extends ~StaticAnnotation~
+***** (fC) ~tailrec~ extends ~StaticAnnotation~
 ***** (fC) ~targetName~ extends ~StaticAnnotation~
-
-** TODO ~scala.annotation.internal~
-*** Classlikes
-**** (C) ~ContextResultCount~ extends ~StaticAnnotation~
-**** (C) ~AnnotationDefault~ extends ~Annotation~
-**** (fC) ~Body~ extends ~Annotation~
-**** (C) ~SourceFile~ extends ~Annotation~
-**** (C) ~Alias~ extends ~Annotation~
-**** (C) ~unshared~ extends ~Annotation~
-**** (C) ~sharable~ extends ~Annotation~
-**** (fC) ~InlineParam~ extends ~Annotation~
-**** (C) ~Child[T]~ extends ~Annotation~
-**** (fC) ~Repeated~ extends ~Annotation~
+***** (fC) ~threadUnsafe~ extends ~StaticAnnotation~
+***** (fC) ~transparentTrait~ extends ~StaticAnnotation~
+***** (C) ~unspecialized~ extends ~StaticAnnotation~
+***** (C) ~unused(message: String)~ extends ~StaticAnnotation~
+***** (fC) ~varargs~ extends ~StaticAnnotation~
 
 ** TODO ~scala.annotation.meta~
 ** DONE ~scala.annotation.unchecked~
@@ -10591,6 +10587,13 @@
 ***** (fC) ~BooleanBeanProperty~
 ***** (fC) ~BeanProperty~
    
+** ~scala.collection~
+** ~scala.collection.concurrent~
+** ~scala.collection.convert~
+** ~scala.collection.generic~
+** ~scala.collection.immutable~
+** ~scala.collection.mutable~
+** ~scala.compat~
 ** ~scala.compiletime~
 *** Types
 **** ~Widen[Tup <: Tuple]~
@@ -10608,11 +10611,17 @@
 **** (fcC) ~Error~
 **** (sT, O) ~ErrorKind~
 
+** ~scala.concurrent~
+** ~scala.concurrent.duration~
 ** ~scala.deriving~
 *** Classlikes
 **** (sT, O) ~Mirror~
 **** IGNORE _deprecated_
 
+** ~scala.io~
+** ~scala.jdk~
+** ~scala.jdk.javaapi~
+** ~scala.math~
 ** ~scala.quoted~
 *** Classlikes
 **** (O) ~Unlifted~
@@ -10635,6 +10644,7 @@
 **** (C) ~StopMacroException~
 **** (O) ~Expr~ with ~@compileTimeOnly("Illegal reference to `scala.quoted.runtime.Expr`")~
 
+** ~scala.ref~
 ** ~scala.reflect~
 *** Types
 **** (T) ~Typeable[T]~
@@ -10644,6 +10654,7 @@
 **** (tT) ~Enum~
 **** (T, O) ~Selectable~
 
+** ~scala.reflect.macros~
 ** ~scala.runtime~
 *** Classlikes
 **** (faC) ~MatchCase[Pat, +Body]~
@@ -10654,6 +10665,16 @@
 **** (T) ~FunctionXXL~
 **** (O) ~Scala3RunTime~
      
+** ~scala.runtime.java8~
+** ~scala.sys~
+** ~scala.sys.process~
+** ~scala.util~
+** ~scala.util.control~
+** ~scala.util.hashing~
+** ~scala.util.matching~
+
+
+   
 ** ~scala.runtime.stdLibPatches~
 *** Classlikes
 **** (O) ~language~
@@ -10667,4 +10688,3 @@
     
 ** ~scala.util.control~
 *** (O) ~NonLocalReturns~
-    
