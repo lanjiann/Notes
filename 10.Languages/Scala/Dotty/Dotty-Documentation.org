@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-RC1-bin-20201219-3926860-NIGHTLY
+#+VERSION: 3.0.0-RC1-bin-20201224-2a32d6a-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -454,31 +454,26 @@
 
      - Example:
        #+begin_src scala
-         trait Resettable {
+         trait Resettable:
            def reset(): Unit
-         }
 
-         trait Growable[T] {
+         trait Growable[T]:
            def add(x: T): this.type
-         }
 
-         def f(x: Resettable & Growable[String]) = {
+         def f(x: Resettable & Growable[String]) =
            x.reset()
            x.add("first")
-         }
        #+end_src
 
      - If a /member/ appears in both ~A~ and ~B~, its type in ~A & B~ is the
        /intersection of its type/ in ~A~ and its type in ~B~.
          For instance, assume the definitions:
        #+begin_src scala
-         trait A {
+         trait A:
            def children: List[A]
-         }
 
-         trait B {
+         trait B:
            def children: List[B]
-         }
 
          val x: A & B = new C
          val ys: List[A & B] = x.children
@@ -499,9 +494,8 @@
              ~C~ that inherits ~A~ and ~B~,_ one needs to give at that point a
             definition of a ~children~ method with the required type.
        #+begin_src scala
-         class C extends A with B {
+         class C extends A, B:
            def children: List[A & B] = ???
-         }
        #+end_src
 
 **** More Details
@@ -557,13 +551,11 @@
         final case class UserName(name: String)
         final case class Password(hash: Hash)
 
-        def help(id: UserName | Password) = {
-          val user = id match {
+        def help(id: UserName | Password) =
+          val user = id match
             case UserName(name) => lookupName(name)
             case Password(hash) => lookupPassword(hash)
-          }
           // ...
-        }
       #+end_src
 
     - /Union types/ are _DUALS of /intersection types/.
@@ -582,7 +574,7 @@
         if (true) name else password
         // val res2: Object & Product = UserName(Eve)
 
-        val either: Password | UserName = if (true) name else password
+        val either: Password | UserName = if true then name else password
           // val res2: Password | UserName = UserName(Eve)
       #+end_src
       + ~Object & Product~ is a /supertype/ of ~UserName~ and ~Password~,
@@ -665,16 +657,15 @@
     - TODO
       _More details_ link
 
-*** DONE Match Types - =TODO= _mechanism_
+*** DONE Match Types - =TODO= _mechanism_ - =Keep Reading=
     CLOSED: [2020-03-08 Sun 21:34]
     - A /match type/ reduces to one of a number of right hand sides, depending on
       a /scrutinee type/. Example:
       #+begin_src scala
-        type Elem[X] = X match {
+        type Elem[X] = X match
           case String      => Char
           case Array[t]    => t
           case Iterable[t] => t
-        }
       #+end_src
       + An ~Elem~ with /CONCRETE type parameter/ ~X~ can be reduced _as_ (NOT legal
         code you want to write out explicitly):
@@ -694,20 +685,18 @@
 
     - Match types can form part of *RECURSIVE TYPE definitions*. Example:
       #+begin_src scala
-        type LeafElem[X] = X match {
+        type LeafElem[X] = X match
           case String      => Char
           case Array[t]    => LeafElem[t]
           case Iterable[t] => LeafElem[t]
           case AnyVal      => X
-        }
       #+end_src
 
     - _Recursive match type definitions_ can also be given an /upper bound/, like this:
       #+begin_src scala
-        type Concat[+Xs <: Tuple, +Ys <: Tuple] <: Tuple = Xs match {
+        type Concat[+Xs <: Tuple, +Ys <: Tuple] <: Tuple = Xs match
           case Unit    => Ys
           case x *: xs => x *: Concat[xs, Ys]
-        }
       #+end_src
       + In this definition, every instance of ~Concat[A, B]~, whether reducible
         or not, is known to be a /subtype/ of ~Tuple~.
@@ -719,12 +708,11 @@
      CLOSED: [2020-03-08 Sun 21:32]
      # =from Jian= Internal Representation of Match Types
      #+begin_src scala
-       S match {
+       S match
          case P1 => T1
          case P2 => T2
          // ...
          case Pn => Tn
-       }
      #+end_src
      - It's _internal representation_ (=from Jian= Tasty???) is
        ~Match(S, C1, ..., Cn) <: B~
@@ -757,10 +745,7 @@
     - A /dependent function type/ describes functions where the _result type_ may
       DEPEND ON the _function's parameter values_. Example:
       #+begin_src scala
-        trait Entry {
-          type Key
-          val key: Key
-        }
+        trait Entry { type Key; val key: Key }
 
         def extractKey(e: Entry): e.Key = e.key          // a dependent method
 
@@ -887,9 +872,8 @@
 
     - Example:
       #+begin_src scala
-        enum Color {
+        enum Color:
           case Red, Green, Blue
-        }
       #+end_src
       Desugare to core Scala features are explained in the section _Translation_.
       + This defined a new ~sealed~ /class/ ~Color~ with 3 values:
@@ -903,11 +887,10 @@
      CLOSED: [2020-07-10 Fri 19:08]
      /Enums/ CAN BE _parameterized_:
      #+begin_src scala
-       enum Color(val rgb: Int) {
+       enum Color(val rgb: Int):
          case Red   extends Color(0xFF0000)
          case Green extends Color(0x00FF00)
          case Blue  extends Color(0x0000FF)
-       }
      #+end_src
      As the example shows, you can _DEFINE_ the parameter value BY using an
      _EXPLICIT_ ~extends~ /clause/.
@@ -941,7 +924,7 @@
 
      - Example:
        #+begin_src scala
-         enum Planet(mass: Double, radius: Double) {
+         enum Planet(mass: Double, radius: Double):
            private final val G = 6.67300E-11
            def surfaceGravity = G * mass / (radius * radius)
            def surfaceWeight(otherMass: Double) =  otherMass * surfaceGravity
@@ -954,19 +937,17 @@
            case Saturn  extends Planet(5.688e+26, 6.0268e7)
            case Uranus  extends Planet(8.686e+25, 2.5559e7)
            case Neptune extends Planet(1.024e+26, 2.4746e7)
-         }
        #+end_src
 
      - It is also possible to define an *EXPLICIT* /companion object/ for an /enum/:
        #+begin_src scala
-         object Planet {
-           def main(args: Array[String]) = {
+         object Planet:
+           def main(args: Array[String]) =
              val earthWeight = args(0).toDouble
              val mass = earthWeight / Earth.surfaceGravity
-             for (p <- values)
+             for p <- values do
                println(s"Your weight on $p is ${p.surfaceWeight(mass)}")
-           }
-         }
+         end Planet
        #+end_src
        + =from Jian= ???
          Before compiling, will ~case~'s be merged into the generated /companion
@@ -1004,11 +985,10 @@
          package scala.reflect
 
          /** A base trait of all Scala enum definitions */
-         transparent trait Enum extends Any with Product with Serializable {
+         transparent trait Enum extends Any, Product, Serializable:
 
            /** A number uniquely identifying a case of an enum */
            def ordinal: Int
-         }
        #+end_src
 
      - /Enum values/ *WITH* ~extends~ /clauses/ get *expanded* to /anonymous class
@@ -1017,11 +997,10 @@
        members of enums_) would be defined like this:
        #+begin_src scala
          val Venus: Planet =
-           new Planet(4.869e24, 6.0518e6) {
+           new Planet(4.869e24, 6.0518e6):
              def ordinal: Int = 1
              override def productPrefix: String = "Venus"
              override def toString: String = "Venus"
-           }
        #+end_src
 
      - /Enum values/ *WITHOUT* ~extends~ /clauses/ all share a single implementation
@@ -1035,16 +1014,15 @@
 **** TODO Reference
      For more info, see [[https://github.com/lampepfl/dotty/issues/1970][Issue #1970]] and [[https://github.com/lampepfl/dotty/pull/4003][PR #4003]].
 
-*** DONE Algebraic Data Types
+*** DONE Algebraic Data Types - =Keep Reading=
     CLOSED: [2020-07-11 Sat 01:28]
     The ~enum~ concept is general enough to ALSO support ADTs and GADTs.
 
     - Example:
       #+begin_src scala
-        enum Option[+T] {
+        enum Option[+T]:
           case Some(x: T)
           case None
-        }
       #+end_src
       + ~case Some~ is a shorthand for writing a /case class/ that _extends_
         ~Option~.
@@ -1053,10 +1031,9 @@
 
       + The ~extends~ clauses can be given explicitly:
         #+begin_src scala
-          enum Option[+T] {
+          enum Option[+T]:
             case Some(x: T) extends Option[T]
             case None       extends Option[Nothing]
-          }
         #+end_src
 
       + Note:
@@ -1078,20 +1055,17 @@
 
     - As all other enums, ADTs can define methods.
       #+begin_src scala
-        enum Option[+T] {
+        enum Option[+T]:
           case Some(x: T)
           case None
 
-          def isDefined: Boolean = this match {
+          def isDefined: Boolean = this match
             case None => false
             case some => true
-          }
-        }
 
-        object Option {
+        object Option:
           def apply[T >: Null](x: T): Option[T] =
             if (x == null) None else Some(x)
-        }
       #+end_src
 
     - /Enumerations/ and /ADTs/ have been presented as two *DIFFERENT concepts*.
@@ -1103,14 +1077,12 @@
     - For instance, the code below gives an implementation of ~Color~ either with
       three /enum values/ or with a /parameterized case/ that takes an RGB value.
       #+begin_src scala
-        enum Color(val rgb: Int) {
+        enum Color(val rgb: Int):
           case Red           extends Color(0xFF0000)
           case Green         extends Color(0x00FF00)
           case Blue          extends Color(0x0000FF)
           case Mix(mix: int) extends Color(mix)
-        }
       #+end_src
-
 
 **** TODO Parameter Variance of Enums
      =New added in 2020-09-18=
@@ -1180,7 +1152,7 @@
              * _starts with_ a compiler-generated import that imports the names ~<caseIds>~
                of all cases _so that they can be used WITHOUT prefix *IN* the trait._
                #+begin_src scala
-                 sealed abstract class E ... extends <parents> with scala.Enum {
+                 sealed abstract class E ... extends <parents> with scala.reflect.Enum {
                    import E.{ <caseIds> }
                    <defs>
                  }
@@ -1687,8 +1659,7 @@
 *** DONE Given Instances
     CLOSED: [2020-11-09 Mon 11:54]
     /Given instances/ (or, simply, "givens") define "canonical" values of certain
-    /types/ that serve for /synthesizing arguments/ to /context parameters/ (=from
-    Jian= through /using clause/).
+    /types/ that serve for /synthesizing arguments/ to /context parameters/.
 
     - =from Jian=
       The concepts of /context parameters/ and /using clauses/ will be introduced
@@ -1697,25 +1668,23 @@
 
     - Example:
       #+begin_src scala
-        trait Ord[T] {
+        trait Ord[T]:
           def compare(x: T, y: T): Int
           extension (x: T) def < (y: T) = compare(x, y) < 0
           extension (x: T) def > (y: T) = compare(x, y) > 0
-        }
 
         given intOrd: Ord[Int] with
           def compare(x: Int, y: Int) =
-            if (x < y) -1 else if (x > y) +1 else 0
+            if x < y then -1 else if x > y then +1 else 0
 
         given listOrd[T](using ord: Ord[T]): Ord[List[T]] with
-          def compare(xs: List[T], ys: List[T]): Int = (xs, ys) match {
+          def compare(xs: List[T], ys: List[T]): Int = (xs, ys) match
             case (Nil, Nil) => 0
             case (Nil, _)   => -1
             case (_, Nil)   => +1
             case (x :: xs1, y :: ys1) =>
               val fst = ord.compare(x, y)
               if (fst != 0) fst else compare(xs1, ys1)
-          }
       #+end_src
       This code defines a /trait/ ~Ord~ (type class) with two /given instances/.
 
@@ -1723,8 +1692,11 @@
      CLOSED: [2020-07-17 Fri 02:28]
      The name of a /given instance/ *can be left out*.
      #+begin_src scala
-       given Ord[Int] with { /* ... */ }
-       given [T](using Ord[T]): Ord[List[T]] with { /* ... */ }
+       given Ord[Int] with
+         ...
+
+       given [T](using Ord[T]): Ord[List[T]] with
+         ...
      #+end_src
      If the name of a /given/ is missing,
      the compiler will _synthesize a name_ from the implemented type(s).
@@ -1903,16 +1875,16 @@
     CLOSED: [2020-07-17 Fri 04:19]
     - Functional programming tends to _express most dependencies_ AS
       _simple function parameterization_.
-      + Pros:
+      * Pros:
         clean and powerful,
 
-      + Cons:
+      * Cons:
         sometimes leads to functions that take _MANY_ /parameters/
         where _the same value is passed over and over again_ in _LONG call chains_
         to _MANY_ functions.
-        * Q :: What is a good way to get rid of this?
+        + Q :: What is a good way to get rid of this?
 
-        * A :: /Context parameters/ can help here
+        + A :: /Context parameters/ can help here
                since they ENABLE
                the compiler to *synthesize* repetitive /arguments/
                INSTEAD OF the programmer having to write them EXPLICITLY.
@@ -1922,12 +1894,12 @@
             we can try to put common variables in a /scope/ that can be access by
             functions (methods), then we don't need to pass those variables as
             parameters to functions.
-            + Actually I can describe this as /term inferene by scope/ (I don't
+            * Actually I can describe this as /term inferene by scope/ (I don't
               know if this name showed up in other literatures), whereas the /context
               parameters/ is /term inference by type/.
                 Similarly, I can call /inheritence from supertype(s)/ as /term
               inference by subtyping relation/.
-              * Summary:
+              + Summary:
                 If consider in this way, I discover that /term inference/ is
                 everywhere. Though they are based on different mechanisms, they
                 are all /term inferences/.
@@ -1952,8 +1924,8 @@
         max(List(1, 2, 3), Nil)
       #+end_src
       From the /givens/ defined in the last section,
-      + ~intOrd~ is defined, it is in scope, and it can be used for ~max(2, 3)~
-      + ~listOrd~ is defined, it is in scope, the /context parameter/ it need is
+      * ~intOrd~ is defined, it is in scope, and it can be used for ~max(2, 3)~
+      * ~listOrd~ is defined, it is in scope, the /context parameter/ it need is
         ~intOrd~, which is also in scope, and thus the an instance of ~Ord[List[Int]]~
         can be *synthesized*.
 
@@ -1985,9 +1957,8 @@
 **** DONE Inferring Complex Arguments
      CLOSED: [2020-07-17 Fri 04:06]
      #+begin_src scala
-       def descending[T](using asc: Ord[T]): Ord[T] = new Ord[T] {
+       def descending[T](using asc: Ord[T]): Ord[T] = new Ord[T]:
          def compare(x: T, y: T) = asc.compare(y, x)
-       }
 
        def minimum[T](xs: List[T])(using Ord[T]) =
          maximum(xs)(using descending)
@@ -2045,7 +2016,8 @@
 **** DONE Summoning Instances
      CLOSED: [2020-07-17 Fri 04:18]
      - =from Jian=
-       ~sommon~ from ~Predef~ is a replacement of the ~implicitly~ in Scala 2.
+       ~sommon~ from ~Predef~ is a replacement and improved version of the
+       ~implicitly~ in Scala 2. The difference between them is mentioned below.
 
      - The ~summon~ is simply defined as /the (*non-widening*) identity function/
        over a /context parameter/:
@@ -2063,9 +2035,9 @@
      #+begin_src text
        ClsParamClause      ::=  ... | UsingClsParamClause
        DefParamClauses     ::=  ... | UsingParamClause
-       UsingClsParamClause ::=  '(' 'using' (ClsParams | Types) ')'
-       UsingParamClause    ::=  '(' 'using' (DefParams | Types) ')'
-       ParArgumentExprs    ::=  ... | '(' 'using' ExprsInParens ')'
+       UsingClsParamClause ::=  ‘(’ ‘using’ (ClsParams | Types) ‘)’
+       UsingParamClause    ::=  ‘(’ ‘using’ (DefParams | Types) ‘)’
+       ParArgumentExprs    ::=  ... | ‘(’ ‘using’ ExprsInParens ‘)’
      #+end_src
 
 *** DONE Context Bounds
@@ -2114,7 +2086,7 @@
 **** Syntax
      #+begin_src text
        TypeParamBounds ::= [SubtypeBounds] {ContextBound}
-       ContextBound    ::= ':' Type
+       ContextBound    ::= ‘:’ Type
      #+end_src
      
 *** DONE Importing Givens
@@ -2125,41 +2097,39 @@
     instances/.*
     - Example:
       #+begin_src scala
-        object A {
+        object A:
           class TC
           given tc: TC = ???
           def f(using TC) = ???
-        }
 
-        object B {
+        object B:
           import A._
           import A.given
           // ...
-        }
       #+end_src
-      + In Dotty,
-        * Import *EVERYTHING except givens* (this is _different from Scala 2_):
+      * In Dotty,
+        + Import *EVERYTHING except givens* (this is _different from Scala 2_):
           ~import A._~
 
-        * Import *ALL givens*:
+        + Import *ALL givens*:
           ~import A.given~
 
-        * Import *everything* in ~A~:
+        + Import *everything* in ~A~:
           ~import A.{given, _}~
 
     - There are *TWO* main _benefits_ arising from these rules:
-      + It is MADE CLEARER where /givens/ in scope are coming from.
-        * =from Jian=
+      * It is MADE CLEARER where /givens/ in scope are coming from.
+        + =from Jian=
           This AMBIGUITY only appear when use wildcard import in Scala 2.
           - This is why you can still import /givens/ through their names if you
             don't use /wildcard import/ -- no ~given~ is required.
             For example, ~import A.tc~ is legal!
 
-        * In particular,
+        + In particular,
           it is *NOT POSSIBLE to HIDE* imported /givens/ in a long list of
           /regular wildcard imports/.
 
-      + It ENABLES importing ALL /givens/ WITHOUT importing anything else.
+      * It ENABLES importing ALL /givens/ WITHOUT importing anything else.
         This is _particularly important since /givens/ can be ANONYMOUS_, so the
         usual recourse of using /named imports/ is NOT practical --
         =from Jian= next subsection will introduce /importing (/givens/) by type/.
@@ -2199,12 +2169,11 @@
 
        + Example code:
          #+begin_src scala
-           object Instances {
+           object Instances:
              given intOrd: Ordering[Int] = ...
              given listOrd[T: Ordering]: Ordering[List[T]] = ...
              given ec: ExecutionContext = ...
              given im: Monoid[Int] = ...
-           }
 
            import A.{given Ordering[?], given ExecutionContext}
          #+end_src
@@ -2283,7 +2252,7 @@
      - So, the definition of ~circumference~ above translates to the plain
        method, and can also be invoked as such:
        #+begin_src scala
-         def extension_circumference(c: Circle): Double = c.radius * math.Pi * 2
+         <extension> def circumference(c: Circle): Double = c.radius * math.Pi * 2
 
          assert(circle.circumference == circumference(circle))
        #+end_src
@@ -2377,7 +2346,7 @@
        by ~:~.
        + Examples:
          #+begin_src scala
-           extension (ss: Seq[String]):
+           extension (ss: Seq[String])
              def longestStrings: Seq[String] =
                val maxLength = ss.map(_.length).max
                ss.filter(_.length == maxLength)
@@ -2397,7 +2366,7 @@
              val maxLength = ss.map(_.length).max
              ss.filter(_.length == maxLength)
 
-         extension (ss: Seq[String]):
+         extension (ss: Seq[String])
            def longestString: String = ss.longestStrings.head
        #+end_src
        + *CAUTION*
@@ -2408,7 +2377,7 @@
            #+begin_src scala
              // No change for `longestStrings`, receiver is `(ss: Seq[String])`
 
-             extension (ss1: Seq[String]):
+             extension (ss1: Seq[String])
                def longestString: String = ss1.longestStrings.head
            #+end_src
 
@@ -2416,7 +2385,7 @@
        have /using clauses/.
        + Example:
          #+begin_src scala
-           extension [T](xs: List[T])(using Ordering[T])
+           extenson [T](xs: List[T])(using Ordering[T])
              def smallest(n: Int): List[T] = xs.sorted.take(n)
 
              def smallestIndices(n: Int): List[Int] =
@@ -2461,7 +2430,7 @@
              else Some(i % x)
 
            object IntOpsEx extends IntOps:
-               extension (i: Int) def safeDiv(x: Int): Option[Int] =
+             extension (i: Int) def safeDiv(x: Int): Option[Int] =
              // extension method brought into scope via inheritance from IntOps
              if x.isZero
              then None
@@ -2470,7 +2439,7 @@
            trait SafeDiv:
              import IntOpsEx._ // brings safeDiv and safeMod into scope
 
-             extension (i: Int) def divide(d: Int) : Option[(Int, Int)] =
+             extension (i: Int) def divide(d: Int): Option[(Int, Int)] =
                // extension methods imported and thus in scope
                (i.safeDiv(d), i.safeMod(d)) match
                  case (Some(d), Some(r)) => Some((d, r))
@@ -2490,6 +2459,7 @@
              ...
 
            object List:
+             ...
              extension [T](xs: List[List[T]])
                def flatten: List[T] = xs.foldLeft(Nil: List[T])(_ ++ _)
 
@@ -2550,9 +2520,9 @@
 
          + The whole /extension method/ rewrites to
            #+begin_src scala
-             def extension_position(s: String)(ch: Char, n: Int): Int =
+             def position(s: String)(ch: Char, n: Int): Int =
                if n < s.length && s(n) != ch
-               then extension_position(s)(ch, n + 1)
+               then position(s)(ch, n + 1)
                else n
            #+end_src
 
@@ -2639,7 +2609,7 @@
        //  xs.foldLeft(summon[Monoid[T]].unit)(_.combine(_))
 
        def combineAll[T: Monoid](xs: List[T]): T =
-         xs.foldLeft(Monoid[T].unit)(_.combine(_))
+         xs.foldLeft(summon[Monoid[T]].unit)(_.combine(_))
      #+end_src
 
 **** DONE Functors
@@ -2655,7 +2625,7 @@
        + WITHOUT /extension method/:
          #+begin_src scala
            trait Functor[F[_]]:
-             def [A, B](x: F[A]).map(mapper: A => B): F[B]
+             def map[A, B](x: F[A], f: A => B): F[B]
 
            given Functor[List] with
              def map[A, B](x: List[A], f: A => B): List[B] =
@@ -2733,11 +2703,9 @@
             Option(x)
 
           extension [A, B](xo: Option[A])
-            def flatMap(f: A => Option[B]): Option[B] =
-              xo match {
+            def flatMap(f: A => Option[B]): Option[B] = xo match
                 case Some(x) => f(x)
                 case None    => None
-              }
       #+end_src
 
 ***** ~Reader~
@@ -2756,7 +2724,7 @@
       - Let's define a ~Config~ type, and two functions using it:
         #+begin_src scala
           trait Config:
-            // ...
+          // ...
           end Config
 
           def compute(i: Int)(config: Config): String = ???
@@ -2900,10 +2868,9 @@
     - For example, given the following ~Tree~ algebraic data type (ADT) with a
       ~dervies~ clause,
       #+begin_src scala
-        enum Tree[T] derives Eq, Ordering, Show {
+        enum Tree[T] derives Eq, Ordering, Show:
           case Branch(left: Tree[T], right: Tree[T])
           case Left(elem: T)
-        }
       #+end_src
       + _The ~derives~ clause_ *generates* the following /given instances/ for the
         ~Eq~, ~Ordering~ and ~Show~ /type classes/ _in the /companion object/ of ~Tree~,_
@@ -2948,7 +2915,13 @@
 
      - ~Mirror~ /type class/ definition
        #+begin_src scala
-         sealed trait Mirror {
+         sealed trait Mirror:
+
+           /** The type being mirrored */
+           type MirroredMonoType
+
+           /** The type of the elements of the mirrored type */
+           type MirroredElemTypes
 
            /** The mirrored *-type */
            type MirroredMonoType
@@ -2958,48 +2931,24 @@
 
            /** The names of the elements of the type */
            type MirroredElemLabels <: Tuple
-         }
 
-         object Mirror {
+
+         object Mirror:
 
            /** The Mirror for a product type */
-           trait Product extends Mirror {
-             /** Create a new instance of type `T` with elements taken from product `p`. */
+           trait Product extends Mirror:
+             /** Create a new instance of type `T` with elements
+              ,*  taken from product `p`.
+              ,*/
              def fromProduct(p: scala.Product): MirroredMonoType
-           }
 
-           trait Sum extends Mirror { self =>
-             /** The ordinal number of the case class of `x`. For enums, `ordinal(x) == x.ordinal` */
+           trait Sum extends Mirror:
+             /** The ordinal number of the case class of `x`.
+              ,*  For enums, `ordinal(x) == x.ordinal`
+              ,*/
              def ordinal(x: MirroredMonoType): Int
-           }
 
-           trait Singleton extends Product {
-             type MirroredMonoType = this.type
-             type MirroredType = this.type
-             type MirroredElemTypes = EmptyTuple
-             type MirroredElemLabels = EmptyTuple
-             def fromProduct(p: scala.Product) = this
-           }
-
-           type Of[T] = Mirror {
-             type MirroredType = T
-             type MirroredMonoType = T
-             type MirroredElemTypes <: Tuple
-           }
-
-           type ProductOf[T] = Mirror.Product {
-               type MirroredType = T
-               type MirroredMonoType = T
-               type MirroredElemTypes <: Tuple
-             }
-
-           type SumOf[T] = Mirror.Sum {
-             type MirroredType = T
-             type MirroredMonoType = T
-             type MirroredElemTypes <: Tuple
-           }
-
-         }
+         end Mirror
        #+end_src
        + ~Product~ types (i.e. /case classes and objects/, and /enum cases/) have
          /mirrors/ which are *subtypes* of ~Mirror.Product~.
@@ -3014,43 +2963,39 @@
        of ~Tree~, and this is the reason why we don't need the ~Tree~ qualifier in
        the following example.
        #+begin_src scala
-         // Mirror for `Tree` -- `SumOf[Tree]`
-         Mirror.Sum {
-           type MirroredType = Tree[_]
-           type MirroredElemTypes = (Branch[_], Leaf[_])
+         // Mirror for `Tree`
+         new Mirror.Sum:
+           type MirroredType = Tree
+           type MirroredElemTypes[T] = (Branch[T], Leaf[T])
            type MirroredMonoType = Tree[_]
            type MirroredLabels = "Tree"
            type MirroredElemLabels = ("Branch", "Leaf")
 
-           def ordinal(x: MirroredMonoType): Int = x match {
+           def ordinal(x: MirroredMonoType): Int = x match
              case _: Branch[_] => 0
              case _: Leaf[_]   => 1
-           }
-         }
 
-         // Mirror for `Branch` -- `ProductOf[Branch]`
-         Mirror.Product {
-           type MirroredType = Branch[_]
-           type MirroredElemTypes = (Tree[_], Tree[_])
+         // Mirror for `Branch`
+         new Mirror.Product:
+           type MirroredType = Branch
+           type MirroredElemTypes[T] = (Tree[T], Tree[T])
            type MirroredMonoType = Branch[_]
            type MirroredLabels = "Branch"
            type MirroredElemLabels = ("left", "right")
 
            def fromProduct(p: Product): MirroredMonoType =
              new Branch(...)
-         }
 
-         // Mirror for `Leaf` -- `ProductOf[Leaf]`
-         Mirror.Product {
-           type MirroredType = Leaf[_]
-           type MirroredElemTypes = Tuple1[_]
+         // Mirror for `Leaf`
+         new Mirror.Product:
+           type MirroredType = Leaf
+           type MirroredElemTypes[T] = Tuple1[T]
            type MirroredMonoType = Leaf[_]
            type MirroredLabels = "Leaf"
            type MirroredElemLabels = Tuple1["elem"]
 
            def fromProduct(p: Product): MirroredMonoType =
              new Leaf(...)
-         }
        #+end_src
 
      - Note the following properties of ~Mirror~ /types/,
@@ -3062,7 +3007,7 @@
 
        + The /kinds/ of ~MirroredType~ and ~MirroredElemTypes~ match the /kind/
          of the data type the /mirror/ is an /instance/ for.
-         * This allows ~Mirror~'s to support /ADTs/ of *all* /kinds/.
+         * This allows ~Mirror~'s to support /ADTs/ of *all* /kinds/. =FIXME=
 
        + There is NO DISTINCT /representation type/ for /sums/ or /products/
          (ie. there is no ~HList~ or ~Coproduct~ type as in Scala 2 versions of shapeless).
@@ -3137,7 +3082,7 @@
          2. however this walkthrough can be taken as a guide for authors of the
             /higher level derivation libraries/ that we expect typical /type class/
             authors will use (for a fully worked out example of such a library,
-            see _shapeless 3_).
+            see _Shapeless 3_).
 
 ***** TODO How to write a type class ~derived~ method using low level mechanisms
       - The low-level method we will use to implement a type class derived method
@@ -3145,22 +3090,19 @@
         inline methods, inline matches, and implicit searches via summonInline
         or summonFrom. Given this definition of the Eq type class,
         #+begin_src scala
-          trait Eq[T] {
+          trait Eq[T]:
             def eqv(x: T, y: T): Boolean
-          }
         #+end_src
         we need to implement a method Eq.derived on the companion object of ~Eq~
         that produces a given instance for ~Eq[T]~ given a ~Mirror[T]~.
 
       - Here is a possible implementation,
         #+begin_src scala
-          inline given derived[T](using m: Mirror.Of[T]): Eq[T] = {
+          inline given derived[T](using m: Mirror.Of[T]): Eq[T] =
             val elemInstances = summonAll[m.MirroredElemType]          // (1)
-            inline m match {                                           // (2)
+            inline m match                                             // (2)
               case s: Mirror.SumOf[T]     => eqSum(s, elemInstances)
               case p: Mirror.ProductOf[T] => eqProduct(p, elemInstances)
-            }
-          }
         #+end_src
 
       - Note that derived is defined as an inline given. This means that the method
@@ -3174,11 +3116,12 @@
         either all the branches of a sum type or all the fields of a product
         type. The implementation of summonAll is inline and uses Dotty's
         summonInline construct to collect the instances as a List,
+        =FIXME= =remove empty line=
         #+begin_src scala
-          inline def summonAll[T <: Tuple]: List[Eq[_]] = inline erasedValue[T] match {
-            case _: Unit      => Nil
-            case _: (t *: ts) => summonInline[Eq[t]] :: summonAll[ts]
-          }
+          inline def summonAll[T <: Tuple]: List[Eq[_]] =
+            inline erasedValue[T] match
+              case _: EmptyTuple => Nil
+              case _: (t *: ts)  => summonInline[Eq[t]] :: summonAll[ts]
         #+end_src
         with the instances for children in hand the derived method uses an
         inline match to dispatch to methods which can construct instances for
@@ -3194,12 +3137,10 @@
         check (4).
         #+begin_src scala
           def eqSum[T](s: Mirror.SumOf[T], elems: List[Eq[_]]): Eq[T] =
-            new Eq[T] {
-              def eqv(x: T, y: T): Boolean = {
+            new Eq[T]:
+              def eqv(x: T, y: T): Boolean =
                 val ordx = s.ordinal(x)                            // (3)
-                                    (s.ordinal(y) == ordx) && check(elems(ordx))(x, y) // (4)
-              }
-            }
+                (s.ordinal(y) == ordx) && check(elems(ordx))(x, y) // (4)
         #+end_src
 
       - In the product case, ~eqProduct~ we test the runtime values of the arguments
@@ -3207,12 +3148,11 @@
         of the data type (5),
         #+begin_src scala
           def eqProduct[T](p: Mirror.ProductOf[T], elems: List[Eq[_]]): Eq[T] =
-            new Eq[T] {
+            new Eq[T]:
               def eqv(x: T, y: T): Boolean =
                 iterator(x).zip(iterator(y)).zip(elems.iterator).forall {  // (5)
                   case ((x, y), elem) => check(elem)(x, y)
                 }
-            }
         #+end_src
 
       - Pulling this all together we have the following complete implementation,
@@ -3220,20 +3160,17 @@
           import scala.deriving._
           import scala.compiletime.{erasedValue, summonInline}
 
-          inline def summonAll[T <: Tuple]: List[Eq[_]] = inline erasedValue[T] match {
-            case _: Unit      => Nil
-            case _: (t *: ts) => summonInline[Eq[t]] :: summonAll[ts]
-          }
+          inline def summonAll[T <: Tuple]: List[Eq[_]] =
+            inline erasedValue[T] match
+              case _: EmptyTuple => Nil
+              case _: (t *: ts)  => summonInline[Eq[t]] :: summonAll[ts]
 
-          trait Eq[T] {
+          trait Eq[T]:
             def eqv(x: T, y: T): Boolean
-          }
 
-          // TODO: FIXME
-          object Eq {
-            given Eq[Int] {
+          object Eq:
+            given Eq[Int] with
               def eqv(x: Int, y: Int) = x == y
-            }
 
             def check(elem: Eq[_])(x: Any, y: Any): Boolean =
               elem.asInstanceOf[Eq[Any]].eqv(x, y)
@@ -3241,56 +3178,51 @@
             def iterator[T](p: T) = p.asInstanceOf[Product].productIterator
 
             def eqSum[T](s: Mirror.SumOf[T], elems: => List[Eq[_]]): Eq[T] =
-              new Eq[T] {
-                def eqv(x: T, y: T): Boolean = {
+              new Eq[T]:
+                def eqv(x: T, y: T): Boolean =
                   val ordx = s.ordinal(x)
                   (s.ordinal(y) == ordx) && check(elems(ordx))(x, y)
-                }
-              }
 
             def eqProduct[T](p: Mirror.ProductOf[T], elems: => List[Eq[_]]): Eq[T] =
-              new Eq[T] {
+              new Eq[T]:
                 def eqv(x: T, y: T): Boolean =
                   iterator(x).zip(iterator(y)).zip(elems.iterator).forall {
                     case ((x, y), elem) => check(elem)(x, y)
                   }
-              }
 
-            inline given derived[T](using m: Mirror.Of[T]): Eq[T] = {
-              val elemInstances = summonAll[m.MirroredElemTypes]
-              inline m match {
+            inline given derived[T](using m: Mirror.Of[T]): Eq[T] =
+              lazy val elemInstances = summonAll[m.MirroredElemTypes]
+              inline m match
                 case s: Mirror.SumOf[T]     => eqSum(s, elemInstances)
                 case p: Mirror.ProductOf[T] => eqProduct(p, elemInstances)
-              }
-            }
-          }
+          end Eq
         #+end_src
         we can test this relative to a simple ADT like so,
         #+begin_src scala
-          enum Opt[+T] derives Eq {
+          enum Opt[+T] derives Eq:
             case Sm(t: T)
-                case Nn
-          }
+            case Nn
 
-          object Test extends App {
+          @main def test =
             import Opt._
             val eqoi = summon[Eq[Opt[Int]]]
             assert(eqoi.eqv(Sm(23), Sm(23)))
             assert(!eqoi.eqv(Sm(23), Sm(13)))
             assert(!eqoi.eqv(Sm(23), Nn))
-          }
         #+end_src
 
       - In this case the code that is generated by the inline expansion for the
         derived Eq instance for Opt looks like the following, after a little
         polishing,
+        =FIXME=
         #+begin_src scala
           given derived$Eq[T](using eqT: Eq[T]): Eq[Opt[T]] =
-            eqSum(summon[Mirror[Opt[T]]],
-                  List(
-                    eqProduct(summon[Mirror[Sm[T]]], List(summon[Eq[T]]))
-                      eqProduct(summon[Mirror[Nn.type]], Nil)
-                  )
+            eqSum(
+              summon[Mirror[Opt[T]]],
+              List(
+                eqProduct(summon[Mirror[Sm[T]]], List(summon[Eq[T]])),
+                eqProduct(summon[Mirror[Nn.type]], Nil)
+              )
             )
         #+end_src
 
@@ -3303,20 +3235,21 @@
         from what a programmer might write by hand. As a third example, using a
         higher level library such as shapeless the type class author could
         define an equivalent ~derived~ method as,
+        =FIXME=
         #+begin_src scala
-          given eqSum[A](using inst: => K0.CoproductInstances[Eq, A]): Eq[A] {
+          given eqSum[A](using inst: => K0.CoproductInstances[Eq, A]): Eq[A] with
             def eqv(x: A, y: A): Boolean = inst.fold2(x, y)(false)(
               [t] => (eqt: Eq[t], t0: t, t1: t) => eqt.eqv(t0, t1)
             )
-          }
 
-          given eqProduct[A](using inst: K0.ProductInstances[Eq, A]): Eq[A] {
+          given eqProduct[A](using inst: K0.ProductInstances[Eq, A]): Eq[A] with
             def eqv(x: A, y: A): Boolean = inst.foldLeft2(x, y)(true: Boolean)(
-              [t] => (acc: Boolean, eqt: Eq[t], t0: t, t1: t) => Complete(!eqt.eqv(t0, t1))(false)(true)
+              [t] => (acc: Boolean, eqt: Eq[t], t0: t, t1: t) =>
+                Complete(!eqt.eqv(t0, t1))(false)(true)
             )
-          }
 
-          inline def derived[A](using gen: K0.Generic[A]): Eq[A] = gen.derive(eqSum, eqProduct)
+          inline def derived[A](using gen: K0.Generic[A]): Eq[A] =
+            gen.derive(eqSum, eqProduct)
         #+end_src
 
       - The framework described here
@@ -3462,9 +3395,8 @@
          @implicitNotFound("Values of types ${L} and ${R} cannot be compared with == or !=")
          sealed trait CanEqual[-L, -R]
 
-         object CanEqual {
+         object CanEqual:
            object derived extends CanEqual[Any, Any]
-         }
        #+end_src
 
     - One can have *several* ~CanEqual~ /given instances/ for *one* /type/.
@@ -3512,7 +3444,8 @@
      - By the usual rules of /type class derivation/, this _generates_ the following
        ~CanEqual~ /instance/ in the /companion object/ of ~Box~:
        #+begin_src scala
-         given [T, U](using CanEqual[T, U]): CanEqual[Box[T], Box[U]] = CanEqual.derived
+         given [T, U](using CanEqual[T, U]): CanEqual[Box[T], Box[U]] =
+           CanEqual.derived
        #+end_src
 
      - Examples:
@@ -3640,10 +3573,9 @@
      - Say you want to come up with a safe version of the ~contains~ /method/ on
        ~List[T]~. The original definition of ~contains~ in the standard library was:
        #+begin_src scala
-         class List[+T] {
+         class List[+T]:
            // ...
            def contains(x: Any): Boolean
-         }
        #+end_src
        1. That uses /universal equality/ in an *unsafe* way
           since it permits arguments of *any* /type/ to be compared with the
@@ -3651,10 +3583,9 @@
 
        2. The "obvious" alternative definition
           #+begin_src scala
-            class List[+T] {
+            class List[+T]:
               // ...
               def contains(x: T): Boolean
-            }
           #+end_src
           *not* work, since it refers to the /covariant parameter/ ~T~ in a
           /nonvariant/ context.
@@ -3662,10 +3593,9 @@
        3. The only variance-correct way to use the /type parameter/ ~T~ in contains
           is as a /lower bound/:
           #+begin_src scala
-            class List[+T] {
+            class List[+T]:
               // ...
               def contains[U >: T](x: U): Boolean
-            }
           #+end_src
           This /generic version/ of ~contains~ is the one used in the current
           (Scala 2.13) version of ~List~. It looks different but it admits exactly
@@ -3673,10 +3603,9 @@
 
        4. Make it _more useful (i.e. restrictive)_ by adding an ~CanEqual~ parameter:
           #+begin_src scala
-            class List[+T] {
+            class List[+T]:
               // ...
               def contains[U >: T](x: U)(using CanEqual[T, U]): Boolean
-            }
           #+end_src
           This version of ~contains~ is *equality-safe*!
           More precisely, given ~x: T~, ~xs: List[T]~ and ~y: U~, then ~xs.contains(y)~
@@ -3772,7 +3701,7 @@
       + THEN ::
         ~e~ *is converted to* a /context function literal/ by *rewriting it to*
         #+begin_src scala
-          (x_1: T1, ..., x_n: Tn) ?=> e
+          (x_1: T1, ..., x_n: Tn) ?=> E
         #+end_src
         where the NAMES ~x_1, ..., x_n~ are ARBITRARY.
         * This expansion is performed *before* the expression ~e~ is typechecked,
@@ -3816,17 +3745,15 @@
      - The idea is to define /classes/ for ~Table~ and ~Row~ that allow the addition
        of elements via ~add~:
        #+begin_src scala
-         class Table {
+         class Table:
            val rows = new ArrayBuffer[Row]
            def add(r: Row): Unit = rows += r
            override def toString = rows.mkString(start = "Table(", sep = ", ", end = ")")
-         }
 
-         class Row {
+         class Row:
            val cells = new ArrayBuffer[Cell]
            def add(c: Cell): Unit = cells += c
            override def toString = cells.mkString(start = "Row(", sep = ", ", end = ")")
-         }
 
          case class Cell(elem: String)
        #+end_src
@@ -3835,17 +3762,15 @@
        _with /context function types/ as parameters_ to *AVOID* the plumbing
        boilerplate that would otherwise be necessary.
        #+begin_src scala
-         def table(init: Table ?=> Unit) = {
+         def table(init: Table ?=> Unit) =
            given t: Table = new Table
            init
            t
-         }
 
-         def row(init: Row ?=> Unit)(using t: Table) = {
+         def row(init: Row ?=> Unit)(using t: Table) =
            given r: Row = new Row
            init
            t.add(r)
-         }
 
          def cell(str: String)(using r: Row) =
            r.add(new Cell(str))
@@ -3853,14 +3778,14 @@
 
      - With that setup, the _table construction_ code above compiles and _expands to_:
        #+begin_src scala
-         table { (using $t: Table) =>
+         table { (using $t: Table) ?=>
 
-           row { (using $r: Row) =>
+           row { (using $r: Row) ?=>
              cell("top left")(using $r)
              cell("top right")(using $r)
            }(using $t)
 
-           row { (using $r: Row) =>
+           row { (using $r: Row) ?=>
              cell("bottom left")(using $r)
              cell("bottom right")(using $r)
            }(using $t)
@@ -3873,17 +3798,16 @@
      method/ *ensuring* so that the checked result can be referred to simply by
      ~result~.
      #+begin_src scala
-       object PostConditions {
+       object PostConditions:
          opaque type WrappedResult[T] = T
 
          def result[T](using r: WrappedResult[T]): T = r
 
          extension [T](x: T)
-           def ensuring(condition: WrappedResult[T] ?=> Boolean): T = {
+           def ensuring(condition: WrappedResult[T] ?=> Boolean): T =
              assert(condition(using x))
              x
-           }
-       }
+       end PostConditions
 
        import PostConditions.{ensuring, result}
 
@@ -3917,11 +3841,10 @@
        + Hence, the implementation of ~ensuring~ is as about _as *efficient* as the
          best possible code one could write by hand_:
          #+begin_src scala
-           {
+           val s =
              val result = List(1, 2, 3).sum
              assert(result == 6)
              result
-           }
          #+end_src
          * =from Jian= =TODO= =Verify=
            Inspect the function calls to ~result~ and ~condition~ (after inserting
@@ -3937,12 +3860,13 @@
     ~scala.Conversion~ class.
 
     - ~scala.Conversion~ class is defined in package scala as follows:
+      =FIXME=
       #+begin_src scala
-        abstract class Conversion[-T, +U] extends (T => U)
+        abstract class Conversion[-T, +U] extends (T => U):
+          def apply(x: T): U
       #+end_src
 
     - Example:
-      =FIXME=
       #+begin_src scala
         given Conversion[String, Token] with
           def apply(str: String): Token = new KeyWord(str)
@@ -3971,16 +3895,15 @@
 
      2. /Magnet pattern/ that use /implicit conversion/:
         #+begin_src scala
-          object Completions {
+          object Completions:
 
             // The argument "magnet" type
-            enum CompletionArg {
+            enum CompletionArg:
               case Error(s: String)
               case Response(f: Future[HttpResponse])
               case Status(code: Future[StatusCode])
-            }
 
-            object CompletionArg {
+            object CompletionArg:
 
               // conversions defining the possible arguments to pass to `complete`
               // these always come with CompletionArg
@@ -3991,16 +3914,16 @@
               given fromString    : Conversion[String, CompletionArg]               = Error(_)
               given fromFuture    : Conversion[Future[HttpResponse], CompletionArg] = Response(_)
               given fromStatusCode: Conversion[Future[StatusCode], CompletionArg]   = Status(_)
-            }
+            end CompletionArg
 
             import CompletionArg._
 
-            def complete[T](arg: CompletionArg) = arg match {
+            def complete[T](arg: CompletionArg) = arg match
               case Error(s)     => ...
               case Response(f)  => ...
               case Status(code) => ...
-            }
-          }
+
+          end Completions
         #+end_src
         + =from Jian= Why does ~complete~ have a /type parameter/ ~T~.
 
@@ -4022,9 +3945,8 @@
 
     - Example:
       #+begin_src scala
-        trait Codec[T] {
+        trait Codec[T]:
           def write(x: T): Unit
-        }
 
         given intCodec: Codec[Int] = ???
 
@@ -4244,7 +4166,8 @@
         BUT they can be _SIMULATED_ with /implicit classes/. For instance, the
         /extension method/
         #+begin_src scala
-          extension (c: Circle) def circumference: Double = c.radius * math.Pi * 2
+          extension (c: Circle)
+            def circumference: Double = c.radius * math.Pi * 2
         #+end_src
         could be _SIMULATED_ to some degree by
         #+begin_src scala
@@ -4434,24 +4357,23 @@
                    be /inlined/ at the point of use.
      - Example:
        #+begin_src scala
-         object Config {
+         object Config:
            inline val logging = false
-         }
 
-         object Logger {
+         object Logger:
            private var indent = 0
 
            inline def log[T](msg: String, indentMargin: => Int)(op: => T): T =
-             if (Config.logging) {
+             if Config.logging
+             then
                println(s"${"  " * indent}start $msg")
                indent += indentMargin
                val result = op
                indent -= indentMargin
                println(s"${"  " * indent}$msg = $result")
                result
-             }
              else op
-         }
+         end Logger
        #+end_src
        * The ~Config~ object contains a definition of the /inline value/ ~logging~.
          This means that ~logging~ is treated as a _constant value_, equivalent to
@@ -4472,19 +4394,19 @@
          #+begin_src scala
            var indentSetting = 2
 
-           def factorial(n: BigInt): BigInt = {
+           def factorial(n: BigInt): BigInt =
              log(s"factorial($n)", indentSetting) {
-               if (n == 0) 1
-               else        n * factorial(n - 1)
+               if n == 0
+               then 1
+               else n * factorial(n - 1)
              }
-           }
          #+end_src
          + IF ~inline val logging = false~, the usage code will be re-written as
            #+begin_src scala
-             def factorial(n: BigInt): BigInt = {
-               if (n == 0) 1
-               else        n * factorial(n - 1)
-             }
+             def factorial(n: BigInt): BigInt =
+               if n == 0
+               then 1
+               else n * factorial(n - 1)
            #+end_src
            1. Since _NEITHER_ ~msg~ _OR_ ~indentMargin~ were used, they do *NOT*
               appear in the _generated code_ for ~factorial~.
@@ -4498,17 +4420,17 @@
 
          + IF ~inline val logging = true~, the usage code will be re-written as
            #+begin_src scala
-             def factorial(n: BigInt): BigInt = {
+             def factorial(n: BigInt): BigInt =
                val msg = s"factorial($n)"
                println(s"${"  " * indent}start $msg")
                Logger.inline$indent_=(indent.+(indentSetting))
                val result =
-                 if (n == 0) 1
-                 else        n * factorial(n - 1)
+                 if n == 0
+                 then 1
+                 else n * factorial(n - 1)
                Logger.inline$indent_=(indent.-(indentSetting))
                println(s"${"  " * indent}$msg = $result")
                result
-             }
            #+end_src
            - The /by-value parameter/ ~msg~ is _evaluated only once_,
              per the usual Scala semantics, by binding the value and reusing the
@@ -4528,14 +4450,12 @@
        ~power~ will be implemented by straight _inline code_ *WITHOUT ANY /loop/
        or /recursion/.*
        #+begin_src scala
-         inline def power(x: Double, n: Int): Double = {
-           if (n == 0) 1.0
-           else if (n == 1) x
-           else {
+         inline def power(x: Double, n: Int): Double =
+           if n == 0 then s.0
+           else if n == 1 then x
+           else
              val y = power(x, n / 2)
-             if (n % 2 == 0) y * y else y * y * x
-           }
-         }
+             if n % 2 == 0 then y * y else y * y * x
 
          power(expr, 10)
          // translates to
@@ -4586,15 +4506,13 @@
         method/, the /inline method/ *CAN ALSO be invoked at /runtime/.*
         For instance, consider the scenario:
         #+begin_src scala
-          abstract class A {
+          abstract class A:
             def f: Int
             def g: Int = f
-          }
 
-          class B extends A {
+          class B extends A:
             inline def f = 22
             override inline def g = f + 11
-          }
 
           val b = B
           val a: A = b
@@ -4615,14 +4533,13 @@
      3. /Inline methods/ can also be ~abstract~.
           An /abstract inline method/ can be _implemented_ ONLY by other /inline
         methods/. *It cannot be invoked directly*:
+        =FIXME ???=
         #+begin_src scala
-          abstract class A {
+          abstract class A:
             inline def f: Int
-          }
 
-          object B extends A {
+          object B extends A:
             inline def f: Int = 22
-          }
 
           B.f  // OK
           val a: A = B
@@ -4698,13 +4615,11 @@
       - It is also possible to have _inline vals_ of /types/ that do not have a
         specific syntax, such as ~Short(4)~.
         #+begin_src scala
-          trait InlineConstant {
+          trait InlineConstant:
             inline val myShort: Short
-          }
 
-          object Constants extends InlineConstants {
+          object Constants extends InlineConstants:
             inline val myShort/*: Short(4)*/ = 4
-          }
         #+end_src
         =from Jian=
         * ~inline val myShort: Short = 4~ is illegal
@@ -4719,12 +4634,12 @@
      *SPECIALIZED to a more precise type* upon expansion.
 
      - Example:
+       =FIXME= =IMPROVE=
        #+begin_src scala
          class A
 
-         class B extends A {
+         class B extnds A:
            def m = true
-         }
 
          transparent inline def choose(b: Boolean): A =
            if b then (new A) else (new B)
@@ -4754,10 +4669,14 @@
 
 **** DONE Inline Conditionals
      CLOSED: [2020-11-24 Tue 02:17]
+     This feature has a bug that is reported by me =Jian=
+     https://github.com/lampepfl/dotty/issues/10521
+     
      #+begin_src scala
        inline def update(delta: Int) =
-         inline if (delta >= 0) increaseBy(delta)
-                else            decreaseBy(-delta)
+         inline if delta >= 0
+                then increaseBy(delta)
+                else decreaseBy(-delta)
      #+end_src
      - If the /condition/ of an /if-then-else expressions/ is a /constant expression/
        then _it *SIMPLIFIES* to the selected branch._ -- *NOT guaranteed*.
@@ -4797,10 +4716,10 @@
      - The example below defines an /inline method/ with a single /inline match
        expression/ that picks a case based on its /static type/:
        #+begin_src scala
-         transparent inline def g(x: Any): Any = inline x match {
-           case x: String => (x, x)  // Tuple2[String, String](x, x)
-           case x: Double => x
-         }
+         transparent inline def g(x: Any): Any =
+           inline x match
+             case x: String => (x, x)  // Tuple2[String, String](x, x)
+             case x: Double => x
 
          g(1.0d)    // Has type `1.0d` which is a subtype of `Double`
          g("test")  // Has type `(String, String)`
@@ -4815,15 +4734,14 @@
        1. _matches_ the structure of a number in /Church-encoding/
        2. _computes_ the corresponding integer.
        #+begin_src scala
-         enum Nat {
+         enum Nat
            case Zero
            case Succ[N <: Nat](n: N)
-         }
 
-         transparent inline def toInt(n: Nat): Int = inline n match {
-           case Nat.Zero     => 0
-           case Nat.Succ(n1) => toInt(n1) + 1
-         }
+         transparent inline def toInt(n: Nat): Int =
+           inline n match
+             case Nat.Zero     => 0
+             case Nat.Succ(n1) => toInt(n1) + 1
 
          inline val natTwo = toInt(Nat.Succ(Nat.Succ(Nat.Zero)))
          val intTwo: 2 = natTwo
@@ -4832,6 +4750,7 @@
        =IMPORTANT= =GOOD EXAMPLE=
        =IMPORTANT= =GOOD EXAMPLE=
        =IMPORTANT= =GOOD EXAMPLE=
+       =FIXME= =???= =Replace the final with inline= =I remember use final to declare constants will be phased out=
 
 **** DONE The ~scala.compiletime~ Package
      CLOSED: [2020-11-24 Tue 03:07]
@@ -4849,13 +4768,13 @@
           import scala.compiletime.{constValue, S}
 
           transparent inline def toIntC[N]: Int =
-            inline constValue[N] match {
+            inline constValue[N] match
               case 0        => 0
               case _: S[n1] => 1 + toIntC[n1]
-            }
 
           inline val ctwo = toIntC[2]
         #+end_src
+        =FIXME= =???= =Replace the final with inline= =I remember use final to declare constants will be phased out=
 
       - ~constValueOpt[T]~ is similar to ~constValue[T]~, and it generates a
         _constant value_ of type ~Option[T]~.
@@ -4882,18 +4801,18 @@
           import scala.comiletime.erasedValue
           // erased def erasedValue[T]: T = ???
 
-          inline def defaultValue[T] = inline erasedValue[T] match {
-            case _: Byte    => Some(0: Byte)
-            case _: Char    => Some(0: Char)
-            case _: Short   => Some(0: Short)
-            case _: Int     => Some(0)
-            case _: Long    => Some(0L)
-            case _: Float   => Some(0.0f)
-            case _: Double  => Some(0.0d)
-            case _: Boolean => Some(false)
-            case _: Unit    => Some(())
-            case _          => None
-          }
+          inline def defaultValue[T] =
+            inline erasedValue[T] match
+              case _: Byte    => Some(0: Byte)
+              case _: Char    => Some(0: Char)
+              case _: Short   => Some(0: Short)
+              case _: Int     => Some(0)
+              case _: Long    => Some(0L)
+              case _: Float   => Some(0.0f)
+              case _: Double  => Some(0.0d)
+              case _: Boolean => Some(false)
+              case _: Unit    => Some(())
+              case _          => None
 
           val dInt:     Some[Int]     = defaultValue[Int]
           val dDouble:  Some[Double]  = defaultValue[Double]
@@ -4902,14 +4821,14 @@
         #+end_src
 
       - Another example:
+        =FIXME= =???=
         #+begin_src scala
           transparent inline def toIntT[N <: Nat]: Int =
-            inline erasedValue[N] match {
+            inline erasedValue[N] match
               case _: Zero.type => 0
               case _: Succ[n]   => toIntT[n] + 1
-            }
 
-          final val two = toIntT[Succ[Succ[Zero.type]]]
+          inline val two = toIntT[Succ[Succ[Zero.type]]]
         #+end_src
         * =from Jian=
           I think the ~final~ here is not the best practice!!! =FIX=
@@ -5003,10 +4922,9 @@
 
           import scala.annotation.infx._  // TODO: infix ???
 
-          type +[X <: Int | String, Y <: Int | String] = (X, Y) match {
+          type +[X <: Int | String, Y <: Int | String] = (X, Y) match
             case (Int, Int)       => int.+[X, Y]
             case (String, String) => string.+[X, Y]
-          }
 
           val concat: "a" + "b" = "ab"
           val addition: 1 + 1 = 2
@@ -5032,13 +4950,11 @@
        #+begin_src scala
          trait SetFor[T, S <: Set[T]]
 
-         class LowPriority {
-           implicit def hashSetFor[T]: SetFor[T, HashSet[T]] = { ... }
-         }
+         class LowPriority:
+           implicit def hashSetFor[T]: SetFor[T, HashSet[T]] = ...
 
-         object SetFor extends LowPriority {
-           implicit def treeSetFor[T: Ordering]: SetFor[T, TreeSet[T]] = { ... }
-         }
+         object SetFor extends LowPriority:
+           implicit def treeSetFor[T: Ordering]: SetFor[T, TreeSet[T]] = ...
        #+end_src
        + =from Jian=
          I don't know the complete form of this example.
@@ -5136,8 +5052,8 @@
        happen:
        #+begin_src scala
          class A
-         implicit val a1: A = new A
-         implicit val a2: A = new A
+         given a1: A = new A
+         given a2: A = new A
 
          inline def f: Any = summonFrom {
            case given _: A => ???  // error: ambiguous implicits
@@ -5360,13 +5276,12 @@
                to((x: Expr[Int]) => '{ $x.toString })
 
              inline def runf2: String = ${ mcrImpl2 }
-             def mcrImpl2(using Quotes): Expr[String] = {
+             def mcrImpl2(using Quotes): Expr[String] =
                val f2: Expr[Int] => Expr[String] = from('{ (x: Int) => x.toString })
                f2('{2})
-             }
            #+end_src
 
-         + Multi-Stage Programming (inlucdes /runtime/ evaluation, see next section
+        + Multi-Stage Programming (inlucdes /runtime/ evaluation, see next section
            for details):
            1. Include dependency (this was inside dotty before, and they are now
               separated) ~"ch.epfl.lamp" %% "scala3-staging" % scalaVersion.value~.
@@ -5474,12 +5389,13 @@
        #+begin_src scala
          import scala.quoted._
 
-         enum Exp {
+         enum Exp:
            case Num(n: Int)
            case Plus(e1: Exp, e2: Exp)
            case Var(x: String)
            case Let(x: String, e: Exp, in: Exp)
-         }
+
+         import Exp._
        #+end_src
        * The interpreted language consists of numbers ~Num~, addition ~Plus~, and
          variables ~Var~ which are bound by ~Let~.
@@ -5495,12 +5411,12 @@
        #+begin_src scala
          import scala.quoted._
 
-         def compile(e: Exp, env: Map[String, Expr[Int]])(using Quotes): Expr[Int] = e match {
-           case Num(n)          => Expr(n)
-           case Plus(e1, e2)    => '{ ${ compile(e1, env) } + ${ compile(e2, env) } }
-           case Var(x)          => env(x)
-           case Let(x, e, body) => '{ val y = ${ compile(e, env) }; ${ compile(body, env + (x -> 'y)) } }
-         }
+         def compile(e: Exp, env: Map[String, Expr[Int]])(using Quotes): Expr[Int] =
+           e match
+             case Num(n)          => Expr(n)
+             case Plus(e1, e2)    => '{ ${ compile(e1, env) } + ${ compile(e2, env) } }
+             case Var(x)          => env(x)
+             case Let(x, e, body) => '{ val y = ${ compile(e, env) }; ${ compile(body, env + (x -> 'y)) } }
        #+end_src
 
      - Running ~compile(letExp, Map.empty)~ would yield the following Scala code:
@@ -5528,13 +5444,12 @@
        #+begin_src scala
          package quoted
 
-         object Expr {
+         object Expr:
            /** Lift a value into an expression containing the construction of that value */
            def apply[T: ToExpr](x: T)(using Quotes): Expr[T] =
              summon[ToExpr[T]].toExpr(x)
 
            // ...
-         }
        #+end_src
        * This method says that values of types implementing the ~ToExpr~ /type
          class/ can be converted ("lifted") to ~Expr~ values using ~Expr.apply~.
@@ -5566,13 +5481,12 @@
        =FIXME=
        #+begin_src scala
          given ToExpr[Int] with
-           def toExpr(n: Int): Expr[Int] = n match {
+           def toExpr(n: Int): Expr[Int] = n match
              case Int.MinValue    => '{ Int.MinValue }
              case _ if n < 0      => '{ - ${ toExpr(-n) } }
              case 0               => '{ 0 }
              case _ if n % 2 == 0 => '{ ${ toExpr(n / 2) } * 2 }
              case _               => '{ ${ toExpr(n / 2) } * 2 + 1 }
-           }
        #+end_src
        * =from Jian=
          Since the PCP is only for /free variables/, and ~'{ Int.MinValue }~ and
@@ -5601,10 +5515,9 @@
      - Using /lifting/, we can now give the missing definition of ~showExpr~ in
        the introductory example:
        #+begin_src scala
-         def showExpr[T](expr: Expr[T])(using Quotes): Expr[String] = {
+         def showExpr[T](expr: Expr[T])(using Quotes): Expr[String] =
            val code: String = expr.show
            Expr(code)
-         }
        #+end_src
        * That is, the ~showExpr~ /method/ _converts_ its ~Expr~ argument to a
          string (~code~), and *lifts* the result back to an ~Expr[String]~ using
@@ -5659,7 +5572,7 @@
        here's the ~assert~ /macro/ again together with a program that CALLS
        ~assert~.
        #+begin_src scala
-         object Macros {
+         object Macros:
 
            inline def assert(inline expr: Boolean): Unit =
              ${ assertImpl('expr) }
@@ -5667,14 +5580,10 @@
            def assertImpl(expr: Expr[Boolean])(using Quotes) =
              val failMsg: Expr[String] = Expr(s"failed assertion: ${expr.show}")
              '{ if !($expr) then throw new AssertionError($failMsg) }
-         }
 
-         object App {
-           val program = {
-             val x = 1
-             Macros.assert(x != 0)
-           }
-         }
+         @main def program =
+            val x = 1
+            Macros.assert(x != 0)
        #+end_src
        * The example is only /phase correct/ because ~Macros~ is a /global value/
          and as such *NOT subject to* _phase consistency checking_.
@@ -5696,7 +5605,7 @@
            Hence, conceptually the program part should be treated by the
            compiler *as if* (=from Jian= not real legal code?) it was quoted:
            #+begin_src scala
-             val program = '{
+             @main def program = '{
                val x = 1
                ${ Macros.assertImpl('{ x != 0 }) }
              }
@@ -5740,16 +5649,15 @@
              ${ powerCode('x, 'n) }
 
            private def powerCode(x: Expr[Double], n: Expr[Int])(using Quotes): Expr[Double] =
-             n.value match {
+             n.value match
                case Some(m) => powerCode(x, m)
                case None    => '{ Math.pow($x, $y) }
-             }
 
            private def powerCode(x: Expr[Double], n: Int)(using Quotes): Expr[Double] =
-             if      (n == 0)     '{ 1.0 }
-             else if (n == 1)     x
-             else if (n % 2 == 0) '{ val y = $x * $x; ${ powerCode('y, n / 2) } }
-             else                 '{ $x * ${ powerCode(x, n - 1) } }
+             if      n == 0     then '{ 1.0 }
+             else if n == 1     then x
+             else if n % 2 == 0 then '{ val y = $x * $x; ${ powerCode('y, n / 2) } }
+             else                    '{ $x * ${ powerCode(x, n - 1) } }
          #+end_src
 
 **** DONE Scope Extrusion
@@ -5761,7 +5669,7 @@
        * The restriction prevents code like this:
          #+begin_src scala
            var x: Expr[T] = ...
-             '{ (y: T) => ${ x = 'y; 1 } }
+           '{ (y: T) => ${ x = 'y; 1 } }
          #+end_src
          This code, IF it was accepted, would *extrude* a reference to a /quoted
          variable/ ~y~ from its /scope/.
@@ -5806,7 +5714,7 @@
          Since ~run~ runs _ARBITRARY_ code it can ALWAYS produce a /side effect/
          if the code it runs produces one.
 
-**** DONE Example Expansion - =RE-READ=
+**** DONE Example Expansion - =RE-DO= =???= =Code Example Changed???=
      CLOSED: [2020-11-30 Mon 23:18]
      Assume we have _two_ /methods/,
      one ~map~ that takes an ~Expr[Array[T]]~ and a function ~f~
@@ -5814,7 +5722,7 @@
      one ~sum~ that performs a sum by delegating to ~map~.
      =from Jian= I prefer to use ~var acc = 0~ instead of ~var sum = 0~ to avoid same names.
      #+begin_src scala
-       object Macros {
+       object Macros:
          inline def sum_m(arr: Array[Int]): Int = ${sum('arr)}
   
          def sum(arr: Expr[Array[Int]])(using Quotes): Expr[Int] = '{
@@ -5832,7 +5740,6 @@
              i += 1
            }
          }
-       }
      #+end_src
      
      Expand the call to ~sum_m(Array(1, 2, 3))~:
@@ -5896,16 +5803,15 @@
      search_ available in a /quote context/. For this we simply provide
      ~scala.quoted.Expr.summon~:
      #+begin_src scala
+       import scala.collection.immutable.{ TreeSet, HashSet }
        import scala.quoted._
 
        inline def setFor[T]: Set[T] = ${ setForExpr[T] }
 
-       def setForExpr[T: Type](using Quotes): Expr[Set[T]] = {
-         Expr.summon[Ordering[T]] match {
+       def setForExpr[T: Type](using Quotes): Expr[Set[T]] =
+         Expr.summon[Ordering[T]] match
            case Some(ord) => '{ TreeSet.empty[T](using $ord) }
            case _         => '{ HashSet.empty[T] }
-         }
-       }
      #+end_src
 
 **** DONE Relationship with Whitebox ~inline~
@@ -5917,10 +5823,9 @@
          ${ defaultOfImpl('str) }
 
        def defaultOfImpl(strExpr: Expr[String])(using Quotes): Expr[Any] =
-         strExpr.valueOrError match {
+         strExpr.valueOrError match
            case "int"    => '{1}
            case "string" => '{"a"}
-         }
 
        // in a separate file
        val a: Int    = defaultOf("int")
@@ -5975,20 +5880,20 @@
          inline def sum(inline args: Int*): Int = ${ sumExpr('args) }
 
          private def sumExpr(argsExpr: Expr[Seq[Int]])
-                            (using Quotes): Expr[Int] = argsExpr match {
-           case Varargs(args @ Exprs(argValues)) =>
-             // args is of type Seq[Expr[Int]]
-             // argValues is of type Seq[Int]
-             Expr(argValues.sum) // precompute result of sum
+                            (using Quotes): Expr[Int] =
+           argsExpr match
+             case Varargs(args @ Exprs(argValues)) =>
+               // args is of type Seq[Expr[Int]]
+               // argValues is of type Seq[Int]
+               Expr(argValues.sum) // precompute result of sum
 
-           case Varargs(argExprs) => // argExprs is of type Seq[Expr[Int]]
-             val staticSum: Int = argExprs.map(_.value.getOrElse(0)).sum
-             val dynamicSum: Seq[Expr[Int]] = argExprs.filter(_.value.isEmpty)
-             dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
+             case Varargs(argExprs) => // argExprs is of type Seq[Expr[Int]]
+               val staticSum: Int = argExprs.map(_.value.getOrElse(0)).sum
+               val dynamicSum: Seq[Expr[Int]] = argExprs.filter(_.value.isEmpty)
+               dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
 
-           case _ =>
-             '{ $argsExpr.sum }
-         }
+             case _ =>
+               '{ $argsExpr.sum }
        #+end_src
     
 ***** DONE Quoted patterns
@@ -6010,28 +5915,26 @@
 
              inline def optimize(inline arg: Int): Int = ${ optimizeExpr('arg) }
 
-             private def optimizeExpr(body: Expr[Int])(using Quotes): Expr[Int] = body match {
-               // Match a call to sum without any arguments
-               case '{ sum() }                     => Expr(0)
-               // Match a call to sum with an argument $n of type Int. n will be the Expr[Int] representing the argument.
-               case '{ sum($n) }                   => n
-               // Match a call to sum and extracts all its args in an `Expr[Seq[Int]]`
-               case '{ sum(${Varargs(args)}: _*) } => sumExpr(args)
-               case body                           => body
-             }
+             private def optimizeExpr(body: Expr[Int])(using Quotes): Expr[Int] =
+               body match
+                 // Match a call to sum without any arguments
+                 case '{ sum() }                     => Expr(0)
+                 // Match a call to sum with an argument $n of type Int. n will be the Expr[Int] representing the argument.
+                 case '{ sum($n) }                   => n
+                 // Match a call to sum and extracts all its args in an `Expr[Seq[Int]]`
+                 case '{ sum(${Varargs(args)}: _*) } => sumExpr(args)
+                 case body                           => body
 
-             private def sumExpr(args1: Seq[Expr[Int]])(using Quotes): Expr[Int] = {
-                 def flatSumArgs(arg: Expr[Int]): Seq[Expr[Int]] = arg match {
+             private def sumExpr(args1: Seq[Expr[Int]])(using Quotes): Expr[Int] =
+                 def flatSumArgs(arg: Expr[Int]): Seq[Expr[Int]] = arg match
                    case '{ sum(${Varargs(subArgs)}: _*) } => subArgs.flatMap(flatSumArgs)
-                   case arg => Seq(arg)
-                 }
+                   case arg                               => Seq(arg)
 
                  val args2 = args1.flatMap(flatSumArgs)
 
                  val staticSum: Int = args2.map(_.value.getOrElse(0)).sum
                  val dynamicSum: Seq[Expr[Int]] = args2.filter(_.value.isEmpty)
                  dynamicSum.foldLeft(Expr(staticSum))((acc, arg) => '{ $acc + $arg })
-             }
            #+end_src
       
 ***** DONE Recovering precise types using patterns
@@ -6039,31 +5942,30 @@
       Sometimes it is necessary to get a more precise type for an expression.
       This can be achived using the following pattern match.
       #+begin_src scala
-        def f(expr: Expr[Any])(using Quotes) =
-          expr match
-            case '{ $x: t } =>
-              // If the pattern match succeeds, then there is some type `t` such that
-              // - `x` is bound to a variable of type `Expr[t]`
-              // - `t` is bound to a new type `t` and a given instance `Type[t]` is provided for it
-              // That is, we have `x: Expr[t]` and `given Type[t]`, for some (unknown) type `t`.
+        def f(expr: Expr[Any])(using Quotes) = expr match
+          case '{ $x: t } =>
+            // If the pattern match succeeds, then there is some type `t` such that
+            // - `x` is bound to a variable of type `Expr[t]`
+            // - `t` is bound to a new type `t` and a given instance `Type[t]` is provided for it
+            // That is, we have `x: Expr[t]` and `given Type[t]`, for some (unknown) type `t`.
       #+end_src
       
       This might be used to then perform an implicit search as in:
 
       #+begin_src scala
-        extension (inline sc: StringContext) inline def showMe(inline args: Any*): String =
-          ${ showMeExpr('sc, 'args) }
+        extension (inline sc: StringContext)
+          inline def showMe(inline args: Any*): String =
+            ${ showMeExpr('sc, 'args) }
 
-        private def showMeExpr(sc: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[String] = {
+        private def showMeExpr(sc: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[String] =
           argsExpr match {
-            case Varargs(argExprs) =>
+            sase Varargs(argExprs) =>
               val argShowedExprs = argExprs.map {
                 case '{ $arg: tp } =>
-                  val showTp = Type.of[Show[tp]] 
-                  Expr.summon(using showTp) match {
+                  val showTp = Type.of[Show[tp]]
+                  Expr.summon(using showTp) match
                     case Some(showExpr) => '{ $showExpr.show($arg) }
                     case None           => report.error(s"could not find implicit for ${Type.show[Show[tp]]}", arg); '{???}
-                  }
               }
               val newArgsExpr = Varargs(argShowedExprs)
               '{ $sc.s($newArgsExpr: _*) }
@@ -6073,11 +5975,16 @@
               report.error(s"Args must be explicit", argsExpr)
               '{???}
           }
-        }
-
-        trait Show[-T] {
+s
+        trait Show[-T]:
           def show(x: T): String
-        }
+
+        // TODO: FIXME
+        // in a different file
+        given Show[Boolean] with
+          def show(b: Boolean) = "boolean!"
+
+        println(showMe"${true}")
       #+end_src
 
 ***** DONE Open code patterns
@@ -6109,8 +6016,8 @@
           #+begin_src scala
             inline def eval(inline e: Int): Int = ${ evalExpr('e) }
 
-            private def evalExpr(e: Expr[Int])(using Quotes): Expr[Int] = {
-              e match {
+            private def evalExpr(e: Expr[Int])(using Quotes): Expr[Int] =
+              e match
                 case '{ val y: Int = $x; $body(y): Int } =>
                   // body: Expr[Int => Int] where the argument represents references to y
                   evalExpr(Expr.betaReduce('{$body(${evalExpr(x)})}))
@@ -6121,8 +6028,6 @@
                     case _                  => e
 
                 case _ => e
-              }
-            }
 
             eval {  // expands to the code: (16: Int)
               val x: Int = 4
@@ -6151,8 +6056,7 @@
 
 **** More Examples
 
-*** TODO TASTy Inspection
-**** Inspecting TASTy files
+*** TODO TASTy Inspection**** Inspecting TASTy files
 **** Template project
 
 ** TODO OTHER NEW FEATURES
@@ -6162,13 +6066,11 @@
 
     - Example:
       #+begin_src scala
-        trait Greeting(val name: String) {
+        trait Greeting(val name: String):
           def msg = s"How are you, $name"
-        }
 
-        class C extends Greeting("Bob") {
+        class C extends Greeting("Bob"):
           println(msg)
-        }
       #+end_src
 
     - =IMPORTANT= Initialization Rule:
@@ -6180,7 +6082,7 @@
       For instance, you might try to _extend ~Greeting~ TWICE, with DIFFERENT
       parameters._
       #+begin_src scala
-        class D extends C with Greeting("Bill")  // error: parameter passed twice
+        class D extends C, Greeting("Bill")  // error: parameter passed twice
       #+end_src
       Should this print ~"Bob"~ or ~"Bill"~? In fact this program is *ILLEGAL*,
       because it _VIOLATES the SECOND rule of the following for /trait parameters/:_
@@ -6193,9 +6095,8 @@
 
     - Here's /trait/ extending the /parameterized trait/ ~Greeting~.
       #+begin_src scala
-        trait FormalGreeting extends Greeting {
+        trait FormalGreeting extends Greeting:
           override def msg = s"How do you do, $name"
-        }
       #+end_src
       + As is required, no arguments are passed to ~Greeting~.
         However, this poses an *ISSUE* when defining a /class/ that extends
@@ -6206,7 +6107,7 @@
         The correct way to write ~E~ is to extend both ~Greeting~ and ~FormalGreeting~
         (in either order):
         #+begin_src scala
-          class E extends Greeting("Bob") with FormalGreeting
+          class E extends Greeting("Bob"), FormalGreeting
         #+end_src
 
 **** TODO Reference
@@ -6322,20 +6223,19 @@
 
     - Example:
       #+begin_src scala
-        class StringBuilder(s: String) {
+        class StringBuilder(s: String):
           def this() = this("")
-        }
 
         StringBuilder("abc")  // same as `new StringBuilder("abc")`
         StringBuilder()       // same as `new StringBuilder()`
       #+end_src
       This works since a /companion object/ with TWO ~apply~ /methods/ are =FIXME=
       _generated together with_ the /class/. The /companion object/ looks like:
+      =FIXME= =IMPROVE ME= =???=
       #+begin_src scala
-        object StringBuilder {
+        object StringBuilder:
           inline def apply(s: String): StringBuilder = new StringBuilder(s)
           inline def apply(): StringBuilder = new StringBuilder()
-        }
       #+end_src
       The _synthetic object_ ~StringBuilder~ and its ~apply~ /methods/ are called
       /constructor proxies/.
@@ -6398,18 +6298,16 @@
         class BitMap
         class InkJet
 
-        class Printer {
+        class Printer:
           type PrinterType
           def print(bits: BitMap): Unit = ???
           def status: List[String] = ???
-        }
 
-        class Scanner {
+        class Scanner:
           def scan(): BitMap = ???
           def status: List[String] = ???
-        }
 
-        class Copier {
+        class Copier:
           private val printUnit = new Printer { type PrinterType = InkJet }
           private val scanUnit = new Scanner
 
@@ -6417,9 +6315,8 @@
           export printUnit.{status => _, _}
 
           def status: List[String] = printUnit.status ++ scanUnit.status
-        }
       #+end_src
-      - Here the two ~export~ clauses define the following /export aliases/ in
+      * Here the two ~export~ clauses define the following /export aliases/ in
         class ~Copier~:
         #+begin_src scala
           final def scan(): BitMap            = scanUnit.scan()
@@ -6427,14 +6324,14 @@
           final type PrinterType              = printUnit.PrinterType
         #+end_src
 
-      - The exported members can be accessed inside ~Copier~ as well as from
+      * The exported members can be accessed inside ~Copier~ as well as from
         outside:
         #+begin_src scala
           val copier = new Copier
           copier.print(copier.scan())
         #+end_src
 
-      - Syntax (similar to ~import~):
+      * Syntax (similar to ~import~):
         #+begin_src scala
           export path . { sel_1, ..., sel_n }
           export given path . { sel_1, ..., sel_n }
@@ -6444,7 +6341,7 @@
         + ~export~ is like ~import~.
           Synthetic members generated by compiler can't be exported.
 
-      - A member is *eligible for being exported* if all of the following holds:
+      * A member is *eligible for being exported* if all of the following holds:
         + The _owner of the being exported member_ is *NOT* the /base class/ of
           /class/ (includes /object) that conttains the /export clause/.
 
@@ -6461,10 +6358,10 @@
         + it is a /given instance/ (or an old-style /implicit value/)
           iff the ~export~ is tagged with ~given~.
 
-      - It is a /compile-time error/ if a simple or renaming selector does *not*
+      * It is a /compile-time error/ if a simple or renaming selector does *not*
         identify any _eligible members_.
 
-      - _Code generation_ triggered by ~export~'s:
+      * _Code generation_ triggered by ~export~'s:
         + /Type members/ are aliased by _type definitions_;
         + /Term members/ are aliased by _method definitions_;
         + Export aliases _copy_ the /type and value parameters/ of the members
@@ -6474,7 +6371,7 @@
         + Aliases of /inline methods/ or values are again defined ~inline~.
         + There are *NO* OTHER /modifiers/ that can be given to an alias.
 
-      - The _Code generation_ rule above has the following *CONSEQUENCES* for
+      * The _Code generation_ rule above has the following *CONSEQUENCES* for
         /overriding/:
         + Export aliases *cannot* be overridden, since they are ~final~.
 
@@ -6484,7 +6381,7 @@
         + However, export aliases *can* _IMPLEMENT_ /deferred members/ (=from Jian=
           I think this term is the same as /abstract members/) of /base classes/.
 
-      - TODO =RE-READ= TODO
+      * TODO =RE-READ= TODO
         /Export aliases/ for /public value/ definitions that are accessed *WITHOUT
         referring to* /private values/ in the qualifier path are marked by the
         compiler as "stable" and their result types are the /singleton types/ of
@@ -6501,11 +6398,11 @@
           def f: c.T = ...
         #+end_src
 
-      - /Export clauses/ *can* appear in /classes/
+      * /Export clauses/ *can* appear in /classes/
         /Export clauses/ *can* appear _at the /top-level/._
         /Export clauses/ *CANNOT* appear _as a statement IN A BLOCK_.
 
-      - =from Jian=
+      * =from Jian=
         A real world example:
         Sometimes we know something should be /static/, but make it /static/ can
         make the code looks WIERD! Before adding ~export~, we don't have a perfect
@@ -6531,23 +6428,20 @@
 
         + In Scala 3, we still keep /static/ things /static/, but we can write
           #+begin_src scala
-            trait Calculator {
+            trait Calculator:
               val calculatorName: String
-            }
 
-            final class AbcCalculator extends Calculator {
+            final class AbcCalculator extends Calculator:
               export AbcCalculator.calculatorName
-            }
 
-            object AbcCalculator {
+            object AbcCalculator:
               val calculatorName = "Abc"
-            }
           #+end_src
-          * Of course, for providing a perfect solution like this with ~export~,
+          - Of course, for providing a perfect solution like this with ~export~,
             One requirement is satisfied:
             - The being overridden field is /abstract/.
 
-          * Another limitation is that we can't do similar thing to the /subclasses/
+          - Another limitation is that we can't do similar thing to the /subclasses/
             of ~AbcCalculator~ -- the compiler will synthesize /final members/ for
             ~export~ clauses! However, this is not a real limitation -- a good design
             should avoid creating a long inheritance chain. Mostly, none level is
@@ -6660,26 +6554,26 @@
 
     - Example:
       #+begin_src scala
-        object Logarithms {
+        object Logarithms:
 
           opaque type Logarithm = Double
 
-          object Logarithm {
+          object Logarithm:
             // These are the ways to lift to the Logarithm type
 
             def apply(d: Double): Logarithm = math.log(d)
 
             def safe(d: Double): Option[Logarithm] =
               if (d > 0.0) Some(math.log(d)) else None
-          }
+          end Logarithm
 
           // Extension methods define opaque type aliases' public APIs
-          extension (x: Logarithm) {
+          extension (x: Logarithm)
             def toDouble: Double = math.exp(x)
             def + (y: Logarithm): Logarithm = Logarithm(math.exp(x) + math.exp(y))
             def * (y: Logarithm): Logarithm = Logarithm(x + y)
-          }
-        }
+
+        end Logarithms
       #+end_src
       + ~Logarithm~ is the same as ~Double~ is *only known in the scope where
         ~Logarithm~ is defined* which in this case is object ~Logarithms~.
@@ -6695,8 +6589,8 @@
 
             val l = Logarithm(1.0)
             val l2 = Logarithm(2.0)
-            val l3 = l1 * l2
-            val l4 = l1 + l2
+            val l3 = l * l2
+            val l4 = l + l2
           #+end_src
           - =IMPORTANT=
             The ~import Predef.{any2stringadd => _}~ is necessary!!!
@@ -6717,23 +6611,31 @@
      /Opaque type aliases/ can also come with /bounds/.
      Example:
      #+begin_src scala
-       object Access {
+       object Access:
 
          opaque type Permissions = Int
          opaque type PermissionChoice = Int
          opaque type Permission <: Permissions & PermissionChoice = Int
 
-         extension (x: Permissions) def & (y: Permissions): Permissions = x | y
-         extension (x: PermissionChoice) def | (y: PermissionChoice): PermissionChoice = x | y
-         extension (granted: Permissions) def is(required: Permissions): Boolean = (granted & required) == required
-         extension (granted: Permissions) def isOneOf(required: PermissionChoice): Boolean = (granted & required) != 0
+         extension (x: Permissions)
+           def & (y: Permissions): Permissions = x | y
+
+         extension (x: PermissionChoice)
+           def | (y: PermissionChoice): PermissionChoice = x | y
+
+         extension (granted: Permissions)
+           def is(required: Permissions): Boolean = (granted & required) == required
+
+         extension (granted: Permissions)
+           def isOneOf(required: PermissionChoice): Boolean = (granted & required) != 0
 
          val NoPermission: Permission = 0
          val Read: Permission = 1
          val Write: Permission = 2
          val ReadWrite: Permissions = Read | Write
          val ReadOrWrite: PermissionChoice = Read | Write
-       }
+
+       end Access
      #+end_src
      - The ~Access~ object defines THREE /opaque type aliases/:
        + ~Permission~,       representing a single permission,
@@ -6743,8 +6645,9 @@
      - /Type bound/ of ~Permission~ makes it known outside the ~Access~ object that
        ~Permission~ is a /subtype/ of the other two types. Hence, the following
        usage scenario type-checks:
+       =FIXME=
        #+begin_src scala
-         object User {
+         object User:
            import Access._
 
            case class Item(rights: Permissions)
@@ -6761,7 +6664,7 @@
 
            assert(!noItem.rights.is(ReadWrite))
            assert(!noItem.rights.isOneOf(ReadOrWrite))
-         }
+         end User
        #+end_src
        + On the other hand, ~roItem.rights.isOneOf(ReadWrite)~ can't pass the type check.
 
@@ -6779,21 +6682,20 @@
         // File Writer.scala
         package p
 
-        open class Writer[T] {
+        open class Writer[T]:
 
           /** Sends to stdout, can be overridden */
           def send(x: T) = println(x)
 
           /** Sends all arguments using `send` */
           def sendAll(xs: T*) = xs.foreach(send)
-        }
+        end Writer
 
         // File EncryptedWriter.scala
         package p
 
-        class EncryptedWriter[T: Encryptable] extends Writer[T] {
+        class EncryptedWriter[T: Encryptable] extends Writer[T]:
           override def send(x: T) = super.send(encrypt(x))
-        }
       #+end_src
 
     - An /open class/ typically comes with
@@ -7371,9 +7273,8 @@
      #+begin_src scala
        import scala.annotation.threadUnsafe
 
-       class ThreadUnsafeExample {
+       class Hello:
          @threadUnsafe lazy val x: Int = 1
-       }
      #+end_src
 
 *** DONE The ~@targetName~ Annotation
@@ -7385,9 +7286,10 @@
       #+begin_src scala
         import scala.annotation.targetName
 
-        object VecOps {
-          @targetName("append") def (xs: Vec[T]) ++= [T] (ys: Vec[T]): Vec[T] =  // ...
-        }
+        object VecOps:
+          extension [T](xs: Vec[T])
+            @targetName("append")
+            def ++= [T] (ys: Vec[T]): Vec[T] =  // ...
       #+end_src
       1. The ~++=~ operation is
          implemented (in /bytecode/ or /native code/) _under the name_ ~append~.
@@ -7594,7 +7496,7 @@
     #+begin_src scala
       if x < 0 then
         "negative"
-      else if x == 0
+      else if x == 0 then
         "zero"
       else
         "positive"
@@ -7647,7 +7549,7 @@
      - old to new: option =-rewrite -new-syntax=
      - new to old: option =-rewrite -old-syntax=
 
-*** TODO Optional Braces
+*** TODO Optional Braces - =READING=
     *As an /experimental feature/,*
     Scala 3 _enforces some rules on indentation_ and _allows *SOME* occurrences of
     braces {...} to be optional_. =from Jian= WHY NOT *ALL*???
@@ -7845,7 +7747,7 @@
        as ~null~:
        #+begin_src scala
          // -Yexplicit-nulls
-         class C with
+         class C:
            val f: String = foo(f)
            def foo(f2: String): String = f2
 
@@ -7889,8 +7791,8 @@
      - An extension method ~.nn~ to "cast away" nullability
        #+begin_src scala
          def[T] (x: T|Null) nn: x.type & T =
-           if (x == null) throw new NullPointerException("tried to cast away nullability, but value is null")
-           else           x.asInstanceOf[x.type & T]
+           if x == null then new NullPointerException("tried to cast away nullability, but value is null")
+           else              x.asInstanceOf[x.type & T]
        #+end_src
        This means that given ~x: String|Null~, ~x.nn~ has type ~String~, so we
        can call all the usual methods on it. Of course, ~x.nn~ will _throw a
@@ -7921,16 +7823,13 @@
 ***** DONE Parent-Child Interaction
       CLOSED: [2020-07-25 Sat 00:52]
       #+begin_src scala
-        abstract class AbstractFile {
+        abstract class AbstractFile:
           def name: String
-
           val extension: String = name.substring(4)
-        }
 
-        class RemoteFile(url: String) extends AbstractFile {
+        class RemoteFile(url: String) extends AbstractFile
           val localFile: String = s"${url.##}.tmp"  // error: usage of `localFile` before it's initialized
           def name: String = localFile
-        }
       #+end_src
       The checker will report:
       #+begin_src text
@@ -7949,12 +7848,11 @@
 ***** DONE Inner-Outer Interaction
       CLOSED: [2020-07-25 Sat 00:54]
       #+begin_src scala
-        object Trees {
+        object Trees:
           class ValDef { counter += 1 }
           class EmptyValDef extends ValDef
           val theEmptyValDef = new EmptyValDef
           private var counter = 0  // error
-        }
       #+end_src
       The checker will report:
       #+begin_src text
@@ -7973,16 +7871,14 @@
 ***** DONE Functions
       CLOSED: [2020-07-25 Sat 00:58]
       #+begin_src scala
-        abstract class Parent {
+        abstract class Parent:
           val f: () => String = () => this.message
           def message: String
-        }
 
-        class Child extends Parent {
+        class Child extends Parent:
           val a = f()
           val b = "hello"           // error
           def message: String = b
-        }
       #+end_src
       The checker reports:
       #+begin_src text
@@ -8050,16 +7946,13 @@
          #+begin_src scala
            class MyException(val b: B) extends Exception("")
 
-           class A {
+           class A:
              val b = try { new B } catch { case myEx: MyException => myEx.b }
              println(b.a)
-           }
 
-           class B {
+           class B:
              throw new MyException(this)
              val a: Int = 1
-           }
-
          #+end_src
          + In the code above, the _control effect_ *teleport* the _uninitialized
            value_ wrapped in an /exception/.
@@ -8084,15 +7977,13 @@
        /initialized object/ may *not* later point to an object _UNDER initialization_.
        As an example, the following code will be rejected:
        #+begin_src scala
-         trait Reporter {
+         trait Reporter:
            def report(msg: String): Unit
-         }
 
-         class FileReporter(ctx: Context) extends Reporter {
+         class FileReporter(ctx: Context) extends Reporter:
            ctx.typer.reporter = this  // `ctx` now reaches an uninitialized object
            val file: File = new File("report.txt")
            def report(msg: String) = file.write(msg)
-         }
        #+end_src
        * In the code above,
          *SUPPOSE* ~ctx~ points to a /transitively initialized object/.
@@ -8168,18 +8059,16 @@
        boundaries. For example, the following code passes the check when the two
        classes are defined in the same project:
        #+begin_src scala
-         class Base {
+         class Base:
            private val map: mutable.Map[Int, String] =
              mutable.Map.empty
 
            def enter(k: Int, v: String) =
              map(k) = v
-         }
 
-         class Child extends Base {
+         class Child extends Base:
            enter(1, "one")
            enter(2, "two")
-         }
        #+end_src
        However, when the class ~Base~ and ~Child~ are defined in two different
        projects, the check can emit a warning for the calls to enter in the /class/
@@ -8242,10 +8131,10 @@
     - *OLD*:
       In Scala 2, /numeric literals/ were *confined* to the /primitive numeric
       types/:
-      + ~Int~
-      + ~Long~
-      + ~Float~
-      + ~Double~
+      * ~Int~
+      * ~Long~
+      * ~Float~
+      * ~Double~
 
     - *NEW*:
       Scala 3 allows to write /numeric literals/ also for /user defined types/.
@@ -8256,9 +8145,8 @@
         val y: BigInt = 0x123_abc_789_def_345_678_901
         val z: BigDecimal = 110_222_799_799.99
 
-        (y: BigInt) match {
+        (y: BigInt) match
           case 123_456_789_012_345_678_901 =>
-        }
       #+end_src
 
     - (In Scala 3)
@@ -8319,9 +8207,8 @@
 
      - ~FromDigits~:
        #+begin_src scala
-         trait FromDigits[T] {
+         trait FromDigits[T]:
            def fromDigits(digits: String): T
-         }
        #+end_src
 
      - Implementations of the ~fromDigits~
@@ -8343,15 +8230,14 @@
        + for _numbers with a decimal point_,
        + for _numbers that can have both a decimal point and an exponent_:
        #+begin_src scala
-         object FromDigits {
+         object FromDigits:
 
            /** A subclass of `FromDigits` that also allows to convert whole number literals
              *  with a radix other than 10
              */
-           trait WithRadix[T] extends FromDigits[T] {
+           trait WithRadix[T] extends FromDigits[T]:
              def fromDigits(digits: String): T = fromDigits(digits, 10)
              def fromDigits(digits: String, radix: Int): T
-           }
 
            /** A subclass of `FromDigits` that also allows to convert number
              *  literals containing a decimal point ".".
@@ -8365,7 +8251,6 @@
            trait Floating[T] extends Decimal[T]
 
            // ...
-         }
        #+end_src
        A /user-defined number type/ can implement one of those, which signals to
        the compiler that hexadecimal numbers, decimal points, or exponents are
@@ -8391,9 +8276,8 @@
      class, ~BigFloat~, that accepts /numeric literals/. ~BigFloat~ is defined in
      terms of a ~BigInt~ /mantissa/ and an ~Int~ /exponent/:
      #+begin_src scala
-       case class BigFloat(mantissa: BigInt, exponent: Int) {
+       case class BigFloat(mantissa: BigInt, exponent: Int):
          override def toString = s"${mantissa}e${exponent}"
-       }
      #+end_src
      - ~BigFloat~ /literals/ can have a /decimal point/ as well as an /exponent/.
        E.g. the following expression should produce the ~BigFloat~ number
@@ -8407,23 +8291,25 @@
            import scala.util.FromDigits
 
            def apply(digits: String): BigFloat =
-             val (mantissaDigits, givenExponent) = digits.toUpperCase.split('E') match
-               case Array(mantissaDigits, edigits) =>
-                 val expo =
-                   try FromDigits.intFromDigits(edigits)
-                   catch case ex: FromDigits.NumberTooLarge =>
-                     throw FromDigits.NumberTooLarge(s"exponent too large: $edigits")
-                 (mantissaDigits, expo)
+             val (mantissaDigits, givenExponent) =
+               digits.toUpperCase.split('E') match
+                 case Array(mantissaDigits, edigits) =>
+                   val expo =
+                     try FromDigits.intFromDigits(edigits)
+                     catch case ex: FromDigits.NumberTooLarge =>
+                       throw FromDigits.NumberTooLarge(s"exponent too large: $edigits")
+                   (mantissaDigits, expo)
 
-               case Array(mantissaDigits) =>
-                 (mantissaDigits, 0)
+                 case Array(mantissaDigits) =>
+                   (mantissaDigits, 0)
 
-             val (intPart, exponent) = mantissaDigits.split('.') match
-               case Array(intPart, decimalPart) =>
-                 (intPart ++ decimalPart, givenExponent - decimalPart.length)
+             val (intPart, exponent) =
+               mantissaDigits.split('.') match
+                 case Array(intPart, decimalPart) =>
+                   (intPart ++ decimalPart, givenExponent - decimalPart.length)
 
-               case Array(intPart) =>
-                 (intPart, givenExponent)
+                 case Array(intPart) =>
+                   (intPart, givenExponent)
 
              BigFloat(BigInt(intPart), exponent)
 
@@ -8462,12 +8348,11 @@
          To do this, replace the ~FromDigits~ /instance/ in the ~BigFloat~ /object/
        by the following two definitions:
        #+begin_src scala
-         object BigFloat {
+         object BigFloat:
            // ...
 
-           class FromDigits extends FromDigits.Floating[BigFloat] {
+           class FromDigits extends FromDigits.Floating[BigFloat]:
              def fromDigits(digits: String) = apply(digits)
-           }
 
            // TODO: FIXME
            given FromDigits with
@@ -8477,22 +8362,18 @@
 
            private def fromDigitsImpl(digits: Expr[String])
                                      (using ctx: Quotes): Expr[BigFloat] =
-             digits.value match {
+             digits.value match
                case Some(ds) =>
-                 try {
+                 try
                    val BigFloat(m, e) = apply(ds)
                    '{BigFloat(${Expr(m)}, ${Expr(e)})}
-                 }
-                 catch {
-                   case ex: FromDigits.FromDigitsException =>
+                 catch case ex: FromDigits.FromDigitsException =>
                      ctx.error(ex.getMessage)
                      '{BigFloat(0, 0)}
-                 }
 
                case None =>
                  '{apply($digits)}
-             }
-         }  // end BigFloat
+         end BigFloat
        #+end_src
        + The /macro/ implementation takes an argument of /type/ ~Expr[String]~ and
          yields a result of /type/ ~Expr[BigFloat]~. It tests whether its argument
@@ -8549,21 +8430,19 @@
 
 **** Example
      #+begin_src scala
-       object StructuralTypeExample {
-         case class Record(elems: (String, Any)*) extends Selectable {
-           def selectDynamic(name: String): Any = elems.find(_._1 == name).get._2
-         }
+       class Record(elems: (String, Any)*) extends Selectable:
+         private val fields = elems.toMap
+         def selectDynamic(name: String): Any = fields(name)
 
-         type Person = Record {
-           val name: String
-           val age: Int
-         }
+       type Person = Record {
+         val name: String
+         val age: Int
+       }
 
-         def main(args: Array[String]): Unit = {
-           val person = Record("name" -> "Emma", "age" -> 42).asInstanceOf[Person]
-           println(s"${person.name} is ${person.age} years old.")
-           // Prints: Emma is 42 years old.
-         }
+       @main def main(args: Array[String]): Unit = {
+         val person = Record("name" -> "Emma", "age" -> 42).asInstanceOf[Person]
+         println(s"${person.name} is ${person.age} years old.")
+         // Prints: Emma is 42 years old.
        }
      #+end_src
 
@@ -8595,14 +8474,16 @@
 
      - Example:
        #+begin_src scala
-         trait MultiSet[T] {
+         import scala.annotation.targetName
+
+         trait MultiSet[T]:
            infix def union(other: MultiSet[T]): MultiSet[T]
 
            def difference(other: MultiSet[T]): MultiSet[T]
 
            @targetName("intersection")
            def *(other: MultiSet[T]): MultiSet[T]
-         }
+         end MultiSet
 
          val s1, s2: MultiSet[Int]
 
@@ -8662,8 +8543,9 @@
            infix def op[T](x: T)(y: S): R         // OK
            infix def op[T](x: T, y: S): R         // error: two parameters
 
-           infix def (x: A) op (y: B): R          // OK
-           infix def (x: A) op (y1: B, y2: B): R  // error: two parameters
+           extension (x: A)
+             infix def op4(y: B): R          // OK
+             infix def op5(y1: B, y2: B): R  // error: two parameters
          #+end_src
 
       4. ~infix~ can also be given to /type, trait or class definitions/
@@ -8716,8 +8598,8 @@
 
        def condition =
          x > 0
-           || xs.exists(_ > 0)
-           || xs.isEmpty
+         || xs.exists(_ > 0)
+         || xs.isEmpty
      #+end_src
 
      - Thanks to the *change* of /semicolon inference/.
@@ -8741,8 +8623,8 @@
        * No following legal operand
          #+begin_src scala
            println("hello")
-             ???
-             ??? match { case 0 => 1 }
+           ???
+           ??? match { case 0 => 1 }
          #+end_src
          + The second line ~???~ doesn't have a following operand.
 
@@ -8845,11 +8727,11 @@
            /*!*/ implicit val x = ...  // error: type must be given explicitly
 
            /*!*/ implicit def y = ...  // error: type must be given explicitly
+         }
 
-           val y = {
-             implicit val ctx = this.ctx  // ok
-             // ...
-           }
+         val y = {
+           implicit val ctx = this.ctx  // ok
+           // ...
          }
        #+end_src
        + Scala 3:
@@ -8886,10 +8768,9 @@
          package p
          given a: A = A()
 
-         object o {
+         object o:
            given b: B = B()
            type C
-         }
        #+end_src
        + Both ~a~ and ~b~ are visible as /impicits/ at the point of the definition
          of /type/ ~C~.
@@ -9116,10 +8997,9 @@
          implicit def ordT[T, S](
            implicit conv: Conversion[T, S],
                     ordS: Ordering[S]
-         ): Ordering[T] = {
+         ): Ordering[T] =
            // `ordS` compares values of type `S`, but we can convert from `T` to `S`
            (x: T, y: T) => ordS.compare(x, y)
-         }
 
          class A(val x: Int)  // The type for which wewant an `Ordering`
 
@@ -9140,10 +9020,9 @@
            given ordT[T, S](
              using conv: Conversion[T, S],
                    ordS: Ordering[S]
-           ): Ordering[T] = {
+           ): Ordering[T] =
              // `ordS` compares values of type `S`, but we can convert from `T` to `S`
              (x: T, y: T) => ordS.compare(x, y)
-           }
 
            class A(val x: Int)  // The type for which wewant an `Ordering`
 
@@ -9197,22 +9076,21 @@
 
     - This has several consequences:
       1. ~match~ expressions can be chained:
+         =FIXME=
          #+begin_src scala
-           xs match {
+           xs match
              case Nil    => "empty"
              case h :: t => "nonempty"
-           } match {
+           match
              case "empty"    => 0
              case "nonempty" => 1
-           }
          #+end_src
 
-      2. ~match~ may follow a /period/: =TODO= check the concept of /period/
+      2. ~match~ may follow a /period/:
          #+begin_src scala
-           if xs.match {
+           if xs.match
              case Nil => false
              case _   => true
-           }
            then "nonempty"
            else "empty"
          #+end_src
@@ -9233,17 +9111,16 @@
       them in expressions, using ~a : _*~ type annotation:
       + NEW:
         #+begin_src scala
-          xs match {
+          xs match
             case List(1, 2, xs: _*) => println(xs)  // binds xs
             case List(1, _: _*)     =>              // wildcard pattern
-          }
         #+end_src
 
       + OLD:
         it is shorter but _less regular_, and it no longer supported.
         #+begin_src scala
           /*!*/  case List(1, 2, xs @ _*) =>  // syntax error
-          /*!*/  case List(1, _ @ _*)     =>  // syntax error
+          /*!*/  case List(1, _*)         =>  // syntax error
         #+end_src
 
 **** Compatibility considerations
@@ -9297,7 +9174,9 @@
          val first :: rest = elems  // error in Scala 3.1; work in Scala 2
        #+end_src
        + Use ~@unchecked~ to avoid the error:
-         ~val first :: rest : @unchecked = elems~
+         #+begin_src scala
+           val first :: rest = elems: @unchecked  // OK
+         #+end_src
 
 **** Pattern Bindings in ~for~ Expressions
      - In Scala 2, /pattern bindings/ in ~for~ expressions do _implicit filtering_,
@@ -9655,23 +9534,20 @@
 
     - Example:
       #+begin_src scala
-        @main def happyBirthday(age: Int, name: String, others: String*): Unit = {
+        @main def happyBirthday(age: Int, name: String, others: String*): Unit =
           val suffix =
-            (age % 100) match {
+            age % 100 match
               case 11 | 12 | 13 => "th"
               case _ =>
-                (age % 10) match {
+                age % 10 match
                   case 1 => "st"
                   case 2 => "nd"
                   case 3 => "rd"
                   case _ => "th"
-                }
-            }
 
           val bldr = new StringBuilder(s"Happy $age$suffix birthday, $name")
           for other <- others do bldr.append(" and ").append(other)
           bldr.toString
-        }
       #+end_src
       This would generate a main program ~happyBirthday~ that could be called like this
       #+begin_src bash
@@ -9722,7 +9598,7 @@
 
     - Code generation example:
       #+begin_src scala
-        final class happyBirthday {
+        final class happyBirthday:
           import scala.util.{CommandLineParser => CLP}
           <static> def main(args: Array[String]): Unit =
             try
@@ -9730,16 +9606,14 @@
                 CLP.parseArgument[Int](args, 0),
                 CLP.parseArgument[String](args, 1),
                 CLP.parseRemainingArguments[String](args, 2))
-            catch {
+            catch
               case error: CLP.ParseError => CLP.showError(error)
-            }
-        }
       #+end_src
-      NOTE:
-      The ~<static>~ modifier above expresses that the main method is
-      generated as a /static method/ of /class/ ~happyBirthDay~.
-        It is *NOT* available for user programs in Scala. Regular "static"
-      members are generated in Scala using objects instead.
+      * NOTE:
+        The ~<static>~ modifier above expresses that the main method is
+        generated as a /static method/ of /class/ ~happyBirthDay~.
+          It is *NOT* available for user programs in Scala. Regular "static"
+        members are generated in Scala using objects instead.
 
     - ~@main~ methods are the recommended scheme to generate programs that can be
       invoked from the command line in Scala 3.
@@ -9747,10 +9621,9 @@
     - They replace the previous scheme to write program as objects with a special
       ~App~ parent class. In Scala 2, ~happyBirthday~ could be written also like this:
       #+begin_src scala
-        object happyBirthday extends App {
+        object happyBirthday extends App:
           // needs by-hand parsing of arguments vector
           // ...
-        }
       #+end_src
       + The previous functionality of ~App~, which relied on the "magic"
         ~DelayedInit~ trait, is *no longer available*.
@@ -9836,10 +9709,10 @@
       * Under the new syntax rules, this code can be written also without the
         awkward ~({...})~ bracketing like this:
         #+begin_src scala
-          while {
+          while
             i += 1
             f(i) == 0
-          } do ()
+          do ()
         #+end_src
 
     - The idea to
@@ -9847,10 +9720,10 @@
       also gives a solution to the "loop-and-a-half" problem.
       For instance:
       #+begin_src scala
-        while {
+        while
           val x: Int = iterator.next()
           x >= 0
-        } do print(".")
+        do print(".")
       #+end_src
       
 **** Why Drop The Construct?

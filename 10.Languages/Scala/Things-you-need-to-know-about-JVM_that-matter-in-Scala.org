@@ -5,8 +5,73 @@
 * What is JVM - 1
 ** Primitives and references - 2
 ** Operations - 5
+   - In general, JVM follows the /von Neumann architecture/.
+     * When you do computation,
+       + some part of your memory contains _data_ the program operates on
+       + some part of your memory contains the _program itself_.
+
+     * At ANY given moment:
+       1. the computer knows that it is at exactly this point of the program,
+          by keeping trace of the memory address of current instruction,
+
+       2. the computer fetches the instruction from under the address,
+
+       3. then executes it,
+
+       4. after that it moves to the next instruction in the memory - unless the
+          instruction was to jump to another part of the program it would be the
+          next instruction right after the one we just finished.
+
+   - This /memory address/ of a program on JVM is, again, an implementation detail.
+     * JVM specification would tell you that EACH /thread/ knows its /program counter
+       (pc)/, telling at which instruction of which method it is currently.
+
+   - Additionally,
+     * computer can have /registers/ which store data that are intended to use by
+       the *current* operation.
+
+     * /Instructions/, whether it is CPU's instruction, or JVM's bytecode,
+       USUALLY *only* operate on these /registers/ (though JVM call them /local
+       variables/), taking values to process from them and storing the result in
+       /registers/ as well. (Exceptions would be things like _loading data from the
+       memory to registers and vice versa_).
+
+   - =TODO= NOTE =TODO=
+     
 ** More about memory - 9
 *** Stack - 9
+    - When we step into a function, compiler can calculate some things e.g.:
+      * how many local variables will we need during a whole call
+      * how much space will they take - primitives’ size depend of their type and references have a fixed size
+
+    - It means, that every time compiler step into a function, it knows perfectly
+      how much size it needs in order to be able to call function. That
+      description holding all pieces of information about a call is called a
+      frame. What JVM does when it calls a function is creation of a new frame
+      for it, populating the variables storing arguments and putting in on a
+      stack. This stack of frames is separate from stack of operands (which we
+      saw in action in the example above) - they have a similar name, because
+      stack is the name of a data structure which pops element out in reverse
+      order to which we popped them in, aka last-in-first-out queue (LIFO).
+      Operand stack is created separately for each frame.
+
+    - How the /stack/ of /frames/ looks like, we can see every time we receive an
+      ~Exception~. An example in Ammonite:
+      =TODO=
+      As we can see, Ammonite has a method <clinit> which called method d, which
+      called c, which called b, which called a which threw Exception, and
+      Exception preserved information about the state of stack at the moment of
+      its creation. It is one of these build-in mechanisms of JVM, that makes
+      our life much easier than e.g. C/C++ programmer’s life (who not only would
+      get crash, but also without much information to figure out the cause).
+
+    - Similarly to C and C++, /JVM stack/ is intended to be _relatively SMALL._
+      * Each /frame/ contains _ONLY_ /references/ or /primitives/,
+        so it shouldn't grow too large,
+
+      * depth of calls is also expected to be finite and small,
+        so that whole /stack/ is _usually UNDER a few megabytes in size._
+        
 *** Heap - 14
 *** Boxing and unboxing - 15
 *** JVM types vs Scala type hierarchy - 16
