@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-RC1-bin-20201228-029ae77-NIGHTLY --> 3.0.0-RC1-bin-20201229-d932af9-NIGHTLY
+#+VERSION: 3.0.0-RC1-bin-20201228-029ae77-NIGHTLY --> 3.0.0-RC1-bin-20210101-141bf9e-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -192,7 +192,8 @@
 *** Default Includes
 
 * TODO Reference
-** TODO Overview
+** DONE Overview
+   CLOSED: [2021-01-02 Sat 02:05]
 *** DONE Goals - =RE-READ=
     CLOSED: [2020-12-09 Wed 23:44]
     - The language REDESIGN was guided by _THREE_ main goals:
@@ -373,8 +374,60 @@
         + XML literals =TODO=
         + compound types =???= =TODO=
       
-*** TODO Changes
-*** TODO New Constructs
+*** DONE Changes - =Read in Details=
+    CLOSED: [2021-01-02 Sat 01:56]
+    - These constructs have undergone changes to make them more regular and useful.
+      * /Structural Types/:
+        They now allow pluggable implementations, which greatly increases their
+        usefulness.
+        =TODO= =???= Some usage patterns are restricted compared to the status quo.
+
+      * /Name-based pattern matching/: =FIXME= =Use current name: Option-less pattern matching=
+        The existing undocumented Scala 2 implementation has been codified in a
+        slightly simplified form.
+
+      * /Eta expansion/ =FIXME= 1. =use :=; 2. =--> Automatic Eta Expansion=
+        is now performed universally also in the absence of an expected type.
+        The postfix ~_~ operator is thus made redundant. It will be deprecated
+        and dropped after Scala 3.0.
+
+      * /Implicit Resolution/:
+        The /implicit resolution rules/ have been *cleaned up* to make them
+        *more useful and less surprising*.
+        + /Implicit scope/ is restricted to *no longer include* /package prefixes/. =???= =TODO=
+
+    - Most aspects of _old-style_ /implicit resolution/ are still available under
+      =-source 3.0-migration=.
+      * The other changes in this list are *applied UNCONDITIONALLY*.
+    
+*** DONE New Constructs - =Read in Details=
+    CLOSED: [2021-01-02 Sat 02:05]
+    These are additions to the language that make it more powerful or pleasant to
+    use.
+    * /Enums/
+      provide *concise syntax* for /enumerations/ and /algebraic data types/.
+
+    * /Parameter untupling/
+      avoids having to use case for /tupled parameter destructuring/.
+
+    * /Dependent function types/ =TODO= =RE-READ=
+      *generalize* /dependent methods/ to /dependent function values and types/.
+
+    * /Polymorphic function types/ =TODO= =RE-READ=
+      *generalize* /polymorphic methods/ to /polymorphic function values and types/.
+      + Current status:
+        There is a proposal and a _merged PROTOTYPE implementation_,
+        BUT the implementation _has *NOT* been finalized_ (it is notably *missing*
+        type inference support).
+
+    * /Kind polymorphism/
+      allows the definition of operators working equally on /types/ and /type
+      constructors/.
+
+    * ~@targetName~ annotations
+      make it easier to *interoperate* with code _written in other languages_ and
+      give MORE FLEXIBILITY for _avoiding /name clashes/._
+
 *** DONE Metaprogramming
     CLOSED: [2020-12-10 Thu 00:25]
     The following constructs together aim to put /metaprogramming/ in Scala on a
@@ -431,7 +484,8 @@
       * *Stabilizing* the feature set needed for metaprogramming is our
         *FIRST priority*.
       
-*** TODO See Also - =IMPORTANT= =READ=
+*** DONE See Also - =IMPORTANT= =READ=
+    CLOSED: [2021-01-02 Sat 02:05]
     A [[https://dotty.epfl.ch/docs/reference/features-classification.html][classification of proposed language features]] is an *expanded version* of
     this page that
     - _ADDS the status_ (i.e.
