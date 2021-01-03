@@ -800,73 +800,108 @@
 ** DONE Summary - 30
    CLOSED: [2021-01-02 Sat 01:25]
    
-* DONE 3. Common Programming Concepts - 31 - =START=
-  CLOSED: [2017-08-17 Thu 23:57]
-  *Keywords* See Appendix A =TODO=
+* DONE 3. Common Programming Concepts - 31
+  CLOSED: [2021-01-03 Sun 03:16]
+  This chapter covers *concepts* that APPEAR IN ALMOST EVERY programming language
+  and how they work in Rust.
+    Many programming languages have much in common at their core. _NONE of the
+  concepts presented in this chapter are unique to Rust_, but we'll _discuss them
+  in the context_ of Rust and explain the conventions around using these concepts.
+    
+  - Specifically, you'll learn about
+    * variables
+    * basic types
+    * functions
+    * comments
+    * control flow
+
+    These foundations will be in every Rust program, and learning them early
+    will give you a strong core to start from.
+
+  - *Keywords* See Appendix A =TODO=
+    
 ** DONE Variables and Mutability - 32
-   CLOSED: [2017-08-17 Thu 00:51]
+   CLOSED: [2021-01-02 Sat 14:02]
 *** DONE Differences Between Variables and Constants - 34
-    CLOSED: [2017-08-17 Thu 00:41]
+    CLOSED: [2021-01-02 Sat 13:54]
     - Rust has ~const~ keyword.
 
-    - Constants are NOT only immutable by default, they're always immutable.
+    - /Constants/ *must be* /immutable/.
 
-    - The type of constant (declared with ~const~) _must_ be annotated.
+    - The /type/ of /constant/ (declared with ~const~) *must be* annotated.
 
-    - Constants can be declared in any scope, including the global scope.
+    - /Constants/ can be declared in any /scope/, including the /global scope/.
 
-    - A constant can ONLY be set to a constant expression,
+    - A /constant/ can ONLY be set to a /constant expression/,
+      (=from Jian= I use *ONLY* here, and WHY does this book use *may be*???)
       NOT
-      + the result of a function call
+      * the result of a function call
         or
-      + any other value that could only be computed at runtime.
+      * any other value that could only be computed at runtime.
 
-    - ~_~'s are allowed when you write a number, and they will be ignored when do
-      evaluation.
+    - Example:
+      #+begin_src rust
+        const MAX_POINTS: u32 = 100_000;
+      #+end_src
 
+    - /Constants/ are *valid*
+      * for the entire time a program runs,
+      * within the scope they were declared in,
+        
+      making them a useful choice for values in your application domain that
+      multiple parts of the program might need to know about
+
+    - Naming hardcoded values used throughout your program as /constants/ is useful
+      in _conveying the meaning of that value to future maintainers of the code._
+      
 *** DONE Shadowing - 34
-    CLOSED: [2017-08-17 Thu 00:44]
-    _I the /shadowing/ feature is BAD._
+    CLOSED: [2021-01-02 Sat 14:02]
+    _I think the /shadowing/ feature is BAD._
+
+    - Shadowing is different from ~mut~.
+      * It actually create a new variable (~mut~ or not).
+        Since it is NEW, it can have a DIFFERENT /type/.
 
     =From Jian=
     From my point of view, the only natural way of shadowing is in embeded scope.
-    I don't want to see shadowing happend in a flat structure.
+    I don't want to see shadowing happend in a flat structure, though it is actually
+    a new scope -- start from the point that the shadowing happens.
 
-    There should a feature to let you write down the transition of types of
-    a varaible, and this transition only describes the type transition in the
-    local scope.
 ** DONE Data Types - 36
-   CLOSED: [2017-08-17 Thu 21:53]
-   Sometime the type CANNOT be inferred, you must add the type annotation.
-
-   For example, ~parse~ below need to know the type of its result, or it does NOT
-   know what to do: ~let guess: u32 = "42".parse().expect("Not a number!");~
-
+   CLOSED: [2021-01-03 Sun 01:59]
+   Look at two data type subsets: /scalar/ and /compound/.
+   
 *** DONE Scalar Types - 36
-    CLOSED: [2017-08-17 Thu 21:53]
-    - /scala types/ :: The types of some single values.
+    CLOSED: [2021-01-03 Sun 00:32]
+    - /scala type/ :: A type represents a single value.
 
-    - Four primary scalar types in Rust:
+    - _FOUR_ primary /scalar types/ in Rust:
       + integers
       + floating-point numbers
-      + booleans
+      + Booleans
       + characters
 
 **** DONE Integer Types
-     CLOSED: [2017-08-17 Thu 04:15]
-     Table 3-1: Integer Types in Rust
+     CLOSED: [2021-01-03 Sun 00:32]
+     - integer :: a number WITHOUT a fractional component.
 
-     | Length | Signed | Unsigned |
-     |--------+--------+----------|
-     | 8-bit  | i8     | u8       |
-     | 16-bit | i16    | u16      |
-     | 32-bit | i32    | u32      |
-     | 64-bit | i64    | u64      |
-     | arch   | isize  | usize    |
+     - Each variant can be either /signed/ or /unsigned/ and has an explicit size.
 
-     - signed numbers range: -(2 ^ (n-1)) to (2 ^ (n-1)) - 1 inclusive.
+     - Table 3-1: Integer Types in Rust
+       | Length  | Signed | Unsigned |
+       |---------+--------+----------|
+       | 8-bit   | i8     | u8       |
+       | 16-bit  | i16    | u16      |
+       | 32-bit  | i32    | u32      |
+       | 64-bit  | i64    | u64      |
+       | 128-bit | i128   | u128     |
+       | arch    | isize  | usize    |
 
-     - unsigned variants can store numbers from 0 to 2^n - 1
+     - Each signed variant range: -(2 ^ (n-1)) to (2 ^ (n-1)) - 1 inclusive.
+
+     - Each unsigned variant can store numbers from 0 to 2^n - 1
+
+     - Signed numbers are stored using /two's complement/ representation.
 
      - ~isize~ and ~usize~ depend on the architectures:
        32-bit for 32-bit architecture;
@@ -874,104 +909,150 @@
 
      - All number literals _except the byte literal_ allow a /type suffix/, for
        example: ~57u8~
-       =IMPORTANT=
 
      - ~_~ as a visual separator, such as ~1_000~. You can put the ~_~ anywhere
        in numbers.
 
      - Table 3-2: Integer Literals in Rust
-       | Number literals | Example     |
-       |-----------------+-------------|
-       | Decimal         | 98\under222      |
-       | Hex             | 0xff        |
-       | Octal           | 0o77        |
-       | Binary          | 0b1111\under0000 |
-       | Byte(~u8~ only) | b'A'        |
+       | Number literals | Example       |
+       |-----------------+---------------|
+       | Decimal         | ~98\under222~      |
+       | Hex             | ~0xff~        |
+       | Octal           | ~0o77~        |
+       | Binary          | ~0b1111\under0000~ |
+       | Byte(~u8~ only) | ~b'A'~        |
 
-     - If you don't know which type of integer to use, use the default ~i32~.
-       It is generally the fastest, even on 64-bit systems.
+     - If you don't know which type of integer to use,
+       use the default ~i32~. _It is generally the fastest, even on 64-bit systems._
 
      - The primary situation in which you'd use ~isize~ or ~usize~ is when
        indexing some sort of collection.
        =From Jian= This sounds like the ~size_t~ type in C.
 
+     - *Integer Overflow*
+       - Compile in *debug mode*,
+         Rust includes checks for /integer overflow/ that cause your program to
+         panic at runtime if this behavior occurs.
+         * =TODO= "Unrecoverable Errors with panic!" section in Chapter 9.
+
+       - Compile in *release mode* with the ~--release~ flag,
+         1. Rust does _not include checks_ for /integer overflow/ that cause
+            /panics/.
+         2. Instead, if overflow occurs, Rust performs /two's complement wrapping/.
+            * The program won't /panic/,
+              BUT the variable will have a value that probably isn't what you
+              were expecting it to have.
+
+            * *Relying on integer overflow's wrapping behavior is considered an error.*
+              If you want to _wrap EXPLICITLY_, you can use the /standard library
+              type/ ~Wrapping~.
+
 **** DONE Floating-Point Types
-     CLOSED: [2017-08-17 Thu 21:50]
+     CLOSED: [2021-01-03 Sun 00:32]
      ~f32~ (IEEE-754 single-precision) and ~f64~ (IEEE-754 double-precision).
-     The performance of ~f32~ is bettern in the 32bit systems.
-     The performance of ~f64~ is bettern in the 64bit systems.
-     #+BEGIN_SRC rust
-       fn main() {
-           let x = 2.0; // f64
-           let y: f32 = 3.0; // f32
-       }
-     #+END_SRC
+
+     - *By default* the /floating type/ is ~f64~
+       because
+       on modern CPUs it's *roughly the same speed* as ~f32~
+       but is capable of _more precision_.
+       
+     - Example:
+       #+begin_src rust
+         fn main() {
+             let x = 2.0; // f64
+             let y: f32 = 3.0; // f32
+         }
+       #+end_src
 
 **** DONE Numeric Operations
-     CLOSED: [2017-08-17 Thu 21:51]
+     CLOSED: [2021-01-03 Sun 00:32]
      ~+~, ~-~, ~*~, ~/~, ~%~
      Read Appendix B.
 
 **** DONE The Boolean Type
-     CLOSED: [2017-08-17 Thu 21:53]
+     CLOSED: [2021-01-03 Sun 00:32]
      Type name ~bool~. Its values: ~true~ and ~false~.
 
 **** DONE The Character Type
-     CLOSED: [2017-08-17 Thu 04:19]
-     In Rust, ~char~ type values are Unicode Scalar Values.
+     CLOSED: [2021-01-03 Sun 00:32]
+     In Rust, ~char~ type values are /Unicode Scalar Values/.
      Range: from =U+0000= to =U+D7FF= and =U+E000= to =U+10FFFF= inclusive.
 
-     However, a "character" is NOT really a concept in Unicode, so your human
-     intuition for what a "charactr" is may NOT match up with what a ~char~ is in
-     Rust.
-     =TODO= Chapter 8
+     - However, a "character" is NOT really a concept in Unicode, so your human
+       intuition for what a "charactr" is may NOT match up with what a ~char~ is
+       in Rust.
+       =TODO=
+       Discuss this topic in detail in "Strong UTF-8 Encoded Text with Strings"
+       in Chapter 8
 
 *** DONE Compound Types - 40
-    CLOSED: [2017-08-17 Thu 03:57]
+    CLOSED: [2021-01-03 Sun 01:59]
 **** DONE The Tuple Type
-     CLOSED: [2017-08-17 Thu 00:54]
+     CLOSED: [2021-01-03 Sun 01:15]
     - ~let tup: (i32, f64, u8) = (500, 6.4, 1);~
-      + Pattern matching is a good way to extract value(s) from a tuple.
+      * Pattern matching is a good way to extract value(s) from a tuple.
         ~let (x, y, z) = tup;~
 
-      + ~.~ syntax
-        ~tup.0~ is ~(500 : i32)~.
+      * ~.~ syntax
+        ~tup.0~ is ~500~.
 
 **** DONE The Array Type
-     CLOSED: [2017-08-17 Thu 03:57]
+     CLOSED: [2021-01-03 Sun 01:59]
      Rust /arrays/ have a fixed length: once declared, they CANNOT grow or shrink
      in size.
-     ~let a = [1, 2, 3, 4, 5];~
+     ~let a: [i32; 5] = [1, 2, 3, 4, 5];~
 
-     - Arrays are useful
-       + when you want your data allocated on the /stack/ _rather than_ the
+     - /Arrays/ are useful
+       * when you want your data allocated on the /stack/ _rather than_ the
          /heap/ (=TODO= we will discuss the /stack/ and the /heap/ more in
          Chapter 4),
          or
-       + when you want to ensure you always have a fixed number of elements.
+       * when you want to ensure you always have a fixed number of elements.
 
+     - /Arrays/ are not as flexible as /vectors/.
+       If you're unsure whether to use an /array/ or a /vector/, you should probably
+       use a /vector/.
+       =TODO= Chapter 8 discusses /vectors/ in more detail.
+
+     - Create an array that contains the _same_ value for EACH element:
+       ~let a = [3; 5];~
+       
 ***** DONE Accessing Array Elements
-      CLOSED: [2017-08-17 Thu 03:57]
-      ~a[0]~
+      CLOSED: [2021-01-03 Sun 01:59]
+      An /array/ is a SINGLE chunk of memory allocated on the /stack/.
+      
+      - Acces elements of an /array/ using /indexing/, ~a[0]~.
+      
 ***** DONE Invalid Array Element Access
-      CLOSED: [2017-08-17 Thu 03:57]
-      - When this happens, compilation wouldn't produce any errors, but the
-        program would result in a /runtime error/.
+      CLOSED: [2021-01-03 Sun 01:59]
+      - When this happens,
+        Generally speaking, compilation wouldn't produce any errors,
+        * BUT when the index info can be known at compile time, errors can be
+          reported.
 
+        * When the index info is unknown at compile time (most cases), Rust will
+          /panic/ at runtime.
+          
       - /panic/ :: a program exits with an error.
 
       - =TODO= Chapter 9 error handling.
-
+        
+      - In many low-level languages, such as C, this kind of check is NOT done.
+        
 ** DONE Functions - 43
-   CLOSED: [2017-08-17 Thu 22:30]
-   /snake case/: all letters are lowercase and underscores separate words.
+   CLOSED: [2021-01-03 Sun 02:30]
+   - Rust function name convention: /snake case/.
+
+   - /snake case/: all letters are lowercase and underscores separate words.
 
 *** DONE Function Parameters - 44
-    CLOSED: [2017-08-17 Thu 22:14]
+    CLOSED: [2021-01-03 Sun 02:04]
     - Technically, the concrete values are called /arguments/.
 
     - In casual conversation people tend to use the words "parameter" and
       "argument" interchangeably.
+
+    - In /function signatures/, you *must* declare the /type/ of EACH /parameter/.
 
     - Example:
       #+BEGIN_SRC rust
@@ -986,8 +1067,14 @@
         }
       #+END_SRC
 
-*** DONE Statements and Expressions in Function Bodies - 45
-    CLOSED: [2017-08-17 Thu 22:29]
+*** DONE Function Bodies Contain Statements and Expressions - 45
+    CLOSED: [2021-01-03 Sun 02:24]
+    - /Function bodies/ are made up of a series of /statements/ OPTIONALLY ENDING
+      in an /expressions/.
+
+    - Because Rust is an /expression-based language/,
+      the distinction between /statements/ and /expressions/ is IMPORTANT.
+
     - /statements/ :: instructions that perform some action and do not return a
                       value.
 
@@ -997,7 +1084,33 @@
 
     - Calling a _macro_ is an expression.
 
-    - The _block_ that we use to create new scopes, {}, is an expression.
+    - =IMPORTANT=
+      Different from many other languages, a /Rust statement/ does *NOT* have
+      /return value/.
+      * The ~let x = (let y = 6);~ is *illegal*.
+        In many other languages, a similar /statement/ is illegal.
+        + In C (Ruby is similar), both ~x~ and ~y~ are ~6~.
+          =from Jian= I don't like this way.
+          #+begin_src c
+            #include <stdio.h>
+
+            int main(void) {
+              int y = 4;
+              int x = (y = 6);
+              printf("x = %d, y = %d\n", x, y);
+            }
+          #+end_src
+
+        + In Scala, ~x~ is ~()~, a ~Unit~ value. _This is reasonable._
+          #+begin_src scala
+            var y = 4
+
+            val x = (y = 6)
+            // x: Unit = ()
+            // y: Int = 6
+          #+end_src
+
+    - The _block_ that we use to *create new* /scopes/, ~{}~, is an /expression/.
       #+BEGIN_SRC rust
         let y = {
             let x = 3;
@@ -1005,31 +1118,45 @@
         };
       #+END_SRC
 
-    - =IMPORTANT=
-      Expressions do NOT include ending semicolons.
-      If you add a semicolon to the end of an expression, you turn it into a
-      statement, which _will then NOT return a value_.
+    - =IMPORTANT= =CRITICAL=
+      /Expressions/  *MUSTN'T* include ending semicolons.
+        If you add a semicolon to the end of an /expression/, you turn it into a
+      /statement/, which _will then NOT return a value_.
+      
 *** DONE Functions with Return Values - 47
-    CLOSED: [2017-08-17 Thu 22:29]
-    - Anotate the return value type of a function:
-      #+BEGIN_SRC rust
-        fn plus_one(x: i32) -> i32 {
-            x + 1
-            // NO ;
-        }
+    CLOSED: [2021-01-03 Sun 02:28]
+    Anotate the /return value type/ of a function:
+    #+BEGIN_SRC rust
+      fn plus_one(x: i32) -> i32 {
+          x + 1
+          // NO ;
+      }
 
-        fn main() {
-            let x = plus_one(5);
-            println!("The value of x is: {}", x);
-        }
-      #+END_SRC
+      fn main() {
+          let x = plus_one(5);
+          println!("The value of x is: {}", x);
+      }
+    #+END_SRC
 
-** TODO Comments - 49
+    - GOOD NEWS:
+      If you add a ~;~ after the ~x + 1~ in ~plus_one~,
+      since no /return value/ from a /statement/, you will see a compile error
+      of "mismatch types", and a suggestion:
+      =- help: consider removing this semicolon=
+
+** DONE Comments - 49
+   CLOSED: [2021-01-03 Sun 02:30]
    ~//~
+   
+   - Rust also has _another kind_ of /comment/, /documentation comments/,
+     =TODO=
+     which we'll discuss in the “Publishing a Crate to Crates.io” section of
+     _Chapter 14_.
+     
 ** DONE Control Flow - 49
-   CLOSED: [2017-08-17 Thu 23:57]
+   CLOSED: [2021-01-03 Sun 03:15]
 *** DONE ~if~ Expressions - 49
-    CLOSED: [2017-08-17 Thu 22:33]
+    CLOSED: [2021-01-03 Sun 02:45]
     #+BEGIN_SRC rust
       if number < 5 {
           println!("condition was true");
@@ -1038,32 +1165,79 @@
       }
     #+END_SRC
 
-    The branches of a ~if ... else~ structure is also called /arms/.
+    The _branches_ of a ~if ... else~ structure is also called /arms/.
+    Just like the /arms/ in ~match~ /expression/.
 
 **** DONE Handling Multiple Conditions with ~else if~
-     CLOSED: [2017-08-17 Thu 22:34]
-     In many cases, ~match~ is a better way.
-     =TODO= CHAPTER 6
+     CLOSED: [2021-01-03 Sun 02:39]
+     In many cases,
+     to avoid cluter your code with too many ~else if~ expressions,
+     ~match~ is a better way.
+     
+     =TODO= CHAPTER 6 describes ~match~.
+     
 **** DONE Using ~if~ in a ~let~ statement
-     CLOSED: [2017-08-17 Thu 22:35]
+     CLOSED: [2021-01-03 Sun 02:45]
+     Because ~if~ is an /expression/,
+     we can use it on the right side of a ~let~ /statement/.
 
+     - In this way, all /arms/ *must* have the *same* /type/.
+     
 *** DONE Repetition with Loops - 54
-    CLOSED: [2017-08-17 Thu 23:57]
+    CLOSED: [2021-01-03 Sun 03:15]
+    Rust has _THREE_ kinds of /loops/:
+    - ~loop~
+    - ~while~
+    - ~for~
+    
 **** DONE Repeating Code with ~loop~
-     CLOSED: [2017-08-17 Thu 22:37]
+     CLOSED: [2021-01-03 Sun 02:49]
      ~loop~ is like the ~while(true)~ in the C programming language.
 
+     - Use ~break~ to quite programmatically.
+
+     - Use =^C= (Ctrl-C) to quite in terminal at runtime.
+
+**** DONE Returning Values from Loops
+     CLOSED: [2021-01-03 Sun 02:52]
+     #+begin_src rust
+       fn main() {
+           let mut counter = 0;
+
+           let result = loop {
+               counter += 1;
+
+               if counter == 10 {
+                   break counter * 2;
+               }
+           };
+
+           println!("The result is {}", result);
+       }
+     #+end_src
+
+     - =from Jian=
+       This is a feature that is different from other languages.
+     
 **** DONE Conditional Loops with ~while~
-     CLOSED: [2017-08-17 Thu 22:38]
+     CLOSED: [2021-01-03 Sun 02:54]
      #+BEGIN_SRC rust
        while number != 0 {
            println!("{}!", number);
-           number = number - 1;
+    
+           number -= 1;
        }
      #+END_SRC
 
+     - ~while~ could be implemented using a combination of ~loop~, ~if~,
+       ~else~, and ~break~; you could try that now in a program, if you'd like.
+         However, this pattern is so common that Rust has a built-in language
+       construct for it. This pattern is eliminate a lot of nesting that would
+       be necessary if you used ~loop~, ~if~, ~else~, and ~break~, and it's
+       CLEARER.
+       
 **** DONE Looping Through a Collection with ~for~
-     CLOSED: [2017-08-17 Thu 22:42]
+     CLOSED: [2021-01-03 Sun 03:15]
      #+BEGIN_SRC rust
        fn main() {
            let a = [10, 20, 30, 40, 50];
@@ -1074,85 +1248,86 @@
        }
      #+END_SRC
 
-     We prefer ~for~ to ~while~. We use ~for~ to iterate a collection of data,
-     and no boundary check is needed.
+     We prefer ~for~ to ~while~. We use ~for~ to *iterate* a collection of data,
+     and no index boundary check is needed.
 
-     Use type ~Range~ values:
-     #+BEGIN_SRC rust
-       fn main() {
-           for number in (1..4).rev() {
-               println!("{}!", number);
+     - The *safety* and *conciseness* of ~for~ /loops/ make them the _most commonly
+       used_ /loop/ construct in Rust.
+       * Even in situations in which you want to run some code a certain number
+         of times, as in the countdown example that used a ~while~ loop, most
+         Rustaceans would use a ~for~ loop, combined with ~Range~.
+         #+begin_src rust
+           fn main() {
+               for number in (1..4).rev() {
+                   println!("{}!", number);
+               }
+               println!("LIFTOFF!!!");
            }
-           println!("LIFTOFF!!!");
-       }
-     #+END_SRC
-
+         #+end_src
+       
 ** DONE Summary - 57
-   CLOSED: [2017-08-17 Thu 23:57]
-* DONE 4. Understanding Ownership - 59
-  CLOSED: [2017-08-19 Sat 00:31]
-  /ownership/ is the most unique feature of Rust,
+   CLOSED: [2021-01-03 Sun 03:16]
+   
+* 4. Understanding Ownership - 59 - =START=
+  /ownership/ is the *MOST UNIQUE feature* of Rust,
   and
-  it enables Rust to make memory safety guarantees _without_ needing a garbage
-  collector.
+  it enables Rust to make
+  /memory safety/ guarantees _without_ needing a /garbage collector/.
 
   This chapter will talk about several related features:
+  - /ownership/
   - /borrowing/
   - /slice/
   - how Rust lays data out in memory.
 
-** DONE What is Ownership? - 59
-   CLOSED: [2017-08-18 Fri 01:15]
+** What is Ownership? - 59
    - ~ownership~ is the central feature of Rust.
 
-   - _Most languages_ can be group to _TWO_ categories if considering the ways
-     they manage memory:
+   - _Most languages_ can be grouped to _TWO_ categories
+     if considering _the ways they manage memory_:
      + With garbage collector
      + Explicitly call _allocate_ and _deallocate (free)_ operations to manage
        the memory.
 
-     However, Rust is different from these two categories -- it has its own
-     approach to manage memory:
+   - HOWEVER,
+     Rust is different from these two categories -- it has its own approach to
+     manage memory:
        Memory is managed through a system of /ownership/ with a set of rules that
      the compiler checks at compile time.
-       _NO run-time costs_ are incurred for any of the ownership features.
+     * _NO run-time costs_ are incurred for ANY of the /ownership/ features.
 
-       =From Jian= I think this can be considered as a semi-automatic approach,
-     you need to annotate something to make the compiler know what to do, but you
-     don't need to manually and explicitly use a _deallocation/free_ operation.
-
-   - =TODO= This chapter we work through some examples to learn how /ownership/
-     works. The examples focus on a very common data structure: _strings_.
+   - =TODO=
+     This chapter we work through some examples to learn how /ownership/
+     works. The examples focus on a very common data structure:
+     *strings*.
 
    - *The Stack and the Heap*
      - In a systems programming language like Rust, whether a value is on the
        /stack/ or the /heap/ has _more of an effect on_
-
-       + how the language behaves
-
-       + why we have to make certain decision.
+       * HOW the language behaves
+       * WHY we have to make certain decision.
 
      - Here is a brief explanation in preparation
        (We'll describe parts of /ownership/ in relation to the /stack/ and the
         /heap/ _later_ in this chapter).
 
-       + Both the /stack/ and the /heap/ are parts of memory that is available to
-         your code _at runtime_.
+       * Both the /stack/ and the /heap/ are parts of /memory/ that is available
+         to your code _at runtime_.
 
-       + /stack/ -- LIFO.
+       * /stack/ -- LIFO.
          /push on to/ and /pop off/
 
-       + Use the dat in /stack/ is fast:
-         * no need to search
-         * fixed size
+       * Use the data in /stack/ is fast:
+         + no need to search (top frame(s))
+         + fixed size
 
-       + The process of get space from /heap/ is called /allocating on the heap/.
+       * The process of get space from /heap/ is called /allocating on the heap/.
 
-       + /pointers/ (rather than the data it points to, some of which can be
-         fixed size but not all) are known and have fixed size. They can be
+       * /pointers/ (rather than the data it points to, some of which can be
+         fixed size but not all) are known and have *fixed size*. They can be
          stored on the /stack/.
 
-       + Keeping track of what parts of code are using what data on the /heap/,
+       * Keeping track of what parts of code are using what data on the /heap/,
          _minimizing the amount of duplicate data_ on the /heap/,
          and /cleaning up/ unused data on the /heap/ so we don't run out of space
          are all problems that /ownership/ addresses.
@@ -1163,31 +1338,40 @@
          /ownership/ exists can help explain why it works the way it does.
 
 *** DONE Ownership Rules - 61
-    CLOSED: [2017-08-18 Fri 01:17]
+    CLOSED: [2021-01-03 Sun 03:31]
+    =FIXME= ordered list
+
     1. _EACH_ value in Rust has a variable that's called its /owner/.
        (/owner/ is one variable)
 
     2. There can ONLY be ONE /owner/ at a time.
 
-    3. When the /owner/ goes out of scope, the value will be dropped.
+    3. When the /owner/ goes _out of /scope/,_ the value will be *dropped*.
 
 *** DONE Variable Scope - 61
-    CLOSED: [2017-08-18 Fri 01:20]
-    As in C/C++, the boundaries of a scope is marked with a pair of curly braces.
+    CLOSED: [2021-01-03 Sun 03:31]
+    As in C/C++, the boundaries of a /scope/ is marked with a pair of curly braces.
+    
+    =NEXT= Now we'll build on top of this understanding by introducing the ~String~ type.
+    
 *** DONE The ~String~ Type - 62
-    CLOSED: [2017-08-18 Fri 01:41]
+    CLOSED: [2021-01-03 Sun 03:40]
     To illustrate the rules of /ownership/, we need data that stored on the
     /heap/. The data type we mentioned in Chapter 3 are all stored on the
     /stack/ (they will be popped off the /stack/ when their scope is over, NO
     need for /ownership/).
 
-    - String literals are not enough.
-      String literals are immutable, and they have known size (of course,
-      "literal" indicates they are hard coded, and hard coded things are always
-      of known sizes).
+    - /String literals/ are NOT enough.
+      /String literals/ are *immutable*, and they have *known size* (of course,
+      "literal" indicates they are _hard coded_, and _hard coded_ things are
+      ALWAYS of known sizes).
 
-      What if we want _immutable_, and _unknow size_ space to store a sequence of
-      characters? Then we need ~String~ variables.
+      * Q :: What if we want _immutable_, and _unknow size_ space to store a
+             sequence of characters?
+      * A :: Then we need ~String~ variables.
+             Another /string type/ provided by Rust.
+               This type is allocated on the /heap/ and as such is able to store
+             an amount of text that is _unknown to us at /compile time/._
 
     - WHY ~String~ CAN be mutated but literals CANNOT?
       #+BEGIN_SRC rust
@@ -1198,59 +1382,63 @@
 
       _The difference is how these two types deal with memory._
 
-*** DONE Memory and Allocation - 63
-    CLOSED: [2017-08-18 Fri 03:41]
-    - WHY /string literals/ are immutable?
+    - The ~::~ syntax will be discussed more
+      in "Method Syntax" section of _Chapter 5_ and
+      when we talk about namespacing with modules in
+      "Paths for Referring to an item in the Module Tree" in _Chapter 7_.
 
-      All the info about string literals are fixed, they are hardcoded directly
-      into the final executable (saved in the /stack/), making string literals
-      fast and efficient. These properties only come from its immutability.
+*** Memory and Allocation - 63
+    - Q :: WHY /string literals/ are immutable?
+    - A :: All the info about /string literals/ are fixed, they are hardcoded
+           directly into the final executable (saved in the /stack/), _making
+           /string literals/ *fast* and *efficient*._
+      * These properties only come from its /immutability/.
 
-    - For ~String~, we need /heap/:
-      + /allocation/ :: The memory must be requested from the operating system at
-                        runtime.
+    - With the ~String~ /type/,
+      IN ORDER TO support a /mutable/, /growable/ piece of text,
+      we need to *allocate* an amount of /memory/ on the /heap/:
+      * allocation :: The /memory/ must be requested from the operating system
+                      _at runtime_.
 
-      + /deallocation/ :: We need a way of returning this memory to the operating
+      * /deallocation/ :: We need a way of *returning* this /memory/ to the operating
                           system when we're done with our ~String~.
 
     - /allocation/ is done when we call ~String::from~.
       This is pretty much universal in programming languages.
 
-    - /deallocation/ is different.
+    - /deallocation/ is different in different languages.
       + Some languages use GC.
 
       + Without GC, it is usually hard
-        * if we forget, we'll waste memory.
-          =From Jian= ??? _memory leak_
+        * if we forget, we'll waste memory -- _memory leak_.
 
         * if we do it too early, we'll have an invalid variable. =TODO= segFault???
 
-        * if we do it twice (or more), that's a but too. This happens frequently.
+        * if we do it twice (or more), that's a bug too.
 
-    - We need to pair exactly one ~allocate~ with exactly one ~free~.
+    - We need to _PAIR_
+      *exactly one* ~allocate~ with *exactly one* ~free~.
 
     - Rust does NOT use GC, but it also takes a different path from the tradition
       way of explicitly using /allocation/ and /deallocation/:
-        the memory is automatically returned once the variable that owns it goes
-      out of scope.
+        the /memory/ is AUTOMATICALLY returned once the variable that owns it goes
+      _out of /scope/._
+      * Rust *automatically* calls the special function ~drop~ and *implicitly* at
+        the closing ~}~.
 
-      Rust calls the special function ~drop~ automatically and implicitly at the
-      closing ~}~.
-
-    - Note: =TODO=
+    - Note: =TODO= =LEARN from C++=
       In C++, this pattern of deallocating resources at the end of an item's
-      lifetime is sometimes called /Resource Acquisition Is Initialization (RAII)/.
-
-      The ~drop~ function in Rust will be familiar to you if you've used RAII
-      patterns.
+      /lifetime/ is sometimes called /Resource Acquisition Is Initialization (RAII)/.
+        The ~drop~ function in Rust will be familiar to you if you've used RAII
+      patterns in C++.
 
     - =IMPORTANT=
-      The Rust way seems simple, but it can be unexpected in more complicated
-      situations when we want to have multiple variables use the data we've
-      allocated on the /heap/.
+      The Rust way _seems simple_,
+      BUT it can be _unexpected in more complicated situations_
+      when we want to have multiple variables use the data we've allocated on
+      the /heap/.
 
-**** DONE Ways That Variables and Data Interact: /Move/
-     CLOSED: [2017-08-18 Fri 03:25]
+**** Ways Variables and Data Interact: /Move/ - =START=
      #+BEGIN_SRC rust
        let s1 = String::from("hello");
        let s2 = s1;
@@ -1305,8 +1493,7 @@
        Therefore, any automatic copying can be assumed to be _inexpensive_ in
        terms of runtime performance.
 
-**** DONE Ways That Variables and Data Interact: /Clone/
-     CLOSED: [2017-08-18 Fri 03:25]
+**** Ways Variables and Data Interact: /Clone/
      If you DO want to copy the heap data of the ~String~:
      #+BEGIN_SRC rust
        let s1 = String::from("hello");
@@ -1317,8 +1504,7 @@
 
      This is called /clone/, which might be _expensive_.
 
-**** DONE Stack-Only Data: /Copy/
-     CLOSED: [2017-08-18 Fri 03:41]
+**** Stack-Only Data: /Copy/
      #+BEGIN_SRC rust
        let x = 5;
        let y = x;
@@ -1357,13 +1543,11 @@
          Values of type ~(i32, i32)~ are ~Copy~.
          Values of type ~(i32, String)~ are _NOT_.
 
-*** DONE Ownership and Functions - 68
-    CLOSED: [2017-08-18 Fri 03:44]
+*** Ownership and Functions - 68
     The semantics for passing a value to a function are similar to assigning a
     value to a variable -- /move/ or /copy/.
 
-*** DONE Return Values and Scope - 68
-    CLOSED: [2017-08-18 Fri 03:52]
+*** Return Values and Scope - 68
     Returning values can also transfer ownership.
 
     - ~drop~ won't touch variables whose values have been /moved/.
@@ -1395,8 +1579,7 @@
       However, this is tedious. Luckily for us, Rust has a feature called
       /references/.
 
-** DONE References & Borrowing - 70
-   CLOSED: [2017-08-18 Fri 18:23]
+** References & Borrowing - 70
    The last example of the last section, with the help of /reference/:
    #+BEGIN_SRC rust
      fn main() {
@@ -1564,8 +1747,7 @@
     2. /References/ must always be valid.
 
     Next, we'll look at a different kind of /reference/: /slices/.
-** DONE The Slice Type - 75
-   CLOSED: [2017-08-19 Sat 00:31]
+** The Slice Type - 75
    - Another data type that does _NOT_ have ownership is the /slice/.
 
    - /slices/ let you reference a contiguous sequence of elements in a collection
@@ -1708,8 +1890,7 @@
 
 *** DONE Other Slices - 81
 
-** DONE Summary - 81
-   CLOSED: [2017-08-19 Sat 00:30]
+** Summary - 81
 
 * DONE 5. Using Structs to Structure Related Data - 83
   CLOSED: [2017-08-19 Sat 23:48]
