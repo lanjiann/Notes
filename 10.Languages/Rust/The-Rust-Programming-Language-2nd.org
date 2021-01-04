@@ -1280,7 +1280,8 @@
   - /slice/
   - how Rust lays data out in memory.
 
-** What is Ownership? - 59
+** DONE What is Ownership? - 59
+   CLOSED: [2021-01-04 Mon 03:27]
    - ~ownership~ is the central feature of Rust.
 
    - _Most languages_ can be grouped to _TWO_ categories
@@ -1387,7 +1388,8 @@
       when we talk about namespacing with modules in
       "Paths for Referring to an item in the Module Tree" in _Chapter 7_.
 
-*** Memory and Allocation - 63
+*** DONE Memory and Allocation - 63
+    CLOSED: [2021-01-04 Mon 03:20]
     - Q :: WHY /string literals/ are immutable?
     - A :: All the info about /string literals/ are fixed, they are hardcoded
            directly into the final executable (saved in the /stack/), _making
@@ -1438,16 +1440,17 @@
       when we want to have multiple variables use the data we've allocated on
       the /heap/.
 
-**** Ways Variables and Data Interact: /Move/ - =START=
+**** DONE Ways Variables and Data Interact: /Move/
+     CLOSED: [2021-01-04 Mon 03:07]
      #+BEGIN_SRC rust
        let s1 = String::from("hello");
        let s2 = s1;
      #+END_SRC
 
      - A ~String~ basic info is made up of three parts:
-       + a pointer to the (/heap/) memory that holds the contents of the string,
-       + a length
-       + a capacity.
+       * a /pointer/ to the (/heap/) memory that _holds_ the contents of the string
+       * a /length/
+       * a /capacity/
 
        This group of data is stored on the /stack/.
 
@@ -1457,44 +1460,39 @@
      - /capacity/ :: the total amount of memory, in bytes, that the ~String~ has
                      received from the OS.
 
-     - The _different_ between /length/ and /capacity/ matters,
-       BUT _NOT in the context_, so for now, it's fine to ignore the /capacity/.
-
      - When we _assign_ ~s1~ to ~s2~, the ~String~ info data is copied, meaning
        we copy the /pointer/, the /length/, and the /capacity/ that are on the
        /stack/.
 
-       We do _NOT_ copy the data on the /heap/ that the pointer refers to.
+       _We do *NOT copy* the data on the /heap/ that the /pointer/ refers to._
 
-     - For the example above, if ~drop~ is naive, there will be a
-       /double free error/, and it is one of the memory safety bugs.
-
-     - Complie the code below
-       #+BEGIN_SRC rust
-         let s1 = String::from("hello");
-         let s2 = s1;
-
-         println!("{}", s1);
-       #+END_SRC
-       You'll get an error message that tells you the ~s1~ in the ~println!~ line
-       is =value used here after move=.
+     - For the discussion about the above example till now,
+       if ~drop~ is naive, there will be a /double free error/, and it is one of
+       the memory safety bugs.
+       * Rust does one extra thing, it invalidate ~s1~ after ~s2 = s1;~.
 
      - /move/ :: when do operations like assignment,
-       1. copy the meta info (in /stack/) of a variable,
-          and
-       2. invalidate the old one
+       1. copy the meta info of this varaible (/pointer/ combined with other info)
+          that is on /stack/;
+       2. invalidate the old one on /stack/.
 
-       The 1. is just like the "shallow copy" concept as you know, BUT now we
-       also have the step 2, that's why we have this new concept /move/.
+     - CAUTION:
+       Here we discuss /move/, which is unrelated to the stack-only data.
 
-     - In addition, there’s a design choice that’s implied by this:
-       Rust will _NEVER automatically_ create “deep” copies of your data.
+     - The step 1 in /move/ is just like the "shallow copy", a concept we learn
+       in almost all languages,
+       BUT now we also have the step 2, that's why we have this new concept /move/.
 
-       Therefore, any automatic copying can be assumed to be _inexpensive_ in
-       terms of runtime performance.
+     - In addition, there’s a design choice that's implied by this:
+       * Rust will _NEVER automatically_ create “deep” copies of your data.
+         
+       Therefore, in Rust, any _automatic copying_ can be assumed to be
+       *inexpensive* in terms of runtime performance.
 
-**** Ways Variables and Data Interact: /Clone/
-     If you DO want to copy the heap data of the ~String~:
+**** DONE Ways Variables and Data Interact: /Clone/
+     CLOSED: [2021-01-04 Mon 03:10]
+     If you do want to *copy the heap data* of a an object,
+     like the ~String~ in the above example:
      #+BEGIN_SRC rust
        let s1 = String::from("hello");
        let s2 = s1.clone();
@@ -1502,9 +1500,13 @@
        println!("s1 = {}, s2 = {}", s1, s2);
      #+END_SRC
 
-     This is called /clone/, which might be _expensive_.
+     - This is called /clone/, which might be _expensive_ -- the implementation of
+       ~clone~ can be arbitrary code.
 
-**** Stack-Only Data: /Copy/
+     - ~clone~ is a visual indicator that something different is going on.
+
+**** DONE Stack-Only Data: /Copy/
+     CLOSED: [2021-01-04 Mon 03:20]
      #+BEGIN_SRC rust
        let x = 5;
        let y = x;
@@ -1515,48 +1517,79 @@
      - No compile error, ~x~ is still valid in the ~println!~ line.
 
      - Values of types like integer are stored on /stack/.
-       Copy a value in /stack/ is NOT expensive (even in the /move/ operation, we
-       copy the data in /stack/ which is cheap, we just DID NOT copy the data in
-       /heap/ which can be expensive).
+       Copy a value in /stack/ is *NOT expensive* (even in the /move/ operation,
+       we copy the data in /stack/ which is cheap, we just DID NOT copy the data
+       in /heap/ which can be expensive).
        Thus, NO reason to prevent ~x~ from being valid after we create ~y~.
 
      - ~Copy~ trait:
-       + If a type has the ~Copy~ trait, an older variable is still usable after
+       * If a type has the ~Copy~ trait, an older variable is still valid after
          assignment.
 
-       + Rust WON'T let us annotate a type with the ~Copy~ trait if the type, or
-         any of its parts, has implemented the ~Drop~ trait (The _exclusive_
-         property between the ~Copy~ trait and the ~Drop~ trait).
+       * Rust WON'T let us annotate a type with the ~Copy~ /trait/ if the type,
+         or any of its parts, has implemented the ~Drop~ /trait/ -- the
+         _exclusive property_ between the ~Copy~ /trait/ and the ~Drop~ /trait/.
 
-       + If the type needs something special to happen when the value goes out of
-         scope and we add the ~Copy~ annotation to that type, we'll get a
-         compile time error.
+       * If
+         1. a type needs something special to happen when the value goes out of scope
+         2. we add ~Copy~ annotation to that /type/, we'll get a /compile time error/.
 
-         =TODO= see Appendix C on Derivable Traits to learn about how to add the
+         =TODO= see Appendix C on _Derivable Traits_ to learn about how to add the
          ~Copy~ annotation to your type.
 
+     - As a general rule, any group of _simple_ /scalar values/ can be ~Copy~.
+       =from Jian=
+       See below, the /tuples/ case, you will know what does this _simple_ mean.
+
      - Examples of the types that are ~Copy~:
-       + All integer types
-       + The boolean type
-       + All floating point types
-       + Tuples, but ONLY if they contain types that are also ~Copy~:
+       * All integer types
+       * The boolean type
+       * All floating point types
+       * Tuples, but ONLY if they contain types that are also ~Copy~:
          Values of type ~(i32, i32)~ are ~Copy~.
          Values of type ~(i32, String)~ are _NOT_.
 
-*** Ownership and Functions - 68
-    The semantics for passing a value to a function are similar to assigning a
-    value to a variable -- /move/ or /copy/.
+*** DONE Ownership and Functions - 68
+    CLOSED: [2021-01-04 Mon 03:22]
+    The semantics for *passing a value to a function* are SIMILAR TO
+    *assigning a value to a variable* -- /move/ or /copy/.
 
-*** Return Values and Scope - 68
-    Returning values can also transfer ownership.
+*** DONE Return Values and Scope - 68
+    CLOSED: [2021-01-04 Mon 03:27]
+    /Returning values/ can also *transfer* /ownership/.
 
-    - ~drop~ won't touch variables whose values have been /moved/.
-      This is about the "content" of this variable, which is in the /heap/.
+    - Example:
+      #+begin_src rust
+        fn main() {
+            let s1 = gives_ownership();         // gives_ownership moves its return
+                                                // value into s1
 
-      For the meta data of this variable in /stack/, no need to pay attention,
-      no matter this is a mechanism of GC or NOT, /stack/ will pop and push as
-      the program run, and the programmer should almost always never touch it
-      manually.
+            let s2 = String::from("hello");     // s2 comes into scope
+
+            let s3 = takes_and_gives_back(s2);  // s2 is moved into
+                                                // takes_and_gives_back, which also
+                                                // moves its return value into s3
+        } // Here, s3 goes out of scope and is dropped. s2 goes out of scope but was
+          // moved, so nothing happens. s1 goes out of scope and is dropped.
+
+        fn gives_ownership() -> String {             // gives_ownership will move its
+                                                     // return value into the function
+                                                     // that calls it
+
+            let some_string = String::from("hello"); // some_string comes into scope
+
+            some_string                              // some_string is returned and
+                                                     // moves out to the calling
+                                                     // function
+        }
+
+        // takes_and_gives_back will take a String and return one
+        fn takes_and_gives_back(a_string: String) -> String { // a_string comes into
+                                                              // scope
+
+            a_string  // a_string is returned and moves out to the calling function
+        }
+      #+end_src
 
     - If we pass the value of a variable into a function and we still want to use
       this value after this call, we can return this value back:
@@ -1575,11 +1608,10 @@
             (s, length)
         }
       #+END_SRC
+      *However, this is tedious.
+      Luckily for us, Rust has a feature called /references/.*
 
-      However, this is tedious. Luckily for us, Rust has a feature called
-      /references/.
-
-** References & Borrowing - 70
+** References & Borrowing - 70 - =START=
    The last example of the last section, with the help of /reference/:
    #+BEGIN_SRC rust
      fn main() {
@@ -1610,8 +1642,7 @@
      =error: cannot borrow immutable borrowed content `*some_string` as mutable=
      Just as variables are immutable by default, so are references.
 
-*** DONE Mutable References - 72
-    CLOSED: [2017-08-18 Fri 04:29]
+*** Mutable References - 72
     #+BEGIN_SRC rust
       fn main() {
           let mut s = String::from("hello");
@@ -1687,8 +1718,7 @@
 
       On the other hand, ONLY multiple /immutable references/ have NO problem.
 
-*** DONE Dangling References - 74
-    CLOSED: [2017-08-25 Fri 01:09]
+*** Dangling References - 74
     - /a dangling pointer/ :: a pointer that references a location in memory that
          may have been given to someone else, by freeing some memory while
          preserving a pointer to that memory.
@@ -1738,15 +1768,15 @@
           }
         #+END_SRC
 
-*** DONE The Rules of References - 75
-    CLOSED: [2017-08-18 Fri 03:54]
-    1. At any given time, you can have either but NOT both of:
-       + One mutable /reference/.
-       + Any number of immutable /references/.
+*** The Rules of References - 75
+    1. At ANY given time, you can have _either but NOT both_ of:
+       * *One* /mutable reference/.
+       * *Any number* of /immutable references/.
 
-    2. /References/ must always be valid.
+    2. /References/ *must always* be valid.
 
     Next, we'll look at a different kind of /reference/: /slices/.
+    
 ** The Slice Type - 75
    - Another data type that does _NOT_ have ownership is the /slice/.
 
