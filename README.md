@@ -4,7 +4,8 @@ All my notes for technical book reading
 
 Some of them only have outlines -- too many things need to learn, and some of them have low priority.
 
-99 directories, 331 files.</br>
+103 directories, 374 files
+
 .</br>
 ├── 00.Basic_Knowledge</br>
 │   ├── Arch_Linux</br>
@@ -23,6 +24,8 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── System_Management</br>
 │   │   ├── Learn-Powershell-Core-6.0.org</br>
 │   │   ├── Learn-Windows-Powershell-in-A-Month-of-Lunches-3rd.org</br>
+│   │   ├── PowerShell-for-SYSADMINS.org</br>
+│   │   ├── The-Unix-Person's-Guide-to-Powershell.org</br>
 │   │   ├── Unix-and-Linux-System-AdminHandbook-4th.org</br>
 │   │   └── Windows-PowerShell-in-Action-3rd.org</br>
 │   ├── System_Virtualization</br>
@@ -32,19 +35,22 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │       └── Git</br>
 │           ├── Got-Git_CN.org</br>
 │           ├── Pragmatic-Guide-to-Git.org</br>
-│           ├── Pro-Git-2.1.227.org</br>
+│           ├── Pro-Git-2.1.277.org</br>
 │           ├── Rys-Git-Tutorial.org</br>
 │           └── Writing-on-GitHub.org</br>
 ├── 01.Theory</br>
+│   ├── Algebra-Driven_Design.org</br>
 │   ├── Category_Theory</br>
 │   │   ├── Category-Theory-for-Programmers-Scala-Edition.org</br>
 │   │   ├── Category-Theory-in-Context.tm</br>
 │   │   └── Conceptual-Mathematics.tm</br>
+│   ├── Introduction-to-Automata-Theory,Languages,and-Computation_3rd.org</br>
 │   ├── Lambda_Calculus</br>
 │   │   ├── A-Tutorial-Introduction-to-the-Lambda-Calculus_by_Raul-Rojas.tm</br>
 │   │   ├── Programming-Language-and-Lambda-Calculi_by_Matthias-Felleisen_Matthew-Flatt.tm</br>
 │   │   └── The-Calculi-Of-Lambda-Conversion.org</br>
 │   ├── Mathematical-Logic-Part-I.tm</br>
+│   ├── Optics-by-Example.org</br>
 │   ├── Paradigms-of-Artificial-Intelligence-Programming.org</br>
 │   ├── Parsing-Techniques-2nd.tm</br>
 │   ├── Pre_Category</br>
@@ -62,7 +68,9 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   └── UniMath</br>
 │       └── Symmetry.tm</br>
 ├── 02.Ruminations</br>
+│   ├── 97-Things-Every-Programmer-Should-Know.org</br>
 │   ├── A-Philosophy-of-Software-Design.org</br>
+│   ├── Elements-of-Information-Theory-2nd.org</br>
 │   └── Working-Effectively-with-Legacy-Code.org</br>
 ├── 03.Algorithm</br>
 │   ├── 00.Methodology</br>
@@ -74,7 +82,8 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Data-Structures-and-Algorithms.org</br>
 │   ├── Functional-Algorithm-and-Data-Structures</br>
 │   │   ├── Pearls-of-Functional-Algorithm-Design.org</br>
-│   │   └── Purely-Functional-Data-Structures.org</br>
+│   │   ├── Purely-Functional-Data-Structures.org</br>
+│   │   └── Structuring_Depth-First_Search_Algorithms_in_Haskell.org</br>
 │   ├── Graph-Theory</br>
 │   │   └── Graph-Theory.org</br>
 │   ├── Introduction-to-Algorithms-3rd.org</br>
@@ -96,6 +105,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── LLVM-Language-Reference-Manual.org</br>
 │   │   └── LLVM-Tutorial.org</br>
 │   ├── Modern-Compiler-Implementation-in-ML.org</br>
+│   ├── Program-Analysis_An-Appetizer.org</br>
 │   └── Static-Single-Assignment-Book.org</br>
 ├── 06.Virtual_Machine</br>
 │   ├── CLR</br>
@@ -146,6 +156,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Monadic-Design-Patterns-for-the-Web.org</br>
 │   ├── Play</br>
 │   │   ├── Essential-Play.org</br>
+│   │   ├── Play-Documentation.org</br>
 │   │   ├── Play-for-Scala.org</br>
 │   │   └── Play-Framework-Essentials.org</br>
 │   ├── Reactive-Web-Applications.org</br>
@@ -228,6 +239,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── Java-Network-Programming-4th.org</br>
 │   │   ├── Java-Puzzlers.org</br>
 │   │   ├── Java-the-Legend.org</br>
+│   │   ├── JUnit-in-Action_3rd.org</br>
 │   │   ├── Libraries</br>
 │   │   │   ├── Java-Generics-and-Collections.org</br>
 │   │   │   ├── Java-IO-NIO-and-NIO2.org</br>
@@ -242,9 +254,10 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   │   ├── Java9-with-JShell.org</br>
 │   │   │   ├── Java-Shell-Users-Guide_JDK10.org</br>
 │   │   │   ├── Mastering-Lambdas_Java-Programming-in-a-Multicore-World.org</br>
-│   │   │   ├── The-Java-Language-Specification-SE11.tm</br>
+│   │   │   ├── The-Java-Language-Specification-SE15.tm</br>
 │   │   │   ├── The-Java-Language-Specification-SE9.org</br>
-│   │   │   └── The-Java-Language-Specification-SE9.tm</br>
+│   │   │   ├── The-Java-Language-Specification-SE9.tm</br>
+│   │   │   └── The-Java-Virtual-Machine-Specification-SE15.tm</br>
 │   │   └── Thinking-in-Java-4th.org</br>
 │   ├── JavaScript</br>
 │   │   ├── Eloquent-JavaScript-2nd.org</br>
@@ -263,11 +276,21 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── Learn-Prolog-Now.org</br>
 │   │   └── The-Art-of-Prolog-2nd.org</br>
 │   ├── Python</br>
+│   │   ├── Effective-Python-2nd.org</br>
 │   │   ├── Fluent-Python-2nd-early-relase.org</br>
 │   │   ├── Fluent-Python.org</br>
 │   │   ├── Learning-Python-5th.org</br>
+│   │   ├── Official_Documentation</br>
+│   │   │   ├── Debugging-and-Profiling.org</br>
+│   │   │   ├── Python-HOWTOs.org</br>
+│   │   │   └── The_Python_Standard_Library</br>
+│   │   │       └── Development_Tools</br>
+│   │   │           └── typing.org</br>
+│   │   ├── Programming-Python_4th.org</br>
+│   │   ├── Python-Cookbook.org</br>
 │   │   ├── Python-Standard-Library.org</br>
 │   │   ├── Python-Testing-with-pytest.org</br>
+│   │   ├── Using-Asyncio-in-Python.org</br>
 │   │   └── Web-Scraping-with-Python-2nd.org</br>
 │   ├── R</br>
 │   │   ├── Advanced-R_2nd.org</br>
@@ -281,8 +304,10 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Racket</br>
 │   │   ├── Guile-Reference-Manual.org</br>
 │   │   ├── Plait-Language.org</br>
+│   │   ├── Plot_Graph-Plotting.org</br>
 │   │   ├── Structure-and-Interpretation-of-Computer-Programs-2nd.org</br>
 │   │   ├── The-Racket-Guide.org</br>
+│   │   ├── The-Racket-Reference.org</br>
 │   │   ├── The-Scheme-Programming-Language-4th.org</br>
 │   │   └── The-Typed-Racket-Guide.org</br>
 │   ├── Rust</br>
@@ -296,6 +321,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── Rust-Standard-Library-Cookbook.org</br>
 │   │   ├── Rust-Style-Guidelines.org</br>
 │   │   ├── The-Cargo-Book.org</br>
+│   │   ├── The-Embedded-Rust-Book.org</br>
 │   │   ├── The-rustc-book.org</br>
 │   │   ├── The-Rustonomicon.org</br>
 │   │   ├── The-Rust-Programming-Language-2nd.org</br>
@@ -304,31 +330,45 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── Ammonite.org</br>
 │   │   ├── Creative-Scala.org</br>
 │   │   ├── Dotty</br>
-│   │   │   └── Dotty-Documentation.org [**READING**]</br>
+│   │   │   ├── Dotty-Documentation.org</br>
+│   │   │   └── Scala-3-Macro-Tutorial.org</br>
 │   │   ├── Effective-Scala-by-Twitter.org</br>
 │   │   ├── Essential-Scala.org</br>
 │   │   ├── Functional-Programming-in-Scala.org</br>
 │   │   ├── Functional-Programming-Simplified.org</br>
-│   │   ├── Hands-on_Scala.org [**READING**]</br>
+│   │   ├── Hands-on_Scala.org</br>
 │   │   ├── Libraries</br>
+│   │   │   ├── Ciris.org</br>
 │   │   │   ├── Essential-Slick.org</br>
 │   │   │   ├── FastParse2.org</br>
-│   │   │   ├── OS-Lib.org [**READING**]</br>
+│   │   │   ├── OS-Lib.org</br>
+│   │   │   ├── Scalameta.org</br>
+│   │   │   ├── scala-reflection-library.org</br>
+│   │   │   ├── Skunk.org</br>
 │   │   │   └── Typelevel</br>
 │   │   │       ├── Algebraic-Typeclasses-forScala.org</br>
 │   │   │       ├── Cats</br>
-│   │   │       │   ├── Cats-API.org</br>
-│   │   │       │   ├── Cats-Effect.org</br>
-│   │   │       │   ├── Cats-MTL.org</br>
+│   │   │       │   ├── cats-API.org</br>
+│   │   │       │   ├── cats-effect.org</br>
+│   │   │       │   ├── cats-mtl.org</br>
+│   │   │       │   ├── cats-retry.org</br>
 │   │   │       │   ├── herding-cats.org</br>
 │   │   │       │   ├── Scala-with-Cats_new.org</br>
 │   │   │       │   └── Scala-with-Cats.org</br>
+│   │   │       ├── circe.org</br>
+│   │   │       ├── fs2.org</br>
+│   │   │       ├── http4s.org</br>
 │   │   │       ├── Monocle-Official.org</br>
-│   │   │       └── Shapeless</br>
-│   │   │           └── The-Type-Astronauts-Guide-to-Shapeless.org</br>
+│   │   │       ├── Redis4Cats.org</br>
+│   │   │       ├── Shapeless</br>
+│   │   │       │   ├── Shapeless-API.org</br>
+│   │   │       │   └── The-Type-Astronauts-Guide-to-Shapeless.org</br>
+│   │   │       └── Squants.org</br>
 │   │   ├── Official_Documents</br>
 │   │   │   ├── Compiler</br>
 │   │   │   │   ├── Compiler-Options.org</br>
+│   │   │   │   ├── Macros.org</br>
+│   │   │   │   ├── Quasiquotes.org</br>
 │   │   │   │   └── Reflection.org</br>
 │   │   │   ├── Language</br>
 │   │   │   │   ├── Implicit-Classes.org</br>
@@ -346,10 +386,11 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   │   ├── Scala-Refactor-Recipies.org</br>
 │   │   │   └── Scala-Traps-and-Pitfalls_Personal-Note.org</br>
 │   │   ├── Play-Documentation.org</br>
-│   │   ├── Programming-in-Scala-3rd.org [**DONE**]</br>
-│   │   ├── Programming-in-Scala-4th.org [**READING**]</br>
+│   │   ├── Practical-FP-in-Scala.org</br>
+│   │   ├── Programming-in-Scala-3rd.org</br>
+│   │   ├── Programming-in-Scala-4th.org</br>
 │   │   ├── Programming-Scala-2nd.org</br>
-│   │   ├── Scala-Cookbook.org [**READING**]</br>
+│   │   ├── Scala-Cookbook.org</br>
 │   │   ├── Scala-Design-Patterns-2nd.org</br>
 │   │   ├── Scala-for-the-Impatient.org</br>
 │   │   ├── Scala-High-Performance-Programming.org</br>
@@ -362,14 +403,16 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── Scala-Puzzlers-from-Me.org</br>
 │   │   ├── Scala-Puzzlers.org</br>
 │   │   ├── Spec_and_Enhancement</br>
-│   │   │   ├── Scala-Language-Spec.org</br>
+│   │   ├── Specification_and_Enhancement</br>
+│   │   │   ├── Scala-Language-Specification.org</br>
 │   │   │   └── Scala-Style-Guide.org</br>
 │   │   ├── Talks-Note.org</br>
-│   │   └── Test_Frameworks</br>
-│   │       ├── ScalaCheck-Cookbook.org</br>
-│   │       ├── ScalaCheck-The-Definitive-Guide.org</br>
-│   │       ├── Scala-Test-Driven-Development.org</br>
-│   │       └── Testing-in-Scala.org</br>
+│   │   ├── Test_Frameworks</br>
+│   │   │   ├── ScalaCheck-Cookbook.org</br>
+│   │   │   ├── ScalaCheck-The-Definitive-Guide.org</br>
+│   │   │   ├── Scala-Test-Driven-Development.org</br>
+│   │   │   └── Testing-in-Scala.org</br>
+│   │   └── Things-you-need-to-know-about-JVM_that-matter-in-Scala.org</br>
 │   ├── SmallTalk</br>
 │   │   ├── A-Little-Smalltalk.org</br>
 │   │   ├── A-Taste-of-SmallTalk.org</br>
@@ -386,6 +429,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 ├── 12.Data_Science</br>
 │   ├── Advanced-Analytics-with-Spark-2nd.org</br>
 │   ├── allaboutscala-Learn-Apache-Spark-2.org</br>
+│   ├── An-Introduction-to-Statistical-Learning.org</br>
 │   ├── Database</br>
 │   │   ├── Database-Management-Systems-3rd.org</br>
 │   │   ├── MySQL</br>
@@ -398,6 +442,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │       ├── SQL-Cookbook.org</br>
 │   │       └── SQL-in-10Min-4th.org</br>
 │   ├── High-Performance-Spark.org</br>
+│   ├── Learning-Spark_2nd.org</br>
 │   ├── Learning-Spark.org</br>
 │   ├── Learning-Spark-SQL.org</br>
 │   ├── Next-Generation-Databases.org</br>
@@ -405,6 +450,8 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Part_IV._Production_Applications</br>
 │   │   └── 2020-06-03_11-11-53_Spark-in-Action.org</br>
 │   ├── Spark-2.4.x-Documentation.org</br>
+│   ├── Spark-3.0.x-Documentation.org</br>
+│   ├── Spark-in-Action_2nd.org</br>
 │   ├── Spark-in-Action.org</br>
 │   └── Spark-The-Definitive-Guide.org</br>
 ├── 13.Building_System</br>
@@ -421,13 +468,14 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │       └── The-Language-of-Languages.org</br>
 ├── 15.System_Programming</br>
 │   └── The-Linux-Programming-Interface.org</br>
-├── IntelliJ-IDEA-Essentials.org</br>
-├── Intellij-IDEA-Help.org</br>
 ├── MISC</br>
 │   ├── Bit_Operations</br>
 │   │   ├── Bit-Twiddling-Hacks.org</br>
 │   │   └── Hackers-Delight-2nd.org</br>
 │   ├── Calendrical-Calculations_The-Ultimate-Edition.org</br>
+│   ├── i3-User's-Guide.org</br>
+│   ├── IntelliJ-IDEA-Essentials.org</br>
+│   ├── Intellij-IDEA-Help.org</br>
 │   ├── Low_Priority</br>
 │   │   └── Tool_MATLAB</br>
 │   │       ├── Matlab-a-Practical-Introduction-to-Programming-and-Problem-Solving.org</br>
