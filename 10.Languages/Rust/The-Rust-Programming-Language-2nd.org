@@ -4,8 +4,7 @@
 #+STARTUP: entitiespretty
 #+STARTUP: fold
 
-* Foreword - xix
-  =TODO=
+* Foreword - xix  =TODO=
   -- Nicholas Matsakis and Aaron Turon
   
 * Preface - xxi
@@ -1611,7 +1610,8 @@
       *However, this is tedious.
       Luckily for us, Rust has a feature called /references/.*
 
-** References & Borrowing - 70 - =START=
+** DONE References & Borrowing - 70
+   CLOSED: [2021-01-05 Tue 00:10]
    The last example of the last section, with the help of /reference/:
    #+BEGIN_SRC rust
      fn main() {
@@ -1627,22 +1627,31 @@
 
    - These _ampersands_ above are /references/.
 
+   - *NOTE*:
+     The opposite of referencing by using ~&~ is /dereferencing/, which is
+     accomplished with the /dereference operator/, ~*~.
+     =TODO=
+     We'll see _some uses of the /dereference operator/ in Chapter 8_ and
+     _discuss details of /dereferencing/ in Chapter 15._
+
    - A /reference/ is essentially a pointer points to the basic info data (a
      pointer, string length, and its capacity) of ~s1~.
 
-   - The name /reference/ indicates _NOT OWN_. NO ~drop~ will be applied to the
-     data it refers to when ~s~ goes out of scope.
-       On the other hand, since pointers are on /stack/, they will be poped out
-     automatically.
+   - The name /reference/ indicates _NOT OWN_.
+     NO ~drop~ will be applied to the data it refers to when ~s~ goes out of
+     scope.
+       On the other hand, since /pointers/ are on /stack/, they will be poped
+     out automatically.
 
-   - We call having references as function parameters /borrowing/ -- when it's
+   - We call _having references as function parameters_ /borrowing/ -- when it's
      done, give it back.
 
-   - If you try to modify the borrowed value, the compiler will issue an error
+   - If you try to _MODIFY_ the /borrowed value/, the compiler will issue an error
      =error: cannot borrow immutable borrowed content `*some_string` as mutable=
-     Just as variables are immutable by default, so are references.
+     Just as variables are _immutable BY DEFAULT_, so are /references/.
 
-*** Mutable References - 72
+*** DONE Mutable References - 72
+    CLOSED: [2021-01-04 Mon 23:48]
     #+BEGIN_SRC rust
       fn main() {
           let mut s = String::from("hello");
@@ -1656,7 +1665,7 @@
 
     =IMPORATN=
     ONE big _restriction_ to /mutable references/:
-    you can only have _one_ /mutable reference/ to a particular piece of data
+    you can ONLY have _one_ /mutable reference/ to a particular piece of data
     _in a particular scope_.
 
     - Example of fail (CANNOT be compiled):
@@ -1668,20 +1677,19 @@
         let r2 = &mut s;
       #+END_SRC
 
-    - This restriction allows for mutation but _in a very controlled fashion_.
-      + pros: Rust can prevent data races at compile time.
-      + cons: new Rustaceans struggle with this restriction -- NOT a real cons
+    - This restriction _allows for mutation BUT in a very controlled fashion_.
+      * PROS: Rust can prevent /data races/ at compile time
+      * CONS: new Rustaceans struggle with this restrictin -- NOT a real cons
 
-    - A /data race/ is a particular type of race condition in which these three
+    - A /data race/ is a particular type of race condition in which these _THREE_
       behaviors occur:
-      1. Two or more pointers access the same data at the same time.
-      2. At least one of the pointers is being used to write to the data.
-      3. There's no mechanism being used to synchronize access to the data.
+      1. Two or more /pointers/ access the same data at the same time.
+      2. At least one of the /pointers/ is being used to write to the data.
+      3. There's NO mechanism being used to synchronize access to the data.
 
-    - Data races cause undefined behavior and can be difficult to diagnose and
-      fix when you're trying to track them down at runtime;
-
-      Rust prevents this problem from happening because it won't even compile
+    - /Data races/ cause /undefined behavior/ and can be difficult to diagnose
+      and fix when you're trying to track them down at runtime;
+        Rust prevents this problem from happening because it won't even compile
       code with data races!
 
     - As always, we can use curly brackets to create a new scope, allowing for
@@ -1707,26 +1715,50 @@
       With compile the error:
       =error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable=
 
-    - _A_ /mutable reference/ is EXCLUSIVE with the other /references/ (both
-      mutable or immutable).
+    - Some conclusions:
+      * _A_ /mutable reference/ is EXCLUSIVE with the other /references/ (both
+        mutable or immutable).
 
-      Any /immutable reference/ are compatible with the other
-      /immutable references/.
+      * Any /immutable reference/ are compatible with the other /immutable
+        references/.
+          This is reasonable. Users of an _immutable references_ don't expect
+        the value to suddenly change out from under them.
 
-      This is reasonable. Users of an _immutable references_ don't expect the
-      value to suddenly change out from under them.
+      * On the other hand, ONLY multiple /immutable references/ is ok.
 
-      On the other hand, ONLY multiple /immutable references/ have NO problem.
+    - Note that
+      a /reference/'s /scope/ starts from where it is introduced and continues
+      through the LAST time that /reference/ is used.
+      #+begin_src rust
+        let mut s = String::from("hello");
 
-*** Dangling References - 74
-    - /a dangling pointer/ :: a pointer that references a location in memory that
-         may have been given to someone else, by freeing some memory while
-         preserving a pointer to that memory.
+        let r1 = &s;  // no problem
+        let r2 = &s;  // no problem
+        println!("{} and {}", r1, r2);
+        // r1 and r2 are no longer used after this point
 
-    - Rust compiler guarantees that references will _NEVER_ be /dangling
-      references/: if we have a reference to some data, the compiler will ensure
-      that the data will not go out of scope before the reference to the data
-      does.
+        let r3 = &mut s;  // no problem
+        println!("{}", r3);
+      #+end_src
+      =IMPORTANT=
+      The /scopes/ of the /immutable references/ ~r1~ and ~r2~ end after the
+      ~println!~ _where they are LAST used_, which is BEFORE the /mutable reference/
+      ~r3~ is created. *These scopes _don't overlap_, so this code is allowed.*
+
+*** DONE Dangling References - 74
+    CLOSED: [2021-01-05 Tue 00:10]
+    - In languages with /pointers/, it's easy to erroneously create a /dangling
+      pointer/.
+
+    - /a dangling pointer/ ::
+      a /pointer/ that /references/ a location in memory that may have been given to
+      someone else, by _freeing some memory while preserving a pointer to that
+      memory._
+
+    - In Rust, by contrast, the compiler *guarantees* that /references/ will never
+      be /dangling references/:
+      if you have a reference to some data, the compiler will ensure that the
+      data will not go out of scope before the reference to the data does.
 
     - Example of trying to create a /dangling reference/ (but fail when compile):
       #+BEGIN_SRC rust
@@ -1755,12 +1787,12 @@
         error: aborting due to previous error
       #+END_SRC
 
-      + This error message refers to a feature /lifetimes/ which will be covered
+      * This error message refers to a feature /lifetimes/ which will be covered
         in Chapter 10.
         =TODO=
         Just disregard this, and read the =help= part, we can know what happened.
 
-      + The way to correct this error:
+      * The way to correct this error:
         #+BEGIN_SRC rust
           fn no_dangle() -> String {
               let s = String::from("hello");
@@ -1768,7 +1800,8 @@
           }
         #+END_SRC
 
-*** The Rules of References - 75
+*** DONE The Rules of References - 75
+    CLOSED: [2021-01-05 Tue 00:10]
     1. At ANY given time, you can have _either but NOT both_ of:
        * *One* /mutable reference/.
        * *Any number* of /immutable references/.
@@ -1778,7 +1811,7 @@
     Next, we'll look at a different kind of /reference/: /slices/.
     
 ** The Slice Type - 75
-   - Another data type that does _NOT_ have ownership is the /slice/.
+   - Another data type that does _NOT_ have /ownership/ is the /slice/.
 
    - /slices/ let you reference a contiguous sequence of elements in a collection
      rather than the whole collection.
@@ -1816,8 +1849,7 @@
        }
      #+END_SRC
 
-*** DONE String Slices - 77
-    CLOSED: [2017-08-19 Sat 00:31]
+*** String Slices - 77 - =START=
     #+BEGIN_SRC rust
       let s = String::from("hello world");
       let hello = &s[0..5];
@@ -1918,7 +1950,7 @@
 
      =TODO= Chapter 8
 
-*** DONE Other Slices - 81
+*** Other Slices - 81
 
 ** Summary - 81
 
