@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-RC1-bin-20201228-029ae77-NIGHTLY --> 3.0.0-RC1-bin-20210101-141bf9e-NIGHTLY
+#+VERSION: 3.0.0-RC1-bin-20201228-029ae77-NIGHTLY --> 3.0.0-RC1-bin-20210108-2cf4dc4-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -249,30 +249,30 @@
     - These constructs replace existing constructs with the aim of making the
       language safer and simpler to use, and to promote uniformity in code style.
 
-      * /Trait Parameters/
+      * /Trait parameters/
         REPLACE
         /early initializers/ with a more generally useful construct.
 
-      * /Given Instances/
+      * /Given instances/
         REPLACE
         /implicit objects and defs/, focussing on intent over mechanism.
 
-      * /Using Clauses/
+      * /Using clauses/
         REPLACE
         /implicit parameters/,
         AVOIDING
         their ambiguities.
 
-      * /Extension Methods/
+      * /Extension methods/
         REPLACE
         /implicit classes/ with a clearer and simpler mechanism.
 
-      * /Opaque Type Aliases/
+      * /Opaque type aliases/
         REPLACE
         _most uses_ of /value classes/
         while guaranteeing absence of /boxing/.
 
-      * _Toplevel definitions_
+      * _Top-level definitions_
         REPLACE
         _package objects_,
         DROPPING
@@ -404,27 +404,27 @@
     CLOSED: [2021-01-02 Sat 02:05]
     These are additions to the language that make it more powerful or pleasant to
     use.
-    * /Enums/
+    - /Enums/
       provide *concise syntax* for /enumerations/ and /algebraic data types/.
 
-    * /Parameter untupling/
+    - /Parameter untupling/
       avoids having to use case for /tupled parameter destructuring/.
 
-    * /Dependent function types/ =TODO= =RE-READ=
+    - /Dependent function types/ =TODO= =RE-READ=
       *generalize* /dependent methods/ to /dependent function values and types/.
 
-    * /Polymorphic function types/ =TODO= =RE-READ=
+    - /Polymorphic function types/ =TODO= =RE-READ=
       *generalize* /polymorphic methods/ to /polymorphic function values and types/.
-      + Current status:
+      * Current status:
         There is a proposal and a _merged PROTOTYPE implementation_,
         BUT the implementation _has *NOT* been finalized_ (it is notably *missing*
         type inference support).
 
-    * /Kind polymorphism/
+    - /Kind polymorphism/
       allows the definition of operators working equally on /types/ and /type
       constructors/.
 
-    * ~@targetName~ annotations
+    - ~@targetName~ annotations
       make it easier to *interoperate* with code _written in other languages_ and
       give MORE FLEXIBILITY for _avoiding /name clashes/._
 
@@ -496,7 +496,7 @@
 
     - _EXPECTED migration cost_ of each language construct.
 
-** DONE NEW TYPES
+** DONE New Types
    CLOSED: [2020-03-08 Sun 21:34]
 *** DONE Intersection Types
     CLOSED: [2019-11-10 Sun 17:47]
@@ -557,9 +557,9 @@
       Syntactically, an /intersection type/ ~S & T~ is similar to an /infix
       type/, where the _infix operator_ is ~&~.
       - ~&~ is treated as a /soft keyword/.
-        + it is a _NORMAL identifier_ with the usual precedence.
+        * it is a _NORMAL identifier_ with the usual precedence.
 
-        + *BUT*
+        * *BUT*
           a type of the form ~A & B~
           _is *ALWAYS* recognized as_ an /intersection type/,
           _WITHOUT_ trying to resolve ~&~.
@@ -578,8 +578,8 @@
 
       - Derived:
         Given type constructor ~C~,
-        + If ~C~ is /covariant/, ~C[A] & C[B] ~> C[A & B]~
-        + If ~C~ is /contravariant/, ~C[A] & C[B] ~> C[A | B]~
+        * If ~C~ is /covariant/, ~C[A] & C[B] ~> C[A & B]~
+        * If ~C~ is /contravariant/, ~C[A] & C[B] ~> C[A | B]~
 
 ***** TODO Erasure
       TODO TODO TODO
@@ -631,9 +631,9 @@
         val either: Password | UserName = if true then name else password
           // val res2: Password | UserName = UserName(Eve)
       #+end_src
-      + ~Object & Product~ is a /supertype/ of ~UserName~ and ~Password~,
+      * ~Object & Product~ is a /supertype/ of ~UserName~ and ~Password~,
         BUT NOT the /least supertype/ ~Password | UserName~
-        * =from Jian= In the document, there is is a typo (not wrong, but not very
+        + =from Jian= In the document, there is is a typo (not wrong, but not very
           meaningful): _Object & Product is a supertype of UserName and ~Product~._
           TODO Create a PR to correct this!
 
@@ -675,7 +675,7 @@
         *the /least upper bound (lub)/ of a set of type is the union of these
         types.*
 
-        + This *replaces* the definition of /least upper bound/ in the Scala 2
+        * This *replaces* the definition of /least upper bound/ in the Scala 2
           specification. TODO
 
 ***** TODO Motivation - TODO NOTE, TODO Re-READ
@@ -708,7 +708,7 @@
       is a shorthand for a PLAIN /type definition/ with a /type lambda/ as its RHS:
       ~type T = [X] =>> (X, X)~
 
-    - TODO
+    - =TODO=
       _More details_ link
 
 *** DONE Match Types - =TODO= _mechanism_ - =Keep Reading=
@@ -721,7 +721,7 @@
           case Array[t]    => t
           case Iterable[t] => t
       #+end_src
-      + An ~Elem~ with /CONCRETE type parameter/ ~X~ can be reduced _as_ (NOT legal
+      * An ~Elem~ with /CONCRETE type parameter/ ~X~ can be reduced _as_ (NOT legal
         code you want to write out explicitly):
         #+begin_src scala
           Elem[String]      =:= Char
@@ -733,9 +733,9 @@
         *mutually subtypes* of each other.
 
     - Syntax in general: ~S match { P1 => T1 .... Pn => Tn }~, where
-      + ~S~, ~T1~, ..., ~Tn~ are types.
-      + ~P1~, ..., ~Pn~ are patterns.
-        * /Type variables/ in patterns start as usual with a lower case letter.
+      * ~S~, ~T1~, ..., ~Tn~ are types.
+      * ~P1~, ..., ~Pn~ are patterns.
+        + /Type variables/ in patterns start as usual with a lower case letter.
 
     - Match types can form part of *RECURSIVE TYPE definitions*. Example:
       #+begin_src scala
@@ -752,10 +752,10 @@
           case Unit    => Ys
           case x *: xs => x *: Concat[xs, Ys]
       #+end_src
-      + In this definition, every instance of ~Concat[A, B]~, whether reducible
+      * In this definition, every instance of ~Concat[A, B]~, whether reducible
         or not, is known to be a /subtype/ of ~Tuple~.
 
-      + This is necessary to _make the recursive invocation ~x *: Concat[xs, Ys]~
+      * This is necessary to _make the recursive invocation ~x *: Concat[xs, Ys]~
         type check_, since ~*:~ demands a ~Tuple~ as its right operand.
 
 **** DONE Representation of Match Types
@@ -770,20 +770,20 @@
      #+end_src
      - It's _internal representation_ (=from Jian= Tasty???) is
        ~Match(S, C1, ..., Cn) <: B~
-       + ~Ci~ is of the form ~[Xs] => P => T~
-         * ~[Xs]~
+       * ~Ci~ is of the form ~[Xs] => P => T~
+         + ~[Xs]~
            a /type parameter clause/ of the /variables bound/ in pattern ~Pi~.
            _It can be omitted if there is *NO* /bound/._
 
-         * Each case (~Pi => Ti~) is either:
+         + Each case (~Pi => Ti~) is either:
            - a /unary function type/ like ~String => Char~
              OR
            - a /type lambda over a unary function type/ like ~Array[t] => LeafElem[t]~.
 
-         * ~B~ is the declared /upper bound/ of the /match type/, or ~Any~ if no
+         + ~B~ is the declared /upper bound/ of the /match type/, or ~Any~ if no
            such bound is given.
 
-       + Scrutiny, /bound types/ and /pattern types/ must be /first-order types/.
+       * Scrutiny, /bound types/ and /pattern types/ must be /first-order types/.
          TODO =from Jian= ??? I don't quite understand this sentence!?!?
 
 **** TODO Match type reduction
@@ -808,14 +808,14 @@
         //             a dependent function type
       #+end_src
 
-      - Scala _ALREADY_ has /dependent methods/.
+      * Scala _ALREADY_ has /dependent methods/.
         BUT so far (in Scala 2) it was _NOT possible_ to turn such /methods/ into
         /function values/, so that they can be passed as /parameters/ to other
         functions, or returned as results.
         + /Dependent methods/ COULD NOT be turned into /functions/ simply because
           there was no type that could describe them.
 
-      - In dotty the /type/ of the ~extractor~ value above is ~(e: Entry) => e.Key~
+      * In dotty the /type/ of the ~extractor~ value above is ~(e: Entry) => e.Key~
 
     - The /dependent function type/ above is just /syntactic sugar/ for
       #+begin_src scala
@@ -918,7 +918,7 @@
        such as ~type F = [A] =>> List[A]~, one would call ~F~ _withing a /type
        expression/,_ as in ~type Bar = F[Int]~.
    
-** DONE ENUMS
+** DONE Enums
    CLOSED: [2020-07-11 Sat 04:07]
 *** DONE Enumerations
     CLOSED: [2020-07-10 Fri 23:57]
@@ -930,12 +930,12 @@
           case Red, Green, Blue
       #+end_src
       Desugare to core Scala features are explained in the section _Translation_.
-      + This defined a new ~sealed~ /class/ ~Color~ with 3 values:
-        * ~Color.Red~
-        * ~Color.Green~
-        * ~Color.Blue~
+      * This defined a new ~sealed~ /class/ ~Color~ with 3 values:
+        + ~Color.Red~
+        + ~Color.Green~
+        + ~Color.Blue~
 
-      + The _color values_ are members of ~Color~'s /companion object/.
+      * The _color values_ are members of ~Color~'s /companion object/.
 
 **** DONE Parameterized enums
      CLOSED: [2020-07-10 Fri 19:08]
@@ -1078,34 +1078,34 @@
           case Some(x: T)
           case None
       #+end_src
-      + ~case Some~ is a shorthand for writing a /case class/ that _extends_
+      * ~case Some~ is a shorthand for writing a /case class/ that _extends_
         ~Option~.
 
-      + ~None~ is NOT parameterized, it is treated as a _normal_ enum value.
+      * ~None~ is NOT parameterized, it is treated as a _normal_ enum value.
 
-      + The ~extends~ clauses can be given explicitly:
+      * The ~extends~ clauses can be given explicitly:
         #+begin_src scala
           enum Option[+T]:
             case Some(x: T) extends Option[T]
             case None       extends Option[Nothing]
         #+end_src
 
-      + Note:
+      * Note:
         The /parent type/ of the ~None~ value is inferred as ~Option[Nothing]~.
         Generally,
-        * all /covariant/ /type parameters/ of the /enum class/ are *minimized* in
+        + all /covariant/ /type parameters/ of the /enum class/ are *minimized* in
           a compiler-generated ~extends~ clause
 
-        * whereas all /contravariant/ /type parameters/ are *maximized*.
+        + whereas all /contravariant/ /type parameters/ are *maximized*.
 
-        * If ~Option~ was /non-variant/, you would need to give the ~extends~
+        + If ~Option~ was /non-variant/, you would need to give the ~extends~
           /clause/ of ~None~ *EXPLICITLY*.
 
     - If not directly ~new~ a enumeration, the /type/ is always its parent.
       For example,
-      + ~Option.Some(2)~ is of /type/ ~Option[Int]~
-      + ~Option.None~ is of /type/ ~Option[Nothing]~
-      + ~new Option.Some(2)~ is of /type/ ~Option.Some[Int]~
+      * ~Option.Some(2)~ is of /type/ ~Option[Int]~
+      * ~Option.None~ is of /type/ ~Option[Nothing]~
+      * ~new Option.Some(2)~ is of /type/ ~Option.Some[Int]~
 
     - As all other enums, ADTs can define methods.
       #+begin_src scala
@@ -1156,54 +1156,54 @@
 
     - We now explain the *expansion of enums* _in detail_.
       Here are some _terminology_ and _notational conventions_:
-      + ~E~ as a NAME of an /enum/,
+      * ~E~ as a NAME of an /enum/,
         ~C~ as a NAME of a /case/ that appears in ~E~.
 
-      + We use ~<...>~ for /syntactic constructs/ that in some circumstances *might
+      * We use ~<...>~ for /syntactic constructs/ that in some circumstances *might
         be empty*.
-        * For instance, ~<value-params>~ represents one or more parameter lists
+        + For instance, ~<value-params>~ represents one or more parameter lists
           ~(...)~ or nothing at all.
 
-      + Enum cases fall into _THREE_ categories:
-        * /Class cases/ are those /cases/ that are *parameterized*,
+      * Enum cases fall into _THREE_ categories:
+        + /Class cases/ are those /cases/ that are *parameterized*,
           - _EITHER_ with a /type parameter/ section ~[...]~
           - _OR_ with _one or more (possibly empty)_ /parameter sections/ ~(...)~.
 
-        * /Simple cases/ are /cases/ of a *non-generic* /enum/ that have
+        + /Simple cases/ are /cases/ of a *non-generic* /enum/ that have
           *NEITHER /parameters/ NOR an /extends clause/ or /body/.*
           That is, _they consist of a NAME only._
 
-        * /Value cases/ are /cases/ that
+        + /Value cases/ are /cases/ that
           - do *NOT HAVE* a /parameter section/
 
           - BUT that do *HAVE* a (possibly generated) /extends clause/ and/or a
             /body/.
 
     - There are _NINE_ *desugaring rules*.
-      + Overview:
-        * Rule (1) DESUGAR /enum/ definitions.
+      * Overview:
+        + Rule (1) DESUGAR /enum/ definitions.
 
-        * Rules (2) and (3) DESUGAR /simple cases/.
+        + Rules (2) and (3) DESUGAR /simple cases/.
 
-        * Rules (4) to (6) define /extends clauses/ for /cases/ that are MISSING
+        + Rules (4) to (6) define /extends clauses/ for /cases/ that are MISSING
           them.
 
-        * Rules (7) to (9) define how such /cases/ with /extends clauses/ map into
+        + Rules (7) to (9) define how such /cases/ with /extends clauses/ map into
           /case classes/ or /vals/.
 
-      + Details
+      * Details
         1. An ~enum~ definition
            + ~enum E ... { <defs> <cases> }~ expands to
              (=from Jian=
              Here ~...~ can be anything between the _NAME_ of /enum/ and _BODY_
              of /enum/)
-             * a ~sealed abstract class~ that extends the ~scala.Enum~ /trait/
+             - a ~sealed abstract class~ that extends the ~scala.Enum~ /trait/
                AND
-             * an associated /companion object/ that CONTAINS the _defined cases_,
+             - an associated /companion object/ that CONTAINS the _defined cases_,
                expanded according to rules (2 - 8).
 
            + The /enum trait/
-             * _starts with_ a compiler-generated import that imports the names ~<caseIds>~
+             - _starts with_ a compiler-generated import that imports the names ~<caseIds>~
                of all cases _so that they can be used WITHOUT prefix *IN* the trait._
                #+begin_src scala
                  sealed abstract class E ... extends <parents> with scala.reflect.Enum {
@@ -1383,7 +1383,7 @@
            }
          #+end_src
 
-** DONE CONTEXTUAL ABSTRACTIONS
+** DONE Contextual Abstractions
    CLOSED: [2020-07-19 Sun 03:32]
 *** DONE Overview
     CLOSED: [2020-07-17 Fri 02:07]
@@ -1391,13 +1391,13 @@
      CLOSED: [2020-07-17 Fri 02:07]
      - Scala's /implicits/ are its most distinguished feature.
        They are the fundamental way to *ABSTRACT over context.*
-       + They represent a unified paradigm with a great variety of use cases, among
+       * They represent a unified paradigm with a great variety of use cases, among
          them:
-         * *implementing* /type classes/
-         * *establishing* /context/
-         * /dependency injection/
-         * *expressing* capabilities
-         * *computing* NEW /types/ and *proving* _relationships_ between them.
+         + *implementing* /type classes/
+         + *establishing* /context/
+         + /dependency injection/
+         + *expressing* capabilities
+         + *computing* NEW /types/ and *proving* _relationships_ between them.
 
      - Following Haskell, Scala was the _SECOND popular_ language to have some form
        of /implicits/. Other languages have followed suit. E.g
@@ -1414,12 +1414,12 @@
 
      - Even though these designs use widely different terminology, they are all
        variants of the core idea of /term inference/.
-       + Scala *embodies* the idea in a _PURER form_ than most other languages:
-         * /implicit parameter/:
+       * Scala *embodies* the idea in a _PURER form_ than most other languages:
+         + /implicit parameter/:
            _DIRECTLY_ leads to an /inferred argument term/ that could also be
            written down EXPLICITLY.
 
-         * /type class/ based design:
+         + /type class/ based design:
            _LESS DIRECT_ since they *hide* /term inference/ behind some form of
            /type classification/ and do NOT offer the option of writing the
            inferred quantities (typically, dictionaries) EXPLICITLY.
@@ -1433,9 +1433,9 @@
               I believe this is due to a number of aspects that together make
             /implicits/ *HARDER to learn THAN NECESSARY* and also make it *HARDER
             to PREVENT ABUSES*.
-       + Particular criticisms are:
+       * Particular criticisms are:
          1. _Being very powerful, /implicits/ are EASILY *over-used* and *mis-used*._
-            * This observation holds in almost all cases when we talk about /implicit
+            + This observation holds in almost all cases when we talk about /implicit
               conversions/, which,
               EVEN THOUGH _conceptually different_,
               _SHARE the *SAME* syntax_ with other /implicit definitions/.
@@ -1462,7 +1462,7 @@
                     This is a useful step to *PUSH BACK against overuse* of /implicit
                   conversions/.
 
-            * But the problem remains that _syntactically_,
+            + But the problem remains that _syntactically_,
               /conversions/ and /values/ just look *TOO SIMILAR for comfort.*
 
          2. Another widespread abuse is over-reliance on /implicit imports/.
@@ -1539,13 +1539,13 @@
        2. 1. is what is expressed by /implicit classes/ in later versions of Scala.
        3. /Implicit parameters and instance definitions/ came later in 2006 and
           we picked similar syntax since it seemed convenient.
-          + For the same reason, NO effort was made to *distinguish* /implicit
+          * For the same reason, NO effort was made to *distinguish* /implicit
             imports or arguments/ *from* _normal ones_.
 
      - Existing Scala programmers by and large have gotten used to the status quo
        and see little need for change.
        _BUT_ for newcomers this status quo presents a _big hurdle_.
-       + I believe if we want to overcome that hurdle, we should take a step back
+       * I believe if we want to overcome that hurdle, we should take a step back
          and allow ourselves to consider a radically new design.
 
 **** DONE The New Design
@@ -1554,20 +1554,20 @@
        Scala. *They introduce _four_ fundamental CHANGES*:
        1. /Given Instances/ (use keyword ~given~):
           a new way to define basic terms that can be synthesized.
-          + They _replace_ /implicit definitions/.
+          * They _replace_ /implicit definitions/.
 
-          + The core principle of the proposal:
+          * The core principle of the proposal:
             rather than mixing the ~implicit~ /modifier/ with a large number of
             features, we have a SINGLE WAY to define terms that can be synthesized
             for types.
 
        2. /Using Clauses/ (use keyword ~using~):
           a new syntax for _IMPLICIT parameters and their arguments_.
-          + It *unambiguously* aligns /parameters/ and /arguments/, solving a number
+          * It *unambiguously* aligns /parameters/ and /arguments/, solving a number
             of language warts.
 
-          + It also allows us to have _SEVERAL ~using~ clauses_ in a definition.
-            * =from Jian=
+          * It also allows us to have _SEVERAL ~using~ clauses_ in a definition.
+            + =from Jian=
               Scala 2 /implicit parameters and arguments/ can't do this -- if
               _not explicitly_ mark ~using~
               1. how can the compiler know if a parameter list is
@@ -1577,7 +1577,7 @@
               2. if the compiler doesn't know which is which,
                  it doesn't know if some term inference need to be applied.
 
-            * =from Jian=
+            + =from Jian=
               Here is an example of, if we don't need to mark ~using~ when manually
               pass the /context parameters/, what ambiguity can happen:
               #+begin_src scala
@@ -1603,9 +1603,9 @@
        3. /"Given" Imports/:
           a new class of /import selectors/ that _SPECIFICALLY import givens_
           and _NOTHING else_.
-          + =from Jian=
-            * Import /givens/ by their _names_ is like normal import sytax.
-            * Import /givens/ by their _types_ need to use the keyword ~given~.
+          * =from Jian=
+            + Import /givens/ by their _names_ is like normal import sytax.
+            + Import /givens/ by their _types_ need to use the keyword ~given~.
 
        4. /Implicit Conversions/:
           now expressed as /given instances/ of a standard ~Conversion~ class.
@@ -1613,50 +1613,50 @@
 
      - This section also contains pages describing other language features that
        are _related to_ /context abstraction/. These are:
-       + /Context Bounds/, which carry over *unchanged*.
+       * /Context Bounds/, which carry over *unchanged*.
 
-       + /Extension Methods/ REPLACE /implicit classes/ in a way that _INTEGRATES
+       * /Extension Methods/ REPLACE /implicit classes/ in a way that _INTEGRATES
          BETTER with /type classes/._
 
-       + /Implementing Type classes/ demonstrates how some common /type classes/
+       * /Implementing Type classes/ demonstrates how some common /type classes/
          can be implemented using the new constructs, e.g. /extension method/.
 
-       + /Type class Derivation/ introduces constructs to AUTOMATICALLY *derive*
+       * /Type class Derivation/ introduces constructs to AUTOMATICALLY *derive*
          /type class instances/ for ADTs.
 
-       + /Multiversal Equality/ introduces a special type class to support /type
+       * /Multiversal Equality/ introduces a special type class to support /type
          safe equality/.
 
-       + /Context Functions/ provide a way to abstract over /context parameters/.
+       * /Context Functions/ provide a way to abstract over /context parameters/.
 
-       + /By-Name Context Parameters/ are an essential tool to DEFINE /recursive
+       * /By-Name Context Parameters/ are an essential tool to DEFINE /recursive
          synthesized values/ WITHOUT looping.
 
-       + _Relationship with Scala 2 Implicits_ discusses the relationship between
+       * _Relationship with Scala 2 Implicits_ discusses the relationship between
          old-style implicits and new-style givens and how to migrate from one to
          the other.
 
      - Overall, the _new design_ achieves a BETTER *SEPARATION* of /term inference/
        *FROM* _the REST of the language_:
-       + There is a *single way* to define /givens/ instead of a multitude of forms
+       * There is a *single way* to define /givens/ instead of a multitude of forms
          all taking an ~implicit~ /modifier/.
 
-       + There is a *single way* to introduce /implicit parameters and arguments/
+       * There is a *single way* to introduce /implicit parameters and arguments/
          _instead of_ conflating ~implicit~ with normal arguments.
 
-       + There is a *separate way* to _import givens_ that does *NOT allow* them
+       * There is a *separate way* to _import givens_ that does *NOT allow* them
          to *hide* in a sea of normal imports.
 
-       + And there is a *single way* to define an /implicit conversion/ which is
+       * And there is a *single way* to define an /implicit conversion/ which is
          clearly marked as such and _does NOT require SPECIAL syntax._
 
      - This design thus
-       + *avoids* feature interactions
-       + makes the language more *consistent* and *orthogonal*.
-       + make /implicits/ _easier to learn_ and _harder to abuse_.
-       + greatly improve the *clarity* of the 95% of Scala programs that use
+       * *avoids* feature interactions
+       * makes the language more *consistent* and *orthogonal*.
+       * make /implicits/ _easier to learn_ and _harder to abuse_.
+       * greatly improve the *clarity* of the 95% of Scala programs that use
          /implicits/.
-       + fulfil the promise of /term inference/ in a principled way
+       * fulfil the promise of /term inference/ in a principled way
          that is also _accessible_ and _friendly_.
 
      - Q :: Could we achieve the same goals by tweaking existing implicits?
@@ -1666,51 +1666,51 @@
        1. Some of the problems are clearly _syntactic_ and
           _require different syntax_ to solve them.
           =from Jian=
-          + For example, mutiple /context parameter lists/ is impossible in Scala 2.
+          * For example, mutiple /context parameter lists/ is impossible in Scala 2.
             Scala 3 enable this feature by introducing new syntax, and manually
             passing /context parameters/ must explicitly use ~using~.
 
-          + Make the /imports/ to /implicits/ explicitly.
+          * Make the /imports/ to /implicits/ explicitly.
 
-          + Distinguish _define_ /implicits/ and _use_ /implicits/.
+          * Distinguish _define_ /implicits/ and _use_ /implicits/.
 
        2. There is the problem how to migrate.
-          + Requirement:
+          * Requirement:
             We cannot change the rules in mid-flight. At some stage of language
             evolution we need to accommodate both the new and the old rules.
 
-          + Solution candiates:
-            * With a syntax change, this is easy:
+          * Solution candiates:
+            + With a syntax change, this is easy:
               1. *Introduce* the _NEW syntax_ with new rules,
               2. *Support* the _OLD syntax_ for a while to *facilitate* _cross compilation_,
               3. *Deprecate* and *phase out* the _OLD syntax_ at some later time.
 
-            * (NOT actually available)
+            + (NOT actually available)
               Keeping the same syntax does not offer this path, and in fact does
               not seem to offer any viable path for evolution
 
        3. Even if we would somehow succeed with migration, if we don't choose to
           use new syntax in the new design, we still have the problem how to
           teach this.
-          + We cannot make existing tutorials go away.
-            * Almost all existing tutorials start with /implicit conversions/, which
+          * We cannot make existing tutorials go away.
+            + Almost all existing tutorials start with /implicit conversions/, which
               is not encouraged and the Scala 2 syntax will go away in Scala 3.1+;
 
-            * They use _normal imports_, which will go away, and they explain calls
+            + They use _normal imports_, which will go away, and they explain calls
               to methods with /implicit parameters/ by expanding them to plain
               applications, which will also go away.
               =from Jian= new syntax need ~using~
 
-          + This means that we'd have to add modifications and qualifications to
+          * This means that we'd have to add modifications and qualifications to
             all existing literature and courseware, likely _causing more confusion
             with beginners instead of less_.
 
-          + By contrast,
+          * By contrast,
             with a _NEW syntax_ there is a clear criterion:
             Any book or courseware that mentions ~implicit~ is OUTDATED and SHOULD
             BE UPDATED.
 
-*** DONE Given Instances
+*** DONE Given Instances -- =START= =Adjust unordered list=
     CLOSED: [2020-11-09 Mon 11:54]
     /Given instances/ (or, simply, "givens") define "canonical" values of certain
     /types/ that serve for /synthesizing arguments/ to /context parameters/.
@@ -4327,7 +4327,7 @@
        /old style implicits/ might start to be *deprecated* in a _version
        *FOLLOWING* Scala 3.0_.
 
-** DONE METAPROGRAMMING
+** DONE Metaprogramming
    CLOSED: [2020-12-28 Mon 01:37]
 *** DONE Overview
     CLOSED: [2020-12-28 Mon 01:44]
@@ -6423,7 +6423,7 @@
      #+end_src
      in the folder where you want to clone the template.
 
-** TODO OTHER NEW FEATURES
+** TODO Other New Features
 *** DONE Trait Parameters
     CLOSED: [2020-07-14 Tue 12:59]
     Dotty allows /traits/ to have /parameters/, just like /classes/ have /parameters/.
@@ -9100,7 +9100,7 @@
        In Proceedings of the 15th ACM SIGPLAN-SIGACT symposium on Principles of
        programming languages (pp. 47-57). ACM.
 
-** TODO OTHER CHANGED FEATURES
+** TODO Other Changed Features
 *** DONE Numeric Literals
     CLOSED: [2020-11-18 Wed 05:01]
     - *NOTE*:
@@ -10090,14 +10090,14 @@
     The syntax of /vararg patterns/ has changed.
     - In the _NEW syntax_ one writes /varargs/ in patterns _EXACTLY LIKE_ one writes
       them in expressions, using ~a : _*~ type annotation:
-      + NEW:
+      * NEW:
         #+begin_src scala
           xs match
             case List(1, 2, xs: _*) => println(xs)  // binds xs
             case List(1, _: _*)     =>              // wildcard pattern
         #+end_src
 
-      + OLD:
+      * OLD:
         it is shorter but _less regular_, and it no longer supported.
         #+begin_src scala
           /*!*/  case List(1, 2, xs @ _*) =>  // syntax error
@@ -10118,7 +10118,7 @@
     CLOSED: [2020-05-25 Mon 11:03]
     - In Scala 2, /pattern bindings/ in ~val~ definitions and ~for~ expressions are
       *LOOSELY typed*.
-      + Potentially failing matches are still _ACCEPTED at /compile-time/,_
+      * Potentially failing matches are still _ACCEPTED at /compile-time/,_
         but may influence the program's /runtime/ behavior.
 
     - From Scala 3.1 on, /type checking/ rules will be tightened so that _errors
@@ -10131,10 +10131,10 @@
          val xs: List[Any] = List(1, 2, 3)
          val (x: String) :: _ = xs
        #+end_src
-       + This code gives a compile-time error in Scala 3.0 with the ~-strict~
+       * This code gives a compile-time error in Scala 3.0 with the ~-strict~
          setting or Scala 3.1 by default.
 
-       + It will fail at runtime with a ~ClassCastException~ in Scala 2.
+       * It will fail at runtime with a ~ClassCastException~ in Scala 2.
 
      - In Scala 3.1, a /pattern binding/ is *ONLY allowed* if the pattern is
        /irrefutable/, that is, if the right-hand side's type CONFORMS TO the
@@ -10154,7 +10154,7 @@
        #+begin_src scala
          val first :: rest = elems  // error in Scala 3.1; work in Scala 2
        #+end_src
-       + Use ~@unchecked~ to avoid the error:
+       * Use ~@unchecked~ to avoid the error:
          #+begin_src scala
            val first :: rest = elems: @unchecked  // OK
          #+end_src
@@ -10162,19 +10162,19 @@
 **** Pattern Bindings in ~for~ Expressions
      - In Scala 2, /pattern bindings/ in ~for~ expressions do _implicit filtering_,
        and filter out data that are not matched.
-       + In Scala 3, apply this _implicit filtering_ *ONLY when* a ~case~ shows up
+       * In Scala 3, apply this _implicit filtering_ *ONLY when* a ~case~ shows up
          before the pattern -- this is a new syntax! Scala 2 syntax no longer has
          the implicit filtering semantics.
 
      - Example (in Scala 3.1):
-       + Usage in Scala 2 can fail becuase of the semantics change.
+       * Usage in Scala 2 can fail becuase of the semantics change.
          #+begin_src scala
            val elems: List[Any] = List((1, 2), "hello", (3, 4))
            for ((x, y) <- elems) yield (y, x) // error: pattern's type (Any, Any) is more specialized
                                               // than the right hand side expression's type Any
          #+end_src
 
-       + Make implicit filtering available by using the ~case~:
+       * Make implicit filtering available by using the ~case~:
          #+begin_src scala
            for (case (x, y) <- elems) yield (y, x)  // returns List((2, 1), (4, 3))
          #+end_src
@@ -10188,10 +10188,10 @@
      - The new syntax is supported in Dotty and Scala 3.0.
 
      - However, to enable smooth cross compilation between Scala 2 and Scala 3,
-       + In Scala 3.0, the changed behavior and additional type checks are *only
+       * In Scala 3.0, the changed behavior and additional type checks are *only
          enabled under the ~-strict~ setting*.
 
-       + In Scala 3.1+, they will be enabled by default.
+       * In Scala 3.1+, they will be enabled by default.
 
 *** DONE Option-less Pattern Matching - =RE-READ= - =Further simplification will come, no need to read now=
     CLOSED: [2020-09-25 Fri 00:37]
@@ -10200,8 +10200,8 @@
       to Scala 2.
         From a user perspective, this means that Scala 3 generated patterns are a
       lot easier to debug as
-      + _variables_ all show up in debug modes
-      + _positions_ are correctly preserved
+      * _variables_ all show up in debug modes
+      * _positions_ are correctly preserved
 
     - Dotty supports a *superset* of Scala 2 /extractors/.
 
@@ -10229,13 +10229,13 @@
         def unapply[A](x: T)(using x: B): U
       #+end_src
       - The type ~U~ conforms to
-        + one of the following matches:
-          * /Boolean match/
-          * /Product match/
+        * one of the following matches:
+          + /Boolean match/
+          + /Product match/
 
           OR
 
-        + the type ~R~:
+        * the type ~R~:
           #+begin_src scala
             type R = {
               def isEmpty: Boolean
@@ -10244,18 +10244,18 @@
             }
           #+end_src
           Here ~S~ conforms to one of the following matches:
-          * single match
-          * name-based match
+          + single match
+          + name-based match
 
       - *Precedence* of these forms:
         ~unapply~ form > /single match/ > /name-based match/
 
       - A usage of a /fixed-arity extractor/ is irrefutable if one of the following
         condition holds:
-        + ~U~ = ~true~
-        + the /extractor/ is used as a /product match/
-        + ~U~ = ~Some[T]~ *(for Scala 2 compatibility)*
-        + ~U <: R~ and ~U <: { def isEmpty: false }~
+        * ~U~ = ~true~
+        * the /extractor/ is used as a /product match/
+        * ~U~ = ~Some[T]~ *(for Scala 2 compatibility)*
+        * ~U <: R~ and ~U <: { def isEmpty: false }~
 
 ***** Variadic Extractors
       Variadic extractors expose the following signature:
@@ -10263,8 +10263,8 @@
         def unapplySeq[A](x: T)(using x: B): U
       #+end_src
       - The type U conforms to one of the following matches:
-        + /sequence match/
-        + /product-sequence match/
+        * /sequence match/
+        * /product-sequence match/
 
       - Or ~U~ conforms to the /type/ ~R~:
         #+begin_src scala
@@ -10280,18 +10280,18 @@
 
       - A usage of a /variadic extractor/ is irrefutable if one of the following
         conditions holds:
-        + the /extractor/ is used directly as a
-          * /sequence match/
+        * the /extractor/ is used directly as a
+          + /sequence match/
             OR
-          * /product-sequence match/
-        + ~U~ = ~Some[T]~ *(for Scala 2 compatibility)*
-        + ~U <: R~ and ~U <: { def isEmpty: false }~
+          + /product-sequence match/
+        * ~U~ = ~Some[T]~ *(for Scala 2 compatibility)*
+        * ~U <: R~ and ~U <: { def isEmpty: false }~
 
 **** DONE Boolean Match
      CLOSED: [2020-09-24 Thu 23:44]
      - Criterion:
-       + ~U =:= Boolean~
-       + Pattern-matching on exactly *0* patterns
+       * ~U =:= Boolean~
+       * Pattern-matching on exactly *0* patterns
 
      - Example:
        #+begin_src scala
@@ -10309,12 +10309,12 @@
 **** DONE Product Match
      CLOSED: [2020-09-24 Thu 23:44]
      - Criterion:
-       + ~U <: Product~
+       * ~U <: Product~
 
-       + N > 0 is the maximum number of consecutive (parameterless ~def~ or ~val~)
+       * N > 0 is the maximum number of consecutive (parameterless ~def~ or ~val~)
           ~_1: P1~ ... ~_N: PN~ members in ~U~
 
-       + Pattern-matching on EXACTLY *N* patterns with types P1, P2, ..., PN
+       * Pattern-matching on EXACTLY *N* patterns with types P1, P2, ..., PN
 
      - Example:
        #+begin_src scala
@@ -10365,10 +10365,10 @@
 **** DONE Name-based Match
      CLOSED: [2020-09-24 Thu 23:51]
      - Criterion:
-       + N > 1 is the maximum number of consecutive (parameterless ~def~ or ~val~)
+       * N > 1 is the maximum number of consecutive (parameterless ~def~ or ~val~)
           ~_1: P1~ ... ~_N: PN~ members in ~U~
 
-       + Pattern-matching on EXACTLY ~N~ patterns with types P1, P2, ..., PN
+       * Pattern-matching on EXACTLY ~N~ patterns with types P1, P2, ..., PN
 
      - Example:
        #+begin_src scala
@@ -10392,7 +10392,7 @@
 **** DONE Sequence Match
      CLOSED: [2020-09-25 Fri 00:30]
      - Criterion:
-       + ~U <: X~, ~T2~ and ~T3~ conform to ~T1~
+       * ~U <: X~, ~T2~ and ~T3~ conform to ~T1~
          #+begin_src scala
            type X = {
              def lengthCompare(len: Int): Int // or, `def length: Int`
@@ -10402,10 +10402,10 @@
            }
          #+end_src
 
-       + Pattern-matching on EXACTLY *N* simple patterns with types ~T1~, ~T1~, ...,
+       * Pattern-matching on EXACTLY *N* simple patterns with types ~T1~, ~T1~, ...,
           ~T1~, where *N* is the _runtime size_ of the sequence, or
 
-       + Pattern-matching on >= N simple patterns and a /vararg pattern/ (e.g.,
+       * Pattern-matching on >= N simple patterns and a /vararg pattern/ (e.g.,
           ~xs: _*~) with types ~T1~, ~T1~, ..., ~T1~, ~Seq[T1]~, where *N* is the
           _minimum size_ of the sequence.
 
@@ -10428,14 +10428,14 @@
 **** DONE Product-Sequence Match
      CLOSED: [2020-09-25 Fri 00:36]
      - Criterion:
-       + ~U <: Product~
+       * ~U <: Product~
 
-       + N > 0 is the _maximum number_ of consecutive (parameterless def or val)
+       * N > 0 is the _maximum number_ of consecutive (parameterless def or val)
           ~_1: P1~ ... ~_N: PN~ members in ~U~
 
-       + ~PN~ conforms to the signature ~X~ defined in /Seq Pattern/
+       * ~PN~ conforms to the signature ~X~ defined in /Seq Pattern/
 
-       + Pattern-matching on EXACTLY *>= N* patterns, the first *N - 1* patterns
+       * Pattern-matching on EXACTLY *>= N* patterns, the first *N - 1* patterns
           have types P1, P2, ... P(N-1), the type of the remaining patterns are
          determined as in /Seq Pattern/.
 
@@ -10487,13 +10487,13 @@
      an empty parameter list.
      - Given a simple reference to ~next~ does *NOT auto-convert* to a function.
        One has to write explicitly ~() => next()~ to achieve that
-       + Once again since the ~_~ _is going to be DEPRECATED_ it's better to write
+       * Once again since the ~_~ _is going to be DEPRECATED_ it's better to write
          it this way rather than ~next _~.
 
      - The _REASON_ for *excluding* /nullary methods/ from /automatic eta expansion/:
        that Scala implicitly inserts the ~()~ argument, which would *conflict* with
        /eta expansion/.
-       + _Automatic ~()~ insertion_ is _limited_ (see "Dropped: Auto-Application)
+       * _Automatic ~()~ insertion_ is _limited_ (see "Dropped: Auto-Application)
          in Dotty, but the fundamental ambiguity remains.
 
 *** TODO Changes in Compiler Plugins
@@ -10537,25 +10537,25 @@
       #+end_src
 
     - A ~@main~ annotated method can be written either
-      + at the top-level
+      * at the top-level
         OR
-      + in a statically accessible object.
+      * in a statically accessible object.
 
     - Parameters of the ~@main~ method:
-      + the ~@main~ method can have an _ARBITRARY number_ of parameters.
+      * the ~@main~ method can have an _ARBITRARY number_ of parameters.
 
-      + For each parameter type there *must be* an instance of the
+      * For each parameter type there *must be* an instance of the
         ~scala.util.FromString~ /type class/ that is used to
         _convert_ an *argument string* _to_ the *required parameter type*.
 
-      + The _parameter list_ of a ~@main~ method can end in a repeated parameter
+      * The _parameter list_ of a ~@main~ method can end in a repeated parameter
         that then takes all remaining arguments given on the command line.
 
     - The program implemented from a @main method checks that there are enough
       arguments on the command line to fill in all parameters, and that argument
       strings are convertible to the required types. If a check fails, the
       program is terminated with an error message.
-      + Examples:
+      * Examples:
         #+begin_src bash
           scala happyBirthday 22
           # Illegal command line after first argument: more arguments expected
@@ -10606,19 +10606,19 @@
           // needs by-hand parsing of arguments vector
           // ...
       #+end_src
-      + The previous functionality of ~App~, which relied on the "magic"
+      * The previous functionality of ~App~, which relied on the "magic"
         ~DelayedInit~ trait, is *no longer available*.
 
-      + ~App~ still exists in limited form for now,
+      * ~App~ still exists in limited form for now,
         but
-        * it does *not support* /command line arguments/
-        * it will be *deprecated* in the future.
+        + it does *not support* /command line arguments/
+        + it will be *deprecated* in the future.
 
-      + If programs need to *cross-build* between Scala 2 and Scala 3,
+      * If programs need to *cross-build* between Scala 2 and Scala 3,
         it is *RECOMMENDED* to use an _EXPLICIT_ ~main~ method with an
         ~Array[String]~ argument instead.
 
-** TODO DROPPED FEATURES
+** TODO Dropped Features
 *** DONE Dropped: ~DelayedInit~
     CLOSED: [2020-11-24 Tue 08:24]
     The special handling of the ~DelayedInit~ trait is _NO LONGER SUPPORTED_.
@@ -11075,21 +11075,21 @@
     and will be phased out.
 
     - Previously, these /modifier/ were needed
-      + for *avoiding the generation* of /getters/ and /setters/ (~private[this]~
+      * for *avoiding the generation* of /getters/ and /setters/ (~private[this]~
         ONLY).
 
-      + for *excluding from variance checks* (~private[this]~ ONLY).
-        * Scala 2 also excludes ~protected[this]~ but this was found to be unsound
+      * for *excluding from variance checks* (~private[this]~ ONLY).
+        + Scala 2 also excludes ~protected[this]~ but this was found to be unsound
           and was therefore removed.
           TODO More details and examples about the unsoundness!!! TODO
 
     - _REASON_ of Dropped:
-      + The compiler now *can infers for ~private~ members the fact that they are ONLY
+      * The compiler now *can infers for ~private~ members the fact that they are ONLY
         accessed via ~this~.* Such members are treated as if they had been declared
         ~private[this]~ -- the previous requirements can be satisfied without manually
         write ~[this]~ out.
 
-      + ~protected[this]~ is dropped without a replacement.
+      * ~protected[this]~ is dropped without a replacement.
         =from Jian=
         The only requirement for ~protected[this]~ is to tell the compiler NOT
         do /variance checks/, which is already been pointed out that it is unsound!
@@ -11099,19 +11099,19 @@
       =from Jian=
       Learn more about this. There are more discussion about this topic.
 
-* TODO Scala 3 Syntax Summary
-** Lexical Syntax
-** Keywords
-*** Regular keywords
-*** Soft keywords
+** TODO Scala 3 Syntax Summary
+*** Lexical Syntax
+*** Keywords
+**** Regular keywords
+**** Soft keywords
     
-** Context-free Syntax
-*** Literals and Paths
-*** Types
-*** Expressions
-*** Type and Value Parameters
-*** Bindings and Imports
-*** Declarations and Definitions
+*** Context-free Syntax
+**** Literals and Paths
+**** Types
+**** Expressions
+**** Type and Value Parameters
+**** Bindings and Imports
+**** Declarations and Definitions
     
 * TODO Contributing
 ** TODO Contribute Knowledge
@@ -11187,7 +11187,7 @@
 *** Architecture
 **** (a) The queue subsystem
 **** (b) Bytecode-level types, ~BType~
-**** (c) Utilities offering a more "" API to bytecode emission
+**** (c) Utilities offering a more "high-level" API to bytecode emission
 **** (d) Mapping between type-checker types and ~BType~'s
 **** (e) More "high-level" utilities for bytecode emission
 **** (f) Building an ASM ~ClassNode~ given an AST ~TypeDef~
@@ -11237,7 +11237,7 @@
 *** Compiler Phases
 
 ** Dotc's concept of time
-** Scala Syntax Summary
+** Scala 3 Syntax Summary
 *** Lexical Syntax
 *** Keywords
 **** Regular keywords
@@ -11523,22 +11523,38 @@
 ** ~scala.sys~
 ** ~scala.sys.process~
 ** ~scala.util~
-** ~scala.util.control~
-** ~scala.util.hashing~
-** ~scala.util.matching~
-
-
-   
-** ~scala.runtime.stdLibPatches~
-*** Classlikes
-**** (O) ~language~
-**** (O) ~Predef~
-     
-** ~scala.util~
 *** (T, O) ~FromDigits[T]~
 *** (T) ~LowPriorityNot~
 *** (O) ~CommandLineParser~
 *** (fC, O) ~Not[+T]~
     
 ** ~scala.util.control~
-*** (O) ~NonLocalReturns~
+*** Type members
+**** Classlikes
+***** (O, C) ~Breaks~
+***** (aC) ~ControlThrowable~
+***** (O) ~Exception~
+***** (O, T) ~NoStackTrace~
+***** (O) ~NonFatal~
+***** (O) ~NonLocalReturns~
+***** (O) ~TailCalls~
+
+** ~scala.util.hashing~
+*** Type members
+**** Classlikes
+***** (O, fC) ~ByteswapHashing[T]~
+***** (O, T) ~Hashing[T]~
+***** (O) ~MurmurHash3~
+     
+*** Value members
+**** Methods
+***** byteswap32(v: Int): Int
+***** byteswap64(v: Long): Long
+      
+** ~scala.util.matching~
+*** Type members
+**** Classlikes
+***** (O, C) ~Regex~
+***** (T) ~UnanchoredRegex~
+     
+     
