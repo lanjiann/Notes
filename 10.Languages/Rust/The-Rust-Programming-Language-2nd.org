@@ -1267,7 +1267,8 @@
 ** DONE Summary - 57
    CLOSED: [2021-01-03 Sun 03:16]
    
-* 4. Understanding Ownership - 59 - =START=
+* DONE 4. Understanding Ownership - 59
+  CLOSED: [2021-01-05 Tue 15:51]
   /ownership/ is the *MOST UNIQUE feature* of Rust,
   and
   it enables Rust to make
@@ -1810,53 +1811,83 @@
 
     Next, we'll look at a different kind of /reference/: /slices/.
     
-** The Slice Type - 75
+** DONE The Slice Type - 75
+   CLOSED: [2021-01-05 Tue 15:46]
    - Another data type that does _NOT_ have /ownership/ is the /slice/.
 
-   - /slices/ let you reference a contiguous sequence of elements in a collection
-     rather than the whole collection.
+   - /slices/ let you *reference* a /contiguous sequence of elements/
+     in a collection rather than the whole collection.
 
-   - Write a small program to get the first word of a string.
-     Since we don't want the ownership of the string, we pass a reference.
+   - Let's use a example to illustrate this:
+     * Q ::
+       WRITE a /function/ that
+       TAKES a /string/ and
+       RETURNS the _first word_ it finds in that /string/.
+               If no space can be found, return the whole string.
+               
+     * A :: The signature should be like ~fn first_word(s: &String) -> ?~.
+            We don't want /ownership/, so this is fine.
 
-     What should we return?
-     Since we don't really have a way to talk about part of a string, we choose
-     to return the index of the end of the word.
+     * Q :: BUT what should we return?
+       1. Since we don't have the /ownership/,
+          we don't really have a way to talk about part of a /string/.
 
-     #+BEGIN_SRC rust
-       fn first_word(s: &String) -> usize {
-           let bytes = a.as_bytes();
+       2. However, we could _return the /index/ of the end of the word._
+          Let's try that, as shown in Listing 4-7.
+          #+begin_src rust
+            fn first_word(s: &String) -> usize {
+                let bytes = s.as_bytes();
 
-           for (i, &item) in bytes.itre().enumerate() {
-               if item == b' ' {
-                   return i;
-               }
-           }
+                for (i, &item) in bytes.iter().enumerate() {
+                    if item == b' ' {
+                        return i;
+                    }
+                }
 
-           s.len()
-       }
-     #+END_SRC
+                s.len()
+            }
+          #+end_src
+          + =TODO= We'll discuss /iterators/ in more detail in Chapter 13.
 
-     There is a potential bug: the returned value can be available even the
-     refered string is no longer there (for a mutable string).
-     #+BEGIN_SRC rust
-       fn main() {
-           let mut s = String::from("hello world");
-           let word = first_word(&s);
-           s.clear();
+          + Since the returned value of ~usize~ is a separate value from the
+            ~String~, there's no guarantee that it will still be valid in the
+            future. *THIS IS BAD!*
+            #+begin_src rust
+              fn main() {
+                  let mut s = String::from("hello world");
+                  let word = first_word(&s);
+                  s.clear();
 
-           // operate `s` with `word` can lead to a crash.
-       }
-     #+END_SRC
+                  // operate `s` with `word` can lead to a crash.
+              }
+            #+end_src
 
-*** String Slices - 77 - =START=
+            - If we want to write a ~second_word~, the /return value type/ is
+              ~(usize, usize)~, which is tedious and even more brittle.
+
+   - =NEXT= Rust has a solution to this problem: /string slices/.
+     
+*** DONE String Slices - 77
+    CLOSED: [2021-01-05 Tue 15:46]
     #+BEGIN_SRC rust
       let s = String::from("hello world");
+
       let hello = &s[0..5];
       let hello_ = &s[..5]; // for short
+
       let world = &s[6..11];
       let world_ = &s[6..]; // for short
     #+END_SRC
+
+    - Note:
+      /String slice/ _range indices_ *must* occur at _valid /UTF-8 character/
+      boundaries_.
+        If you attempt to create a /string slice/ in the middle of a multibyte
+      character, your program will exit with an error. For the purposes of
+      introducing /string slices/, we are assuming ASCII only in this section;
+      =TODO=
+      a more thorough discussion of UTF-8 handling is in the “Storing UTF-8
+      Encoded Text with Strings” section of Chapter 8.
 
     - Then, let's re-write the ~first_word~ function ("string slice" is written
       as ~&str~):
@@ -1864,7 +1895,7 @@
         fn first_word(s: &String) -> &str {
             let bytes = a.as_bytes();
 
-            for (i, &item) in bytes.itre().enumerate() {
+            for (i, &item) in bytes.iter().enumerate() {
                 if item == b' ' {
                     return &s[0..i];
                 }
@@ -1874,16 +1905,39 @@
         }
       #+END_SRC
 
-    - With the help of /slice/, invalid code cannot be compiled:
+    - With the help of /string slice/, invalid code cannot be compiled:
       #+BEGIN_SRC rust
         fn main() {
             let mut s = String::from("hello world");
             let word = first_word(&s);
-            s.clear(); // ERROR!
+            s.clear();  // error!
+            println!("the first word is: {}", word);
         }
       #+END_SRC
+      * Compiler error:
+        #+begin_src text
+             Compiling ownership v0.1.0 (file:///projects/ownership)
+          error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
+            --> src/main.rs:18:5
+             |
+          16 |     let word = first_word(&s);
+             |                           -- immutable borrow occurs here
+          17 | 
+          18 |     s.clear(); // error!
+             |     ^^^^^^^^^ mutable borrow occurs here
+          19 | 
+          20 |     println!("the first word is: {}", word);
+             |                                       ---- immutable borrow later used here
 
-      + The error message is:
+          error: aborting due to previous error
+
+          For more information about this error, try `rustc --explain E0502`.
+          error: could not compile `ownership`.
+
+          To learn more, run the command again with --verbose.
+        #+end_src
+
+      * The error message is:
         #+BEGIN_SRC text
           17:6 error: cannot borrow `s` as mutable because it is also borrowed as
                       immutable [E0502]
@@ -1900,80 +1954,97 @@
           ^
         #+END_SRC
 
-      + Explanation to the error message:
-        ~clear~ needs to truncate the ~String~, it tries to take a /mutable
+      * Explanation to the error message:
+        ~clear~ needs to truncate the ~String~, it tries to get a /mutable
         reference/, which fails due to the rule that if we have an /immutable
         reference/ to a variable, we _CANNOT_ also take a /mutable reference/.
 
 **** DONE String Literals Are Slices
-     CLOSED: [2017-08-19 Sat 00:19]
-     Recall that we talked about /string literals/ being stored inside the
-     binary. Now that we know about /slices/, we can properly understand /string
-     literals/: ~let s = "Hello, world!";~
-     The type of s here is ~&str~:
-     it's a slice pointing to that specific point of the binary. This is also why
-     string literals are immutable; ~&str~ is an ~immutable reference~.
+     CLOSED: [2021-01-05 Tue 15:46]
+     Recall that we talked about /string literals/ being stored inside the binary.
+     Now that we know about /slices/, we can properly understand /string literals/:
+     ~let s = "Hello, world!";~, where the /type/ of ~s~ is ~&str~.
+       It's a /slice/ pointing to that specific point of the binary. This is also
+     why /string literals/ are *IMMUTABLE*; ~&str~ is an /immutable reference/.
 
 **** DONE String Slices as Parameters
-     CLOSED: [2017-08-19 Sat 00:27]
+     CLOSED: [2021-01-05 Tue 15:46]
      One move improvement on ~first_word~:
-     change its type signature to ~fn first_word(s: &str) -> &str {~
+     change its /type signature/
+     FROM ~fn first_word(s: &String) -> &str {~
+     TO ~fn first_word(s: &str) -> &str {~
 
-     This change makes our API more general and useful without losing any
-     functionality:
-     #+BEGIN_SRC rust
-       fn main() {
-           let my_string = String::from("hello world");
+     - This change *makes our API more general and useful* WITHOUT losing any
+       functionality:
+       #+begin_src rust
+         fn main() {
+             let my_string = String::from("hello world");
 
-           // first_word works on slices of `String`s
-           let word_1 = first_word(&my_string[..]);
+             // first_word works on slices of `String`s
+             let word_1 = first_word(&my_string[..]);
 
-           let my_string_literal = "hello world";
+             let my_string_literal = "hello world";
 
-           // first_word works on slices of string literals
-           let word_2 = first_word(&my_string_literal[..]);
+             // first_word works on slices of string literals
+             let word_2 = first_word(&my_string_literal[..]);
 
-           // since string literals *are* string slices already,
-           // this works too, without the slice syntax!
-           let word_3 = first_word(my_string_literal);
-       }
-     #+END_SRC
+             // since string literals *are* string slices already,
+             // this works too, without the slice syntax!
+             let word_3 = first_word(my_string_literal);
+         }
+       #+end_src
+       * If we have a /string slice/, we can pass that directly.
+
+       * If we have a ~String~, we can pass a /slice/ of the entire ~String~.
+     
 **** DONE Other Slices
-     CLOSED: [2017-08-19 Sat 00:29]
-     For example,
-     #+BEGIN_SRC rust
-       let a = [1, 2, 3, 4, 5];
-       let slice = &a[1..3];
-     #+END_SRC
+     CLOSED: [2021-01-05 Tue 15:46]
+     /String slices/, as you might imagine, are specific to /strings/.
+     BUT there's a _MORE GENERAL_ /slice type/, too.
+     
+     - For example (arrays),
+       #+begin_src rust
+         let a = [1, 2, 3, 4, 5];
 
-     Here the type of ~slice~ is ~&[i32]~.
+         let slice = &a[1..3];
+       #+end_src
+       * This /slice/ has the type ~&[i32]~.
 
-     =TODO= Chapter 8
+       * It works the same way as /string slices/ do, by storing a /reference/ to
+         the first element and a length.
 
-*** Other Slices - 81
+       * *You'll use this kind of /slice/ for all sorts of other collections.*
+         =TODO=
+         We'll discuss these collections in detail when we talk about vectors in
+         Chapter 8.
 
-** Summary - 81
+*** Other Slices - 81 - =START=
+
+** DONE Summary - 81
+   CLOSED: [2021-01-05 Tue 15:51]
 
 * DONE 5. Using Structs to Structure Related Data - 83
-  CLOSED: [2017-08-19 Sat 23:48]
-  - ~struct~ :: a custom data type that lets us name and package together
-                multiple related values that make up a meaningful group.
+  CLOSED: [2021-01-06 Wed 02:18]
+  - ~struct~ :: a custom data type that lets us
+    * *name* and
+    * *package* together multiple related values that make up a meaningful group.
 
   - If you're familiar with an object-oriented language, a /struct/ is like an
     object's data attributes.
 
   - In this chapter, we'll
-    + compare and contrast /tuples/ with /structs/, demonstrate how to use /structs/,
+    * compare and contrast /tuples/ with /structs/,
+      demonstrate how to use /structs/,
 
-    + discuss how to define /methods/ and /associated functions on structs/ to
+    * discuss how to define /methods/ and /associated functions on structs/ to
       specify behavior associated with a struct's data.
 
-  - The /struct/ and /enum/ (which is discussed in Chapter 6) concepts are the
-    building blocks for creasing new types in your program's domain to take full
-    advantage of Rust's compile time type checking.
+  - The /struct/ and /enum/ (which is discussed in Chapter 6 =TODO=) concepts are
+    the building blocks for *creasing* NEW /types/ in your program's domain to
+    take full advantage of Rust's compile time type checking.
 
 ** DONE Defining and Instantiating Structs - 83
-   CLOSED: [2017-08-19 Sat 04:55]
+   CLOSED: [2021-01-06 Wed 00:57]
    #+BEGIN_SRC rust
      struct User {
          username: String,
@@ -1986,7 +2057,7 @@
    - Create an /instance/ of a /struct/ by specifying concrete values for each of
      the fields. The order of fields is not important.
      #+BEGIN_SRC rust
-       let user1 = User {
+       let mut user1 = User {
            email: String::from("someone@example.com"),
            username: String::from("someusername123"),
            active: true,
@@ -1995,16 +2066,36 @@
      #+END_SRC
 
    - Dot notation:
-     + get the value of a field:
+     * *get* the value of a /field/:
        ~user1.email~
 
-     + if the field is mutable:
+     * if a /field/ is /mutable/:
        ~user1.email = String::from("someone-else@example.com");~
+       + Note:
+         the *ENTIRE* /instance/ MUST be /mutable/;
+         Rust *doesn't allow* us to mark ONLY CERTAIN /fields/ as /mutable/.
+         
+   - Define a /function/ to create a new /struct/ with some specified values of
+     /fields/:
+     #+begin_src rust
+       fn build_user(email: String, username: String) -> User {
+           User {
+               email: email,
+               username: username,
+               active: true,
+               sign_in_count: 1,
+           }
+       }
+     #+end_src
+     =NEXT=
+     We have a convention shorthand to *simpify* the assignment when /variable
+     names/ match /field names/, which can help avoiding repeating the ~email~
+     and ~username~ in the example above.
 
 *** DONE Using the Field Init Shorthand when Variables and Fields Have the Same Name - 85
-    CLOSED: [2017-08-19 Sat 04:32]
-    If some variables have the same names as struct fields, we can do
-    /field init shorthand/
+    CLOSED: [2021-01-05 Tue 17:17]
+    If some /variables/ have the *SAME names* as /struct fields/, we can do
+    /field init shorthand/ syntax
     #+BEGIN_SRC rust
       fn build_user(email: String, username: String) -> User {
           User {
@@ -2016,8 +2107,10 @@
       }
     #+END_SRC
 
-*** DONE Creating Instances from Other Instances With Struct Update Syntax - 86
-    CLOSED: [2017-08-19 Sat 04:32]
+*** DONE Creating Instances From Other Instances With Struct Update Syntax - 86
+    CLOSED: [2021-01-06 Wed 00:43]
+    Struct update syntax:
+    
     #+BEGIN_SRC rust
       // Suppose `user1` is in scope, and
       // the `active` field and `sign_in_count` of `user2` are the same as `user1`
@@ -2027,9 +2120,25 @@
           ..user1
       };
     #+END_SRC
+    
+    is a shorthand for
+    
+    #+begin_src rust
+      let user2 = User {
+          email: String::from("another@example.com"),
+          username: String::from("anotherusername567"),
+          ..user1
+      };
+    #+end_src
+    
 *** DONE Using Tuple Structs Without Named Fields to Create Different Types - 86
-    CLOSED: [2017-08-19 Sat 04:38]
-    /tuple struct/
+    CLOSED: [2021-01-06 Wed 00:51]
+    - /Tuple structs/ are useful when you want to give the whole /tuple/ a name
+      and make the /tuple/ be a different type _from other tuples_.
+      * =from Jian=
+        Especially for other /tuples/ (named or not) that have the SAME _field
+        types combination_.
+    
     #+BEGIN_SRC rust
       struct Color(i32, i32, i32);
       struct Point(i32, i32, i32);
@@ -2038,49 +2147,60 @@
       // but we can use the *name* to differentiate them.
       let black = Color(0, 0, 0);
       let origin = Point(0, 0, 0);
+
+      println!("origin x coordinate {}", origin.0);
     #+END_SRC
 
 *** DONE Unit-Like Structs Without Any Fields - 87
-    CLOSED: [2017-08-19 Sat 04:55]
+    CLOSED: [2021-01-06 Wed 00:57]
     - /unit-like struct/
-      + it behave similarly to ~()~, the unit type.
+      * it behave similarly to ~()~, the /unit type/.
 
-      + it is useful in situations such as when you need to implement a trait on
-        some type, but you don't have any data you want to store in the type
-        itself. =TODO= CHAPTER 10
+      * it is useful in situations such as
+        WHEN you need to implement a /trait/ on some /type/,
+        BUT you don't have any data you want to store in the type itself.
+        =TODO= CHAPTER 10
 
     - *Ownership of Struct Data*
-      + in the examples above, when we define a /struct/, for its field, we
-        chose ~String~ rather than ~&str~. This means for the cases here, we want
-        instances of this /struct/ to own all of its data and for that data to
-        be valid for as long as the entire struct is valid.
+      * in the examples above, when we define a /struct/, for its /string type
+        fields/, we chose ~String~ rather than ~&str~.
+          This is a deliberate choice because we want instances of this /struct/
+        to own all of its data and for that data to be valid for as long as the
+        ENTIRE /struct/ is valid.
 
-      + if we use reference type for a field, we need to specify /lifetime/.
+      * We can have /structs/ that store /references/, but then we need to specify
+        /lifetimes/, but then we need to specify /lifetimes/.
         =TODO= CHAPTER 10.
         For now, we just not use reference.
 
 ** DONE An Example Program Using Structs - 88
-   CLOSED: [2017-08-19 Sat 06:24]
-   The evalution of a example (finally) with a ~struct~
+   CLOSED: [2021-01-06 Wed 01:45]
+   The evalution of a example
    #+BEGIN_SRC rust
      // Ver 1
      fn main() {
-         let length1 = 50;
          let width1 = 30;
+         let height1 = 50;
 
          println!(
              "The area of the rectangle is {} square pixels.",
-             area(length1, width1)
+             area(width1, height1)
          );
      }
 
-     fn area(length: u32, width: u32) -> u32 {
-         length * width
+     fn area(width: u32, height: u32) -> u32 {
+         width * height
      }
    #+END_SRC
+   It would be MORE _readable_ and MORE _manageable_ to group ~width~ and
+   ~height~ together.
+   =from Jian=
+   If not, there is possibility to pass in ~width~ and ~height~ together that
+   belongs to different rectangles.
+   =NEXT=
 
 *** DONE Refactoring with Tuples - 89
-    CLOSED: [2017-08-19 Sat 05:56]
+    CLOSED: [2021-01-06 Wed 01:31]
     #+BEGIN_SRC rust
       fn main() {
           let rect1 = (50, 30);
@@ -2095,17 +2215,23 @@
           dimensions.0 * dimensions.1
       }
     #+END_SRC
+    It's better if we can have a clearer way to distinguish the _width_ and
+    _height_.
+    =NEXT=
 
 *** DONE Refactoring with Structs: Adding More Meaning - 89
-    CLOSED: [2017-08-19 Sat 05:59]
+    CLOSED: [2021-01-06 Wed 01:32]
     #+BEGIN_SRC rust
       struct Rectangle {
-          length: u32,
           width: u32,
+          height: u32,
       }
 
       fn main() {
-          let rect1 = Rectangle { length: 50, width: 30 };
+          let rect1 = Rectangle {
+              width: 30,
+              height: 50,
+          };
 
           println!(
               "The area of the rectangle is {} square pixels.",
@@ -2114,84 +2240,108 @@
       }
 
       fn area(rectangle: &Rectangle) -> u32 {
-          rectangle.length * rectangle.width
+          rectangle.width * rectangle.height
       }
     #+END_SRC
 
-*** TODO Adding Useful Functionality with Derived Traits - 90
-    If we try to print the struct we defined with
-    ~println!("rect1 is {}", rect1);~
-    , we will receive an error message:
-    =error[E0277]: the trait bound `Rectangle: std::fmt::Display` is not satisfied=
+*** DONE Adding Useful Functionality with Derived Traits - 90
+    CLOSED: [2021-01-06 Wed 01:45]
+    1. If we try to *print* the /struct/ we defined with
+       ~println!("rect1 is {}", rect1);~, we will receive an error message:
+       #+begin_src text
+         error[E0277]: the trait bound `Rectangle: std::fmt::Display` is not satisfied
+       #+end_src
 
-    Read the message below the last line, we can get some hints:
-    =note: `Rectangle` cannot be formatted with the default formatter; try using=
-    =`:?` instead if you are using a format string=
+       Continue reading the errors, we'll find some helpful note:
+    
+       #+begin_src text
+         = help: the trait `std::fmt::Display` is not implemented for `Rectangle`
+         = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+       #+end_src
 
-    Then try ~println!("rect1 is {:?}", rect1);~
-    This output format is called ~Debug~. ~Debug~ is a trait that enables us to
-    print out our struct in a way that is useful for developers so we can see its
-    value while we're debugging our code.
+    2. Then try ~println!("rect1 is {:?}", rect1);~, the ~{:?}~ tells this /macro
+      call/ we want to use an output format called ~Debug~.
+       * ~Debug~ is a /trait/ that enables us to print out our /struct/ in a way
+         that is useful for developers so we can see its value while we're
+         debugging our code.
 
-    We see =error: the trait bound `Rectangle: std::fmt::Debug` is not satisfied=
-    But we also see
-    =note: `Rectangle` cannot be formatted using `:?`; if it is defined in your=
-    =crate, add `#[derive(Debug)]` or manually implement it=
+    3. However, only ~{:?}~ doesn't work, because we also didn't implement it for
+       our /struct/.
+       #+begin_src text
+         error[E0277]: `Rectangle` doesn't implement `std::fmt::Debug`
+       #+end_src
+      
+    4. Continue reading the errors for hint:
+       #+begin_src text
+         = help: the trait `std::fmt::Debug` is not implemented for `Rectangle`
+         = note: add `#[derive(Debug)]` or manually implement it `std::fmt::Debug`
+       #+end_src
+       
+    5. Let's try this:
+       #+begin_src rust
+         #[derive(Debug)]
 
-    #+BEGIN_SRC rust
-      #[derive(Debug)]
+         struct Rectangle {
+             length: u32,
+             width: u32,
+         }
 
-      struct Rectangle {
-          length: u32,
-          width: u32,
-      }
+         fn main() {
+             let rect1 = Rectangle { length: 50, width: 30 };
 
-      fn main() {
-          let rect1 = Rectangle { length: 50, width: 30 };
+             println!("rect1 is {:?}", rect1);
+         }
+       #+end_src
+       The output is =rect1 is Rectangle { width: 30, height: 50 }=
 
-          println!("rect1 is {:?}", rect1);
-      }
-    #+END_SRC
-
-    The output is =rect1 is Rectangle { length: 50, width: 30 }=
-    Use ~{:#?}~ instead of ~{:?}~, we can a different style of print:
-    #+BEGIN_SRC text
-      rect1 is Rectangle {
-          length: 50,
-          width: 30
-      }
-    #+END_SRC
+       * Use ~{:#?}~ instead of ~{:?}~, we can a different style of print:
+         #+BEGIN_SRC text
+           rect1 is Rectangle {
+               width: 30,
+               height: 50,
+           }
+         #+END_SRC
+         
+    6. Our ~area~ function is very specific. It would be helpful to tie this
+       behavior more closely to our ~Rectangle~ /struct/, because it won't work
+       with any other type.
+       =NEXT= 
+       /method/
 
 ** DONE Method Syntax - 92
-   CLOSED: [2017-08-19 Sat 23:48]
+   CLOSED: [2021-01-06 Wed 02:17]
    /methods/ are different from /functions/ in that they're defined within the
    context of
-   + a struct
-   + an enum =TODO= Chapter 6
-   + a trait object =TODO= Chapter 17
+   * a struct
+   * an enum =TODO= Chapter 6
+   * a trait object =TODO= Chapter 17
 
-   Their first parameter is always ~self~, which represents the instance of the
-   /struct/ the method is being called on.
+   Their _FIRST parameter_ is ALWAYS ~self~, which represents the /instance/ of
+   the /struct/ the /method/ is being called on.
 
-*** TODO Defining Methods - 92
-    =RE-READ=
-    Re-write the example in the last section, make ~area~ a method of the
-    ~Rectangle~ struct.
+*** DONE Defining Methods - 92
+    CLOSED: [2021-01-06 Wed 02:03]
+    Re-write the example in the last section, make ~area~ a /method/ of the
+    ~Rectangle~ /struct/.
+    
     #+BEGIN_SRC rust
       #[derive(Debug)]
       struct Rectangle {
-          length: u32,
           width: u32,
+          height: u32,
       }
 
       impl Rectangle {
           fn area(&self) -> u32 {
-              self.length * self.width
+              self.width * self.height
           }
       }
 
       fn main() {
-          let rect1 = Rectangle { length: 50, width: 30 };
+          let rect1 = Rectangle {
+              width: 30,
+              height: 50,
+          };
 
           println!(
               "The area of the rectangle is {} square pixels.",
@@ -2202,118 +2352,181 @@
 
     - ~impl~ block.
 
-    - Methods can, just like any other parameter,
-      + take ownership of ~self~,
-      + borrow ~self~ immutably as we've done here,
-      + borrow ~self~ mutably.
+    - /Methods/ can, just like any other parameter,
+      * take ownership of ~self~,
+      * borrow ~self~ immutably as we've done here,
+      * borrow ~self~ mutably.
 
-    - Having a method that takes ownership of the instance by using just self as
-      the first parameter is _RARE_;
-      this technique is usually used when the method transforms ~self~ into
-      something else and we want to prevent the caller from using the original
-      instance after the transformation.
+    - Having a /method/ that takes /ownership/ of the /instance/ by using just
+      ~self~ as the first parameter is *RARE*:
+      this technique is usually used when the /method/
+      1. transforms ~self~ into something else
+      2. we want to *PREVENT the caller FROM using the original instance AFTER
+         the transformation.*
+      
       =TODO= you can imagine -- it's rare to call a method and then the passed in
       object is no longer valid. Of course, this method can return a new object
       and disable the old one (=FROM Jian= a functional way, but I doubt if this
       is often used in Rust).
 
     - *Where's the -> Operator?* =TODO=
-      + In C++, if ~object~ is a pointer, there are two ways to call a method:
+      * In C++,
+        if ~object~ is a /pointer/,
+        there are two equivalent ways to call a /method/:
         - ~object->something()~
         - ~(*object).something()~
 
-      + Rust does NOT have an equivalent to the ~->~ operator;
-        Rust has a feature called /automatic referencing and dereferencing/.
-        Calling methods is one of the few places in Rust that has this behavior.
+      * Rust does NOT have an equivalent to the ~->~ operator;
+        *Rust has a feature called /automatic referencing and dereferencing/.*
+        Calling /methods/ is one of the few places in Rust that has this behavior.
 
-        =TODO= BAD example ...
-        This means the usually method call form is ~object.something()~.
-          Rust automatically adds in ~&~, ~&mut~, or ~*~ so ~object~ matches the
-        signatue of the method. In other words, the following are the same:
-        * ~p1.distance(&p2);~
-        * ~(&p1).distance(&p2);~
+        + Here's how it works:
+          when calling a /method/ with ~object.something()~,
+          Rust AUTOMATICALLY adds in ~&~, ~&mut~, or ~*~ so ~object~ *matches* the
+          /signatue/ of the /method/.
+          - In other words, the following are the same: =FIXME= =broken textframe=
+            * ~p1.distance(&p2);~
+            * ~(&p1).distance(&p2);~
 
-      + The first one looks much cleaner.
-        This automatic referencing behavior works because methods have a clear
-        receiver -- the type of ~self~. Given the receiver and name of a method,
-        Rust can figure out definitively whether the method is reading
-        (~&self~), mutating (~&mut self~), or consuming (~self~). The fact that
-        Rust makes borrowing implicit for method receivers is a big part of
-        making ownership ergonomic in practice.
+      * The first one, ~p1.distance(&p2);~, looks much cleaner.
+        This *automatic referencing behavior* works because /methods/ have a CLEAR
+        /receiver/ -- the type of ~self~.
+        + Given the /receiver/ and name of a /method/, Rust can figure out
+          definitively whether the /method/ is *reading* (~&self~), *mutating*
+          (~&mut self~), or *consuming* (~self~).
+
+        + The fact that Rust *makes /borrowing/ implicit* for /method receivers/
+          is a big part of *making /ownership/ ergonomic* in practice.
+          =from Jian= If not, use Rust in practice can be horrible.
 
 *** DONE Methods with More Parameters - 94
-    CLOSED: [2017-08-19 Sat 23:19]
+    CLOSED: [2021-01-06 Wed 02:07]
     #+BEGIN_SRC rust
       impl Rectangle {
           fn area(&self) -> u32 {
-              self.length * self.width
+              self.width * self.height
           }
 
-          fn can_hold() -> bool {
-              self.length > other.length && self.width > other.width
+          fn can_hold(&self, other: &Rectangle) -> bool {
+              self.width > other.width && self.height > other.height
           }
       }
 
       fn main() {
-          let rect1 = Rectangle { length: 50, width: 30 };
-          let rect2 = Rectangle { length: 40, width: 10 };
-          let rect3 = Rectangle { length: 45, width: 60 };
+          let rect1 = Rectangle {
+              width: 30,
+              height: 50,
+          };
+
+          let rect2 = Rectangle {
+              width: 10,
+              height: 40,
+          };
+          let rect3 = Rectangle {
+              width: 60,
+              height: 45,
+          };
 
           println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));  // true
           println!("Can rect1 hold rect3? {}", rect1.can_hold(&rect3));  // false
       }
     #+END_SRC
+    
 *** DONE Associated Functions - 95
-    CLOSED: [2017-08-19 Sat 23:46]
-    - /associated functions/: functions that don't take ~self~ as the first
+    CLOSED: [2021-01-06 Wed 02:14]
+    - associated functions :: functions that don't take ~self~ as the first
       parameter.
 
-    - I think this is the /static methods/ in the other OOP languages.
+    - =from Jian=
+      I think this is the /static methods/ in the other OOP languages.
+      However, in Rust, we consider /associated functions/ as /functions/, not
+      /methods/.
+
+    - /Associated functions/ are often used for constructors (=from Jian= in
+      general meaning, including /factory methods/) that will return a NEW
+      /instance/ of the /struct/.
 
     - Example:
       #+BEGIN_SRC rust
         impl Rectangle {
             fn square(size: u32) -> Rectangle {
-                Rectangle { length: size, width: size }
+                Rectangle {
+                    width: size,
+                    height: size,
+                }
             }
         }
       #+END_SRC
-
       Call /associated functions/ with the syntax like ~Rectangle::square(3);~
 
-    - The ~::~ syntax is used for both associated functions and namespaces crated
-      by modules.
-      =From Jian=
-        From the point of view of semantics, ~Rectangle~ is essentially a
-      namespace for ~square~.
+    - This /function/ is namespaced by the /struct/:
+      the ~::~ syntax is used for both
+      /associated functions/
+      AND
+      _namespaces created by modules._
+      =TODO= We'll discuss /modules/ in Chapter 7.
+      
+*** DONE Multiple ~impl~ Blocks - 96
+    CLOSED: [2021-01-06 Wed 02:16]
+    Each /struct/ is allowed to have /MULTIPLE ~impl~ blocks/.
 
-*** TODO Multiple ~impl~ Blocks - 96
+    - Of course,
+      for the ~Rectangle~ example, there is _no reason to split_ the only ~impl~
+      block we created, though that is valid syntax.
 
+    - =TODO=
+      We'll see a case in which /MULTIPLE ~impl~ blocks/ are useful in Chapter
+      10, where we discuss /generic types/ and /traits/.
+    
 ** DONE Summary - 96
-   CLOSED: [2017-08-19 Sat 23:48]
-   - Structs ... =TODO=
-
-   - Structs are NOT the only way we can create custom types: let's turn to
-     Rust's _enum_ feature to add another tool to our toolbox.
+   CLOSED: [2021-01-06 Wed 02:17]
+   - =NEXT=
+     Structs are NOT the only way we can create custom types:
+     let's turn to Rust's _enum_ feature to add another tool to our toolbox.
 
 * DONE 6. Enums and Pattern Matching - 97
   CLOSED: [2017-08-20 Sun 04:56]
-  - /enums/ :: define a type by enumerating its possible values.
+  - enums :: a type that enumerates its possible variants.
+
+  - This chapter will discuss:
+    1. DEFINE and USE an /enum/ to show how an /enum/ can encode meaning along
+       with data.
+
+    2. EXPLORE a particularly useful /enum/, called ~Option~.
+
+    3. LOOK AT how /pattern matching/ in the /match expression/ makes it easy to
+       run different code for different values of an /enum/.
+      
+    4. COVER how the ~if let~ construct is another _convenient and concise_ idiom
+       available to you to handle /enums/ in your code.
+
+  - /Enums/ are a feature in many languages, but their capabilities _differ_ in
+    each language.
+      /Rust's enums/ are most similar to algebraic data types in functional
+    languages, such as F#, OCaml, and Haskell.
+    
 ** DONE Defining an Enum - 98
-   CLOSED: [2017-08-20 Sun 04:24]
+   CLOSED: [2021-01-06 Wed 13:56]
    For example, define a data type that can be used to anotate all IP v4 and
    IP v6 addresses.
-   #+BEGIN_SRC rust
+   #+begin_src rust
      enum IpAddrKind {
          V4,
          V6,
      }
-   #+END_SRC
+   #+end_src
 
 *** DONE Enum Values - 98
-    CLOSED: [2017-08-20 Sun 03:41]
-    - The above example is too simple! It only show the type and NO address info,
-      which is not very useful. We can combine it with a /struct/:
+    CLOSED: [2021-01-06 Wed 10:58]
+    - Use the TWO variants of ~IpAddrKind~ in the syntax
+      #+begin_src rust
+        let four = IpAddrKind::V4;
+        let six = IpAddrKind::V6;
+      #+end_src
+      Both values ~IpAddrKind::V4~ and ~IpAddrKind::V6~ are of the *SAME* /type/:
+      ~IpAddrKind~.
+
+    - Example:
       #+BEGIN_SRC rust
         // The definition of `IpAddrKind` is in scope
 
@@ -2333,7 +2546,7 @@
         };
       #+END_SRC
 
-    - Usually we don't use /enums/ in the way above.
+    - _Usually we *don't* use /enums/ in the way above._
       Here is a concise and practical way to use /enums/ only (with its usages):
       #+BEGIN_SRC rust
         enum IpAddr {
@@ -2345,23 +2558,34 @@
         let loopback = IpAddr::V6(String::from("::1"));
       #+END_SRC
 
-      + This better than the way of composing ~enum~ and ~struct~ together:
-        * more concise
-        * No limitations about the address info
-          #+BEGIN_SRC rust
-            // We can do
-            enum IpAddr {
-                V4(u8, u8, u8, u8),
-                V6(String),
-            }
-            let home = IpAddr::V4(127, 0, 0, 1);
-            let loopback = IpAddr::V6(String::from("::1"));
+      * This better than the way of composing ~enum~ and ~struct~ together:
+        + more concise
+        + No limitations about the address info
+          - Since ipv4 always have four numeric components that will have values
+            between 0 and 255, we want to store ~V4~ addresses as four ~u8~ values,
+            and keep the ~V4~ addresses as one ~String~ value.
+              This is not applicable if we use ~struct~:
+            #+begin_src rust
+              // Illegal syntax, just a illustration.
+              struct IpAddr {
+                  kind: IpAddrKind,
+                  address: if kind is V6 then String else (u8, u8, u8, u8),
+              }
+            #+end_src
+            
+            /Enums/ can handle this case with ease:
+            #+begin_src rust
+              // We can do
+              enum IpAddr {
+                  V4(u8, u8, u8, u8),
+                  V6(String),
+              }
 
-            // BUT we CANNOT specify two types of data for the `address` field of structs in
-            // a concise way.
-          #+END_SRC
+              let home = IpAddr::V4(127, 0, 0, 1);
+              let loopback = IpAddr::V6(String::from("::1"));
+            #+end_src
 
-      + The standard library ~std::new~ has a /enum/ ~IpAddr~, its definition is:
+      * The standard library ~std::new~ has a /enum/ ~IpAddr~, its definition is:
         #+BEGIN_SRC rust
           struct Ipv4Addr {
               // details elided
@@ -2376,20 +2600,23 @@
               V6(Ipv6Addr),
           }
         #+END_SRC
+        The standard library also define a specific ~struct~ for ~Ipv6Addr~ to
+        make sure its content is legal for the ipv6 standard.
 
     - Another example:
       #+BEGIN_SRC rust
         // Use `enum`, all variants have the same type.
         // Write a function with this type of parameter(s) is simple.
         enum Message {
-            Quit,
-            Move { x: i32, y: i32 },
-            Write(String),
-            ChangeColor(i32, i32, i32),
+            Quit,  // no data
+            Move { x: i32, y: i32 },  // include an anonymous struct
+            Write(String),  // a single `String`
+            ChangeColor(i32, i32, i32),  // include three `i32` values
         }
 
-        // Use `struct`'s. Four types.
-        // To Write a function for all of these types, we need polymorphism.
+        // If we use `struct`'s. There will be four types.
+        //   It's hard to define a function to take any of these kinds of messages
+        // as we could easily do with the `Message` enum.
         struct QuitMessage; // unit struct
         struct MoveMessage {
             x: i32,
@@ -2399,8 +2626,29 @@
         struct ChangeColorMessage(i32, i32, i32); // tuple struct
       #+END_SRC
 
+    - There is one _more similarity_ between /enums/ and /structs/:
+      we're also able to define /methods/ on /enums/.
+      * Here's a /method/ named ~call~ that we could define on our ~Message~ /enum/:
+        #+begin_src rust
+          impl Message {
+              fn call(&self) {
+                  // method body would be defined here
+              }
+          }
+
+          let m = Message::Write(String::from("hello"));
+          m.call();
+        #+end_src
+
 *** DONE The ~Option~ Enum and Its Advantages Over Null Values - 101
-    CLOSED: [2017-08-20 Sun 04:23]
+    CLOSED: [2021-01-06 Wed 13:56]
+    A case study:
+    the ~Option~ enum in the standard library.
+
+    As Tony Hoare, the inventor of null, mentioned, introduce /null/ to programming
+    languages is a big mistake. However, the concept that /null/ is trying to
+    express is still a useful one: a /null/ is a value that is currently invalid
+    or absent for some reason. A new design is required! Here it is in Rust:
     #+BEGIN_SRC rust
       // Defined in the standard library (the prelude).
       // NO `Option::` prefix required.
@@ -2409,15 +2657,19 @@
           None,
       }
     #+END_SRC
+    - It is so useful that it's even included in the /prelude/.
+      So do its variants -- no need to use ~Option::~ prefix to reference them.
 
-    - The ~<T>~ part, generics, =TODO= Chapter 10
+    - The ~<T>~ part, /generics/, =TODO= Chapter 10
 
     - If we use ~None~ rahter than ~Some~, we need to tell Rust what type of
       ~Option<T>~ we have, because the compiler _CANNOT_ infer the type that the
       type that the ~Some~ variant will hold by looking only at a ~None~ value.
 
+    - Discussion about WHY the ~Option<T>~ is better than ~null~.
+
 ** DONE The ~match~ Control Flow Operator - 104
-   CLOSED: [2017-08-20 Sun 04:56]
+   CLOSED: [2021-01-06 Wed 14:19]
    =TODO= Chapter 18 will cover all the different kinds of patterns and what they do.
 
    - Example:
@@ -2431,24 +2683,41 @@
 
        fn value_in_cents(coin: Coin) -> i32 {
            match coin {
-               Coin::Penny => 1,
-               Coin::Nickel => 5,
-               Coin::Dime => 10,
+               Coin::Penny   => 1,
+               Coin::Nickel  => 5,
+               Coin::Dime    => 10,
                Coin::Quarter => 25,
            }
        }
      #+END_SRC
-     Curly braces is only used when you want multiple lines in a match arm.
+     
+     * Curly braces is only used when you want multiple lines in a match arm.
+       #+begin_src rust
+         fn value_in_cents(coin: Coin) -> i32 {
+             match coin {
+                 Coin::Penny   => {
+                     println!("Lucky penny!");
+                     1
+                 },  // This , is optional
+                 Coin::Nickel  => 5,
+                 Coin::Dime    => 10,
+                 Coin::Quarter => 25,
+             }
+         }
+       #+end_src
+       =TODO=
+       =from Jian=
+       I'm not sure the reason why the ~,~ is optional when curly braces is there
+       in the => RHS of a /match arm/.
 
-*** DONE Patterns That Bind to Values - 106
-    CLOSED: [2017-08-20 Sun 04:44]
+*** DONE Patterns that Bind to Values - 106
+    CLOSED: [2021-01-06 Wed 14:13]
     #+BEGIN_SRC rust
       #[derive(Debug)] // So we can inspect the state in a minute
-
       enum UsState {
           Alabama,
           Alaska,
-          // ... etc
+          // --snip--
       }
 
       enum Coin {
@@ -2460,27 +2729,28 @@
 
       fn value_in_cents(coin: Coin) -> i32 {
           match coin {
-              Coin::Penny => 1,
-              Coin::Nickel => 5,
-              Coin::Dime => 10,
+              Coin::Penny          => 1,
+              Coin::Nickel         => 5,
+              Coin::Dime           => 10,
               Coin::Quarter(state) => {
                   println!("State quarter from {:?}!", state);
                   25
-              },
+              }
           }
       }
     #+END_SRC
 
 *** DONE Matching with ~Option<T>~ - 107
-    CLOSED: [2017-08-20 Sun 04:46]
-    =From Jian= In other languages, pattern match is usually NOT the best (the
-    most concise) way to process ~Option<T>~ type values.
-    How about Rust????? =TODO=
+    CLOSED: [2021-01-06 Wed 14:16]
+    =From Jian=
+    In other languages, /pattern matching/ is NOT the best (the most concise)
+    way to process ~Option<T>~ type values when there is a chaining call on it
+    -- too verbose.
 
     #+BEGIN_SRC rust
       fn plus_one(x: Option<i32>) -> Option<i32> {
           match x {
-              None => None,
+              None    => None,
               Some(i) => Some(i + 1),
           }
       }
@@ -2491,7 +2761,7 @@
     #+END_SRC
 
 *** DONE Matches Are Exhaustive - 108
-    CLOSED: [2017-08-20 Sun 04:53]
+    CLOSED: [2021-01-06 Wed 14:17]
     Rust Compiler has /exhaustive check/ for pattern matching.
     Non-exhaustive result in an error, rather than warning as in other languages.
     #+BEGIN_SRC rust
@@ -2507,14 +2777,27 @@
       // 6 |         match x {
       //   |               ^ pattern `None` not covered
     #+END_SRC
+    
+    - =from Jian= =TODO=
+      There should be a walkaround as in other languages, right?
 
 *** DONE The ~_~ Placeholder - 108
-    CLOSED: [2017-08-20 Sun 04:56]
-    ~_~ is a pattern that can match any value, and it always shows up as the last
-    pattern (or other patterns can never be matched).
+    CLOSED: [2021-01-06 Wed 14:18]
+    ~_~ is a pattern that can match all values, and it ALWAYS shows up as the
+    last pattern (or other patterns can never be matched).
+    #+begin_src rust
+      let some_u8_value = 0u8;
+      match some_u8_value {
+          1 => println!("one"),
+          3 => println!("three"),
+          5 => println!("five"),
+          7 => println!("seven"),
+          _ => (),
+      }
+    #+end_src
 
 ** DONE Concise Control Flow with ~if let~ - 109
-   CLOSED: [2017-08-20 Sun 04:38]
+   CLOSED: [2021-01-06 Wed 14:22]
    The ~if let~ syntax lets you combine ~if~ and ~let~ into a less verbose way to
    handle values that match one pattern and ignore the rest.
    #+BEGIN_SRC rust
@@ -2529,7 +2812,7 @@
          println!("three");
      }
    #+END_SRC
-   + With ~if let~ we lose exhaustive checking, but more concise.
+   * With ~if let~ we *lose* /exhaustive checking/, but more concise.
      Choose ~if let~ or ~match~ is a trade-off.
 
    + ~if let~ can have an ~else~ branch.
@@ -2552,72 +2835,462 @@
        }
      #+END_SRC
 
-** DONE Summary - 110
-   CLOSED: [2017-08-20 Sun 04:38]
+** Summary - 110
 
-* DONE 7. Managing Growing Projects with Packages, Crates, and Modules - 111
-  CLOSED: [2017-08-21 Mon 22:41]
-  =Old-Title=: _Using Modules to Reuse and Orgnize Code_
+* TODO 7. Managing Growing Projects with Packages, Crates, and Modules - 111 - =START=
+  As you write large programs, organizing your code will be important because
+  keeping track of your entire program in your head will become impossible.
+    
+  - By grouping related functionality and separating code with distinct features,
+    you'll clarify where to find code that implements a particular feature and
+    where to go to change how a feature works.
 
-  - A /module/ :: a /namespace/ that contains definitions of functions or types,
-                  and you can choose whether those definitions are visible
-                  outside their module (public) or not (private).
+  - The programs we've written SO FAR have been _in *one* /module/ in *one* file._
+    
+    1. As a project grows, you can organize code by splitting it into *multiple*
+       /modules/ and then *multiple* /files/.
 
-  - An overview of how modules work:
-    + The ~mod~ keyword declares a new module.
-      Code within the module appears
-      + either immediately following this declaration within curly braces
-        or
-      + in another file. =TODO= =???=
+    2. A /package/ can contain *multiple* /binary crates/ and _OPTIONALLY_ *one*
+       /library crate/.
+       * As a /package/ grows, you can extract parts into SEPARATE /crates/ that
+         become /external dependencies/.
 
-    + _By default_, functions, types, constants, and modules are _private_. The
-      ~pub~ keyword makes an item public and therefore visible outside its
-      namespace.
+  - This chapter covers all these techniques.
+    For very large projects of a set of INTERRELATED /packages/ that evolve
+    together, Cargo provides /workspaces/, which we'll cover in the “Cargo
+    Workspaces” section in Chapter 14. =TODO=
 
-    + The ~use~ keyword brings modules, or the definitions inside modules, into
-      scope so it's easier to refer to them.
+  - Rust has a number of features that allow you to manage your code's organization,
+    including
+    * which details are *exposed*,
+    * which details are *private*, and
+    * what _names_ are in each /scope/ in your programs.
 
-** Packages and Crates - 112
-** Defining Modules to Control Scope and Privacy - 113
-** Paths for Referring to an Item in the Module Tree - 115
-*** Exposing Paths with the ~pub~ Keyword - 117
-*** Starting Relative Paths with ~super~ - 119
-*** Making Structs and Enums Public - 120
+  - These features, sometimes collectively referred to as the /module system/,
+    include:
+    * Packages :: A Cargo feature that lets you *build*, *test*, and *share* /crates/
+    * Crates :: A tree of /modules/ that produces a /library/ or /executable/
+    * Modules AND use :: Let you control the _organization_, /scope/, and _PRIVACY of paths_
+    * Paths :: A way of naming an item, such as a /struct/, /function/, or /module/
 
-** Bringing Paths into Scope with the ~use~ Keyword - 121
+  - In this chapter, we'll cover all these features,
+    1. discuss how they interact, and
+
+    2. explain how to use them to manage scope.
+
+    3. By the end, you should have a solid understanding of the /module system/
+       and be able to work with scopes like a pro!
+
+** DONE Packages and Crates - 112
+   CLOSED: [2021-01-07 Thu 15:21]
+   The first parts of the /module system/ we'll cover are /packages/ and /crates/.
+
+   - A /crate/ is a /binary/ OR /library/.
+     The /crate root/ is a source file that the Rust compiler starts from and
+     makes up the /root module/ of your /crate/ (=TODO= we'll explain /modules/
+     in depth in the “Defining Modules to Control Scope and Privacy” section). A
+     /package/ is one or more /crates/ that provide a set of functionality. A
+     /package/ contains a =Cargo.toml= file that _describes how to build_ those
+     /crates/.
+
+   - Several rules determine what a /package/ can contain.
+     * A /package/ *must* contain zero or one /library crates/, and no more.
+
+     * It can contain as many /binary crates/ as you'd like,
+       but it *must* contain _at least one_ /crate/ (either /library/ or
+       /binary/).
+
+   - Let's walk through what happens when we create a /package/.
+     1. =cargo new my-project=.
+        Cargo created a =Cargo.toml= file, giving us a /package/.
+        
+        * Looking at the contents of =Cargo.toml=, there's no mention of
+          =src/main.rs= because Cargo follows a convention that =src/main.rs= is
+          the /crate root/ of a /binary crate/ with the *same name* as the
+          /package/.
+        
+        * Likewise, Cargo knows that if the /package directory/ contains
+          =src/lib.rs=, the /package/ contains a /library crate/ with the *same
+          name* as the /package/, and =src/lib.rs= is its /crate root/. Cargo
+          passes the /crate root/ files to =rustc= to *build* the /library/ or
+          /binary/.
+
+        * Here, we have a /package/ that only contains =src/main.rs=, meaning it
+          ONLY contains a /binary crate/ named =my-project=.
+            If a /package/ contains =src/main.rs= and =src/lib.rs=, it has *two*
+          /crates/: a /library/ and a /binary/, both with the *same name* as the
+          /package/.
+
+        * A /package/ can have *multiple* /binary crates/ by placing files in
+          the =src/bin= directory: _each file_ will be a separate /binary crate/.
+
+   - A /crate/ will group related functionality together in a scope so the
+     functionality is easy to share between *multiple* projects.
+
+   - Keeping a /crate/'s functionality in its own scope clarifies whether particular
+     functionality is defined in our /crate/ or the =rand= /crate/ and prevents
+     potential conflicts.
+
+   - =TODO= Let's move on and talk about the /module system/!
+     
+** DONE Defining Modules to Control Scope and Privacy - 113
+   CLOSED: [2021-01-08 Fri 15:51]
+   - In this section,
+     * we'll talk about
+       + /modules/
+       + other parts of the /module system/, namely
+         - /paths/ that allow you to name items
+         - the ~use~ /keyword/ that brings a /path/ into /scope/
+         - the ~pub~ /keyword/ to make items public
+
+     * We'll also discuss
+       + the ~as~ /keyword/
+       + /external packages/
+       + the /glob operator/ =???= =TODO=
+
+   - /Modules/ let us _organize code within a /crate/ into groups_ for readability
+     and easy reuse.
+
+   - /Modules/ also _control the PRIVACY of items_.
+
+   - As an example,
+     let's write a library crate that provides the functionality of a
+     restaurant.
+
+     * In the restaurant industry,
+       some parts of a restaurant are referred to as _front of house_ and others
+       as _back of house_.
+
+       + Front of house ::
+         where customers are; this is where hosts seat customers, servers take
+         orders and payment, and bartenders make drinks.
+
+       + Back of house ::
+         where the chefs and cooks work in the kitchen, dishwashers clean up,
+         and managers do administrative work.
+
+     * To structure our /crate/ in the same way that a real restaurant works,
+       we can organize the /functions/ into /nested modules/:
+       Create a new library named restaurant by running
+       =cargo new --lib restaurant=; then put the code in
+       #+begin_src rust
+         // Listing 7-1:
+         // into src/lib.rs to define some modules and function signatures.
+         mod front_of_house {
+             mod hosting {
+                 fn add_to_waitlist() {}
+
+                 fn seat_at_table() {}
+             }
+
+             mod serving {
+                 fn take_order() {}
+
+                 fn serve_order() {}
+
+                 fn take_payment() {}
+             }
+         }
+       #+end_src
+
+   - Earlier, we mentioned that =src/main.rs= and =src/lib.rs= are called /crate
+     roots/.
+       The reason for their name is that the contents of either of these two
+     files form a /module named crate/ at the root of the _crate's module
+     structure_, known as the _module tree_.
+     #+begin_src text
+       Listing 7-2 shows the module tree for the structure in Listing 7-1.
+
+       crate
+        └── front_of_house
+            ├── hosting
+            │   ├── add_to_waitlist
+            │   └── seat_at_table
+            └── serving
+                ├── take_order
+                ├── serve_order
+                └── take_payment
+     #+end_src
+     * This tree shows
+       + how some of the /modules/ nest inside one another (for example, hosting
+         nests inside ~front_of_house~).
+
+       + some /modules/ are siblings to each other, meaning they're defined in
+         the *same* /module/ (~hosting~ and ~serving~ are defined within
+         ~front_of_house~).
+         - Notice that the entire /module tree/ is rooted under the _implicit_
+           /module named crate/.
+     
+** DONE Paths for Referring to an Item in the Module Tree - 115
+   CLOSED: [2021-01-09 Sat 01:52]
+   To show Rust where to find an item in a /module tree/, we use a /path/ in the
+   same way we use a /path/ when navigating a filesystem.
+
+   - If we want to call a /function/, we need to know its /path/.
+   
+   - A /path/ can take *TWO* forms:
+     * An /absolute path/
+       starts from a /crate root/ by using
+       + a _crate name_
+         OR
+       + a literal ~crate~.
+
+     * A /relative path/
+       starts from the CURRENT /module/ and uses
+       + ~self~
+       + ~super~, or
+       + an identifier in the CURRENT /module/.
+   
+   - BOTH /absolute and relative paths/ are followed by one or more identifiers
+     _SEPARATED_ by double colons (~::~).
+
+   - Let's return to the example in Listing 7-1.
+     * Q :: How do we call the ~add_to_waitlist~ function?
+            This is the same as asking, what's the path of the ~add_to_waitlist~
+            function?
+
+     * A :: We'll show _TWO_ ways to call the ~add_to_waitlist~ /function/ from a
+            new function ~eat_at_restaurant~ defined in the /crate root/.
+       *Note*: _this example *won't compile* just yet; =TODO= we'll explain why
+               in a bit._
+       #+begin_src rust
+         // In Listing 7-3: we simplified our code a bit by removing some of the
+         //                 modules and functions.
+         mod front_of_house {
+             mod hosting {
+                 fn add_to_waitlist() {}
+             }
+         }
+
+         pub fn eat_at_restaurant() {
+             // Absolute path
+             crate::front_of_house::hosting::add_to_waitlist();
+
+             // Relative path
+             front_of_house::hosting::add_to_waitlist();
+         }
+       #+end_src
+       + The ~eat_at_restaurant~ function is part of our /library crate's public
+         API/, so we mark it with the ~pub~ keyword.
+
+       + =NEXT= In the ”Exposing Paths with the ~pub~ Keyword” section, we'll go
+         into more detail about ~pub~.
+         =FIXME= - =open quote use close quote character=.
+
+   - The first time we call the ~add_to_waitlist~ function in ~eat_at_restaurant~,
+     we use an absolute path. The ~add_to_waitlist~ function is defined in the same
+     crate as ~eat_at_restaurant~, which means we can use the ~crate~ keyword to
+     start an absolute path.
+
+   - Choosing whether to use a /relative or absolute path/ is a decision you'll
+     make based on your project. The decision should depend on
+     * WHETHER you're more likely to move item /definition/ code *separately* from
+     * OR *together* with
+     the code that uses the item.
+
+   - For example,
+     * if we move the ~front_of_house~ /module/ and the ~eat_at_restaurant~
+       /function/ into ~mod customer_experience~,
+       we'd need to *update* the /absolute path/ to ~add_to_waitlist~,
+       BUT the /relative path/ would *still be valid*.
+
+     * However,
+       if we moved the ~eat_at_restaurant~ /function/ *SEPARATELY* into
+       ~mod dining~,
+       the /absolute path/ to the ~add_to_waitlist~ call would *stay the same*,
+       BUT the /relative path/ would need to be *updated*.
+
+     Our preference is to specify /absolute paths/ because it's more likely to
+     move code /definitions/ and item calls *independently* of each other.
+
+   - /Modules/ aren't useful only for organizing your code.
+     They also define Rust's /privacy boundary/.
+
+   - The way /privacy/ works in Rust is that *ALL items (/functions/, /methods/,
+     /structs/, /enums/, /modules/, and /constants/) are private by default*.
+     * Same level object can use each other.
+     * /parent module/ can't use the _private_ items inside /child modules/
+     * items in /child modules/ can use the items in their /ancestor modules/
+
+*** DONE Exposing Paths with the ~pub~ Keyword - 117
+    CLOSED: [2021-01-09 Sat 01:29]
+    Add ~pub~ to ~hosting~ and ~add_to_waitlist~.
+    #+begin_src rust
+      mod front_of_house {
+          pub mod hosting {
+              pub fn add_to_waitlist() {}
+          }
+      }
+
+      pub fn eat_at_restaurant() {
+          // Absolute path
+          crate::front_of_house::hosting::add_to_waitlist();
+
+          // Relative path
+          front_of_house::hosting::add_to_waitlist();
+      }
+    #+end_src
+    
+*** DONE Starting Relative Paths with ~super~ - 119
+    CLOSED: [2021-01-09 Sat 01:32]
+    ~super~ is like the ~..~ syntax in filesystem.
+    
+    #+begin_src rust
+      fn serve_order() {}
+
+      mod back_of_house {
+          fn fix_incorrect_order() {
+              cook_order();
+              super::serve_order();
+          }
+
+          fn cook_order() {}
+      }
+    #+end_src
+    
+*** DONE Making Structs and Enums Public - 120
+    CLOSED: [2021-01-09 Sat 01:52]
+    We can also use ~pub~ to designate /structs/ and /enums/ as _public_, but
+    there are a few extra details.
+
+    - If we use ~pub~ before a /struct definition/,
+      we _make the /struct/ public_, but the /struct's fields/ will STILL be _private_.
+      We can make each field public or not on a case-by-case basis.
+      The ~pub~ on ~struct~ *dosen't affect* the privacy of this /struct fields/.
+      #+begin_src rust
+        mod back_of_house {
+            pub struct Breakfast {
+                pub toast: String,
+                seasonal_fruit: String,
+            }
+
+            impl Breakfast {
+                pub fn summer(toast: &str) -> Breakfast {
+                    Breakfast {
+                        toast: String::from(toast),
+                        seasonal_fruit: String::from("peaches"),
+                    }
+                }
+            }
+        }
+
+        pub fn eat_at_restaurant() {
+            // Order a breakfast in the summer with Rye toast
+            let mut meal = back_of_house::Breakfast::summer("Rye");
+            // Change our mind about what bread we'd like
+            meal.toast = String::from("Wheat");
+            println!("I'd like {} toast please", meal.toast);
+
+            // The next line won't compile if we uncomment it; we're not allowed
+            // to see or modify the seasonal fruit that comes with the meal
+            // meal.seasonal_fruit = String::from("blueberries");
+        }
+      #+end_src
+      * If there is no the associated ~summer~ function, we can't construct a
+        an instance of ~Breakfast~ -- ~Breakfast~ has /a private field/.
+     
+
+    - In contrast, if we make _an /enum/ PUBLIC_,
+      _all of its /variants/ are then PUBLIC._
+      We only need the ~pub~ before the ~enum~ keyword, as shown in Listing 7-10.
+      #+begin_src rust
+        // Listing 7-10: Designating an enum as public makes all its variants public
+        mod back_of_house {
+            pub enum Appetizer {
+                Soup,
+                Salad,
+            }
+        }
+
+        pub fn eat_at_restaurant() {
+            let order1 = back_of_house::Appetizer::Soup;
+            let order2 = back_of_house::Appetizer::Salad;
+        }
+      #+end_src
+
+    - =TODO=
+      There's one more situation involving ~pub~ that we haven't covered, and
+      that is our LAST /module system/ feature: the ~use~ keyword.
+        We'll cover ~use~ by itself first, and then we'll show how to *combine*
+      ~pub~ and ~use~.
+
+** TODO Bringing Paths into Scope with the ~use~ Keyword - 121
 *** Creating Idiomatic ~use~ Paths - 123
 *** Providing New Names with the ~as~ Keyword - 124
 *** Re-exporting Names with ~pub use~ - 124
 *** Using External Packages - 125
 *** Using Nested Paths to Clean Up Large ~use~ Lists - 126
-*** The Glob Operator - 127
+*** DONE The Glob Operator - 127
+    CLOSED: [2021-01-09 Sat 01:57]
+    Bring *all* /public items/ defined in a path into scope.
+    #+begin_src rust
+      use std::collections::*;
+    #+end_src
+    
+    - Be careful when using the /glob operator/!
+      /Glob/ can *make it harder to tell*
+      * what names are in scope and
+      * where a name used in your program was defined.
 
-** Separating Modules into Different Files - 127
+    - The /glob operator/
+      * It is often used
+        WHEN testing to bring everything under _test_ into the /tests module/;
+        =TODO=
+        we'll talk about that in the “How to Write Tests” section in Chapter 11.
+      
+      * =TODO= =TODO= =TODO=
+        It is also sometimes used as part of the /prelude pattern/:
+        see the standard library documentation for more information on that
+        pattern.
+
+** TODO Separating Modules into Different Files - 127
 ** Summary - 128
 
-* TODO 8. Common Collections - 131
+* DONE 8. Common Collections - 131
+  CLOSED: [2021-01-07 Thu 01:05]
+  Rust's standard library includes a number of very useful data structures called
+  /collections/.
+
+  - *Unlike* the built-in /array/ and /tuple/ types,
+    the data these collections point to is *stored on the /heap/,*
+    which means the amount of data does _not need to be known at compile time_ and
+    can *grow or shrink* as the program runs.
+
+  - In this chapter, we'll discuss *THREE* /collections/ that are used very often
+    in Rust programs:
+    * A /vector/ allows you to store a _variable number of values_
+      *next to each other*.
+
+    * A /string/ is a _collection of characters_.
+      We've mentioned the ~String~ type previously,
+      BUT in this chapter we'll talk about it in depth.
+
+    * A /hash map/ allows you to _associate a value with a particular key_.
+      It's a particular implementation of the more general data structure called
+      a map.
+
+  - We'll discuss
+    * how to *create* and *update*
+      + /vectors/
+      + /strings/
+      + /hash maps/,
+      as well as
+    * what makes each special.
+    
 ** DONE Storing Lists of Values with Vectors - 132
-   CLOSED: [2017-08-20 Sun 05:26]
+   CLOSED: [2021-01-06 Wed 16:59]
    - /vector/ :: ~Vec<T>~.
 
-   - /Vectors/ allow us to store more than one value in a single data structure
-     that puts _all the values next to each other in memory_.
-
-   - Vectors can _ONLY_ store values of the _same type_.
-     /homogeneous/
-
-   - They are useful in situations where you have a list of items,
-
 *** DONE Creating a New Vector - 132
-    CLOSED: [2017-08-20 Sun 05:03]
+    CLOSED: [2021-01-06 Wed 15:24]
     - Create an empty /vector/: ~let v: Vec<i32> = Vec::new();~
-      The type annotation is required.
+      The /type annotation/ is required.
 
-    - Use macro ~vec!~ to create a /vector/ with initial values:
+    - Use /macro/ ~vec!~ to create a /vector/ with _initial values_:
       ~let v = vec![1, 2, 3];~
 
 *** DONE Updating a Vector - 132
-    CLOSED: [2017-08-20 Sun 05:05]
+    CLOSED: [2021-01-06 Wed 15:25]
     #+BEGIN_SRC rust
       let mut v = Vec::new();
 
@@ -2625,14 +3298,15 @@
       v.push(6);
       // Rust can infer that the type of `v` is `Vec<i32>`
     #+END_SRC
+    The ~mut~ is for the inside of this /vector/.
 
-    The ~mut~ is for the inside of this vector.
-    (=From Jian= The book doesn't mention if this ~mut~ is for the ~v~ itself.
-     However, since Rust has /shadow/ feature, I'm pretty sure that ~mut~ is NOT
-     for ~v~ itself)
+    - =From Jian=
+      The book doesn't mention if this ~mut~ is for the ~v~ itself.
+      However, since Rust has /shadow/ feature, I'm pretty sure that ~mut~ is
+      NOT for ~v~ itself
 
-*** DONE Dropping a Vector Drops its Elements - 133
-    CLOSED: [2017-08-20 Sun 05:09]
+*** DONE Dropping a Vector Drops Its Elements - 133
+    CLOSED: [2021-01-06 Wed 15:26]
     #+BEGIN_SRC rust
       {
           let v = vec![1, 2, 3, 4];
@@ -2643,68 +3317,285 @@
     #+END_SRC
     =TODO=
     This may seem like a straightforward point, but can get a little more
-    complicated once we start to introduce references to the elements of the
-    vector. Let’s tackle that next!
+    complicated once we start to introduce /references/ to the elements of the
+    /vector/. Let's tackle that next!
 
 *** DONE Reading Elements of Vectors - 133
-    CLOSED: [2017-08-20 Sun 05:19]
-    #+BEGIN_SRC rust
-      let v = vec![1, 2, 3, 4, 5];
+    CLOSED: [2021-01-06 Wed 15:57]
+    - Two ways:
+      #+begin_src rust
+        let v = vec![1, 2, 3, 4, 5];
 
-      let third: &i32 = &v[2];
-      let third_opt: Option<&i32> = v.get(2);
-    #+END_SRC
-*** TODO Iterating over the Values in a Vector - 135
-*** TODO Using an Enum to Store Multiple Types - 136
+        let third: &i32 = &v[2];
+        println!("the third element is {}", third);
 
-** TODO Storing UTF-8 Encoded Text with Strings - 137
-   Strings are an area that new Rustaceans commonly get stuck on.
-   This is due to a combination of three things:  =???= =TODO=
-   + Rust's propensity for making sure to expose possible errors,
-   + strings being a more complicated data structure than many programmers give
-     them credit for, and
-   + UTF-8
+        match v.get(2) {
+            Some(third) => println!("The third element is {}", third),
+            None        => println!("There is no third element.")
+        }
+      #+end_src
 
-*** DONE What Is a String? - 137
-    CLOSED: [2017-08-22 Tue 00:01]
-   Rust _actually_ only has one string type in the core language itself: ~str~,
-   the /string slice/, which is usually seen in its borrowed form, ~&str~.
+    - When the program has a valid reference, the borrow checker enforces the
+      /ownership/ and /borrowing rules/ (covered in Chapter 4) to ensure THIS
+      /reference/ and ANY OTHER /references/ to the contents of the /vector/
+      remain valid.
+        Recall the rule that states you *can't* have /mutable and immutable
+      references/ in the SAME /scope/. That rule applies in Listing 8-7, where we
+      hold an /immutable reference/ to the first element in a /vector/ and try to
+      add an element to the end, *which won't work if we also try to refer to
+      that element later in the function*:
+      =TODO= =RE-NOTE=
+      #+begin_src rust
+        // Listing 8-7:
+        // Attempting to add an element to a vector while holding a reference to an item
+
+        let mut v = vec![1, 2, 3, 4, 5];
+
+        let first = &v[0];
+        v.push(6);
+
+        println!("The first element is: {}", first);
+      #+end_src
+      
+      Compiling this code will result in this error (~cargo run~):
+      #+begin_src text
+           Compiling collections v0.1.0 (file:///projects/collections)
+        error[E0502]: cannot borrow `v` as mutable because it is also borrowed as immutable
+         --> src/main.rs:6:5
+          |
+        4 |     let first = &v[0];
+          |                  - immutable borrow occurs here
+        5 | 
+        6 |     v.push(6);
+          |     ^^^^^^^^^ mutable borrow occurs here
+        7 | 
+        8 |     println!("The first element is: {}", first);
+          |                                          ----- immutable borrow later used here
+
+        error: aborting due to previous error
+
+        For more information about this error, try `rustc --explain E0502`.
+        error: could not compile `collections`.
+
+        To learn more, run the command again with --verbose.
+      #+end_src
+      The code in Listing 8-7 might look like it should work:
+      * Q ::
+        why should a /reference/ to the first element care about what changes at
+        the end of the vector?
+
+      * A ::
+        This error is due to the way /vectors/ work:
+        adding a new element onto the end of the /vector/ *might require allocating
+        new memory and copying the old elements to the new space*, if there isn't
+        enough room to put all the elements next to each other where the /vector/
+        currently is.
+          In that case, the /reference/ to the first element would be pointing to
+        /deallocated memory/. The /borrowing rules/ *prevent* programs from
+        ending up in that situation.
+
+    - =TODO=
+      *Note*:
+      For more on the implementation details of the ~Vec<T>~ type, see “The
+      Rustonomicon”.
+    
+*** DONE Iterating over the Values in a Vector - 135
+    CLOSED: [2021-01-06 Wed 16:16]
+    - We can iterate through all of the elements of a /vector/
+      RATHER THAN use indices to access one at a time.
+      #+begin_src rust
+        // Listing 8-8:
+        // Printing each element in a vector by iterating over the elements using a `for` loop
+
+        let v = vec![100, 32, 57];
+        for i in &v {
+            println!("{}", i);
+        }
+      #+end_src
+
+    - Iterate over /mutable references/ to each element in a /mutable vector/ in
+      order to make changes to all the elements.
+      #+begin_src rust
+        // Listing 8-9:
+        // Iterating over mutable references to elements in a vector
+
+        let mut v = vec![100, 32, 57];
+        for i in &mut v {
+            *i += 50;
+        }
+      #+end_src
+      To change the value that the /mutable reference/ refers to,
+      we have to use the /dereference operator/ (~*~) to get to the value in ~i~
+      before we can use the ~+=~ operator.
+        =TODO= We'll talk more about the /dereference operator/ in the “Following
+      the Pointer to the Value with the Dereference Operator” section of Chapter 15.
+    
+*** DONE Using an Enum to Store Multiple Types - 136
+    CLOSED: [2021-01-06 Wed 16:59]
+    Combine /enum/ with /vectors/ to effectively save values of DIFFERENT /types/
+    in to one /vector/, meanwhile keep the safety -- combine /enum/ with ~match~
+    exhaustive checking feature can guarantee this.
+
+    - For example,
+      #+begin_src rust
+        // Listing 8-10:
+        // Defining an enum to store values of different types in one vector
+
+        enum SpreadsheetCell {
+            Int(i32),
+            Float(f64),
+            Text(String),
+        }
+
+        let row = vec![
+            SpreadsheetCell::Int(3),
+            SpreadsheetCell::Text(String::from("blue")),
+            SpreadsheetCell::Float(10.12),
+        ];
+      #+end_src
+
+    - Rust needs to know what /types/ will be in the /vector/ _at compile time_
+      so it knows *exactly how much /memory/ on the /heap/ will be needed* to
+      store each element.
+      
+    - =TODO= =???=
+      When you're writing a program, if you don't know the exhaustive set of
+      types the program will get _at runtime_ to store in a /vector/, the /enum/
+      technique won't work.
+      =TODO= =???=
+      Instead, you can use a /trait object/, which we'll cover in Chapter 17.
+
+    - Now that we've discussed some of the most common ways to use /vectors/,
+      =TODO= be sure to review the API documentation for all the many useful methods
+      defined on ~Vec<T>~ by the standard library.
+        For example, in addition to push, a pop method removes and returns the
+      last element. Let’s move on to the next collection type: ~String~!
+
+** DONE Storing UTF-8 Encoded Text with Strings - 137
+   CLOSED: [2021-01-06 Wed 22:36]
+   - Strings are an area that new Rustaceans commonly get stuck on.
+     This is due to a combination of three things:  =???= =TODO=
+     * Rust's propensity for making sure to expose possible errors,
+
+     * strings being a more complicated data structure than many programmers give
+       them credit for, and
+
+     * UTF-8
+
+   - It's useful to discuss /strings/ in the context of collections
+     because
+     /strings/ are implemented
+     * as a /collection/ of /bytes/,
+     * plus some /methods/ to provide useful functionality
+       when those /bytes/ are interpreted as text.
+     
+   - In this section, we'll talk about the operations on ~String~ that every
+     collection type has, such as *creating*, *updating*, and *reading*.
+
+   - We'll also discuss the ways in which ~String~ is different from the other
+     collections, namely how indexing into a ~String~ is complicated by the
+     differences between how people and computers interpret String data.
+     
+*** DONE What Is a String? - 137 - =RE-READ=
+    CLOSED: [2021-01-06 Wed 19:46]
+   Rust _actually_ *only has one* /string type/ in the _core language_ itself:
+   ~str~, the /string slice/, which is usually seen in its /borrowed form/, ~&str~.
 
    - ~String~ is provided in the standard library of Rust, rather than coded into
-     the core language, and is a _growable_, _mutable_, _owned_, _UTF-8 encoded_
-     string type.
+     the *core language*, and is a _growable_, _mutable_, _owned_, _UTF-8 encoded_
+     /string type/.
 
    - When Rustaceans talk about "strings", they usually mean both the ~String~
-     and the string slice ~&str~ types.
+     and the /string slice/ ~&str~ types.
+
+   - Alghough this section is largely about ~String~, both /types/ are used
+     heavily in Rust's standard library.
 
    - Both ~String~ and /string slices/ are UTF-8 encoded.
 
-   - =TODO= Read the API doc to get more details about the other string types,
-     + standard library: ~0sString~, ~0sStr~, ~CString~, and ~CStr~.
+   - =TODO=
+     Read the API doc to get more details about the other /string types/,
+     * standard library:
+       + ~OsString~
+       + ~OsStr~
+       + ~CString~
+       + ~CStr~
 
-     + library crates: ....
+     * /library crates/ can provide even more options for storing string data.
 
-     + Similar to the ~*String~ / ~*Str~ naming =TODO=, =???=, they often provide
-       an owned and borrowed variant, just like ~String~ / ~&str~.
+     * See how those _names_ all end in ~String~ or ~Str~?
+         They _refer to_ /owned and borrowed variants/, just like the ~String~ and
+       ~str~ types you've seen previously.
+
+     * These /string types/ can store text *in different encodings* OR *be
+       represented in memory in a different way*, for example. We won't discuss
+       these OTHER /string types/ in this chapter; =TODO= see their API
+       documentation for more about how to use them and when each is
+       appropriate.
 
 *** DONE Creating a New String - 137
-    CLOSED: [2017-08-22 Tue 00:01]
-    - ~let mut s = String::new();~
+    CLOSED: [2021-01-06 Wed 22:36]
+    - Many of the same operations available with ~Vec<T>~ are available with
+      ~String~ as well, starting with the ~new~ function to create a /string/:
+      #+begin_src rust
+        // Listing 8-11: Creating a new, empty `String`
+        let mut s = String::new();
+      #+end_src
+      This line creates a NEW /empty string/ called ~s~, which we can then *load*
+      data into.
 
-    - string literal to ~String~.
-      ~let s = "initial contents".to_string();~
-      ~let s = String::from("initial contents")~
+    - Often, we'll have some initial data that we want to start the string with.
+      For that, we use the ~to_string~ /method/, which is available on any type
+      that implements the ~Display~ /trait/, as /string literals/ do. Listing
+      8-12 shows two examples.
+      #+begin_src rust
+        // Listing 8-12:
+        // Using the `to_string` method to create a `String` from a string literal
+
+        let data = "initial contents";
+        let s = data.to_string();
+
+        // the method also works on a literal directly:
+        let s = "initial contents".to_string();
+      #+end_src
+
+    - Two equivalent ways to get a ~String~ from a /string literal/.
+      * ~let s = "initial contents".to_string();~
+      * ~let s = String::from("initial contents");~
+      Which you choose is a matter of style.
+
+    - Remember that /strings/ are *UTF-8 encoded*, so we can include any properly
+      encoded data in them, as shown in Listing 8-14.
+      #+begin_src rust
+        let hello = String::from("السلام عليكم");
+        let hello = String::from("Dobrý den");
+        let hello = String::from("Hello");
+        let hello = String::from("שָׁלוֹם");
+        let hello = String::from("नमस्ते");
+        let hello = String::from("こんにちは");
+        let hello = String::from("안녕하세요");
+        let hello = String::from("你好");
+        let hello = String::from("Olá");
+        let hello = String::from("Здравствуйте");
+        let hello = String::from("Hola");
+      #+end_src
 
 *** DONE Updating a String - 138
-    CLOSED: [2017-08-22 Tue 00:26]
-**** TODO Appending to a String with ~push_str~ and ~push~ - 139
+    CLOSED: [2021-01-06 Wed 20:26]
+    A ~String~ can *grow* in _size_ and its _contents_ can change,
+    just like the contents of a ~Vec<T>~, if you push more data into it.
+      
+    - Update ~String~'s with ~+~ or ~format!~.
+    
+**** DONE Appending to a String with ~push_str~ and ~push~ - 139
+     CLOSED: [2021-01-06 Wed 20:09]
      #+BEGIN_SRC rust
        let mut s = String::from("foo");
        s.push_str("bar");
 
        let mut s1 = String::from("foo");
-       let s2 = String::from("bar");
-       s1.push_str(&s2);
+       let s2 = "bar";
+       s1.push_str(s2);
        // s2 is still valid
 
        let mut s3 = String::from("lo");
@@ -2712,97 +3603,320 @@
      #+END_SRC
 
 **** DONE Concatenation with the ~+~ Operator or the ~format!~ Macro - 139
-     CLOSED: [2017-08-22 Tue 00:26]
-     #+BEGIN_SRC rust
-       let s1 = String::from("Hello, ");
-       let s2 = String::from("world!");
-       let s3 = s1 + &s2; // Note that s1 has been moved here and can no longer be used.
-       // this is due to what doese `+` do under the hood
-       // `fn add(self, s: &str) -> String`.
-     #+END_SRC
+     CLOSED: [2021-01-06 Wed 20:26]
+     - ~+~
+       #+BEGIN_SRC rust
+         let s1 = String::from("Hello, ");
+         let s2 = String::from("world!");
+         let s3 = s1 + &s2; // Note that s1 has been moved here and can no longer be used.
+         // this is due to what does `+` do under the hood
+         // `fn add(self, s: &str) -> String`.
+       #+END_SRC
+       ~fn add(self, s: &str) -> String~ is not the exact signature in the standard
+       library. It is just a specific version that the /generics/ part is replaced
+       with a concrete type ~String~.
 
-     - The ~&s2~ is ~&String~, and the ~add~ method requires ~&str~.
-       Q: What happened makes this right?
-       A: A ~&String~ argument can be /coerced/ into a ~&str~ - when the ~add~
-          function is called, Rust uses /deref coercion/.
+       1. The ~&s2~ is ~&String~, and the ~add~ method requires ~&str~.
+          * Q :: What happened makes this right?
+          * A :: The compiler can /coerce/ the ~&String~ argument into a ~&str~.
+              
+          * When the ~add~ /method/ is called, Rust uses /deref coercion/, which
+            here turns ~&s2~ into ~&s2[..]~.
 
-     - /deref coercion/: you could think of _here_ as turning ~&s2~ into ~s2[..]~
-       for use in the ~add~ function.
-       =TODO= chapter 15
+          * =TODO= - =TODO= - =TODO=
+            Discuss /deref coercion/ in more depth in Chapter 15.
+
+          * Because ~add~ does NOT take /ownership/ of the ~s~ parameter, ~s2~ will still
+            be a valid ~String~ after this operation.
+          
+       2. We can see the signature of ~add~ takes /ownership/ of ~self~, because
+          ~self~ does NOT have an ~&~.
+            This means s1 in Listing 8-18 will be moved into the add call and no
+          longer be valid after that. So although let s3 = s1 + &s2; looks like it
+          will copy both strings and create a new one, this statement actually
+          takes ownership of s1, appends a copy of the contents of s2, and then
+          returns ownership of the result. In other words, it looks like it’s
+          making a lot of copies but isn’t; the implementation is more efficient
+          than copying.
 
      - Concatenate multiple strings:
-       ~let s = format!("{}-{}-{}", s1, s2, s3);~
-       This doesn't take ownership of any of its parameters.
+       * The behavior of the ~+~ operator gets unwieldy (=from Jian= because of
+         ~+~ is not symmetric to its LHS and RHS):
+         #+begin_src rust
+           let s1 = String::from("tic");
+           let s2 = String::from("tac");
+           let s3 = String::from("toe");
 
-*** TODO Indexing into Strings - 141
+           let s = s1 + "-" + &s2 + "-" + &s3;
+         #+end_src
+         
+       * Use the ~format!~ macro:
+         #+begin_src rust
+           let s = format!("{}-{}-{}", s1, s2, s3);
+         #+end_src
+         This doesn't take /ownership/ of any of its parameters.
+         The format string part of ~format!~ is the same as the ~println!~.
+
+*** DONE Indexing into Strings - 141
+    CLOSED: [2021-01-06 Wed 22:22]
     Try the indexing operation (as in other languages).
     You'll get an error message:
     #+BEGIN_SRC text
-      error: the trait bound `std::string::String: std::ops::Index<_>` is not
-      satisfied [--explain E0277]
-        |>
-        |>     let h = s1[0];
-        |>             ^^^^^
-      note: the type `std::string::String` cannot be indexed by `_`
+         Compiling collections v0.1.0 (file:///projects/collections)
+      error[E0277]: the type `std::string::String` cannot be indexed by `{integer}`
+       --> src/main.rs:3:13
+        |
+      3 |     let h = s1[0];
+        |             ^^^^^ `std::string::String` cannot be indexed by `{integer}`
+        |
+        = help: the trait `std::ops::Index<{integer}>` is not implemented for `std::string::String`
+
+      error: aborting due to previous error
+
+      For more information about this error, try `rustc --explain E0277`.
+      error: could not compile `collections`.
+
+      To learn more, run the command again with --verbose.
     #+END_SRC
+    - This indicate that *Rust strings do _NOT_ support indexing.*
 
-    This indicate that Rust strings do NOT support indexing.
+    - Q :: WHY?
 
-    WHY?
-    In order to answer that, we have to talk a bit about how Rust stores strings
-    in memory.
+    - A :: In order to answer that, we have to talk a bit about
+           _HOW Rust stores /strings/ in memory._
 
 **** DONE Internal Representation - 141
-     CLOSED: [2017-08-22 Tue 00:35]
+     CLOSED: [2021-01-06 Wed 22:22]
      A ~String~ is a wrapper over a ~Vec<u8>~.
-     However, one UTF-8 character can take two bytes. If there is indexing, the
-     returned value can be a number of no sense if considered as a character.
 
-     For example,
-     ~let hello = "Здравствуйте";~, of which ~hello.len()~ is 24, rather than 12.
-     If ~&hello[0]~ is workable, it should be 208, which is NOT a valid
-     character on its own.
+     1. Let's look at some of our properly encoded UTF-8 example strings from
+        Listing 8-14.
+        #+begin_src rust
+          let hello = String::from("Hola");  // 4 letters, 4 bytes long
 
-**** TODO Bytes and Scalar Values and Grapheme Clusters! Oh my! - 142
+          let hello = String::from("Здравствуйте");  // 12 letters, 24 bytes long
+        #+end_src
+        From these two examples we know index into the string's bytes will *NOT
+        ALWAYS* correlate to a valid /Unicode scalar value/.
 
-*** TODO Slicing Strings - 142
-*** TODO Methods for Iterating over Strings - 143
-*** TODO Strings Are Not So Simple - 144
+     2. The above example can illustrate that
+        index a UTF-8 string is completely different from indexing the bytes in
+        a string.
+          To avoid returning an unexpected value and causing bugs that might
+        not be discovered immediately, Rust doesn't allow index a /string/.
 
-** TODO Storing Keys with Associated Values in Hash Maps - 144
+**** DONE Bytes and Scalar Values and Grapheme Clusters! Oh My! - 142
+     CLOSED: [2021-01-06 Wed 22:22]
+     - Another point about UTF-8 is that there are actually *THREE* relevant ways
+       to look at /strings/ from Rust's perspective:
+       * bytes,
+       * scalar values,
+       * /grapheme clusters/ (the closest thing to what we would call /letters/).
+
+     - If we look at the Hindi word “नमस्ते” written in the Devanagari script, it
+       is stored as a /vector/ of ~u8~ values that looks like this:
+       #+begin_src text
+         [224, 164, 168, 224, 164, 174, 224, 164, 184, 224, 165, 141, 224, 164, 164,
+         224, 165, 135]
+       #+end_src
+       * That's 18 bytes and is how computers ultimately store this data.
+         If we look at them as /Unicode scalar values/, which are what /Rust's
+         ~char~ type/ is, those bytes look like this:
+         #+begin_src text
+           ['न', 'म', 'स', '्', 'त', 'े']
+         #+end_src
+         + There are six char values here, but the fourth and sixth are *not*
+           /letters/ -- they're /diacritics/ that don't make sense on their own.
+
+       * Finally, if we look at them as /grapheme clusters/, we'd get what a
+         person would call the *four* /letters/ that make up the Hindi word:
+         #+begin_src text
+           ["न", "म", "स्", "ते"]
+         #+end_src
+
+     - Rust provides different ways of interpreting the raw string data that
+       computers store so that each program can choose the interpretation it
+       needs, no matter what human language the data is in.
+
+     - *A final reason Rust doesn't allow us to index into a ~String~ to get a
+       character*:
+       indexing operations are expected to always take constant time O(1).
+       But *it isn't possible to guarantee that performance with a ~String~,*
+       because Rust would have to walk through the contents from the beginning
+       to the index to determine how many valid characters there were.
+
+*** DONE Slicing Strings - 142
+    CLOSED: [2021-01-06 Wed 22:34]
+    - Indexing into a string is often a bad idea because it's not clear what the
+      return type of the string-indexing operation should be:
+      * a byte value?
+      * a character?
+      * a grapheme cluster?
+      * a string slice?
+        
+    - *THEREFORE*,
+      Rust asks you to be more specific if you really need to use indices to
+      create /string slices/.
+        To be more specific in your indexing and indicate that you want a /string
+      slice/,
+      RATHER THAN indexing using ~[]~ with a single number,
+      you can *use ~[]~ with a range* to create a /string slice/ containing
+      particular bytes:
+      #+begin_src rust
+        let hello = "Здравствуйте";
+
+        let s = &hello[0..4];
+      #+end_src
+      Here, ~s~ will be a ~&str~ that contains the _first 4 bytes_ of the /string/.
+      Earlier, we mentioned that each of these characters was _2 bytes_, which
+      means s will be ~Зд~.
+
+    - Q :: What would happen if we used ~&hello[0..1]~?
+    - A :: Rust would /panic/ _at runtime_
+           in the same way as if an invalid index were accessed in a /vector/
+      * ~cargo run~:
+        #+begin_src text
+             Compiling collections v0.1.0 (file:///projects/collections)
+              Finished dev [unoptimized + debuginfo] target(s) in 0.43s
+               Running `target/debug/collections`
+          thread 'main' panicked at 'byte index 1 is not a char boundary; it is inside 'З' (bytes 0..2) of `Здравствуйте`', src/libcore/str/mod.rs:2069:5
+          note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
+        #+end_src
+        =IMPORTANT=
+        *You should use /ranges/ to create /string slices/ with caution, because
+        doing so can crash your program.*
+      
+*** DONE Methods for Iterating over Strings - 143
+    CLOSED: [2021-01-06 Wed 20:53]
+    Fortunately, you can access elements in a /string/ in other ways.
+    
+    - Perform operations on individual /Unicode scalar/ values, the
+      best way to do so is to use the ~chars~ /method/:
+      #+begin_src rust
+        for c in "नमस्ते".chars() {
+            println!("{}", c);
+        }
+      #+end_src
+      
+      Output:
+      
+      #+begin_src text
+        न
+        म
+        स
+        ्
+        त
+        े
+      #+end_src
+      
+    - Iterate bytes in a ~String~:
+      #+begin_src rust
+        for b in "नमस्ते".bytes() {
+            println!("{}", b);
+        }
+      #+end_src
+      
+      Output:
+      
+      #+begin_src text
+        224
+        164
+        // --snip--
+        165
+        135
+      #+end_src
+
+    - Getting /grapheme clusters/ from /strings/ is *complex*,
+      so this functionality is *not provided* by the /standard library/.
+      * Crates are available on crates.io if this is the functionality you need.
+    
+*** DONE Strings Are Not So Simple - 144
+    CLOSED: [2021-01-06 Wed 22:36]
+    *To summarize, /strings/ are complicated.*
+
+    Different programming languages make different choices about how to present
+    this complexity to the programmer.
+      Rust has chosen to make the correct handling of ~String~ data the default
+    behavior for all Rust programs, which means programmers have to put more
+    thought into handling UTF-8 data upfront.
+    - This trade-off
+      * exposes more of the complexity of /strings/ than is apparent in other
+        programming languages,
+      * BUT it prevents you from having to handle errors involving non-ASCII
+        characters later in your development life cycle.
+
+** DONE Storing Keys with Associated Values in Hash Maps - 144
+   CLOSED: [2021-01-06 Wed 17:58]
    ~HashMap<K, V>~
-*** TODO Creating a New Hash Map - 144
-    #+BEGIN_SRC rust
-      use std::collections::HashMap;
+   
+   - Many programming languages support this kind of data structure,
+     but they often use a DIFFERENT NAME, such as
+     * hash
+     * map
+     * object
+     * hash table
+     * dictionary
+     * associative array
+     * ... just to name a few
+   
+*** DONE Creating a New Hash Map - 144
+    CLOSED: [2021-01-06 Wed 17:29]
+    - *Create* an /EMPTY hash map/ with ~new~ and add elements with insert.
+      #+begin_src rust
+        // Listing 8-20:
+        // Creating a new hash map and inserting some keys and values
 
-      let mut scores = HashMap::new();
+        use std::collections::HashMap;
 
-      scores.insert(String::from("Blue"), 10);
-      scores.insert(String::from("Yellow"), 50);
-    #+END_SRC
+        let mut scores = HashMap::new();
 
-    Of the three collections, hash map is the least often used, so it's NOT
-    included in the features imported automatically in the prelude.
-    Hash maps also have less support from the standard library; for example,
-    hash maps have no built-in macro to construct them.
+        scores.insert(String::from("Blue"), 10);
+        scores.insert(String::from("Yellow"), 50);
+      #+end_src
+      * Of our three common collections (mentioned in this chapter),
+        this one is the least often used, so it's *not* included in the features
+        brought into scope automatically in the /prelude/.
 
-    #+BEGIN_SRC rust
-      use std::collections::HashMap;
+      * /Hash maps/ also have *less* support from the standard library;
+        there's *no* built-in /macro/ to construct them, for example.
+        =TODO= =TODO= =TODO=
 
-      let teams = vec![String::from("Blue"), String::from("Yellow")];
-      let initial_scores = vec![10, 50];
+    - Just like /vectors/, /hash maps/ store their data on the /heap/.
 
-      let scores: HashMap<_, _> = teams.iter().zip(initial_scores.iter()).collect();
-    #+END_SRC
+    - /Hash maps/ are *homogeneous*.
+
+    - Another way of constructing a hash map is by using /iterators/ and the
+      ~collect~ method on a /vector/ of /tuples/, where each /tuple/ consists of
+      a key and its value.
+
+    - =TODO=
+      We'll be going into more detail about /iterators/ and their associated
+      /methods/ in the ”Processing a Series of Items with Iterators” section of
+      Chapter 13.
+
+    - The ~collect~ /method/ gathers data into _a number of /collection types/,_
+      including ~HashMap~. =from Jian= NOT only ~HashMap~.
+      * For example, 
+        #+begin_src rust
+          // Listing 8-21:
+          // Creating a hash map from a list of teams and a list of scores
+
+          use std::collections::HashMap;
+
+          let teams = vec![String::from("Blue"), String::from("Yellow")];
+          let initial_scores = vec![10, 50];
+
+          let mut scores: HashMap<_, _> =
+              teams.into_iter().zip(initial_scores.into_iter()).collect();
+        #+end_src
+        Since ~collect~ can generate multiple types of collections, the /type
+        annotation/ for ~scores~ must be given to tell what type of result it
+        wants. However, the types of keys and values can be inferred, and this is
+        why we can put two ~_~'s in the type parameters sites of ~HashMap~.
 
 *** DONE Hash Maps and Ownership - 145
-    CLOSED: [2017-08-22 Tue 00:58]
-    For types that implement the ~Copy~ trait, like ~i32~, the values are copied
-    into the hash map.
-      For owned values like String, the values will be moved and the hash map
-    will be the owner of those values:
-
-    #+BEGIN_SRC rust
+    CLOSED: [2021-01-06 Wed 17:47]
+    #+begin_src rust
       use std::collections::HashMap;
 
       let field_name = String::from("Favorite color");
@@ -2812,10 +3926,24 @@
       map.insert(field_name, field_value);
       // `field_name` and `field_value` are invalid at this point.
       // The _move_ is done by the `insert` method.
-    #+END_SRC
+    #+end_src
+    - For /types/ that implement the ~Copy~ /trait/, like ~i32~,
+      the values are _copied into_ the /hash map/.
+
+    - For /owned values/ like ~String~,
+      the values will be moved and the /hash map/ will be the owner of those
+      values.
+
+    - If we insert /references/ to /values/ into the /hash map/,
+      the values _won't be moved into_ the /hash map/.
+        The values that the /references/ point to *must be valid for at least as
+      long as the hash map is valid.*
+      =TODO= =TODO= =TODO=
+      We'll talk more about these issues in the “Validating References with
+      Lifetimes” section in Chapter 10.
 
 *** DONE Accessing Values in a Hash Map - 146
-    CLOSED: [2017-08-22 Tue 01:06]
+    CLOSED: [2021-01-06 Wed 17:48]
     #+BEGIN_SRC rust
       use std::collections::HashMap;
 
@@ -2835,13 +3963,14 @@
       }
     #+END_SRC
 
-*** TODO Updating a Hash Map - 147
+*** DONE Updating a Hash Map - 147
+    CLOSED: [2021-01-06 Wed 17:58]
 **** DONE Overwriting a Value - 147
-     CLOSED: [2017-08-22 Tue 01:09]
+     CLOSED: [2021-01-06 Wed 17:49]
      Do ~insert~ more than one times for one key.
 
 **** DONE Only Inserting a Value If the Key Has No Value - 147
-     CLOSED: [2017-08-22 Tue 01:21]
+     CLOSED: [2021-01-06 Wed 17:50]
      #+BEGIN_SRC rust
        use std::collections::HashMap;
 
@@ -2858,15 +3987,15 @@
      - ~entry~ returan a value of enum, ~Entry~.
 
      - The ~or_insert~ method on ~Entry~ returns
-       + the value for the corresponding ~Entry~ key if it exists, and
-       + if not, inserts its argument as the new value for this key and returns
+       * the value for the corresponding ~Entry~ key if it exists, and
+       * if not, inserts its argument as the new value for this key and returns
          the modified ~Entry~.
 
        This is much cleaner than writing the logic ourselves, and in addition,
        plays more nicely with the borrow checker.
 
 **** DONE Updating a Value Based on the Old Value - 148
-     CLOSED: [2017-08-22 Tue 01:21]
+     CLOSED: [2021-01-06 Wed 17:55]
      #+BEGIN_SRC rust
        use std::collections::HashMap;
 
@@ -2881,22 +4010,21 @@
 
        println!("{:?}", map);
      #+END_SRC
-
-     - The ~or_insert~ method actually returns a mutable reference (~&mut V~).
-       We save it in the ~count~ variable, so in order to assign to that value
-       we must first dereference ~count~ using the ~*~.
+     1. The ~or_insert~ method actually returns a /mutable reference/ (~&mut V~).
+     2. We save it in the ~count~ variable, so in order to *assign to* that value
+        we must first *dereference* ~count~ using the ~*~.
 
 **** DONE Hashing Functions - 149
-     CLOSED: [2017-08-22 Tue 01:21]
-     - _By default_, ~HashMap~ uses a cryptographically secure hashing function
-       that can provide resistance to Denial of Service (DoS) attacks.
+     CLOSED: [2021-01-06 Wed 17:58]
+     1. _By default_, ~HashMap~ uses a *"cryptographically strong" hashing function*
+        that can provide resistance to Denial of Service (DoS) attacks.
 
-       _This is not the fastest hashing algorithm out there_, but the tradeoff
-       for _better security_ that comes with the drop in performance is worth it.
+     2. _This default is not the fastest hashing algorithm out there_, but the
+        tradeoff for _better security_ that comes with the drop in performance
+        is *worth it*.
 
-       You can switch to another function by specifying a different /hasher/.
-
-     - A /hasher/ :: a type that implements the ~BuildHasher~ trait.
+     3. You can switch to another function by specifying a different /hasher/.
+        - /hasher/ :: a type that implements the ~BuildHasher~ trait.
 
 ** TODO Summary - 149
    - Given a list of integers, use a vector and return the mean (average),
@@ -2919,36 +4047,43 @@
      =TODO=
 
 * TODO 9. Error Handling - 151
-  - Rust groups errors into two major categories:
-    + recoverable errors
-    + unrecoverable errors
+  - Rust groups errors into TWO major categories:
+    * recoverable errors
+    * unrecoverable errors - always symptoms of bugs
+
+  - Most languages don't distinguish between these TWO kinds of errors and
+    handle both in the same way, using mechanisms such as /exceptions/.
 
   - Rust doesn't have exceptions.
     Instead, it has
-    + the value ~Result<T, E>~ for recoverable errors.
-    + the ~panic!~ macro that stops execution when it encounters unrecoverable
+    * the type ~Result<T, E>~ for recoverable errors.
+    * the ~panic!~ macro that stops execution when it encounters unrecoverable
       errors.
 
 ** DONE Unrecoverable Errors with ~panic!~ - 152
-   CLOSED: [2017-08-22 Tue 15:34]
-   - When this macro executes, your program will:
+   CLOSED: [2021-01-07 Thu 01:25]
+   - When this /macro/ executes, your program will:
      1. print a failure message
      2. unwind and clean up the stack
      3. quit
 
-   - *Unwinding the Stack Versus Aborting on Panic*
-     + /unwinding/ :: walks back up the stack and cleans up the data from each
+   - This most commonly occurs when a bug of some kind has been detected and
+     it's _not clear_ to the programmer how to handle the error.
+
+   - *Unwinding the Stack or Aborting in Response to a Panic*
+     * /unwinding/ :: walks back up the /stack/ and cleans up the data from each
                       function it encounters, but this walking and cleanup is a
                       lot of work.
 
 
-     + the alternative is to _immediately abort_. No cleanup by the program.
-       Memory need to be cleaned up by the OS.
+     * the alternative is to _immediately abort_.
+       1. No cleanup by the program.
+       2. Memory need to be cleaned up by the OS.
 
-     + If you want to make your resulting binary as small as possible, you can
-       switch from /unwinding/ to /aborting/ on panic by adding
-       ~panic = 'abort'~ to the appropriate ~[profile]~ sections in the
-       =Cargo.toml=.
+     * If you want to make your _resulting binary as small as possible_,
+       you can switch from /unwinding/ to /aborting/ on /panic/ by adding
+       ~panic = 'abort'~ to the appropriate ~[profile]~ sections in the =Cargo.toml=.
+       For example, if you want to abort on /panic/ in release mode, add this:
        #+BEGIN_SRC toml
          [profile.release]
          panic = 'abort'
@@ -2958,8 +4093,10 @@
       figure this out.
 
 *** DONE Using a ~panic!~ Backtrace - 153
-    CLOSED: [2017-08-22 Tue 15:34]
+    CLOSED: [2021-01-07 Thu 01:25]
     - /buffer overread/
+      * In Rust will trigger a /panic/
+      * In C/C++ will trigger an /undefined behavior/.
 
     - A example:
       #+BEGIN_SRC rust
@@ -2970,7 +4107,7 @@
         }
       #+END_SRC
 
-      + ~cargo run~
+      * Command ~cargo run~
         #+BEGIN_SRC text
              Compiling panic v0.1.0 (file:///projects/panic)
               Finished dev [unoptimized + debuginfo] target(s) in 0.27 secs
@@ -2981,59 +4118,82 @@
           error: Process didn't exit successfully: `target/debug/panic` (exit code: 101)
         #+END_SRC
 
-      + ~RUST_BAKTRACE=1 cargo run~
+      * Command ~RUST_BAKTRACE=1 cargo run~
         #+BEGIN_SRC text
-              Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs
-               Running `target/debug/panic`
-          thread 'main' panicked at 'index out of bounds: the len is 3 but the index is 100', /stable-dist-rustc/build/src/libcollections/vec.rs:1392
+          $ RUST_BACKTRACE=1 cargo run
+          thread 'main' panicked at 'index out of bounds: the len is 3 but the index is 99', /rustc/5e1a799842ba6ed4a57e91f7ab9435947482f7d8/src/libcore/slice/mod.rs:2806:10
           stack backtrace:
-             1:     0x560ed90ec04c - std::sys::imp::backtrace::tracing::imp::write::hf33ae72d0baa11ed
-                                  at /stable-dist-rustc/build/src/libstd/sys/unix/backtrace/tracing/gcc_s.rs:42
-             2:     0x560ed90ee03e - std::panicking::default_hook::{{closure}}::h59672b733cc6a455
-                                  at /stable-dist-rustc/build/src/libstd/panicking.rs:351
-             3:     0x560ed90edc44 - std::panicking::default_hook::h1670459d2f3f8843
-                                  at /stable-dist-rustc/build/src/libstd/panicking.rs:367
-             4:     0x560ed90ee41b - std::panicking::rust_panic_with_hook::hcf0ddb069e7abcd7
-                                  at /stable-dist-rustc/build/src/libstd/panicking.rs:555
-             5:     0x560ed90ee2b4 - std::panicking::begin_panic::hd6eb68e27bdf6140
-                                  at /stable-dist-rustc/build/src/libstd/panicking.rs:517
-             6:     0x560ed90ee1d9 - std::panicking::begin_panic_fmt::abcd5965948b877f8
-                                  at /stable-dist-rustc/build/src/libstd/panicking.rs:501
-             7:     0x560ed90ee167 - rust_begin_unwind
-                                  at /stable-dist-rustc/build/src/libstd/panicking.rs:477
-             8:     0x560ed911401d - core::panicking::panic_fmt::hc0f6d7b2c300cdd9
-                                  at /stable-dist-rustc/build/src/libcore/panicking.rs:69
-             9:     0x560ed9113fc8 - core::panicking::panic_bounds_check::h02a4af86d01b3e96
-                                  at /stable-dist-rustc/build/src/libcore/panicking.rs:56
-            10:     0x560ed90e71c5 - <collections::vec::Vec<T> as core::ops::Index<usize>>::index::h98abcd4e2a74c41
-                                  at /stable-dist-rustc/build/src/libcollections/vec.rs:1392
-            11:     0x560ed90e727a - panic::main::h5d6b77c20526bc35
-                                  at /home/you/projects/panic/src/main.rs:4
-            12:     0x560ed90f5d6a - __rust_maybe_catch_panic
-                                  at /stable-dist-rustc/build/src/libpanic_unwind/lib.rs:98
-            13:     0x560ed90ee926 - std::rt::lang_start::hd7c880a37a646e81
-                                  at /stable-dist-rustc/build/src/libstd/panicking.rs:436
-                                  at /stable-dist-rustc/build/src/libstd/panic.rs:361
-                                  at /stable-dist-rustc/build/src/libstd/rt.rs:57
-            14:     0x560ed90e7302 - main
-            15:     0x7f0d53f16400 - __libc_start_main
-            16:     0x560ed90e6659 - _start
-            17:                0x0 - <unknown>
+             0: backtrace::backtrace::libunwind::trace
+                       at /Users/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/backtrace-0.3.40/src/backtrace/libunwind.rs:88
+             1: backtrace::backtrace::trace_unsynchronized
+                       at /Users/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/backtrace-0.3.40/src/backtrace/mod.rs:66
+             2: std::sys_common::backtrace::_print_fmt
+                       at src/libstd/sys_common/backtrace.rs:84
+             3: <std::sys_common::backtrace::_print::DisplayBacktrace as core::fmt::Display>::fmt
+                       at src/libstd/sys_common/backtrace.rs:61
+             4: core::fmt::ArgumentV1::show_usize
+             5: std::io::Write::write_fmt
+                       at src/libstd/io/mod.rs:1426
+             6: std::sys_common::backtrace::_print
+                       at src/libstd/sys_common/backtrace.rs:65
+             7: std::sys_common::backtrace::print
+                       at src/libstd/sys_common/backtrace.rs:50
+             8: std::panicking::default_hook::{{closure}}
+                       at src/libstd/panicking.rs:193
+             9: std::panicking::default_hook
+                       at src/libstd/panicking.rs:210
+            10: std::panicking::rust_panic_with_hook
+                       at src/libstd/panicking.rs:471
+            11: rust_begin_unwind
+                       at src/libstd/panicking.rs:375
+            12: core::panicking::panic_fmt
+                       at src/libcore/panicking.rs:84
+            13: core::panicking::panic_bounds_check
+                       at src/libcore/panicking.rs:62
+            14: <usize as core::slice::SliceIndex<[T]>>::index
+                       at /rustc/5e1a799842ba6ed4a57e91f7ab9435947482f7d8/src/libcore/slice/mod.rs:2806
+            15: core::slice::<impl core::ops::index::Index<I> for [T]>::index
+                       at /rustc/5e1a799842ba6ed4a57e91f7ab9435947482f7d8/src/libcore/slice/mod.rs:2657
+            16: <alloc::vec::Vec<T> as core::ops::index::Index<I>>::index
+                       at /rustc/5e1a799842ba6ed4a57e91f7ab9435947482f7d8/src/liballoc/vec.rs:1871
+            17: panic::main
+                       at src/main.rs:4
+            18: std::rt::lang_start::{{closure}}
+                       at /rustc/5e1a799842ba6ed4a57e91f7ab9435947482f7d8/src/libstd/rt.rs:67
+            19: std::rt::lang_start_internal::{{closure}}
+                       at src/libstd/rt.rs:52
+            20: std::panicking::try::do_call
+                       at src/libstd/panicking.rs:292
+            21: __rust_maybe_catch_panic
+                       at src/libpanic_unwind/lib.rs:78
+            22: std::panicking::try
+                       at src/libstd/panicking.rs:270
+            23: std::panic::catch_unwind
+                       at src/libstd/panic.rs:394
+            24: std::rt::lang_start_internal
+                       at src/libstd/rt.rs:51
+            25: std::rt::lang_start
+                       at /rustc/5e1a799842ba6ed4a57e91f7ab9435947482f7d8/src/libstd/rt.rs:67
+            26: panic::main
         #+END_SRC
+        * In order to get /backtraces/ with this information, /debug symbols/
+          *must be enabled.*
+          
+        * /Debug symbols/ *are enabled by default* when
+          + using ~cargo build~ or ~cargo run~ *without* the ~--release~ flag,
+            as we have here. 
 
-    - A /backtrace/ :: a list of all the functions that have been called to get
-                       to this point.
+    - backtrace :: a list of all the /functions/ that have been called to get to
+                   this point.
 
     - /Backtraces/ in Rust work like they do in other languages:
       the key to reading the backtrace is to _start from_ the top and read _until_
       you see files you wrote.
+      1. The lines above the lines mentioning your files are code that your code
+         called;
+      2. the lines below are code that called your code.
 
-      The lines above the lines mentioning your files are code that your code
-      called;
-      the lines below are code that called your code.
-
-** DONE Recoverable Errors with ~Result~ - 155
-   CLOSED: [2017-08-23 Wed 13:00]
+** TODO Recoverable Errors with ~Result~ - 155
    - Definition
      #+BEGIN_SRC rust
        enum Result<T, E> {
@@ -3041,10 +4201,16 @@
            Err(E),
        }
      #+END_SRC
+     
+   - Note that, like the ~Option~ /enum/, the ~Result~ /enum/ and its /variants/
+     have been brought into /scope/ by the /prelude/, so we don't need to specify
+     ~Result::~ before the ~Ok~ and ~Err~ /variants/ in the /match arms/.
 
 *** DONE Matching on Different Errors - 158
-    CLOSED: [2017-08-22 Tue 15:58]
+    CLOSED: [2021-01-07 Thu 01:40]
     #+BEGIN_SRC rust
+      // Listing 9-5: Handling different kinds of errors in different ways
+
       use std::fs::File;
       use std::io::ErrorKind;
 
@@ -3053,42 +4219,45 @@
 
           let f = match f {
               Ok(file) => file,
-              Err(ref error) if error.kind() == ErrorKind::NotFound => {
-                  match File::create("hello.txt") {
+              Err(error) => match error.kind() {
+                  ErrorKind::NotFound => match File::create("hello.txt") {
                       Ok(fc) => fc,
-                      Err(e) => {
-                          panic!(
-                              "Tried to create file but there was a problem: {:?}",
-                              e
-                          )
-                      },
-                  }
-              },
-              Err(error) => {
-                  panic!(
-                      "There was a problem opening the file: {:?}",
-                      error
-                  )
+                      Err(e) => panic!("Problem creating the file: {:?}", e),
+                  },
+                  other_error => panic!("Problem opening the file: {:?}", other_error),
               },
           };
       }
     #+END_SRC
 
-    - /match guard/ :: for example, the ~if error.kind() == ErrorKind::NotFound~
-                       above.
-    - The ~ref~ in the pattern is needed so that ~error~ is NOT _moved_ into the
-      guard condition but is mearly referenced by it.
+    - That's a lot of ~match~!
+      The ~match~ expression is very useful but also very much a primitive.
+      * =from Jian=
+        The readability of nested ~match~ expressions can be bad.
+        This means we need to consider some other better ways to do chained
+        error handlings.
 
-    - =TODO=
-      The reason ~ref~ is used to take a reference in a pattern instead of ~&~ will
-      be covered in detail in Chapter 18.
-      In short, in the context of a pattern,
-      + ~&~ matches a reference and gives us its value,
-      + but ~ref~ matches a value and gives us a reference to it.
+    - A more seasoned Rustacean might write
+      #+begin_src rust
+        use std::fs::File;
+        use std::io::ErrorKind;
+
+        fn main() {
+            let f = File::open("hello.txt").unwrap_or_else(|error| {
+                if error.kind() == ErrorKind::NotFound {
+                    File::create("hello.txt").unwrap_or_else(|error| {
+                        panic!("Problem creating the file: {:?}", error);
+                    })
+                } else {
+                    panic!("Problem opening the file: {:?}", error);
+                }
+            });
+        }
+      #+end_src
 
 *** DONE Shortcuts for Panic on Error: ~unwrap~ and ~expect~ - 159
-    CLOSED: [2017-08-22 Tue 16:11]
-    Pattern matching is NOT always concise and communicate intent well.
+    CLOSED: [2021-01-07 Thu 01:44]
+    /Pattern matching/ is NOT always concise and communicate intent well.
 
     - ~unwrap~:
       ~let f = File::open("hello.txt").unwrap();~
@@ -3099,46 +4268,50 @@
       Similar as ~unwrap~, but can take a message for the ~panic!~
       ~let f = File::open("hello.txt").expect("Failed to open hello.txt");~
 
-*** DONE Propagating Errors - 160
-    CLOSED: [2017-08-22 Tue 16:26]
+    - If we call ~unwrap~ in multiple places, it will take time to find out
+      which one is /panic/. For ~expect~, since different ones have different
+      error messages, distinguish them is simple.
+
+*** TODO Propagating Errors - 160
     Propagate errors, and give the control to the caller:
 
     - Example:
       #+BEGIN_SRC rust
+        use std::fs::File;
         use std::io;
         use std::io::Read;
-        use std::fs::File;
 
         fn read_username_from_file() -> Result<String, io::Error> {
-            let f= File::open("hello.txt");
+            let f = File::open("hello.txt");
 
             let mut f = match f {
                 Ok(file) => file,
-                Err(e) => return Err(e),
+                Err(e)   => return Err(e),
             };
 
             let mut s = String::new();
 
             match f.read_to_string(&mut s) {
-                Ok(_) => Ok(s),
+                Ok(_)  => Ok(s),
                 Err(e) => Err(e),
             }
         }
       #+END_SRC
-
-      + The ~return~ above is imporatant!
+      * The ~return~ above is imporatant!
         If NO ~return~, that ~Err(e)~ will be assigned to ~f~, rather than being
         returned. With this ~return~, we achieve "propagating errors".
 
     - This pattern of propagating errors is so common in Rust that there is
       _dedicated syntax to make this easier_: ~?~.
 
-**** DONE A Shortcut for Propagating Errors: ~?~ Operator - 162
-     CLOSED: [2017-08-23 Wed 12:55]
+**** DONE A Shortcut for Propagating Errors: the ~?~ Operator - 162
+     CLOSED: [2021-01-07 Thu 02:06]
      #+BEGIN_SRC rust
+       // Listing 9-7:
+       // A function that returns errors to the calling code using the `?` operator
+       use std::fs::File;
        use std::io;
        use std::io::Read;
-       use std::fs::File;
 
        fn read_username_from_file() -> Result<String, io::Error> {
            let mut f = File::open("hello.txt")?;
@@ -3148,22 +4321,50 @@
        }
      #+END_SRC
 
-     ~?~ expressions can be chained
-     #+BEGIN_SRC rust
-       use std::io;
-       use std::io::Read;
-       use std::fs::File;
+     - ~?~ expressions can be chained
+       #+begin_src rust
+         use std::io;
+         use std::io::Read;
+         use std::fs::File;
 
-       fn read_username_from_file() -> Result<String, io::Error> {
-           let mut s = String::new();
-           File::open("hello.txt")?.read_to_string(&mut s)?;
-           Ok(s)
-       }
-     #+END_SRC
+         fn read_username_from_file() -> Result<String, io::Error> {
+             let mut s = String::new();
+             File::open("hello.txt")?.read_to_string(&mut s)?;
+             Ok(s)
+         }
+       #+end_src
 
-**** DONE The ~?~ Operator Can Only Be Used in Functions That Return ~Result~ - 163
-     CLOSED: [2017-08-23 Wed 13:00]
-     Since one of a ~?~ expression result is to immediately return the ~Err~ value.
+     - /error values/ that have the ~?~ operator called on them go through the
+       ~from~ function, defined in the ~From~ /trait/ in the standard library,
+       which is used to _CONVERT errors FROM one type INTO another._
+
+       * When the ~?~ operator calls the ~from~ function, the /error type/
+         received is converted into the /error type/ defined in the /return
+         type/ of the current function.
+
+       * This is useful when a /function/ returns *one* /error type/ to represent
+         all the ways a function might fail, even if parts might fail for many
+         different reasons.
+           As long as each error type implements the ~from~ function to define
+         how to convert itself to the returned /error type/, the ~?~ operator
+         _takes care of the *conversion* AUTOMATICALLY._
+
+     - The functions ~read_username_from_file~ of different versions in this
+       ~Result<T, E>~ section are designed for illustrating error handling.
+       If we don't care about this illustration, there is a standard library
+       fucntion can do this with a single line:
+       #+begin_src rust
+         use std::fs;
+         use std::io;
+
+         fn read_username_from_file() -> Result<String, io::Error> {
+             fs::read_to_string("hello.txt")
+         }
+       #+end_src
+
+**** The ~?~ Operator Can Be Used in Functions That Return ~Result~ - 163 - =START=
+     - We're *only allowed* to use the ~?~ operator in a function that returns
+       ~Result~ or ~Option~ or another type that implements ~std::ops::Try~.
 
 ** TODO To ~panic!~ or Not To ~panic!~ - 164
 *** DONE Examples, Prototype Code, and Tests - 165
@@ -3443,8 +4644,8 @@
 
 *** TODO Trait as Parameters - 186
 **** TODO Trait Bound Syntax  - 187
-**** TODO Specifying Multiple Trait Bound with the + Syntax  - 187
-**** TODO Clearer Trait Bounds with where Clauses - 188
+**** TODO Specifying Multiple Trait Bound with the ~+~ Syntax  - 187
+**** TODO Clearer Trait Bounds with ~where~ Clauses - 188
 **** TODO Returning Types that Implement Traits - 188
      _specifying /trait bound(s)/ on a generic type_
 
@@ -4796,7 +5997,7 @@
 
      - /closure/
 
-*** DONE Extracting Logic from main - 246
+*** DONE Extracting Logic from ~main~ - 246
     CLOSED: [2017-08-28 Mon 02:11]
     #+BEGIN_SRC rust
       fn main() {
@@ -4867,10 +6068,10 @@
 *** DONE Splitting Code into a Library Crate - 248
     CLOSED: [2017-08-28 Mon 02:14]
     - The following pieces of code will be moved to =src/lib.rs=:
-      + The ~run~ function definition
-      + The relevant ~use~ statements
-      + The difinition of ~Config~
-      + The ~Config::new~ function definition
+      * The ~run~ function definition
+      * The relevant ~use~ statements
+      * The difinition of ~Config~
+      * The ~Config::new~ function definition
 
     - The =src/lib.rs=:
       #+BEGIN_SRC rust
@@ -5174,7 +6375,7 @@
           }
         #+END_SRC
 
-*** DONE Capturing  the Environment with Closures - 274
+*** DONE Capturing the Environment with Closures - 274
     CLOSED: [2017-08-29 Tue 21:58]
     - When a /closure/ captures a value from its environment, the /closure/ uses
       memory to store the values for use in the closure body. This use of memory
@@ -5296,7 +6497,7 @@
       The ~sum~ method takes the ownership of ~v1_iter~, and ~v1_iter~ CANNOT be
       used after the ~let total~ line.
 
-*** DONE Methods That Produce Other ~Iterator~ - 279
+*** DONE Methods That Produce Other ~Iterator~'s - 279
     CLOSED: [2017-08-29 Tue 22:50]
     - /iterator adaptor/ :: a method defined on the ~Iterator~ trait that
          produces other iterators.
@@ -5539,8 +6740,8 @@
 
 ** TODO Cargo Workspaces - 303
 *** Creating a Workspace - 303
-*** Creating the Second Crate in the Workspace - 304
-**** Depending on an External Crate in a Workspace - 305
+*** Creating the Second Package in the Workspace - 304
+**** Depending on an External Package in a Workspace - 305
 **** Adding a Test to a Workspace - 306
 
 ** TODO Installing Binaries from Crates.io with ~cargo install~ - 308
@@ -5955,7 +7156,7 @@
    - interior mutability ::
 
 *** Enforcing Borrowing Rules at Runtime with ~RefCell<T>~ - 330
-*** DONE Interior Mutability: A Mutable Borrow to an Immutable Value - 331
+*** Interior Mutability: A Mutable Borrow to an Immutable Value - 331
 **** A Use Case for Interior Mutability: Mock Objects - 332
 **** Keeping Track of Borrows at Runtime with ~RefCell<T>~ - 336
     - Similarly to ~Rc<T>~, ~RefCell<T>~ is only for use in _single-threaded_
@@ -6039,9 +7240,9 @@
 *** TODO Similarities Between ~RefCell<T>~ / ~Rc<T>~ and ~Mutex<T>~ / ~Arc<T>~ - 368
 
 ** TODO Extensible Concurrency with the ~Sync~ and ~Send~ Traits - 368
-*** TODO Allowwing Transference of Ownership Between Threads with Send - 369
-*** TODO Allowwing Access from Multiple Thread with Sync - 369
-*** TODO Implementing ~Send~ and ~Sync~ Manually is Unsafe - 369
+*** TODO Allowwing Transference of Ownership Between Threads with ~Send~ - 369
+*** TODO Allowwing Access from Multiple Thread with ~Sync~ - 369
+*** TODO Implementing ~Send~ and ~Sync~ Manually is ~Unsafe~ - 369
 
 ** TODO Summary - 370
 
@@ -6061,7 +7262,7 @@
     + some characteristics that are commonly considered to be object-oriented.
     + how those characteristics translate to idiomatic Rust.
 
-** DONE Characteristics of Object-Oriented Languages? - 371
+** DONE Characteristics of Object-Oriented Languages - 371
    CLOSED: [2017-08-30 Wed 21:26]
    There isn't consensus in the programming community about the features a
    language needs to have in order to be called object-oriented.
@@ -6081,7 +7282,7 @@
     - In Rust, /structs/ provide the same functionality as of /objects/, though
       we don't call them /objects/.
 
-*** DONE Encapsulation That Hides Implementation Details - 372
+*** DONE Encapsulation that Hides Implementation Details - 372
     CLOSED: [2017-08-30 Wed 21:09]
     - /encapsulation/ :: the implementation details of an object aren't
          accessible to code using that object.
@@ -6365,11 +7566,11 @@
           first argument.
 
 ** TODO Implementating on Object-Oriented Design Pattern - 382
-*** TODO Defining Post and Creating a New Instance in the Draft State - 383
+*** TODO Defining ~Post~ and Creating a New Instance in the Draft State - 383
 *** TODO Storing the Text of the Post Content - 384
 *** TODO Ensuring the Content of a Draft Post Is Empty - 384
-*** TODO Requesting a Review of the Post Changes its State - 385
-*** TODO Adding the approve Method that Changes the Behavior of ~content~ - 386
+*** TODO Requesting a Review of the Post Changes Its State - 385
+*** TODO Adding the ~approve~ Method that Changes the Behavior of ~content~ - 386
 *** TODO Trade-offs of the State Pattern - 389
 **** TODO Encoding States and Behavior as Types
 **** TODO Implementing Transitions as Transformations into Different Types
@@ -6559,9 +7760,9 @@
       }
     #+END_SRC
 
-*** DONE Matching Ranges of Values with the ~...~ Syntax - 404
+*** DONE Matching Ranges of Values with ~..=~ - 404
     CLOSED: [2017-08-30 Wed 01:23]
-    - ~...~ is used to match an _inclusive_ range.
+    - ~..=~ is used to match an _inclusive_ range.
 
     - Ranges are only allowed with
       + numeric values (=TODO= =From Jian= CANNOT be Flotaing, Right???)
@@ -6571,88 +7772,95 @@
       #+BEGIN_SRC rust
         // Suppose `x` is number
         match x {
-            1 ... 5 => println!("one through five"),
+            1..=5 => println!("one through five"),
             _ => println!("something else"),
         }
       #+END_SRC
 
       #+BEGIN_SRC rust
         match x {
-            'a' ... 'j' => println!("early ASCII letter"),
-            'k' ... 'z' => println!("late ASCII letter"),
+            'a'..='j' => println!("early ASCII letter"),
+            'k'..='z' => println!("late ASCII letter"),
             _ => println!("something else"),
         }
       #+END_SRC
 
 *** DONE Destructuring to Break Apart Values - 405
     CLOSED: [2017-08-30 Wed 01:30]
-    - Patterns can be used to _destructure_
-      + structs
-      + enums
-      + tuples
-      + references
+**** Destructuring Structs
+**** Destructuring Enums
+**** Destructuring Nested Structs and Enums
+**** Destructuring Structs and Tuples
 
-    - Example:
-      #+BEGIN_SRC rust
-        struct Point {
-            x: i32,
-            y: i32,
-        }
+     - =OLD NOTE !!!=
 
-        fn main() {
-            let p = Point { x: 0, y: 7 };
+     - Patterns can be used to _destructure_
+       + structs
+       + enums
+       + tuples
+       + references
 
-            let Point { x, y } = p;
-            assert_eq!(0, x);
-            assert_eq!(7, y);
+     - Example:
+       #+BEGIN_SRC rust
+         struct Point {
+             x: i32,
+             y: i32,
+         }
 
-            // The below code is also available:
-            //
-            // let Point { x: a, y: b } = p;
-            // assert_eq!(0, a);
-            // assert_eq!(7, b);
-        }
-      #+END_SRC
+         fn main() {
+             let p = Point { x: 0, y: 7 };
 
-    - Example:
-      #+BEGIN_SRC rust
-        fn main() {
-            let p = Point { x: 0, y: 7 };
+             let Point { x, y } = p;
+             assert_eq!(0, x);
+             assert_eq!(7, y);
 
-            match p {
-                Point { x, y: 0 } => println!("On the x axis at {}", x),
-                Point { x: 0, y } => println!("On the y axis at {}", y),
-                Point { x, y } => println!("On neither axis: ({}, {})", x, y),
-            }
-        }
-      #+END_SRC
+             // The below code is also available:
+             //
+             // let Point { x: a, y: b } = p;
+             // assert_eq!(0, a);
+             // assert_eq!(7, b);
+         }
+       #+END_SRC
 
-    - Example:
-      #+BEGIN_SRC rust
-        let points = vec![
-            Point { x: 0, y: 0 },
-            Point { x: 1, y: 5 },
-            Point { x: 10, y: -3 },
-        ];
+     - Example:
+       #+BEGIN_SRC rust
+         fn main() {
+             let p = Point { x: 0, y: 7 };
 
-        let sum_of_squares: i32 = points
-            .iter()
-            .map(|&Point {x, y}| x * x + y * y)
-            .sum();
+             match p {
+                 Point { x, y: 0 } => println!("On the x axis at {}", x),
+                 Point { x: 0, y } => println!("On the y axis at {}", y),
+                 Point { x, y } => println!("On neither axis: ({}, {})", x, y),
+             }
+         }
+       #+END_SRC
+
+     - Example:
+       #+BEGIN_SRC rust
+         let points = vec![
+             Point { x: 0, y: 0 },
+             Point { x: 1, y: 5 },
+             Point { x: 10, y: -3 },
+         ];
+
+         let sum_of_squares: i32 = points
+             .iter()
+             .map(|&Point {x, y}| x * x + y * y)
+             .sum();
 
 
-        // If we forget the `&`
-        //
-        // The error message is:
-        // error[E0308]: mismatched types
-        //   -->
-        //    |
-        // 14 |         .map(|Point {x, y}| x * x + y * y)
-        //    |               ^^^^^^^^^^^^ expected &Point, found struct `Point`
-        //    |
-        //    = note: expected type `&Point`
-        //               found type `Point`
-      #+END_SRC
+         // If we forget the `&`
+         //
+         // The error message is:
+         // error[E0308]: mismatched types
+         //   -->
+         //    |
+         // 14 |         .map(|Point {x, y}| x * x + y * y)
+         //    |               ^^^^^^^^^^^^ expected &Point, found struct `Point`
+         //    |
+         //    = note: expected type `&Point`
+         //               found type `Point`
+       #+END_SRC
 
 *** DONE Ignoring Values in a Pattern - 409
     CLOSED: [2017-08-30 Wed 01:48]
@@ -6693,7 +7901,7 @@
        }
      #+END_SRC
 
-**** DONE Ignoring an Unused Variable by Starting its Name with an Underscore
+**** DONE Ignoring an Unused Variable by Starting Its Name with ~_~
      CLOSED: [2017-08-30 Wed 01:48]
      - The difference between ~_x~ and ~_~:
        + ~_x~ still binds the value, though there is no warning when ~_x~ is
@@ -6853,12 +8061,13 @@
 *** TODO Unsafe Superpowers - 418
 *** TODO Dereferencing a Raw Pointer - 419
 *** TODO Calling an Unsafe Function or Method - 421
-**** TODO creating a Safe Abstraction Over Unsafe Code
-**** TODO ~extern~ Functions for Calling External Code are Unsafe
-**** TODO Calling Rust Functions from Other Languages
+**** TODO Creating a Safe Abstraction over Unsafe Code
+**** TODO Using ~extern~ Functions to Call External Code
+     - *Calling Rust Functions from Other Languages*
 
 *** TODO Accessing or Modifying a Mutable Static Variable - 425
 *** TODO Implementing an Unsafe Trait - 426
+*** TODO Accessing Fields of a Union
 *** TODO When to Use Unsafe Code - 427
 
 ** TODO Advanced Traits - 427
@@ -6884,9 +8093,9 @@
 
 ** TODO Macros - 446
 *** The Difference Between Macros and Functions - 446
-*** Declarative Macros with macro_rules! for General Metaprogramming - 446
+*** Declarative Macros with ~macro_rules!~ for General Metaprogramming - 446
 *** Procedural Macros for Generating Code from Attributes - 449
-*** How to Write a Custom derive Macro - 449
+*** How to Write a Custom ~derive~ Macro - 449
 *** Attribute-like macros - 454
 *** Function-like macros - 455
 
@@ -6907,40 +8116,58 @@
 *** TODO Improving Throughput with a Thread Pool - 469
 **** Code Structure If We Could Spawn a Thread for Each Request - 470
 **** Creating a Similar Interface for a Finite Number of Threads - 470
-**** Building the ThreadPool Struct Using Compiler-Driven Development - 471
-**** Validating the Number of Threads in new - 474
+**** Building the ~ThreadPool~ Struct Using Compiler Driven Development - 471
+**** Validating the Number of Threads in ~new~ - 474
 **** Creating Space to Store the Threads - 475
-**** A Worker Struct Responsible for Sending Code from the ThreadPool to a Thread - 476
+**** A ~Worker~ Struct Responsible for Sending Code from the ~ThreadPool~ to a Thread - 476
 **** Sending Requests to Threads via Channels - 478
-**** Implementing the execute Method - 481
+**** Implementing the ~execute~ Method - 481
 
 ** TODO Graceful Shutdown and Cleanup - 487
-*** TODO Implementing the ~Drop~ Trait on ThreadPool - 487
+*** TODO Implementing the ~Drop~ Trait on ~ThreadPool~ - 487
 *** TODO Signaling to the Threads to Stop Listening for Jobs - 489
 
 ** TODO Summary - 493
 
-* TODO Appendix A: Keywords - 495
-** TODO Keywords Currently in Use - 495
-** TODO Keywords Reserved for Future Use - 497
-** TODO Raw Identifiers - 497
+* TODO 21. Appendix
+** TODO 21.1. A - Keywords
+*** TODO Keywords Currently in Use
+    take =NOTE=
 
-* TODO Appendix B: Operators and Symbols - 499
-** TODO Operators - 499
-** TODO Non-operator Symbols - 501
+*** TODO Keywords Reserved for Future Use
+    take =Note=
+    
+*** DONE Raw Identifiers
+    CLOSED: [2021-01-06 Wed 14:32]
+    /Keywords/ can be used as /identifiers/ if they are prefixed with ~r#~.
+    
+    - Use case:
+      Rust 2015 doesn't include a /keyword/ ~try~.
+      If your code in Rust 2018 want to use a library written in Rust 2015, which
+      contains a function ~try~, you need to invoke it with ~r#try~.
+ 
+    - =TODO=
+      More in Appendix E.
 
-* TODO Appendix C: Derivable Traits - 507
-** ~Debug~ for Programmer Output - 508
-** ~PartialEq~ and ~Eq~ for Equality Comparisons - 508
-** ~PartialOrd~ and ~Ord~ for Ordering Comparisons - 509
-** ~Clone~ and ~Copy~ for Duplicating Values - 509
-** ~Hash~ for Mapping a Value to a Value of Fixed Size - 510
-** ~Default~ for Default Values - 510
+** TODO 21.2. B - Operators and Symbols
+*** TODO Operators
+*** TODO Non-operator Symbols
 
-* TODO Appendix D: Useful Development Tools - 511
-** Automatic Formatting with rustfmt - 511
-** Fix Your Code with rustfix - 512
-** More Lints with Clippy - 513
-** IDE Integration Using the Rust Language Server - 514
-
-* TODO Appendix E: Editions - 515
+** TODO 21.3. C - Derivable Traits
+*** ~Debug~ for Programmer Output - 508
+*** ~PartialEq~ and ~Eq~ for Equality Comparisons - 508
+*** ~PartialOrd~ and ~Ord~ for Ordering Comparisons - 509
+*** ~Clone~ and ~Copy~ for Duplicating Values - 509
+*** ~Hash~ for Mapping a Value to a Value of Fixed Size - 510
+*** ~Default~ for Default Values - 510
+*
+** TODO 21.4. D - Useful Development Tools
+*** Automatic Formatting with =rustfmt= - 511
+*** Fix Your Code with =rustfix= - 512
+*** More Lints with Clippy - 513
+*** IDE Integration Using the Rust Language Server - 514
+*
+** TODO 21.5. E - Editions
+** DONE 21.6. F - Translations of the Book
+   CLOSED: [2021-01-06 Wed 14:36]
+** TODO 21.7. G - How Rust is Made and "Nightly Rust"
