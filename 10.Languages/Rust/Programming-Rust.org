@@ -352,149 +352,142 @@
 *** TODO Running the Mandelbrot Plotter - 40
 *** TODO Safety Is Invisible - 41
 
-* TODO 3. Basic types - 43
+* TODO 3. Basic types - 43 - =READING=
   - Rust's types serve several goals:
-    + Safety
+    * Safety
 
-    + Efficiency:
+    * Efficiency:
         Programmers have fine-grained control over how Rust programs represent
-      values in memory, and can choose types they know the processor will
+      values in memory, and can choose /types/ they know the processor will
       handle efficiently.
       *Programs needn't pay for generality or flexibility they don't use.*
 
-    + Concision:
-      Rust manages all of this without requiring too much guidance from the
-      programmer in the form of types written out in the code -- usually much
-      less cluttered with types than the analogous C++ program would be.
-
-  - Types can help Rust compiler to choose _GOOD machine-level_ /representations/
-    for values your program operate on: /representations/ whose _performance_ you
-    *can predict*, and which give you full access to the machine's capabilities.
-
-  - As a /statically typed language/, Rust
-    + *forces* the users to take more planning from the up front.
-      The planning is materialized as _consistent_ data types in your program.
-
-    + compiler checks the _consistency_ between data types, and catch many
-      mistakes earlier, before running.
+    * Concision:
+      With type inference, programmers don't need to manually written out most
+      types, which make Rust code usually much less cluterred with types than
+      the analogous C++ program would be.
+      
+  - /Types/ can help Rust compiler to choose _GOOD machine-level_ /representations/
+    for values your program operate on:
+    /representations/ whose _performance_ you *can predict*, and which give you
+    full access to the machine's capabilities.
 
   - Rust has two features to facilitate your program:
-    + /type inference/
-    + /generics/
+    * /type inference/
+    * /generics/
 
   - Here's a summary of the sorts of /types/ you'll see in Rust.
     This table shows Rust's /primitive types/, some /VERY common types/ from the
     standard library, and some examples of /user-defined types/:
-    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    TODO TODO TODO TODO TODO TODO =Re-READ= TODO TODO TODO TODO TODO TODO TODO TODO
-    + Signed and unsigned integers, of given bit width
-      * Types: ~i8~, ~i16~, ~i32~, ~i64~, ~u8~, ~u16~, ~u32~, ~u64~
-      * Values: ~42~, ~-5i8~, ~0x400u16~, ~0o100i16~, ~20_922_789_888_000u64~,
+    * Signed and unsigned integers,
+      of explicitly given bit width
+      + Types: ~i8~, ~i16~, ~i32~, ~i64~, ~u8~, ~u16~, ~u32~, ~u64~
+      + Values: ~42~, ~-5i8~, ~0x400u16~, ~0o100i16~, ~20_922_789_888_000u64~,
                 ~b'*'~ (~u8~ byte literal)
 
-    + Signed and unsigned integers, the same size as an address on the machine
-      (32 or 64 bits)
-      * Types: ~isize~, ~usize~
-      * Values: ~137~, ~-0b0101_0010isize~, ~0xffff_fc00usize~
+    * Signed and unsigned integers,
+      the same size as an address on the machine (32 or 64 bits)
+      + Types: ~isize~, ~usize~
+      + Values: ~137~, ~-0b0101_0010isize~, ~0xffff_fc00usize~
 
-    + IEEE floating-point numbers
-      * Types: ~f32~ (single precision), ~f64~ (double precision)
-      * Values: ~1.61803~, ~3.14f32~, ~6.0221e23f64~
+    * IEEE floating-point numbers
+      + Types: ~f32~ (single precision), ~f64~ (double precision)
+      + Values: ~1.61803~, ~3.14f32~, ~6.0221e23f64~
 
-    + Boolean
-      * Types: ~bool~
-      * Values: ~true~, ~false~
+    * Boolean
+      + Types: ~bool~
+      + Values: ~true~, ~false~
 
-    + Unicode character, 32 bits wide
-      * Types: ~char~
-      * Values: ~'*'~, ~'\n'~, ~'字'~, ~'\x7f'~, ~'\u{CA0}'~
+    * Unicode character, 32 bits wide
+      + Types: ~char~
+      + Values: ~'*'~, ~'\n'~, ~'字'~, ~'\x7f'~, ~'\u{CA0}'~
 
-    + Tuple: mixed types allowed
-      * Example type: ~(char, u8, i32)~
-      * Example type value: ~('%', 0x7f, -1)~
+    * Tuple
+      + Example type: ~(char, u8, i32)~
+      + Example type value: ~('%', 0x7f, -1)~
 
-    + "unit" (empty) tuple
-      * Type: ~()~
-      * Singleton value: ~()~
+    * "unit" (empty) tuple
+      + Type: ~()~
+      + Singleton value: ~()~
 
-    + Named-field struct
-      * Example type: ~struct S { x: f32, y: f32 }~
-      * Example type value: ~S { x: 120.0, y: 209.0 }~
+    * Named-field struct
+      + Example type: ~struct S { x: f32, y: f32 }~
+      + Example type value: ~S { x: 120.0, y: 209.0 }~
 
-    + Tuple-like struct
-      * Example type: ~struct T(i32, char);~
-      * Example type value: ~T(120, 'X')~
+    * Tuple-like struct
+      + Example type: ~struct T(i32, char);~
+      + Example type value: ~T(120, 'X')~
 
-    + Unit-like struct; has no fields
-      * Example type: ~struct E;~
-      * Example type value: ~E~
+    * Unit-like struct; has no fields
+      + Example type: ~struct E;~
+      + Example type value: ~E~
 
-    + Enumeration, algebraic data type
-      * Example type: ~enum Attend { OnTime, Late(u32) }~
-      * Example type value: ~Attend::Late(5)~, ~Attend::OnTime~
+    * Enumeration, algebraic data type
+      + Example type: ~enum Attend { OnTime, Late(u32) }~
+      + Example type value: ~Attend::Late(5)~, ~Attend::OnTime~
 
-    + ~Box~: owning pointer to value in heap
-      * Example type: ~Box<Attend>~
-      * Example type value: ~Box::new(Late(15))~
+    * ~Box~: owning pointer to value in heap
+      + Example type: ~Box<Attend>~
+      + Example type value: ~Box::new(Late(15))~
 
-    + /Shared and mutable references/
+    * /Shared and mutable references/
       nonowning pointers that must not outlive their referent
-      * Example type: ~&i32~, ~&mut i32~
-      * Example type value: ~&s.y~, ~&mut v~
+      + Example type: ~&i32~, ~&mut i32~
+      + Example type value: ~&s.y~, ~&mut v~
 
-    + /UTF-8 string/, _DYNAMICALLY SIZED_
-      * Type: ~String~
-      * Values: ~"ラーメン: ramen".to_string()~
+    * /UTF-8 string/, _DYNAMICALLY SIZED_
+      + Type: ~String~
+      + Values: ~"ラーメン: ramen".to_string()~
 
-    + Reference to ~str~: *nonowning* /pointer/ to UTF-8 text
-      * Type: ~&str~
-      * Values: ~"そば: soba"~, ~&s[0..12]~
+    * Reference to ~str~: *nonowning* /pointer/ to UTF-8 text
+      + Type: ~&str~
+      + Values: ~"そば: soba"~, ~&s[0..12]~
 
-    + Array, fixed length; elements all of same type
-      * Example types: ~[f64; 4]~, ~[u8; 256]~
-      * Example type values: ~[1.0, 0.0, 0.0, 1.0]~, ~[b' '; 256]~
+    * Array
+      + Example types: ~[f64; 4]~, ~[u8; 256]~
+      + Example type values: ~[1.0, 0.0, 0.0, 1.0]~, ~[b' '; 256]~
 
-    + Vector, varying length; elements all of same type
-      * Example type: ~Vec<f64>~
-      * Example type values: ~vec![0.367, 2.718, 7.389]~
+    * Vector, varying length; elements all of same type
+      + Example type: ~Vec<f64>~
+      + Example type values: ~vec![0.367, 2.718, 7.389]~
 
-    + Reference to slice: reference to a portion of an array or vector, comprising
+    * Reference to slice: reference to a portion of an array or vector, comprising
       pointer and length
-      * Types: ~&[u8]~, ~&mut [u8]~
-      * Values: ~&v[10..20]~, ~&mut a[..]~
+      + Types: ~&[u8]~, ~&mut [u8]~
+      + Values: ~&v[10..20]~, ~&mut a[..]~
 
-    + Trait object: reference to any value that implements a given set of methods
-      * ~&Any~, ~&mut Read~
-      * value as ~&Any~,  ~&mut file~ as ~&mut Read~
+    * Trait object: reference to any value that implements a given set of methods
+      + ~&Any~, ~&mut Read~
+      + value as ~&Any~,  ~&mut file~ as ~&mut Read~
 
-    + Pointer to function
-      * ~fn(&str, usize) -> isize~
-      * ~i32::saturating_add~
+    * Pointer to function
+      + ~fn(&str, usize) -> isize~
+      + ~i32::saturating_add~
 
-    + Closure
-      * (Closure types have no written form)
-      * ~\vert{}a, b\vert{} a*a + b*b~
+    * Closure
+      + (Closure types have no written form)
+      + ~\vert{}a, b\vert{} a*a + b*b~
 
   - Most of these /types/ are convered in this chapter, except for the following:
-    + We give /struct types/ their own chapter, _Chapter 9_.
+    * /struct types/, _Chapter 9_.
 
-    + We give /enumerated types/ their own chapter, _Chapter 10_.
+    * /enumerated types/, _Chapter 10_.
 
-    + We describe /trait objects/ in _Chapter 11_.
+    * /trait objects/, _Chapter 11_.
 
-    + We describe the essentials of ~String~ and ~&str~ here, but provide more
-      detail in _Chapter 17_.
+    * We describe the essentials of ~String~ and ~&str~ here,
+      but provide more detail in _Chapter 17_.
 
-    + We cover /function and closure types/ in _Chapter 14_.
+    * /function and closure types/, _Chapter 14_.
 
 ** DONE Machine Types - 46
-   CLOSED: [2018-05-20 Sun 21:28]
+   CLOSED: [2021-01-11 Mon 21:56]
    - The footing of Rust's type system is
-     + a collection of fixed-width numeric types,
+     * a collection of /fixed-width numeric types/,
        chosen to match the types that almost all modern processors implement
        directly in hardware, and
 
-     + the Boolean and character types.
+     * the ~Boolean~ and /character types/.
 
    - Sizes and representations:
      |  Size (bits) | Unsigned integer | Signed integer | Floating-point |
@@ -505,15 +498,18 @@
      |           64 | ~u64~            | ~i64~          | ~f64~          |
      | Machine word | ~usize~          | ~isize~        |                |
 
+     * =from Jian=
+       ~u128~ and ~i128~ are added in the current Rust version (Rust 2018???).
+
    - Machine Word :: a value _the size of an address_ on the machine the code
-                     runs one, _usually_ 32 bits or 64 bits, which depends on
-                     the target machine.
+                     runs on, _usually_ 32 bits or 64 bits, which depends on
+                     the concrete target machine.
 
 *** DONE Integer Types - 47
-    CLOSED: [2018-05-19 Sat 02:47]
+    CLOSED: [2021-01-11 Mon 11:23]
     - *UNLIKE* C and C++,
       Rust treats /characters/ as _distinct_ from the /numeric types/.
-      Read "Characters" on Page 52.
+      =TODO= Read "Characters" on Page 52.
 
     - ~usize~ are analogous to ~size_t~ in C/C++.
 
@@ -522,66 +518,93 @@
     - Rust requires /array indices/ to be ~usize~.
 
     - Values representing
-      + the sizes of arrays or vectors
+      * the _sizes_ of /arrays/ or /vectors/
 
-      + the counts of the number of elements in some data structure
+      * the _counts of the number of elements_ in some data structure
 
       also generally have the ~usize~ type.
 
-    - In /debug build/, Rust compiler checks for integer overflow in arithmetic:
+    - In /debug build/, Rust compiler checks for /integer overflow/ in arithmetic:
       #+BEGIN_SRC rust
         let big_val = std::i32::MAX;
         let x = big_val + 1;  // panic: arithmetic operation overflowed
       #+END_SRC
 
-    - In /release build/, this addition would wrap to a negative number
-      (*UNLIKE* C++, where signed integer overflow is _undefined_ behavior).
+    - In /release build/, this addition would wrap to a NEGATIVE number
+      (*UNLIKE* C++, where /signed integer overflow/ is /undefined behavior/).
 
       However, it is still a bad to do this operation if you don't want to give
       up forever.
 
-      + Solution: Explicitly tell the compiler that you really know what you do!
+      * Solution:
+        Explicitly tell the compiler that you really know what you do!
         ~let x = big_val.wrapping_add(1);  // ok~
 
     - /Integer literals/ in Rust can take suffix indicating their type.
       For instance, ~42u8~ and ~1729isize~
 
-      If you don't the /inference/ can satisfy what you want, you can use this
-      way to indicate type manually.
-
     - /Inference/ usually identifies a unique type,
-      BUT sometimes any one of several types would work. In this case, Rust
-      defaults to ~i32~, if that is among the possibilities. Otherwise, report
-      the ambiguity as an error!
+      BUT sometimes any one of several types would work.
+      In this case, Rust defaults to ~i32~, if that is among the possibilities.
+      Otherwise, report the ambiguity as an error!
 
     - The radix prefixes of /Integer literals/: ~0x~, ~0o~, and ~0b~.
+      * =from Jian=
+        Rust is the only language I know that uses ~0o~.
+        I LIKE IT!!!
 
     - You can insert _underscore_ to make long numbers more legible.
       For instance, ~4_294_967_295~.
         The positions of the _underscore_ is *FLEXIBLE* -- it's designed for
       human, NOT for the compiler! For instance, ~0xfff_ffff~, or ~127_u8~.
 
-    - /Byte literals/    ~b'a'~
-      =TODO=
+    - /Byte literals/
+      Only ASCII characters may appear in /byte literals/.
+      For example, ~b'a'~
+      * Also, pay attention to the /escape sequences/ -- there are a few
+        characters that you cannot simply place after the single quote,
+        because that would be either syntactically ambiguous or hard to read.
+        | Character       | Byte literal | Numeric equivalent |
+        |-----------------+--------------+--------------------|
+        | Single quote, ' | ~b'\''~      | 39u8               |
+        | Backslash, \    | ~b'\\'~      | 92u8               |
+        | Newline         | ~b'\n'~      | 10u8               |
+        | Carriage return | ~b'\r'~      | 13u8               |
+        | Tab             | ~b'\t'~      | 9u8                |
+
+      * For characters that are hard to write or read, you can write their code
+        in hexadecimal instead, in the form of ~b'\xHH'~, where HH is ANY
+        two-digit hexadecimal number, represents the byte whose value is HH.
+
+      * Since /byte literals/ are just another notation for ~u8~ values, consider
+        whether a SIMPLE /numeric literal/ might be more legible:
+        it probably makes sense to use ~b'\x1b'~ instead of simply ~27~
+        _ONLY when you want to EMPHASIZE that the value represents an ASCII code._
 
     - Convert from one integer type to another integer type with the ~as~
       operator. For instance, ~10_i8 as u16~
 
-      + =TODO= MORE Details =TODO= =NOTE=
+      * Note:
+        the documentation contains *SEPARATE pages* for the /type/ ITSELF
+        + for _“i32 (primitive type)”_,
+        + and for the /module/ dedicated to that /type/, _“std::i32”_.
 
-    - /Integers/, like any other sort of value, _can have /methods/._
-      Check the standard library documents. For instance, ~std::i32~
+    - *CAUTION* =IMPORTANT= =IMPORTANT= =IMPORTANT= =IMPORTANT= =IMPORTANT= =IMPORTANT=
+      that /method calls/ have a /higher precedence/ than /unary prefix operators/.
+      * =from Jian=
+        This is often generate unexpected result:
+        ~-4i32.abs()~ will be ~-4~, rather than ~4~.
 
 *** DONE Floating-Point Types - 50
-    CLOSED: [2018-05-20 Sun 21:28]
+    CLOSED: [2021-01-11 Mon 14:40]
     - Rust provides
-      + IEEE single-precision floating type ~f32~:
-        * at least *6* decimal digits
-        * Roughly -3.4 \times{} 10^{38} to +3.4 \times{} 10^{38}
+      * IEEE single-precision floating type ~f32~:
+        + at least *6* decimal digits
+        + Roughly -3.4 \times{} 10^{38} to +3.4 \times{} 10^{38}
 
-      + IEEE double-precision floating type ~f64~:
-        * at least *15* decimal digits
-        * Roughly -1.8 \times{} 10^{308} to +1.8 \times{} 10^{308}
+      * IEEE double-precision floating type ~f64~:
+        + at least *15* decimal digits
+        + Roughly -1.8 \times{} 10^{308} to +1.8 \times{} 10^{308}
 
     - Following the IEEE 754-2008 specification,
       these types include
@@ -590,48 +613,61 @@
       + a *not-a-number value*
 
     - Rust's ~f32~ and ~f64~ correspond to
-      + the ~float~ and ~double~ types in C and C++ implementations that _support_
+      * the ~float~ and ~double~ types in C and C++ implementations that _support_
         IEEE floating point;
 
-      + Java, which _always_ uses IEEE floating point.
+      * Java, which _always_ uses IEEE floating point.
 
     - Example for the /floating-point literals/:
-      ~3.1415.926e-4f64~
+      ~31415.926e-4f64~
+      * integer part: 31415
+      * fractional part: .926
+      * exponent: e-4
+      * type suffix: f64
 
-      + Every part of a floating-point number after the _integer part_ is OPTIONAL,
-        but *at least one of* the _fractional part_, _exponent_, or _type suffix_
-        *must* be present, to _distinguish_ it from an /integer literal/.
+    - Every part of a /floating-point number/ after the _integer part_ is OPTIONAL,
+      but *at least one of* the _fractional part_, _exponent_, or _type suffix_
+      *must* be present, to _distinguish_ it from an /integer literal/.
 
-      + ~5.~ is a valid floating-point constant.
+      * ~5.~ is a valid floating-point constant.
 
-      + The default type is ~f64~, if both would be possible,
+      * The default type is ~f64~, if both would be possible,
         which is similar as C/C++/Java.
+
+    - Rust treats /integer literals/ and /floating-point literals/ as *DISTINCT*
+      classes:
+      it will never infer a floating-point type for an /integer literal/, or vice
+      versa.
 
     - You can add _underscore_ to the _fractional part_.
 
-    - The ~std::f32~ and ~std::f64~ modules define constants for the IEEE-required
-      special values like ~INFINITY~, ~NEG_INFINITY~, ~NAN~, and ~MIN~ and ~MAX~
-      (the largest and smallest finite values).
+    - The ~std::f32~ and ~std::f64~ /modules/ define _constants_ for the
+      IEEE-required special values like ~INFINITY~, ~NEG_INFINITY~, ~NAN~, and
+      ~MIN~ and ~MAX~ (the largest and smallest finite values).
 
-    - The ~std::f32::consts~ and ~std::f64::consts~ modules provide various commonly
-      used mathematical constants like ~E~, ~PI~, and _the square root of two_.
+    - The ~std::f32::consts~ and ~std::f64::consts~ modules provide various
+      commonly used mathematical constants like ~E~, ~PI~, and _the square root
+      of two_.
 
     - The ~f32~ and ~f64~ types provide a FULL COMPLEMENT of /methods/ for mathematical
       calculations; for example, ~3f64.sqrt()~.
 
     - The ~type suffix~ is often not required, but when the context is _not clear_,
       you need to write them down:
-      ~println!("{}", (2.0).sqrt());~ is non-compilable!
+      #+begin_src rust
+        // NOT Compilable!
+        println!("{}", (2.0).sqrt());
+      #+end_src
 
       The correct version can be one of
-      + ~println!("{}", (2.0_f64).sqrt());~ or with ~f32~
-      + ~println!("{}", f64::sqrt(2.0));~ or with ~f32~
+      * ~println!("{}", (2.0_f64).sqrt());~ or with ~f32~
+      * ~println!("{}", f64::sqrt(2.0));~ or with ~f32~
 
     - You shouldn't expect any implicity conversion for these non collectiontypes
-      in Rust.
+      in Rust. If the conversion is required, use /type cast/ -- the ~as~ syntax.
 
 *** DONE The ~bool~ Type - 51
-    CLOSED: [2018-05-19 Sat 02:51]
+    CLOSED: [2021-01-11 Mon 14:42]
     - ~as~ can be used to convert ~bool~ values to ~integer~ types:
       #+BEGIN_SRC rust
         assert_eq!(false as i32, 0);
@@ -640,57 +676,54 @@
       However, you CANNOT convert in the other direction.
 
     - The info of a ~bool~ value can be saved in a single bit,
-      HOWEVER, Rust use an entire byte for a ~bool~ value in memory, so you can
-      create a /pointer/ to it.
+      HOWEVER, Rust use an _ENTIRE byte_ for a ~bool~ value in memory, so you
+      can create a /pointer/ to it.
 
 *** DONE Characters - 52
-    CLOSED: [2018-05-19 Sat 12:00]
+    CLOSED: [2021-01-11 Mon 21:56]
     - Character (Rust's) :: ~char~ represents a single Unicode character, as a
-         32-bit value.
+                            32-bit value.
 
-    - Rust uses the char type for single characters in isolation,
-
-      BUT
-      Rust uses the /UTF-8 encoding/ for /strings/ and /streams/ of text.
-
+    - Rust uses the ~char~ type for single characters in isolation,
+      BUT Rust uses the /UTF-8 encoding/ for /strings/ and /streams/ of text.
       So,
-      a String represents its text as a sequence of UTF-8 bytes, *NOT* as an array
-      of ~char~.
+      a ~String~ represents its text as a sequence of /UTF-8 bytes/,
+      *NOT* as an array of ~char~.
 
     - If you prefer, you can write out a character's /Unicode code point/ in
       hexadecimal:
-      + If a /code point/ is in the range U+0000 to U+007F, which is drawn from
+      * If a /code point/ is in the range U+0000 to U+007F, which is drawn from
         the ASCII character set, can write the character as ~'\xHH'~, where =HH=
         is a two digit hexadecimal number.
 
-      + You can write any Unicode character as ~'\u{HHHHHH}'~, where =HHHHHH= is
+      * You can write any Unicode character as ~'\u{HHHHHH}'~, where =HHHHHH= is
         a hexadecimal number between one and six digits long.
 
     - A ~char~ *ALWAYS* holds a /Unicode code point/ in the range
-      + from 0x0000 to 0xD7FF
+      * from 0x0000 to 0xD7FF
         OR
-      + from 0xE000 to 0x10FFFF
+      * from 0xE000 to 0x10FFFF
 
       A ~char~ is *NEVER* a surrogate pair half (from 0xD800 to 0xDFFF), or a
       value outside the Unicode codespace, that is, greater than 0x10FFFF.
 
     - Conversions:
-      Rust *Never Implicitly* converts between ~char~ and any other type.
+      Rust *Never Implicitly* converts BETWEEN ~char~ AND _any other type._
 
-      + ~char~ --> integer numbers
+      * ~char~ --> integer numbers
         Do the *explicit conversion* with ~as~.
 
-      + integer numbers --> ~char~
-        * If you do this directly with ~as~, you can only from ~u8~ to ~char~
+      * integer numbers --> ~char~
+        + If you do this directly with ~as~, you can only from ~u8~ to ~char~
           - Rationale:
             *Rust intends the ~as~ operator to perform _ONLY_ cheap, infallible
             conversions*,
             BUT
-            every integer type _other than_ ~u8~ includes values that are not
-            permitted Unicode code points, so those conversions would _require
+            every integer type _other than_ ~u8~ includes values that are NOT
+            permitted /Unicode code points/, so those conversions would _require
             runtime checks_.
 
-        * You can use ~std::char::from_u32~, and take any ~u32~ value and returns
+        + You can use ~std::char::from_u32~, and take any ~u32~ value and returns
           an ~Option<char>~.
 
     - Check the ~std::char~ to learn more useful methods.
@@ -703,11 +736,11 @@
         assert_eq!(std::char::from_digit(2, 10), Some('2'));
       #+END_SRC
 
-    - Single /characters/ are not very interesting as /strings/ and /streams/.
+    - Single /characters/ are NOT very interesting as /strings/ and /streams/.
       =TODO= "String Types" on page 64.
 
 ** DONE Tuples - 54
-   CLOSED: [2018-05-19 Sat 12:45]
+   CLOSED: [2021-01-11 Mon 22:02]
    - For example,
      ~("Brazil", 1985)~ is a tuple fo type ~(&str, i32)~ (or whatever integer
      type, within a proper context, Rust infers from ~1985~).
@@ -721,35 +754,35 @@
 
    - Rust consistently permits an *extra trailing comma* everywhere commas are
      used: /function arguments/, /arrays/, /struct/ and /enum/ definitions, and
-     so on. For instance, ~("Brazil", 1985)~ and ~("Brazil", 1985,)~ are
-     equivalent.
+     so on.
 
-     + *Rationale*:
+     * For instance, ~("Brazil", 1985)~ and ~("Brazil", 1985,)~ are equivalent.
+
+     * *Rationale*:
        This may look odd to human readers, but it can make diffs easier to read
        when entries are added and removed at the end of a list.
 
    - *UNLIKE* Scala, Rust support /single element tuple/, though the syntax is a
      little wierd! For instance, ~("lonely hearts",)~ is a /single element tuple/
      of type ~(&str,)~. Here the ~,~ in both /value/ and /type/ are mandatory!
-     =IMPORTANT=
 
      =TODO= =???=
      =From Jian= Why do we need /single element tuple/??? Scala has proved that
      /single element tuple/ is NOT useful -- there are always ways to use other
      techniques, and not redundant!
-~s/~
-** DONE Pointer types - 55
-   CLOSED: [2019-08-01 Thu 22:24]
+
+** Pointer types - 55
    - Rust has _SEVERAL_ /types/ that represent _memory addresses_.
 
-   - TODO NOTE
-     + Languages like Java:
-     + Rust:
+   - =TODO=
+     NOTE
+     * Languages like Java:
+     * Rust:
 
    - We'll discuss *three* /pointer types/ here:
-     + /references/
-     + /boxes/
-     + /unsafe pointers/
+     * /references/
+     * /boxes/
+     * /unsafe pointers/
 
 *** DONE References - 56
     CLOSED: [2019-08-01 Thu 22:16]
@@ -826,8 +859,7 @@
       TODO
       For details, see Chapter 21.
 
-** DONE Arrays, Vectors, and Slices - 57
-   CLOSED: [2019-08-07 Wed 01:52]
+** Arrays, Vectors, and Slices - 57
    - Rust has *three* types for representing a _sequence of values_ in memory:
      + ~[T; N]~ 
        An /array/ of ~N~ values, each of type ~T~.
@@ -1078,8 +1110,7 @@
         print(&sv[1..3]); // print v[1] and v[2]
       #+END_SRC
 
-** DONE String Types - 64 - =TODO= =Re-Read=
-   CLOSED: [2018-05-22 Tue 09:03]
+** String Types - 64 - =TODO= =Re-Read=
    - C++ has *two* /string types/:
      + ~const char *~: /String literals/
      + ~std::string~: Dynamically creating strings at runtime
@@ -1349,12 +1380,12 @@
           use ~std::ffi::CString~ and ~&CStr~. =IMPORTANT=
 
 ** DONE Beyond the basics - 69
-   CLOSED: [2018-05-20 Sun 21:30]
+   CLOSED: [2021-01-11 Mon 22:05]
    - There are *three* kinds of /user-defined types/, and we'll cover them in
      *three* successive chapters:
-     + ~struct~'s in Chapter 9; TODO
-     + ~enum~'s in Chapter 10;  TODO
-     + ~trait~'s in Chapter 11. TODO
+     * ~struct~'s in Chapter 9; =TODO=
+     * ~enum~'s in Chapter 10;  =TODO=
+     * ~trait~'s in Chapter 11. =TODO=
 
    - /Functions/ and /closures/ have their own types, TODO covered in Chapter 14.
 
