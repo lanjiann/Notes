@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 3.0.0-RC1-bin-20201228-029ae77-NIGHTLY --> 3.0.0-RC1-bin-20210113-8345078-NIGHTLY
+#+VERSION: 8d00ed1, f72855e --> 3.0.0-RC1-bin-20210113-8345078-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -300,8 +300,8 @@
       * The plan is to _deprecate and phase them out_ later.
 
     - /Value classes/ (superseded by /opaque type aliases/) are a special case.
-      There are *currently NO deprecation* plans for /value classes/, since we
-      might want to bring them back in a more general form if they are supported
+      There are *currently NO deprecation plans* for /value classes/, since we
+      might bring them back in a more general form if they are supported
       natively by the JVM as is planned by project Valhalla.
       =FUTURE=
       * =from Jian=
@@ -374,7 +374,7 @@
         + XML literals =TODO=
         + compound types =???= =TODO=
       
-*** DONE Changes - =Read in Details=
+*** DONE Changes - =Read in Details= - =Change to Type Checking and Inference=
     CLOSED: [2021-01-02 Sat 01:56]
     - These constructs have undergone changes to make them more regular and useful.
       * /Structural Types/:
@@ -749,8 +749,8 @@
     - _Recursive match type definitions_ can also be given an /upper bound/, like this:
       #+begin_src scala
         type Concat[+Xs <: Tuple, +Ys <: Tuple] <: Tuple = Xs match
-          case Unit    => Ys
-          case x *: xs => x *: Concat[xs, Ys]
+          case EmptyTuple => Ys
+          case x *: xs    => x *: Concat[xs, Ys]
       #+end_src
       * In this definition, every instance of ~Concat[A, B]~, whether reducible
         or not, is known to be a /subtype/ of ~Tuple~.
@@ -4374,7 +4374,7 @@
          program code programmatically.
 
     3. =REDO=
-       /Staging/ construct new code at /runtime/.
+       /Runtime Staging/ construct new code at /runtime/.
        That way, code generation can depend NOT ONLY on _static data_ BUT ALSO on
        _data available at runtime_.
        * This splits the evaluation of the program in two or more phases or
@@ -4388,7 +4388,7 @@
          /inline/ can only be done at /compile time/.
 
     4. =Outdated Docs=
-       /TASTy Reflection/
+       /Reflection/
        * /Quotations/ are a "black-box" representation of code.
          They can be parameterized and composed using /splices/ but their
          structure cannot be analyzed from the outside.
@@ -5139,10 +5139,10 @@
 **** DONE Macros: Quotes and Splices
      CLOSED: [2020-11-30 Mon 02:31]
      - Macros are built on _TWO_ well-known fundamental operations:
-       + quotation :: ~'{...}~ for /expressions/;
+       * quotation :: ~'{...}~ for /expressions/;
                       ~'[...]~ for /types/.
 
-       + splicing :: ~${ ... }~
+       * splicing :: ~${ ... }~
 
      - Additionally, *within* a /quote/ or a /splice/
        we can /quote/ or /splice/ _identifiers_ *directly* (i.e. ~'e~ and ~$e~).
@@ -6014,8 +6014,8 @@
             sase Varargs(argExprs) =>
               val argShowedExprs = argExprs.map {
                 case '{ $arg: tp } =>
-                  val showTp = Type.of[Show[tp]]
-                  Expr.summon(using showTp) match
+                  val showTp = Type.of[]
+                  Expr.summon[Show[tp]] match
                     case Some(showExpr) => '{ $showExpr.show($arg) }
                     case None           => report.error(s"could not find implicit for ${Type.show[Show[tp]]}", arg); '{???}
               }
@@ -6091,7 +6091,7 @@
 
 **** TODO More details
 
-*** DONE Multi-Stage Programming =RE-READ=
+*** DONE Runtime Multi-Stage Programming - =RE-READ=
     CLOSED: [2020-12-27 Sun 13:25]
     The framework expresses at the same time /compile-time metaprogramming/ and
     /multi-stage programming/.
@@ -6227,30 +6227,33 @@
          f.apply(Array(1, 2, 3))  // Return 6
        #+end_src
 
-*** DONE TASTy Reflect =FIXME=
+*** DONE Reflection
     CLOSED: [2020-12-28 Mon 01:37]
-    /TASTy Reflect/ ENABLES *inspection* and *construction* of /Typed Abstract
+    /Reflection/ ENABLES *inspection* and *construction* of /Typed Abstract
     Syntax Trees (Typed-AST)/.
 
-    - /TASTy Reflect/ may be used
-      ON /quoted expressions/ (~quoted.Expr~) and /quoted types/ (~quoted.Type~)
+    - /Reflection/ may be used ON
+      /quoted expressions/ (~quoted.Expr~) and /quoted types/ (~quoted.Type~)
       FROM /Macros/ or ON _full TASTy files_.
       
     - =IMPORTANT=
       If you are writing /macros/, please first read /Macros/.
-      You may find all you need without using /TASTy Reflect/.
+      You may find all you need without using /quote reflection/.
     
 **** API: From quotes and splices to TASTy reflect trees and back
      - With ~quoted.Expr~ and ~quoted.Type~ we can compute code but also analyze
        code by inspecting the ASTs.
-       * Macros provide the *GUARANTEE* that the generation of code will be /type-correct/.
+       * /Macros/ provide the *GUARANTEE* that the generation of code will be
+         /type-correct/.
 
-       * Using /TASTy Reflect/ will *BREAK* these guarantees and may fail at macro
-         expansion time, hence _additional explicit checks *must be done*._
+       * Using /quote reflection/ will *BREAK* these guarantees and may fail
+         _at macro expansion time_, hence _additional explicit checks *must be
+         done*._
          
      - To provide _reflection capabilities_ in /macros/
-       we need to *add* an /implicit parameter/ of type ~scala.quoted.Quotes~ and
-       ~import quotes.reflect._~ from it in the scope where it is used.
+       we need to
+       *add* an /implicit parameter/ of type ~scala.quoted.Quotes~ and
+       *import* ~quotes.reflect._~ from it in the scope where it is used.
        #+begin_src scala
          import scala.quoted._
 
@@ -6262,33 +6265,35 @@
        #+end_src
 
 ***** Extractors
-      - ~import quotes.reflect._~ will provide _ALL_ /extractors/ and /methods/ on
-        /TASTy Reflect trees/. For example the ~Literal(_)~ /extractor/ used below.
+      - ~import quotes.reflect._~ will provide _ALL_ /extractors/ and /methods/
+        on ~quotes.reflect.Tree~'s. For example the ~Literal(_)~ /extractor/
+        used below.
         #+begin_src scala
           def natConstImpl(x: Expr[Int])(using Quotes): Expr[Int] =
             import quotes.reflect._
-            val xTree: Term = x.asTerm
+            val tree: Term = x.asTerm
 
-            xTree match
+            tree match
               case Inlined(_, _, Literal(IntConstant(n))) =>
                 if n <= 0 then
                   report.error("Parameter must be natural number")
                   '{0}
                 else
-                  xTree.asExprOf[Int]
+                  tree.asExprOf[Int]
 
               case _ =>
                 report.error("Parameter must be a known constant")
                 '{0}
         #+end_src
         
-      - We can easily know which extractors are needed using ~Printer.TreeStructure.show~,
-        which returns the _STRING REPRESENTATION the structure of the tree_. Other
-        /printers/ can also be found in the ~Printer~ /module/.
+      - We can easily know which /extractors/ are needed using
+        ~Printer.TreeStructure.show~, which returns the _STRING REPRESENTATION
+        the structure of the tree_. Other /printers/ can also be found in the
+        ~Printer~ /module/.
         #+begin_src scala
-          xTree.show(using Printer.TreeStructure)
+          tree.show(using Printer.TreeStructure)
           // or
-          Printer.TreeStructure.show(xTree)
+          Printer.TreeStructure.show(tree)
         #+end_src
         
       - The /methods/ ~quotes.reflect.Term.{asExpr, asExprOf}~ provide a way to go
@@ -6326,29 +6331,34 @@
         =FIXME= https://scalacenter.github.io/scala-3-migration-guide/docs/compatibility.html
       
 ***** TODO Tree Utilities
-      ~scala.tasty.reflect~ contains _THREE_ facilities for /tree traversal and
+      ~quotes.reflect~ contains _THREE_ facilities for /tree traversal and
       transformation/.
       
-      - ~TreeAccumulator~ ties the knot of a traversal. By calling ~foldOver(x, tree))~
-        we can dive into the ~tree~ node and start accumulating values of type ~X~
-        (e.g., of type ~List[Symbol]~ if we want to collect symbols). The code
-        below, for example, collects the pattern variables of a tree.
+      - ~TreeAccumulator~ ties the knot of a traversal.
+        By calling ~foldOver(x, tree)(owner)~ we can dive into the ~tree~ node
+        and start accumulating values of type ~X~ (e.g., of type ~List[Symbol]~
+        if we want to collect symbols). The code below, for example, collects
+        the ~val~ definitions in the tree.
         #+begin_src scala
-          def collectPatternVariables(tree: Tree)(implicit ctx: Context): List[Symbol] =
+          def collectPatternVariables(tree: Tree)(using ctx: Context): List[Symbol] =
             val acc = new TreeAccumulator[List[Symbol]]:
-              def apply(syms: List[Symbol], tree: Tree)(implicit ctx: Context) = tree match
-                case Bind(_, body) => apply(tree.symbol :: syms, body)
-                case _             => foldOver(syms, tree)
+              def foldTree(syms: List[Symbol], tree: Tree)
+                          (owner: Symbol): List[Symbol] = tree match
+                case ValDef(_, _, rhs) =>
+                  val newSyms = tree.symbol :: syms
+                  foldTree(newSyms, body)(tree.symbol)
+
+                case _ =>
+                  foldOverTree(syms, tree)(owner)
 
             acc(Nil, tree)
         #+end_src
-        =FIXME= =NEED FIX= =TODO=
-        * The return type of the recursive function ~apply~ must be annotated.
-        * ~implicit~ should be replaced with the new ~summon~
-        * Does ~scala.tasty.reflect~ still exist?
+        A ~TreeTraverser~ extends a ~TreeAccumulator~ and performs the same
+        traversal but without returning any value. Finally, a ~TreeMap~ performs
+        a transformation.
 
-****** TODO Let
-       ~scala.tasty.Reflection~ also offers a /method/ ~let~ that allows us to
+****** TODO ~ValDef.let~
+       ~quotes.reflect.ValDef~ also offers a /method/ ~let~ that allows us to
        bind the ~rhs~ (right-hand side) to a ~val~ and use it in ~body~.
          Additionally, ~lets~ binds the given ~terms~ to names and allows to use
        them in the ~body~. Their type definitions are shown below:
@@ -6358,59 +6368,43 @@
          def lets(terms: List[Term])(body: List[Term] => Term): Term = ...
        #+end_src
 
-**** TODO More Examples
-     - Start experimenting with TASTy Reflect (link)
-       =from Jian= Outdated, need update
-
 *** DONE TASTy Inspection =FIXME=
     CLOSED: [2020-12-28 Mon 01:37]
-    ~libraryDependencies += "ch.epfl.lamp" %% "scala3-tasty-inspector" % scalaVersion.value~
+    #+begin_src scala
+      libraryDependencies += "org.scala-lang" %% "scala3-tasty-inspector" % scalaVersion.value
+    #+end_src
 
-    TASTy files contain the full typed tree of a class including source positions
-    and documentation. This is ideal for tools that analyze or extract semantic
-    information from the code. To avoid the hassle of working directly with the
-    TASTy file we provide the ~TastyInspector~ which loads the contents and exposes
-    it through the TASTy reflect API.
+    _TASTy files_ contain the FULL /typed tree/ of a /class/ including _source
+    positions_ and _documentation_. This is ideal for tools that analyze or
+    extract semantic information from the code. To avoid the hassle of working
+    directly with the TASTy file we provide the ~TastyInspector~ which loads the
+    contents and exposes it through the TASTy reflect API.
     
 **** Inspecting TASTy files =FIXME=
-     To inspect the /TASTy Reflect trees/ of a TASTy file a ~Consumer~ =FIXME=
-     can be defined in the following way: =FIXME=
+     To inspect the /trees/ of a _TASTy file_ a ~Consumer~ =FIXME=
+     can be defined in the following way:
      #+begin_src scala
        import scala.quoted._
        import scala.tasty.inspector._
 
-       class Consumer extends TastyInspector:
-        protected def processCompilationUnit(using Quotes)(tree: quotes.reflect.Tree): Unit =
+       class MyInspector extends TastyInspector:
+         protected def processCompilationUnit(using Quotes)
+                                             (tree: quotes.reflect.Tree): Unit =
           import quotes.reflect._
           // Do something with the tree
-            ???
      #+end_src
      
      - Then the ~Consumer~ =FIXME= can be instantiated with the following code to
-       get the /tree of the class/ ~foo.Bar~ for a ~foo~ in the /classpath/.
-       =from Jian= I fix the code, and the fixed version can only inspect ~Foo~.
-       =TODO= Make the fixed version of code inspect ~Foo.Bar~ directly.
+       get the /tree/ of the ~foo/Bar.tasty~ file.
        #+begin_src scala
-         import dotty.tools.dotc.util.ClasspathFromClassloader
-         import dotty.tools.io.Path
-         import java.io.File
-
          object Test:
-         def main(args: Array[String]): Unit =
-           val classpath = ClasspathFromClassloader(this.getClass.getClassLoader)
-             .split(File.pathSeparator)
-             .find(_.contains("runWithCompiler"))
-             .get
-         val allTastyFiles = Path(classpath).walkFilter(_.extension == "tasty").map(_.toString).toList
-
-         // TODO: How to inspect `Foo.Bar` instead of `Foo`???
-         val tastyFiles = allTastyFiles.filter(_.contains("Foo"))
-                                              (new Consumer).inspectTastyFiles(tastyFiles)
+           def main(args: Array[String]): Unit =
+             new MyInspector().inspectTastyFiles("foo/Bar.tasty")
        #+end_src
      
-     - Note that if we need to run the ~main~ (in the example above =FIXME= defined
-       in an object called ~Test~) after compilation we need to make the compiler
-       available to the runtime:
+     - Note that if we need to run the ~main~ (in the example below defined in an
+       object called ~Test~) after compilation we need to make the compiler
+       available to the /runtime/:
        #+begin_src shell
          scalac -d out Test.scala
          scala -with-compiler -classpath out Test
@@ -6697,12 +6691,31 @@
       * Syntax (similar to ~import~):
         #+begin_src scala
           export path . { sel_1, ..., sel_n }
-          export given path . { sel_1, ..., sel_n }
         #+end_src
         + ~path~ here must be a /stable identifier/.
 
         + ~export~ is like ~import~.
           Synthetic members generated by compiler can't be exported.
+          
+        + Selectors can be of one of the following forms: =TODO= simplify this part of note
+          * A simple selector x creates aliases for all eligible members of path
+            that are named x.
+
+          * A renaming selector x => y creates aliases for all eligible members
+            of path that are named x, but the alias is named y instead of x.
+
+          * An omitting selector x => _ prevents x from being aliased by a
+            subsequent wildcard selector.
+
+          * A given selector given x has an optional type bound x. It creates
+            aliases for all eligible given instances that conform to either x,
+            or Any if x is omitted, except for members that are named by a
+            previous simple, renaming, or omitting selector.
+
+          * A wildcard selector _ creates aliases for all eligible members of path
+            except for given instances, synthetic members generated by the
+            compiler and those members that are named by a previous simple,
+            renaming, or omitting selector.
 
       * A member is *eligible for being exported* if all of the following holds:
         + The _owner of the being exported member_ is *NOT* the /base class/ of
@@ -6718,8 +6731,8 @@
           * *NOT* a /constructor/,
           * *NOT* the (*synthetic*) class part of an object,
 
-        + it is a /given instance/ (or an old-style /implicit value/)
-          iff the ~export~ is tagged with ~given~.
+        + it is a /given instance/ (declared with ~given~)
+          iff the ~export~ is from a /given selector/.
 
       * It is a /compile-time error/ if a simple or renaming selector does *not*
         identify any _eligible members_.
@@ -6764,6 +6777,13 @@
       * /Export clauses/ *can* appear in /classes/
         /Export clauses/ *can* appear _at the /top-level/._
         /Export clauses/ *CANNOT* appear _as a statement IN A BLOCK_.
+        
+      * If an /export clause/ contains a /wildcard/ or /given selector/, it is
+        *forbidden* for its /qualifier path/ to *refer* to a /package/.
+        - This is because it is *not yet known*
+          how to safely track /wildcard dependencies/ to a /package/ for the
+          purposes of incremental compilation.
+          =TODO= =NEW-ADDED= =TRY-TO-UNDERSTAND=
 
       * =from Jian=
         A real world example:
