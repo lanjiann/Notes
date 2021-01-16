@@ -6065,41 +6065,65 @@
 ** DONE Summary - 205
    CLOSED: [2021-01-11 Mon 02:59]
 
-* TODO 11. Writing Automated Tests - 207
+* DONE 11. Writing Automated Tests - 207
+  CLOSED: [2021-01-15 Fri 03:46]
+  - We'll discuss the mechanics of Rust's testing facilities.
+    We'll talk about
+    * the /annotations/ and /macros/
+      available to you when *writing* your tests,
+
+    * the _default behavior_ and _options_
+      provided for *running* your tests,
+
+    * how to *organize* tests *into* /unit tests/ and /integration tests/.
+
 ** DONE How to Write Tests - 208
-   CLOSED: [2017-08-28 Mon 20:47]
+   CLOSED: [2021-01-15 Fri 02:21]
    The features Rust provides specifically for writing tests:
-   - the ~test~ attribute
-   - a few macros
-   - the ~should_panic~ attribute.
+   - the ~test~ /attribute/
+   - a few /macros/
+   - the ~should_panic~ /attribute/.
 
 *** DONE The Anatomy of a Test Function - 208
-    CLOSED: [2017-08-28 Mon 14:21]
-    - /attributes/ :: metadata about pieces of Rust code.
+    CLOSED: [2021-01-15 Fri 01:46]
+    - At its simplest,
+      a /test/ in Rust is a /function/ that's annotated with the ~test~
+      /attribute/.
+
+    - attributes :: metadata about pieces of Rust code.
+      * Examples:
+        + The ~derive~ we see in Chapter 5
+        + The ~test~ we will see in this Chapter
+
+    - When you run your _tests_ with the =cargo test= command,
+      Rust builds a /test runner binary/ that
+      1. *runs* the functions annotated with the ~test~ /attribute/
+        and
+      2. *reports* on whether each _test function_ passes or fails.
 
     - TEST
-      1. Use ~cargo new ~addr~ to
-         create a new library project called ~adder~.
-
-         Then in the =src/lib.rs=
+      1. Use =cargo new addr --lib= to
+         create a new library project called =adder=.
+         In its =src/lib.rs=
          #+BEGIN_SRC rust
            #[cfg(test)]
            mod tests {
                #[test]
                fn it_works() {
+                   assert_eq!(2 + 2, 4);
                }
            }
          #+END_SRC
-         + For now, ignore the first twolines and focus on the function to see how
-           it works.
+         * For now, ignore the first twolines and focus on the function to see how
+           it works. =TODO=
 
-         + The ~#[test]~ /attribute/ indicates this is a test function.
-             There are non-test functions in the ~tests~ module to help do some
-           common things, so we need to indicate which functions are tests with
-           the ~#[test]~ attribute.
+         * The ~#[test]~ /attribute/ indicates this is a _test function_.
+           + There are _non-test helper functions_ in the ~tests~ /module/,
+             so we need to *indicate* which /functions/ are _tests_ with the
+             ~#[test]~ /attribute/.
 
       2. Use ~cargo test~ to run the test(s).
-         + test 1
+         * test 1: one test, should be ok
            #+BEGIN_SRC rust
              #[cfg(test)]
              mod tests {
@@ -6107,15 +6131,27 @@
                  fn exploration() {
                  }
              }
-
-             // running 1 test
-             // test tests::exploration ... ok
-             //
-             // test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured
            #+END_SRC
-           =TODO= Talk about the _ignored_ later.
+           
+           + =cargo test= result
+             #+begin_src text
+                  Compiling adder v0.1.0 (file:///projects/adder)
+                   Finished test [unoptimized + debuginfo] target(s) in 0.57s
+                    Running target/debug/deps/adder-92948b65e88960b4
 
-         + test 2
+               running 1 test
+               test tests::exploration ... ok
+
+               test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+                  Doc-tests adder
+
+               running 0 tests
+
+               test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+             #+end_src
+
+         * test 2: two tests, one should be ok, and the other should fail
            #+BEGIN_SRC rust
              #[cfg(test)]
              mod tests {
@@ -6128,73 +6164,85 @@
                      panic!("Make this test fail");
                  }
              }
-
-             // running 2 tests
-             // test tests::exploration ... ok
-             // test tests::another ... FAILED
-             //
-             // failures:
-             //
-             // ---- tests::another stdout ----
-             //     thread 'tests::another' panicked at 'Make this test fail', src/lib.rs:9
-             // note: Run with `RUST_BACKTRACE=1` for a backtrace.
-             //
-             // failures:
-             //     tests::another
-             //
-             // test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured
-             //
-             // error: test failed
            #+END_SRC
 
-*** DONE Checking Results with the ~assert!~ Macro - 211
-    CLOSED: [2017-08-28 Mon 14:32]
-    - It is useful when you want to ensure that some condition in a test
-      evaluates to ~true~.
-      + If is ~true~, do nothing
-      + If is ~false~, it calls the ~panic!~
+           + =cargo test= result
+             #+begin_src text
+                  Compiling adder v0.1.0 (file:///projects/adder)
+                   Finished test [unoptimized + debuginfo] target(s) in 0.72s
+                    Running target/debug/deps/adder-92948b65e88960b4
 
-    - In =src/lib.rs=:
-      #+BEGIN_SRC rust
+               running 2 tests
+               test tests::another ... FAILED
+               test tests::exploration ... ok
+
+               failures:
+
+               ---- tests::another stdout ----
+               thread 'main' panicked at 'Make this test fail', src/lib.rs:10:9
+               note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
+
+
+               failures:
+                   tests::another
+
+               test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out
+
+               error: test failed, to rerun pass '--lib'
+             #+end_src
+             - The second to the last line mentioned statistics of _different kind_
+               of tests.
+               * =TODO= Talk about =ignored= and =filtered= later.
+               * =TODO= =measured= is for benchmark tests.
+
+*** DONE Checking Results with the ~assert!~ Macro - 211
+    CLOSED: [2021-01-15 Fri 01:52]
+    - ~assert!~ is useful when you want to ensure that some condition in a test
+      evaluates to ~true~.
+      * If is ~true~, do nothing
+      * If is ~false~, it calls the ~panic!~
+
+    - In Chapter 4, Listing 5-15, we have =src/lib.rs=:
+      #+begin_src rust
         #[derive(Debug)]
         pub struct Rectangle {
-            length: u32,
             width: u32,
+            height: u32,
         }
 
         impl Rectangle {
             pub fn can_hold(&self, other: &Rectangle) -> bool {
-                self.length > other.length && self.width > other.width
+                self.width > other.width && self.height > other.height
             }
         }
+      #+end_src
 
+      We can add tests like:
+      #+begin_src rust
         #[cfg(test)]
         mod tests {
             use super::*;
 
             #[test]
             fn larger_can_hold_smaller() {
-                let larger = Rectangle { length: 8, width: 7 };
-                let smaller = Rectangle { length: 5, width: 1 };
+                let larger = Rectangle {
+                    width: 8,
+                    height: 7,
+                };
+                let smaller = Rectangle {
+                    width: 5,
+                    height: 1,
+                };
 
                 assert!(larger.can_hold(&smaller));
             }
         }
-
-        // running 1 test
-        // test tests::larger_can_hold_smaller ... ok
-        //
-        // test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured
-      #+END_SRC
+      #+end_src
 
 *** DONE Testing Equality with the ~assert_eq!~ and ~assert_ne!~ Macros - 214
-    CLOSED: [2017-08-28 Mon 19:39]
-    - ~assert_eq!~ is like combine ~assert!~ and ~==~, though it will print out
-      more import when it fails.
-
-      ~assert_ne!~ is its opposite.
-
-    - They print out their two argument values when the assertion fails.
+    CLOSED: [2021-01-15 Fri 02:04]
+    - ~assert_eq!~ and ~assert_ne!~ also print out the two compared values
+      if the assertion fails, which makes it easier to see WHY the test failed.
 
     - Example:
       #+BEGIN_SRC rust
@@ -6212,34 +6260,60 @@
             }
         }
 
+        // ...
         // running 1 test
         // test tests::it_adds_two ... ok
         //
-        // test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured
+        // test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+        // ...
       #+END_SRC
+      * If we define the ~add_two~ as ~a + 3~, when testing we will see:
+        #+begin_src text
+          ...
+          running 1 test
+          test tests::it_adds_two ... FAILED
 
-    - ~assert_eq!~ and ~assert_ne!~ take arguments with no order constraints (
-      In some languages test framework, there is ~expected~ and ~actual~, while
-      Rust doesn't).
+          failures:
 
-    - Under the surface, the ~assert_eq!~ and ~assert_ne!~ macros use the
-      operators ~==~ and ~!=~ (the ~PartialEq~ trait is required), respectively.
-      When assertions fail, these macros print their arguments using _debug
-      formatting_ (the ~Debug~ trait is required).
+          ---- tests::it_adds_two stdout ----
+          thread 'main' panicked at 'assertion failed: `(left == right)`
+            left: `4`,
+           right: `5`', src/lib.rs:11:9
+          note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
 
-      All of the primitive types and most of the standard library types
-      implement these traits.
 
-      Both of these two traits are derivable traits, we can use
-      ~#[derive(PartialEq, Debug)]~ annotation to your struct or enum definition.
-      =TODO= See Appendix C.
-    -
+          failures:
+              tests::it_adds_two
+
+          test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out
+          ...
+        #+end_src
+        + ~assert_eq!~ and ~assert_ne!~ take arguments with no order constraints:
+          In some languages test framework, there is =expected= and =actual=,
+          while Rust doesn't -- it uses the terms =left= and =right=.
+
+    - ~assert_ne!~ is most useful for cases
+      when we're not sure what a value will be,
+      but we know what the value definitely won't be if our code is functioning
+      as we intend.
+
+    - ~assert_eq!~ and ~assert_ne!~ /macros/ can only compare values whoes types
+      implement
+      * ~PartialEq~, because under the surface these /macros/ uses ~==~ and ~!=~.
+      * ~Debug~, because when the _assertions fail_, these /macros/ *print* their
+        arguments using /debug formatting/.
 
 *** DONE Adding Custom Failure Messages - 216
-    CLOSED: [2017-08-28 Mon 19:47]
-    - Additional optional arguments can be passed to ~assert!~, ~assert_eq!~, and
-      ~assert_ne!~. this argument will be passed to ~format!~ macro, so we can
-      use the syntax of ~{}~ placeholders.
+    CLOSED: [2021-01-15 Fri 02:10]
+    - Additional optional arguments as _failure message_ can be passed to ~assert!~,
+      ~assert_eq!~, and ~assert_ne!~.
+      * *Any* arguments specified _AFTER_
+        the one required argument to ~assert!~
+        OR
+        the two required arguments to ~assert_eq!~ and ~assert_ne!~
+        are passed along to the ~format!~ /macro/,
+        so you can pass a /format string/ that contains ~{}~ placeholders and
+        values to go in those placeholders.
 
     - Example:
       #+BEGIN_SRC rust
@@ -6263,8 +6337,9 @@
       #+END_SRC
 
 *** DONE Checking for Panics with ~should_panic~ - 218
-    CLOSED: [2017-08-28 Mon 20:47]
-    #+BEGIN_SRC rust
+    CLOSED: [2021-01-15 Fri 02:18]
+    #+begin_src rust
+      // Listing 11-8: Testing that a condition will cause a panic!
       struct Guess {
           value: u32,
       }
@@ -6275,9 +6350,7 @@
                   panic!("Guess value must be between 1 and 100, got {}", value);
               }
 
-              Guess {
-                  value
-              }
+              Guess { value }
           }
       }
 
@@ -6291,95 +6364,144 @@
               Guess::new(200);
           }
       }
-    #+END_SRC
+    #+end_src
 
-    - ~#[should_panic]~ goes after ~#[test]~ and before the function
+    - ~#[should_panic]~ goes *after* ~#[test]~ and *before* the function.
 
-    - If we remove the ~|| value > 100~ part, the test will fail.
+    - We can create a bug by removing the ~|| value > 100~ part,
+      and the test will fail. We will see the message is _NOT very useful_.
+      * The above ~should_panic~ can be imprecise:
+        ANY /panic/ can satisfy it, even though it's not what we expect.
+        We can add an _optional ~expected~ parameter_ to the ~should_panic~
+        /attribute/. A _substring_ of the /panic message/ is enough.
+        #+BEGIN_SRC rust
+          struct Guess {
+              value: u32,
+          }
 
-    - The above ~should_panic~  can be imprecise: any panic can satisfy it, even
-      though it's not what we expect. We can add an optional ~expected~ parameter
-      to the ~should_panic~ attribute. A substring of the panic message is
-      enough.
-      #+BEGIN_SRC rust
-        struct Guess {
-            value: u32,
-        }
+          impl Guess {
+              pub fn new(value: u32) -> Guess {
+                  if value < 1 {
+                      panic!("Guess value must be greater than or equal to 1, got {}.",
+                             value);
+                  } else value > 100 {
+                      panic!("Guess value must be less than or equal to 100, got {}.",
+                             value);
+                  }
 
-        impl Guess {
-            pub fn new(value: u32) -> Guess {
-                if value < 1 {
-                    panic!("Guess value must be greater than or equal to 1, got {}.",
-                           value);
-                } else value > 100 {
-                    panic!("Guess value must be less than or equal to 100, got {}.",
-                           value);
-                }
+                  Guess {
+                      value
+                  }
+              }
+          }
 
-                Guess {
-                    value
-                }
-            }
-        }
+          #[cfg(test)]
+          mod tests {
+              use super::*;
 
+              #[test]
+              #[should_panic(expected = "Guess value must be less than or equal to 100")]
+              fn greater_than_100() {
+                  Guess::new(200);
+              }
+          }
+        #+END_SRC
+        + If we create a bug by swap the /panic messages/ in the ~new~ function,
+          we can see the test failure messages when ~expected~ /panic messages/
+          can't match.
+
+*** DONE Using ~Result<T, E>~ in Tests - 221
+    CLOSED: [2021-01-15 Fri 02:21]
+    - We can also write tests taht use ~Result<T, E>~!
+
+    - Example: 
+      #+begin_src rust
         #[cfg(test)]
         mod tests {
-            use super::*;
-
             #[test]
-            #[should_panic(expected = "Guess value must be less than or equal to 100")]
-            fn greater_than_100() {
-                Guess::new(200);
+            fn it_works() -> Result<(), String> {
+                if 2 + 2 == 4 {
+                    Ok(())
+                } else {
+                    Err(String::from("two plus two does not equal four"))
+                }
             }
         }
-      #+END_SRC
+      #+end_src
 
-*** Using ~Result<T, E>~ in Tests - 221
+    - You *can't* use the ~#[should_panic]~ /annotation/ on tests that use
+      ~Result<T, E>~.
+      Instead, you should *return an ~Err~ value directly* when the test _should
+      fail_.
 
 ** DONE Controlling How Tests Are Run - 221
-   CLOSED: [2017-08-28 Mon 22:35]
+   CLOSED: [2021-01-15 Fri 02:58]
+   - Just as =cargo run= compiles your code and then *runs* the _resulting binary_,
+     =cargo test= compiles your code in test mode and *runs* the _resulting test
+     binary_.
+     
+   - Can specify command line options to change the _defaut behavior_ of =cargo test=.
+     * The _default behavior_ of the binary produced by =cargo test= is to
+       1. run all the tests in parallel
+       2. capture output generated during test runs,
+          preventing the output from being displayed and
+       3. making it easier to read the output related to the test results.
+
+   - =IMPORTANT=
+     Some command line options go to =cargo test=, and
+     some go to the =resulting test binary=.
+     * _To *separate* these two types of arguments,_ you list
+       1. the arguments that go to =cargo test=
+       2. followed by the separator ~--~ and
+       3. then the ones that go to the _test binary_.
+       
+
+     * For examle,
+       + Running =cargo test --help= displays the options you can use with
+         =cargo test=;
+
+       + Running =cargo test -- --help= displays the options you can use after
+         the separator ~--~.
+     
 *** DONE Running Tests in Parallel or Consecutively - 222
-    CLOSED: [2017-08-28 Mon 21:09]
-    - When multiple tests are run,
-      _by default they run in parallel using threads_.
+    CLOSED: [2021-01-15 Fri 02:38]
+    - When you run multiple tests,
+      *by default* they run _in parallel using threads_.
+      * =IMPORTANT=
+        Because of this parallelism, you should take care that
+        + your tests do *NOT* depend on each other
 
-      Ruslt:
-      + finish running faster.
-      + get faster feedback.
+        + your tests do *NOT* depend on on any _shared state_, including a
+          _shared environment_ such as the current working directory or
+          environment variables.
 
-    - =IMPORTANT=
-      Since test are running in parallel, you should take care that
-      + your tests do not depend on each other
-
-      + your tests do not depend on on any shared state, including a shared
-        environment such as the current working directory or environment
-        variables (=From Jian= immutable things are OK)
-
-    - If you don't want to run the tests in parallel,
-      or
-      if you want more fine-grained control over the number of threads used,
-      =TODO= HOW?
-
-      you can send the ~--test-threads~ flag and the number of threads you want
-      to use to the test binary. For example:
-      ~$ cargo test -- --test-threads=1~ does not use any parallelism.
-      ~$ cargo test -- --test-threads=2~
+    - ~--test-threads~ flag
+      * If you *don't* want to run the tests in parallel,
+        ~$ cargo test -- --test-threads=1~ does not use any parallelism.
+      
+      * If you want more fine-grained control over the _number of threads_ used,
+        ~$ cargo test -- --test-threads=2~
 
 *** DONE Showing Function Output - 222
-    CLOSED: [2017-08-28 Mon 21:17]
-    - If a test passes, all its to standard output prints will be captured.
+    CLOSED: [2021-01-15 Fri 02:42]
+    - *By default*
+      * if a test _passes_, all its to standard output prints will be captured by
+        the Rust's test library.
 
-    - Disable the output capture of tests, use ~--nocapture~.
-      ~$ cargo test -- --nocapture~
-      We usually don't use this option alone -- since the default parallelism,
-      the output will be interleaved.
+      * If a test _fails_, we'll see whatever was printed to standard output with
+        the rest of the failure message.
 
-      Use ~$ cargo test -- --nocapture --test-threads=1~
+    - *Disable the output capture of tests*: use the ~--show-output~ flag.
+      ~$ cargo test -- --show-output~
+      * We usually *don't use this option alone*, since the default parallelism,
+        the output will be interleaved -- we usually disable /parallelism/ and
+        _output capture_ together by using
+        ~$ cargo test -- --show-output --test-threads=1~
 
 *** DONE Running a Subset of Tests by Name - 224
-    CLOSED: [2017-08-28 Mon 22:31]
-    You can choose which test(s) to run by passing ~cargo test~ the name or names
-    of the test(s) you want to run as an argument.
+    CLOSED: [2021-01-15 Fri 02:47]
+    You can choose which test(s) to run by _passing ~cargo test~ the name or
+    names of the test(s)_ you want to run as an argument.
     #+BEGIN_SRC rust
       // src/lib.rs
 
@@ -6409,121 +6531,220 @@
     #+END_SRC
 
 **** DONE Running Single Tests - 225
-     CLOSED: [2017-08-28 Mon 22:27]
+     CLOSED: [2021-01-15 Fri 02:45]
      ~$ cargo test one_hundred~
+     
+     * *Caution*:
+       _We *can't* specify the names of multiple tests in this way;_
 
 **** DONE Filtering to Run Multiple Tests - 225
-     CLOSED: [2017-08-28 Mon 22:27]
-     Specify part of a test name, multiple tests will run if they share this
+     CLOSED: [2021-01-15 Fri 02:46]
+     Specify *part of a test name*, multiple tests will run if they share this
      specified word.
-     ~$ cargo test add~ will run the ~add_two_and_two~ and ~add_three_and_two~
-     above.
+     ~$ cargo test add~ will run tests whose names contain =add=.
 
 *** DONE Ignore Some Tests Unless Specifically Requested - 226
-    CLOSED: [2017-08-28 Mon 22:35]
-    - Use the ~#[ignore]~ attribute after ~#[test]~ and before the function.
+    CLOSED: [2021-01-15 Fri 02:50]
+    You often want to ignore some time-consuming tests during most runs of
+    =cargo test=.
 
-    - If you want to run only the ignored tests, run ~$ cargo test -- --ignored~
+    - Example:
+      #+begin_src rust
+        #[test]
+        fn it_works() {
+            assert_eq!(2 + 2, 4);
+        }
 
-    - Use ~--all~ option to run all tests.
+        #[test]
+        #[ignore]
+        fn expensive_test() {
+            // code that takes an hour to run
+        }
+      #+end_src
+      * Use the ~#[ignore]~ /attribute/
+        *after* ~#[test]~ and *before* the /function/.
+
+      * If you want to _run *only* the IGNORED tests,_
+        run ~$ cargo test -- --ignored~
+
+      * Use ~--include-ignored~ option to run all tests.
+        + Only in NIGHTLY version.
 
 ** DONE Test Organization - 227
-   CLOSED: [2017-08-29 Tue 20:26]
-   The Rust community tends to think about tests in terms of two main categories:
-   I /unit tests/
+   CLOSED: [2021-01-15 Fri 03:45]
+   - The Rust community thinks about tests in terms of _TWO main categories_:
+     * unit tests ::
+       _small_ and _more focused_, testing _one module in isolation_ at a time,
+       and *can test /private interfaces/.*
 
-   * /integration tests/ (=From Jian= In Haskell, I think we also call it
-     /property tests/)
+     * integration tests ::
+       *entirely external* to your library and use your code _in the same way
+       any other external code would_, using
+       + *ONLY* the /public interface/
+       + potentially exercising *MULTIPLE* /modules/ per test.
+
+   - Writing both kinds of tests is important to ensure that the pieces of your
+     library are doing what you expect them to, _separately and together._
 
 *** DONE Unit Tests - 227
-    CLOSED: [2017-08-29 Tue 15:43]
-    - We put /unit tests/ in the =src= directory, in each file with the code that
+    CLOSED: [2021-01-15 Fri 03:15]
+    - Put /unit tests/ in the =src= directory, in each file with the code that
       they're testing.
 
-    - _CONVENTION_: create a module named ~tests~ in each file to contain the
-      test functions, and we annotate the module with ~cfg(test)~.
+    - _CONVENTION_:
+      create a /module/ named ~tests~ *in each file* to contain the _test
+      functions_, and we annotate the /module/ with ~cfg(test)~.
 
 **** DONE The Tests Module and ~#[cfg(test)]~ - 227
-     CLOSED: [2017-08-29 Tue 15:39]
-     - The ~#[cfg(test)]~ annotation on the tests module tells Rust to compile
+     CLOSED: [2021-01-15 Fri 03:08]
+     - The ~#[cfg(test)]~ annotation on the /tests module/ tells Rust to compile
        and run the test code _ONLY_ when we run ~cargo test~, and not when we run
-       ~cargo build~.
+       ~cargo build~. This
+       * *saves* /compile time/
+         when you only want to BUILD the library
+
+       * *saves* _space_ in the _resulting compiled artifact_
+         because the tests are not included. 
 
      - /integration tests/ go in a different directory, they don't need the
        ~[cfg(test)]~ annotation.
 
 **** DONE Testing Private Functions - 227
-     CLOSED: [2017-08-29 Tue 15:43]
-     =IMPORTANT=
-     Rust's Privacy rules do allow you to test private functions directly.
-     For example,
-     #+BEGIN_SRC rust
-       pub fn add_two(a: i32) -> i32 {
-           internal_adder(a, 2)
-       }
+     CLOSED: [2021-01-15 Fri 03:15]
+     There's debate within the testing community about
+     *whether or not private functions should be tested directly,*
+     and other languages make it difficult or impossible to test private functions.
 
-       // a function is *private* by default
-       fn internal_adder(a: i32, b: i32) -> i32 {
-           a + b
-       }
+     Regardless of which testing ideology you adhere to,
+     =IMPORTANT= _Rust's privacy rules do *allow* you to TEST /private functions/._
+     
+     - Example:
+       #+begin_src rust
+         pub fn add_two(a: i32) -> i32 {
+             internal_adder(a, 2)
+         }
 
-       #[cfg(test)]
-       mod tests {
-           use super::*;
+         // a function is *private* by default
+         fn internal_adder(a: i32, b: i32) -> i32 {
+             a + b
+         }
 
-           #[test]
-           fn internal() {
-               assert_eq!(4, internal_adder(2, 2))
-           }
-       }
-     #+END_SRC
+         #[cfg(test)]
+         mod tests {
+             use super::*;
+
+             #[test]
+             fn internal() {
+                 assert_eq!(4, internal_adder(2, 2))
+             }
+         }
+       #+end_src
 
 *** DONE Integration Tests - 228
-    CLOSED: [2017-08-29 Tue 20:25]
+    CLOSED: [2021-01-15 Fri 03:45]
     In Rust, integration tests are _entirely external_ to your library -- they
     use your library in the same way any other code would, which means they can
-    only call functions that are part of your library's public API.
+    only call functions that are part of your library's public API (/private
+    functions/ tests are already done in the /unit tests/ part).
+    
+    - Units of code that work correctly on their own could have problems when
+      integrated, so *test /coverage/ of the /integrated code/ is important as
+      well.*
 
-    =From Jian= This is reasonable: test the private functions should be done by
-    unit tests, rather than integration tests.
+    - To create /integration tests/, you first need a =tests= directory.
 
 **** DONE The =tests= Directory - 229
-     CLOSED: [2017-08-29 Tue 16:08]
-     - Make a =tests= directory in the top level of your project.
+     CLOSED: [2021-01-15 Fri 03:45]
+     - Make a =tests= directory in the top level of your project, next to =src=.
+       * Cargo knows to look for /integration test/ files in this directory.
 
-       Cargo knows to look for integration test files in this directory.
+       * We can make as many test files as we want =FIXME= (remove "to") in this
+         directory, and Cargo will compile *each* of the files as an *individual*
+         /crate/.
+         
+     - Example:
+       #+begin_src rust
+         // Listing 11-13: An integration test of a function in the adder crate
 
-       We can make multiple files inside this directory, and Cargo will compile
-       each of the files as an individual crate.
+         // tests/integration_test.rs
+         use adder;
 
-     - ~cargo test~ output has three sections:
-       + the unit test
-       + the integration tests
-       + the doc tests
+         #[test]
+         fn it_adds_two() {
+             assert_eq!(4, adder::add_two(2));
+         }
+       #+end_src
+       * ~use adder~:
+         _each file_ in the tests directory is a *separate* /crate/,
+         so we need to bring our library into each test /crate's scope/.
 
-     - ~cargo test --test integration_test~
-       + Run particular integration test function by specifying the test
-         function's name as an argument to ~cargo test~.
+       * ~$ cargo test~ output:
+         #+begin_src text
+              Compiling adder v0.1.0 (file:///projects/adder)
+               Finished test [unoptimized + debuginfo] target(s) in 0.73s
+                Running target/debug/deps/adder-92948b65e88960b4
 
-       + To run all of the tests in a particular integration test file, use the
-         ~--test~ argument of ~cargo test~ followed by the name of the file:
-         ~cargo test --test integration_test~
+           running 1 test
+           test tests::internal ... ok
+
+           test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+                Running target/debug/deps/integration_test-82e7799c1bc62298
+
+           running 1 test
+           test it_adds_two ... ok
+
+           test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+              Doc-tests adder
+
+           running 0 tests
+
+           test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+         #+end_src
+         The /integration tests/ section starts with the line
+         =Running target/debug/deps/integration_test-ce99bcc2479f4607=
+         =FIXME= this hash is different from the one above.
+
+     - We can still run a *particular* _integration test function_
+       by specifying the _test function's name_ as an argument to ~cargo test~.
+
+     - To run _ALL the tests_ in a PARTICULAR _integration test file,_
+       use the ~--test~ argument of ~cargo test~ followed by the name of the
+       file: ~cargo test --test integration_test~
 
 **** DONE Submodules in integration Tests - 230
-     CLOSED: [2017-08-29 Tue 19:46]
-     Sometimes you want to extract some common functions into a file, and the
-     other /integration tests/ (in multiple files) use it.
-     + If you put it in a file (assume its name is =common.rs=) directly in
-       =tests=, Cargo will consider it as a /integration tests/ and output the
-       something about it when you run ~cargo test~ -- this is usually NOT what
-       we want.
+     CLOSED: [2021-01-15 Fri 03:45]
+     As mentioned earlier, _each file_ in the =tests= directory is compiled as
+     its own *separate* /crate/.
 
-     + Rather than =common.rs=, we should put the comman code into
-       =projectName/tests/common/mod.rs=, and then ~cargo test~ won't run it.
+     - Treating _each /integration test/ file_ as _its own crate_ is useful to
+       create *separate* /scopes/ that are more like the way end users will be
+       using your /crate/ (=from Jian= Every /integration test/ file simulate
+       one end user use case. Of course differnt users use cases should be in
+       DIFFERENT /scope/).
+       =TODO= =RECALL=
+         However, this means files in the =tests= directory don't share the
+       same behavior as files in =src= do, as you learned in Chapter 7 regarding
+       how to separate code into /modules/ and /files/.
+     
+     - Sometimes you want to _extract some common functions into a file_, and
+       the other /integration tests/ (in multiple files) use it.
+       * If you put it in a file (assume its name is =common.rs=) directly in
+         =tests=, Cargo will consider it as a /integration tests/, even if it may
+         not contain any ~#[test]~, and add a section for it in th output of
+         ~cargo test~ -- _this is usually *NOT* what we want._
 
-     + Example:
-       #+BEGIN_SRC rust
-         extern crate adder;
+       * Rather than =common.rs=, we should put the common code into
+         =tests/common/mod.rs=. This is an _alternate naming convention_ that
+         Rust also understands.
+           Naming the file this way _tells Rust *not* to treat the ~common~
+         /module/ as an /integration test file/._ Then we have a expected output
+         in ~cargo test~.
+
+     - Example:
+       #+begin_src rust
+         use adder;
 
          mod common;
 
@@ -6532,45 +6753,48 @@
              common::setup();
              assert_eq!(4, adder::add_two(2));
          }
-       #+END_SRC
+       #+end_src
+       * Note:
+         the ~mod common;~ /declaration/ is the same as the /module declaration/
+         we demonstrated in Listing 7-21.
 
 **** DONE Integration Tests for Binary Crates - 232
-     CLOSED: [2017-08-29 Tue 20:25]
+     CLOSED: [2021-01-15 Fri 03:45]
      - If our project is a binary crate that _ONLY_ contains a =src/main.rs= and
-       does not have a =src/lib.rs=, we are _NOT able_ to create integration tests
-       in the tests directory and use extern crate to import functions defined in
-       =src/main.rs=.
+       does not have a =src/lib.rs=, we are *NOT able* to create /integration tests/
+       in the =tests= directory and bring functions defined in the =src/main.rs=
+       file into scope with a ~use~ statement.
 
-     - Only library crates expose functions that other crates are able to call
-       and use; binary crates are meant to be run on their own.
+     - Only /library crates/ expose functions that OTHER /crates/ are able to call
+       and use; /binary crates/ are meant to be run on their own.
 
-       This is one of the reasons Rust projects that provide a binary have a
-       straightforward =src/main.rs= that calls logic that lives in =src/lib.rs=.
-       With that structure, integration tests can test the library crate by
-       using extern crate to cover the important functionality. If the important
-       functionality works, the small amount of code in =src/main.rs= will work
-       as well, and that small amount of code does not need to be tested.
-
-       =From Jian= Keep your =src/main.rs= simple!!!
+       * This is one of the reasons Rust projects that provide a binary have a
+         STRAIGHTFORWARD =src/main.rs= that calls logic that lives in
+         =src/lib.rs=.
+           With that structure, /integration tests/ *can test* the /library
+         crate/ with ~use~ to make the important functionality available.
+         + If the important functionality works, the small amount of code in
+           =src/main.rs= will work as well, and that small amount of code does
+           not need to be tested.
+           - =From Jian= Keep your =src/main.rs= simple!!!!!!!!!!!!!!!
 
 ** DONE Summary - 232
-   CLOSED: [2017-08-29 Tue 20:26]
+   CLOSED: [2021-01-15 Fri 03:46]
 
 * TODO 12. An I/O Project: Building a Command Line Program - 233
-  _OLD TITLE_ An I/O Project
   - This chapter is both
-    + a recap of many skills
-    + an exploration of a few more standard library features
+    * a recap of many skills
+    * an exploration of a few more standard library features
 
   - Make our own version of the classic command line tool ~grep~ (Globally search
     a Regular Expression and Print).
 
   - In the simplest use case, ~grep~ searches a specified file for a specified
     string using the following steps:
-    + Take as arguments a filename and a string.
-    + Read the file.
-    + Find lines in the file that contain the string argument.
-    + Print out those lines.
+    * Take as arguments a filename and a string.
+    * Read the file.
+    * Find lines in the file that contain the string argument.
+    * Print out those lines.
 
   - We'll also show how to use environment variables and print to standard error
     instead of standard out; these tech are commonly used in command line tools.
@@ -6579,11 +6803,11 @@
     Andrew Gallant by using Rust.
 
   - This project will bring together a number of concepts you've learned so far:
-    + Organizing code (using what we learned in modules, _Chapter 7_)
-    + Using vectors and strings (collections, _Chapter 8_)
-    + Handling errors (_Chapter 9_)
-    + Using traits and lifetimes where appropriate (_Chapter 10_)
-    + Writing tests (_Chapter 11_)
+    * Organizing code (using what we learned in modules, _Chapter 7_)
+    * Using vectors and strings (collections, _Chapter 8_)
+    * Handling errors (_Chapter 9_)
+    * Using traits and lifetimes where appropriate (_Chapter 10_)
+    * Writing tests (_Chapter 11_)
 
   - We'll also briefly introduce /closures/, /iterators/, and /trait objects/,
     which Chapter 13 and 17 will cover in detail =TODO=.
@@ -6594,8 +6818,8 @@
    CLOSED: [2017-08-27 Sun 18:48]
    Our first task is to make ~greprs~ able to accept its two command line
    arguments:
-   + the file name
-   + a string to search for.
+   - the file name
+   - a string to search for.
 
    The result is we can use a command of the pattern
    ~cargo run searchstring example-filename.txt~
@@ -6621,20 +6845,20 @@
             println!("{:?}", args);
         }
       #+END_SRC
-      + As we talked about in Chapter 7,
+      * As we talked about in Chapter 7,
         in cases where the desired function is nested in more than one module,
         it's CONVENTIONAL to _bring the parent module into scope_, rather than
         the function itself.
 
-      + ~std::env::args~ will panic if any argument containts invalid Unicode.
+      * ~std::env::args~ will panic if any argument containts invalid Unicode.
 
-      + To take arguments with invalid Unicode, use ~std::env::args_os~, which
+      * To take arguments with invalid Unicode, use ~std::env::args_os~, which
         returns ~OsString~.
 
           ~OsString~ values differ per-platform and are more complex to work
         with than ~String~ values.
 
-      + Run:
+      * Run:
         #+BEGIN_SRC bash
           cargo run
           # ["target/debug/greprs"]
@@ -6691,13 +6915,13 @@
      I/O, including file I/O.
 
    - Don't be confused with /prelude/
-     + Here we use ~std::io::prelude::*~
-     + There is also a general ~prelude~ which is always brought in
+     * Here we use ~std::io::prelude::*~
+     * There is also a general ~prelude~ which is always brought in
        automatically, unless you disable it (=From Jian= HOW TO???).
 
    - We've got a few flaws though:
-     + the ~main~ function has multiple responsibilities
-     + we're not handling errors as well as we could be.
+     * the ~main~ function has multiple responsibilities
+     * we're not handling errors as well as we could be.
 
    - While our program is still small, these flaws aren't a big problem, but as
      our program grows, it will be harder to fix them cleanly.
@@ -6713,8 +6937,8 @@
 
    - There are _FOUR_ problems that we'd like to fix to improve our program, they
      have to do with:
-     + the way the program is structured
-     + how it's handling potential errors
+     * the way the program is structured
+     * how it's handling potential errors
 
    - Problem 1 :: ~main~ contains more than one tasks:
      1. parse arguments
@@ -6757,14 +6981,14 @@
 
       4. The responsibilities that remain in the ~main~ function after this
          process should be:
-         + Calling the command line parsing logic with the argument values
-         + Setting up any other configuration
-         + Calling a ~run~ function in ~lib.rs~
-         + If ~run~ returns an error, handling that error
+         * Calling the command line parsing logic with the argument values
+         * Setting up any other configuration
+         * Calling a ~run~ function in ~lib.rs~
+         * If ~run~ returns an error, handling that error
 
     - This pattern is all about separating concerns:
-      + ~main.rs~ handles running the program
-      + ~lib.rs~ handles all of the logic of the task at hand.
+      * ~main.rs~ handles running the program
+      * ~lib.rs~ handles all of the logic of the task at hand.
 
       Because we can't test the ~main~ function directly, this structure lets us
       test all of our program's logic by moving it into functions in ~lib.rs~.
@@ -7153,7 +7377,7 @@
         }
       #+END_SRC
 
-      + we need ~stderr~ to be /mutable/ so we can write to it!
+      * we need ~stderr~ to be /mutable/ so we can write to it!
 
 ** DONE Summary - 262
    CLOSED: [2017-08-30 Wed 05:32]
@@ -8210,15 +8434,15 @@
     =From Jian= The milestones should be mentioned: *Smalltalk* and *Java*.
 
   - There are many _competing definitions_ for what OOP is:
-    + under some definitions, Rust is object-oriented;
-    + under other definitions, Rust is not.
+    * under some definitions, Rust is object-oriented;
+    * under other definitions, Rust is not.
 
     =From Jian= Let's see which parts is the good parts in OOP in Rust's point of
     view.
 
   - In this chapter, we'll explore
-    + some characteristics that are commonly considered to be object-oriented.
-    + how those characteristics translate to idiomatic Rust.
+    * some characteristics that are commonly considered to be object-oriented.
+    * how those characteristics translate to idiomatic Rust.
 
 ** DONE Characteristics of Object-Oriented Languages - 371
    CLOSED: [2017-08-30 Wed 21:26]
@@ -8390,6 +8614,7 @@
             }
         }
       #+END_SRC
+      
 *** DONE Implementations the Trait - 377
     CLOSED: [2017-08-30 Wed 22:30]
     #+BEGIN_SRC rust
@@ -8508,19 +8733,19 @@
       _A type can't be both sized and unsized at the same time!_
 
     - A method is /object safe/ if either:
-      + It requires ~Self~ to be ~Sized~ or
+      * It requires ~Self~ to be ~Sized~ or
 
-      + It meets _ALL_ three of the following:
-        * It _MUST NOT_ have any generic type parameters
+      * It meets _ALL_ three of the following:
+        + It _MUST NOT_ have any generic type parameters
 
-        * Its first argument _MUST_ be
+        + Its first argument _MUST_ be
           - of type ~Self~
             or
           - a type that dereferences to the ~Self~ type (that is, it must be a
             method rather than an associated function and have ~self~, ~&self~,
             or ~&mut self~ as the first argument)
 
-        * It _MUST NOT_ use ~Self~ anywhere else in the signature except for the
+        + It _MUST NOT_ use ~Self~ anywhere else in the signature except for the
           first argument.
 
 ** TODO Implementating on Object-Oriented Design Pattern - 382
