@@ -6781,7 +6781,7 @@
 ** DONE Summary - 232
    CLOSED: [2021-01-15 Fri 03:46]
 
-* TODO 12. An I/O Project: Building a Command Line Program - 233
+* TODO 12. An I/O Project: Building a Command Line Program - 233 - =start=
   - This chapter is both
     * a recap of many skills
     * an exploration of a few more standard library features
@@ -7382,112 +7382,99 @@
 ** DONE Summary - 262
    CLOSED: [2017-08-30 Wed 05:32]
 
-* DONE 13. Functional Language Features: Iterators and Closures - 263
-  CLOSED: [2017-08-30 Wed 20:36]
-** DONE Closures: Anonymous Functions That Can Capture Their Environment - 264
-   CLOSED: [2017-08-29 Tue 21:58]
-   Rust /closures/ are _allowed_ to capture values from the scope in which they
-   are called.
+* DONE 13. Functional Language Features: Iterators and Closures - 263 - =TODO=
+  CLOSED: [2021-01-16 Sat 23:58]
+  - In this chapter,
+    1. we *won't debate* the issue of what functional programming is or isn't
+    2. but will instead discuss some features of Rust that are similar to features
+       in many languages often referred to as /functional/.
 
-   Rust /functions/ are _NOT allowed_ to capture values from the scope in which
-   they are called, which is _different_ from most of they other languages.
+  - More specifically, we'll cover:
+    * Closures :: a function-like construct you can store in a variable
+    * Iterators :: a way of processing a series of elements
+    * How to use these two features to improve the I/O project in Chapter 12
+    * The _performance_ of these two features (Spoiler alert: they're faster than you might think!)
+
+  - Mastering /closures/ and /iterators/ is an important part of writing idiomatic,
+    fast Rust code, so we'll devote this entire chapter to them.
+  
+** DONE Closures: Anonymous Functions That Can Capture Their Environment - 264
+   CLOSED: [2021-01-16 Sat 03:34]
+   - /Rust's closures/ are _allowed to *capture* values_ from the /scope/ in which
+     they are defined.
+
+   - Rust /functions/ are _NOT allowed to capture values_ from the /scope/ in which
+     they are defined,
+     =from Jian= which is _different_ from most of they other languages.
 
 *** DONE Creating an Abstraction of Behavior with Closure - 264
-    CLOSED: [2017-08-29 Tue 20:50]
+    CLOSED: [2021-01-16 Sat 01:57]
+    =from Jian= This section is trivial for people have coding experience.
+    Only some basic example to illustrate 
+    1. write code with duplicate calls to a pure /function/.
+    2. save duplicate calls to one variable, and use it multiple times.
+    3. introduce a /closure/ which replaces the pure /function/,
+       but again call it multiple times. =WHY=
+    
 **** Refactoring Using Functions - 266
 **** Refactoring with Closures to Store Code - 267
 
 *** DONE Closure Type Inference and Annotation - 269
-    CLOSED: [2017-08-29 Tue 20:50]
-    - The curly braces are _optional_ if the closure body only has one line.
-
-*** DONE Storing Closures Using Generic Parameters and the ~Fn~ Traits - 270
-    CLOSED: [2017-08-29 Tue 21:03]
-    - Type annotations are required on /functions/ because they're are part of an
-      explicit interface exposed to your users.
-        Defining this interface rigidly is important for ensuring that everyone
+    CLOSED: [2021-01-16 Sat 01:57]
+    - /Type annotations/ are required on /functions/
+      because they're part of an /explicit interface/ *exposed to* your users.
+      Defining this interface rigidly is important for ensuring that everyone
       agrees on what types of values a function uses and returns.
-
-    - /Closures/ aren't used in an exposed interface like this, though: they
-      might be stored in variables and used without naming them and exposing them
-      to be invoked by users of our library.
-
-    - Add type some annotation(s) to a /closure/:
-      #+BEGIN_SRC rust
-        // // NO type annotation version:
-        // let expensive_closure = |num| {
-        // ...
-
-        let expensive_closure = |num: i32| -> i32 {
+        But /closures/ *AREN'T used in an exposed interface* like this: they're
+      stored in /variables/ and used without naming them and exposing them to
+      users of our library.
+      
+    - Closure with type annotations (mostly not required and recommended):
+      #+begin_src rust
+        let expensive_closure = |num: u32| -> u32 {
             println!("calculating slowly...");
             thread::sleep(Duration::from_secs(2));
             num
-        };
-      #+END_SRC
-
-    - Until now (2017-08-29), a /closure generics/ _CANNOT_ be created and binded
-      to a variable (of course, you CAN create it in place and use, but you
-      CANNOT bind it).
-
-      This means you'll get an error when compile the code below:
-      #+BEGIN_SRC rust
-        let example_closure = |x| x;
-
-        let s = example_closure(String::from("hello"));
-        let s = example_closure(5);
-
-        // error[E0308]: mismatched types
-        //  --> src/main.rs
-        //   |
-        //   | let n = example_closure(5);
-        //   |                         ^ expected struct `std::string::String`, found
-        //   integral variable
-        //   |
-        //   = note: expected type `std::string::String`
-        //              found type `{integer}`
-      #+END_SRC
-
-      After analysising the first use, the compiler will infer that
-      ~example_closure~ has a type of ~String -> String~, and then when it
-      analysis the second use, it found a confliction.
-
-*** DONE Limitations of the Cacher Implementation - 273
-    CLOSED: [2017-08-29 Tue 21:58]
-    - /memoization/ or /lazy evaluation/ (=From Jian= I don't think _or_ is
-      proper).
-
-    - _Each closure instance has its own unique anonymous type_:
-      that is, even if two closures have the same signature, their types are
-      still considered to be different.
-        In order to define structs, enums, or function parameters that use
-      closures, we use generics and trait bounds like we discussed in
-      Chapter 10.
-
-    - All closures implement one of the traits (=TODO= discussed in the next
-      section):
-      + ~Fn~
-      + ~FnMut~
-      + ~FnOnce~
-
-    - If a closure has a parameter of type ~i32~ and returns an ~i32~, the trait
-      bound we specify is ~Fn(i32) -> i32~.
-
-      For example,
-      #+BEGIN_SRC rust
-        // src/main.rs
-        struct Cacher<T>
-            where T: Fn(i32) -> i32
-        {
-            calculation: T,
-            value: Option<i32>,
         }
-      #+END_SRC
+      #+end_src
 
-    - The logic around the ~value~ field that we've just described is defined as:
-      #+BEGIN_SRC rust
-        // src/main.rs
+    - The curly braces are _optional_ if the closure body only has one line.
+
+*** DONE Storing Closures Using Generic Parameters and the ~Fn~ Traits - 270
+    CLOSED: [2021-01-16 Sat 02:32]
+    Create a /struct/ and use memoization to *cache* this expensive calculation.
+    #+begin_src rust
+      struct Cacher<T>
+      where
+          T: Fn(u32) -> u32,
+      {
+          calculation: T,
+          value: Option<u32>,
+      }
+    #+end_src
+    
+    - All /closures/ implement *at least one* of the /traits/:
+      * ~Fn~
+      * ~FnMut~
+      * ~FnOnce~
+
+    - Note:
+      /Functions/ can implement *all three* of the ~Fn~ /traits/ too.
+      * If what we want to do doesn't require capturing a value from the environment,
+        we can use a /function/ rather than _a /closure/ where we need something that
+        implements an ~Fn~ /trait/._
+
+    - =NEXT=
+      We'll discuss the difference between these /traits/ in the “Capturing the
+      Environment with Closures” section;
+
+    - In this example, we can use the ~Fn~ /trait/.
+
+    - Implement methods for ~Cacher<T>~:
+      #+begin_src rust
         impl<T> Cacher<T>
-            where T: Fn(i32) -> i32
+        where
+            T: Fn(u32) -> u32,
         {
             fn new(calculation: T) -> Cacher<T> {
                 Cacher {
@@ -7496,136 +7483,225 @@
                 }
             }
 
-            fn value(&mut self, arg: i32) -> i32 {
+            fn value(&mut self, arg: u32) -> u32 {
                 match self.value {
                     Some(v) => v,
                     None => {
                         let v = (self.calculation)(arg);
                         self.value = Some(v);
                         v
-                    },
+                    }
                 }
             }
         }
-      #+END_SRC
+      #+end_src
+      
+      Then we can write:
+      #+begin_src rust
+        fn generate_workout(intensity: u32, random_number: u32) {
+            let mut expensive_result = Cacher::new(|num| {
+                println!("calculating slowly...");
+                thread::sleep(Duration::from_secs(2));
+                num
+            });
 
-      + The fields on the Cacher struct are private since we want Cacher to
-        manage their values rather than letting the calling code potentially
-        change the values in these fields directly.
+            if intensity < 25 {
+                println!("Today, do {} pushups!", expensive_result.value(intensity));
+                println!("Next, do {} situps!", expensive_result.value(intensity));
+            } else {
+                if random_number == 3 {
+                    println!("Take a break today! Remember to stay hydrated!");
+                } else {
+                    println!("Today, run for {} minutes!", expensive_result.value(intensity));
+                }
+            }
+        }
+      #+end_src
 
-      + Now we have the re-implemented ~generate_workout~:
-        #+BEGIN_SRC rust
-          fn generate_workout(intensity: i32, random_number: i32) {
-              let mut expensive_result = Cacher::new(|num| {
-                  println!("calculating slowly...");
-                  thread::sleep(Duration::from_secs(2));
-                  num
-              });
+*** DONE Limitations of the ~Cacher~ Implementation - 273
+    CLOSED: [2021-01-16 Sat 03:12]
+    There are *two problems* with the _current implementation_ of ~Cacher~ that
+    would make reusing it in different contexts difficult.
 
-              if intensity < 25 {
-                  println!(
-                      "Today, do {} pushups!",
-                      expensive_result.value(intensity)
-                  );
-                  println!(
-                      "Next, do {} situps!",
-                      expensive_result.value(intensity)
-                  );
-              } else {
-                  if random_number == 3 {
-                      println!("Take a break today! Remember to stay hydrated!");
-                  } else {
-                      println!(
-                          "Today, run for {} minutes!",
-                          expensive_result.value(intensity)
-                      );
+    - Problem 1:
+      _a ~Cacher~ instance_ *assumes* it will ALWAYS get the _same value_ for
+      the parameter ~arg~ to the ~value~ /method/.
+      #+begin_src rust
+        // This test of `Cacher` will fail!
+        #[test]
+        fn call_with_different_values() {
+            let mut c = Cacher::new(|a| a);
+
+            let v1 = c.value(1);
+            let v2 = c.value(2);
+
+            assert_eq!(v2, 2);
+        }
+      #+end_src
+      * Try modifying ~Cacher~ to hold a /hash map/, from ~arg~'s of different
+        calls to the result of calling the /closure/, rather than a SINGLE value.
+        
+      * The ~value~ /function/ will
+        + look up the ~arg~ in the /hash map/ and return the value if it's present.
+
+        + If it's not present,
+          the ~Cacher~ will call the /closure/ and save the resulting value in
+          the /hash map/ associated with its ~arg~ value.
+          
+      * =from Jian= New implementation:
+        #+begin_src rust
+          use std::collections::HashMap;
+
+          struct Cacher<T>
+          where
+              T: Fn(u32) -> u32,
+          {
+              calculation: T,
+              values: HashMap<u32, u32>,
+          }
+
+          impl<T> Cacher<T>
+          where
+              T: Fn(u32) -> u32,
+          {
+              fn new(calculation: T) -> Cacher<T> {
+                  Cacher {
+                      calculation,
+                      values: HashMap::new(),
+                  }
+              }
+
+              fn value(&mut self, arg: u32) -> u32 {
+                  match self.values.get(&arg) {
+                      Some(v) => *v,
+                      None => {
+                          let v = (self.calculation)(arg);
+                          self.values.insert(arg, v);
+                          v
+                      }
                   }
               }
           }
-        #+END_SRC
+        #+end_src
 
-      + With the implementation of ~Cacher~, the test below will *FAIL*:
-        #+BEGIN_SRC rust
-          #[test]
-          fn call_with_different_values() {
-              let mut c = Cacher::new(|a| a);
-
-              let v1 = c.value(1);
-              let v2 = c.value(2);
-
-              assert_eq!(v2, 2);
-          }
-        #+END_SRC
+    - Problem 2:
+      * The current ~Cacher~ implementation is that it _only accepts_ /closures/
+        that
+        + TAKE one parameter of type ~u32~
+        + RETURN a ~u32~.
+      
+      * We might want to cache the results of /closures/ that, for example,
+        + TAKE a /string slice/
+        + RETURN ~usize~ values,
+          
+        To fix this issue, =TODO=
+        try INTRODUCING *more* /generic parameters/ to _INCREASE the flexibility_
+        of the ~Cacher~ functionality.
 
 *** DONE Capturing the Environment with Closures - 274
-    CLOSED: [2017-08-29 Tue 21:58]
-    - When a /closure/ captures a value from its environment, the /closure/ uses
-      memory to store the values for use in the closure body. This use of memory
-      is overhead that we don't want pay for in the more common case where we
-      want to execute code that doesn't capture its environment.
-        Because functions are never allowed to capture their environment,
-      defining and using functions will never incur this overhead.
+    CLOSED: [2021-01-16 Sat 03:34]
+    - *Overhead* of captureing values from the /definition site environment/:
+      * /closures/ use memory to *store* the _values for use in the /closure/
+        body._
 
-    - _Three_ ways (taking ownership, borrowing immutably, and borrowing
-      mutably) of capturing values are encoded in the _three_ ~Fn~ traits as
+      * /functions/ are *NEVER allowed to capture* their environment, defining
+        and using functions will *NEVER incur this _overhead_.*
+
+    - _THREE ways (taking ownership, borrowing immutably, and borrowing
+      mutably) of capturing values_ are encoded in the _THREE ~Fn~ traits_ as
       follows:
-      + ~FnOnce~ _takes ownership_ of the variables it captures from the
-        environment and moves those variables into the closure when the closure
-        is defined. Therefore, a FnOnce closure cannot be called more than once
-        in the same context.
+      * ~FnOnce~
+        *takes* /ownership/ of the variables it captures from the environment and
+        *moves* those variables *into* the /closure/ when the /closure/ is defined.
 
-      + ~Fn~ _borrows_ values from the environment _immutably_.
+        + Therefore,
+          a ~FnOnce~ /closure/ *cannot be called more than once* _in the SAME
+          context_.
+          
+      * ~FnMut~ *can change* the environment since it *mutably borrows* values.
 
-      + ~FnMut~ can change the environment since it _mutably borrows_ values.
+      * ~Fn~ *borrows* values from the environment _immutably_.
+
+    - When you create a /closure/,
+      Rust *infers* which /trait/ to use *based on* how the /closure/ uses the
+      _values from the environment_. 
+      * *ALL* /closures/ implement ~FnOnce~ because they can ALL _be called at
+        least once_.
+
+      * /Closures/ that *don't move* the _captured variables_ also implement
+        ~FnMut~,
+
+      * /Closures/ that *don't need mutable access* to the _captured variables_
+        also implement ~Fn~.
 
     - If we want to FORCE the /closure/ to _take ownership_ of the values it uses
       in the environment, we can use the ~move~ keyword before the parameter
       list.
-
       _This is mostly useful when passing a closure to a new thread in order to
       move the data to be owned by the new thread._
 
-      =TODO= We'll have more examples of move closures in Chapter 16 when we talk
-      about concurrency.
+      * =TODO=
+        We'll have more examples of move closures in Chapter 16 when we talk
+        about concurrency.
 
-    - For now here's the code with the ~move~ keyword added to the /closure/
-      definition and using vectors instead of integers, since integers can be
-      /copied/ rather than /moved/:
-      #+BEGIN_SRC rust
-        // src/main.rs
+      * For now here's the code with the ~move~ /keyword/ added to the /closure/
+        definition and using /vectors/ instead of /integers/, since /integers/
+        can be /copied/ rather than /moved/:
+        #+BEGIN_SRC rust
+          // Listing 13-12: Example of a closure that refers to a variable in its enclosing scope
 
-        fn main() {
-            let x = vec![1, 2, 3];
+          fn main() {
+              let x = vec![1, 2, 3];
 
-            let equal_to_x = move |z| z == x;
+              let equal_to_x = move |z| z == x;
 
-            println!("can't use x here: {:?}", x);
+              println!("can't use x here: {:?}", x);
 
-            let y = vec![1, 2, 3];
+              let y = vec![1, 2, 3];
 
-            assert!(equal_to_x(y));
-        }
-      #+END_SRC
-      This won't compile because of the ~println!~ line.
+              assert!(equal_to_x(y));
+          }
+        #+END_SRC
+        This *won't compile* because of the ~println!~ line.
 
-    - Most of the time when specifying one of the ~Fn~ trait bounds, you can
-      start with ~Fn~ and the compiler will tell you if you need ~FnMut~ or
-      ~FnOnce~ based on what happens in the closure body.
+    - Most of the time when specifying _one of the ~Fn~ /trait/ bounds,_
+
+    - The Rust compiler can guide you how to pick a ~Fn~ /trait/:
+      1. you can start with ~Fn~
+
+      2. the compiler will tell you if you need ~FnMut~ or ~FnOnce~
+         based on _what happens in the /closure/ body._
 
 ** DONE Processing a Series of Items with Iterators - 276
-   CLOSED: [2017-08-29 Tue 23:10]
-   - In Rust, iterators are /lazy/.
+   CLOSED: [2021-01-16 Sat 23:42]
+   The /iterator pattern/ allows you to perform some task on a sequence of items
+   in turn.
+
+   - An /iterator/ is responsible for the logic of
+     ITERATING over each item and
+     DETERMINING when the sequence has finished.
+     * When you use /iterators/, you don't have to reimplement that logic yourself.
+
+   - In Rust, *iterators are LAZY,* meaning they have no effect until you call
+     /methods/ that consume the /iterator/ to use it up.
+     * For example,
+       #+begin_src rust
+         let v1 = vec![1, 2, 3];
+         let v1_iter = v1.iter();
+       #+end_src
 
    - Example:
-     #+BEGIN_SRC rust
+     #+begin_src rust
        let v1 = vec![1, 2, 3];
-       for val in  v1.iter() {
-           println!("Got: {}" val);
+       let v1_iter = v1.iter();
+
+       for val in v1_iter {
+           println!("Got: {}", val);
        }
-     #+END_SRC
+     #+end_src
 
 *** DONE The ~Iterator~ Trait and the ~next~ Method - 277
-    CLOSED: [2017-08-29 Tue 23:10]
+    CLOSED: [2021-01-16 Sat 19:57]
     #+BEGIN_SRC rust
       trait Iterator {
           type Item;
@@ -7637,7 +7713,12 @@
     #+END_SRC
 
     - ~type Item~ and ~Self::Item~.
-      Define an associated type with this trait. =TODO= Chapter 19
+      Define an /associated type/ with this /trait/. =TODO= Chapter 19
+      
+    - The ~next~ /method/
+      1. returns one item of the /iterator/ at a time wrapped in ~Some~ and,
+      2. WHEN _iteration is over_,
+         returns ~None~.
 
     - ~next~
       #+BEGIN_SRC rust
@@ -7655,13 +7736,39 @@
             assert_eq!(v1_iter.next(), None);
         }
       #+END_SRC
+      * ~v1_iter~ should be *mutable*:
+        calling the ~next~ /method/ on an /iterator/ _changes internal state_
+        that the /iterator/ uses to keep track of where it is in the sequence.
+        + _NO need to make ~v1_iter~ MUTABLE_
+          WHEN we used a ~for~ loop because the loop
+          1. took /ownership/ of ~v1_iter~ and 
+          2. made it *mutable* _behind the scenes._
 
-*** DONE Methods That Consume the ~Iterator~ - 278
-    CLOSED: [2017-08-29 Tue 22:42]
-    - The methods that call the ~next~ method are called /consuming adaptors/,
-      since calling them uses up the iterator.
+      * The values we get from the calls to ~next~ are /immutable references/ to
+        the values in the /vector/.
+        + The ~iter~ /method/ produces an /iterator/ over /immutable references/.
+
+        + If we want to
+          *create* an /iterator/ that *takes ownership* of ~v1~ and
+          *returns* _OWNED values_,
+          we can call ~into_iter~ instead of ~iter~.
+
+        + Similarly, if we want to iterate over /mutable references/,
+          we can call ~iter_mut~ instead of ~iter~.
+        
+*** DONE Methods that Consume the Iterator - 278
+    CLOSED: [2021-01-16 Sat 20:03]
+    - The ~Iterator~ /trait/ has a number of different /methods/ with _default
+      implementations_ provided by the standard library.
+
+    - The /methods/ that call the ~next~ /method/ are called /consuming adaptors/,
+      because calling them uses up the /iterator/.
 
     - Example:
+      The ~sum~ /method/
+      *takes* /ownership/ of the /iterator/ and
+      *iterates through* the items by repeatedly calling ~next~, thus CONSUMING
+      the /iterator/.
       #+BEGIN_SRC rust
         // src/lib.rs
 
@@ -7676,26 +7783,36 @@
             assert_eq!(total, 6);
         }
       #+END_SRC
-      The ~sum~ method takes the ownership of ~v1_iter~, and ~v1_iter~ CANNOT be
-      used after the ~let total~ line.
+      The ~sum~ /method/ takes the /ownership/ of ~v1_iter~,
+      and ~v1_iter~ CANNOT be used after the ~let total~ line.
 
-*** DONE Methods That Produce Other ~Iterator~'s - 279
-    CLOSED: [2017-08-29 Tue 22:50]
-    - /iterator adaptor/ :: a method defined on the ~Iterator~ trait that
-         produces other iterators.
+*** DONE Methods that Produce Other Iterators - 279
+    CLOSED: [2021-01-16 Sat 20:31]
+    - /iterator adaptors/ :: methods defined on the ~Iterator~ trait that allow
+                             you to change /iterators/ into different kinds of /iterators/.
 
     - /iterator adaptor/ ~map~
       #+BEGIN_SRC rust
         let v1: Vec<i32> = vec![1, 2, 3];
         v1.iter().map(|x| x + 1);
       #+END_SRC
-      Compile this code, and a =warning= shows up do to the lazy feature of the
-      iterators: if an iterator isn't consumed, it is not used.
-        Use the ~collect~ method to force the value out ,and do something to it.
+      Compile this code, and a =warning= (=note: iterators are lazy and do nothing
+      unless consumed=) shows up: /iterator adaptors/ are /lazy/, and we need to
+      consume the /iterator/ here.
+      * We can use the ~collect~ /method/:
+        #+begin_src rust
+          let v1: Vec<i32> = vec![1, 2, 3];
+          let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
+          assert_eq!(v2, vec![2, 3, 4]);
+        #+end_src
 
-*** DONE Using Closures That Capture their Environment - 280
-    CLOSED: [2017-08-29 Tue 22:57]
+*** DONE Using Closures that Capture Their Environment - 280
+    CLOSED: [2021-01-16 Sat 23:19]
+    We can demonstrate a common use of /closures/ that _capture their environment_
+    by using the ~filter~ /iterator adaptor/.
+
     #+BEGIN_SRC rust
+      // Listing 13-19: Using the `filter` method with a closure that captures `shoe_size`
       #[derive(PartialEq, Debug)]
       struct Shoe {
           size: i32,
@@ -7703,36 +7820,43 @@
       }
 
       fn shoes_in_my_size(shoes: Vec<Shoe>, shoe_size: i32) -> Vec<Shoe> {
-          shoes.into_iter()
-              .filter(|s| s.size == shoe_size)
-              .collect()
+          shoes.into_iter().filter(|s| s.size == shoe_size).collect()
       }
 
-      #[test]
-      fn filters_by_size() {
-          let shoes = vec![
-              Shoe { size: 10, style: String::from("sneaker") },
-              Shoe { size: 13, style: String::from("sandal") },
-              Shoe { size: 10, style: String::from("boot") },
-          ];
+      #[cfg(test)]
+      mod tests {
+          use super::*;
 
-          let in_my_size = shoes_in_my_size(shoes, 10);
-
-          assert_eq!(
-              in_my_size,
-              vec![
+          #[test]
+          fn filters_by_size() {
+              let shoes = vec![
                   Shoe { size: 10, style: String::from("sneaker") },
+                  Shoe { size: 13, style: String::from("sandal") },
                   Shoe { size: 10, style: String::from("boot") },
-              ]
-          );
-      }
-    #+END_SRC
+              ];
 
-    - ~into_iter~ method
+              let in_my_size = shoes_in_my_size(shoes, 10);
+
+              assert_eq!(
+                  in_my_size,
+                  vec![
+                      Shoe { size: 10, style: String::from("sneaker") },
+                      Shoe { size: 10, style: String::from("boot") },
+                  ]
+              );
+          }
+      }
+
+      fn main() {}
+    #+END_SRC
+    - The /closure/ *captures* the ~shoe_size~ parameter _from the environment_.
 
 *** DONE Creating Our Own Iterators with the ~Iterator~ Trait - 281
-    CLOSED: [2017-08-29 Tue 23:10]
+    CLOSED: [2021-01-16 Sat 23:42]
     #+BEGIN_SRC rust
+      // Listing 13-20: Defining the Counter struct and a new function that creates
+      //                instances of Counter with an initial value of 0 for count
+
       // src/lib.rs
 
       struct Counter {
@@ -7749,9 +7873,8 @@
           type Item = u32;
 
           fn next(&mut self) -> Option<Self::Item> {
-              self.count += 1;
-
-              if self.count < 6 {
+              if self.count < 5 {
+                  self.count += 1;
                   Some(self.count)
               } else {
                   None
@@ -7759,9 +7882,17 @@
           }
       }
     #+END_SRC
+    - =TODO= Don't worry about /associated types/ yet, we'll cover them in Chapter 19.
+
+    - If the value of ~count~ is less than 5,
+      * ~next~ will
+        + INCREMENT ~count~ and
+        + RETURN the current value wrapped in ~Some~.
+    - Once count is 5,
+      our iterator will _stop incrementing_ ~count~ and always return ~None~.
 
 **** DONE Using Our ~Counter~ Iterator's ~next~ Method - 282
-     CLOSED: [2017-08-29 Tue 23:05]
+     CLOSED: [2021-01-16 Sat 23:42]
      #+BEGIN_SRC rust
        #[test]
        fn calling_next_directly() {
@@ -7777,26 +7908,25 @@
      #+END_SRC
 
 **** DONE Using Other ~Iterator~ Trait Methods - 282
-     CLOSED: [2017-08-29 Tue 23:10]
+     CLOSED: [2021-01-16 Sat 23:42]
      #+BEGIN_SRC rust
        #[test]
        fn using_other_iterator_trait_methods() {
-           let sum: u32 = Counter::new().zip(Counter::new().skip(1))
-                                        .map(|(a, b)| a * b)
-                                        .filter(|x| x % 3 == 0)
-                                        .sum();
+           let sum: u32 = Counter::new()
+               .zip(Counter::new().skip(1))
+               .map(|(a, b)| a * b)
+               .filter(|x| x % 3 == 0)
+               .sum();
 
            assert_eq!(18, sum);
        }
      #+END_SRC
-
      ~zip~ produces only four pairs -- ~(5, None)~ is never produced -- ~zip~
      returns ~None~ when either of its input iterators return ~None~.
 
-** DONE Improving Our I/O Project - 283
-   CLOSED: [2017-08-30 Wed 19:41]
+** Improving Our I/O Project - 283
    Use iterators to make places in the code clearer and more concise.
-
+   
 *** DONE Removing a ~clone~ Using an Iterator - 284
     CLOSED: [2017-08-30 Wed 19:41]
 **** DONE Using the Returned Iterator Directly - 284
@@ -7869,19 +7999,21 @@
     #+END_SRC
 
 ** DONE Comparing Performance: Loops vs. Iterators - 287
-   CLOSED: [2017-08-30 Wed 20:36]
+   CLOSED: [2021-01-16 Sat 23:57]
    - Benchmark by loading the entire contents of "The Adventures of Sherlock
      Holmes" by Sir Arthur Conan Doyle into a String and looking for the word
      =the= in the contents.
-
-     The /iterator/ version is a little faster.
+     * Conclusion: the /iterator/ version is a little faster.
 
    - /Iterators/ are one of Rust's /zero-cost abstractions/.
 
-   - /zero-cost abstractions/ :: (by Bjarne Stroustrup in "Foundations of C++")
-        In general, C++ implementations obey the zero-overhead principle: What
-        you don't use, you don't pay for. An further: What you do use, you
-        couldn't hand code any better.
+   - /zero-cost abstractions/ ::
+     #+begin_quote
+       In general, C++ implementations obey the zero-overhead principle:
+       What you don't use, you don't pay for.
+       An further: What you do use, you couldn't hand code any better.
+                                   -- by Bjarne Stroustrup in "Foundations of C++"
+     #+end_quote
 
    - Example (from an audio decoder):
      The decoding algorithm uses the linear prediction mathematical operation to
@@ -7901,12 +8033,77 @@
            buffer[i] = prediction as i32 + delta;
        }
      #+END_SRC
+     * Q :: What assembly code would this Rust code compile to?
+     * A :: It compiles down to the same assembly you'd write by hand.
+       + There's *no loop* at all corresponding to the iteration over the values
+         in ~coefficients~:
+         Rust knows that there are 12 iterations, so it “unrolls” the loop.
+         /Unrolling/ is an optimization that removes the overhead of the loop
+         controlling code and instead generates repetitive code for each
+         iteration of the loop.
 
-** DONE Summary - 289
-   CLOSED: [2017-08-30 Wed 19:53]
+     * All of the ~coefficients~ get stored in /registers/,
+       which means accessing the values is *very fast*.
 
-* TODO 14. More About Cargo and Crates.io - 291
-** TODO Customizing Builds with Release Profiles - 292
+     * There are no /bounds checks/ on the array access at runtime.
+
+     * CONCLUSION:
+       All these optimizations that Rust is able to apply make the resulting
+       code extremely efficient.
+
+   - Summary:
+     *Now that you know this, you can use /iterators/ and /closures/ without fear!*
+     They make code seem like it's higher level
+     BUT *don't* impose a /runtime performance penalty/ for doing so.
+
+** Summary - 289
+
+* TODO 14. More About Cargo and Crates.io - 291 - =TODO= =publish=
+  In this chapter, we'll discuss some of its other, more advanced features to
+  show you how to do the following:
+  * *Customize* your build through /release profiles/
+  * *Publish* libraries *on* crates.io
+  * *Organize* LARGE projects with /workspaces/
+  * *Install* binaries *from* crates.io
+  * *Extend* Cargo using _custom commands_
+
+** DONE Customizing Builds with Release Profiles - 292
+   CLOSED: [2021-01-17 Sun 00:27]
+   In Rust, /release profiles/ are *predefined* and *customizable* /profiles/
+   with different configurations that allow a programmer to have more control
+   over various options for compiling code. Each profile is configured
+   independently of the others.
+
+   - Cargo has two MAIN /profiles/:
+     * ~cargo build~ uses the ~dev~ /profile/
+       + The ~dev~ /profile/ is defined with *good defaults for _DEVELOPMENT_.*
+
+     * ~cargo build --release~ uses the ~release~ /profile/
+       + the ~release~ /profile/ has *good defaults for _RELEASE_ builds.*
+
+   - These /profile/ names might be familiar from the OUTPUT of your _builds_:
+     * ~cargo build~: Finished dev [unoptimized + debuginfo] target(s) in 0.0s
+     * ~cargo build --release~: Finished release [optimized] target(s) in 0.0s
+
+   - Cargo has *default settings* for each of the /profiles/ that apply
+     when there aren't any ~[profile.*]~ sections in the project's =Cargo.toml=
+     file.
+
+   - By adding ~[profile.*]~ sections for any /profile/ you want to customize,
+     you can *override* any subset of the _default settings_.
+     * For example,
+       here are the default values for the ~opt-level~ setting for the ~dev~ and
+       ~release~ /profiles/:
+       #+begin_src toml
+         [profile.dev]
+         opt-level = 0
+
+         [profile.release]
+         opt-level = 3
+       #+end_src
+       + ~opt-level~ controls the _number of optimizations_ Rust will apply to
+         your code, with a *range of 0 to 3.*
+
 ** TODO Publishing a Crate to Crates.io - 293
 *** TODO Making Useful Documentation Comments - 293
 **** Commonly Used Sections - 294
@@ -7920,30 +8117,292 @@
 *** TODO Publishing a New Version of an Existing Crate - 302
 *** TODO Removing Versions from Crate.io with ~cargo yank~ - 302
 
-** TODO Cargo Workspaces - 303
-*** Creating a Workspace - 303
-*** Creating the Second Package in the Workspace - 304
-**** Depending on an External Package in a Workspace - 305
-**** Adding a Test to a Workspace - 306
+** DONE Cargo Workspaces - 303
+   CLOSED: [2021-01-17 Sun 01:27]
+   As your project develops, you might find that the /library crate/ continues to
+   get bigger and you want to *split up* your /package/ further into _MULTIPLE
+   /library crates/._
+     In this situation, Cargo offers a feature called /workspaces/ that can help
+   manage _MULTIPLE related packages_ that are developed in tandem.
+   
+*** DONE Creating a Workspace - 303
+    CLOSED: [2021-01-17 Sun 01:27]
+    Create a project named as =add=, which includes ONE /binary crate/ and TWO
+    /library crates/. The /binary crate/, which will provide the _main
+    functionality_, will depend on the TWO /libraries/: one provides a function
+    ~add_one~, and the other one provides ~add_two~.
+    
+    - There are multiple ways to structure a workspace; =TODO= =???=
+      we're going to show one common way.
+      1. ~mkdir add~ and then ~cd add~
 
-** TODO Installing Binaries from Crates.io with ~cargo install~ - 308
-** TODO Extending Cargo with Custom Commands - 309
-** TODO Summary - 309
+      2. Add =Cargo.toml=
+         #+begin_src toml
+           [workspace]
+
+           members = [
+               "adder",
+           ]
+         #+end_src
+
+      3. ~cargo new adder~
+         Then the project directory structure:
+         #+begin_src text
+           ├── Cargo.lock
+           ├── Cargo.toml
+           ├── adder
+           │   ├── Cargo.toml
+           │   └── src
+           │       └── main.rs
+           └── target
+         #+end_src
+         One /workspace/ has one =target= directory at the top level for the
+         /compiled artifacts/ to be placed into;
+         * EXAMPLE:
+           =adder= doesn't have its own =target=, even if run ~cargo build~ just
+           INSIDE =adder=.
+
+         * RATIONALE:
+           + The /crates/ in a /workspace/ are meant to depend on each other.
+              =from Jian= If not, we shouldn't use /workspace/.
+
+           + By sharing _ONE_ =target= directory, the /crates/ can *AVOID
+             unnecessary rebuilding*:
+             If each /crate/ had its own =target= directory, EACH /crate/ would
+             have to *recompile* EACH of the other /crates/ in the /workspace/ to
+             have the /artifacts/ in its own =target= directory.
+    
+*** DONE Creating the Second Package in the Workspace - 304
+    CLOSED: [2021-01-17 Sun 01:27]
+    Next, create another /member package/ in the /workspace/ and call it =add-one=.
+    
+    1. Change the top level =Cargo.toml=:
+       #+begin_src toml
+         [workspace]
+
+         members = [
+             "adder",
+             "add-one",
+         ]
+       #+end_src
+
+    2. ~cargo new add-one --lib~
+       Then the project directory structure is like:
+       #+begin_src text
+         ├── Cargo.lock
+         ├── Cargo.toml
+         ├── add-one
+         │   ├── Cargo.toml
+         │   └── src
+         │       └── lib.rs
+         ├── adder
+         │   ├── Cargo.toml
+         │   └── src
+         │       └── main.rs
+         └── target
+       #+end_src
+
+    3. Add =add-one/src/lib.rs=
+       #+begin_src rust
+         pub fn add_one(x: i32) -> i32 {
+             x + 1
+         }
+       #+end_src
+       
+    4. Edit the =adder/Cargo.toml=:
+       #+begin_src toml
+         [dependencies]
+
+         add-one = { path = "../add-one" }
+       #+end_src
+       Cargo does *NOT assume* that /crates/ in a /workspace/ will depend on each
+       other, so we need to be explicit about the dependency relationships
+       between the /crates/.
+       * =from Jian=
+         I think this is reasonable, if assue this,
+         *circular dependency will be introduced AUTOMATICALLY*.
+
+    5. Use the ~add_one~ function from the =add-one= /crate/.
+       #+begin_src rust
+         // adder/src/main.rs
+
+         use add_one;
+
+         fn main() {
+             let num = 10;
+             println!(
+                 "Hello, world! {} plus one is {}!",
+                 num,
+                 add_one::add_one(num)
+             );
+         }
+       #+end_src
+
+     6. We can ~cargo build~, and then ~cargo run -p adder~.
+        * The ~-p~ flag specifies which /package/ in the /workspace/ we want to run.
+       
+**** DONE Depending on an External Package in a Workspace - 305
+     CLOSED: [2021-01-17 Sun 01:27]
+     Add /external packages/ to corresponding =[dependencies]= section of
+     corresponding =Cargo.toml=.
+     
+     - Example:
+       ~add_one~ depends on ~rand~.
+       Then add ~rand~ to the =[dependencies]= section of =add-one/Cargo.toml=.
+       
+     - /Crates/ in the SAME /workspace/ doesn't share dependencies.
+       If =adder/src/main.rs= wants to use ~rand~, then edit =adder/Cargo.toml=.
+
+     - Building the =adder= /package/ will *add* ~rand~ to the list of /dependencies/
+       for =adder= in =Cargo.lock=, but *no additional copies of =rand= will be
+       downloaded*.
+       
+       * Cargo has *ensured* that EVERY /crate/ in EVERY /package/ in the /workspace/
+         using the ~rand~ /package/ *will be using the _SAME version_.*
+         + This
+           - *saves space*
+           - ensures that the /crates/ in the /workspace/ will be *compatible*
+             with each other.
+
+**** DONE Adding a Test to a Workspace - 306
+     CLOSED: [2021-01-17 Sun 01:27]
+     1. Add a /unit test/ to =add-one/src/lib.rs=.
+
+     2. Run ~cargo test~ in the top-level =add= directory, and it will run all tests
+        from EACH /crate/. Of course, currently only =add-one= has a /unit test/.
+        #+begin_src text
+             Compiling add-one v0.1.0 (file:///projects/add/add-one)
+             Compiling adder v0.1.0 (file:///projects/add/adder)
+              Finished test [unoptimized + debuginfo] target(s) in 0.27s
+               Running target/debug/deps/add_one-f0253159197f7841
+
+          running 1 test
+          test tests::it_works ... ok
+
+          test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+               Running target/debug/deps/adder-49979ff40686fa8e
+
+          running 0 tests
+
+          test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+             Doc-tests add-one
+
+          running 0 tests
+
+          test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+        #+end_src
+        
+        - ~cargo test -p add-one~ can be used to run the ONLY tests for the
+          =add-one= /crate/.
+          #+begin_src text
+                 Finished test [unoptimized + debuginfo] target(s) in 0.00s
+                 Running target/debug/deps/add_one-b3235fea9a156f74
+
+            running 1 test
+            test tests::it_works ... ok
+
+            test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+               Doc-tests add-one
+
+            running 0 tests
+
+            test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+          #+end_src
+          
+     3. If you *publish* the /crates/ in the /workspace/ to crates.io,
+        *EACH /crate/ in the /workspace/ will need to be _published SEPARATELY_.* 
+        - The ~cargo publish~ does *NOT* have an ~--all~ flag or a ~-p~ flag.
+
+     4. _SUMMARY:_
+        As your project grows, consider using a /workspace/:
+        * it's easier to understand smaller, individual components than one big
+          blob of code.
+        * Furthermore, keeping the /crates/ in a /workspace/ can *make coordination
+          between them easier if they are often changed at the same time.*
+
+** DONE Installing Binaries from Crates.io with ~cargo install~ - 308
+   CLOSED: [2021-01-17 Sun 01:44]
+   - The ~cargo install~ command allows you to install and use /binary crates/
+     LOCALLY.
+     * This isn’t intended to replace system packages; it’s meant to be a convenient
+       way for Rust developers to install tools that others have shared on crates.io.
+
+     * NOTE:
+       you can *ONLY install* packages that have /binary targets/.
+
+       + binary target :: the runnable program that is created if the /crate/ has
+                           a =src/main.rs= file or another file specified as a
+                           /binary/, as opposed to a /library target/.
+                           
+       + library target :: isn't runnable on its own
+                            but is suitable for including within other programs.
+
+       + USUALLY, =IMPORTANT=
+         /crates/ have information in the README file *ABOUT*
+         whether a /crate/ is a /library/, has a /binary target/, or _both_.
+
+   - _All binaries_ installed with ~cargo install~ are stored in _the installation
+     root's bin folder_.
+       If you installed Rust using =rustup.rs= and *don't* have any _custom
+     configurations_, this directory will be =$HOME/.cargo/bin=.
+     * Ensure that directory is in your ~$PATH~, then use the installed binary can
+       be simpler.
+
+   - For example,
+     in Chapter 12 we mentioned that there's a Rust implementation of the ~grep~
+     tool called ~ripgrep~ for searching files. If we want to install ~ripgrep~,
+     we can run the following:
+     ~cargo install ripgrep~
+     #+begin_src text
+           Updating crates.io index
+         Downloaded ripgrep v11.0.2
+         Downloaded 1 crate (243.3 KB) in 0.88s
+         Installing ripgrep v11.0.2
+       --snip--
+          Compiling ripgrep v11.0.2
+           Finished release [optimized] target(s) in 3m 10s
+         Installing ~/.cargo/bin/rg
+          Installed package `ripgrep v11.0.2` (executable `rg`)
+     #+end_src
+     * The _second-to-last line of the output_ shows
+       the _LOCATION_ (=~/.cargo/bin/=)
+       AND
+       the _NAME_ of the installed binary, which in the case of ~ripgrep~ is ~rg~.
+     
+** DONE Extending Cargo with Custom Commands - 309
+   CLOSED: [2021-01-17 Sun 01:30]
+   Cargo is designed so you can _extend it with new subcommands_
+   *WITHOUT having to modify* Cargo.
+
+   - If a binary in your ~$PATH~ is named ~cargo-something~,
+     you can run it *as if it was a Cargo subcommand* by running ~cargo something~.
+
+   - /Custom commands/ like this are also *listed* when you run ~cargo --list~.
+
+   - Being able to use ~cargo install~ to install extensions and then run them just
+     like the built-in Cargo tools is a super convenient benefit of Cargo's
+     design!
+     
+** DONE Summary - 309
+   CLOSED: [2021-01-17 Sun 01:30]
 
 * TODO 15. Smart Pointers - 311
   - /pointer/ :: a generic programming term for something that refers to a
                  location that stores some other data.
 
   - /smart pointers/ :: data structures that
-    + act like a pointer
-    + have additional metadata and capabilities, such as /reference counting/.
+    * act like a pointer
+    * have additional metadata and capabilities, such as /reference counting/.
 
   - The /smart pointers/ pattern originated in C++.
 
   - In Rust, an additional difference between /plain references/ and
     /smart pointers/ is that
-    + /references/ are a kind of pointer that ONLY borrow data;
-    + by contrast, in many cases, /smart pointers/ own the data that they point to.
+    * /references/ are a kind of pointer that ONLY borrow data;
+    * by contrast, in many cases, /smart pointers/ own the data that they point to.
 
   - We've actually already encountered a few smart pointers in this book,
     even though we didn't call them that by name at the time.
@@ -7951,10 +8410,10 @@
     For example, ~String~ and ~Vec<T>~ are both /smart pointers/.
 
   - /smart pointers/
-    + _own_ some memory and allow you to manipulate it,
-    + have
-      * metadata (like their /capacity/)
-      * extra capabilities or guarantees (~String~ data will always be valid UTF-8).
+    * _own_ some memory and allow you to manipulate it,
+    * have
+      + metadata (like their /capacity/)
+      + extra capabilities or guarantees (~String~ data will always be valid UTF-8).
 
   - The characteristics that distinguish a /smart pointer/ from an
     /ordinary struct/ are:
@@ -7966,22 +8425,22 @@
     pattern.
 
     The ones we cover here are the most common ones from the standard library:
-    + ~Box<T>~, for allocating values on the /heap/.
+    * ~Box<T>~, for allocating values on the /heap/.
 
-    + ~Rc<T>~, a reference counted type so data can have multiple owners
+    * ~Rc<T>~, a reference counted type so data can have multiple owners
       (=From Jian= as I know, reference count can solve /circular reference/
       =double check here=).
 
-    + ~RefCell<T>~, which isn't a /smart pointer/ itself, but manages access to
+    * ~RefCell<T>~, which isn't a /smart pointer/ itself, but manages access to
       the /smart pointers/ ~Ref~ and ~RefMut~ to enforce the borrowing rules
       _at runtime_ instead of compile time.
 
     Along the way, we'll also cover:
-    + The /interior mutability/ pattern where an immutable type exposes an API
+    * The /interior mutability/ pattern where an immutable type exposes an API
       for mutating an interior value, and the borrowing rules apply _at runtime_
       instead of compile time.
 
-    + Reference cycles, how they can leak memory, and how to prevent them.
+    * Reference cycles, how they can leak memory, and how to prevent them.
 
 ** DONE Using ~Box<T>~ to Point to Data on the Heap - 312
    CLOSED: [2017-08-31 Thu 10:30]
@@ -8040,16 +8499,15 @@
 *** Treating a Type Like a Reference by Implementing the ~Deref~ Trait - 320
 *** Implicit ~Deref~ Coercions with Functions and Methods - 321
 *** How ~Deref~ Coercion Interacts with Mutability - 322
-
    - The ~Deref~ allows us to override ~*~ (the dereference operator).
 
    - Override ~*~ for smart pointers makes accessing the data behind the smart
      pointer convenient.
-     + With /references/ that are _NOT_ /smart pointers/, there's _only one_
+     * With /references/ that are _NOT_ /smart pointers/, there's _only one_
        value that the reference is pointing to, so the dereference operation is
        straightforward.
 
-     + /Smart pointers/ can also store metadata about the pointer of the data.
+     * /Smart pointers/ can also store metadata about the pointer of the data.
 
        We usually do ONLY want the data, NOT the metadata. If we don't override
        the ~*~ (through implementing the ~Deref~ trait), we need to manually
@@ -8106,41 +8564,41 @@
      expands ~*my_favorite_song~ to:
      ~*(my_favorite_song.deref())~
 
-    - Rust tends to favor _explicitness_ over _implicitness_.
+     * Rust tends to favor _explicitness_ over _implicitness_.
 
-      One exception: /deref coercions/ of arguments to functions and methods.
+       One exception: /deref coercions/ of arguments to functions and methods.
 
-    - A /deref coercion/ will automatically convert a reference to any pointer
-      into a reference to that pointer's contents.
+     * A /deref coercion/ will automatically convert a reference to any pointer
+       into a reference to that pointer's contents.
 
-    - A /deref coercion/ happens when the reference type of the argument passed
-      into the function _differs_ from the reference type of the parameter
-      defined in that function's signature.
+     * A /deref coercion/ happens when the reference type of the argument passed
+       into the function _differs_ from the reference type of the parameter
+       defined in that function's signature.
 
-    - /Deref coercion/ was added to Rust to make calling functions and methods
-      _NOT_ need as many explicit references and dereferences with ~&~ and ~*~.
+     * /Deref coercion/ was added to Rust to make calling functions and methods
+       _NOT_ need as many explicit references and dereferences with ~&~ and ~*~.
 
-    - Example:
-      #+BEGIN_SRC rust
-        fn compress_mp3(audio: &[u8]) -> Vec<u8> {
-            // the actual implementation would go here
-        }
+     * Example:
+       #+BEGIN_SRC rust
+         fn compress_mp3(audio: &[u8]) -> Vec<u8> {
+             // the actual implementation would go here
+         }
 
-        // If there is NOT *deref coercions*, we need
-        compress_mp3(my_favorite_song.audio.as_slice());
+         // If there is NOT *deref coercions*, we need
+         compress_mp3(my_favorite_song.audio.as_slice());
 
-        // Luckily that we have *deref coercions*
-        compress_mp3(&my_favorite_song);
-      #+END_SRC
+         // Luckily that we have *deref coercions*
+         compress_mp3(&my_favorite_song);
+       #+END_SRC
 
-    - Similar to how we use the ~Deref~ trait to override ~*~ on ~&T~'s, there is
-      also a ~DerefMut~ trait for overriding ~*~ on ~&mut T~.
+     * Similar to how we use the ~Deref~ trait to override ~*~ on ~&T~'s, there is
+       also a ~DerefMut~ trait for overriding ~*~ on ~&mut T~.
 
-    - Rust does /deref coercion/ when it finds types and trait implementations in
-      _three_ cases:
-      + From ~&T~ to ~&U~ when ~T: Deref<Target=U>~.
-      + From ~&mut T~ to ~&mut U~ when ~T: DerefMut<Target=U>~.
-      + From ~&mut T~ to ~&U~ when ~T: Deref<Target=U>~.
+     * Rust does /deref coercion/ when it finds types and trait implementations in
+       _three_ cases:
+       + From ~&T~ to ~&U~ when ~T: Deref<Target=U>~.
+       + From ~&mut T~ to ~&mut U~ when ~T: DerefMut<Target=U>~.
+       + From ~&mut T~ to ~&U~ when ~T: Deref<Target=U>~.
 
 ** DONE Running Code on Cleanup with the ~Drop~ Trait - 323
    CLOSED: [2017-08-31 Thu 21:34]
@@ -8188,16 +8646,16 @@
         // Dropping CustomSmartPointer!
         // Wait for it...
       #+END_SRC
-      + We are NOT allowed to call the ~drop~ method that we defined (like
+      * We are NOT allowed to call the ~drop~ method that we defined (like
         ~c.drop~) directly. If we did it, the error message will be
         =explicit destructor calls not allowed=.
 
-      + We are also NOT allowed to call ~Drop::drop~ directly because Rust inserts
+      * We are also NOT allowed to call ~Drop::drop~ directly because Rust inserts
         its call to ~Drop::drop~ automatically when the value goes out of scope,
         if we are allowed to do this manually, there will be doulbe (or multiple)
         free problem.
 
-      + The definition of ~std::mem::drop~:
+      * The definition of ~std::mem::drop~:
         #+BEGIN_SRC rust
           pub mod std {
               pub mod mem {
@@ -8355,8 +8813,8 @@
 
       _But_ with ~RefCell<T>~, we use the ~borrow~ and ~borrow_mut~ methods, which
       are part of the _safe API_ that ~RefCell<T>~ has.
-      + ~borrow~ returns the smart pointer type ~Ref~
-      + ~borrow_mut~ returns the smart pointer type ~RefMut~.
+      * ~borrow~ returns the smart pointer type ~Ref~
+      * ~borrow_mut~ returns the smart pointer type ~RefMut~.
 
      - Example:
        =NOTE=: ~data~ is immutable, though we change its inner value through

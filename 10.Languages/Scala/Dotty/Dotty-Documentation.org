@@ -1,5 +1,5 @@
 #+TITLE: Dotty Documentation
-#+VERSION: 8d00ed1, f72855e --> 3.0.0-RC1-bin-20210113-8345078-NIGHTLY
+#+VERSION: 8d00ed1, f72855e --> 3.0.0-RC1-bin-20210117-65b17af-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
 #+STARTUP: folded
@@ -5155,9 +5155,9 @@
        /Quotes/ and /splices/ in this section allow us to treat code in a similar
        way, effectively supporting /macros/.
        
-       In string interpolation we /quoted/ a string and then we /spliced/ into it,
-       two others.
-       1. ~name~, is a reference to a value of type string,
+       In /string interpolation/ we /quoted/ a string and then we /spliced/ into
+       it, two others.
+       1. ~name~, is a reference to a value of type ~String~,
        2. an _arithmetic expression_ that will be evaluated followed by the /splicing/
           of its string representation.
 
@@ -6161,17 +6161,17 @@
          BUT only ~$~ is subject to the /PCP/, whereas ~run~ is just a NORMAL
          /method/.
 
-       * ~run~ provides a ~Quotes~ that can be used to *show* the expression in its
-         scope.
+       * ~scala.quoted.staging.run~ provides a ~Quotes~ that can be used to *show*
+         the expression in its scope.
 
-       * On the other hand ~withQuotes~ provides a ~Quotes~ WITHOUT *evaluating*
-         the expression.
+       * On the other hand ~scala.quoted.staging.withQuotes~ provides a ~Quotes~
+         WITHOUT *evaluating* the expression.
          #+begin_src scala
            pakcage scala.quoted.staging
 
-           def run[T](expr: Quotes ?=> Expr[T])(using toolbox: Toolbox): T = ...
+           def run[T](expr: Quotes ?=> Expr[T])(using Compiler): T = ...
 
-           def withQuotes[T](thunk: Quotes ?=> T)(using toolbox: Toolbox): T = ...
+           def withQuotes[T](thunk: Quotes ?=> T)(using Compiler): T = ...
          #+end_src
      
 **** DONE Create a new Scala 3 project with staging enabled
@@ -6208,17 +6208,17 @@
        how we make a future-stage function of type ~Expr[Array[Int] => Int]~ in
        line 6 below.
 
-     - Using ~run { ... }~ we can *evaluate* an expression at /runtime/.
+     - Using ~staging.run { ... }~ we can *evaluate* an expression at /runtime/.
 
-     - Within the scope of ~run~ we can also invoke ~show~ on an expression to get
-       a source-like representation of the expression.
+     - Within the scope of ~staging.run~ we can also invoke ~show~ on an expression
+       to get a source-like representation of the expression.
        #+begin_src scala
-         import scala.quoted.staging._
+         import scala.quoted._
 
-         // make available the necessary toolbox for runtime code generation
-         given Toolbox = ToolBox.make(getClass.getClassLoader)
+         // make available the necessary compiler for runtime code generation
+         given staging.Compiler = staging.Compiler.make(getClass.getClassLoader)
 
-         val f: Array[Int] => Int = run {
+         val f: Array[Int] => Int = staging.run {
            val stagedSum: Expr[Array[Int] => Int] = '{ (arr: Array[Int]) => ${sum('arr)} }
            println(stagedSum.show)  // Prints "(arr: Array[Int]) => { var sum = 0; ... }"
            stagedSum
@@ -6390,8 +6390,8 @@
        class MyInspector extends TastyInspector:
          protected def processCompilationUnit(using Quotes)
                                              (tree: quotes.reflect.Tree): Unit =
-          import quotes.reflect._
-          // Do something with the tree
+           import quotes.reflect._
+           // Do something with the tree
      #+end_src
      
      - Then the ~Consumer~ =FIXME= can be instantiated with the following code to
@@ -7597,10 +7597,12 @@
       * ~ClassTag~ _type tests_ are _still supported_
         BUT a /warning/ will be emitted after 3.0.
       
-**** Examples
-     Given the following abstract definition of ~Peano~ numbers that provides
-     ~TypeTest[Nat, Zero]~ and ~TypeTest[Nat, Succ]~
+**** Example
+     Given the following abstract definition of ~Peano~ numbers that provides two
+     /given instances/ of types ~TypeTest[Nat, Zero]~ and ~TypeTest[Nat, Succ]~
      #+begin_src scala
+       import scala.refelct._
+
        trait Peano:
          type Nat
          type Zero <: Nat
@@ -7616,27 +7618,53 @@
            def unapply(nat: Succ): Option[Nat]
          }
 
-         given TypeTest[Nat, Zero] = typeTestOfZero
-         protected def typeTestOfZero: TypeTest[Nat, Zero]
-         given TypeTest[Nat, Succ] = typeTestOfSucc
-         protected def typeTestOfSucc: TypeTest[Nat, Succ]
+         given typeTestOfZero: TypeTest[Nat, Zero]
+         given typeTestOfSucc: TypeTest[Nat, Succ]
      #+end_src
      
-     it will be possible to write the following program
+     together with an implementation of ~Peano~ numbers based on type ~Int~
      
      #+begin_src scala
-       val peano: Peano = ...
+       object PeanoInt extends Peano:
+         type Nat = Int
+         type Zero = Int
+         type Succ = Int
 
-       import peano._
+         def safeDiv(m: Nat, n: Nat): (Nat, Nat) = (m / n, m % n)
 
-       def divOpt(m: Nat, n: Nat): Option[(Nat, Nat)] =
-         n match
-           case Zero        => None
-           case s @ Succ(_) => Some(safeDiv(m, s))
+         val Zero: Zero = 0
 
-       val two = Succ(Succ(Zero))
-       val five = Succ(Succ(Succ(two)))
-       println(divOpt(five, two))
+         val Succ: SuccExtractor = new:
+           def apply(nat: Nat): Succ = nat + 1
+           def unapply(nat: Succ): Succ = Some(nat - 1)
+
+         def typeTestOfZero: TypeTest[Nat, Zero] = new:
+           def unapply(x: Nat): Option[x.type & Zero] =
+             if x == 0 then Some(x) else None
+
+
+         def typeTestOfSucc: TypeTest[Nat, Succ] = new:
+           def unapply(x: Nat): Option[x.type & Succ] =
+             if x > 0 then Some(x) else None
+     #+end_src
+     
+     it is possible to write the following program
+     
+     #+begin_src scala
+       @main def test =
+         import PeanoInt._
+
+         def divOpt(m: Nat, n: Nat): Option[(Nat, Nat)] =
+           n match
+             case Zero        => None
+             case s @ Succ(_) => Some(safeDiv(m, s))
+
+         val two = Succ(Succ(Zero))
+         val five = Succ(Succ(Succ(two)))
+
+         println(divOpt(five, two))  // prints "Some((2, 1))"
+         println(divOpt(two, five))  // prints "Some((0, 2))"
+         println(divOpt(two, Zero))  // prints "None"
      #+end_src
      Note that without the ~TypeTest[Nat, Succ]~ the pattern ~Succ.unapply(nat: Succ)~
      would be unchecked.
@@ -8543,16 +8571,16 @@
        #+end_src
 
 **** DONE Working with ~Null~
-     CLOSED: [2020-12-30 Wed 17:03]
+     CLOSED: [2021-01-19 Tue 02:51]
      To make working with nullable values easier, we *propose* adding a few
      utilities to the standard library. So far, we have found the following
      useful:
      - An extension method ~.nn~ to "cast away" nullability
        #+begin_src scala
-         def[T] (x: T | Null) nn: x.type & T =
-           if x == null
-           then new NullPointerException("tried to cast away nullability, but value is null")
-           else x.asInstanceOf[x.type & T]
+         extension [T](x: T | Null) =
+           inline def nn: T =
+             assert(x != null)
+             x.asInstanceOf[T]
        #+end_src
        This means that given ~x: String|Null~, ~x.nn~ has type ~String~, so we
        can call all the usual methods on it. Of course, ~x.nn~ will _throw a
@@ -10809,7 +10837,7 @@
       If SEVERAL /toplevel definitions/ are /overloaded variants/ with the SAME
       NAME, *they must all come from the _SAME_ source file.*
     
-*** DONE Dropped: Early Initializers
+*** DONE Dropped: Early Initializers - =TODO= =READ=
     CLOSED: [2020-12-16 Wed 20:14]
     /Early initializers/ of the form
     #+begin_src scala
@@ -10822,6 +10850,8 @@
 
     - =TODO=
       Learn more about the usages of /early Initializers/ in Scala 2.
+
+    - For more information, see [[https://www.scala-lang.org/files/archive/spec/2.13/05-classes-and-objects.html#early-definitions][SLS §5.1.6]]. =TODO= =READ=
     
 *** DONE Dropped: Class Shadowing
     CLOSED: [2020-12-16 Wed 20:05]
@@ -11576,5 +11606,3 @@
 **** Classlikes
 ***** (O, C) ~Regex~
 ***** (T) ~UnanchoredRegex~
-     
-     
