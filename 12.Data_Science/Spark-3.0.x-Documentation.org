@@ -185,31 +185,495 @@
        spark-submit examples/src/main/r/dataframe.R
      #+END_SRC
 
-* TODO RDDs, Accumulators, Broadcast Vars
-** Overview
-** Linking with Spark
-** Initializing Spark
+* TODO RDDs Programming Guide
+  # RDDs, Accumulators, Broadcast Vars
+** DONE Overview
+   CLOSED: [2021-01-19 Tue 05:17]
+   - At a high level, EVERY _Spark application_ consists of
+     * a driver program that runs the user's ~main~ function and
+     * executes various parallel operations on a cluster.
+
+   - The main abstraction Spark provides is a /resilient distributed dataset (RDD)/,
+     which is a collection of elements _PARTITIONED across the nodes of the
+     cluster_ that can be _operated on in PARALLEL_.
+
+     * RDDs are created by starting with
+       + a file in the /Hadoop file system/ (or any other /Hadoop-supported file
+         system/),
+         OR
+       + an existing /Scala collection/ _in the driver program_, and transforming it.
+
+     * Users may also ask Spark to *persist an RDD in memory*, allowing it to be
+       reused efficiently across parallel operations.
+
+     * Finally, /RDDs/ *AUTOMATICALLY recover from node FAILURES*.
+
+   - A second abstraction in Spark is /shared variables/ that can be used in
+     parallel operations.
+
+     * By default,
+       when Spark runs
+       /a function in parallel/ AS _a set of /tasks/ on different nodes,_
+       it ships a _COPY of each variable_ used in the /function/ to EACH /task/.
+
+     * Sometimes, a /variable/ needs to *be shared*
+       + ACROSS /tasks/,
+         OR
+       + BETWEEN /tasks/ AND the /driver program/.
+
+     * Spark supports *TWO* types of /shared variables/:
+       + /broadcast variables/, which can be used to *cache* a value in memory _on
+         all nodes_
+
+       + /accumulators/, which are variables that are only "added" to, such as
+         counters and sums. =TODO= =???=
+
+** DONE Linking with Spark
+   CLOSED: [2021-01-19 Tue 12:01]
+   _Spark 3.0.1_ is built and distributed to work with _Scala 2.12_ BY DEFAULT.
+
+   - To write applications in Scala,
+     you will need to use a *compatible Scala version* (e.g. 2.12.X for Spark
+     3.0.1).
+   
+   - Dependencies:
+     * ~libraryDependencies += "org.apache.spark" %% "spark-core" % "3.0.1"~
+     * if you wish to access an /HDFS cluster/, you need to add a dependency on
+       ~hadoop-client~ for your version of HDFS.
+       ~libraryDependencies += "org.apache.hadoop" % "hadoop-client" % your-hdfs-version~
+       
+   - Imports:
+     #+begin_src scala
+       import org.apache.spark.SparkContext
+       import org.apache.spark.SparkConf
+     #+end_src
+     
+** DONE Initializing Spark
+   CLOSED: [2021-01-19 Tue 13:33]
+   The first thing a Spark program must do is to create a ~SparkContext~ object,
+   which *tells Spark how to ACCESS a cluster.*
+
+   - To create a ~SparkContext~
+     you FIRST need to build a ~SparkConf~ object that contains _information about
+     your application._
+
+   - *ONLY ONE* ~SparkContext~ should be active per JVM. =TODO=
+     You *must* ~stop()~ the active ~SparkContext~ BEFORE creating a new one.
+     #+begin_src scala
+       val conf = new SparkConf().setAppName(appName).setMaster(master)
+       new SparkContext(conf)
+     #+end_src
+     * The ~appName~ parameter is a name for your application to show on the
+       cluster UI.
+
+     * ~master~ is a Spark,
+       _Mesos_ or _YARN_ cluster URL,
+       OR
+       a special ~"local"~ string to run in local mode.
+       + In practice,
+         when running on a cluster, you will *not want* to _hardcode master_ in the
+         program, but rather launch the application with ~spark-submit~ and
+         receive it there.
+         - However, for _local testing_ and /unit tests/, you can pass ~"local"~
+           to run Spark in-process.
+     
 *** Using the Shell
+    - In the /Spark shell/, a special interpreter-aware ~SparkContext~ is already
+      created for you, in the variable called ~sc~
 
-** Resilient Distributed Datasets (RDDs)
-*** Parallelized Collections
-*** External Datasets
-*** RDD Operations
-**** Basics
-**** Passing Functions to Spark
-**** Understanding closures
+    - Making your own ~SparkContext~ will not work.
+      You can set which master the context connects to using the =--master=
+      argument, and you can add JARs to the classpath by passing a
+      comma-separated list to the =--jars= argument.
+      
+    - You can also add dependencies (e.g. Spark Packages) to your shell session
+      by supplying a comma-separated list of Maven coordinates to the =--packages=
+      argument. Any additional repositories where dependencies might exist (e.g.
+      Sonatype) can be passed to the =--repositories= argument.
+
+    - For example,
+      * Run =spark-shell= on exactly four cores, use:
+        #+begin_src shell
+          spark-shell --master local[4]
+        #+end_src
+    
+        + Add =code.jar= to its /classpath/, use:
+          #+begin_src shell
+            spark-shell --master local[4] --jars code.jar
+          #+end_src
+    
+        + To include a /dependency/ using Maven coordinates:
+          #+begin_src shell
+            spark-shell --master local[4] --packages "org.example:example:0.1"
+          #+end_src
+
+      * For a complete list of options, run =spark-shell --help=.
+        Behind the scenes, =spark-shell= invokes the more general =spark-submit=
+        script.
+
+** TODO Resilient Distributed Datasets (RDDs)
+   Spark revolves around the concept of a /resilient distributed dataset (RDD)/,
+   which is a _fault-tolerant collection_ of elements that can be operated on in
+   parallel.
+
+   - There are _TWO_ ways to create RDDs:
+     * parallelizing an existing collection in your driver program,
+
+     * referencing a dataset in an external storage system, such as a
+       + shared filesystem
+       + HDFS, HBase
+       + any data source offering a _Hadoop InputFormat_. =???=
+   
+*** DONE Parallelized Collections
+    CLOSED: [2021-01-19 Tue 14:05]
+    - /Parallelized collections/ are created by calling ~SparkContext~'s ~parallelize~
+      /method/ on an _existing collection_ in your /driver program/ (a Scala ~Seq~).
+      * For example,
+        #+begin_src scala
+          val data = Array(1, 2, 3, 4, 5)
+          val distData = sc.paralleize(data)
+        #+end_src
+
+    - One important parameter for /parallel collections/ is the *number of
+      partitions* to cut the dataset into.
+      * Spark will run one task for each partition of the cluster.
+
+      * Typically you want *2-4 partitions* _for each CPU_ in your cluster.
+
+      * Normally, Spark tries to _set the NUMBER of /partitions/ *automatically*
+        based on your cluster._
+        + However, you can also set it *manually* by passing it as a _second
+          parameter_ to ~parallelize~ (e.g. ~sc.parallelize(data, 10)~).
+
+    - Note:
+      some places in the code use the term /slices/ (a *synonym* for
+      /partitions/) to maintain backward compatibility.
+
+*** TODO External Datasets
+*** TODO RDD Operations
+    - RDDs support _TWO_ types of operations:
+      * transformations :: *create* a new dataset from an existing one
+
+      * actions :: *return* a value to the /driver program/
+                   AFTER *running a computation* on the dataset.
+
+    - All /transformations/ in Spark are *lazy*.
+
+    - The /transformations/ are only computed
+      when an /action/ requires a result to be returned to the /driver program/.
+
+    - By default, EACH /transformed RDD/ may be *recomputed* _EACH time_ you run
+      an /action/ on it.
+      
+      * However, you may also *persist* an RDD _in memory_ using the ~persist~
+        (or cache) /method/, in which case Spark will keep the elements around
+        on the cluster for much faster access the next time you query it.
+
+      * There is also support for *persisting* RDDs _on disk_,
+        or replicated across multiple nodes.
+      
+**** DONE Basics
+     CLOSED: [2021-01-19 Tue 17:06]
+     To illustrate RDD basics, consider the simple program below:
+     #+begin_src scala
+       val lines = sc.textFile("data.txt")
+       val lineLengths = lines.map(_.length)
+       val totalLength = lineLengths.reduce(_ + _)
+     #+end_src
+     
+     1. The first line defines a base RDD from an _external file._
+
+     2. This dataset is *not loaded* _in memory_ or otherwise acted on:
+        * ~lines~ is merely a pointer to the file.
+        * The second line defines ~lineLengths~ as the result of a ~map~
+          /transformation/. Again, ~lineLengths~ is *not immediately computed*,
+          due to /laziness/.
+
+     3. Finally, we run ~reduce~, which is an /action/.
+        At this point Spark
+        * _breaks_ the computation _into_ /tasks/ to run on separate machines,
+          
+          AND
+
+        * each machine
+          + RUNS both _its part of the map_ and _a local reduction_,
+          + RETURNING only its answer to the /driver program/.
+
+     4. If we also wanted to *use ~lineLengths~ again later*, we could add:
+        #+begin_src scala
+          lineLengths.persist()
+        #+end_src
+        before the ~reduce~, which would cause ~lineLengths~ to be saved _in
+        memory_ after the first time it is computed.
+     
+**** DONE Passing Functions to Spark
+     CLOSED: [2021-01-19 Tue 20:51]
+     Spark's API relies heavily on passing functions in the /driver program/ to
+     run on the cluster. There are _TWO_ recommended ways to do this:
+     - /Anonymous function/ syntax
+
+     - /Static methods/ in a /global singleton object/.
+
+       * Note that while it is also possible to pass a /reference/ to a /method/
+         in a /class instance/ (as *opposed to* a /singleton object/), this
+         requires sending the object that contains that /class/ along with the
+         /method/. =IMPORTANT=
+         + For example
+           #+begin_src scala
+             class MyClass {
+               def func1(s: String): String = { ... }
+               def doStuff(rdd: RDD[String]): RDD[String] = { rdd.map(func1) }
+             }
+           #+end_src
+           The whole /object/ needs to be sent to the cluster, because ~doStuff~
+           references ~this.func1~.
+
+       * In a similar way, accessing /fields/ of the outer object will reference
+         the whole object:
+         #+begin_src scala
+           class MyClass {
+             val field = "Hello"
+             def doStuff(rdd: RDD[String]): RDD[String] = { rdd.map(x => field + x) }
+           }
+         #+end_src
+         The whole /object/ needs to be sent to the cluster, because ~doStuff~
+         references ~this.field~.
+
+
+         + _To *AVOID* this issue_,
+           the simplest way is to *copy* /field/ *into* a /local variable/ instead
+           of accessing it externally:
+             #+begin_src scala
+               def doStuff(rdd: RDD[String]): RDD[String] = {
+                 val field_ = this.field
+                 rdd.map(x => field_ + x)
+               }
+             #+end_src
+       
+**** TODO Understanding closures
+     One of the harder things about Spark is understanding the scope and life
+     cycle of variables and methods when executing code across a cluster. RDD
+     operations that modify variables outside of their scope can be a frequent
+     source of confusion. In the example below we’ll look at code that uses
+     ~foreach()~ to increment a counter, but similar issues can occur for other
+     operations as well.
+     
 ***** Example
+      Consider the naive RDD element sum below, which may *behave differently*
+      _DEPENDING ON whether execution is happening within the *same* JVM._
+
+      - A common example of this is when
+        #+begin_src scala
+          var counter = 0
+          var rdd = sc.parallelize(data)
+
+          // Wrong: Don't do this!!
+          rdd.foreach(x => counter += x)
+
+          println("Counter value: " + counter)
+        #+end_src
+        * running Spark in ~local~ mode (~--master = local[n]~)
+          
+          _VERSUS_
+
+        * deploying a Spark application to a cluster (e.g. via spark-submit to
+          _YARN_):
+      
 ***** Local vs. cluster modes
+      The behavior of the above code is *undefined*, and may not work as
+      intended.
+        
+      - To execute jobs, Spark _breaks up_ the processing of RDD operations _into_
+        /tasks/, each of which is executed by ONE /executor/.
+
+        * _Prior to_ execution, Spark *computes* the /task's closure/.
+        
+          + The /closure/ is those variables and methods which must be visible
+            for the /executor/ to perform its computations on the RDD (in this
+            case ~foreach()~).
+
+          + This /closure/ is *serialized* and *sent* to EACH /executor/.
+
+      - The variables within the /closure/ sent to each /executor/ are now copies
+        and thus, when counter is referenced within the ~foreach~ function, it's
+        no longer the ~counter~ on the /driver node/. There is still a ~counter~
+        in the memory of the /driver node/ but this is *no longer visible* to the
+        /executors/! The /executors/ only see the copy from the /serialized
+        closure/.
+        Thus, the final value of ~counter~ will still be zero since all operations
+        on ~counter~ were referencing the value within the /serialized closure/.
+
+      - In /local mode/, in some circumstances, the ~foreach~ function will actually
+        execute within the *same* JVM as the /driver/ and will _reference the *same*
+        original ~counter~,_ and *may* actually update it.
+
+      - To ensure well-defined behavior in these sorts of scenarios one should use
+        an ~Accumulator~. ~Accumulators~ in Spark are used specifically to provide
+        a mechanism for safely updating a variable when execution is split up across
+        worker nodes in a cluster. The Accumulators section of this guide discusses
+        these in more detail.
+
+      - In general, closures - constructs like loops or locally defined methods,
+        should not be used to mutate some global state. Spark does not define or
+        guarantee the behavior of mutations to objects referenced from outside
+        of closures. Some code that does this may work in local mode, but that’s
+        just by accident and such code will not behave as expected in
+        distributed mode. Use an Accumulator instead if some global aggregation
+        is needed.
+        
 ***** Printing elements of an RDD
+      Another common idiom is attempting to print out the elements of an RDD
+      using ~rdd.foreach(println)~ or ~rdd.map(println)~.
 
-**** Working with Key-Value Pairs
-**** Transformations
-**** Actions
-**** Shuffle operations
+      - *On a single machine*, this will generate the expected output and print all
+        the RDD's elements.
+
+      - However, *in /cluster mode/,* the output to _stdout_ being called by the
+        /executors/ is now writing to the /executor/'s _stdout_ instead, not the
+        one on the /driver/, so stdout on the /driver/ won't show these! To print
+        all elements on the /driver/, one can use the ~collect()~ method to first
+        bring the RDD to the /driver node/ thus: ~rdd.collect().foreach(println)~.
+        This can cause the /driver/ to run out of memory, though, because ~collect()~
+        fetches the entire RDD to a _single machine_; if you only need to print a
+        few elements of the RDD, a safer approach is to use the ~take()~:
+        ~rdd.take(100).foreach(println)~.
+
+**** DONE Working with Key-Value Pairs
+     CLOSED: [2021-01-21 Thu 02:26]
+     While most Spark operations work on RDDs containing *ANY type* of objects,
+     *a few special operations are only available on RDDs of key-value pairs.*
+     
+     - The most common ones are /distributed “shuffle” operations/, such as
+       *grouping* or *aggregating* the elements _by a key_.
+
+     - In Scala, these operations are _AUTOMATICALLY_ available on RDDs containing
+       ~Tuple2~ objects (the /built-in tuples/ in the language, created by simply
+       writing ~(a, b)~). The /key-value pair/ operations are available in the
+       ~PairRDDFunctions~ /class/, which _AUTOMATICALLY wraps around_ an RDD of
+       tuples.
+
+     - For example, the following code uses the ~reduceByKey~ operation on /key-value
+       pairs/ to count how many times each line of text occurs in a file:
+       #+begin_src scala
+         val lines = sc.textFile("data.txt")
+         val pairs = lines.map(s => (s, 1))
+         val counts = pairs.reduceByKey(_ + _)
+       #+end_src
+       
+     - We could also use ~counts.sortByKey()~, for example, to sort the pairs
+       alphabetically, and finally ~counts.collect()~ to _bring them back to the
+       /driver program/ as an *ARRAY* of objects._
+
+     - Note: =IMPORTANT=
+       when using custom objects as the /key/ in /key-value pair/ operations, you
+       must be sure that a custom ~equals()~ /method/ is accompanied with a matching
+       ~hashCode()~ /method/. For full details, see the contract outlined in the
+       ~Object.hashCode()~ documentation.
+       
+**** TODO Transformations - =RE-READ=
+**** TODO Actions - =RE-READ=
+**** TODO Shuffle operations
+     Certain operations within Spark trigger an _event_ known as the /shuffle/.
+     
+     - The /shuffle/ is Spark's mechanism for *re-distributing data* so that it's
+       grouped DIFFERENTLY *across partitions.*
+
+     - This typically involves *copying data across /executors/ and _machines_,*
+       making the /shuffle/ a *complex* and *costly operation*.
+
 ***** Background
-***** Performance Impact
+      - To understand what happens during the /shuffle/, we can consider the
+        example of the ~reduceByKey~ operation:
+        it generates a *new* RDD where all values for a single key are combined
+        into a tuple - the key and the result of executing a /reduce function/
+        against all _values_ associated with that _key_.
 
-*** RDD Persistence
+        * The challenge is that
+          + BEFORE the ~reduceByKey~ call:
+            not all values for a single key necessarily reside on the same
+            partition, or even the same machine,
+
+          + *JUST before* the _reduce by key_ operation (=from Jian= can be
+            considered as during the call of ~reduceByKey~, after its data
+            preparation process):
+            BUT they must be co-located to compute the result.
+
+      - In Spark, data is *GENERALLY _not_ distributed across* /partitions/ to be
+        in the necessary place for a specific operation.
+
+        * During computations,
+          a SINGLE /task/ will operate on a SINGLE /partition/ - thus,
+          + to organize all the data for a SINGLE ~reduceByKey~ reduce /task/ to
+             execute,
+          + Spark needs to perform an all-to-all operation.
+            It must read from *ALL* /partitions/ to find *ALL* the _values_ for
+            *ALL* _keys_, and then *BRING together values ACROSS /partitions/* to
+            compute the final result for each _key_ - this is called the /shuffle/.
+
+      - Although
+        the set of elements in each /partition/ of newly shuffled data will be
+        _DETERMINISTIC_, and so is the _ORDERING_ of /partitions/ themselves,
+        *the ordering of these elements is not.*
+          If one desires _predictably ordered data following /shuffle/_ then it's
+        possible to use:
+        * ~mapPartitions~ to sort each partition using, for example, ~.sorted~
+
+        * ~repartitionAndSortWithinPartitions~ to efficiently _SORT_ /partitions/
+          while *simultaneously* _REPARTITIONING_
+
+        * ~sortBy~ to make a *globally ordered* RDD
+
+      - Operations which can cause a /shuffle/ include
+        * /repartition operations/
+          like ~repartition~ and ~coalesce~
+
+        * /byKey operations/ (_except for counting_)
+          like ~groupByKey~ and ~reduceByKey~
+
+        * /join operations/
+          like ~cogroup~ and ~join~
+        
+***** Performance Impact - =READING= - =START=
+      - The /Shuffle/ is an *expensive operation* since it involves
+        * _disk I/O_
+        * _data serialization_
+        * _network I/O_
+
+
+      - To organize data for the /shuffle/, Spark generates sets of tasks - map
+        tasks to organize the data, and a set of reduce tasks to aggregate it.
+        This nomenclature comes from MapReduce and does not directly relate to
+        Spark’s map and reduce operations.
+
+      - Internally, results from individual map tasks are kept in memory until
+        they can’t fit. Then, these are sorted based on the target partition and
+        written to a single file. On the reduce side, tasks read the relevant
+        sorted blocks.
+
+      - Certain shuffle operations can consume significant amounts of heap memory
+        since they employ in-memory data structures to organize records before
+        or after transferring them. Specifically, reduceByKey and aggregateByKey
+        create these structures on the map side, and 'ByKey operations generate
+        these on the reduce side. When data does not fit in memory Spark will
+        spill these tables to disk, incurring the additional overhead of disk
+        I/O and increased garbage collection.
+
+      - Shuffle also generates a large number of intermediate files on disk.
+        As of Spark 1.3, these files are preserved until the corresponding RDDs
+        are no longer used and are garbage collected. This is done so the
+        shuffle files don’t need to be re-created if the lineage is re-computed.
+        Garbage collection may happen only after a long period of time, if the
+        application retains references to these RDDs or if GC does not kick in
+        frequently. This means that long-running Spark jobs may consume a large
+        amount of disk space. The temporary storage directory is specified by
+        the spark.local.dir configuration parameter when configuring the Spark
+        context.
+
+      - Shuffle behavior can be tuned by adjusting a variety of configuration
+        parameters. See the ‘Shuffle Behavior’ section within the Spark
+        Configuration Guide.
+
+*** TODO RDD Persistence
 **** Which Storage Level to Choose?
 **** Removing Data
 
