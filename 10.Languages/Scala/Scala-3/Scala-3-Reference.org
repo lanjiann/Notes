@@ -1,8 +1,8 @@
 #+TITLE: Scala 3 Reference
-#+VERSION: 8d00ed1, f72855e --> 3.0.0-RC1-bin-20210122-6947b0f-NIGHTLY
+#+VERSION: 8d00ed1, f72855e --> 3.0.0-RC1-bin-20210123-b731573-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: entitiespretty
-#+STARTUP: folded
+#+STARTUP: overview
 
 * BLOG
 * DONE Usage
@@ -33,7 +33,7 @@
          |_ bin
              |_ scalac
              |_ scalad
-             |_ scala
+             |_ scal
        #+end_src
        + scalac is the Dotty compiler
        + scalad is the Dotty Documentation tool
@@ -508,10 +508,11 @@
 
      - Example:
        #+begin_src scala
-         trait Resettable:
+         trait Resettable with
            def reset(): Unit
 
-         trait Growable[T]:
+         // TODO: FIXME
+         trait Growable[T] with
            def add(x: T): this.type
 
          def f(x: Resettable & Growable[String]) =
@@ -523,10 +524,10 @@
        /intersection of its type/ in ~A~ and its type in ~B~.
          For instance, assume the definitions:
        #+begin_src scala
-         trait A:
+         trait A with
            def children: List[A]
 
-         trait B:
+         trait B with
            def children: List[B]
 
          val x: A & B = new C
@@ -548,7 +549,7 @@
              ~C~ that inherits ~A~ and ~B~,_ one needs to give at that point a
             definition of a ~children~ method with the required type.
        #+begin_src scala
-         class C extends A, B:
+         class C extends A, B with
            def children: List[A & B] = ???
        #+end_src
 
@@ -602,8 +603,8 @@
 
     - Example:
       #+begin_src scala
-        final case class UserName(name: String)
-        final case class Password(hash: Hash)
+        case class UserName(name: String)
+        case class Password(hash: Hash)
 
         def help(id: UserName | Password) =
           val user = id match
@@ -625,7 +626,7 @@
         val name = UserName("Eve")
         // val name: UserName = UserName(Eve)
 
-        if (true) name else password
+        if true then name else password
         // val res2: Object & Product = UserName(Eve)
 
         val either: Password | UserName = if true then name else password
@@ -681,12 +682,21 @@
 ***** TODO Motivation - TODO NOTE, TODO Re-READ
 ***** TODO Join of a union type - TODO ???
 ****** Example
+       =FIXME= replace ~with~ with ~,~???
 
 ***** TODO Type inference
 ****** Example
+       =FIXME= Use ideal way:
+       #+begin_src scala
+         import scala.collection.mutable
+
+         val x = mutable.ListBuffer(Right("foo"), Left(0))
+         val y: mutable.ListBuffer[Either[Int, String]] = x
+       #+end_src
 
 ***** TODO Members
 ****** Example
+       =FIXME= replace ~with~ with ~,~???
 
 ***** Exhaustivity checking
 ***** TODO Erasure
@@ -758,6 +768,32 @@
       * This is necessary to _make the recursive invocation ~x *: Concat[xs, Ys]~
         type check_, since ~*:~ demands a ~Tuple~ as its right operand.
 
+**** TODO Dependent Typeing - =TODO= =RE-READ=
+     /Match types/ can be used to *define* /dependently typed methods/.
+
+     - For instance,
+       here is the value level counterpart to the ~LeafElem~ type defined above
+       (note the use of the /match type/ as the /return type/):
+       #+begin_src scala
+         def leafElem[X](x: X): LeafElem[X] = x match
+            case x: String      => x.charAt(0)
+            case x: Array[t]    => leafElem(x(9))
+            case x: Iterable[t] => leafElem(x.next())
+            case x: AnyVal      => x
+       #+end_src
+
+     - This special mode of typing for match expressions is only used
+       *when the following conditions are met:*
+       1. The /match expression patterns/ do *not* have /guards/
+
+       2. The /match expression scrutinee's type/ is a /subtype/ of the /match
+          type scrutinee's type/
+
+       3. The /match expression/ and the /match type/ have the *SAME number* of cases
+
+       4. The /match expression patterns/ are all /Typed Patterns/, and these types
+          are ~=:=~ to their corresponding /type patterns/ in the /match type/
+     
 **** DONE Representation of Match Types
      CLOSED: [2020-03-08 Sun 21:32]
      # =from Jian= Internal Representation of Match Types
@@ -786,12 +822,10 @@
        * Scrutiny, /bound types/ and /pattern types/ must be /first-order types/.
          TODO =from Jian= ??? I don't quite understand this sentence!?!?
 
-**** TODO Match type reduction
+**** TODO Match Type Reduction
 **** TODO Subtyping Rules for Match Types
+**** TODO Termination
 **** TODO Variance Laws for Match Types
-**** TODO Typing Rules for Match Expressions
-**** TODO Overlapping Patterns
-**** TODO Handling Termination
 **** TODO Related Work
 
 *** DONE Dependent Function Types
@@ -819,9 +853,8 @@
 
     - The /dependent function type/ above is just /syntactic sugar/ for
       #+begin_src scala
-        Function1[Entry, Entry#Key] {
+        Function1[Entry, Entry#Key]:
           def apply(e: Entry): e.Key
-        }
       #+end_src
 
 **** More details
@@ -836,9 +869,10 @@
         def foo[A](xs: List[A]): List[A] = xs.reverse
 
         // A polymorphic function value:
-        val bar: [A] => List[A] => List[A] = [A] => (xs: List[A]) => foo[A](xs)
+        val bar: [A] => List[A] => List[A]
         //       ^^^^^^^^^^^^^^^^^^^^^^^^^
         //       a polymorphic function type
+               = [A] => (xs: List[A]) => foo[A](xs)
       #+end_src
       
     - Scala already has /polymorphic methods/, i.e. /methods/ which accepts /type
@@ -926,7 +960,7 @@
 
     - Example:
       #+begin_src scala
-        enum Color:
+        enum Color with
           case Red, Green, Blue
       #+end_src
       Desugare to core Scala features are explained in the section _Translation_.
@@ -965,10 +999,10 @@
        #+end_src
 
      - The /companion object/ of an /enum/ also defines *TWO* utility /methods/.
-       + ~valueOf~: obtain an /enum value/ by its _name_:
+       * ~valueOf~: obtain an /enum value/ by its _name_:
          ~Color.valueOf("Blue")  // val res0: Color = Blue~
 
-       + ~values~: returns _ALL_ /enum values/ defined in an enumeration in an
+       * ~values~: returns _ALL_ /enum values/ defined in an enumeration in an
          ~Array~:
          ~Color.values  // val res1: Array[Color] = Array(Red, Green, Blue)~
 
@@ -1003,10 +1037,49 @@
                println(s"Your weight on $p is ${p.surfaceWeight(mass)}")
          end Planet
        #+end_src
-       + =from Jian= ???
+       * =from Jian= ???
          Before compiling, will ~case~'s be merged into the generated /companion
          object/???
 
+**** DONE Deprecation of Enum Cases
+     CLOSED: [2021-01-23 Sat 00:48]
+     - As a library author, you may want to
+       1. *signal* that an enum case is no longer intended for use.
+       2. However you could still want to gracefully *handle the removal* of a case
+          from your _public API_, such as special casing _deprecated cases_.
+
+     - To illustrate, say that current ~Planet~ enum originally had an additional
+       case ~Pluto~, and we want to DEPRECATED it.
+       We can use ~scala.deprecated~:
+       #+begin_src scala
+         enum Planet(mass: Double, radius: Double):
+            ...
+            case Neptune extends Planet(1.024e+26, 2.4746e7)
+
+            @deprecated("refer to IAU definition of planet")
+            case Pluto extends Planet(1.309e+22, 1.1883e3)
+         end Planet
+       #+end_src
+
+     - *Outside* the /lexical scopes/ of ~enum Planet~ or ~object Planet~, references
+       to ~Planet.Pluto~ will produce a _deprecation warning_,
+       BUT *within* those scopes we can still reference it to implement introspection
+       over the _deprecated cases_:
+       #+begin_src scala
+         trait Deprecations[T <: reflect.Enum] {
+            extension (t: T) def isDeprecatedCase: Boolean
+         }
+
+         object Planet {
+            given Deprecations[Planet] with {
+               extension (p: Planet)
+                  def isDeprecatedCase = p == Pluto
+            }
+         }
+       #+end_src
+       * We could imagine that a library may use /type class derivation/ to
+         AUTOMATICALLY provide an /instance/ for ~Deprecations~.
+       
 **** DONE Compatibility with Java Enums
      CLOSED: [2020-08-22 Sat 22:10]
      If you want to use the Scala-defined enums as Java enums, you can do so by
@@ -1020,7 +1093,7 @@
          Color.Red.compareTo(Color.Green)
          // val res15: Int = -1
        #+end_src
-       + There is _NO need to provide_ /constructor arguments/ (as defined in the
+       * There is _NO need to provide_ /constructor arguments/ (as defined in the
          Java API docs) to ~java.lang.Enum~ when extending it – _the compiler will
          GENERATE them AUTOMATICALLY._
 
@@ -1074,9 +1147,9 @@
 
     - Example:
       #+begin_src scala
-        enum Option[+T]:
-          case Some(x: T)
-          case None
+        enum Option[+T] with
+           case Some(x: T)
+           case None
       #+end_src
       * ~case Some~ is a shorthand for writing a /case class/ that _extends_
         ~Option~.
@@ -1085,9 +1158,9 @@
 
       * The ~extends~ clauses can be given explicitly:
         #+begin_src scala
-          enum Option[+T]:
-            case Some(x: T) extends Option[T]
-            case None       extends Option[Nothing]
+          enum Option[+T] with
+             case Some(x: T) extends Option[T]
+             case None       extends Option[Nothing]
         #+end_src
 
       * Note:
@@ -1109,17 +1182,18 @@
 
     - As all other enums, ADTs can define methods.
       #+begin_src scala
-        enum Option[+T]:
-          case Some(x: T)
-          case None
+        enum Option[+T] with
+           case Some(x: T)
+           case None
 
-          def isDefined: Boolean = this match
-            case None => false
-            case some => true
+           def isDefined: Boolean = this match
+              case None => false
+              case _    => true  // TODO: FIXME - IMPROVE ME
 
-        object Option:
+        object Option with
           def apply[T >: Null](x: T): Option[T] =
-            if (x == null) None else Some(x)
+            if x == null then None else Some(x)
+        end Option
       #+end_src
 
     - /Enumerations/ and /ADTs/ have been presented as two *DIFFERENT concepts*.
@@ -1150,7 +1224,6 @@
 
 *** DONE Translation of Enums and ADTs
     CLOSED: [2020-07-11 Sat 04:07]
-    # *Translation of Enum and ADTs*
     - In Scala 3, /enums/ are CONVENIENT /syntactic sugar/,
       BUT they are *NOT* essential to understand _Scala's core_.
 
@@ -1291,21 +1364,21 @@
              unless that /parameter/ is already a /type parameter/ of the /case/,
              i.e. the parameter name is defined in ~<params>~.
 
-**** DONE Translation of Enumerations - =TODO=
+**** DONE Translation of Enums with Singleton Cases - =TODO=
      CLOSED: [2020-07-11 Sat 03:47]
      - enumerations :: /non-generic enums/ that define one or more *singleton* cases.
 
      - /Companion objects/ of /enumerations/ define the following additional
        /synthetic members/.
-       + A /method/ ~valueOf(name: String): E~.
+       * A /method/ ~valueOf(name: String): E~.
          It returns the /singleton case value/ whose identifier is ~name~.
 
-       + A /method/ ~values~ which returns an ~Array[E]~ of *ALL* /singleton case/
+       * A /method/ ~values~ which returns an ~Array[E]~ of *ALL* /singleton case/
          values in ~E~, _in the *ORDER* of their definitions._
 
      - /Companion objects/ of /enumerations/ that contain _at least one_ /simple case/
        define in addtion:
-       + A /private method/ ~$new~ which defines a new /simple case value/ with given
+       * A /private method/ ~$new~ which defines a new /simple case value/ with given
          /ordinal number/ and /name/.
          This /method/ can be thought as being defined as follows:
          #+begin_src scala
@@ -1318,7 +1391,7 @@
 
      - The /anonymous class/ also implements the /abstract/ ~Product~ /methods/
        that it _inherits_ from ~Enum~.
-       + The ~ordinal~ /method/ above is used to generate the ~ordinal~ /method/
+       * The ~ordinal~ /method/ above is used to generate the ~ordinal~ /method/
          if the /enum/ does NOT /extend/ a ~java.lang.Enum~ *(as /Scala enums/ do
          NOT /extend/ ~java.lang.Enums~ UNLESS explicitly specified)*.
          In case it does, there is no need to generate ~ordinal~ as ~java.lang.Enum~
@@ -1326,21 +1399,20 @@
            Similarly there is no need to override ~toString~ as that is defined in
          terms of ~name~ in ~java.lang.Enum~. Finally, ~productPrefix~ will call
          ~this.name~ when ~E~ extends ~java.lang.Enum~.
-         *
-         * =from Jian=
+         + =from Jian=
            This is the reason why NOT define ~ordinal~ directly instead.
 
 **** DONE Scopes for Enum Cases
      CLOSED: [2020-07-11 Sat 03:32]
      - A /case/ in an /enum/ is treated similarly to a /secondary constructor/.
        It can access
-       + *NEITHER* the enclosing ~enum~ using ~this~
-       + *NOR* its /value parameters/ or /instance members/ using simple identifiers.
+       * *NEITHER* the enclosing ~enum~ using ~this~
+       * *NOR* its /value parameters/ or /instance members/ using simple identifiers.
 
      - Even though translated /enum cases/ are located in the /enum's companion
        object/, referencing this /object/ or its /members/ via ~this~ or a simple
        identifier is also *ILLEGAL*.
-       + The compiler typechecks /enum cases/ in the scope of the enclosing
+       * The compiler typechecks /enum cases/ in the scope of the enclosing
          /companion object/ BUT flags any such *illegal* accesses as errors.
 
 **** DONE Translation of Java-compatible enums
@@ -1351,7 +1423,7 @@
 
      - It is a /compile-time error/ for a /Java-compatible enum/ to have
        /class cases/.
-       + =from Jian=
+       * =from Jian=
          This is the restriction from the design of /Java enum/.
 
      - /Cases/ such as ~case C~ expand to a ~@static val~ as opposed to a ~val~.
@@ -1367,7 +1439,7 @@
 
      - If an /enum case/ has an /extends clause/, the /enum class/ *MUST* be one
        of the /classes/ that's extended.
-       + =from Jian=
+       * =from Jian=
          For example,
          #+begin_src scala
            // Illegal
@@ -1722,7 +1794,7 @@
 
     - Example:
       #+begin_src scala
-        trait Ord[T]:
+        trait Ord[T] with
           def compare(x: T, y: T): Int
           extension (x: T) def < (y: T) = compare(x, y) < 0
           extension (x: T) def > (y: T) = compare(x, y) > 0
@@ -1738,7 +1810,7 @@
             case (_, Nil)   => +1
             case (x :: xs1, y :: ys1) =>
               val fst = ord.compare(x, y)
-              if (fst != 0) fst else compare(xs1, ys1)
+              if fst != 0 then fst else compare(xs1, ys1)
       #+end_src
       This code defines a /trait/ ~Ord~ (type class) with two /given instances/.
 
@@ -1772,14 +1844,14 @@
        _publicly available libraries_ *should prefer* /named instances/.
        =IMPORTANT= =!!!= =IMPORTANT=
 
-**** DONE Alias Givens - =IMPROVE and FIX DOC=
+**** DONE Alias Givens - =IMPROVE= =FIXME=
      CLOSED: [2020-07-17 Fri 03:44]
      An alias can be used to define a /given instance/ that is equal to some
      expression. E.g.:
      (=FIX-DOC= =IMPROVE-DOC= Here it's better to use the same example as below,
      then people can compare their syntax)
      #+begin_src scala
-       given global: ExecutioinContext = new ForkJoinPool()
+       given global: ExecutioinContext = ForkJoinPool()
        given factory(using config: Config): Factory = MemoizingFactory(config)
      #+end_src
      - When the first time ~global~ is accessed, the RHS is evaludated, which is
@@ -1790,7 +1862,7 @@
      - This operation is /thread-safe/.
 
      - /Alias givens/ can be _anonymous_ as well, e.g.
-       (=FIX-DOC= =IMPROVE-DOC= Here it's better to use the same example as above,
+       (=FIXME= =IMPROVE-DOC= Here it's better to use the same example as above,
        then people can compare their syntax)
        #+begin_src scala
          given ExecutioinContext = new ForkJoinPool()
@@ -1887,11 +1959,12 @@
          trait Tagged[A]
 
          case class Foo[A](value: Boolean)
-         object Foo:
+         object Foo with
              given fooTagged[A](using Tagged[A]): Foo[A] = Foo(true)
              given fooNotTagged[A](using NotGiven[Tagged[A]]): Foo[A] = Foo(false)
 
-         @main def test() =
+         // TODO: FIXME
+         @main def test(): Unit =
            given Tagged[Int] with {}
            assert(summon[Foo[Int]].value)      // fooTagged is found
            assert(!summon[Foo[String]].value)  // fooNotTagged is found
@@ -1914,13 +1987,11 @@
        TmplDef             ::= ...
                             |  ‘given’ GivenDef
 
-       GivenDef            ::=  [GivenSig] StructuralInstance
-                            |   [GivenSig] Type ‘=’ Expr
-                            |   [GivenSig] Type
+       GivenDef            ::=  [GivenSig] ConstrApp TemplateBody
+                            |   [GivenSig] AnnotType ‘=’ Expr
+                            |   [GivenSig] AnnotType
 
        GivenSig            ::= [id] [DefTypeParamClause] {UsingParamClause} ‘:’
-
-       StructuralInstance  ::=  ConstrApp {‘with’ ConstrApp} ‘with’ TemplateBody
      #+end_src
 
 *** DONE Using Clauses
@@ -2149,12 +2220,12 @@
     instances/.*
     - Example:
       #+begin_src scala
-        object A:
+        object A with
           class TC
           given tc: TC = ???
           def f(using TC) = ???
 
-        object B:
+        object B with
           import A._
           import A.given
           // ...
@@ -2193,7 +2264,7 @@
      - =from Jian=
        However, there is no reason when you want to import SOME /anonymous
        givens/ you must import ALL /anonymous givens/.
-       + Avoid using /wildcard imports/:
+       * Avoid using /wildcard imports/:
          /By-type imports/ syntax is introduced.
          It provides a _MORE SPECIFIC alternative_ to /wildcard imports/, which
          makes it clearer what is imported.
@@ -2201,27 +2272,27 @@
      - =from Jian=
        /Importing by type/ is actually /Importing givens by type/.
        /Importing non-givens by type/ is *NOT allowed*.
-       + Actually,
+       * Actually,
          /Importing non-givens by type/ is allowed at least in Dotty 0.23,
          but this feature was removed from 0.24+ (when I write this sentence down,
          current doc version is 0.26.0)
 
      - =from Jian=
        Check the last example below and you will notice
-       + /by name imports/
+       * /by name imports/
          don't need ~given~ _no matter the imported IS /givens/ or NOT_
 
-       + ONLY /by type imports/
+       * ONLY /by type imports/
          need ~given~.
 
      - Examples:
-       + ~import A.{given TC}~
+       * ~import A.{given TC}~
 
-       + ~import A.{given T1, given T2, ..., given Tn}~
+       * ~import A.{given T1, given T2, ..., given Tn}~
 
-       + Example code:
+       * Example code:
          #+begin_src scala
-           object Instances:
+           object Instances with
              given intOrd: Ordering[Int] = ...
              given listOrd[T: Ordering]: Ordering[List[T]] = ...
              given ec: ExecutionContext = ...
@@ -2234,7 +2305,7 @@
          instances but leave out the ~im~ instance, since it fits none of the
          specified bounds.
 
-       + /By-type imports/ can be *mixed* with /by-name imports/.
+       * /By-type imports/ can be *mixed* with /by-name imports/.
          If BOTH are present in an import clause, *by-type imports come last*.
          ~import A.{im, given Ordering[?]}~
 
@@ -2247,24 +2318,24 @@
        *to* /givens/ and /given imports/.
 
      - The following modifications avoid this hurdle to migration.
-       + A /given import selector/ also brings /old style implicits/ into scope.
+       * A /given import selector/ also brings /old style implicits/ into scope.
          So, in _Scala 3.0_ an /old-style implicit definition/ can be brought into
          scope
-         * EITHER by a ~_~
-         * OR by a ~given _~ /wildcard selector/.
+         + EITHER by a ~_~
+         + OR by a ~given _~ /wildcard selector/.
 
-       + In _Scala 3.1_,
+       * In _Scala 3.1_,
          /old-style implicits/ ACCESSED THROUGH a ~_~ /wildcard import/ will give
          a *deprecation warning*.
 
-       + In some version *AFTER* 3.1,
+       * In some version *AFTER* 3.1,
          /old-style implicits/ ACCESSED THROUGH a ~_~ /wildcard import/ will give a
          *compiler error*.
 
      - These rules mean that library users
-       + can use ~given \under{}~ /selectors/ to ACCESS /old-style implicits/ in _Scala 3.0_,
+       * can use ~given \under{}~ /selectors/ to ACCESS /old-style implicits/ in _Scala 3.0_,
          AND
-       + will be gently nudged and then forced to do so in later versions.
+       * will be gently nudged and then forced to do so in later versions.
          Libraries can then *switch to* /given instances/ *once* their user base has
          migrated.
 
@@ -2279,7 +2350,7 @@
       A way to extend a closed system (not own, or better not change source code).
 
     - Example:
-      + Definition:
+      * Definition:
         #+begin_src scala
           case class Circle(x: Double, y: Double, radius: Double)
 
@@ -2287,7 +2358,7 @@
             def circumference: Double = c.radius * math.Pi * 2
         #+end_src
 
-      + Invoke as regular /methods/:
+      * Invoke as regular /methods/:
         #+begin_src scala
           val circle = Circle(0, 0, 1)
           circle.circumference
@@ -2456,9 +2527,9 @@
        (assume the /reference/ is in the form of ~r.m~):
        1. The /extension method/ is visible under a simple name,
           by being
-          + *defined* or
-          + *inherited* or
-          + *imported* in a /scope/ *enclosing* the /reference/.
+          * *defined* or
+          * *inherited* or
+          * *imported* in a /scope/ *enclosing* the /reference/.
 
        2. The /extension method/ is a /member/ of some /given instance/ that is
           visible at the point of the _reference_.
@@ -2470,54 +2541,55 @@
           in the /implicit scope/ of the /type/ of ~r~._
 
      - Examples of each rule
-       + Example of rule 1 above:
+       * Example of rule 1 above:
          #+begin_src scala
-           trait IntOps:
-             extension (i: Int) def isZero: Boolean = i == 0
+           trait IntOps with
+              extension (i: Int) def isZero: Boolean = i == 0
 
-           extension (i: Int) def safeMod(x: Int): Option[Int] =
-             // extension method defined in same scope IntOps
-             if x.isZero
-             then None
-             else Some(i % x)
+              extension (i: Int) def safeMod(x: Int): Option[Int] =
+                 // extension method defined in same scope IntOps
+                 if x.isZero
+                 then None
+                 else Some(i % x)
 
-           object IntOpsEx extends IntOps:
-             extension (i: Int) def safeDiv(x: Int): Option[Int] =
-             // extension method brought into scope via inheritance from IntOps
-             if x.isZero
-             then None
-             else Some(i / x)
+           object IntOpsEx extends IntOps with
+              extension (i: Int) def safeDiv(x: Int): Option[Int] =
+                 // extension method brought into scope via inheritance from IntOps
+                 if x.isZero
+                 then None
+                 else Some(i / x)
 
            trait SafeDiv:
-             import IntOpsEx._ // brings safeDiv and safeMod into scope
+              import IntOpsEx._ // brings safeDiv and safeMod into scope
 
-             extension (i: Int) def divide(d: Int): Option[(Int, Int)] =
-               // extension methods imported and thus in scope
-               (i.safeDiv(d), i.safeMod(d)) match
-                 case (Some(d), Some(r)) => Some((d, r))
-                 case _                  => None
+              extension (i: Int) def divide(d: Int): Option[(Int, Int)] =
+                 // extension methods imported and thus in scope
+                 (i.safeDiv(d), i.safeMod(d)) match
+                     case (Some(d), Some(r)) => Some((d, r))
+                     case _                  => None
          #+end_src
 
-       + Example of rule 2 above:
+       * Example of rule 2 above:
          #+begin_src scala
            given ops1: IntOps with {}  // brings safeMod into scope
 
            1.safeMod(2)
          #+end_src
 
-       + Example of rule 3 and 4 above:
+       * Example of rule 3 and 4 above:
          #+begin_src scala
-           class List[T]:
-             ...
+           class List[T] with
+              ...
 
-           object List:
-             ...
-             extension [T](xs: List[List[T]])
-               def flatten: List[T] = xs.foldLeft(Nil: List[T])(_ ++ _)
+           object List with
+              ...
+              extension [T](xs: List[List[T]])
+                 def flatten: List[T] = xs.foldLeft(Nil: List[T])(_ ++ _)
+                 // TODO: FIXME IMRPOVEME `Nil: List[T]` --> `List.empty[T]`
 
-             given [T: Ordering]: Ordering[List[T]] with
-               extension (xs: List[T])
-                 def < (ys: List[T]): Boolean = ...
+              given [T: Ordering]: Ordering[List[T]] with
+                 extension (xs: List[T])
+                    def < (ys: List[T]): Boolean = ...
            end List
 
            // extension method available since it is in the implicit scope of List[List[Int]]
@@ -2540,12 +2612,12 @@
           there is an extension method ~m~ in some eligible object ~o~, the
           selection is rewritten to ~o.extension_m[Ts](e)~. An object ~o~ is
           eligible if
-          + ~o~ forms part of the /implicit scope/ of ~T~, or
+          * ~o~ forms part of the /implicit scope/ of ~T~, or
 
-          + ~o~ is a /given instance/ that is visible at the point of the
+          * ~o~ is a /given instance/ that is visible at the point of the
             application, or
 
-          + ~o~ is a /given instance/ in the /implicit scope/ of ~T~.
+          * ~o~ is a /given instance/ in the /implicit scope/ of ~T~.
 
           This second rewriting is attempted at the time where the compiler also
           tries an /implicit conversion/ from ~T~ to a /type/ containing ~m~.
@@ -2553,19 +2625,19 @@
 
      - An /extension method/ can also be used as an /identifier/ by itself
        (=from Jian= without an explicit qualifier).
-       + If an /identifier/ ~m~ does _NOT_ resolve,
+       * If an /identifier/ ~m~ does _NOT_ resolve,
          the /identifier/ is rewritten to:
-         * ~x.m~ if the identifier appears in an /extension/ with /parameter/ ~x~
-         * ~this.m~ otherwise
+         + ~x.m~ if the identifier appears in an /extension/ with /parameter/ ~x~
+         + ~this.m~ otherwise
 
-       + The rewritten term is again tried as an application of an /extension method/.
+       * The rewritten term is again tried as an application of an /extension method/.
          Example:
          #+begin_src scala
            extension (s: String)
-             def position(ch: Char, n: Int): Int =
-               if n < s.length && s(n) != ch
-               then position(ch, n + 1)
-               else n
+              def position(ch: Char, n: Int): Int =
+                 if n < s.length && s(n) != ch
+                 then position(ch, n + 1)
+                 else n
          #+end_src
          + The recursive call ~position(ch, n + 1)~ expands to ~s.position(ch, n + 1)~
            in this case.
@@ -2573,12 +2645,12 @@
          + The whole /extension method/ rewrites to
            #+begin_src scala
              def position(s: String)(ch: Char, n: Int): Int =
-               if n < s.length && s(n) != ch
-               then position(s)(ch, n + 1)
-               else n
+                if n < s.length && s(n) != ch
+                then position(s)(ch, n + 1)
+                else n
            #+end_src
 
-**** DONE More Details
+**** DONE More Details - =TODO= =deleted= =???=
      CLOSED: [2020-07-19 Sun 03:30]
      1. To avoid confusion,
         NAMES of /normal methods/ are *NOT ALLOWED to start with* ~extension_~.
@@ -2602,34 +2674,34 @@
 **** DONE Syntax
      CLOSED: [2020-07-19 Sun 03:31]
      - ~extension~ is a /soft keyword/.
-       + It is recognized as a /keyword/
+       * It is recognized as a /keyword/
          _ONLY_ if
-         * it appears at the start of a statement
+         + it appears at the start of a statement
            AND
-         * it is followed by ~[~ or ~(~.
+         + it is followed by ~[~ or ~(~.
 
-       + In all other cases it is treated as an /identifier/.
+       * In all other cases it is treated as an /identifier/.
 
 *** DONE Implementing Type classes
     CLOSED: [2020-07-20 Mon 00:04]
     - Type Class :: an /abstract/, /parameterized/ type that lets you add new
       behavior to any *closed* /data type/ *without* using /sub-typing/.
-      + /extension methods/ is a technical way (new syntax) to enhance a *closed*
+      * /extension methods/ is a technical way (new syntax) to enhance a *closed*
         /data type/
 
-      + /type class/ is a *systematically strategy* of enhancing a *closed* /data
+      * /type class/ is a *systematically strategy* of enhancing a *closed* /data
         type/, and it can exploit the /extension methods/ technique.
 
     - Examples of use-cases:
-      + expressing how a /type/ you don't own (from the standard or 3rd-party library)
+      * expressing how a /type/ you don't own (from the standard or 3rd-party library)
         conforms to such behavior
 
-      + expressing such a behavior for MULTIPLE /types/ *without* involving
+      * expressing such a behavior for MULTIPLE /types/ *without* involving
         /sub-typing/ relationships (one extends another) between those /types/
         (see: /ad hoc polymorphism/ for /instance/)
 
     - One concept can have multiple implementations. In Scala 3,
-      + Type Classes :: /generic traits/ that are *NOT defined through* the ~extends~
+      * Type Classes :: /generic traits/ that are *NOT defined through* the ~extends~
         keyword, but by /given instances/.
 
     - Some examples of common type classes are in the next subsections.
@@ -2637,13 +2709,13 @@
 **** DONE Semigroups and monoids
      CLOSED: [2020-12-20 Sun 18:58]
      #+begin_src scala
-       trait SemiGroup[T]:
+       trait SemiGroup[T] with
          extension (x: T) def combine (y: T): T
 
-       trait Monoid[T] extends SemiGroup[T]:
+       trait Monoid[T] extends SemiGroup[T] with
          def unit: T
 
-       object Monoid:
+       object Monoid with
          def apply[T](using m: Monoid[T]) = m
 
        // For `String`
@@ -2670,33 +2742,33 @@
 
      - We can represent all types that can be "mapped over" with ~F~ -- a /type
        constructor/ that need ONE /type argument/ to construct a /type/.
-       + Therefore we write it ~F[_]~, hinting that the /type constructor/ ~F~
+       * Therefore we write it ~F[_]~, hinting that the /type constructor/ ~F~
          takes another /type/ as argument.
 
      - The instance of ~Functor~ for ~List~ now becomes:
-       + WITHOUT /extension method/:
+       * WITHOUT /extension method/:
          #+begin_src scala
            trait Functor[F[_]]:
-             def map[A, B](x: F[A], f: A => B): F[B]
+              def map[A, B](x: F[A], f: A => B): F[B]
 
            given Functor[List] with
-             def map[A, B](x: List[A], f: A => B): List[B] =
-               x.map(f)  // `List` already has a `map` method
+              def map[A, B](x: List[A], f: A => B): List[B] =
+                 x.map(f)  // `List` already has a `map` method
 
            def assertTransformation[F[_]: Functor, A, B](expected: F[B], original: F[A], mapping: A => B): Unit =
-             assert(expected == summon[Functor[F]].map(original, mapping))
+              assert(expected == summon[Functor[F]].map(original, mapping))
 
            assertTransformation(List("a1", "b1"), List("a", "b"), elt => s"${elt}1")
          #+end_src
-         * When define the /type class/, use ~F[_]~ to indicate ~F~ is an /kind-1
+         + When define the /type class/, use ~F[_]~ to indicate ~F~ is an /kind-1
            type constructor/.
 
-         * When implement the /given instance/, use ~List~ is enough to tell the
+         + When implement the /given instance/, use ~List~ is enough to tell the
            compiler that it is a /kind-1 type constructor/.
 
-       + WITH /extension method/:
+       * WITH /extension method/:
          #+begin_src scala
-           trait Functor[F[_]]:
+           trait Functor[F[_]] with
              extension [A, B](x: F[A])
                def map(f: A => B): F[B]
 
@@ -2722,7 +2794,7 @@
      - Implementation:
        #+begin_src scala
          // "A `Monad` for type `F[_]` is a `Functor[F]`" => thus has the `map` ability
-         trait Monad[F[_]] extends Functor[F]:
+         trait Monad[F[_]] extends Functor[F] with
 
            /** The unit value for a monad */
            def pure[A](x: A): F[A]
@@ -2740,60 +2812,58 @@
 ***** ~List~
       #+begin_src scala
         given listMonad: Monad[List] with
-          def pure[A](x: A): List[A] =
-            List(x)
+           def pure[A](x: A): List[A] =
+              List(x)
 
-          extension [A, B](xs: List[A])
-            def flatMap(f: A => List[B]): List[B] =
-              xs.flatMap(f)  // rely on the existing `flatMap` method of `List`
+           extension [A, B](xs: List[A])
+              def flatMap(f: A => List[B]): List[B] =
+                 xs.flatMap(f)  // rely on the existing `flatMap` method of `List`
       #+end_src
 
 ***** ~Option~
       #+begin_src scala
         given optionMonad: Monad[Option] with
-          def pure[A](x: A): Option[A] =
-            Option(x)
+           def pure[A](x: A): Option[A] =
+              Option(x)
 
-          extension [A, B](xo: Option[A])
-            def flatMap(f: A => Option[B]): Option[B] = xo match
-                case Some(x) => f(x)
-                case None    => None
+           extension [A, B](xo: Option[A])
+              def flatMap(f: A => Option[B]): Option[B] = xo match
+                 case Some(x) => f(x)
+                 case None    => None
       #+end_src
 
 ***** ~Reader~
       - Reader Monad :: it is used to COMBINE /functions/ that ALL need the *same*
         /data/.
-        + =from Jian=
-          * If not using /reader monad/, _this *same* data_ will be encoded as a
-            /parameter/ for each functions that need to be combined.
+        * =from Jian=
+          + If not using /reader monad/, _this *same* data_ will be encoded as a
+             /parameter/ for each functions that need to be combined.
 
-          * /Reader monad/ is the one that help us to access _this common data_
+          + /Reader monad/ is the one that help us to access _this common data_
             _WITHOUT passing it EXPLICITLY_ to all functions that need to be combined.
 
-        + This _common DATA_ is usually some _configuration_, _context_, _environment
+        * This _common DATA_ is usually some _configuration_, _context_, _environment
           variables_, _etc_.
 
       - Let's define a ~Config~ type, and two functions using it:
         #+begin_src scala
-          trait Config:
+          trait Config
           // ...
-          end Config
-
           def compute(i: Int)(config: Config): String = ???
           def layout(str: String)(config: Config): Unit = ???
         #+end_src
-        + =Fix-Doc=
+        * =Fix-Doc=
           From the context, this ~layout~ should be named as ~show~.
 
-        + Requirement:
+        * Requirement:
           Combine ~compute~ and ~show~ into a single function.
-          * Naive Solution (NO one will like this, especially when new use it frequently):
+          + Naive Solution (NO one will like this, especially when new use it frequently):
             ~show(compute(i)(config))(config)~
 
-        + Addition requirement:
+        * Addition requirement:
           Can we avoid passing ~config~ to both functions, and put ~config~ in
           /context/ that can be accessed by both functions.
-          * Postulated Solution (if you know a /function/ can be a /monad/, it may
+          + Postulated Solution (if you know a /function/ can be a /monad/, it may
             be easy for you to guess we have a solution of this form):
             #+begin_src scala
               def computeAndShow(i: Int): Config => Unit =
@@ -2820,12 +2890,12 @@
            #+begin_src scala
              given configDependentMonad: Monad[ConfigDependent] with
 
-               def pure[A](x: A): ConfigDependent[A] =
-                 config => x
+                def pure[A](x: A): ConfigDependent[A] =
+                   config => x
 
-               extension [A, B](x: ConfigDependent[A])
-                 def flatMap(f: A => ConfigDependent[B]): ConfigDependent[B] =
-                   config => f(x(config))(config)
+                extension [A, B](x: ConfigDependent[A])
+                   def flatMap(f: A => ConfigDependent[B]): ConfigDependent[B] =
+                      config => f(x(config))(config)
 
              end configDependentMonad
            #+end_src
@@ -2836,16 +2906,16 @@
         The /type/ ~ConfigDependent~ can be written using /type lambdas/.
         Using this syntax would turn the previous ~configDependentMonad~ into:
         #+begin_src scala
-          type ConfigDepdenent = [Result] =>> Config => Result
+          type ConfigDepdenent = [Result] =>> Config => Result  // from Jian
 
           given configDependentMonad: Monad[[Result] =>> Config => Result] with
 
-            def pure[A](x: A): Config => A =
-              config => x
+             def pure[A](x: A): Config => A =
+                config => x
 
-            extension [A, B](x: Config => A)
-              def flatMap(f: A => Config => B): Config => B =
-                config => f(x(config))(config)
+             extension [A, B](x: Config => A)
+                def flatMap(f: A => Config => B): Config => B =
+                   config => f(x(config))(config)
 
           end configDependentMonad
         #+end_src
@@ -2857,12 +2927,12 @@
         #+begin_src scala
           given readerMonad[Ctx]: Monad[[X] =>> Ctx => X] with
 
-            def pure[A](x: A): Ctx => A =
-              ctx => x
+             def pure[A](x: A): Ctx => A =
+                ctx => x
 
-            extension [A, B](x: Ctx => A)
-              def flatMap(f: A => Ctx => B): Ctx => B =
-                ctx => f(x(ctx))(ctx)
+             extension [A](x: Ctx => A)
+                def flatMap[B](f: A => Ctx => B): Ctx => B =
+                   ctx => f(x(ctx))(ctx)
 
           end readerMonad
         #+end_src
@@ -2877,24 +2947,24 @@
      - The main _DIFFERENCE_ between /subtype polymorphism/ and /ad-hoc polymorphism
        with type classes/ is how the definition of the /type class/ is implemented,
        in relation to the type it acts upon:
-       + /Ad-hoc polymorphism with type classes/:
+       * /Ad-hoc polymorphism with type classes/:
          the implementation for a /concrete type/, =from Jian= the TARGET type, is
          expressed through
-         * a /given instance definition/, which is supplied as
+         + a /given instance definition/, which is supplied as
            an /implicit argument/ alongside the value it acts upon.
 
-       + /Subtype polymorphism/:
+       * /Subtype polymorphism/:
          the implementation is *mixed INTO* the /parents of a class/, and ONLY a
          SINGLE term is required to perform a polymorphic operation.
 
      - Compare the application of the /subtype polymorphism/ and /ad-hoc polymorphism
        with type classes/:
-       + /ad-hoc polymorphism with type classes/
-         * take more effort to set up,
-         * _BUT_ is more extensible.
+       * /ad-hoc polymorphism with type classes/
+         + take more effort to set up,
+         + _BUT_ is more extensible.
 
-       + /subtype polymorphism/:
-         * add a new /interface/ to a /class/ requires *changing the source code
+       * /subtype polymorphism/:
+         + add a new /interface/ to a /class/ requires *changing the source code
            of that /class/.* --
            =from Jian= usually we don't want to change the source code frequently!
 
@@ -2902,7 +2972,7 @@
        /traits/ and /given instances/, combined with other _constructs_ like
        /extension methods/, /context bounds/, and /type lambdas/ allow a *concise*
        and *natural* expression of /type classes/.
-       + =from Jian=
+       * =from Jian=
          From the /reader monad/ example, you can see without /type lambdas/, its
          representation will be not *natural* -- let the type simulate the view
          of /function/.
@@ -2918,7 +2988,7 @@
     - Common examples of /type class/ are ~Eq~, ~Ordering~, or ~Show~.
 
     - For example, given the following ~Tree~ algebraic data type (ADT) with a
-      ~dervies~ clause,
+      ~dervies~ clause, =FIXME= =???= =: -> with= =???=
       #+begin_src scala
         enum Tree[T] derives Eq, Ordering, Show:
           case Branch(left: Tree[T], right: Tree[T])
@@ -2967,25 +3037,25 @@
 
      - ~Mirror~ /type class/ definition
        #+begin_src scala
-         sealed trait Mirror:
+         sealed trait Mirror with
 
            /** The type being mirrored */
-           type MirroredMonoType
+           type MirroredType
 
            /** The type of the elements of the mirrored type */
            type MirroredElemTypes
 
            /** The mirrored *-type */
-           type MirroredMonoType
+           type MirroredMonoType  // TODO: FIXME wrong syntax highlight
 
-           /** The name of the type */
-           type MirroredLabel <: String
+           /** The name of the type */  // TODO: FIXME wrong syntax highlight
+           type MirroredLabel <: String    // TODO: FIXME wrong syntax highlight
 
            /** The names of the elements of the type */
            type MirroredElemLabels <: Tuple
 
 
-         object Mirror:
+         object Mirror with
 
            /** The Mirror for a product type */
            trait Product extends Mirror:
@@ -3051,38 +3121,38 @@
        #+end_src
 
      - Note the following properties of ~Mirror~ /types/,
-       + Properties are encoded _using /types/ RATHER THAN /terms/._
+       * Properties are encoded _using /types/ RATHER THAN /terms/._
          This means that
-         * they have _no_ runtime footprint _unless_ used
-         * they are a _compile time feature_ for use with Dotty's metaprogramming
+         + they have _no_ runtime footprint _unless_ used
+         + they are a _compile time feature_ for use with Dotty's metaprogramming
            facilities.
 
-       + The /kinds/ of ~MirroredType~ and ~MirroredElemTypes~ match the /kind/
+       * The /kinds/ of ~MirroredType~ and ~MirroredElemTypes~ match the /kind/
          of the data type the /mirror/ is an /instance/ for.
-         * This allows ~Mirror~'s to support /ADTs/ of *all* /kinds/.
+         + This allows ~Mirror~'s to support /ADTs/ of *all* /kinds/.
 
-       + There is NO DISTINCT /representation type/ for /sums/ or /products/
+       * There is NO DISTINCT /representation type/ for /sums/ or /products/
          (ie. there is no ~HList~ or ~Coproduct~ type as in Scala 2 versions of shapeless).
            Instead the collection of child types of a data type is represented by
          an ordinary, possibly parameterized, /tuple type/.
-         * Dotty's metaprogramming facilities can be used to work with these /tuple
+         + Dotty's metaprogramming facilities can be used to work with these /tuple
            types/ as-is, and _higher level libraries_ can be *built on top of them*.
 
-         * =from Jian=
+         + =from Jian=
            It seems ~HList~ or ~Coproduct~ like structures are already partially
            (or minimalized) implemented and merged. Will see if the complete version
            of them can affect _type class derivation_!
            =TODO= =TODO= =TODO=
 
-       + For both /product/ and /sum/ types, the elements of ~MirroredElemTypes~
+       * For both /product/ and /sum/ types, the elements of ~MirroredElemTypes~
          are arranged in *definition order* (i.e. ~Branch[T]~ precedes ~Leaf[T]~ in
          ~MirroredElemTypes~ for ~Tree~ because ~Branch~ is defined _BEFORE_ ~Leaf~
          in the source file).
-         * This means that ~Mirror.Sum~ *differs* in this respect from /shapeless's
+         + This means that ~Mirror.Sum~ *differs* in this respect from /shapeless's
            generic representation/ for ADTs in Scala 2, where the constructors
            are *ordered alphabetically by name*.
 
-       + The methods ~ordinal~ and ~fromProduct~ are defined in terms of
+       * The methods ~ordinal~ and ~fromProduct~ are defined in terms of
          ~MirroredMonoType~ which is the /type/ of /kind-*/ which is obtained from
          ~MirroredType~ by *wildcarding* its /type parameters/.
 
@@ -3098,22 +3168,22 @@
 
      - That is, the ~derived~ /method/ takes a /context parameter/ of (some /subtype/
        of) type ~Mirror~ which
-       + _DEFINES_ the shape of the /deriving type/ ~T~,
+       * _DEFINES_ the shape of the /deriving type/ ~T~,
          AND
-       + _COMPUTES_ the /type class/ _implementation_ according to that shape.
+       * _COMPUTES_ the /type class/ _implementation_ according to that shape.
 
        This is all that the provider of an ADT with a ~derives~ _clause_ has to
        know about the _derivation_ of a /type class instance/.
 
      - Note that ~derived~ /methods/ may
-       + have /context ~Mirror~ parameters/ _INDIRECTLY_
-         * e.g.
+       * have /context ~Mirror~ parameters/ _INDIRECTLY_
+         + e.g.
            by having a /context argument/ which in turn has a /context ~Mirror~
            parameter/
 
-          OR  =TODO= =Fix-Doc=
+          OR  =TODO= =FIXME=
 
-       + NOT have /context ~Mirror~ parameters/ AT ALL
+       * NOT have /context ~Mirror~ parameters/ AT ALL
          * e.g.
            they might use some completely different user-provided mechanism, for
            instance using Dotty /macros/ or /runtime reflection/.
@@ -3219,7 +3289,7 @@
           trait Eq[T]:
             def eqv(x: T, y: T): Boolean
 
-          object Eq:
+          object Eq with
             given Eq[Int] with
               def eqv(x: Int, y: Int) = x == y
 
@@ -3254,7 +3324,8 @@
             case Sm(t: T)
             case Nn
 
-          @main def test =
+          // TODO: FIXME
+          @main def test(): Unit =
             import Opt._
             val eqoi = summon[Eq[Opt[Int]]]
             assert(eqoi.eqv(Sm(23), Sm(23)))
@@ -3267,13 +3338,13 @@
         polishing,
         #+begin_src scala
           given derived$Eq[T](using eqT: Eq[T]): Eq[Opt[T]] =
-            eqSum(
-              summon[Mirror[Opt[T]]],
-              List(
-                eqProduct(summon[Mirror[Sm[T]]], List(summon[Eq[T]])),
-                eqProduct(summon[Mirror[Nn.type]], Nil)
-              )
-            )
+             eqSum(
+                summon[Mirror[Opt[T]]],
+                List(
+                   eqProduct(summon[Mirror[Sm[T]]], List(summon[Eq[T]])),
+                   eqProduct(summon[Mirror[Nn.type]], Nil)
+                )
+             )
         #+end_src
 
       - Alternative approaches can be taken to the way that ~derived~ methods can
@@ -3285,12 +3356,12 @@
         from what a programmer might write by hand. As a third example, using a
         higher level library such as shapeless the type class author could
         define an equivalent ~derived~ method as,
-        =FIXME=
+        
         #+begin_src scala
           given eqSum[A](using inst: => K0.CoproductInstances[Eq, A]): Eq[A] with
             def eqv(x: A, y: A): Boolean = inst.fold2(x, y)(false)(
               [t] => (eqt: Eq[t], t0: t, t1: t) => eqt.eqv(t0, t1)
-            )
+            )  // TODO: FIXME
 
           given eqProduct[A](using inst: K0.ProductInstances[Eq, A]): Eq[A] with
             def eqv(x: A, y: A): Boolean = inst.foldLeft2(x, y)(true: Boolean)(
@@ -3326,9 +3397,9 @@
 
      - Assuming the ~Ordering.derived~ /method/ has a /context parameter/ of /type/
       ~Mirror[T]~, it will be satisfied by
-      + the compiler generated ~Mirror~ /instance/ for ~Option~
+      * the compiler generated ~Mirror~ /instance/ for ~Option~
         AND
-      + the /derivation/ of the /instance/ will be _EXPANDED_ on the RHS of this
+      * the /derivation/ of the /instance/ will be _EXPANDED_ on the RHS of this
         definition in _the same way as_ an /instance/ DEFINED in ADT /companion
         objects/.
 
@@ -3355,9 +3426,9 @@
 
      - There are essentially *TWO* pieces of infrastructure in *compiler-generated
        ~Mirror~ instances*,
-       + /type members/ encoding properties of the /mirrored types/.
+       * /type members/ encoding properties of the /mirrored types/.
 
-       + a MINIMAL _value level_ mechanism for working generically with /terms/
+       * a MINIMAL _value level_ mechanism for working generically with /terms/
          of the /mirrored types/.
 
      - The ~Mirror~ infrastructure _can be seen as_ an /extension/ of the existing
@@ -3366,7 +3437,7 @@
        hence the /type members/ and the ~ordinal~ or ~fromProduct~ /methods/ will
        be members of that object.
 
-       + The primary motivation for this design decision, and the decision to encode
+       * The primary motivation for this design decision, and the decision to encode
          properties via /types/ rather than /terms/:
          to keep the /bytecode and runtime footprint/ of the feature *small enough*
          to make it possible to provide ~Mirror~ instances *unconditionally*.
@@ -3374,22 +3445,22 @@
      - Whilst ~Mirrors~ encode properties precisely via /type members/, the _value
        level_ ~ordinal~ and ~fromProduct~ are somewhat _weakly typed_ (because they
        are defined in terms of ~MirroredMonoType~) just like the members of ~Product~.
-       - This means that
+       * This means that
          code for /generic type classes/ has to _ENSURE_ that
          1. /type exploration/ and /value selection/ PROCEED in lockstep
             AND
-         2. 1. has to assert this conformance in some places using /casts/.
-            * If /generic type classes/ are *correctly* written these /casts/ will
+         2. has to assert this conformance in some places using /casts/.
+            + If /generic type classes/ are *correctly* written these /casts/ will
               *never fail*.
 
      - As mentioned, however,
-       + the compiler-provided mechanism is _INTENTIONALLY very low level_
+       * the compiler-provided mechanism is _INTENTIONALLY very low level_
          AND
-       + it is ANTICIPATED that
+       * it is ANTICIPATED that
          /higher level type class derivation/ and /generic programming/
          _libraries_ will build on this and Dotty's other metaprogramming
          facilities
-         * PURPOSE:
+         + PURPOSE:
            to *hide* these low-level details *from* /type class/ authors and
            general users.
 
@@ -3445,7 +3516,7 @@
          @implicitNotFound("Values of types ${L} and ${R} cannot be compared with == or !=")
          sealed trait CanEqual[-L, -R]
 
-         object CanEqual:
+         object CanEqual with
            object derived extends CanEqual[Any, Any]
        #+end_src
 
@@ -3512,7 +3583,7 @@
      - If the ~strictEquality~ feature is enabled then a comparison using
        ~x \equal{}\equal{} y~ or ~x != y~ between values ~x: T~ and ~y: U~ is _legal iff there
        is a given of type ~CanEqual[T, U]~._
-       + =from Jian=
+       * =from Jian=
          This doc use "if" in ths paragraph, and in this note I replace it with
          "iff", which I think is better because it's right and more strict!
 
@@ -3525,72 +3596,72 @@
        3. neither ~T~ nor ~U~ have a reflective ~CanEqual~ instance.
 
      - Explanations:
-       + /lifting/ a type ~S~ means
-         * *replacing* ALL /references/ to /abstract types/ in /covariant positions/
+       * /lifting/ a type ~S~ means
+         + *replacing* ALL /references/ to /abstract types/ in /covariant positions/
            of ~S~ by _their /upper bound/,_
 
            AND
 
-         * *replacing* ALL /refinement types/ in /covariant positions/ of ~S~ by
+         + *replacing* ALL /refinement types/ in /covariant positions/ of ~S~ by
            _their parent_.
 
-       + a /type/ ~T~ has a _reflexive_ ~CanEqual~ /instance/
+       * a /type/ ~T~ has a _reflexive_ ~CanEqual~ /instance/
          if the _implicit search_ for ~CanEqual[T, T]~ succeeds.
 
      - =from Jian= =TODO= =TODO=
-       + Why ~CanEqual[-T, -U]~ is /contravariant/ for ~T~ or ~U~.
+       * Why ~CanEqual[-T, -U]~ is /contravariant/ for ~T~ or ~U~.
 
-       + I don't quite understand the rule 2.
+       * I don't quite understand the rule 2.
 
-       + My understanding to rule 2 is:
+       * My understanding to rule 2 is:
          ~S[+X]~ is the definition.
          ~U <: A~ and ~T <: S[A]~.
          ~U~ and ~T~ can be compared.
 
-       + In the "Explanations" above:
-         * Q :: WHY "covariant"? WHY NOT "contravariant" or "invariant"?
+       * In the "Explanations" above:
+         + Q :: WHY "covariant"? WHY NOT "contravariant" or "invariant"?
 
 **** DONE Predefined ~CanEqual~ Instances
      CLOSED: [2020-07-20 Mon 02:28]
      - The ~CanEqual~ object defines instances for comparing
-       + the /primitive types/
-         * ~Byte~
-         * ~Short~
-         * ~Char~
-         * ~Int~
-         * ~Long~
-         * ~Float~
-         * ~Double~
-         * ~Boolean~
-         * ~Unit~,
+       * the /primitive types/
+         + ~Byte~
+         + ~Short~
+         + ~Char~
+         + ~Int~
+         + ~Long~
+         + ~Float~
+         + ~Double~
+         + ~Boolean~
+         + ~Unit~,
 
-       + ~java.lang.Number~
-       + ~java.lang.Boolean~
-       + ~java.lang.Character~
+       * ~java.lang.Number~
+       * ~java.lang.Boolean~
+       * ~java.lang.Character~
 
-       + ~scala.collection.Seq~
-       + ~scala.collection.Set~
+       * ~scala.collection.Seq~
+       * ~scala.collection.Set~
 
      - Instances are defined so that *every* one of the /types/ mentioned above
        has /a *reflexive* ~CanEqual~ instance/, and the following holds:
-       + /Primitive numeric types/ can be compared with _each other_.
+       * /Primitive numeric types/ can be compared with _each other_.
 
-       + /Primitive numeric types/ can be compared with *subtypes* of
+       * /Primitive numeric types/ can be compared with *subtypes* of
          ~java.lang.Number~ (and _vice versa_).
 
-       + ~Boolean~ can be compared with ~java.lang.Boolean~ (and _vice versa_).
+       * ~Boolean~ can be compared with ~java.lang.Boolean~ (and _vice versa_).
 
        + ~Char~ can be compared with ~java.lang.Character~ (and _vice versa_).
 
-       + Two /sequences/ (of *arbitrary subtypes* of ~scala.collection.Seq~) can
+       * Two /sequences/ (of *arbitrary subtypes* of ~scala.collection.Seq~) can
          be compared with _each other_ *if their element types can be compared.*
          The two sequence types need not be the same.
 
-       + Two /sets/ (of *arbitrary subtypes* of ~scala.collection.Set~) can be
+       * Two /sets/ (of *arbitrary subtypes* of ~scala.collection.Set~) can be
          compared with _each other_ *if their element types can be compared.*
          The two set types need not be the same.
 
-       + Any /subtype/ of ~AnyRef~ can be compared with ~Null~ (and _vice versa_).
+       * Any /subtype/ of ~AnyRef~ can be compared with ~Null~ (and _vice versa_).
 
      - =from Jian=
        /a *reflexive* ~CanEqual~ instance/ for each /types/ mentioned above means
@@ -3598,18 +3669,18 @@
        if ~CanEqual[A, B]~ is *not* defined. This is true even when ~strictEquality~ is
        disabled. This is mentioned in the above subsection "Precise Rules for
        Equality Checking".
-       + When ~strictEquality~ is *enabled*,
+       * When ~strictEquality~ is *enabled*,
          if there is no ~CanEqual[A, B]~, values of ~A~ and ~B~ can't be compared.
 
-       + When ~strictEquality~ is *turned off*,
+       * When ~strictEquality~ is *turned off*,
          if there is NO ~CanEqual[A, B]~, because of the /*reflexive* ~CanEqual~
          instance/ and *rule 3*, ~A~ and ~B~ can't be compared.
-         * *Note*:
+         + *Note*:
            In this case, when there is no /*reflexive* ~CanEqual~ instance/, even
            without ~CanEqual[A, B]~, values of ~A~ and ~B~ can be compared because of
            ~canEqualAny~.
 
-**** TODO Why Two Type Parameters? - =START=
+**** TODO Why Two Type Parameters? - =START= =RE-READ=
      - One particular feature of the Eql type is that it takes two type parameters,
        representing the types of the two items to be compared. By contrast,
        conventional implementations of an equality type class take only a single
@@ -3623,7 +3694,7 @@
      - Say you want to come up with a safe version of the ~contains~ /method/ on
        ~List[T]~. The original definition of ~contains~ in the standard library was:
        #+begin_src scala
-         class List[+T]:
+         class List[+T] with
            // ...
            def contains(x: Any): Boolean
        #+end_src
@@ -3643,7 +3714,7 @@
        3. The only variance-correct way to use the /type parameter/ ~T~ in contains
           is as a /lower bound/:
           #+begin_src scala
-            class List[+T]:
+            class List[+T] with
               // ...
               def contains[U >: T](x: U): Boolean
           #+end_src
@@ -3653,7 +3724,7 @@
 
        4. Make it _more useful (i.e. restrictive)_ by adding an ~CanEqual~ parameter:
           #+begin_src scala
-            class List[+T]:
+            class List[+T] with
               // ...
               def contains[U >: T](x: U)(using CanEqual[T, U]): Boolean
           #+end_src
@@ -3720,7 +3791,7 @@
 
        11. More on /multiversal equality/ is found in a [[https://www.scala-lang.org/blog/2016/05/06/multiversal-equality.html][blog post]] and a [[https://github.com/lampepfl/dotty/issues/1247][GitHub issue]].
 
-*** DONE Context Functions - =TODO= =RE-READ=
+*** DONE Context Functions - =TODO= =START= =HERE= =RE-READ=
     CLOSED: [2020-07-14 Tue 02:39]
     - Context functions :: functions with *ONLY* /context parameters/.
       + Their /types/ are /context function types/.
@@ -9181,7 +9252,7 @@
 
     - (In Scala 3)
       The _syntax_ of /numeric literals/ is the same as before,
-      + *EXCEPT* there are *NO pre-set limits* _how large they can be_.
+      * *EXCEPT* there are *NO pre-set limits* _how large they can be_.
 
 **** DONE Meaning of Numeric Literals
      CLOSED: [2020-08-23 Sun 00:10]
@@ -9439,17 +9510,17 @@
          (e.g. ~row.columnName~).
 
       2. Achieving the same experience in /statically typed language/ requires
-         + defining a class for every possible row arising from database manipulation
+         * defining a class for every possible row arising from database manipulation
            (including rows arising from joins and projections)
-         + setting up a scheme to map between a row and the class representing it.
+         * setting up a scheme to map between a row and the class representing it.
 
       3. This requires a large amount of boilerplate, which leads developers
          to trade the advantages of static typing for simpler schemes where
          colum names are represented as strings and passed to other operators
          (e.g. ~row.select("columnName")~). _This approach is unatural in both
          sides_
-         + forgoes the advantages of static typing,
-         + is still not as natural as the dynamically typed version.
+         * forgoes the advantages of static typing,
+         * is still not as natural as the dynamically typed version.
 
     - Structural types help in situations where we would like to support simple
       dot notation in dynamic contexts without losing the advantages of static
@@ -9528,18 +9599,18 @@
          s1 `*` s2  // also OK, but unusual
          s1.*(s2)   // also OK, but unusual
        #+end_src
-       + *Infix operations involving alphanumeric operators are deprecated*,
+       * *Infix operations involving alphanumeric operators are deprecated*,
          unless one of the following conditions holds:
-         * the operator definition carries an ~infix~ /modifier/, or
-         * the operator was compiled with Scala 2, or
-         * the operator is followed by an opening brace. =TODO= =???= =TODO=
+         + the operator definition carries an ~infix~ /modifier/, or
+         + the operator was compiled with Scala 2, or
+         + the operator is followed by an opening brace. =TODO= =???= =TODO=
 
      - alphanumeric operator :: an operator *consisting ENTIRELY* of
-       + letters
-       + digits
-       + ~$~
-       + ~_~
-       + any unicode character for which ~java.lang.Character.isIdentifierPart(c)~
+       * letters
+       * digits
+       * ~$~
+       * ~_~
+       * any unicode character for which ~java.lang.Character.isIdentifierPart(c)~
          returns ~true~.
 
      - /Infix operations/ involving /symbolic operators/ are *ALWAYS* allowed, so
@@ -10125,10 +10196,10 @@
          #+end_src
 
       3. The scrutinee of a ~match~ expression must be an ~InfixExpr~.
-         + Previously the scrutinee could be _followed by_ a type ascription ~: T~,
+         * Previously the scrutinee could be _followed by_ a type ascription ~: T~,
            but this is *no longer supported*.
 
-         + So ~x : T match { ... }~ in Scala 3 now has to be written
+         * So ~x : T match { ... }~ in Scala 3 now has to be written
            ~(x: T) match { ... }~.
 
 **** Syntax
@@ -10511,7 +10582,6 @@
 
 *** DONE Automatic Eta Expansion
     CLOSED: [2020-05-25 Mon 10:20]
-    # Automatic Eta Expansion
     The _conversion of METHODS into FUNCTIONS_ has been improved and happens
     *automatically* for /methods/ with one or more parameters.
     - Example:
@@ -10668,7 +10738,7 @@
 
 ** TODO Dropped Features
 *** DONE Dropped: ~DelayedInit~
-    CLOSED: [2020-11-24 Tue 08:24]
+    CLOSED: [2021-01-24 Sun 16:51]
     The special handling of the ~DelayedInit~ trait is _NO LONGER SUPPORTED_.
 
     - Consequence:
@@ -10677,8 +10747,6 @@
         + However, the code is now run in the initializer of the object, which on
           some JVM's means that it will only be interpreted. So, better not use
           it for benchmarking!
-          =from Jian= =TODO= =TODO= =TODO=
-          Learn more!!!
           
         + Also, if you want to access the /command line arguments/, you need to use
           an *EXPLICIT* ~main~ method for that.
@@ -10688,7 +10756,6 @@
 
 *** DONE Dropped: Scala 2 Macros
     CLOSED: [2020-11-22 Sun 21:59]
-    # *Dropped: Scala 2 Macros*
     1. The previous, _experimental macro system_ has been dropped.
 
     2. Instead, there is a _cleaner_, _more restricted_ system.
@@ -10944,7 +11011,7 @@
       
 *** DONE Dropped: XML Literals
     CLOSED: [2020-12-09 Wed 01:46]
-    /XML Literals/ are _still supported_,
+    /XML Literals/ are _STILL supported_,
     BUT will _be *dropped* in the near future_,
     to be *REPLACED* with /XML string interpolation/:
     #+begin_src scala
@@ -11015,13 +11082,11 @@
       method/ or vice versa.
         Instead, both /methods/ *must agree exactly* in their /parameter lists/.
       #+begin_src scala
-        class A {
+        class A with
           def next(): Int
-        }
 
-        class B extends A {
+        class B extends A with
           def next: Int  // overriding error: incompatible type
-        }
       #+end_src
       *Methods overriding* /Java or Scala-2 methods/ are again *exempted from*
       this requirement.
@@ -11110,7 +11175,18 @@
       #+begin_src scala
         import scala.util.control.NonLocalReturns._
 
-        returning { ... throwReturn(x) ... }
+        extension [T](xs: List[T])
+           def has(elem: T): Boolean = returning {
+              for x <- xs do
+                 if x == elem then throwReturn(true)
+
+              false
+           }
+
+        // TODO: FIXME
+        @main def test(): Unit =
+          val xs = List(1, 2, 3, 4, 5)
+          assert(xs.has(2) == xs.contians)
       #+end_src
 
     - =from Jian=
