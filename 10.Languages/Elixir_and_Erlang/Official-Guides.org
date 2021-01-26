@@ -489,20 +489,322 @@
 *** 5. Charlists
    
 ** TODO 7. Keyword lists and maps
-*** 1. Keyword lists
-*** 2. Maps
-*** 3. Nested data structures
+   In Elixir, we have TWO main /associative data structures/:
+   - /keyword lists/
+   - /maps/
    
-** TODO 8. Modules and Functions
-*** 1. Compilation
-*** 2. Scripted mode
-*** 3. Named functions
-*** 4. Function capturing
-*** 5. Default arguments
+*** DONE 1. Keyword lists
+    CLOSED: [2021-01-26 Tue 01:42]
+    - Equivalent way of definitions:
+      #+begin_src elixir
+        list = [{:a, 1}, {:b, 2}]  #=> [a: 1, b: 2]
+        list == [a: 1, b: 2]       #=> true
+      #+end_src
+
+    - Concatenate:
+      #+begin_src elixir
+        list ++ [c: 3]  #=> [a: 1, b: 2, c: 3]
+
+        [a: 0] ++ list  #=> [a: 0, a: 1, b: 2]
+      #+end_src
+
+    - On lookup, the first match will be picked:
+      #+begin_src elixir
+        new_list = [a: 0] ++ list  #=> [a: 0, a: 1, b: 2]
+        new_list[:a]               #=> 0
+      #+end_src
+
+    - /Keyword lists/ are important because they have *THREE* _special
+      characteristics_:
+      * Keys must be /atoms/.
+      * Keys are *ordered*, as specified by the developer.
+      * Keys can be given *more than once*.
+
+    - For example, =TODO=
+      the *Ecto* library makes use of these features to provide an elegant DSL for
+      writing database queries:
+      #+begin_src elixir
+        query = from w in Weather,
+              where: w.prcp > 0,
+              where: w.temp < 20,
+              select: w
+      #+end_src
+
+    - These characteristics are what prompted /keyword lists/ to be the default
+      mechanism for passing _options_ to /functions/ in Elixir.
+        In chapter 5, when we discussed the ~if/2~ /macro/, we mentioned that
+      the following syntax is supported:
+      #+begin_src elixir
+        if false, do: :this, else: :that
+      #+end_src
+      * In fact, the call above is equivalent to:
+        #+begin_src elixir
+          if(false, [do: :this, else: :that])  #=> :that
+
+          if(false, [{:do, :this}, {:else, :that}])  #=> :that
+        #+end_src
+        *In general, when the /keyword list/ is the _LAST argument_ of a /function/,
+        the _square brackets_ are _optional_.*
+
+    - It is rarely done that in practice pattern match /keyword lists/, since
+      pattern matching on lists requires the number of items and their order to
+      match
+
+    - In order to manipulate /keyword lists/, Elixir provides the =Keyword= module.
+
+    - For the linear performance reason, /keyword lists/ are used in Elixir *mainly
+      for passing optional values.* If you need to store many items or guarantee
+      one-key associates with at maximum one-value, you should use /maps/ instead.
+      
+*** TODO 2. Maps
+*** TODO 3. Nested data structures
    
-** TODO 9. Recursion
-*** 1. Loops through recursion
-*** 2. Reduce and map algorithms
+** DONE 8. Modules and Functions
+   CLOSED: [2021-01-26 Tue 01:10]
+   We use the ~defmodule~ /macro/ to define /modules/.
+   We use the ~def~ /macro/ to define /functions/ in /modules/.
+   
+   - Example:
+     #+begin_src elixir
+       defmodule Math do
+         def sum(a, b) do
+           a + b
+         end
+       end
+     #+end_src
+     
+*** DONE 1. Compilation
+    CLOSED: [2021-01-26 Tue 00:29]
+    - Steps of compilation and use: 
+      1. Write the code above in file =math.ex=.
+      2. Compile ~elixirc math.ex~, and get the file =Elixir.Math.beam= containing bytecode.
+      3. Start IEx in the same directory of the bytecode file from step 2.
+      4. Then you can call ~Math.sum(1, 2)~ in IEx.
+    
+    - Elixir projects are usually organized into three directories:
+      * =ebin= - contains the compiled bytecode
+      * =lib= - contains Elixir code (usually =.ex= files)
+      * =test= - contains tests (usually =.exs= files)
+
+    - =TODO=
+      When working on actual projects, the build tool called =mix= will be
+      responsible for compiling and setting up the proper paths for you.
+
+    - For learning purposes,
+      Elixir also supports a *scripted mode* which
+      * is _more flexible_
+      * does *NOT generate* any compiled artifacts.
+        
+*** DONE 2. Scripted mode
+    CLOSED: [2021-01-26 Tue 00:33]
+    #+begin_src elixir
+      defmodule Math do
+        def sum(a, b) do
+          a + b
+        end
+      end
+
+      IO.puts Math.sum(1, 2)
+    #+end_src
+    Run it: ~elixir math.exs~.
+    
+    - =.ex= files used for compiling to =.beam= files,
+      while =.exs= files are used for scripting.
+    
+*** DONE 3. Named functions
+    CLOSED: [2021-01-26 Tue 00:40]
+    - ~defp/2~ is used to define /private functions/.
+    
+    - /Function declarations/ also support /guards/ and /multiple clauses/.
+      * Example:
+        #+begin_src elixir
+          defmodule Math do
+            def zero?(0) do
+              true
+            end
+
+            def zero?(x) when is_integer(x) do
+              false
+            end
+          end
+
+          IO.puts Math.zero?(0)          #=> true
+          IO.puts Math.zero?(1)          #=> false
+          IO.puts Math.zero?([1, 2, 3])  #=> ** (FunctionClauseError)
+          IO.puts Math.zero?(0.0)        #=> ** (FunctionClauseError)
+        #+end_src
+
+    - Similar to constructs like ~if~, named functions support both ~do:~ and
+      ~do/end~ block syntax, 
+      * Example:
+        #+begin_src elixir
+          defmodule Math do
+            def zero?(0), do: true
+            def zero?(x) when is_integer(x), do: false
+          end
+        #+end_src
+        _Use ~do:~ for one-liner is good!_
+    
+*** DONE 4. Function capturing
+    CLOSED: [2021-01-26 Tue 00:56]
+    The ~name/arity~ can also be used to *retrieve* a /named function/ as a
+    /function type/.
+    
+    - Example:
+      #+begin_src elixir
+        # Run `iex math.exs`, and then type
+
+        Math.zero?(0)        # true
+
+        fun = &Math.zero?/1  # &Math.zero?/1
+
+        is_function(fun)     # true
+
+        fun.(0)              # true
+      #+end_src
+
+    - Local or imported functions, like ~is_function/1~, can be _captured *without*
+      the /module/:_
+      #+begin_src elixir
+        &is_function/1          #=> &:erlang.is_function/1
+        (&is_funciton/1).(fun)  #=> true
+      #+end_src
+
+    - /Capture syntax/ can also be used as a _shortcut_ for *creating* /functions/:
+      #+begin_src elixir
+        fun = &(&1 + 1)  #=> #Function<6.71889879/1 in :erl_eval.expr/5>
+        fun.(1)          #=> 2
+
+        fun2 = &"Good #{&1}"  #=> #Function<6.127694169/1 in :erl_eval.expr/5>
+        fun2.("morning")      #=> "Good morning"
+      #+end_src
+
+    - If you want to *capture* a /function/ from a /module/,
+      there is an alternative syntax similar to ~&Module.function/arity~:
+      #+begin_src elixir
+        fun = &List.flatten(&1, &2)  #=> &List.flatten/2
+        fun.([1, [[2], 3]], [4, 5])  #=> [1, 2, 3, 4, 5]
+      #+end_src
+    
+*** DONE 5. Default arguments
+    CLOSED: [2021-01-26 Tue 01:10]
+    - Example:
+      #+begin_src elixir
+        defmodule Concat do
+          def join(a, b, sep \\ " ") do
+            a <> sep <> b
+          end
+        end
+
+        IO.puts Concat.join("Hello", "world")      #=> Hello world
+        IO.puts Concat.join("Hello", "world", "_") #=> Hello_world
+      #+end_src
+
+    - Any expression is allowed to serve as a /default value/,
+      * *BUT it won't be evaluated during the /function definition/.*
+
+      * Every time the function is invoked and any of its /default values/ _have
+        to be used_, the expression for that /default value/ will be evaluated:
+
+      * Example:
+        #+begin_src elixir
+          defmodule DefaultTest do
+            def dowork(x \\ "hello") do
+              x
+            end
+          end
+
+          DefaultTest.dowork      #=> "hello"
+          DefaultTest.dowork 123  #=> 123
+        #+end_src
+
+    - /Multiple clauses function defintion/ with /default values/ requires to create
+      a function head (without an actual body) _for declaring defaults_. For example:
+      #+begin_src elixir
+        defmodule Concat do
+          # A function head declaring defaults
+          def join(a, b \\ nil, sep \\ " ")
+
+          def join(a, b, _sep) when is_nil(b) do
+            a
+          end
+
+          def join(a, b, sep) do
+            a <> sep <> b
+          end
+        end
+      #+end_src
+      The _leading underscore_ in ~_sep~ means that the variable will be *ignored* in
+      this function.
+        
+    - When using /default values/, one must be CAREFUL to *avoid overlapping function
+      definitions*. 
+      #+begin_src elixir
+        defmodule Concat do
+          def join(a, b) do
+            IO.puts "***First join"
+            a <> b
+          end
+
+          def join(a, b, sep \\ " ") do
+            IO.puts "***Second join"
+            a <> sep <> b
+          end
+        end
+      #+end_src
+      Compile this will receive a _warning_:
+      =warning: this clause cannot match because a previous clause at line 2 always matches=
+
+      * =from Jian= =TODO=
+        If this is on purpose, how can I suppress this warning for this definition???
+      
+** DONE 9. Recursion
+   CLOSED: [2021-01-26 Tue 01:20]
+*** DONE 1. Loops through recursion
+    CLOSED: [2021-01-26 Tue 01:20]
+    Due to *immutability*, loops in Elixir (as in any /functional programming
+    language/) are written differently from /imperative languages/.
+    
+*** DONE 2. Reduce and map algorithms
+    CLOSED: [2021-01-26 Tue 01:20]
+    - Reduce algorithm example:
+      #+begin_src elixir
+        defmodule Math do
+          def sum_list([head | tail], accumulator) do
+            sum_list(tail, head + accumulator)
+          end
+
+          def sum_list([], accumulator) do
+            accumulator
+          end
+        end
+
+        IO.puts Math.sum_list([1, 2, 3], 0) #=> 6
+      #+end_src
+
+    - Map algorithm example:
+      #+begin_src elixir
+        defmodule Math do
+          def double_each([head | tail]) do
+            [head * 2 | double_each(tail)]
+          end
+
+          def double_each([]) do
+            []
+          end
+        end
+      #+end_src
+
+    - We usually don't write code manually like above.
+      * We will use the provided functionalities in the ~Enum~ /module/.
+        For example:
+        #+begin_src elixir
+          Enum.reduce([1, 2, 3], 0, &+/2)  #=> 6
+          Enum.map([1, 2, 3], &(&1 * 2))   #=> [2, 4, 6]
+        #+end_src
+        =NEXT=
+        Let’s take a deeper look at ~Enumerable~ and, while we're at it, its
+        *lazy* counterpart, ~Stream~.
 
 ** TODO 10. Enumerables and streams
 *** 1. Enumerables
