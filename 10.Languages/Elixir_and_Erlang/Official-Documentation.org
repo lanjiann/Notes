@@ -1,0 +1,719 @@
+#+TITLE: Elixir
+#+VERSION: 1.11
+#+AUTHOR: Community
+#+STARTUP: entitiespretty
+#+STARTUP: overview
+
+* TODO Getting Started
+** DONE 1. Introduction
+   CLOSED: [2021-01-25 Mon 20:02]
+   - In this tutorial, we are going to teach you about Elixir fundamentals:
+     * the language _syntax_
+     * how to *define* /modules/
+     * how to manipulate the characteristics of _common data structures_, and more.
+
+   - This chapter will focus on ensuring that Elixir is installed and that you
+     can successfully run Elixir's Interactive Shell, called IEx.
+     
+   - Our requirements are (see =elixir -v=):
+     * Elixir 1.5.0 onwards
+     * Erlang/OTP 19 onwards
+     
+*** 1. Installation
+    If you haven't yet installed Elixir, visit our installation page. Once you
+    are done, you can run ~elixir --version~ to get the current Elixir version.
+    
+*** 2. Interactive mode
+    - After installation you will see three new executables:
+      * iex
+      * elixir
+      * elixirc
+      
+    - Example (use REPL):
+      #+begin_src elixir
+        40 + 2
+        # 42
+
+        "hello" <> " world"
+        # "hello world"
+      #+end_src
+
+    - To exit _iex_ press Ctrl+C twice.
+
+    - In Windows, run =iex --werl=
+      
+*** 3. Running scripts
+    #+begin_src elixir
+      # simple.exs
+      IO.puts "Hello world from Elixir"
+    #+end_src
+    
+    Run it
+    #+begin_src shell
+      elixir simple.exs
+      # Hello world from Elixir
+    #+end_src
+    
+    - Later on we will learn =TODO=
+      * how to *compile* Elixir code (in Chapter 8)
+      * how to *use* the _Mix build tool_ (in the Mix & OTP guide).
+    
+*** TODO 4. Asking questions
+    
+** DONE 2. Basic types
+   CLOSED: [2021-01-25 Mon 22:04]
+   #+begin_src elixir
+     1          # integer
+     0x1F       # integer
+     1.0        # float
+     true       # boolean
+     :atom      # atom / symbol
+     "elixir"   # string
+     [1, 2, 3]  # list
+     {1, 2, 3}  # tuple
+   #+end_src
+   
+*** DONE 1. Basic arithmetic
+    CLOSED: [2021-01-25 Mon 20:31]
+    #+begin_src elixir
+      1 + 2   # 3
+      5 * 5   # 25
+      10 / 2  # 5.0
+      div(10, 2)  # 5 -- integer division
+      div 10, 2   # 5
+      rem 10, 3   # 1
+    #+end_src
+    - _ALLOW_ to _drop the parentheses_ when invoking named functions.
+      * This feature gives a cleaner syntax when writing declarations and
+        control-flow constructs.
+
+    - _Shortcut notations_ for entering /binary/, /octal/, and
+      /hexadecimal numbers/:
+      #+begin_src elixir
+        0b1010  # 10
+        0o777   # 511
+        0x1F    # 31
+      #+end_src
+      
+    - Float numbers (64-bit double precision)
+      #+begin_src elixir
+        1.0      # 1.0
+        1.0e-10  # 1.0e-10
+      #+end_src
+
+    - ~round~ and ~trunc~
+      #+begin_src elixir
+        round(3.58)  # 4
+        trunc(3.58)  # 3
+      #+end_src
+    
+*** DONE 2. Identifying functions and documentation
+    CLOSED: [2021-01-25 Mon 22:04]
+    Functions in Elixir are identified by both their /name/ and their /arity/. 
+    
+    - Use ~h~ function to how documentation for any function:
+      run ~h trunc/1~ in IEx.
+      * This will work, even though ~trunc/1~ is actually defined in the /module/
+        ~Kernel~. This is because all functions in ~Kernel~ will automatically
+        imported into our namespace.
+
+      * More often, for /funcitons/ _NOT in ~Kernel~,_ we hould ue full path:
+        ~h Kernel.trunc/1~
+    
+    - Invoking ~h~ without argument displays the documentation for ~IEx.Helpers~,
+      which is where ~h~ and other functionality is defined.
+      
+*** DONE 3. Booleans
+    CLOSED: [2021-01-25 Mon 20:33]
+    ~true~ and ~false~
+    
+    - ~is_boolean/1~ function
+
+    - ~is_integer/1~, ~is_float/1~, and ~is_number/1~.
+    
+*** DONE 4. Atoms
+    CLOSED: [2021-01-25 Mon 20:40]
+    - atom :: a constant whose value is its own name.
+
+    - Some other languages call these /symbols/.
+    
+    - They are often useful to enumerate over distinct values, such as:
+      #+begin_src elixir
+        :apple   # :apple
+        :orange  # :orange
+      #+end_src
+
+    - Equality check:
+      #+begin_src elixir
+        :apple == :apple   # true
+        :apple == :orange  # false
+      #+end_src
+
+    - the /boolean constants/ ~true~ and ~false~ are also /atoms/:
+      #+begin_src elixir
+        true == :true       # true
+        is_atom(false)      # true
+        is_boolean(:false)  # true
+      #+end_src
+      Elixir allows you to skip the leading ~:~ for the /atoms/ ~false~, ~true~,
+      and ~nil~.
+
+    - Finally, Elixir has a construct called aliases which we will explore later. =TODO=
+      /Aliases/ *start in upper case* and are also /atoms/:
+      #+begin_src elixir
+        is_atom(Hello)  # true
+      #+end_src
+
+*** DONE 5. Strings
+    CLOSED: [2021-01-25 Mon 21:02]
+    - /String/ in UTF-8:
+      #+begin_src elixir
+        "hellö"  # "hellö"
+      #+end_src
+      In Windows, you may use a terminal that doesn't use UTF-8 by default.
+      Run ~chcp 65001~ in your current session before entering IEx.
+
+    - /String interpolation/:
+      #+begin_src elixir
+        string = :word
+        "hellö #{string}"  # "hellö world"
+      #+end_src
+
+    - /Strings/ can have _line breaks_ in them.
+      You can introduce them using escape sequences:
+      #+begin_src elixir
+        iex> "hello
+        ...> world"
+        # "hello\nworld"
+
+        iex> "hello\nworld"
+        "hello\nworld"
+      #+end_src
+
+    - You can print a /string/ using the ~IO.puts/1~ /function/ from the ~IO~ /module/:
+      #+begin_src elixir
+        iex> IO.puts "hello\nworld"
+        hello
+        world
+        :ok
+      #+end_src
+      Notice that the ~IO.puts/1~ /function/ *returns* the /atom/ ~:ok~ after printing.
+
+    - /Strings/ in Elixir are _represented internally_ by *contiguous sequences of
+      bytes* known as /binaries/:
+      #+begin_src elixir
+        is_binary("hellö")  # true
+      #+end_src
+
+    - Get the _number of bytes_ in a /string/:
+      #+begin_src elixir
+        byte_size("hellö")  # 6
+      #+end_src
+      
+    - Notice that the _number of bytes_ in that /string/ is 6, even though it has
+      5 /graphemes/.
+        That's because the /grapheme/ =“ö”= takes 2 bytes to be represented in
+      UTF-8. We can get the actual length of the /string/, based on the number of
+      /graphemes/, by using the ~String.length/1~ /function/:
+      #+begin_src elixir
+        String.length("hellö")  # 5
+      #+end_src
+      
+    - The ~String~ /module/
+      contains a bunch of /functions/ that _operate on_ /strings/ as defined in
+      the /Unicode standard/
+      #+begin_src elixir
+        String.upcase("hellö")  # "HELLÖ"
+      #+end_src
+      
+*** DONE 6. Anonymous functions
+    CLOSED: [2021-01-25 Mon 21:58]
+    #+begin_src elixir
+      add = fn a, b -> a + b end
+      add.(1, 2)        # 3
+      is_function(add)  # true
+
+      x = 42
+      (fn -> x = 0 end).()  # 0
+      x  # 42
+    #+end_src
+    
+    - The ~.~ in the _anonymous function invocations_ is used to distinguish the 
+      /anonymous function/ ~add~ and the named function ~add/2~.
+      * In Elixir, named functions can only be defined within a /module/.
+    
+*** DONE 7. (Linked) Lists
+    CLOSED: [2021-01-25 Mon 21:17]
+    - Elixir uses _square brackets_ to specify a _list_ of values.
+      Values can be of *any* type:
+      #+begin_src elixir
+        [1, 2, true, 3]   # [1, 2, true, 3]
+        length [1, 2, 3]  # 3
+      #+end_src
+
+    - Two /lists/ can be *concatenated* or *subtracted* using the ~++/2~ and ~--/2~
+      operators respectively:
+      #+begin_src elixir
+        [1, 2, 3] ++ [4, 5, 6]
+        # [1, 2, 3, 4, 5, 6]
+
+        [1, true, 2, false, 3, true] -- [true, false]
+        # [1, 2, 3, true]
+      #+end_src
+
+    - List operators *NEVER modify* the existing list.
+      We say that Elixir data structures are *immutable*.
+
+    - ~hd/1~ and ~tl/1~
+      #+begin_src elixir
+        list = [1, 2, 3]
+        hd(list)  # 1
+        tl(list)  # [2, 3]
+      #+end_src
+
+    - Sometimes you will create a /list/ and it will return a _value in single quotes_.
+      For example:
+      #+begin_src elixir
+        [11, 12, 13]               # '\v\f\r'
+        [104, 101, 108, 108, 111]  # 'hello'
+      #+end_src
+      When Elixir sees a /list/ of _printable ASCII numbers_, Elixir will *print
+      that as a /charlist/ (literally a list of characters).*
+      * /Charlists/ are quite common when interfacing with existing Erlang code.
+
+      * Whenever you see a value in IEx and you are not quite sure what it is,
+        you can use the ~i/1~ to retrieve information about it:
+        #+begin_src elixir
+          i 'hello'
+          Term
+            'hello'
+          Data type
+            List
+          Description
+            ...
+          Raw representation
+            [104, 101, 108, 108, 111]
+          Reference modules
+            List
+          Implemented protocols
+            ...
+        #+end_src
+
+    - Keep in mind *single-quoted representation* and *double-quoted representation*
+      are not equivalent in Elixir as they are represented by different types:
+      #+begin_src elixir
+        'hello' == "hello"
+        # false
+      #+end_src
+      * Single quotes are /charlists/
+      * Double quotes are /strings/
+      =TODO= More in _"Binaries, strings and charlists"_
+    
+*** DONE 8. Tuples
+    CLOSED: [2021-01-25 Mon 21:38]
+    - tuple :: curly bracket delimited, comma separated.
+    
+    - Example:
+      #+begin_src elixir
+        pair = {:ok, "hello"}
+
+        tuple_size pair  # 2
+
+        put_elem(pair, 1, "wolrd")  # {:ok, "world"}
+      #+end_src
+    
+*** DONE 9. Lists or tuples?
+    CLOSED: [2021-01-25 Mon 21:52]
+    - /Lists/ are /linked lists/ that stored in memory with no contiguous memory
+      guarantee.
+
+    - /Tuples/ are stored in contiguously in memory.
+      * One very common use case for /tuples/ is to use them to return *extra*
+        information from a function. For example,
+        #+begin_src elixir
+          File.read("path/to/existing/file")
+          # {:ok, "... contents ..."}
+
+          File.read("path/to/unknown/file")
+          # {:error, :enoent}
+        #+end_src
+
+    - Elixir convention of function names that used to count elements in a data
+      structure:
+      * Constant time: ~size~
+        + ~byte_size/1~ (for the number of /bytes/ in a /string/)
+        + ~tuple_size/1~
+
+      * Linear time: ~length~
+        + ~length/1~ (for list length)
+        + ~String.length/1~ (for the number of frapheme in a string)
+    
+** DONE 3. Basic operators
+   CLOSED: [2021-01-25 Mon 22:08]
+   - ~or~, ~and~, and ~not~ are for boolean expresions only.
+     * ~and~ and ~or~ are mapped from ~Erlang~'s ~andalso~ and ~orelse~, respectively.
+
+   - ~||~, ~&&~, and ~!~ accept arguments of ANY type.
+     * All values *excpet* ~false~ and ~nil~ will evaluate to ~true~.
+
+   - Both ~==~ and ~===~ exist.
+     The latter is more strict when comparing /integer/ and /floats/.
+       
+   - Order of different types values:
+     *number < atom < reference < function < port < pid < tuple < map < list < bitstring*
+     
+** DONE 4. Pattern matching
+   CLOSED: [2021-01-25 Mon 22:22]
+*** DONE 1. The match operator
+    CLOSED: [2021-01-25 Mon 22:16]
+    In Elixir, ~=~ is actually the /match operator/.
+    
+*** DONE 2. Pattern matching
+    CLOSED: [2021-01-25 Mon 22:16]
+    #+begin_src elixir
+      [head | tail] = [1, 2, 3]
+      # [1, 2, 3]
+
+      head  # 1
+      tail  # [2, 3]
+    #+end_src
+    
+*** DONE 3. The pin operator 
+    CLOSED: [2021-01-25 Mon 22:22]
+    Variable in Elixir can be *rebound*.
+    Ue the /pin operator/ to avoid /rebound/.
+    
+    #+begin_src elixir
+      x = 1
+      [^x, 2, 3] = [1, 2, 3]  # [1, 2, 3]
+      {y, ^x} = {2, 1}        # {2, 1}
+
+      {y, ^x} = {2, 2}
+      # ** (MatchError) no match of right hand side value: {2, 2}
+    #+end_src
+
+    - If a variable is mentioned *more than once* in a pattern,
+      all references should bind to the *SAME* value:
+      #+begin_src elixir
+        {x, x} = {1, 1}  # {1, 1}
+
+        {x, x} = {1, 2}  # ** (MatchError) no match of right hand side value: {1, 2}
+      #+end_src
+
+    - ~_~ in pattern is supported.
+      * The variable ~_~ is special in that it can *never* be read from.
+        Trying to read from it gives a _compile error_.
+    
+** TODO 5. ~case~, ~cond~, and ~if~
+*** DONE 1. ~case~
+    CLOSED: [2021-01-25 Mon 22:35]
+    #+begin_src elixir
+      ## Basic
+      ##---------
+      case {1, 2, 3} do
+        {4, 5, 6} -> "This clause won't match"
+        {1, x, 3} -> "This clause will match and bind x to 2 in thi clause"
+        _         -> "This clause would match any value"
+      end
+
+      # "This clause will match and bind x to 2 in thi clause"
+
+
+      ## Pin operator
+      ##-------------
+      x = 1
+
+      case 10 do
+        ^x -> "Won't match"
+        _  -> "Will match"
+      end
+
+      # "Will match"
+
+
+      ## Guards
+      ##-------------
+      case {1, 2, 3} do
+        {1, x, 3} when x > 0 -> "Will match"
+        _                    -> "Would match, if guard condition were not satisfied"
+      end
+
+      # "Will match"
+    #+end_src
+
+    - Anonymous function can also have *MULTIPLE* clauses and /guards/:
+      #+begin_src elixir
+        f = fn
+          x, y when x > 0 -> x + y
+          x, y            -> x * y
+        end
+
+        f.(1, 3)   # 4
+        f.(-1, 3)  # -3
+      #+end_src
+      * The number of arguments in EACH /anonymous function clause/ needs to be the
+        *SAME*, otherwise an error is raised.
+        #+begin_src elixir
+          f2 = fn
+            x, y when x > 0 -> x + y
+            x, y, z         -> x * y + z
+          end
+
+          # ** (CompileError) iex:1: cannot mix clauses with different arities in anonymous functions
+        #+end_src
+    
+*** DONE 2. ~cond~
+    CLOSED: [2021-01-25 Mon 22:39]
+    #+begin_src elixir
+      cond do
+        2 + 2 == 5 -> "This will not be true"
+        2 * 2 == 3 -> "Nor this"
+        1 + 1 == 2 -> "But this will"
+      end
+
+      # "But this will"
+    #+end_src
+    
+*** DONE 3. ~if~ and ~unless~
+    CLOSED: [2021-01-25 Mon 22:41]
+    ~if/2~ and ~unless/2~ are implemented as /macros/.
+    They aren't special language constructs in Elixir.
+    
+*** TODO 4. ~do/end~ blocks
+   
+** TODO 6. Binaries, strings, and charlists
+*** 1. Unicode and Code Points
+*** 2. UTF-8 and Encodings
+*** 3. Bitstrings
+*** 4. Binaries
+*** 5. Charlists
+   
+** TODO 7. Keyword lists and maps
+*** 1. Keyword lists
+*** 2. Maps
+*** 3. Nested data structures
+   
+** TODO 8. Modules and Functions
+*** 1. Compilation
+*** 2. Scripted mode
+*** 3. Named functions
+*** 4. Function capturing
+*** 5. Default arguments
+   
+** TODO 9. Recursion
+*** 1. Loops through recursion
+*** 2. Reduce and map algorithms
+
+** TODO 10. Enumerables and streams
+*** 1. Enumerables
+*** 2. Eager vs Lazy
+*** 3. The pipe operator
+*** 4. Streams
+    
+** TODO 11. Processes
+*** 1. ~spawn~
+*** 2. ~send~ and ~receive~
+*** 3. Links
+*** 4. Tasks
+*** 5. State
+   
+** TODO 12. IO and the file system
+*** 1. The ~IO~ module
+*** 2. The ~File~ module
+*** 3. The ~Path~ module
+*** 4. Processes
+*** 5. ~iodata~ and ~chardata~
+
+** TODO 13. alias, require, and import
+*** 1. alias
+*** 2. require
+*** 3. import
+*** 4. use
+*** 5. Understanding Aliases
+*** 6. Module nesting
+*** 7. Multi alias/import/require/use
+   
+** TODO 14. Module attributes
+*** 1. As annotations
+*** 2. As “constants”
+*** 3. As temporary storage
+   
+** TODO 15. Structs
+*** 1. Defining structs
+*** 2. Accessing and updating structs
+*** 3. Structs are bare maps underneath
+*** 4. Default values and required keys
+   
+** TODO 16. Protocols
+*** 1. Example
+*** 2. Protocols and structs
+*** 3. Implementing Any
+**** 3.1. Deriving
+**** 3.2. Fallback to Any
+     
+*** 4. Built-in protocols
+   
+** TODO 17. Comprehensions
+*** 1. Generators and filters
+*** 2. Bitstring generators
+*** 3. The ~:into~ option
+*** 4. Other options
+
+** TODO 18. Sigils
+*** 1. Regular expressions
+*** 2. Strings, char lists, and word lists sigils
+**** 2.1 Strings
+**** 2.2 Char lists
+**** 2.3 Word lists
+    
+*** 3. Interpolation and escaping in string sigils
+*** 4. Calendar sigils
+**** 4.1. Date
+**** 4.2. Time
+**** 4.3. NaiveDateTime
+**** 4.4. DateTime
+    
+*** 5. Custom sigils
+
+** TODO 19. try, catch, and rescue
+*** 1. Errors
+*** 2. Throws
+*** 3. Exits
+*** 4. After
+*** 5. Else
+*** 6. Variables scope
+   
+** TODO 20. Typespecs and behaviours
+*** Types and specs
+**** Function specifications
+**** Defining custom types
+**** Static code analysis
+     
+*** Behaviours
+**** Defining behaviours
+**** Adopting behaviours
+**** Dynamic dispatch
+
+** TODO 21. Debugging
+*** IO.inspect/2
+*** ~IEx.pry/0~ and ~IEx.break!/2~
+*** Debugger
+*** Observer
+*** Other tools and community
+   
+** TODO 22. Erlang libraries
+*** 1. The binary module
+*** 2. Formatted text output
+*** 3. The crypto module
+*** 4. The digraph module
+*** 5. Erlang Term Storage
+*** 6. The math module
+*** 7. The queue module
+*** 8. The rand module
+*** 9. The zip and zlib modules
+
+** TODO 23. Where to go next
+*** 1. Build your first Elixir project
+*** 2. Meta-programming
+*** 3. Community and other resources
+*** 4. A byte of Erlang
+
+* TODO Mix and OTP
+** 1. Introduction to Mix
+*** 1 Our first project
+*** 2 Project compilation
+*** 3 Running tests
+*** 4 Automatic code formatting
+*** 5 Environments
+*** 6 Exploring
+    
+** 2. Agent
+*** 1. The trouble with state
+*** 2. Agents
+*** 3. Test setup with ExUnit callbacks
+*** 4. Other agent actions
+*** 5. Client/Server in agents
+   
+** 3. GenServer
+*** 1. GenServer callbacks
+*** 2. The Client API
+*** 3. Testing a GenServer
+*** 4. The need for monitoring
+*** 5. ~call~, ~cast~ or ~info~?
+*** 6. Monitors or links?
+    
+** 4. Supervisor and Application
+*** 1 Our first supervisor
+*** 2 Naming processes
+*** 3 Understanding applications
+**** 3.1 Starting applications
+     
+*** 4 The application callback
+*** 5 Projects or applications?
+*** 6 Next steps
+    
+** 5. Dynamic supervisors
+*** 1. The bucket supervisor 
+*** 2. Supervision trees
+*** 3. Shared state in tests
+*** 4. Observer
+    
+** 6. ETS
+*** ETS as a cache
+*** Race conditions?
+   
+** 7. Dependencies and umbrella projects
+*** 1. External dependencies
+*** 2. Internal dependencies
+*** 3. Umbrella projects
+*** 4. Dependencies within an umbrella project
+*** 5. Don’t drink the kool aid
+*** 6. Summing up
+    
+** 8. Task and ~gen_tcp~
+*** 1. Echo server
+*** 2. Tasks
+*** 3. Task supervisor
+   
+** 9. Doctests, patterns and with
+*** 1. Doctests
+*** 2. with
+*** 3. Running commands
+   
+** 10. Distributed tasks and tags
+*** 1. Enumerables
+*** 2. Eager vs Lazy
+*** 3. The pipe operator
+*** 4. Streams
+    
+** 11. Configuration and releases
+*** 1. Application environment
+*** 2. Configuration
+*** 3. Releases
+*** 4. Why releases?
+*** 5. Assembling multiple releases
+*** 6. Configuring releases
+**** 6.1 Operating System environment configuration
+**** 6.2 Runtime configuration
+     
+*** 7. Summing up
+    
+* TODO Meta-programming in Elixir
+** 1. Quote and unquote
+*** 1. Quoting
+*** 2. Unquoting
+*** 3. Escaping
+    
+** 2. Macros
+*** 1. Foreword
+*** 2. Our first macro
+*** 3. Macro hygiene
+*** 4. The environment
+*** 5. Private macros
+*** 6. Write macros responsibly
+    
+** 3. Domain-specific languages
+*** 1. Foreword
+*** 2. Building our own test case
+*** 3. The test macro
+*** 4. Storing information with attributes
