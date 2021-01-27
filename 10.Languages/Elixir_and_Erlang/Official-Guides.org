@@ -479,7 +479,79 @@
     ~if/2~ and ~unless/2~ are implemented as /macros/.
     They aren't special language constructs in Elixir.
     
-*** TODO 4. ~do/end~ blocks
+*** TODO 4. ~do/end~ blocks - =RE-NOTE=
+    At this point, we have learned _FOUR_ /control structures/: ~case~, ~cond~,
+    ~if~, and ~unless~, and they were all wrapped in ~do/end~ blocks.
+    It happens we could *also write* if as follows: ~if true, do: 1 + 2~
+
+    - Notice how the example above has a comma between true and do:, that’s
+      because it is using Elixir’s regular syntax where each argument is
+      separated by a comma. We say this syntax is using keyword lists. We can
+      pass else using keywords too:
+      #+begin_src elixir
+        if false, do: :this, else: :that
+        #=> :that
+      #+end_src
+
+    - ~do/end~ blocks are a syntactic convenience built on top of the keyword ones.
+      That’s why ~do/end~ blocks do not require a comma between the previous
+      argument and the block. They are useful exactly because they remove the
+      verbosity when writing blocks of code. These are equivalent:
+      #+begin_src elixir
+        if true do
+          a = 1 + 2
+          a + 10
+        end
+        #=> 13
+
+
+        if true, do: {
+          a = 1 + 2
+          a + 10
+        }
+        #=> 13
+      #+end_src
+
+    - =IMPORTANT=
+      One thing to keep in mind when using ~do/end~ blocks is they are
+      *ALWAYS bound to the _outermost_ /function call/.*
+      For example, the following expression:
+      #+begin_src elixir
+        is_number if true do
+          1 + 2
+        end
+        ## **(CompileError) iex:1: undefined function is_number/2
+      #+end_src
+      
+      would be parsed as:
+      
+      #+begin_src elixir
+        is_number(if true) do
+          1 + 2
+        end
+        ## **(CompileError) iex:1: undefined function is_number/2
+      #+end_src
+      which leads to an undefined function error because that invocation passes
+      two arguments, and is_number/2 does not exist. The if true expression is
+      invalid in itself because it needs the block, but since the arity of
+      is_number/2 does not match, Elixir does not even reach its evaluation.
+
+      * Adding *explicit parentheses* is enough to bind the block to ~if~:
+        #+begin_src elixir
+          is_number(if true do
+            1 + 2
+          end)
+
+          #=> true
+        #+end_src
+
+    - /Keyword lists/
+      * play an important role in the language and
+      * are quite common in many /functions/ and /macros/.
+
+    - =NEXT=
+      We will explore them a bit more in a future chapter.
+      Now it is time to talk about “Binaries, strings, and char lists”.
    
 ** TODO 6. Binaries, strings, and charlists
 *** 1. Unicode and Code Points
@@ -488,7 +560,8 @@
 *** 4. Binaries
 *** 5. Charlists
    
-** TODO 7. Keyword lists and maps
+** DONE 7. Keyword lists and maps
+   CLOSED: [2021-01-27 Wed 00:46]
    In Elixir, we have TWO main /associative data structures/:
    - /keyword lists/
    - /maps/
@@ -556,8 +629,118 @@
       for passing optional values.* If you need to store many items or guarantee
       one-key associates with at maximum one-value, you should use /maps/ instead.
       
-*** TODO 2. Maps
-*** TODO 3. Nested data structures
+*** DONE 2. Maps
+    CLOSED: [2021-01-26 Tue 16:46]
+    - Syntax illustrated by an example:
+      #+begin_src elixir
+        map = %{:a => 1, 2 => :b}  #=> %{2 => :b, :a => 1}
+
+        map[:a]  #=> 1
+        map[2]   #=> :b
+        map[:c]  #=> nil
+      #+end_src
+
+    - Compared to /keyword lists/, we can already see _TWO_ DIFFERENCES:
+      * Maps allow *any* value as a /key/.
+      * Maps' /keys/ do *not* follow any _ordering_.
+
+    - Pattern match /maps/ always match on a subset of the given value:
+      #+begin_src elixir
+        %{} = %{:a => 1, 2 => :b}         #=> %{2 => :b, :a => 1}
+
+        %{:a => a} = %{:a => 1, 2 => :b}  #=> %{2 => :b, :a => 1}
+        a  # 1
+
+        %{:c => c} = %{:a => 1, 2 => :b}
+        # ** (MatchError) no match of right hand side value: %{2 => :b, :a => 1}
+      #+end_src
+
+    - The ~Map~ /module/ provides a _very similar API_ to the ~Keyword~ /module/
+      with convenience /functions/ to MANIPULATE /maps/:
+      #+begin_src elixir
+        Map.get(%{:a => 1, 2 => :b}, :a)     #=> 1
+        Map.put(%{:a => 1, 2 => :b}, :c, 3)  #=> %{2 => :b, :a => 1, :c => 3}
+        Map.to_list(%{:a => 1, 2 => :b})     #=> [{2, :b}, {:a, 1}]
+      #+end_src
+
+    - /Maps/ have the following syntax for *updating* a _key's value_:
+      #+begin_src elixir
+        map = %{:a => 1, 2 => :b}  #=> %{2 => :b, :a => 1}
+        %{map | 2 => "two"}        #=> %{2 => "two", :a => 1}
+
+        %{map | :c => 3}
+        #=> ** (KeyError) key :c not found in %{2 => :b, :a => 1}
+      #+end_src
+
+    - When *all* the /keys/ in a /map/ are /atoms/,
+      you can use the /keyword syntax/ for convenience:
+      #+begin_src elixir
+        map = %{a: 1, b: 2}  #=> %{a: 1, b: 2}
+      #+end_src
+      
+    - Another interesting property of /maps/ is that they provide their OWN syntax
+      for *accessing* /atom keys/:
+      #+begin_src elixir
+        map = %{:a => 1, 2 => :b}  #=> %{2 => :b, :a => 1}
+
+        map.a #=> 1
+
+        map.c
+        #=> ** (KeyError) key :c not found in: %{2 => :b, :a => 1}
+      #+end_src
+      Elixir developers typically
+      *PREFER to use the ~map.field~ syntax and pattern matching*
+      instead of the /functions/ in the ~Map~ /module/ when working with /maps/
+      because they lead to an /assertive style of programming/.
+
+      * =TODO=
+        [[https://dashbit.co/blog/writing-assertive-code-with-elixir][This blog post by José Valim]] provides insight and examples on how you
+        get more concise and faster software by writing assertive code in
+        Elixir.
+      
+*** DONE 3. Nested data structures
+    CLOSED: [2021-01-27 Wed 00:46]
+    Often we will have _/maps/ *inside* /maps/,_ or even _/keywords lists/
+    *inside* /maps/,_ and so forth.
+      Elixir provides conveniences for MANIPULATING _nested data structures_ via
+    the ~put_in/2~, ~update_in/2~ and other /macros/ giving the same conveniences
+    you would find in imperative languages while keeping the immutable properties
+    of the language
+
+    - Imagine you have the following structure:
+      #+begin_src elixir
+        users = [
+          john: %{name: "John", age: 27, languages: ["Erlang", "Ruby", "Elixir"]},
+          mary: %{name: "Mary", age: 29, languages: ["Elixir", "F#", "Clojure"]}
+        ]
+        # =>
+        # [john: %{age: 27, languages: ["Erlang", "Ruby", "Elixir"], name: "John"},
+        #  mary: %{age: 29, languages: ["Elixir", "F#", "Clojure"], name: "Mary"}]
+
+        ## Access the value of `john`
+        ##---------------------------
+        users[:john].age  #=> 27
+
+
+        ## Update the value with a expression:
+        ##---------------------------
+        users = put_in users[:john].age, 31
+        #=> [john: %{age: 31, languages: ["Erlang", "Ruby", "Elixir"], name: "John"},
+        #    mary: %{age: 29, languages: ["Elixir", "F#", "Clojure"], name: "Mary"}]
+
+
+        ## Update the value with a function:
+        ##---------------------------
+        users = update_in users[:mary].languages, fn languages -> List.delete(languages, "Clojure") end
+        #=> [john: %{age: 31, languages: ["Erlang", "Ruby", "Elixir"], name: "John"},
+        #    mary: %{age: 29, languages: ["Elixir", "F#"], name: "Mary"}]
+      #+end_src
+      * More to learn (Check the ~Kernel~ module):
+        + ~get_and_update_in/2~:
+          extract a value and update the data structure at once.
+
+        + ~put_in/3~, ~update_in/3~, ~get_and_update_in/3~:
+          dynamic access into the data structure.
    
 ** DONE 8. Modules and Functions
    CLOSED: [2021-01-26 Tue 01:10]
@@ -806,12 +989,156 @@
         Let’s take a deeper look at ~Enumerable~ and, while we're at it, its
         *lazy* counterpart, ~Stream~.
 
-** TODO 10. Enumerables and streams
-*** 1. Enumerables
-*** 2. Eager vs Lazy
-*** 3. The pipe operator
-*** 4. Streams
+** DONE 10. Enumerables and streams
+   CLOSED: [2021-01-27 Wed 03:13]
+*** DONE 1. Enumerables
+    CLOSED: [2021-01-27 Wed 02:49]
+    Elixir provides the concept of /enumerables/ and the ~Enum~ /module/ to work
+    with them.
+
+    - We have already learned _TWO_ /enumerables/: /lists/ and /maps/.
+      #+begin_src elixir
+        Enum.map([1, 2, 3], fn &(&1 * 2) end)            #=> [2, 4, 6]
+        Enum.map(%{1 => 2, 3 => 4}, fn {} -> k * v end)  #=> [2, 12]
+      #+end_src
+
+    - The ~Enum~ /module/ provides a huge range of /functions/ to
+      * /transform/
+      * /sort/
+      * /group/
+      * /filter/
+      * /retrieve items/ from /enumerables/.
+
+      It is one of the /modules/ *developers use frequently* in their Elixir code.
+
+    - Elixir also provides /ranges/:
+      #+begin_src elixir
+        Enum.map(1..3, &(&1 * 2))  #=> [2, 4, 6]
+        Enum.reduce(1..3, &+/2)    #=> 6
+      #+end_src
+
+    - The /functions/ in the ~Enum~ /module/ are *limited to*, as the name says,
+      /enumerating values/ in /data structures/.
+      * For specific operations, like *inserting* and *updating* particular
+        elements, you may need to reach for /modules/ specific to the _data type_.
+
+      * For example, =TODO= =TRY IT=
+        if you want to insert an element at a given position in a /list/, you
+        should use the ~List.insert_at/3~ /function/ from the ~List~ /module/,
+        as it would make little sense to insert a value into, for example, a /range/.
+
+    - The /functions/ in the ~Enum~ /module/ are /polymorphic/
+      because they can work with _DIVERSE data types_, ANY data type that implements
+      the ~Enumerable~ /protocol/.
+      * =TODO=
+        We are going to discuss /Protocols/ in a later chapter;
+        for now we are going to move on to a specific kind of /enumerable/ called
+        a /stream/.
+      
+*** DONE 2. Eager vs Lazy
+    CLOSED: [2021-01-27 Wed 02:56]
+    *All* the /functions/ in the ~Enum~ /module/ are *eager*.
+
+    - Many /functions/ in the ~Enum~ /module/
+      _expect_ an /enumerable/ and
+      _return_ a /list/ back.
+      #+begin_src elixir
+        odd? = &(rem(&1, 2) != 0) #=> #Function<6.80484245/1 in :erl_eval.expr/5>
+        Enum.filter(1..3, odd?)   #=> [1, 3]
+      #+end_src
     
+*** DONE 3. The pipe operator
+    CLOSED: [2021-01-27 Wed 02:56]
+    - ~|>~ (pipe operator) ::
+      expression on its left side and
+      passes it *as the FIRST argument* to the function call on its right side.
+
+    - Example:
+      #+begin_src elixir
+        1..100_000            |>
+          Enum.map(&(&1 * 3)) |>
+          Enum.filter(odd?)   |>
+          Enum.sum
+
+        #=> 7500000000
+      #+end_src
+      
+      is equivalent to
+      
+      #+begin_src elixir
+        Enum.sum(Enum.filter(Enum.map(1..100_000, &(&1 * 3)), odd?))
+        #=> 7500000000
+      #+end_src
+      
+*** DONE 4. Streams
+    CLOSED: [2021-01-27 Wed 03:13]
+    As an _ALTERNATIVE_ to ~Enum~, Elixir provides the ~Stream~ /module/ which
+    supports *lazy operations*.
+    
+    - Example:
+      #+begin_src elixir
+        1..100_000 |> Stream.map(&(&1 * 3)) |> Stream.filter(odd?) |> Enum.sum
+        #=> 7500000000
+      #+end_src
+
+    - streams :: lazy and composable enumerables.
+
+    - Instead of *generating* _intermediate_ /lists/,
+      /streams/ build a series of computations that are invoked
+      *only* when we pass the underlying /stream/ to the ~Enum~ /module/.
+
+    - /Streams/ are useful when working with
+      * large
+      * possibly infinite
+      * collections
+
+    - Many /functions/ in the ~Stream~ /module/
+      1. *accept* ANY /enumerable/ as an argument
+      2. *return* a /stream/ as a result.
+
+    - It also provides /functions/ for *creating* /streams/.
+      * For example,
+        ~Stream.cycle/1~ can be used to *create* a /stream/ that cycles a given
+        enumerable infinitely.
+          Be careful to *NOT* call a /function/ like ~Enum.map/2~ on such
+        /streams/, as they would *cycle forever*:
+        #+begin_src elixir
+          stream = Stream.cycle([1, 2, 3])  #=> #Function<15.16982430/2 in Stream.unfold/2>
+          Enum.take(stream, 10)             #=> [1, 2, 3, 1, 2, 3, 1, 2, 3, 1]
+        #+end_src
+
+    - On the other hand, ~Stream.unfold/2~ can be used to *generate values*
+      from a _given initial value_:
+      #+begin_src elixir
+        stream = Stream.unfold("hełło", &String.next_codepoint/1)
+        #=> #Function<39.75994740/2 in Stream.unfold/2>
+
+        Enum.take(stream, 3)
+        #=> ["h", "e", "ł"]
+      #+end_src
+
+    - ~Stream.resource/3~ which can be used to _WRAP around *resources*,_
+      guaranteeing they are
+      1. *opened* right _BEFORE_ enumeration
+      2. *closed* _AFTERWARDS_, even in the case of failures.
+
+    - For example, ~File.stream!/1~ builds on top of ~Stream.resource/3~ to stream
+      files:
+      #+begin_src elixir
+        stream = File.stream!("path/to/file")
+        #=>
+        #  %File.Stream{
+        #    line_or_bytes: :line,
+        #    modes: [:raw, :read_ahead, :binary],
+        #    path: "path/to/file",
+        #    raw: true
+        #  }
+
+        Enum.take(stream, 10)
+      #+end_src
+      This can be very useful for _handling large files_ or even _slow
+      resources_ like /network resources/.
+      
 ** TODO 11. Processes
 *** 1. ~spawn~
 *** 2. ~send~ and ~receive~
@@ -921,15 +1248,97 @@
 *** 4. A byte of Erlang
 
 * TODO Mix and OTP
-** 1. Introduction to Mix
-*** 1 Our first project
-*** 2 Project compilation
-*** 3 Running tests
-*** 4 Automatic code formatting
-*** 5 Environments
-*** 6 Exploring
+** TODO 1. Introduction to Mix
+   - =TODO= note
+     
+*** TODO 1 Our first project
+*** TODO 2 Project compilation
+*** TODO 3 Running tests
+*** DONE 4 Automatic code formatting
+    CLOSED: [2021-01-27 Wed 01:45]
+    - One of the files generated by ~mix new~ is the =.formatter.exs=.
+      * Elixir ships with a *code formatter* that is capable of automatically
+        formatting our codebase according to a consistent style.
+          The formatter is triggered with the ~mix format~ task. The generated
+        =.formatter.exs= file configures which files should be formatted when
+        ~mix format~ runs.
+
+    - For companies and teams, =IMPORTANT=
+      we recommend developers to run
+      ~mix format --check-formatted~ on their _continuous integration servers_,
+      ensuring all current and future code follows the standard.
+
+    - You can learn more about the code formatter by checking
+      [[https://hexdocs.pm/mix/Mix.Tasks.Format.html][the format task documentation]] or by reading [[https://elixir-lang.org/blog/2018/01/17/elixir-v1-6-0-released/][the release announcement for
+      Elixir v1.6]], the first version to include the formatter.
+      
+*** DONE 5 Environments - =RE-READ=
+    CLOSED: [2021-01-27 Wed 02:23]
+    Mix provides the concept of *“environments”*.
+
+    - They allow a developer to *customize* _compilation_ and _other options for
+      specific scenarios_.
+      By default, Mix understands _THREE_ /environments/:
+      * ~:dev~ - the one in which Mix tasks (like ~compile~) run by default
+      * ~:test~ - used by ~mix test~
+      * ~:prod~ - the one you will use to run your project in production
+
+    - The /environment/ applies only to the _current project_.
+
+    - As we will see in future chapters, ANY /dependency/ you add to your project
+      will _BY DEFAULT_ run in the ~:prod~ /environment/.
+
+    - Customization per /environment/ can be done by accessing [[https://hexdocs.pm/mix/Mix.html#env/0][the ~Mix.env~ function]]
+      in your =mix.exs= file, which _returns_ the *current environment* as an /atom/.
+      That's what we have used in the ~:start_permanent~ options
+      #+begin_src elixir
+        def project do
+          [
+            ...,
+            start_permanent: Mix.env == :prod,
+            ...
+          ]
+        end
+      #+end_src
+      - When true, the ~:start_permanent~ option starts your application in
+        /permanent mode/, which means the /Erlang VM/ will crash if your
+        application's /supervision tree/ _shuts down_.
+        * Notice
+          we don't want this behaviour in *dev* and *test* because it is useful to
+          _keep the VM instance running in those /environments/ for TROUBLESHOOTING
+          purposes._
+      
+    - Mix will *default to* the ~:dev~ /environment/,
+      EXCEPT for the ~test~ /task/ that will *default to* the ~:test~ /environment/.
+      The environment can be changed via the ~MIX_ENV~ environment variable:
+      #+begin_src shell
+        MIX_ENV=prod mix compile
+      #+end_src
+      Or on Windows:
+      #+begin_src shell
+        set "MIX_EN=prod" && mix compile
+      #+end_src
+      =TODO= TRY THESE COMMANDS
+      
+    - Mix is a /build tool/ and, as such,
+      it is *not expected* to be available in production.
+      =IMPORTANT=
+        Therefore, it is recommended to access ~Mix.env~ only in _configuration
+      files_ and inside =mix.exs=, never in your application code (~lib~).
+      
+*** DONE 6 Exploring
+    CLOSED: [2021-01-27 Wed 01:33]
+    - A [[https://hexdocs.pm/mix/][general overview is available on the Mix documentation]].
+      Read [[https://github.com/elixir-lang/elixir/tree/master/lib/mix][the Mix source code here]].
+
+    - Keep in mind that you can always invoke the help task to list all available tasks:
+      #+begin_src shell
+        mix help
+      #+end_src
+      * You can get further information about a _particular task_ by invoking
+        ~mix help TASK~.
     
-** 2. Agent
+** TODO 2. Agent
 *** 1. The trouble with state
 *** 2. Agents
 *** 3. Test setup with ExUnit callbacks
