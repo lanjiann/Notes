@@ -1,8 +1,8 @@
 #+TITLE: Elixir
 #+VERSION: 1.11
 #+AUTHOR: Community
-#+STARTUP: entitiespretty
 #+STARTUP: overview
+#+STARTUP: entitiespretty
 
 * TODO Getting Started
 ** DONE 1. Introduction
@@ -553,13 +553,306 @@
       We will explore them a bit more in a future chapter.
       Now it is time to talk about “Binaries, strings, and char lists”.
    
-** TODO 6. Binaries, strings, and charlists
-*** 1. Unicode and Code Points
-*** 2. UTF-8 and Encodings
-*** 3. Bitstrings
-*** 4. Binaries
-*** 5. Charlists
+** DONE 6. Binaries, strings, and charlists
+   CLOSED: [2021-01-28 Thu 21:16]
+   - In “Basic types”, we learned a little bit about strings and we used the
+     ~is_binary/1~ /function/ for checks:
+     #+begin_src elixir
+       string = "hello"   #=> "hello"
+       is_binary(string)  #=> true
+     #+end_src
+
+   - In this chapter, we will gain clarity on
+     * what exactly /binaries/ are,
+     * how they relate to /strings/, and
+     * what _single-quoted values_, ~'like this'~, mean in Elixir.
+
+   - /strings/ are actually subtly complex and are often misunderstood.
    
+*** DONE 1. Unicode and Code Points
+    CLOSED: [2021-01-28 Thu 11:29]
+    - Unicode organizes all of the characters in its repertoire into code charts,
+      and each character is given a *unique* _numerical index_.
+      * This _numerical index_ is known as a /Code Point/.
+      
+    - In Elixir you can use a ~?~ in front of a /character literal/ to reveal its
+      /code point/, in IEx:
+      * ~?a~ output ~97~
+      * ~?ł~ output ~322~
+
+    - Note that _most (=from Jian= why only "most"?) Unicode code charts_ will
+      refer to a /code point/ by its /hexadecimal representation/, e.g. 97
+      translates to _0061_ in hex, and we can represent any _Unicode character_
+      in an _Elixir string_ by using the ~\u~ notation and the _hex representation_
+      of its /code point/ number:
+      #+begin_src elixir
+        "\u0061" === "a"  #=> true
+        0x0061 = 97 = ?a  #=> 97
+      #+end_src
+      
+*** DONE 2. UTF-8 and Encodings
+    CLOSED: [2021-01-28 Thu 16:14]
+    - Whereas the /code point/ is *what* we store, an encoding deals with *how*
+      we store it: _encoding is an implementation._
+        In other words, we need a mechanism to CONVERT the /code point numbers/
+      INTO /bytes/ so they can be stored in memory, written to disk, etc.
+      * =from Jian=
+        Encoding is used to save the space when storing.
+
+    - Elixir uses UTF-8 to encode its strings, which means that code points are
+      encoded as _a series of 8-bit bytes._
+
+    - UTF-8 is a *variable width character encoding* that uses _one to four bytes_
+      to store each code point; it is capable of encoding all valid Unicode code
+      points.
+
+    - graphemes :: consist of MULTIPLE characters that are often perceived as ONE. 
+
+    - Besides defining characters, *UTF-8 also provides a notion of /graphemes/.*
+      * For example,
+        ~é~ can be represented in Unicode as a single character.
+        It can also be represented as the _COMBINATION_ of
+        1. the character ~e~
+           and
+        2. the acute accent character ~´~
+        into a _SINGLE_ /grapheme/.
+
+      * In other words, what we would expect to be a single character, such as é or
+        ł, can in practice be multiple characters, each represented by potentially
+        multiple bytes. Consider the following:
+        #+begin_src elixir
+          string = "hełło"       #=> "hełło"
+          String.length(string)  #=> 5
+          byte_size(string)      #=> 7
+        #+end_src
+        ~String.length/1~ _counts /graphemes/,_
+        but ~byte_size/1~ reveals the _number of underlying /raw bytes/ needed to
+        store the string when using UTF-8 encoding._
+        + UTF-8 requires
+          - *one* byte to represent the /characters/ ~h~, ~e~, and ~o~,
+          - but *two* bytes to represent ~ł~.
+
+    - Note (in Windows):
+      There is a chance your terminal does _not use UTF-8 by default_.
+      You can *change* the /encoding/ of your current session by running
+      ~chcp 65001~ *before entering* =iex= (=iex.bat=).
+
+    - A common trick in Elixir when you want to see the
+      *inner binary representation* of a /string/ is to concatenate _the null
+      byte_ ~<<0>>~ to it:
+      #+begin_src elixir
+        "hełło" <> <<0>>
+        #=> <<104, 101, 197, 130, 197, 130, 111, 0>>
+      #+end_src
+      * Alternative way (more clean, no trailing ~<<0>>~):
+        #+begin_src elixir
+          IO.inspect("hełło", binaries: :as_binaries)
+          #=> <<104, 101, 197, 130, 197, 130, 111>>
+        #+end_src
+      
+    - =NEXT=
+      ~<<>>~
+      
+*** DONE 3. Bitstrings
+    CLOSED: [2021-01-28 Thu 16:26]
+    Although we have covered /code points/ and /UTF-8 encoding/, we still need
+    to go a bit DEEPER INTO _HOW exactly we store the /encoded bytes/,_ and this
+    is where we introduce the /bitstring/.
+
+    - A /bitstring/ is a *fundamental data type* in Elixir, denoted with the
+      ~<<>>~ syntax. A /bitstring/ is a _contiguous sequence of bits in memory._
+
+    -  =TODO= =READ=
+      A complete reference about the binary / *bitstring constructor* ~<<>>~ can
+      be found in the Elixir documentation.
+
+    - *BY DEFAULT*, _8 bits (i.e. 1 byte)_ is used to store each number in a
+      /bitstring/,
+      * _BUT_ you can manually specify the number of bits via
+        + _a ~::n~ modifier_ to denote the size in ~n~ bits,
+          OR
+        + you can use the more _verbose declaration_ ~::size(n)~:
+        #+begin_src elixir
+          <<42>> === <<42::8>>  #=> true
+          <<3::4>>              #=> <<3::size(4)>>
+        #+end_src
+
+    - For example,
+      the decimal number ~3~ when represented with 4 bits in base ~2~ would be
+      ~0011~, which is equivalent to the values ~0~, ~0~, ~1~, ~1~, each stored
+      using 1 bit:
+      #+begin_src elixir
+        <<0::1, 0::1, 1::1, 1::1>> == <<3::4>>  #=> true
+      #+end_src
+
+    - Any value that _exceeds_ what can be stored by the number of bits provisioned
+      is *truncated*:
+      #+begin_src elixir
+        <<1>> === <<257>>  #=> true
+      #+end_src
+      ~100000001~ (9 bits) is truncated to ~00000001~ (8 bits).
+      
+*** DONE 4. Binaries
+    CLOSED: [2021-01-28 Thu 17:38]
+    - binary :: a /bitstring/ where the number of bits is _divisible by 8_.
+      
+    - From the definition of /binary/ we know
+      _every /binary/ is a /bitstring/, but not every /bitstring/ is a /binary/._
+        We can use the ~is_bitstring/1~ and ~is_binary/1~ functions to demonstrate
+      this.
+      #+begin_src elixir
+        is_bitstring(<<3::4>>)       #=> true
+        is_binary(<<3::4>>)          #=> false
+        is_bitstring(<<0, 255, 42>>) #=> true
+        is_binary(<<0, 255, 42>>)    #=> true
+        is_binary(<<42::16>>)        #=> true
+      #+end_src
+      
+    - We can /pattern match/ on /binaries/ / /bitstrings/:
+      #+begin_src elixir
+        <<0, 1, x>> = <0, 1, 2>>  #=> <<0, 1, 2>>
+        x                         #=> 2
+      #+end_src
+
+    - Note that unless you explicitly use ~::~ modifiers, each entry in the binary
+      pattern is expected to match a _single byte_ (exactly _8 bits_).
+        If we want to match on a binary of *unknown size*, we can use _the ~binary~
+      modifier_ *at the end of the pattern*:
+      #+begin_src elixir
+        <<0, 1, x :: binary>> = <<0, 1, 2, 3>>  #=> <<0, 1, 2, 3>>
+
+        x  #=> <<2, 3>>
+      #+end_src
+
+    - There are a couple other /modifiers/ that can be useful when doing _pattern
+      matches on binaries._ The ~binary-size(n)~ modifier will match _n bytes_ in
+      a /binary/:
+      #+begin_src elixir
+        <<head::binary-size(2), rest::binary>> = <<0, 1, 2, 3>>  #=> <<0, 1, 2, 3>>
+        head  #=> <<0, 1>>
+        rest  #=> <<2, 3>>
+      #+end_src
+
+    - *A /string/ is a _UTF-8 encoded_ /binary/,* where the /code point/ for each
+      character is _encoded using 1 to 4 bytes_.
+
+      * Thus *every /string/ is a /binary/,*
+        but _due to the UTF-8 standard encoding rules_, *NOT every /binary/ is a
+        valid /string/.*
+        #+begin_src elixir
+          is_binary("hello")               #=> true
+          is_binary(<<239, 191, 19>>)      #=> true
+          String.valid?(<<239, 191, 19>>)  #=> false
+        #+end_src
+
+    - The _string concatenation operator_ ~<>~ is actually a _binary concatenation
+      operator_:
+      #+begin_src elixir
+        "a" <> "ha"           #=> "aha"
+        <<0, 1>> <> <<2, 3>>  #=> <<0, 1, 2, 3>>
+      #+end_src
+
+    - Given that /strings/ are /binaries/, we can also _pattern match on /strings/:_
+      #+begin_src elixir
+        <<head, rest::binary>> = "banana"  #=> "banana"
+        head == ?b  #=> true
+        rest        #=> "anana"
+      #+end_src
+
+    - However, remember that /binary pattern matching/ works on /bytes/,
+      so matching on the /string/ like ~“über”~ with _multibyte characters_
+      *won't match* on the character, it will match on the _first byte_ of that
+      character:
+      #+begin_src elixir
+        "ü" <> <<0>>                  #=> <<195, 188, 0>>
+        <<x, rest::binary>> = "über"  #=> "über"
+        x == ?ü                       #=> false
+        rest                          #=> <<188, 98, 101, 114>>
+      #+end_src
+
+    - Therefore, when _pattern matching on /strings/,_ it is important to use the
+      ~utf8~ /modifier/:
+      #+begin_src elixir
+        <<x::utf8, rest::binary>> = "über"  #=> "über"
+        x == ?ü                             #=> true
+        rest                                #=> "ber"
+      #+end_src
+
+    - You will see that Elixir has excellent support for working with /strings/.
+      It also supports many of the _Unicode operations_.
+      * In fact, Elixir passes all the tests showcased in the article
+        [[http://mortoray.com/2013/11/27/the-string-type-is-broken/][“The string type is broken”]]. =TODO= =READ= =!!!=
+        =READ= =READ= =READ= =READ= =READ= =READ= =READ= =READ= =READ= =READ=
+      
+*** DONE 5. Charlists
+    CLOSED: [2021-01-28 Thu 21:14]
+    Our tour of our /bitstrings/, /binaries/, and /strings/ is nearly complete,
+    BUT we have one more _data type_ to explain: the /charlist/.
+   
+    - charlist :: a /list/ of /integers/
+                  where *ALL* the /integers/ are *valid* /code points/.
+
+    - _In practice, you will NOT COME ACROSS THEM OFTEN_,
+      EXCEPT perhaps when interfacing with Erlang, in particular when using
+      older libraries that do not accept /binaries/ as arguments.
+      =IMPORTANT=
+
+    - Whereas /strings/ (i.e. binaries) are created using _double-quotes_,
+      /charlists/ are created with _single-quoted literals_:
+      #+begin_src elixir
+        'hełło'              #=> [104, 101, 322, 322, 111]
+        is_list 'hełło'      #=> true
+        'hello'              #=> 'hello'
+        List.first('hello')  #=> 104
+      #+end_src
+
+    - You can see that *instead of containing* /bytes/,
+      a /charlist/ contains /integer code points/.
+      * _BY DEFAULT,_
+        IEx will *ONLY output* /code points/ if *ANY* of the /integers/ falls
+        *OUTSIDE* the ASCII range of 0 to 127:
+        #+begin_src elixir
+          'hello'  #=> 'hello'
+          'hełło'  #=> [104, 101, 322, 322, 111]
+        #+end_src
+        You can use ~IO.inspect/2~ to inspect the /code points/ of ~'hello'~:
+        #+begin_src elixir
+          IO.inspect('hello')  #=> [104, 101, 108, 108, 111]
+        #+end_src
+
+    - *Interpreting* /integers/ *as* /codepoints/ may lead to some _surprising
+      behavior_.
+      * For example,
+        if you are *storing* a _list of integers_ that happen to _range between 0
+        and 127,_ BY DEFAULT IEx will interpret this as a /charlist/ and it will
+        display the corresponding ASCII characters.
+        #+begin_src elixir
+          heartbeats_per_minute = [99, 97, 116]  #=> 'cat'
+        #+end_src
+
+    - You can convert a /charlist/ to a /string/ and back by using the ~to_string/1~
+      and ~to_charlist/1~ /functions/:
+      #+begin_src elixir
+        to_charlist "hełło"  #=> [104, 101, 322, 322, 111]
+        to_string 'hełło'    #=> "hełło"
+        to_string :hello     #=> "hello"
+        to_string 1          #=> "1"
+      #+end_src
+      Note that those functions are /polymorphic/ - not only do they convert
+      /charlists/ to /strings/, they also operate on /integers/, /atoms/, _and
+      so on_.
+
+    - /String (binary)/ concatenation uses the ~<>~ operator
+      BUT /charlists/, being /lists/, use the _list concatenation operator_
+      ~++~:
+      #+begin_src elixir
+        'this ' <> 'fails'  #=> ** (ArgumentError) ...
+
+        'this ' ++ 'works'  #=> 'this works'
+
+        "this also " ++ "fails"  #=> ** (ArgumentError) ...
+      #+end_src
+    
 ** DONE 7. Keyword lists and maps
    CLOSED: [2021-01-27 Wed 00:46]
    In Elixir, we have TWO main /associative data structures/:
@@ -1146,14 +1439,94 @@
 *** 4. Tasks
 *** 5. State
    
-** TODO 12. IO and the file system
-*** 1. The ~IO~ module
-*** 2. The ~File~ module
-*** 3. The ~Path~ module
-*** 4. Processes
-*** 5. ~iodata~ and ~chardata~
+** DONE 12. IO and the file system - =TODO= =READ after finishing chapter 11=
+   CLOSED: [2021-01-28 Thu 23:54]
+   This chapter is a quick introduction to _input/output mechanisms_ and
+   _file-system-related tasks_, as well as to related /modules/ like ~IO~,
+   ~File~ and ~Path~.
+   
+*** DONE 1. The ~IO~ module
+    CLOSED: [2021-01-28 Thu 23:37]
+    The ~IO~ /module/ is the main mechanism in Elixir for *reading* and *writing*
+    to _standard input/output (~:stdio~)_, _standard error (~:stderr~)_, /files/,
+    and _other IO devices_.
+    
+    #+begin_src elixir
+      IO.puts("hello world")
+      # hello world
+      #=> :ok
 
-** TODO 13. alias, require, and import
+      IO.gets("yes or no? ")
+      # yes or no? yes
+      #=> "yes\n"
+    #+end_src
+    - BY DEFAULT, *read* and *write* _standard input/output_.
+
+    - Can pass ~:stderr~ as an argument to *read* and *write* it:
+      #+begin_src elixir
+        IO.puts(:stderr, "hello world")
+        # hello world
+        #=> :ok
+      #+end_src
+    
+*** DONE 2. The ~File~ module
+    CLOSED: [2021-01-28 Thu 23:53]
+    The ~File~ /module/ contains /functions/ that allow us to open files as IO
+    devices.
+
+    - BY DEFAULT, _files are opened in /binary mode/,_
+      which requires developers to use the specific ~IO.binread/2~ and
+      ~IO.binwrite/2~ /functions/ from the ~IO~ /module/:
+      #+begin_src elixir
+        {:ok, file} = File.open("hello", [:write])  #=> {:ok, #PID<0.47.0>}
+        IO.binwrite(file, "world")  #=> :ok
+        IO.close(file)              #=> :ok
+        File.read("hello")          #=> {:ok, "world"}
+      #+end_src
+      * A /file/ can also be opened with ~:utf8~ /encoding/,
+        which tells the ~File~ /module/ to interpret the /bytes/ _read from_ the
+        /file/ as /UTF-8-encoded bytes/.
+
+    - Besides /functions/ for _opening_, _reading_ and _writing_ /files/, the
+      ~File~ /module/ has many /functions/ to work with the /file system/. Those
+      functions are *named after their UNIX equivalents.*
+      * For example,
+        + ~File.rm/1~
+        + ~File.mkdir/1~
+        + ~File.mkdir_p/1~
+        + ~File.cp_r/2~
+        + ~File.rm_rf/1~
+
+    - You will also notice that /functions/ in the ~File~ /module/ have
+      _TWO variants_: with or without a trailing bang (~!~).
+      * For example,
+        when we read the ~"hello"~ file in the example above, we use ~File.read/1~.
+        Alternatively, we can use ~File.read!/1~:
+        #+begin_src elixir
+          File.read("hello")   #=> {:ok, "world"}
+
+          File.read!("hello")  #=> "world"
+
+          File.read("unknown")  #=> {:error, :enoent}
+
+          File.read!("unknown")  # **(File.Error) could not read file "unknown": no such file or directory
+        #+end_src
+        When you want to handle error, use ~File.read~; Use ~File.read!~ when you
+        don't know how to *handle* the error, or you want your program *crash*
+        when error happen.
+
+*** DONE 3. The ~Path~ module
+    CLOSED: [2021-01-28 Thu 23:39]
+    #+begin_src elixir
+      Path.join("foo", "bar")  #=> "foo/bar"
+      Path.expand("~/hello")   #=> "/Users/jose/hello"
+    #+end_src
+    
+*** TODO 4. Processes
+*** TODO 5. ~iodata~ and ~chardata~
+
+** DONE 13. alias, require, and import - =TODO= =take notes=
+   CLOSED: [2021-01-29 Fri 01:19]
 *** 1. alias
 *** 2. require
 *** 3. import
@@ -1162,16 +1535,144 @@
 *** 6. Module nesting
 *** 7. Multi alias/import/require/use
    
-** TODO 14. Module attributes
-*** 1. As annotations
-*** 2. As “constants”
-*** 3. As temporary storage
+** DONE 14. Module attributes - =TODO= =take notes=
+   CLOSED: [2021-01-29 Fri 01:19]
+   /Module attributes/ in Elixir serve _THREE purposes_:
+   - They serve to *annotate the /module/,*
+     often with information to be used by
+     * the user
+       OR
+     * the /VM/.
+
+   - They work as *constants*.
+
+   - They work as a *temporary module storage* to be used _during compilation_.
+
+*** TODO 1. As annotations - =TODO= =take notes=
+*** TODO 2. As “constants” - =TODO= =take notes=
+*** TODO 3. As temporary storage
    
-** TODO 15. Structs
-*** 1. Defining structs
-*** 2. Accessing and updating structs
-*** 3. Structs are bare maps underneath
-*** 4. Default values and required keys
+** DONE 15. Structs
+   CLOSED: [2021-01-29 Fri 01:06]
+   /Structs/ are extensions _built on top of_ /maps/ that provide *compile-time
+   checks* and *default values*.
+   
+*** DONE 1. Defining structs
+    CLOSED: [2021-01-29 Fri 00:04]
+    To define a /struct/, the ~defstruct~ construct is used:
+    #+begin_src elixir
+      defmodule User do
+        defstruct name: "John", age: 27
+      end
+    #+end_src
+
+    - The /keyword list/ used with ~defstruct~ defines what /fields/ the /struct/
+      will have along with their _DEFAULT values_.
+
+    - /Structs/ _take the *name* of the /module/ they're defined in._
+      In the example above, we defined a /struct/ _named_ ~User~.
+
+    - We can now create ~User~ /structs/ by using a syntax similar to the one
+      used to create maps:
+      #+begin_src elixir
+        %User{}              #=> %User{age: 27, name: "John"}
+        %User{name: "Jane"}  #=> %User{age: 27, name: "Jane"}
+      #+end_src
+      * if you have _defined the /struct/ in a *SEPARATE file*,_ you can _compile
+        the file *inside* IEx *before* proceeding by running ~c "file.exs"~;_
+        + be aware
+          you may get an error saying the /struct/ was not yet defined if you
+          try the below example in a file directly due to when definitions are
+          resolved.
+
+    - /Structs/ provide *compile-time guarantees* that only the /fields/ (and all
+      of them) defined through ~defstruct~ will be allowed to exist in a /struct/:
+      #+begin_src elixir
+        %User{oops: :field}
+        # ** (KeyError) key :oops not found in: %User{age: 27, name: "John"}
+      #+end_src
+    
+*** DONE 2. Accessing and updating structs
+    CLOSED: [2021-01-29 Fri 00:14]
+    - The same techniques (and the same syntax) of /maps/ *access* and *update*
+      the /fields/ apply to /structs/ as well:
+      #+begin_src elixir
+        john = %User{}  #=> %User{age: 27, name: "John"}
+        john.name       #=> "John"
+
+        jane = %{john | name: "Jane"}  #=> %User{age: 27, name: "Jane"}
+
+        %{jane | oops: :field}  # (KeyError) key :oops not found in: %User{age: 27, name: "Jane"}
+      #+end_src
+      When using the _update syntax (~|~)_, the VM is aware that _no new keys
+      will be added to the /struct/,_ allowing _the /maps/ underneath_ to *share
+      their structure in memory.*
+        In the example above, both ~john~ and ~jane~ _share the same key structure
+      in memory._ =TODO= =???=
+
+    - /Structs/ can also be used in /pattern matching/, both for matching on the
+      value of specific keys as well as for ensuring that
+      the _matching value_ is a /struct/ of *the same type as* the _matched value_.
+      #+begin_src elixir
+        %User{name: name} = john  #=> %User{age: 27, name: "John"}
+        name  #=> "John"
+
+        %User{} = %{}  # ** (MatchError) no match of right hand side value: %{}
+      #+end_src
+      
+*** DONE 3. Structs are bare maps underneath
+    CLOSED: [2021-01-29 Fri 01:00]
+    - /Structs/ store a "special" /field/ named ~__struct__~ that holds the name
+      of the /struct/.
+
+    - Here the *bare* in /bare maps/ means
+      *none* of the /protocols/ implemented for /maps/ are available for
+      /structs/.
+      * However, since /structs/ are just /maps/, they work with the /funcitons/
+        from the ~Map~ /module/:
+        #+begin_src elixir
+          jane = Map.put(%User{}, :name, "Jane")  #=> %User{age: 27, name: "Jane"}
+
+          Map.merge(jane, %User{name: "John"})  # => %User{age: 27, name: "John"}
+
+          Map.keys(jane)  #=> [:__struct__, :age, :name]
+        #+end_src
+      
+*** DONE 4. Default values and required keys
+    CLOSED: [2021-01-29 Fri 01:05]
+    - If you do _NOT_ specify a _default key value_ when defining a /struct/,
+      ~nil~ will be assumed:
+      #+begin_src elixir
+        defmodule Product do
+          defstruct [:name]
+        end
+
+        %Product{}  #=> %Product{name: nil}
+      #+end_src
+
+    - When define /structs/,
+      you *must first* specify the /fields/ which _implicitly default_ to ~nil~:
+      #+begin_src elixir
+        defmodule User do
+          defstruct [:email, name: "John", age: 27]
+        end
+
+        %User{}  #=> %User{age: 27, email: nil, name: "John"}
+      #+end_src
+      Doing it in reverse order will raise a *syntax error*.
+
+    - *Enforce* that _CERTAIN_ /keys/ have to be specified
+      when creating the /struct/:
+      #+begin_src elixir
+        defmodule Car do
+          @enforce_keys [:make]
+          defstruct [:model, :make]
+        end
+
+        %Car{}
+        # ** (ArgumentError) the following keys must also be given when building struct Car: [:make]
+        #     expanding struct: Car.__struct__/1
+      #+end_src
    
 ** TODO 16. Protocols
 *** 1. Example
@@ -1182,11 +1683,109 @@
      
 *** 4. Built-in protocols
    
-** TODO 17. Comprehensions
-*** 1. Generators and filters
-*** 2. Bitstring generators
-*** 3. The ~:into~ option
-*** 4. Other options
+** DONE 17. Comprehensions
+   CLOSED: [2021-01-29 Fri 02:11]
+   In Elixir, it is common to *loop over* an /Enumerable/, often *filtering out*
+   some results and *mapping* values into another /list/.
+     /Comprehensions/ are *syntactic sugar* for constructs:
+   they group those common tasks into the ~for~ /special form/.
+   #+begin_src elixir
+     for n <- [1, 2, 3, 4], do: n * n
+     #=> [1, 4, 9, 16]
+   #+end_src
+
+   - A /comprehension/ is made of _THREE parts_:
+     1. /generators/
+     2. /filters/
+     3. /target collectables/ =from Jian= I add this "target"
+   
+*** DONE 1. Generators and filters
+    CLOSED: [2021-01-29 Fri 02:02]
+    /Generators/ are the parts in a /comprehension/: ~pattern <- enumerable~.
+    
+    - In the above example, it is ~n <- [1, 2, 3, 4]~.
+      Other /enumerables/ also work, for example, we can use a /range/ ~1..4~ to
+      do the same thing.
+
+    - Filter in two ways:
+      * Values in the _rhs_ /enumerable/ will be *filtered out*
+        if it *can't match* the _lhs_ /pattern/.
+        #+begin_src elixir
+          values = [good: 1, good: 2, bad: 3, good: 4]
+
+          for {:good, n} <- values, do: n * n
+          #=> [1, 4, 16]
+        #+end_src
+
+      * User a /filter/.
+        #+begin_src elixir
+          multiple_of_3? = fn(n) -> rem(n, 3) == 0 end
+
+          for n <- 0..5, multiple_of_3?.(n), do: n * n
+          #=> [0, 9]
+        #+end_src
+        The input values of the RHS /enumerable/, which can make it the /filter
+        function/ return ~false~ or ~nil~ will be *filtered out*.
+
+    - /Comprehensions/ generally provide a much *more concise* representation than
+      using the equivalent _functions from the ~Enum~ and ~Stream~ /modules/._
+
+    - /Comprehensions/ accept *multiple* /generators/ and /filters/.
+      #+begin_src elixir
+        dirs = ['/home/mikey', '/home/james']
+
+        for dir  <- dirs,
+          file <- File.ls!(dir),
+          path = Path.join(dir, file),
+          File.regular?(path) do
+            File.stat!(path).size
+        end
+      #+end_src
+    
+*** DONE 2. Bitstring generators
+    CLOSED: [2021-01-29 Fri 02:04]
+    #+begin_src elixir
+      pixels = <<213, 45, 132, 64, 76, 32, 76, 0, 0, 234, 32, 15>>
+
+      for <<r::8, g::8, b::8 <- pixels>>, do: {r, g, b}
+      #=> [{213, 45, 132}, {64, 76, 32}, {76, 0, 0}, {234, 32, 15}]
+    #+end_src
+    
+*** DONE 3. The ~:into~ option
+    CLOSED: [2021-01-29 Fri 02:10]
+    /Comprehensions/ by default, when without ~:into~, return /lists/.
+
+    - Use ~:into~ can change their result types, which must be a implementation
+      of the ~Collectable~ /protocol/.
+
+    - For example,
+      #+begin_src elixir
+        for <<c <- " hello world ">>, c != ?\s, into: "", do: <<c>>
+        #=> "helloworld"
+      #+end_src
+
+    - A _COMMON use case_ of ~:into~ can be _transforming values in a /map/:_
+      #+begin_src elixir
+        for {key, val} <- %{"a" => 1, "b" => 2}, into: %{}, do: {key, val * val}
+        #=> %{"a" => 1, "b" => 4}
+      #+end_src
+
+    - Example:
+      Echo your input string with its upper-case representation in terminal
+      #+begin_src elixir
+        stream = IO.stream(:stdio, :line)
+
+        for line <- stream, into: stream do
+          String.upcase(line) <> "\n"
+        end
+      #+end_src
+      Since this example code intercept all your input, you have to type twice
+      ~Ctrl+C~ to quit IEx.
+    
+*** DONE 4. Other options - =TODO= =READ=
+    CLOSED: [2021-01-29 Fri 02:03]
+    /Comprehensions/ support other options, such as ~:reduce~ and ~:uniq~.
+    Please [[https://hexdocs.pm/elixir/Kernel.SpecialForms.html#for/1][check the complete reference]] for more information.
 
 ** TODO 18. Sigils
 *** 1. Regular expressions
