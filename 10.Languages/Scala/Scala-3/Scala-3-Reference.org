@@ -508,11 +508,10 @@
 
      - Example:
        #+begin_src scala
-         trait Resettable with
+         trait Resettable:
            def reset(): Unit
 
-         // TODO: FIXME
-         trait Growable[T] with
+         trait Growable[T]:
            def add(x: T): this.type
 
          def f(x: Resettable & Growable[String]) =
@@ -524,10 +523,10 @@
        /intersection of its type/ in ~A~ and its type in ~B~.
          For instance, assume the definitions:
        #+begin_src scala
-         trait A with
+         trait A:
            def children: List[A]
 
-         trait B with
+         trait B:
            def children: List[B]
 
          val x: A & B = new C
@@ -549,7 +548,7 @@
              ~C~ that inherits ~A~ and ~B~,_ one needs to give at that point a
             definition of a ~children~ method with the required type.
        #+begin_src scala
-         class C extends A, B with
+         class C extends A, B:
            def children: List[A & B] = ???
        #+end_src
 
@@ -960,7 +959,7 @@
 
     - Example:
       #+begin_src scala
-        enum Color with
+        enum Color:
           case Red, Green, Blue
       #+end_src
       Desugare to core Scala features are explained in the section _Translation_.
@@ -1147,7 +1146,7 @@
 
     - Example:
       #+begin_src scala
-        enum Option[+T] with
+        enum Option[+T]:
            case Some(x: T)
            case None
       #+end_src
@@ -1158,7 +1157,7 @@
 
       * The ~extends~ clauses can be given explicitly:
         #+begin_src scala
-          enum Option[+T] with
+          enum Option[+T]:
              case Some(x: T) extends Option[T]
              case None       extends Option[Nothing]
         #+end_src
@@ -1182,7 +1181,7 @@
 
     - As all other enums, ADTs can define methods.
       #+begin_src scala
-        enum Option[+T] with
+        enum Option[+T]:
            case Some(x: T)
            case None
 
@@ -1190,7 +1189,7 @@
               case None => false
               case _    => true  // TODO: FIXME - IMPROVE ME
 
-        object Option with
+        object Option:
           def apply[T >: Null](x: T): Option[T] =
             if x == null then None else Some(x)
         end Option
@@ -1794,7 +1793,7 @@
 
     - Example:
       #+begin_src scala
-        trait Ord[T] with
+        trait Ord[T]:
           def compare(x: T, y: T): Int
           extension (x: T) def < (y: T) = compare(x, y) < 0
           extension (x: T) def > (y: T) = compare(x, y) > 0
@@ -1959,11 +1958,11 @@
          trait Tagged[A]
 
          case class Foo[A](value: Boolean)
-         object Foo with
+         object Foo:
              given fooTagged[A](using Tagged[A]): Foo[A] = Foo(true)
              given fooNotTagged[A](using NotGiven[Tagged[A]]): Foo[A] = Foo(false)
 
-         // TODO: FIXME
+         // TODO: FIXME - signature
          @main def test(): Unit =
            given Tagged[Int] with {}
            assert(summon[Foo[Int]].value)      // fooTagged is found
@@ -1987,11 +1986,13 @@
        TmplDef             ::= ...
                             |  ‘given’ GivenDef
 
-       GivenDef            ::=  [GivenSig] ConstrApp TemplateBody
+       GivenDef            ::=  [GivenSig] StructuralInstance
                             |   [GivenSig] AnnotType ‘=’ Expr
                             |   [GivenSig] AnnotType
 
        GivenSig            ::= [id] [DefTypeParamClause] {UsingParamClause} ‘:’
+
+       StructuralInstance  ::= ConstrApp { ‘with’ ConstraApp} ‘with’ TemplateBody
      #+end_src
 
 *** DONE Using Clauses
@@ -2220,12 +2221,12 @@
     instances/.*
     - Example:
       #+begin_src scala
-        object A with
+        object A:
           class TC
           given tc: TC = ???
           def f(using TC) = ???
 
-        object B with
+        object B:
           import A._
           import A.given
           // ...
@@ -2292,7 +2293,7 @@
 
        * Example code:
          #+begin_src scala
-           object Instances with
+           object Instances:
              given intOrd: Ordering[Int] = ...
              given listOrd[T: Ordering]: Ordering[List[T]] = ...
              given ec: ExecutionContext = ...
@@ -2543,7 +2544,7 @@
      - Examples of each rule
        * Example of rule 1 above:
          #+begin_src scala
-           trait IntOps with
+           trait IntOps:
               extension (i: Int) def isZero: Boolean = i == 0
 
               extension (i: Int) def safeMod(x: Int): Option[Int] =
@@ -2552,7 +2553,7 @@
                  then None
                  else Some(i % x)
 
-           object IntOpsEx extends IntOps with
+           object IntOpsEx extends IntOps:
               extension (i: Int) def safeDiv(x: Int): Option[Int] =
                  // extension method brought into scope via inheritance from IntOps
                  if x.isZero
@@ -2578,10 +2579,10 @@
 
        * Example of rule 3 and 4 above:
          #+begin_src scala
-           class List[T] with
+           class List[T]:
               ...
 
-           object List with
+           object List:
               ...
               extension [T](xs: List[List[T]])
                  def flatten: List[T] = xs.foldLeft(Nil: List[T])(_ ++ _)
@@ -2709,13 +2710,13 @@
 **** DONE Semigroups and monoids
      CLOSED: [2020-12-20 Sun 18:58]
      #+begin_src scala
-       trait SemiGroup[T] with
+       trait SemiGroup[T]:
          extension (x: T) def combine (y: T): T
 
-       trait Monoid[T] extends SemiGroup[T] with
+       trait Monoid[T] extends SemiGroup[T]:
          def unit: T
 
-       object Monoid with
+       object Monoid:
          def apply[T](using m: Monoid[T]) = m
 
        // For `String`
@@ -2768,7 +2769,7 @@
 
        * WITH /extension method/:
          #+begin_src scala
-           trait Functor[F[_]] with
+           trait Functor[F[_]]:
              extension [A, B](x: F[A])
                def map(f: A => B): F[B]
 
@@ -2794,7 +2795,7 @@
      - Implementation:
        #+begin_src scala
          // "A `Monad` for type `F[_]` is a `Functor[F]`" => thus has the `map` ability
-         trait Monad[F[_]] extends Functor[F] with
+         trait Monad[F[_]] extends Functor[F]:
 
            /** The unit value for a monad */
            def pure[A](x: A): F[A]
@@ -3037,7 +3038,7 @@
 
      - ~Mirror~ /type class/ definition
        #+begin_src scala
-         sealed trait Mirror with
+         sealed trait Mirror:
 
            /** The type being mirrored */
            type MirroredType
@@ -3055,7 +3056,7 @@
            type MirroredElemLabels <: Tuple
 
 
-         object Mirror with
+         object Mirror:
 
            /** The Mirror for a product type */
            trait Product extends Mirror:
@@ -3289,7 +3290,7 @@
           trait Eq[T]:
             def eqv(x: T, y: T): Boolean
 
-          object Eq with
+          object Eq:
             given Eq[Int] with
               def eqv(x: Int, y: Int) = x == y
 
@@ -3516,7 +3517,7 @@
          @implicitNotFound("Values of types ${L} and ${R} cannot be compared with == or !=")
          sealed trait CanEqual[-L, -R]
 
-         object CanEqual with
+         object CanEqual:
            object derived extends CanEqual[Any, Any]
        #+end_src
 
@@ -3694,7 +3695,7 @@
      - Say you want to come up with a safe version of the ~contains~ /method/ on
        ~List[T]~. The original definition of ~contains~ in the standard library was:
        #+begin_src scala
-         class List[+T] with
+         class List[+T]:
            // ...
            def contains(x: Any): Boolean
        #+end_src
@@ -3714,7 +3715,7 @@
        3. The only variance-correct way to use the /type parameter/ ~T~ in contains
           is as a /lower bound/:
           #+begin_src scala
-            class List[+T] with
+            class List[+T]:
               // ...
               def contains[U >: T](x: U): Boolean
           #+end_src
@@ -3724,7 +3725,7 @@
 
        4. Make it _more useful (i.e. restrictive)_ by adding an ~CanEqual~ parameter:
           #+begin_src scala
-            class List[+T] with
+            class List[+T]:
               // ...
               def contains[U >: T](x: U)(using CanEqual[T, U]): Boolean
           #+end_src
@@ -8030,7 +8031,7 @@
      - old to new: option =-rewrite -new-syntax=
      - new to old: option =-rewrite -old-syntax=
 
-*** DONE Optional Braces - =TODO= =READ "Settings and Rewrites"=
+*** DONE Optional Braces - =TODO= =Update Notes because of docs changes= =READ "Settings and Rewrites"=
     CLOSED: [2020-12-30 Wed 02:00]
     *As an /experimental feature/,*
     Scala 3 _enforces some rules on indentation_ and _allows some occurrences
@@ -11082,10 +11083,10 @@
       method/ or vice versa.
         Instead, both /methods/ *must agree exactly* in their /parameter lists/.
       #+begin_src scala
-        class A with
+        class A:
           def next(): Int
 
-        class B extends A with
+        class B extends A:
           def next: Int  // overriding error: incompatible type
       #+end_src
       *Methods overriding* /Java or Scala-2 methods/ are again *exempted from*
