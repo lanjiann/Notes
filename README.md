@@ -4,8 +4,6 @@ All my notes for technical book reading
 
 Some of them only have outlines -- too many things need to learn, and some of them have low priority.
 
-103 directories, 374 files
-
 .</br>
 ├── 00.Basic_Knowledge</br>
 │   ├── Arch_Linux</br>
@@ -175,7 +173,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Fonts-and-Encodings.org</br>
 │   └── Unicode-Explained.org</br>
 ├── 10.Languages</br>
-│   ├── Assembly_and_C_and_Rust</br>
+│   ├── Assembly_and_C</br>
 │   │   ├── Assembly-Language-Step-by-Step3rd.org</br>
 │   │   ├── Managing-Projects-with-GNU-Make.org</br>
 │   │   └── Modern-C.org</br>
@@ -192,6 +190,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Elixir_and_Erlang</br>
 │   │   ├── Elixir-in-Action-2nd.org</br>
 │   │   ├── Learn-You-Some-Erlang-for-Great-Good.org</br>
+│   │   ├── Official-Guides.org</br>
 │   │   ├── Programming-Elixir-greaterThan-1dot6.org</br>
 │   │   └── Programming-Erlang-2nd.org</br>
 │   ├── Emacs_Lisp</br>
@@ -321,6 +320,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── Rust-Standard-Library-Cookbook.org</br>
 │   │   ├── Rust-Style-Guidelines.org</br>
 │   │   ├── The-Cargo-Book.org</br>
+│   │   ├── The-Edition-Guide.org</br>
 │   │   ├── The-Embedded-Rust-Book.org</br>
 │   │   ├── The-rustc-book.org</br>
 │   │   ├── The-Rustonomicon.org</br>
@@ -329,9 +329,6 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Scala</br>
 │   │   ├── Ammonite.org</br>
 │   │   ├── Creative-Scala.org</br>
-│   │   ├── Dotty</br>
-│   │   │   ├── Dotty-Documentation.org</br>
-│   │   │   └── Scala-3-Macro-Tutorial.org</br>
 │   │   ├── Effective-Scala-by-Twitter.org</br>
 │   │   ├── Essential-Scala.org</br>
 │   │   ├── Functional-Programming-in-Scala.org</br>
@@ -390,6 +387,10 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── Programming-in-Scala-3rd.org</br>
 │   │   ├── Programming-in-Scala-4th.org</br>
 │   │   ├── Programming-Scala-2nd.org</br>
+│   │   ├── Scala-3</br>
+│   │   │   ├── Programming-in-Scala-5th.org</br>
+│   │   │   ├── Scala-3-Macro-Tutorial.org</br>
+│   │   │   └── Scala-3-Reference.org</br>
 │   │   ├── Scala-Cookbook.org</br>
 │   │   ├── Scala-Design-Patterns-2nd.org</br>
 │   │   ├── Scala-for-the-Impatient.org</br>
@@ -402,7 +403,6 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   ├── Scalameta.org</br>
 │   │   ├── Scala-Puzzlers-from-Me.org</br>
 │   │   ├── Scala-Puzzlers.org</br>
-│   │   ├── Spec_and_Enhancement</br>
 │   │   ├── Specification_and_Enhancement</br>
 │   │   │   ├── Scala-Language-Specification.org</br>
 │   │   │   └── Scala-Style-Guide.org</br>
@@ -411,6 +411,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   │   │   ├── ScalaCheck-Cookbook.org</br>
 │   │   │   ├── ScalaCheck-The-Definitive-Guide.org</br>
 │   │   │   ├── Scala-Test-Driven-Development.org</br>
+│   │   │   ├── ScalaTest-User-Guide.org</br>
 │   │   │   └── Testing-in-Scala.org</br>
 │   │   └── Things-you-need-to-know-about-JVM_that-matter-in-Scala.org</br>
 │   ├── SmallTalk</br>
@@ -430,6 +431,7 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Advanced-Analytics-with-Spark-2nd.org</br>
 │   ├── allaboutscala-Learn-Apache-Spark-2.org</br>
 │   ├── An-Introduction-to-Statistical-Learning.org</br>
+│   ├── Data-Algorithms-with-Spark.org</br>
 │   ├── Database</br>
 │   │   ├── Database-Management-Systems-3rd.org</br>
 │   │   ├── MySQL</br>
@@ -483,4 +485,6 @@ Some of them only have outlines -- too many things need to learn, and some of th
 │   ├── Mastering-Regular-Expressions-3rd.org</br>
 │   ├── Violent-Python.org</br>
 │   └── Visualization-Analysis-and-Design.org</br>
-└── README.md</br>
+├── README.md</br>
+
+102 directories, 379 files
