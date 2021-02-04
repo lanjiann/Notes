@@ -246,31 +246,114 @@
     
 * TODO Part II — Sequential Programming
 ** TODO 3. Basic Concepts - 25
-*** 3.1 Starting and Stopping the Erlang Shell - 25
+*** DONE 3.1 Starting and Stopping the Erlang Shell - 25
+    CLOSED: [2021-02-02 Tue 16:33]
+    ~erl~
+    - Use Ctrl+C (Windows: Ctrl+Break) to _abort_.
+
+    - Type ~q()~ to trigger a _controlled shutdown_.
+      * All open files are *flushed* and *closed*,
+        databases are *stopped* (if running),
+        and all applications are *closed down* in an ordered manner.
+        ~q()~ is a _shell alias_ for the command ~init:stop()~.
+
+    - To _immediately stop the system_,
+      evaluate the expression ~erlang:halt()~.
+
+    - Read _"Stopping Erlang, on page 169"_.
+     
 **** Evaluating Commands in the Shell - 26
+     ~1> X = 20.~
+     20
+
+     ~2> X + 20. % and this is a comment~
+     40
+       
 **** Things That Can Go Wrong - 26
+     - You *can't* type everything you read in this book into the shell.
+       * The /syntactic forms/ in an /Erlang module/ are *NOT expressions* and
+         are not understood by the shell.
+
+       * In particular, you *can't* enter /annotations/ into the shell; these are
+         things that start with a hyphen (such as ~-module~, ~-export~, and so
+         on).
+
+     - Advanced:
+       You can start and stop _MULTIPLE shells._
+       =TODO= For details, see _The Shell Isn't Responding, on page 170_.
+     
 **** Command Editing in the Erlang Shell - 27
      
-*** 3.2 Simple Integer Arithmetic - 27
-*** 3.3 Variables - 28
+*** DONE 3.2 Simple Integer Arithmetic - 27
+    CLOSED: [2021-02-02 Tue 16:35]
+    Erlang uses /arbitrary-sized integers/ for performing integer arithmetic.
+      
+*** DONE 3.3 Variables - 28
+    CLOSED: [2021-02-02 Tue 16:44]
 **** Erlang Variables Do Not Vary - 29
 **** Variable Bindings and Pattern Matching - 30
 **** Why Single Assignment Improves Our Programs - 32
      
-*** 3.4 Floating-Point Numbers - 32
-*** 3.5 Atoms - 33
-*** 3.6 Tuples - 34
+*** DONE 3.4 Floating-Point Numbers - 32
+    CLOSED: [2021-02-03 Wed 03:14]
+    - Divisions:
+      * Normal division: ~/~
+
+      * Integer division: ~div~ and ~rem~
+
+    - _Internally_, Erlang uses *64-bit IEEE 754-1985 floats*,
+      so programs using floats will have the *same* kind of /rounding/ or
+      /precision/ problems associated with floats that you would get in a
+      language like C. =TODO= =Learn MORE!!!=
+      
+*** DONE 3.5 Atoms - 33
+    CLOSED: [2021-02-03 Wed 03:22]
+    In Erlang, /atoms/ are used to represent *constant values*.
+
+    - In Erlang, /atoms/ are *global*.
+
+    - /Atoms/
+      1. start with _lowercase letters_,
+      2. followed by a sequence of
+         * _alphanumeric characters_ or
+         * the underscore (~_~) or at (~@~) sign
+
+    - /Atoms/ can also be written in /quoted form/,
+      in this form, you can use characters that are not allowed in the unquoted
+      form.
+        
+    - The value of an /atom/ is just the /atom/.
+    
+*** DONE 3.6 Tuples - 34
+    CLOSED: [2021-02-03 Wed 03:33]
+    - Example: ~{10, 45}~
+
+    - It's common to use an /atom/ as the _first element_ of the /tuple/, which
+      describes what the /tuple/ represents.
+        So, we'd write ~{point, 10, 45}~ instead of ~{10, 45}~.
+      * This is not required, but is a recommended style.
+    
 **** Creating Tuples - 35
 **** Extracting Values from Tuples - 36
-    
-*** 3.7 Lists - 37
+     Use /pattern matching/ ~=~.
+
+     - _Repeated variables in a pattern_ is allowed.
+       No error report only when
+       1. _Repeated variables in a pattern_ are consistantly bound to the *same*
+          value.
+
+       2. Use special placeholder for /variables/: ~_~.
+          Erlang won't try to bind values to ~_~, and ~_~'s in one pattern do NOT
+          need to be consistantly bound to a single value.
+       
+*** TODO 3.7 Lists - 37
 **** Terminology - 38
 **** Defining Lists - 38
 **** Extracting Elements from a Lists - 39
     
-*** 3.8 Strings - 39
-*** 3.9 Pattern Matching Again - 41
-*** Exercises - 42
+*** TODO 3.8 Strings - 39
+*** TODO 3.9 Pattern Matching Again - 41
+*** TODO Exercises - 42
 
 ** TODO 4. Modules and Functions - 43
 *** TODO 4.1 Modules Are Where We Store Code - 43
