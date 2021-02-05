@@ -41,21 +41,35 @@
    - =TODO= NOTE =TODO=
      
 ** More about memory - 9
-*** Stack - 9
-    - When we step into a function, compiler can calculate some things e.g.:
-      * how many local variables will we need during a whole call
-      * how much space will they take - primitives’ size depend of their type and references have a fixed size
+   - /Memory/ can be _imagined as_ a big array where indices are memory addresses.
 
-    - It means, that every time compiler step into a function, it knows perfectly
-      how much size it needs in order to be able to call function. That
-      description holding all pieces of information about a call is called a
-      frame. What JVM does when it calls a function is creation of a new frame
-      for it, populating the variables storing arguments and putting in on a
-      stack. This stack of frames is separate from stack of operands (which we
-      saw in action in the example above) - they have a similar name, because
-      stack is the name of a data structure which pops element out in reverse
-      order to which we popped them in, aka last-in-first-out queue (LIFO).
-      Operand stack is created separately for each frame.
+   - This /memory/ can be divided into the part that contains
+     * program
+     * the part that contains data.
+     _But we could break it even more!_ =from Jian= when not consider the details.
+
+   - As a matter of the fact,
+     we can break the _data part_ of the /memory/ into
+     * /stacks/ (one per each thread)
+     * a heap (common for all threads).
+
+*** Stack - 9
+    - When we step into a /function/,
+      /compiler/ can calculate some things e.g.:
+      * *how many* /local variables/ will we need during a whole call
+
+      * *how much space* will they take
+        + /primitives/' size depend of their type
+        + /references/ have a fixed size
+
+    - It means, that every time compiler step into a /function/, it knows perfectly
+      how much size it needs in order to be able to call /function/.
+      * frame :: the description holding all pieces of information about a call.
+
+    - What JVM does when it calls a /function/ is creation of a new /frame/ for it,
+      populating the /variables/ storing arguments and putting in on a /stack/.
+      * This /stack of frames/ is *separate from* /stack of operands/ (which we
+        saw in action in the example above)
 
     - How the /stack/ of /frames/ looks like, we can see every time we receive an
       ~Exception~. An example in Ammonite:
