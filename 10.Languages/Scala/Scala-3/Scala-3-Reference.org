@@ -1,5 +1,5 @@
 #+TITLE: Scala 3 Reference
-#+VERSION: 8d00ed1, f72855e --> 3.0.0-RC1-bin-20210131-913d0a8-NIGHTLY
+#+VERSION: 8d00ed1, f72855e --> 3.0.0-M4-bin-20210205-f42279d-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: overview
 #+STARTUP: entitiespretty
@@ -284,10 +284,11 @@
         objects inheriting from classes/.
 
       * /Vararg patterns/
+        =FIXME= /Vararg splices/
         NOW USE
         the form ~: _*~ instead of ~@ _*~,
-        MIRRORING
-        /vararg expressions/,
+        =FIXME= the form ~xs*~ instead of ~xs: _*~ in function arguments,
+        =FIXME= and use the form ~xs*~ instead of ~xs @ _*~ in patterns,
 
       * /Creator applications/
         ALLOW USING
@@ -471,7 +472,10 @@
         + The new implementation is *more robust, efficient and easier to use*
           than the /macro/.
 
-      * /implicit by-name parameters/:
+      * /Implicit by-name parameters/:
+        =FIXME= /By-name context parameters/
+        =TODO= the line is contextual/by-name-context-parameters.md, and this
+               title also should be the same: _by-name context parameters_.
         PROVIDE
         a _more robust_ _in-language_ implementation of the ~Lazy~ /macro/ in
         Shapeless.
@@ -6656,8 +6660,8 @@
         class StringBuilder(s: String):
           def this() = this("")
 
-        StringBuilder("abc")  // same as `new StringBuilder("abc")`
-        StringBuilder()       // same as `new StringBuilder()`
+        StringBuilder("abc")  // old: new StringBuilder("abc")
+        StringBuilder()       // old: new StringBuilder()
       #+end_src
       This works since a /companion object/ with TWO ~apply~ /methods/ are
       _generated together with_ the /class/. The /companion object/ looks like:
@@ -7687,7 +7691,7 @@
          val Succ: SuccExtractor
          trait SuccExtractor {
            def apply(nat: Nat): Succ
-           def unapply(nat: Succ): Option[Nat]
+           def unapply(succ: Succ): Some[Nat]
          }
 
          given typeTestOfZero: TypeTest[Nat, Zero]
@@ -7708,7 +7712,7 @@
 
          val Succ: SuccExtractor = new:
            def apply(nat: Nat): Succ = nat + 1
-           def unapply(nat: Succ): Succ = Some(nat - 1)
+           def unapply(succ: Succ): Some(Nat) = Some(succ - 1)
 
          def typeTestOfZero: TypeTest[Nat, Zero] = new:
            def unapply(x: Nat): Option[x.type & Zero] =
@@ -7741,7 +7745,7 @@
      Note that without the ~TypeTest[Nat, Succ]~ the pattern ~Succ.unapply(nat: Succ)~
      would be unchecked.
      
-*** DONE ~threadUnsafe~ Annotation
+*** DONE The ~threadUnsafe~ Annotation
     CLOSED: [2019-12-31 Tue 04:24]
     When the compiler see a ~@threadUnsafe lazy val~, it can pick a faster
     mechanism to do the initialization.
@@ -10201,34 +10205,40 @@
 
 **** Syntax
 
-*** DONE Vararg Patterns
-    CLOSED: [2020-05-24 Sun 23:01]
-    The syntax of /vararg patterns/ has changed.
-    - In the _NEW syntax_ one writes /varargs/ in patterns _EXACTLY LIKE_ one writes
-      them in expressions, using ~a : _*~ type annotation:
+*** DONE Vararg Splices
+    CLOSED: [2021-02-06 Sat 19:20]
+    The syntax of /vararg splices/ in _patterns_ and _function arguments_ has
+    changed!
+
+    - The *new syntax* uses a _postfix ~*~,_ analogously to how a /vararg parameter/
+      is declared.
       * NEW:
         #+begin_src scala
-          xs match
-            case List(1, 2, xs: _*) => println(xs)  // binds xs
-            case List(1, _: _*)     =>              // wildcard pattern
+          val arr = Array(1, 2, 3)
+          val lst = List(0, arr*)                // vararg splice argument
+          lst match
+            case List(0, 1, xs*) => println(xs)  // binds xs to Seq(2, 3)
+            case List(1, _*)     =>              // wildcard pattern
         #+end_src
 
       * OLD:
-        it is shorter but _less regular_, and it no longer supported.
+        this will be phased out.
         #+begin_src scala
-          /*!*/  case List(1, 2, xs @ _*) =>  // syntax error
-          /*!*/  case List(1, _*)         =>  // syntax error
+          /*!*/  val lst = List(0, arr: _*)   // syntax error
+                 lst match
+                    case List(1, 2, xs @ _*)  // ok, equivalent to `xs*`
         #+end_src
 
+**** Syntax
 **** Compatibility considerations
-     - To enable smooth cross compilation between Scala 2 and Scala 3, Dotty will
-       accept both the old and the new syntax.
+     To enable /cross compilation/ between Scala 2 and Scala 3, the compiler will
+     accept both the old and the new syntax.
 
-     - Under the ~-strict~ setting,
+     - Under the ~-source 3.1~ setting,
        an error will be emitted when the old syntax is encountered.
 
-     - The ~-strict~ setting will be _enabled by default in version 3.1 of the
-       language._
+     - An *automatic rewrite* from old to new syntax is offered under
+       ~-source 3.1-migration~.
 
 *** DONE Pattern Bindings
     CLOSED: [2020-05-25 Mon 11:03]
@@ -11194,7 +11204,9 @@
       
 *** DONE Dropped: ~private[this]~ and ~protected[this]~
     CLOSED: [2020-04-30 Thu 12:49]
-    The ~private[this]~ and ~protected[this]~ /access modifiers/ are *deprecated*
+    The ~private[this]~ and ~protected[this]~ /access 
+
+modifiers/ are *deprecated*
     and will be phased out.
 
     - Previously, these /modifier/ were needed
@@ -11221,6 +11233,25 @@
     - =TODO=
       =from Jian=
       Learn more about this. There are more discussion about this topic.
+
+*** DONE Dropped: wildcard initializer
+    CLOSED: [2021-02-06 Sat 04:39]
+    The syntax
+    #+begin_src scala
+      var x: A = _
+    #+end_src
+    that was used to indicate an /uninitialized field/, has been dropped.
+      At its place there is a special value ~uninitialized~ in the ~scala.compiletime~
+    package. To get an /uninitialized field/, you now write
+    #+begin_src scala
+      import scala.compiletime.uninitialized
+
+      var x: A = uninitialized
+    #+end_src
+
+    - To enable cross-compilation,
+      1. ~_~ is _still supported_,
+      2. BUT it _will be dropped_ in a future 3.x version.
 
 ** TODO Scala 3 Syntax Summary
 *** Lexical Syntax
