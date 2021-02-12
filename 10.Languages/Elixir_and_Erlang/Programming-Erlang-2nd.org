@@ -1074,19 +1074,190 @@
 *** Exercises - 97
 
 ** TODO 7. Binaries and the Bit Syntax - 99
-*** 7.1 Binaries - 99
-**** Working with Binaries - 100
+   A /binary/ is a _data structure_ designed for storing large quantities of
+   _RAW data_ in a *space-efficient* manner.
+   
+   - The Erlang VM is OPTIMIZED for the *efficient*
+     input,
+     output, and
+     message passing of binaries.
+
+   - /Binaries/ should be used whenever possible for *storing* _the contents of LARGE
+     quantities of UNSTRUCTURED data,_ for example _LARGE strings_ or _the contents
+     of files._
+
+   - A /binary/ will be *exactly* _divisible by 8_ and
+     thus corresponds to a sequence of /bytes/.
+
+   - If the number of bits is *not exactly* _divisible by 8_,
+     we use the name /bitstring/ to refer to the data.
+     * When we say /bitstring/, it is to *EMPHASIZE* the fact that
+       the _number of bits_ in data is *NOT an exact multiple of 8.*
+   
+   - /Binaries/, /bitstrings/, and _bit-level pattern matching_ were introduced
+     in Erlang to simplify network programming where we often want to probe into
+     the bit- and byte-level structure of protocol packets.
+
+*** DONE 7.1 Binaries - 99
+    CLOSED: [2021-02-08 Mon 17:51]
+    Data surrounded by ~<<~ and ~>>~.
     
-*** 7.2 The Bit Syntax - 101
-**** Packing and Unpacking 16-Bits Color - 102
-**** Bit Syntax Expressions - 103
-**** Real-World Bit Syntax Examples - 105
+    - Examples:
+      #+begin_src erlang
+        <<5, 10, 20>>.   % <<5, 10, 20>>
+
+        <<"hello">>.     % <<"hello">>
+
+        <<65, 66, 67>>.  % <<"ABC">>
+      #+end_src
+
+    - Must use integers in a /binary/,
+      Integers must be in the range ~0~ to ~255~.
+
+    - The Erlang shell will print a /binary/ as a /string/ if it is printable,
+      otherwise, it will be printed as a sequence of integers.
+      
+**** Working with Binaries - 100
+     We often manipulate /binaries/ using /BIFs/ or with /functions from the
+     ~binary~ module/.
+     
+     - Many of the /functions/ exported from ~binary~ are implemented as
+       *native* code.
+    
+     - Some of the most important /functions/ from ~binary~:
+       * ~list_to_binary(L) -> B~
+         returns a /binary/ constructed by flattening all elements in the
+         /iolist/ ~L~.
+         #+begin_src erlang
+           Bin1 = <<1, 2, 3>>.
+           Bin2 = <<4, 5>>.
+           Bin3 = <<6>>.
+
+           list_to_binary([Bin1, 1, [2, 3, Bin2], 4 | Bin3]).
+           %% <<1, 2, 3, 1, 2, 3, 4, 5, 4, 6>>
+         #+end_src
+         + iolist :: a list whose elements are
+           - _integers in 0..255_,
+           - /binaries/,
+           - /iolists/
+         
+       * ~split_binary(Bin, Pos) -> {Bin1, Bin2}~
+         #+begin_src erlang
+           split_binary(<<1, 2, 3, 4, 5, 6, 7, 8, 9, 10>>, 3).
+           %% {<<1, 2, 3>>, <<4, 5, 6, 7, 8, 9, 10>>}
+         #+end_src
+
+       * ~term_to_binary(Term) -> Bin~
+         + The /binary/ produced is represented in the so-called /external term
+           format/, which can be
+           - stored in files,
+           - sent in messages over a network,
+           - and so on.
+
+         + The input ~Term~ can be reconstructed later with ~binary_to_term/1~,
+           and because of this, these two operations are extremely useful for
+           _storing complex data structures in files_ or _sending complex data
+           structures to remote matchines._
+
+       * ~binary_to_term(Bin) -> Term~
+
+       * ~byte_size(Bin) -> Size~
+         Return the _number of bytes_ in the /binary/.
+       
+*** TODO 7.2 The Bit Syntax - 101 - =READING=
+    - Example:
+      #+begin_src erlang
+        M = <<X:2, Y:7, Z:6>>.
+      #+end_src
+
+    - _CAUTION_:
+      we call this a /bit syntax expression/, *not* /binary syntax expression/,
+      because it also possible generate a /bitstring/ if the total number of
+      bits is not exactly divisible by 8.
+
+    - We didn't show the full bit syntax here.
+      The full bit syntax is slightly more complext!
+      =NEXT= See the following examples.
+    
+**** DONE Packing and Unpacking 16-Bits Colors - 102
+     CLOSED: [2021-02-08 Mon 17:19]
+     _Green channel_ will have 6 bits, because human eye is more sensitive to it.
+     
+     #+begin_src erlang
+       Red = 2.
+       Green = 61.
+       Blue = 20.
+
+       Mem = <<Red:5, Green:6, Blue:5>>.
+       % <<23, 180>>
+
+       <<R:5, G:6, B:5>> = Mem.
+     #+end_src
+     
+**** TODO Bit Syntax Expressions - 103
+**** TODO Real-World Bit Syntax Examples - 105 - =READING=
+     Learning the /bit syntax/ is a bit of extra effect,
+     BUT the benefits are enormous.
+     
 ***** Finding the Synchronization Frame in MPEG Data - 105
 ***** Unpacking COFF Data - 108
 ***** Unpacking the Header of an IPv4 Datagram - 110
      
-*** 7.3 Bitstrings: Processing Bit-Level Data - 110
-*** Exercises - 112
+*** DONE 7.3 Bitstrings: Processing Bit-Level Data - 110
+    CLOSED: [2021-02-08 Mon 19:13]
+    #+begin_src erlang
+      B1 = <<1:8>>.      %% <<1>>
+      byte_size(B1).     %% 1
+      is_binary(B1).     %% true
+      is_bitstring(B1).  %% true
+
+      B2 = <<1:17>>.     %% <<0, 0, 1:1>>
+      is_binary(B1).     %% false
+      is_bitstring(B1).  %% true
+      byte_size(B1).     %% 3
+      bit_size(B1).      %% 17
+    #+end_src
+
+    - *Bit-Level Storage* =IMPORTANT!!!=
+      * In most programming languages, *the _least addressable unit of storage_
+        is typically 8 bits wide.*
+          Manipulating bits within a /char/ is complicated, since to ACCESS
+        individual bits, *they have to masked out and shifted into registers.*
+        _Writing such code is tricky and error-prone._
+
+      * In Erlang *the _least addresable unit of storage_ is a /bit/,* and
+        _individual sequences of bits_ within a /bitstring/ can be accessed
+        directly WITHOUT any shifting and masking operations.
+      
+    - Working with /bitstrings/ is tricky. =IMPORTANT=
+      We can't, for example, write a /bitstring/ to a /file/ or /socket/ (which
+      we can do with a /binary/), *since /files/ and /sockets/ work _in units of
+      bytes_.*
+
+    - We'll conclude this section with a single example, which extracts the
+      individual /bits/ of a /byte/. To do so, we'll make use of a new construct
+      called a /bit comprehension/.
+      #+begin_src erlang
+        B = <<16#5f>>.                %% <<"_">>
+        [X || <<X:1>> <= B].          %% [0, 1, 0, 1, 1, 1, 1, 1]
+        << <<X>> || <<X:1>> <= B >>.  %% <<0, 1, 0, 1, 1, 1, 1, 1>>
+      #+end_src
+      * Here the ~16#5f~ is hexadecimal, and its decimal form is 95.
+
+    - The syntax of /bit comprehensions/ is not described here
+      BUT can be found in the _Erlang Reference Manual_. =TODO=
+        More examples of /bitstring/ processing can be found in the paper
+      _"Bit-Level Binaries and Generalized Comprehensions in Erlang."_
+      =TODO= =TODO= =TODO= =TODO= =TODO= =TODO= =TODO= =TODO= =TODO= =TODO= 
+
+    - SUMMARY:
+      /Binaries/ are used internally in the Erlang system whenever we want to
+      MANAGE _LARGE amounts of UNSTRUCTURED data._
+      =NEXT=
+      In later chapters we'll see how /binaries/ can be be sent in messages over
+      /sockets/ and stored in /files/.
+      
+*** TODO Exercises - 112
 
 ** TODO 8. The Rest of Sequential Erlang - 113
 *** TODO 8.1 ~apply~ - 115
