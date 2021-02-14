@@ -1,5 +1,5 @@
 #+TITLE: Scala 3 Reference
-#+VERSION: 8d00ed1, f72855e --> 3.0.0-M4-bin-20210205-f42279d-NIGHTLY
+#+VERSION: 3.0.0-M4-bin-20210212-0273336-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: overview
 #+STARTUP: entitiespretty
@@ -912,7 +912,7 @@
            case Apply[A, B](fun: Expr[B => A], arg: Expr[B]) extends Expr[A]
        #+end_src
        * =from Jian=
-         In the code below, add ~import Expr._~ to make them workable.
+         In the code below, add ~import Expr.*~ to make them workable.
 
        * *REQUIREMENT*
          Provide a way for users to _map a function over all immediate
@@ -2231,19 +2231,19 @@
           def f(using TC) = ???
 
         object B:
-          import A._
+          import A.*
           import A.given
           // ...
       #+end_src
       * In Dotty,
         + Import *EVERYTHING except givens* (this is _different from Scala 2_):
-          ~import A._~
+          ~import A.*~
 
         + Import *ALL givens*:
           ~import A.given~
 
         + Import *everything* in ~A~:
-          ~import A.{given, _}~
+          ~import A.{given, *}~
 
     - There are *TWO* main _benefits_ arising from these rules:
       * It is MADE CLEARER where /givens/ in scope are coming from.
@@ -2565,7 +2565,7 @@
                  else Some(i / x)
 
            trait SafeDiv:
-              import IntOpsEx._ // brings safeDiv and safeMod into scope
+              import IntOpsEx.* // brings safeDiv and safeMod into scope
 
               extension (i: Int) def divide(d: Int): Option[(Int, Int)] =
                  // extension methods imported and thus in scope
@@ -3283,7 +3283,7 @@
 
       - Pulling this all together we have the following complete implementation,
         #+begin_src scala
-          import scala.deriving._
+          import scala.deriving.*
           import scala.compiletime.{erasedValue, summonInline}
 
           inline def summonAll[T <: Tuple]: List[Eq[_]] =
@@ -3331,7 +3331,7 @@
 
           // TODO: FIXME
           @main def test(): Unit =
-            import Opt._
+            import Opt.*
             val eqoi = summon[Eq[Opt[Int]]]
             assert(eqoi.eqv(Sm(23), Sm(23)))
             assert(!eqoi.eqv(Sm(23), Sm(13)))
@@ -4041,7 +4041,7 @@
               given fromStatusCode: Conversion[Future[StatusCode], CompletionArg]   = Status(_)
             end CompletionArg
 
-            import CompletionArg._
+            import CompletionArg.*
 
             def complete[T](arg: CompletionArg) = arg match
               case Error(s)     => ...
@@ -4483,8 +4483,7 @@
        * /TASTy inspection/ allows to *load* these files and *analyze* their
          content's tree structure.
 
-*** DONE Inline
-    CLOSED: [2020-11-24 Tue 03:48]
+*** Inline - =New Subsection=
 **** DONE Inline Definitions
      CLOSED: [2020-11-24 Tue 01:27]
      - ~inline~ :: a new /soft modifier/ that *guarantees* that a definition will
@@ -4800,7 +4799,8 @@
          val one: 1 = zero + 1
        #+end_src
 
-**** DONE Inline Conditionals
+**** TODO Transparent vs. non-transparent inline
+**** DONE Inline Conditionals - =new edited=
      CLOSED: [2020-11-24 Tue 02:17]
      This feature has a bug that is reported by me =Jian=
      https://github.com/lampepfl/dotty/issues/10521
@@ -4834,7 +4834,7 @@
             |   is not a constant value
             | This location is in code that was inlined at ...
        #+end_src
-
+       
 **** DONE Inline Matches
      CLOSED: [2020-11-24 Tue 02:23]
      - A /match expression/ _in the body_ of an /inline method definition/ _may be_
@@ -5013,8 +5013,8 @@
 
       - For example,
         #+begin_src scala
-          import scala.compiletime.ops.int._
-          import scala.compiletime.ops.boolean._
+          import scala.compiletime.ops.int.*
+          import scala.compiletime.ops.boolean.*
 
           val conjunction: true && true = true
           val multiplication: 3 * 5 = 15
@@ -5048,9 +5048,9 @@
         =IMORTANT=
         =IMORTANT=
         #+begin_src scala
-          import scala.compiletime.ops._
+          import scala.compiletime.ops.*
 
-          import scala.annotation.infx._  // TODO: infix ???
+          import scala.annotation.infix
 
           type +[X <: Int | String, Y <: Int | String] = (X, Y) match
             case (Int, Int)       => int.+[X, Y]
@@ -5211,7 +5211,7 @@
      - =PR #7201= which explains the _NEW ~summonFrom~ syntax._
 
 *** DONE Macros
-    CLOSED: [2020-12-07 Mon 11:18]
+    CLOSED: [2021-02-14 Sun 02:27]
 **** DONE Macros: Quotes and Splices
      CLOSED: [2020-11-30 Mon 02:31]
      - Macros are built on _TWO_ well-known fundamental operations:
@@ -5247,7 +5247,7 @@
        as argument. ~assertImpl~ evaluates the expression and prints it again in
        an error message if it evaluates to ~false~.
        #+begin_src scala
-         import sala.quoted._
+         import sala.quoted.*
 
          inline def assert(inline expr: Boolean): Unit =
            ${ assertImpl('expr) }
@@ -5399,7 +5399,7 @@
          given ~Quotes~ instance. To satisfy this, there are two ways:
          + Macro (All operations happens in /compile time/):
            #+begin_src scala
-             import scala.quoted._
+             import scala.quoted.*
 
              inline def runf1: Int => String = ${ mcrImpl1 }
              def mcrImpl1(using Quotes): Expr[Int => String] =
@@ -5418,8 +5418,8 @@
 
            2. Then,
               #+begin_src scala
-                import scala.quoted._
-                import scala.quoted.staging._
+                import scala.quoted.*
+                import scala.quoted.staging.*
 
                 given Toolbox = Toolbox.make(getClass.getClassLoader)
 
@@ -5517,7 +5517,7 @@
      - Consider the following implementation of a /staged interpreter/ that implements
        a compiler through staging.
        #+begin_src scala
-         import scala.quoted._
+         import scala.quoted.*
 
          enum Exp:
            case Num(n: Int)
@@ -5525,7 +5525,7 @@
            case Var(x: String)
            case Let(x: String, e: Exp, in: Exp)
 
-         import Exp._
+         import Exp.*
        #+end_src
        * The interpreted language consists of numbers ~Num~, addition ~Plus~, and
          variables ~Var~ which are bound by ~Let~.
@@ -5539,7 +5539,7 @@
      - Here's a compiler that maps an expression given in the interpreted language
        to /quoted/ Scala code of type ~Expr[Int]~.
        #+begin_src scala
-         import scala.quoted._
+         import scala.quoted.*
 
          def compile(e: Exp, env: Map[String, Expr[Int]])(using Quotes): Expr[Int] =
            e match
@@ -5932,7 +5932,7 @@
      ~scala.quoted.Expr.summon~:
      #+begin_src scala
        import scala.collection.immutable.{ TreeSet, HashSet }
-       import scala.quoted._
+       import scala.quoted.*
 
        inline def setFor[T]: Set[T] = ${ setForExpr[T] }
 
@@ -5942,10 +5942,10 @@
            case _         => '{ HashSet.empty[T] }
      #+end_src
 
-**** DONE Relationship with Whitebox ~inline~
-     CLOSED: [2020-11-30 Mon 23:34]
-     The code below introduces a /whitebox inline method/ that can return a default
-     value either of /type/ ~Int~ or of /type/ ~String~:
+**** DONE Relationship with Transparent ~inline~
+     CLOSED: [2021-02-14 Sun 02:26]
+     The code below introduces a /transparent inline method/ that can calculate
+     either a value of /type/ ~Int~ or a value of /type/ ~String~:
      #+begin_src scala
        transparent inline def defaultOf(inline str: String) =
          ${ defaultOfImpl('str) }
@@ -6289,7 +6289,7 @@
      - Within the scope of ~staging.run~ we can also invoke ~show~ on an expression
        to get a source-like representation of the expression.
        #+begin_src scala
-         import scala.quoted._
+         import scala.quoted.*
 
          // make available the necessary compiler for runtime code generation
          given staging.Compiler = staging.Compiler.make(getClass.getClassLoader)
@@ -6329,24 +6329,24 @@
      - To provide _reflection capabilities_ in /macros/
        we need to
        *add* an /implicit parameter/ of type ~scala.quoted.Quotes~ and
-       *import* ~quotes.reflect._~ from it in the scope where it is used.
+       *import* ~quotes.reflect.*~ from it in the scope where it is used.
        #+begin_src scala
-         import scala.quoted._
+         import scala.quoted.*
 
          inline def natConst(inline x: Int): Int = ${ natConstImpl('{x}) }
 
          def natConstImpl(x: Expr[Int])(using Quotes): Expr[Int] =
-           import quotes.reflect._
+           import quotes.reflect.*
            ...
        #+end_src
 
 ***** Extractors
-      - ~import quotes.reflect._~ will provide _ALL_ /extractors/ and /methods/
+      - ~import quotes.reflect.*~ will provide _ALL_ /extractors/ and /methods/
         on ~quotes.reflect.Tree~'s. For example the ~Literal(_)~ /extractor/
         used below.
         #+begin_src scala
           def natConstImpl(x: Expr[Int])(using Quotes): Expr[Int] =
-            import quotes.reflect._
+            import quotes.reflect.*
             val tree: Term = x.asTerm
 
             tree match
@@ -6391,7 +6391,7 @@
         or even the source code at the expansion point.
         #+begin_src scala
           def macroImpl()(quotes: Quotes): Expr[Unit] =
-            import quotes.reflect._
+            import quotes.reflect.*
             val pos = Position.ofMacroExpansion
 
             val path = pos.sourceFile.jpath.toString
@@ -6460,13 +6460,13 @@
      To inspect the /trees/ of a _TASTy file_ a ~Consumer~ =FIXME=
      can be defined in the following way:
      #+begin_src scala
-       import scala.quoted._
-       import scala.tasty.inspector._
+       import scala.quoted.*
+       import scala.tasty.inspector.*
 
        class MyInspector extends TastyInspector:
          protected def processCompilationUnit(using Quotes)
                                              (tree: quotes.reflect.Tree): Unit =
-           import quotes.reflect._
+           import quotes.reflect.*
            // Do something with the tree
      #+end_src
      
@@ -6967,16 +6967,16 @@
        #+begin_src scala
          class B { val c: Int }
          object a { val b = new B }
-         export a._
-         export b._
+         export a.*
+         export b.*
        #+end_src
-       + Q :: Is the ~export b._~ clause legal?
+       + Q :: Is the ~export b.*~ clause legal?
        + Q :: If yes, what does it export?
-       + Q :: Is it equivalent to export ~a.b._~?
+       + Q :: Is it equivalent to export ~a.b.*~?
        + Q :: What about if we swap the last two clauses?
               #+begin_src scala
-                export b._
-                export a._
+                export b.*
+                export a.*
               #+end_src
 
      - A :: To avoid tricky questions like these,
@@ -7007,8 +7007,7 @@
                      made available by _ANOTHER_ /export clause/ of the _SAME_
                      /class/.
 
-*** DONE Opaque Type Alias
-    CLOSED: [2019-09-13 Fri 02:50]
+*** TODO Opaque Type Alias - =NEW Subsection=
     /Opaque types aliases/ provide type abstraction without any runtime overhead.
 
     - Example:
@@ -7106,7 +7105,7 @@
        usage scenario type-checks:
        #+begin_src scala
          object User:
-           import Access._
+           import Access.*
 
            case class Item(rights: Permissions)
 
@@ -7130,7 +7129,7 @@
 ***** Syntax
 ***** Type Checking
 ***** Realtionship to SIP 35
-
+      
 *** DONE Open Classes
     CLOSED: [2020-05-14 Thu 01:29]
     An ~open~ /modifier/ on a class signals that the class _is planned for
@@ -7677,7 +7676,7 @@
      Given the following abstract definition of ~Peano~ numbers that provides two
      /given instances/ of types ~TypeTest[Nat, Zero]~ and ~TypeTest[Nat, Succ]~
      #+begin_src scala
-       import scala.refelct._
+       import scala.refelct.*
 
        trait Peano:
          type Nat
@@ -7728,7 +7727,7 @@
      
      #+begin_src scala
        @main def test =
-         import PeanoInt._
+         import PeanoInt.*
 
          def divOpt(m: Nat, n: Nat): Option[(Nat, Nat)] =
            n match
@@ -9805,6 +9804,7 @@
      - These rules make it possible to cross build between Scala 2 using the
        /kind projector/ plugin and Scala 3.0 - 3.2 using option ~-Ykind-projector~.
 
+*** TODO Imports - =NEW=
 *** TODO Changes in Type Checking - =No Doc till now=
     - [//]:# todo: fill in
 
@@ -11180,7 +11180,7 @@
     - A drop-in library replacement is provided in
       ~scala.util.control.NonLocalReturns~:
       #+begin_src scala
-        import scala.util.control.NonLocalReturns._
+        import scala.util.control.NonLocalReturns.*
 
         extension [T](xs: List[T])
            def has(elem: T): Boolean = returning {
