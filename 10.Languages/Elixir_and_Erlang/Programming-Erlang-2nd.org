@@ -1260,8 +1260,33 @@
 *** TODO Exercises - 112
 
 ** TODO 8. The Rest of Sequential Erlang - 113
-*** TODO 8.1 ~apply~ - 115
-*** DONE 8.2 Arithmetic Expressions - 116
+   =TODO= =NOTE=
+   
+*** DONE 8.1 ~apply~ - 115
+    CLOSED: [2021-02-12 Fri 02:05]
+    The BIF ~apply(Mod, Func, [Arg1, Arg2, ..., ArgN])~.
+    This is equivalent to ~Mod:Func(Arg1, Arg2, ..., ArgN)~.
+    
+    - Call a function through ~apply/3~ is MORE FLEXIBLE THAN
+      call a function directly from the _module name_:
+      the _module name_ and/or _function name_ can be *computed dynamically*!
+      * *Warning*:
+        *Because of this flexibility, the use of ~apply/3~ should be avoided if
+        possible.*
+        + When _the number of arguments_ to a function is known in advance,
+          it is much better to use a call of the form ~M:F(Arg1, Arg2, ..., ArgN)~.
+
+        + ~apply/3~ can make many _analysis tools_ can't work out what is happening,
+          and certain compiler optimizations can't be made.
+    
+    - The ~Mod~ argument to apply _doesn't_ have to be an /atom/:
+      it can also be a /tuple/.
+      If we call ~{Mod, P1, P2, ..., Pn}:Func(A1, A2, ..., An)~ then what actually
+      gets called is the following function:
+      ~Mod:Func(A1, A2, ..., An, {Mod, P1, P2, ..., Pn})~
+      =TODO= =NEXT= _Section 24.3, Stateful Modules, on page 418_
+      
+*** DONE 8.2 Arithmetic Expressions - 116 - =RE-REAED=
     CLOSED: [2021-02-08 Mon 01:35]
     Table 3 -- Arithmetic expressions
     
@@ -1271,10 +1296,140 @@
     functions with the _same name_ and _different arities_ *as auxiliary functions*.
     Hide the /auxiliary functions/ when *exporting* functions..
     
-*** 8.4 Attributes - 117
-**** Predefined Module Attributes - 117
-**** User-Defined Attributes - 119
+*** DONE 8.4 Attributes - 117
+    CLOSED: [2021-02-14 Sun 01:40]
+    - /Module attributes/
+      * have the _syntax_ ~atom_tag(...)~ and
+      * are used to *define* certain /properties/ of a file.
+
+    - *NOTE*:
+      ~-record(...)~ and ~include(...)~ have a similar syntax
+      _BUT_ are *NOT* considered /module attributes/.
+
+    - There are _TWO_ types of /module attributes/:
+      * predefined;
+      * user-defined.
     
+**** DONE Predefined Module Attributes - 117
+     CLOSED: [2021-02-14 Sun 00:04]
+     The following /module attributes/ have _predefined meanings_ and
+     _MUST be placed *before any function definitions*._
+
+     - ~-module(modname).~
+       * ~modname~ must be an /atom/.
+
+       * This must be the *first* attribute in the file.
+
+       * Conventionally the code for a module ~modname~ should be stored in a
+         file called =modname.erl=.
+         + Even though this is only a convention,
+           if you do NOT follow this convention, then automatic code loading will
+           not work correctly;
+           =TODO= =NEXT=
+           see _Section 8.10. Dynamic Code Loading, on page 122_ for more details.
+
+     - ~-import(Mod, [Name1/Arity1, Name2/Arity2, ...]).~
+       The /import declaration/ specifies which _function_ are to be imported
+       into the module that includes this ~import~.
+       * /Imported functions/ can be called *without* specifying the /module name/. 
+         #+begin_src erlang
+           -module(abc).
+           -import(lists, [map/2]).
+
+           f(L) ->
+               L1 = map(fun(X) -> 2*X end, L),
+               lists:sum(L1).
+         #+end_src
+
+     - ~-export([Name1/Arity1, Name2/Arity2, ...]).~
+       When call a /function/ that _was NOT exported_, a /exception/
+       will be throw =** exception error: undefined function abc:a/1=.
+
+     - ~-compile(Options).~
+       Add ~Options~ to the *list of compiler options*.
+       * ~Options~ is
+         + a _single_ compiler option
+           OR
+         + a _list_ of compiler options
+         =TODO= see the manual page for the module ~compile~
+
+       * *Note*:
+         ~-compile(export_all).~ is often used while debugging.
+         It *EXPORTS ALL functions* from the /module/ _WITHOUT having to
+         EXPLICITLY_ use the ~-export~ annotation.
+
+     - ~-vsn(Version).~
+       Specify a /module verson/.
+       * ~Version~ is any _literal term_.
+
+       * NO particular syntax or meaning for ~Version~.
+         It can be used
+         + by _analysis programs_
+           OR
+         + for _documentation_ purposes
+       
+**** DONE User-Defined Attributes - 119
+     CLOSED: [2021-02-14 Sun 01:40]
+     - Syntax:
+       ~SomeTag(Value).~ 
+       * ~SomeTag~ must be an /atom/,
+       * ~Value~ must be a _literal term_.
+
+     - The _VALUES_ of the /module attributes/
+       1. are *compiled into* the /module/
+          and
+       2. can be *extracted* _at runtime_.
+    
+     - Example:
+       #+begin_src erlang
+         -module(attrs).
+         -vsn(1234).
+         -author({joe, armstrong}).
+         -purpose("example of attributes").
+         -export([fac/1]).
+
+         fac(1) -> 1;
+         fac(N) -> N * fac(N - 1).
+       #+end_src
+       * In REPL, run ~c(attrs).~, and then ~attrs:module_info().~
+         #+begin_src text
+           [{module,attrs},
+            {exports,[{fac,1},{module_info,0},{module_info,1}]},
+            {attributes,[{vsn,[1234]},
+                         {author,[{joe,armstrong}]},
+                         {purpose,"example of attributes"}]},
+            {compile,[{version,"7.6.6"},
+                      {options,[]},
+                      {source,"/home/shapeless-cat/Practices/Erlang/attrs.erl"}]},
+            {native,false},
+            {md5,<<225,190,230,63,41,116,26,11,89,205,24,35,160,71,
+                  82,39>>}]
+         #+end_src
+         + =from Jian=
+           This is an output I get from REPL.
+             It is not the one in this book, which is _not well indented_, _outdated_,
+           and _has an inconsistent compiler version number_ with the following
+           paragraph.
+       
+         + The user-defined attributes are in the ~{attributes, ...}~ part.
+           You can extract it with ~attrs:module_info(attributes)~.
+             This ~attrs:module_info/1~ also can be used to query each section we
+           can find in the ~attrs:module_info/0~ output: ~module~, ~exports~,
+           ~attributes~, ~compile~, ~native~, and ~md5~.
+           - The ~module_info/0~ and ~module_info/1~ will _be *generated* AUTOMATICALLY
+             every time a /module/ is compiled_.
+
+         + We compile and load the /beam code/ for the /module/ ~attrs~ into the
+           Erlang VM with the ~c/1~ in REPL.
+             We can _EXTRACT the same infomation *without* LOADING the /module/ by
+           using the /module/ ~beam_lib~._
+           #+begin_src erlang
+             beam_lib:chucks("attrs.beam", [attributes]).
+             % {ok, {attrs, [{attributes, [{author,[{joe, armstrong}]},
+             %                             {purpose, "example of attributes"},
+             %                             {vsn, [1234]}]}]}}
+           #+end_src
+             
 *** DONE 8.5 Block Expressions - 120
     CLOSED: [2021-02-08 Mon 01:48]
     #+begin_src erlang
@@ -1320,7 +1475,17 @@
     ~not~, ~and~, ~or~, and ~xor~
     Their LHS and RHS must be /boolean literals/ or _expressions that evaluate to booleans_.
     
-*** 8.8 Character Set - 122
+*** DONE 8.8 Character Set - 122
+    CLOSED: [2021-02-12 Fri 02:11]
+    Since Erlang version R16B, Erlang source code files are assumed to be
+    encoded in the _UTF-8 character set_. Prior to this, _ISO-8859-1 (Latin-1)
+    character set_ was used.
+
+    - _Internally_ Erlang has *no* /character data type/.
+      /Strings/ *don't* really exist but instead are REPRESENTED BY _lists of
+      integers_. No matter which /encoding/ is being used, this _lists of
+      integers_ can work without any problems.
+    
 *** DONE 8.9 Comments - 122
     CLOSED: [2021-02-08 Mon 01:52]
     ~%~ start a comment.
@@ -1332,11 +1497,44 @@
       * ~%%~'s _are recognized in the Emacs erlang-mode_ and
         _enable automatic indentation_ of commented lines.
       
-*** 8.10 Dynamic Code Loading - 122
-*** 8.11 Erlang Preprocessor - 126
-*** 8.12 Escape Sequences - 126
-*** 8.13 Expressions and Expression Sequences - 127
-*** DONE 8.14 Function References - 128 - =TODO=
+*** 8.10 Dynamic Code Loading - 122 =TODO= =RE-READ=
+*** DONE 8.11 Erlang Preprocessor - 126
+    CLOSED: [2021-02-12 Fri 02:31]
+    /Erlang Preprocessor/ will run automatically before compilation.
+    
+    - /Erlang Preprocessor/ will
+      * Expand any macros that might be in the source file;
+      * Insert any necessary include files.
+
+    - Show the result of /preprocessor/ (for example, useful when debugging a
+      FAULTY /macro/).
+      #+begin_src shell
+        erlc -P some_module.erl
+      #+end_src
+      This produces a listing file called =some_module.P=.
+    
+*** DONE 8.12 Escape Sequences - 126
+    CLOSED: [2021-02-15 Mon 01:00]
+    Table 4 -- Escape sequences
+    
+    - Caution:
+      ~\C~: The ASCII code for ~C~ (~C~ is a character).
+    
+*** DONE 8.13 Expressions and Expression Sequences - 127
+    CLOSED: [2021-02-15 Mon 01:06]
+    - Expression :: anything that can be evaluated to produce a value.
+
+    - ~catch~, ~if~, and ~try...catch~ are /expressions/.
+
+    - /Record declarations/ and /module attributes/, which can't be evaluated to
+      values, are NOT /expressions/.
+
+    - Expression sequences :: sequences of expressions separated by commas.
+      * The value of a /expression sequence/ is its _last_ expression value.
+
+      * Lisp uses ~progn~ to to write /expression sequences/.
+
+*** DONE 8.14 Function References - 128
     CLOSED: [2021-02-08 Mon 01:59]
      - Use the following notation for /funciton references/:
        * ~fun LocalFunc/Arity~
@@ -1356,34 +1554,259 @@
            double(L) -> lists:map(fun x1:square/1, L).
          #+end_src
 
-     - =TODO= =NEXT=
-       Note:
+     - NOTE:
        /function references/ that include the /module name/ provide
        _switchover point_ for /dynamic code upgrade/.
-       =NEXT= For details, read *Section 8.10. Dynamic Code Loading. on page 122*
          
-*** 8.15 Include Files - 128
-*** 8.16 List Operations ++ and - - - 129
+*** DONE 8.15 Include Files - 128 - =TODO=
+    CLOSED: [2021-02-12 Fri 02:25]
+    - =from Jian=
+      Is this /include files/ the same as that in the C language.
+      =TODO=
+      =???=
+      =???=
+      =???=
+
+    - Convention:
+      The include files have the /extension/ =.hrl=.
+      
+    - When use ~-include(Filename).~, the ~Filename~ should contains
+      _path (absolute or relative)_ so that the /preprocessor/ can locate the
+      appropriate file.
+
+    - Use ~-include_lib(Name)~ to include /library header files/.
+      * Example:
+        #+begin_src erlang
+          -include_lib("kernel/include/file.hrl").
+        #+end_src
+
+    - /Include files/ *usually* contain /record definitions/.
+        If many /modules/ need to share *common* /record definitions/, then the
+      *common* /record definitions/ are put into /include files/ that are included
+      by all the /modules/ that need these definitions.
+      
+*** DONE 8.16 List Operations ~++~ and ~--~ - 129
+    CLOSED: [2021-02-12 Fri 02:16]
+    ~++~ is concatenation.
+    ~--~ is subtraction.
+
+    - For ~--~, the number of elements in the RHS /list/ matters:
+      #+begin_src erlang
+        [a, b, c, l, d, e, l, x, y, l] -- [l].
+        %% [a, b, c, d, e, l, x, y, l]
+
+        [a, b, c, l, d, e, l, x, y, l] -- [l, l].
+        %% [a, b, c, d, e, x, y, l]
+
+        [a, b, c, l, d, e, l, x, y, l] -- [l, l, l].
+        %% [a, b, c, d, e, x, y]
+
+        [a, b, c, l, d, e, l, x, y, l] -- [l, l, l, l].
+        %% [a, b, c, d, e, x, y]
+      #+end_src
+    
+    - The ~++~ can be used in /patterns/.
+      * When matching /strings/, we can write /patterns/ such as the following:
+        #+begin_src erlang
+          f("begin" ++ T) -> ...
+          f("end" ++ T) -> ...
+          ...
+        #+end_src
+        The first pattern  is expanded into ~[$b, $e, $g, $i, $n | T]~.
+      
 *** 8.17 Macros - 129
 **** Control Flow in Macros - 130
     
-*** 8.18 Match Operator in Patterns - 131
-*** 8.19 Numbers - 132
-**** Integers - 132
-**** Floats - 133
+*** DONE 8.18 Match Operator in Patterns - 131
+    CLOSED: [2021-02-15 Mon 01:10]
+    #+begin_src erlang
+      func1([{tag, {one, A}=Z1, B}=Z2 | T]) ->
+          ...,
+          ... f(..., Z2, ...) ...,
+          ... g(..., Z1, ...) ...,
+          ...
+    #+end_src
+    
+*** DONE 8.19 Numbers - 132
+    CLOSED: [2021-02-15 Mon 01:20]
+    /Numbers/ in Erlang are either /integers/ or /floats/.
+    
+**** DONE Integers - 132
+     CLOSED: [2021-02-15 Mon 01:16]
+     - /Integer arithmetic/ is *exact*.
+       * The number of digits that can be represented in an /integer/ _is LIMITED
+         only by available memory_.
+
+     - /Integers/ are written with one of THREE different syntaxes.
+       * *Conventional syntax*
+         For example, ~12~, ~12375~, and ~-23427~.
+
+       * *Base K integers*
+         ~K#Digits~, and the _HIGHEST number base_ is *36*.
+         For example, ~2#00101010~ and ~16#af6bfa23~.
+
+       * *$ syntax*
+         ~$C~ represents the integer code for the ASCII character ~C~.
+         escape sequences can follow ~$~.
+         For example, ~$a~ is short for 97, ~$\n~ is 10, and ~$\^C~ is 3.
+       
+**** DONE Floats - 133
+     CLOSED: [2021-02-15 Mon 01:20]
+     - A floating-point number has _FIVE_ parts:
+       1. an optional sign
+       2. a whole number part
+       3. a decimal point
+       4. a fractional part
+       5. an optional exponent part
      
-*** 8.20 Operator Precedence - 133
-*** 8.21 The Process Dictionary - 134
-*** 8.22 References - 135
+     - IEEE 754 64-bit.
+       
+*** DONE 8.20 Operator Precedence - 133 - =RE-READ=
+    CLOSED: [2021-02-15 Mon 01:21]
+    Table 5 -- Operator precedence
+    
+*** DONE 8.21 The Process Dictionary - 134
+    CLOSED: [2021-02-15 Mon 02:24]
+    - Process dictionary :: _EACH_ /process/ own _private data store_.
+
+    - The /process dictionary/ is an associative array (in other languages this
+      might be called a /map/, /hashmap/, or /hash table/) composed of a collection
+      of keys and values. Each key has only one value (=from Jian= Unique keys).
+
+    - The dictionary can be manipulated using the following /BIFs/:
+      * ~put(Key, Value) -> OldValue~
+      * ~get(Key) -> Value~
+      * ~get() -> [{Key, Value}]~
+      * ~get_keys(Value) -> [Key]~
+      * ~erase(Key) -> Value~
+      * ~erase() -> [{Key, Value}]~
+
+    - *CAUTION*
+      If you use /process dictionary/, your code will *NO LONGER be /side effect/
+      free,* and all the benefits of using /nondestructive variables/ (=TODO=
+      =???=) that we discussed in _Erlang Variables Do Not Vary, on page 29_, do
+      not apply.
+      * For this reason, *you should use the /process dictionary/ SPARINGLY.*
+       
+    - *Note*
+      One possible reasonable usage of the /process dictionary/:
+      Store "write-once" variables.
+      * If a key acquires a value exactly once and does not change the value,
+        then storing it in the /process dictionary/ is sometimes acceptable.
+      
+*** DONE 8.22 References - 135
+    CLOSED: [2021-02-15 Mon 02:45]
+    - References :: globally unique Erlang terms.
+
+    - They are created with the /BIF/ ~erlang:make_ref()~.
+
+    - /References/ are useful for creating *unique tags*
+      that can be _included in data_ and then _at a LATER stage *compared for
+      equality*._
+      * For example,
+        a bug-tracking system might add a /reference/ to each new bug report in
+        order to give it a _unique identity_.
+    
 *** DONE 8.23 Short-Circuit Boolean Expressions - 135
     CLOSED: [2021-02-08 Mon 02:01]
     ~andalso~ and ~orelse~
     
-*** 8.24 Term Comparisons - 136
-*** 8.25 Tuple Modules - 137
-*** 8.26 Underscore Variables - 137
-*** Exercises - 138
-- 
+*** DONE 8.24 Term Comparisons - 136
+    CLOSED: [2021-02-15 Mon 02:05]
+    - There are eight possible /term comparison operations/,
+      shown _in *Table 6. Term comparisons* on page 137._
+
+    - For the purposes of comparison, *a /total ordering/ is defined over _ALL_
+      /terms/.* This is defined so that the following is true:
+      #+begin_src text
+        number < atom < reference < fun < port < pid < tuple (and record) < map < list < binary
+      #+end_src
+      =IMPORTANT=
+      
+    - All the /term comparison/ operators, with the *EXCEPTION ~=:=~ and ~=/=~,*
+      behave in the following way _if their /arguments/ are numbers_:
+      =from Jian= This is like the /weak conformance/ (here only mention in the
+                  context of /term comparison/).
+      * If one argument is a /integer/ and the other is a /float/,
+        then the /integer/ is converted to a /float/ *before* the comparison is
+        performed.
+        
+      * If both sides are the same type, both /integers/ or both /floats/,
+        keep them as they are.
+      
+    - NOTE:
+      =from Jian= should be *CAUTION*
+      In a lot of library and published code, you'll see ~==~ used when the
+      operator *should have been ~=:=~.*
+        Fortunately, this kind of error does NOT often result in an incorrect
+      program, since if the arguments to ~==~ do NOT contain any /floats/, then
+      the behaviors of the two operators are the same.
+
+    - You should also be aware that /function clause matching/ ALWAYS implies
+      *exact* /pattern matching/, so if you define a fun ~F = fun(12) -> ... end~,
+      then trying to evaluate ~F(12.0)~ will *FAIL*.
+        
+    - *Table 6 -- Term comparison*
+      | Operator | Meaning                          |
+      |----------+----------------------------------|
+      | X > Y    | X is greater than Y.             |
+      | X < Y    | X is less than Y.                |
+      | X =< Y   | X is equal to or less than Y.    |
+      | X >= Y   | X is greater than or equal to Y. |
+      | X == Y   | X is equal to Y.                 |
+      | X /= Y   | X is not equal to Y.             |
+      | X \equal{}:\equal{} Y  | X is identical to Y.             |
+      | X \equal{}/\equal{} Y  | X is not identical to Y.         |
+      
+*** DONE 8.25 Tuple Modules - 137
+    CLOSED: [2021-02-15 Mon 02:51]
+    - In syntax ~M:f(Arg1, Arg2, ..., ArgN)~, ~M~ can be
+      * a /module name/;
+      * a /tuple/ of the form ~{Mod1, X1, X2, ..., Xn}~, in which case the function
+        ~Mod1:f(Arg1, Arg2, ..., ArgN, M)~ is called.
+
+    - =NEXT=
+      This mechanism can be used to
+      * create *"stageful modules*,
+        which is discussed in _Section 24.3, Stateful Modules, on page 418._
+
+      * create *"adapter patterns*,
+        discussed in _Section 24.4, Adapter Patterns, on page 419._
+      
+*** DONE 8.26 Underscore Variables - 137
+    CLOSED: [2021-02-15 Mon 03:03]
+    - /Underscore (prefixed) Variables/ are normal variables,
+      which behave different from ~_~.
+      * *Don't* use /underscore variables/ in one pattern repeatedly for DIFFERENT
+        values.
+        
+    - There are TWO main uses of /underscore variables/.
+      * To name a variable that we don't intend to use, but we want to document
+        some info in its name.
+          That is, writing ~open(File, _Mode)~ makes the program more readable
+        than writing ~open(File, _)~.
+      
+      * For _debugging purposes._
+        + For example, suppose we write this:
+          #+begin_src erlang
+            some_func(X) ->
+                {P, Q} = some_other_func(X),
+                io:format("Q = ~p~n", [Q]),
+                P.
+          #+end_src
+          
+          - Now comment out the following ~format~ statement:
+            #+begin_src erlang
+              some_func(X) ->
+                  {P, Q} = some_other_func(X),
+                  %% io:format("Q = ~p~n", [Q]),
+                  P.
+            #+end_src
+            Compile this we can see a warning that ~Q~ is NOT used.
+            We can rename ~Q~ as ~_Q~ to avoid this warning.
+        
+*** TODO Exercises - 138
+
 ** TODO 9. Types - 141
 *** 9.1 Specifying Data and Function Types - 141
 *** 9.2 Erlang Type Notation - 143
