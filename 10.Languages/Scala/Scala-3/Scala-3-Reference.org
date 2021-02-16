@@ -1,5 +1,5 @@
 #+TITLE: Scala 3 Reference
-#+VERSION: 3.0.0-M4-bin-20210212-0273336-NIGHTLY
+#+VERSION: 3.0.0-RC1
 #+AUTHORS: Dotty Contributors
 #+STARTUP: overview
 #+STARTUP: entitiespretty
@@ -1191,7 +1191,7 @@
 
            def isDefined: Boolean = this match
               case None => false
-              case _    => true  // TODO: FIXME - IMPROVE ME
+              case _    => true
 
         object Option:
           def apply[T >: Null](x: T): Option[T] =
@@ -1966,7 +1966,6 @@
              given fooTagged[A](using Tagged[A]): Foo[A] = Foo(true)
              given fooNotTagged[A](using NotGiven[Tagged[A]]): Foo[A] = Foo(false)
 
-         // TODO: FIXME - signature
          @main def test(): Unit =
            given Tagged[Int] with {}
            assert(summon[Foo[Int]].value)      // fooTagged is found
@@ -2169,7 +2168,7 @@
      #+end_src
 
 *** DONE Context Bounds
-    CLOSED: [2020-07-17 Fri 04:21]
+    CLOSED: [2021-02-15 Mon 23:16]
     A /context bound/ is a *SHORTHAND* for expressing the common pattern (a.k.a
     type class pattern) of an /context parameter/ that depends on *One* /type
     parameter/.
@@ -2191,24 +2190,25 @@
        _If both are present, /subtype bounds/ *come first*,_ e.g.
        ~def g[T <: B : C](x: T):R = ...~
 
-**** Migration - =RE-READ=
+**** DONE Migration
+     CLOSED: [2021-02-15 Mon 23:16]
      - To ease migration, /context bounds/ in Dotty
        + in Scala 3.0
          /context bounds/ in Dotty _map to_ /OLD-STYLE implicit parameters/ for
          which /arguments/ can be passed
-         * _EITHER_ with a /using clause/
+         * _EITHER_ with a ~(using ...)~
          * _OR_ with a normal application as in Scala 2.
 
        + From Scala 3.1 on,
          /context bounds/ in Dotty will _map to_ /context parameters/ instead,
          as is described above.
 
-     - If _the source version is 3.1_ and _the =-migration= command-line option is
-       set_,
-       ANY pairing of an /evidence context parameter/ stemming from a /context
-       bound/ with a /normal argument/ (=from Jian= not marked with ~using~) will
-       give a *MIGRATION WARNING* which indicates that a /using clause/ is needed
-       instead.
+     - If the _source version_ is ~future-migration~,
+       any pairing of
+         an /evidence context parameter/ stemming from
+         a /context bound/ with a normal argument
+       will give a _migration warning_. The warning indicates that a ~(using ...)~
+       clause is needed instead.
        + The _REWRITE_ can be done AUTOMATICALLY under =-rewrite=.
 
 **** Syntax
@@ -2291,7 +2291,7 @@
          need ~given~.
 
      - Examples:
-       * ~import A.{given TC}~
+       * ~import A.given TC~
 
        * ~import A.{given T1, given T2, ..., given Tn}~
 
@@ -2424,10 +2424,11 @@
              ~xs.\plus{}:(x)~.
 
 **** DONE Generic Extensions
-     CLOSED: [2020-07-19 Sun 01:17]
-     This section will discuss /extension method/ of /generic type/.
+     CLOSED: [2021-02-16 Tue 00:23]
+     It is also possible to extend /generic types/ by adding /type parameters/
+     to an /extension/.
 
-     - Examples:
+     - For instance:
        #+begin_src scala
          extension [T](xs: List[T])
            def second = xs.tail.head
@@ -2436,32 +2437,36 @@
            def + (y: T): T = summon[Numeric[T]].plus(x, y)
        #+end_src
 
-     - If an /extension method/ has /type parameters/,
-       they come _immediately after_ ~extension~ and
-       are _followed by_ the /extended parameter/.
+     - /Type parameters on extensions/ can also be _combined with_ /type parameters
+       on the methods/ themselves: 
+       #+begin_src scala
+         extension [T](xs: List[T])
+            def sumBy[U: Numeric](f: T => U): U = ...
+       #+end_src
+       * /Type arguments/ matching /method type parameters/ are passed as usual:
+         #+begin_src scala
+           List("a", "bb", "ccc").sumBy[Int](_.length)
+         #+end_src
+         
+       * By contrast,
+         /type arguments/ matching /type parameters following extension/ can be
+         passed *only if the /method/ is referenced as a _REGULAR method_:*
+         #+begin_src scala
+           List[String]("a", "bb", "ccc").sumBy(_.length)
+         #+end_src
 
-     - When calling a /generic extension method/, any EXPLICITLY given /type
-       arguments/ should follow the /method/ NAME (of course, usually they are
-       left out since they can be inferred).
-       + So the ~second~ /method/ could be instantiated as follows.
-         ~List(1, 2, 3).second[Int]~
+       * or, passing, BOTH /type arguments/ 
+         #+begin_src scala
+           List[String]("a", "bb", "ccc").sumBy[Int](_.length)
+         #+end_src
 
      - /Extensions/ can also take /using clauses/.
-       For instance, the ~+~ extension above could equivalently be written with a
-       /using clause/:
-       #+begin_src scala
-         extension [T](x: T)(using n: Numeric[T])
-           def + (y: T): T = n.plus(x, y)
-       #+end_src
-
-     - Note:
-       /Type parameters/ have to be given *immediately after* the ~extension~
-       keyword; they *CANNOT* be given AFTER the ~def~.
-       + _This RESTRICTION might be lifted_
-         *in the future ONCE* we support /multiple type parameter clauses/ in a
-         /method/.
-           By contrast, there can be /using clauses/ _in front_ as well as _after_
-         the ~def~.
+       * For instance,
+         the ~+~ extension above could equivalently be written with a /using clause/:
+         #+begin_src scala
+           extension [T](x: T)(using n: Numeric[T])
+              def + (y: T): T = n.plus(x, y)
+         #+end_src
 
 **** DONE Collective Extensions
      CLOSED: [2020-07-19 Sun 01:33]
@@ -2589,8 +2594,7 @@
            object List:
               ...
               extension [T](xs: List[List[T]])
-                 def flatten: List[T] = xs.foldLeft(Nil: List[T])(_ ++ _)
-                 // TODO: FIXME IMRPOVEME `Nil: List[T]` --> `List.empty[T]`
+                 def flatten: List[T] = xs.foldLeft(List.empty[T])(_ ++ _)
 
               given [T: Ordering]: Ordering[List[T]] with
                  extension (xs: List[T])
@@ -2993,7 +2997,7 @@
     - Common examples of /type class/ are ~Eq~, ~Ordering~, or ~Show~.
 
     - For example, given the following ~Tree~ algebraic data type (ADT) with a
-      ~dervies~ clause, =FIXME= =???= =: -> with= =???=
+      ~dervies~ clause,
       #+begin_src scala
         enum Tree[T] derives Eq, Ordering, Show:
           case Branch(left: Tree[T], right: Tree[T])
@@ -3329,7 +3333,6 @@
             case Sm(t: T)
             case Nn
 
-          // TODO: FIXME
           @main def test(): Unit =
             import Opt.*
             val eqoi = summon[Eq[Opt[Int]]]
@@ -3366,7 +3369,7 @@
           given eqSum[A](using inst: => K0.CoproductInstances[Eq, A]): Eq[A] with
             def eqv(x: A, y: A): Boolean = inst.fold2(x, y)(false)(
               [t] => (eqt: Eq[t], t0: t, t1: t) => eqt.eqv(t0, t1)
-            )  // TODO: FIXME
+            )
 
           given eqProduct[A](using inst: K0.ProductInstances[Eq, A]): Eq[A] with
             def eqv(x: A, y: A): Boolean = inst.foldLeft2(x, y)(true: Boolean)(
@@ -4483,7 +4486,8 @@
        * /TASTy inspection/ allows to *load* these files and *analyze* their
          content's tree structure.
 
-*** Inline - =New Subsection=
+*** DONE Inline
+    CLOSED: [2021-02-15 Mon 18:00]
 **** DONE Inline Definitions
      CLOSED: [2020-11-24 Tue 01:27]
      - ~inline~ :: a new /soft modifier/ that *guarantees* that a definition will
@@ -4677,7 +4681,6 @@
           val a: A = B
           a.f  // error: cannot inline `f` in `A`.
         #+end_src
-        =FIXME= fix the last comment line.
 
 **** DONE Relationship to ~@inline~
      CLOSED: [2020-11-24 Tue 02:07]
@@ -4799,12 +4802,41 @@
          val one: 1 = zero + 1
        #+end_src
 
-**** TODO Transparent vs. non-transparent inline
-**** DONE Inline Conditionals - =new edited=
-     CLOSED: [2020-11-24 Tue 02:17]
-     This feature has a bug that is reported by me =Jian=
-     https://github.com/lampepfl/dotty/issues/10521
+**** DONE Transparent vs. non-transparent inline
+     CLOSED: [2021-02-15 Mon 17:55]
+    - As we already discussed, /transparent inline methods/ may *influence* /type
+      checking/ at call site. Technically this implies that
+      * /transparent inline methods/ must be *expanded DURING* /type checking/ of
+        the program.
+
+      * Other /inline methods/ are inlined later *after* the program is *fully typed*.
+    
+    - For example,
+      the following two functions
+      will be _typed the SAME way_
+      _BUT_ will *be inlined at DIFFERENT times*.
+      #+begin_src scala
+        inline def f1: T = ...
+        transparent inline def f2: T = (...): T
+      #+end_src
+    
+    - A noteworthy difference is the behavior of ~transparent inline given~.
+      - If there is an error reported when inlining that definition,
+        1. it will be considered as an *implicit search mismatch* and
+        2. the search will *continue*.
+
+      - A ~transparent inline given~ can add a type ascription in its RHS (as in
+        ~f2~ from the previous example) to
+        * *AVOID* the _precise type_
+        * BUT *KEEP* the _search behavior_
+
+    - On the other hand, an ~inline given~ is
+      1. taken as an implicit and
+      2. then inlined after typing.
+      Any error will be emitted as usual.
      
+**** DONE Inline Conditionals
+     CLOSED: [2021-02-15 Mon 17:59]
      #+begin_src scala
        inline def update(delta: Int) =
          inline if delta >= 0
@@ -4834,6 +4866,10 @@
             |   is not a constant value
             | This location is in code that was inlined at ...
        #+end_src
+
+     - In a ~transparent inline~,
+       an ~inline if~ will *force* the inlining of ANY inline definition in its
+       condition *during* /type checking/.
        
 **** DONE Inline Matches
      CLOSED: [2020-11-24 Tue 02:23]
@@ -6404,7 +6440,8 @@
             val sourceCode = pos.sourceCode
             ...
         #+end_src
-        =FIXME= https://scalacenter.github.io/scala-3-migration-guide/docs/compatibility.html
+        =FIXME - not this doc=
+        https://scalacenter.github.io/scala-3-migration-guide/docs/compatibility.html
       
 ***** TODO Tree Utilities
       ~quotes.reflect~ contains _THREE_ facilities for /tree traversal and
@@ -6444,7 +6481,7 @@
          def lets(terms: List[Term])(body: List[Term] => Term): Term = ...
        #+end_src
 
-*** DONE TASTy Inspection =FIXME=
+*** DONE TASTy Inspection
     CLOSED: [2020-12-28 Mon 01:37]
     #+begin_src scala
       libraryDependencies += "org.scala-lang" %% "scala3-tasty-inspector" % scalaVersion.value
@@ -6456,26 +6493,28 @@
     directly with the TASTy file we provide the ~TastyInspector~ which loads the
     contents and exposes it through the TASTy reflect API.
     
-**** Inspecting TASTy files =FIXME=
-     To inspect the /trees/ of a _TASTy file_ a ~Consumer~ =FIXME=
+**** Inspecting TASTy files
+     To inspect the /trees/ of a _TASTy file_ a /consumer/
      can be defined in the following way:
      #+begin_src scala
        import scala.quoted.*
        import scala.tasty.inspector.*
 
-       class MyInspector extends TastyInspector:
-         protected def processCompilationUnit(using Quotes)
-                                             (tree: quotes.reflect.Tree): Unit =
-           import quotes.reflect.*
-           // Do something with the tree
+       class MyInspector extends Inspector:
+          def inspect(using Quotes)(tastys: List[Tasty[quotes.type]]): Unit =
+             import quotes.reflect.*
+             for tasty <- tastys do
+                val tree = tasty.ast
+                // Do something with the tree
      #+end_src
      
-     - Then the ~Consumer~ =FIXME= can be instantiated with the following code to
-       get the /tree/ of the ~foo/Bar.tasty~ file.
+     - Then the consumer can be instantiated with the following code to get the
+       /tree/ of the ~foo/Bar.tasty~ file.
        #+begin_src scala
          object Test:
-           def main(args: Array[String]): Unit =
-             new MyInspector().inspectTastyFiles("foo/Bar.tasty")
+            def main(args: Array[String]): Unit =
+               val tastyFiles = List("foo/Bar.tasty")
+               TastyInspector.inspectTastyFiles(tastyFiles)(new MyInspector)
        #+end_src
      
      - Note that if we need to run the ~main~ (in the example below defined in an
@@ -6495,7 +6534,7 @@
 
 ** TODO Other New Features
 *** DONE Trait Parameters
-    CLOSED: [2020-07-14 Tue 12:59]
+    CLOSED: [2021-02-15 Mon 23:07]
     Dotty allows /traits/ to have /parameters/, just like /classes/ have /parameters/.
 
     - Example:
@@ -6520,12 +6559,15 @@
       #+end_src
       Should this print ~"Bob"~ or ~"Bill"~? In fact this program is *ILLEGAL*,
       because it _VIOLATES the SECOND rule of the following for /trait parameters/:_
-      1. If a /class/ ~C~ _extends_ a /parameterized trait/ ~T~, and
-         IF its /superclass/ does NOT:
-         THEN ~C~ must pass arguments to ~T~.
-         ELSE ~C~ must not pass arguments to ~T~
+      1. IF a /class/ ~C~ _extends_ a /parameterized trait/ ~T~, and
+         IF its /superclass/ does NOT,
+         ~C~ *must* pass arguments to ~T~.
 
-      2. /Traits/ *must NEVER* PASS arguments to /parent traits/.
+      2. IF a /class/ ~C~ _extends_ a /parameterized trait/ ~T~, and
+         IF its /superclass/ does as well,
+         ~C~ *must not* pass arguments to ~T~.
+
+      3. /Traits/ *must NEVER* PASS arguments to /parent traits/.
 
     - Here's /trait/ extending the /parameterized trait/ ~Greeting~.
       #+begin_src scala
@@ -6720,7 +6762,7 @@
               tens of generated methods. However, people keep doing this.
 
 *** DONE Export Clauses -- =TODO= _Elaboration of Export Clauses_
-    CLOSED: [2020-05-18 Mon 02:46]
+    CLOSED: [2021-02-15 Mon 18:12]
     *An ~export~ clause defines aliases for selected members of an object.*
     - NOTE:
       Unless otherwise stated, _the term "class"_ in this discussion also
@@ -6905,10 +6947,32 @@
             ~export~ clauses! However, this is not a real limitation -- a good design
             should avoid creating a long inheritance chain. Mostly, none level is
             enough.
-            - However, if in future this limitation can be removed or not that strict,
+            * However, if in future this limitation can be removed or not that strict,
               it is of course better for using. The only thing I doubt is that if this
               will be limited in theory and remove the limitation can create an unsound
               system.
+
+    - *Restrictions*:
+      1. /Export clauses/ can appear
+         * in /classes/
+           OR
+         * at the top-level.
+         An /export clause/ *cannot* appear as a statement in a block.
+
+      2. If an /export clause/ contains a /wildcard/ or /given selector/,
+         it is *forbidden* for its qualifier path to refer to a /package/.
+         =TODO= =from Jian= _I don't quite understand this. Need an example._
+           This is because it is not yet known how to safely track wildcard
+         dependencies to a package for the purposes of incremental compilation.
+
+      3. Simple renaming exports like =TO BE REMOVED Restriction=
+         #+begin_src scala
+           export status as stat
+         #+end_src
+         are not supported yet.
+           They would run afoul of the restriction that the exported ~a~ cannot
+         be already a member of the /object/ containing the ~export~. *This
+         restriction might be lifted in the future.*
 
 **** DONE Motivation
      CLOSED: [2020-05-18 Mon 02:35]
@@ -7124,7 +7188,8 @@
          end User
        #+end_src
        * On the other hand, ~roItem.rights.isOneOf(ReadWrite)~ can't pass the type check.
-
+         
+**** Opaque Type Members on Classes - =NEW ADDED= =TODO=
 **** TODO More details
 ***** Syntax
 ***** Type Checking
@@ -8188,7 +8253,6 @@
      The Scala grammar uses the term /template body/ for the definitions of a
      class, trait, or object that are normally enclosed in braces. The braces
      around a template body can also be omitted by means of the following rule.
-     =FIXME= =period=
        
      - If at the point where a /template body/ can start there is a ~:~ that
        occurs at the end of a line, and that is followed by _at least one_
@@ -9804,7 +9868,64 @@
      - These rules make it possible to cross build between Scala 2 using the
        /kind projector/ plugin and Scala 3.0 - 3.2 using option ~-Ykind-projector~.
 
-*** TODO Imports - =NEW=
+*** DONE Imports
+    CLOSED: [2021-02-15 Mon 18:30]
+    The syntax of /wildcard imports/ and /renaming imports/ has changed.
+    The same change happens to the new added ~export~.
+
+    - =from Jian=
+      There is some restrictions in /renaming exports/, read the "Restrictions"
+      part point 3.
+    
+**** DONE Wildcard Imports
+     CLOSED: [2021-02-15 Mon 18:25]
+     Use ~*~ insteand of ~_~.
+     
+     - Example:
+       #+begin_src scala
+         import scala.annotation.*  // imports everything in the annotation package
+       #+end_src
+       
+     - If you want to import a member named ~*~ specifically,
+       you can use backticks around it.
+       #+begin_src scala
+         object A:
+            def * = ...
+            def min = ...
+
+         object B:
+            import A.`*`  // imports just `*`
+
+         object C:
+            import A.`*`  // imports everything in A
+       #+end_src
+     
+**** DONE Renaming Imports
+     CLOSED: [2021-02-15 Mon 18:27]
+     Use ~as~ instead of ~=>~.
+     
+     - A single renaming import no longer needs to be enclosed in braces.
+
+     - Example:
+       #+begin_src scala
+         import A.{min as minimum, `*` as multiply}
+         import Predef.{augmentString as _, *}
+         import scala.annotation as ann
+         import java as j
+       #+end_src
+     
+**** DONE Migration
+     CLOSED: [2021-02-15 Mon 18:30]
+     - To support cross-building,
+       Scala 3.0 supports the old import syntax that uses ~_~ and ~=>~ as well.
+       
+     - The old syntax will be dropped in a future versions.
+       
+     - Automatic rewritings from old to new syntax are offered under
+       ~-source 3.1-migration -rewrite~.
+       
+**** TODO Syntax
+    
 *** TODO Changes in Type Checking - =No Doc till now=
     - [//]:# todo: fill in
 
@@ -10177,11 +10298,10 @@
 
     - This has several consequences:
       1. ~match~ expressions can be chained:
-         =FIXME=
          #+begin_src scala
            xs match
-             case Nil    => "empty"
-             case h :: t => "nonempty"  // HERE!!! Not in use bindings
+             case Nil => "empty"
+             case _   => "nonempty"
            match
              case "empty"    => 0
              case "nonempty" => 1
@@ -10214,8 +10334,8 @@
       is declared.
       * NEW:
         #+begin_src scala
-          val arr = Array(1, 2, 3)
-          val lst = List(0, arr*)                // vararg splice argument
+          val arr = Array(0, 1, 2, 3)
+          val lst = List(arr*)                   // vararg splice argument
           lst match
             case List(0, 1, xs*) => println(xs)  // binds xs to Seq(2, 3)
             case List(1, _*)     =>              // wildcard pattern
@@ -10224,9 +10344,9 @@
       * OLD:
         this will be phased out.
         #+begin_src scala
-          /*!*/  val lst = List(0, arr: _*)   // syntax error
+          /*!*/  val lst = List(arr: _*)      // syntax error
                  lst match
-                    case List(1, 2, xs @ _*)  // ok, equivalent to `xs*`
+                    case List(0, 1, xs @ _*)  // ok, equivalent to `xs*`
         #+end_src
 
 **** Syntax
@@ -10705,7 +10825,7 @@
     - Code generation example:
       #+begin_src scala
         final class happyBirthday:
-          import scala.util.{CommandLineParser => CLP}
+          import scala.util.CommandLineParser as CLP
           <static> def main(args: Array[String]): Unit =
             try
               happyBirthday(
@@ -11190,7 +11310,6 @@
               false
            }
 
-        // TODO: FIXME
         @main def test(): Unit =
           val xs = List(1, 2, 3, 4, 5)
           assert(xs.has(2) == xs.contians)
@@ -11234,7 +11353,7 @@ modifiers/ are *deprecated*
       =from Jian=
       Learn more about this. There are more discussion about this topic.
 
-*** DONE Dropped: wildcard initializer
+*** DONE Dropped: Wildcard Initializer
     CLOSED: [2021-02-06 Sat 04:39]
     The syntax
     #+begin_src scala

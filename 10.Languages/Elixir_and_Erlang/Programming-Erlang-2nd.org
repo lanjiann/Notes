@@ -1808,24 +1808,155 @@
 *** TODO Exercises - 138
 
 ** TODO 9. Types - 141
-*** 9.1 Specifying Data and Function Types - 141
-*** 9.2 Erlang Type Notation - 143
-**** The Grammar of Types - 143
-**** Predefined Types - 144
-**** Specifying the Input and Output Types of a Function - 145
-**** Exported and Local Types - 146
-**** Opaque Types - 147
+   - Erlang has /type notation/ that we can use to
+     1. define new _data types_
+     2. add /type annotations/ 
+   
+   - In this chapter we'll
+     1. introduce the /type notation/
+     2. talk about _two programs (*dialyzer* and *typer*)_ that can be used to
+        find errors in our code.
+     
+   - *dialyzer* and *typer* are included in the standard Erlang distribution.
+     * *dialyzer* stands for _"DIscrepancy AnaLYZer for ERlang programs"_, and it
+       does precisely that which is implied by its name:
+       *it finds discrepancies in Erlang code.*
+
+     * *typer* provides *information about the /types/ used in your programs.*
+       
+   - Both the *dialyzer* and *typer* work _GOOD_ well with _NO_ /type annotations/
+     at all,
+     BUT if you add /type annotations/ to your program, the quality of the
+     analysis performed by these tools will be *IMPROVED*.
+
+   - This is a fairly complex chapter, so we'll organize materials in this chapter
+     as:
+     1. a simple example /types/,
+
+     2. go a bit deeper and look at the _type grammar_,
+
+     3. a section with the *dialyzer*,
+        * workflow
+        * the kind of errors that the *dialyzer* _CAN'T_ find.
+     
+     4. a little theory of how the *dialyzer* works,
+        which will hep us understand the errors that the *dialyzer* finds.
+
+*** DONE 9.1 Specifying Data and Function Types - 141
+    CLOSED: [2021-02-16 Tue 00:45]
+    Illustrate a walking tour to the /types/ in Erlang with the code below:
+    #+name: walks.erl
+    #+begin_src erlang
+      -module(walks).
+      -export([plan_route/2]).
+
+      -spec plan_route(point(), point()) -> route().
+      -type direction() :: north | south | east | west.
+      -type point()     :: {integer(), integer()}.
+      -type route()     :: [{go, direction(), integer()}].
+      %% ...
+    #+end_src
+    - ~-spec~ creates /type specifications/.
+
+    - ~-type~ creates /type declarations/
+
+    - To add expressive power to the /types/,
+      we can annotate them with _descriptive variables_.
+      * For example, we could change the specification of ~plan_route~ to the
+        following:
+        #+begin_src erlang
+          -spec plan_route(From:: point(), To:: point()) -> route().
+        #+end_src
+        The names ~From~ and ~To~ in the /type annotation/
+        + give the user some idea as to the role these arguments play in the
+          function.
+
+        + are used to link the names in the documentation to the variables in the
+          /type annotations/.
+       
+*** TODO 9.2 Erlang Type Notation - 143
+**** DONE The Grammar of Types - 143
+     CLOSED: [2021-02-16 Tue 01:19]
+     - /Types/ are defined informally using the following syntax:
+       #+begin_src text
+         T1 :: A | B | C ... 
+       #+end_src
+       * Using this notation, we can define a _SUBSET_ of /Erlang types/ as follows:
+         =TODO=
+         #+begin_src text
+         #+end_src
+         =TODO= explanation
+
+     - New types can be defined with the following syntax:
+       #+begin_src erlang
+         -type NewTypeName(TVar1, TVar2, ..., TVarN) :: Type.
+       #+end_src
+       * ~TVar1~ to ~TVarN~ are _optional type variables_.
+       * ~Type~ is a type expression.
+
+     - Some examples:
+       #+begin_src erlang
+         -type onOff()        :: on | off.
+         -type person()       :: {person, name(), age()}.
+         -type people()       :: [person()].
+         -type name()         :: {firstname, string()}.
+         -type age()          :: integer().
+         -type dict(Key, Val) :: [{Key, Val}].
+       #+end_src
+       
+**** DONE Predefined Types - 144
+     CLOSED: [2021-02-16 Tue 01:32]
+     In addition to the _type grammar_, the following /type aliases/ are
+     *predefined*:
+     #+begin_src erlang
+       -type term()    :: any().
+
+       -type boolean() :: true | false.
+       -type byte()    :: 0..255.
+       -type char()    :: 0..16#10ffff.
+       -type number()  :: integer() | float().
+
+       -type list()                 :: [any()].
+       -type maybe_improper_list()  :: maybe_improper_list(any(), any()).
+       -type maybe_improper_list(T) :: maybe_improper_list(T, any()).
+
+       -type string()          :: [char()].
+       -type nonempty_string() :: [char(), ...].
+       -type iolist()          :: maybe_improper_list(byte() | binary() | iolist() | binary() | []).
+
+       -type module()    :: atom().
+       -type mfa()       :: {atom(), atom(), atom()}.
+       -type node()      :: atom().
+       -type timeout()   :: infinity | non_neg_integer().
+       -type no_return() :: none().
+     #+end_src
+     - ~maybe_improper_list~ is used to specify the /types/ of /lists/ whose
+       _ultimate tail_ is *non-nil*.
+         Such /lists/ are _rarely used_, but it is possible to specify their
+       /types/!
+       =from Jian= Need examples!!!
+     
+     - There are also a small number of /predefined types/.
+       * ~non_neg_integer()~
+       * ~pos_integer()~
+       * ~neg_integer()~
+
+     - ~[X, ...]~ means a *non-empty list* of type ~X~.
+         
+**** TODO Specifying the Input and Output Types of a Function - 145 - =START= =!!!=
+**** TODO Exported and Local Types - 146
+**** TODO Opaque Types - 147
     
-*** 9.3 A Session with the Dialyzer - 148
+*** TODO 9.3 A Session with the Dialyzer - 148
 **** Incorrect Use of a BIF Return Value - 149
 **** Incorrect Arguments to a BIF - 150
 **** Incorrect Program Logic - 150
 **** Working with the Dialyzer - 151
 **** Things That Confuse the Dialyzer - 151
     
-*** 9.4 Type Inference and Success Typing - 152
-*** 9.5 Limitations of the Type System - 155
-*** Exercises - 157
+*** TODO 9.4 Type Inference and Success Typing - 152
+*** TODO 9.5 Limitations of the Type System - 155
+*** TODO Exercises - 157
 - 
 ** TODO 10. Compiling and Running Your Program - 159
 *** 10.1 Modifying the Development Environment - 159
