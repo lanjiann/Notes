@@ -2450,15 +2450,30 @@
          
        * By contrast,
          /type arguments/ matching /type parameters following extension/ can be
-         passed *only if the /method/ is referenced as a _REGULAR method_:*
+         passed *only if the /method/ is referenced as a _non-extension method_:*
          #+begin_src scala
-           List[String]("a", "bb", "ccc").sumBy(_.length)
+           sumBy[String](List("a", "bb", "ccc"))(_.length)
          #+end_src
 
-       * or, passing, BOTH /type arguments/ 
+         or, passing, BOTH /type arguments/ 
+         
          #+begin_src scala
-           List[String]("a", "bb", "ccc").sumBy[Int](_.length)
+           sumBy[String](List("a", "bb", "ccc"))[Int](_.length)
          #+end_src
+
+         + =FIXME=
+           The *only if* looks wrong. Both of the 4 forms work:
+           #+begin_src scala
+             // Non-extension method calls
+             sumBy[String](List("a", "bb", "ccc"))(_.length)
+             sumBy[String](List("a", "bb", "ccc"))[Int](_.length)
+
+             // Extension method calls
+             List[String]("a", "bb", "ccc").sumBy(_.length)
+             List[String]("a", "bb", "ccc").sumBy[Int](_.length)
+           #+end_src
+           * Personally,
+             I think the /type arguments/ usage in the _non-extension method calls_ looks weird.
 
      - /Extensions/ can also take /using clauses/.
        * For instance,
