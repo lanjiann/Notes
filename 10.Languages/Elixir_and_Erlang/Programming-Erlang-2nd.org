@@ -1874,7 +1874,8 @@
         + are used to link the names in the documentation to the variables in the
           /type annotations/.
        
-*** TODO 9.2 Erlang Type Notation - 143
+*** DONE 9.2 Erlang Type Notation - 143
+    CLOSED: [2021-02-19 Fri 01:05]
 **** DONE The Grammar of Types - 143
      CLOSED: [2021-02-16 Tue 01:19]
      - /Types/ are defined informally using the following syntax:
@@ -1943,9 +1944,100 @@
 
      - ~[X, ...]~ means a *non-empty list* of type ~X~.
          
-**** TODO Specifying the Input and Output Types of a Function - 145 - =START= =!!!=
-**** TODO Exported and Local Types - 146
-**** TODO Opaque Types - 147
+**** DONE Specifying the Input and Output Types of a Function - 145
+     CLOSED: [2021-02-19 Fri 00:48]
+     Syntax
+     #+begin_src erlang
+       -spec functionName(T1, T2, ..., Tn) -> Tret when
+             T1 :: Typei,
+             Tj :: Typej,
+             ...
+     #+end_src
+     Here, the ~when~ part is _optional_.
+     
+     - Example:
+       #+begin_src erlang
+         -spec file:open(FileName, Modes) -> {ok, Handle} | {error, Why} when
+               FileName :: string(),
+               Modes    :: [Mode],
+               Mode     :: read | write | read_and_write,
+               Handle   :: file_handle(),
+               Why      :: error_term().
+       #+end_src
+       * We can also write a equivalent form that doesn't have _descriptive
+         variables_, and put the types info in the ~when~ part in the parameters
+         list. However this is not very readable:
+         #+begin_src erlang
+           -spec file:open(string(), [read | write | read_and_write]) -> {ok, file_handle()} | {error, error_term()}
+         #+end_src
+
+     - /Type variables/ can be used in argumetns, as in the following examples:
+       #+begin_src erlang
+         -spec lists:map(fun((A) -> B), [A]) -> [B].
+         -spec lists:filter(fun((X) -> bool()), [X]) -> [X].
+       #+end_src
+       
+**** DONE Exported and Local Types - 146
+     CLOSED: [2021-02-19 Fri 00:55]
+     Types by default are private to its definition module.
+     They can be exported with ~export_type~.
+     
+     - Example:
+       Module ~a~ defines some types, and module ~b~ need to use them.
+       #+begin_src erlang
+         -module(a).
+         -type rich_text() :: [{font(), char()}].
+         -type font()      :: integer().
+         -export_type([rich_text/0, font/0]).
+
+         %% ...
+       #+end_src
+       
+       and
+       
+       #+begin_src erlang
+         -module(b).
+         %% ...
+         -spec rich_text_length(a:rich_text()) -> integer().
+       #+end_src
+     
+**** DONE Opaque Types - 147
+     CLOSED: [2021-02-19 Fri 01:05]
+     Sometimes we want to hide a type internal details.
+
+     - =from Jian=
+       Of course, this can be hidden from the "outside" only.
+         There is no reason want possibility to do this for the "insdie" -- the
+       module where it is defined.
+     
+     - Example:
+       #+begin_src erlang
+         -module(a).
+         -opaque rich_text() :: [{font(), char()}].
+         -export_type([rich_text/0]).
+
+         -export([make_text/1, bounding_box/1]).
+         -spec make_text(string()) -> rich_text().
+         -spec bounding_box(rich_text()) -> {Height::integer(), Width::integer()}.
+
+         %% ...
+       #+end_src
+       
+       Use it in module ~b~:
+       #+begin_src erlang
+         -module(b).
+         %% ...
+
+         do_this() ->
+             X = a:make_text("hello world"),
+             {W, H} = a:bounding_box(X)
+       #+end_src
+       Here in ~b~ we use ~a:bounding_box~ to hand ~X~, and no need to know internal
+       details of ~X~ in module ~b~.
+
+     - If other modules try to use values of type ~rich_text()~ as they know the
+       internal details of them, an /abstraction violation/ will happen, and
+       _dialyzer_ can detect it.
     
 *** TODO 9.3 A Session with the Dialyzer - 148
 **** Incorrect Use of a BIF Return Value - 149
@@ -1959,30 +2051,271 @@
 *** TODO Exercises - 157
 - 
 ** TODO 10. Compiling and Running Your Program - 159
-*** 10.1 Modifying the Development Environment - 159
-**** Setting the Search Paths for Loading Code - 159
-**** Executing a Set of Commands When the System Is Started - 161
-    
-*** 10.2 Different Ways to Run Your Program - 161
-**** Compile and Run in the Eralng Shell - 162
-**** Compile and Run from the Command Prompt - 162
-**** Run As an Escript - 164
-**** Programs with Command-Line Arguments - 165
+   In the previous chapters, we use Erlang shell. This is fine for small examples.
+   For more complext and full featured project, we can _AUTOMATE_ the process with
+   *makefiles*.
+   
+   - We also talk about troubleshootings:
+     * makefiles may fail;
+     * wrong enviroment variables;
+     * incorrect search paths.
      
-*** 10.3 Automating Compilation with Makefiles - 166
-**** A Makefile Template - 166
-***** Specializing the Makefile Template - 168
+*** DONE 10.1 Modifying the Development Environment - 159
+    CLOSED: [2021-02-19 Fri 02:34]
+    - If you put *all* /modules/ and /files/ in the *SAME* directory and start
+      Erlang from *this* directory, then the /Erlang loader/ will have no trouble
+      finding your code.
+      
+**** DONE Setting the Search Paths for Loading Code - 159
+     CLOSED: [2021-02-19 Fri 02:18]
+     - The _Erlang runtime system_ makes use of a _code autoloading mechanism_.
+       * For this to work correctly, you must SET a number of *search paths* in
+         order to find the correct version of your code.
+     
+     - The _code-loading mechanism_ is actually programmed *in* Erlang -- we talked
+       about this earlier in *Section 8.10, Dynamic Code Loading, on page 122.*
+       _Code loading is performed "on demand."_
+
+       * When the system tries to call a function in a /module/ that _has NOT been
+         loaded_,
+         1. an exception occurs, and
+         2. the system tries to find an _object code file_ for the MISSING module.
+            1) If the MISSING module is called ~myMissingModule~, then the code loader
+               will search for a file called =myMissingModule.beam= in all the
+               directories that are in the /current load path/.
+               
+            2) The search *stops* at the _FIRST_ matching file, and the _object code_
+               in this file is loaded into the system.
+
+     - Use ~code:get_path()~ in Erlang shell to return the _current load paths_.
+
+     - The _TWO most common functions_ that we use to manipulate the /load path/
+       are as follows:
+       * ~-spec code:add_patha(Dir) => true | {error, bad_directory}~
+         Add a new directory, ~Dir~, to the *start* of the /load path/.
+
+       * ~-spec code:add_pathz(Dir) => true | {error, bad_directory}~
+         Add a new directory, ~Dir~, to the *end* of the /load path/.
+     
+     - Usually it doesn't matter which you use. =from Jian= WHY?
+       * The only thing to watch out for is if using ~add_patha/1~ and ~add_pathz/1~
+         produces different results.
+         + How to debug:
+           If you suspect an _INCORRECT_ /module/ was loaded, you can call
+           ~code:all_loaded()~ (which returns a list of ALL loaded modules) or
+           ~code:clash()~ to help you investigate what went wrong.
+       
+     - Unless you're doing some _STRANGE system programming_,
+       you probably won't ever need other _path manipulation routines_ in the
+       /module/ ~code~.
+
+     - =TODO= =???=
+       The usual convention is to put these commands in a file called =.erlang=
+       in your home directory.
+
+     - Start Erlang shell with a command like:
+       ~$ erl -pa Dir1 -pa Dir2 ... -pz DirK1 -pz DirK2~
+       
+**** DONE Executing a Set of Commands When the System Is Started - 161
+     CLOSED: [2021-02-19 Fri 02:34]
+     Besides load path, you can put _ANY_ Erlang code in this =.erlang= file.
+     When you start Erlang, it FIRST reads and evaluates ALL the commands in
+     this file.
     
-*** 10.4 When Things Go Wrong - 169
-**** Stopping Erlang - 169
-**** Undefined (Missing) Code - 170
-**** The Shell Isn't Responding - 170
-**** My Makefile Doesn't Make - 172
-**** Erlang Has Crashed and You Want to Read the Crash Dump - 172
+     - Suppose your =.erlang= file is as follows:
+       #+Name: .erlang
+       #+begin_src erlang
+         io:format("Hi, I'm in your .erlang file~n").
+         %% ...
+       #+end_src
+       Then when we start the system with ~erl~, we'll see the following output:
+       #+begin_src text
+         ...
+         Hi, I'm in your .erlang file
+         Eshell V5.9  (abort with ^G)
+       #+end_src
+       
+       =IMPORTANT=
+       =IMPORTANT=
+       =IMPORTANT=
+       =IMPORTANT=
+       =IMPORTANT=
+       =IMPORTANT=
+     - If there is a file called =.erlang= in the _current directory_ when Erlang
+       is started, then it will *take precedence over* the =.erlang= in _your home
+       directory_.
+      
+       * This way, you can arrange that Erlang will _behave in DIFFERENT ways
+         depending upon where it is started._ *This can be useful for
+         specialized applications.*
+         =IMPORTANT=
+           In this case, it's probably a good idea to include some print statements
+         in the _startup file_:
+         otherwise, you might forget about the local startup file, which could
+         be very confusing.
+
+     - *Tip*:
+       In some systems, it's not clear where your home directory is, or it might
+       NOT be where you think it is. To find out where Erlang thinks your home
+       directory is, do the following ~init:get_argument(home).~, and you may see
+       a result like: ~{ok, [["/home/joe"]]}~
+       
+*** DONE 10.2 Different Ways to Run Your Program - 161
+    CLOSED: [2021-02-19 Fri 03:38]
+    - Erlang programs are stored in /modules/.
+
+    - Usually two ways to run:
+      * Compile your program before running it.
+      * Run your program directly without compiling it by running an /escript/.
+
+    - Let's compile and run the following program in _THREE_ ways:
+      #+NAME: hello.erl
+      #+begin_src erlang
+        -module(hello).
+        -export([start/0]).
+
+        start() ->
+            io:format("Hello world~n").
+            %% the ~n is interpreted as a newline in the Erlang io and io_lib modules.
+      #+end_src
+      
+**** DONE Compile and Run in the Eralng Shell - 162
+     CLOSED: [2021-02-19 Fri 03:06]
+     - Steps:
+       1. Start the Erlang shell.
+       2. ~c(hello).~ returns ~{ok, hello}~,
+          if code is right and your current location have that =hello.erl= file.
+       3. Run ~hello:start().~
+        
+     - Quick Scripting:
+       #+begin_src shell
+
+         erl -eval 'io:format("Memory: ~p~n", [erlang:memory(total)]).' -noshell -s init stop
+       #+end_src
+       
+**** DONE Compile and Run from the Command Prompt - 162
+     CLOSED: [2021-02-19 Fri 03:21]
+     - Commands:
+       #+begin_src shell
+         erlc hello.erl
+         erl -noshell -s hello start -s init stop
+       #+end_src
+       * ~-noshell~ starts Eralng without an _interactive shell_.
+
+       * ~-s hello start~ runs the function ~hello:start()~.
+         + Note:
+           When using the ~-s Mod ...~ option, the ~Mod~ must have been compiled.
+         
+       * ~-s init stop~ stops the system by evaluating the function ~init:stop()~
+         after the previous command has finished.
+     
+     - In the above example, we have two ~-s ...~'s.
+       * We can have _as many functions as we like_ on the command line:
+         Each ~-s ...~ command is evaluated with an apply statement, and when it
+         has run to completion, the next commands is evaluated.
+
+     - Put those commands into a shell script:
+       #+NAME: hello.sh
+       #+begin_src shell
+         #!/usr/bin/env shell
+
+         erl -noshell\
+             -pa /home/joe/2012/book/JAERLANG/Book/code\
+             -s hello start\
+             -s init stop
+       #+end_src
+       Add a new _absolute path_ with ~-pa~ /load path/ can guarantee that the
+       location where you can run this script is not limited to the folder that
+       contains =hello.erl=.
+       
+**** DONE Run As an Escript - 164
+     CLOSED: [2021-02-19 Fri 03:25]
+     #+NAME: hello
+     #+begin_src erlang
+       #!/usr/bin/env escript
+
+       main(Args) ->
+           io:format("Hello world~n").
+     #+end_src
+     
+     - The Escript file must contain a function ~main(Args)~.
+
+     - *Exporting Functions During Development*
+       You don't want to keep adding or removing export declarations during your
+       development.
+       * Solution:
+         #+begin_src erlang
+           -compile(export_all).
+         #+end_src
+         Remember:
+         + Remove it when you think your code no longer need high frequency changes.
+         + Using it make analyzing code with dialyzer a lot more difficult.
+       
+**** DONE Programs with Command-Line Arguments - 165
+     CLOSED: [2021-02-19 Fri 03:38]
+     We use this example:
+     #+NAME: fac.erl
+     #+begin_src erlang
+       -module(fac).
+       -export([fac/1]).
+
+       fac(0) -> 1;
+       fac(N) -> N * fac(N-1).
+     #+end_src
+     
+     - Compile and Run in the Eralng Shell:
+       Just pass the argument.
+
+     - Compile and Run from the Command Prompt
+       #+NAME: fac1.erl
+       #+begin_src erlang
+         -module(fac1).
+         -export([main/1]).
+
+         main([A]) ->
+             I = list_to_integer(atom_to_list(A)),
+             F = fac(I),
+             io:format("factorial ~w = ~w~n", [I, F]),
+             init:stop().
+
+         fac(0) -> 1;
+         fac(N) -> N * fac(N-1).
+       #+end_src
+       * Then
+         #+begin_src shell
+           erlc fac1.erl
+           erl -noshell -s fac1 main 25
+         #+end_src
+     
+     - Run As an Escript:
+       #+NAME: factorial
+       #+begin_src erlang
+         #!/usr/bin/env escript
+
+         main([A]) ->
+             I = list_to_integer(atom_to_list(A)),
+             F = fac(I),
+             io:format("factorial ~w = ~w~n", [I, F]).
+
+         fac(0) -> 1;
+         fac(N) -> N * fac(N-1).
+       #+end_src
+       * Run it in shell: ~./factorial 25~
+       
+*** TODO 10.3 Automating Compilation with Makefiles - 166
+**** TODO A Makefile Template - 166
+***** TODO Specializing the Makefile Template - 168
     
-*** 10.5 Getting Help - 172
-*** 10.6 Tweaking the Environment - 173
-*** Exercises - 174
+*** TODO 10.4 When Things Go Wrong - 169
+**** TODO Stopping Erlang - 169
+**** TODO Undefined (Missing) Code - 170
+**** TODO The Shell Isn't Responding - 170
+**** TODO My Makefile Doesn't Make - 172
+**** TODO Erlang Has Crashed and You Want to Read the Crash Dump - 172
+    
+*** TODO 10.5 Getting Help - 172
+*** TODO 10.6 Tweaking the Environment - 173
+*** TODO Exercises - 174
 - 
 * TODO Part III — Concurrent and Distributed Programs
 ** 11. Real-World Concurrency - 177
