@@ -2304,6 +2304,83 @@
        
 *** TODO 10.3 Automating Compilation with Makefiles - 166
 **** TODO A Makefile Template - 166
+     Here's the _template_ that I base most of my /makefiles/ on:
+     #+begin_src makefile
+       .SUFFIXES: .erl .beam .yrl
+
+       .erl.beam:
+            erlc -W $<
+
+       .yrl.erl:
+            erlc -W $<
+
+       ERL = erl -boot start_clean
+
+       # Here's a list of Erlang modules you want compiling
+       # If the modules don't fit onto one line add a \ character to the end of the
+       # line and continue on the next line
+
+       # Edit the lines below
+       MODS = module1 module2 \
+              module3 ... special1 ...\
+              ...
+              moduleN
+
+       # The first target in any makefile is the default target.
+       # If you just type "make" then "make all" is assumed (because
+       #    "all" is the first target in this makefile)
+
+       all: compile
+
+       compile: ${MODS:%=%.beam} subdirs
+
+       ## special compilation requirements are added here
+
+       special1.beam: special1.erl
+                ${ERL} -Dflag1 -W0 special1.erl
+
+       ## run an application from the makefile
+       application1: compile
+               ${ERL} -pa Dir1 -s application1 start Arg1 Arg2
+
+       #  the subdirs target compiles any code in sub-directories
+
+       subdirs:
+               cd dir1; $(MAKE)
+               cd dir2; $(MAKE)
+               ...
+
+       # remove all the code
+       clean:
+               rm -rf *.beam erl_crash.dump
+               cd dir1; ${MAKE} clean
+               cd dir2; ${MAKE} clean
+     #+end_src
+     - Start with some rules to compile Erlang modules and files with the
+       =.yrl= extension -- files containing parser definitions for the /Eralng
+       parser generator program/ -- _yecc_ (an Erlang version of _yacc_).
+
+     - All /modules/ in ~MODS~ are compiled with ~erlc Mod.erl~.
+
+     - /Modules/ that need special treatment, and they are handled in *separate
+       rules*. For example, ~special1~.
+
+     - Inside a makefile there are a number of /targets/.
+       * target :: an alpanumeric string starting in the first column and
+                   terminated by a colon (~:~).
+     
+     - To run the /makefile/, you give the shell command:
+       ~make [Target]~
+       * The argument ~[Target]~ is _optional_.
+         If it is ommited, then the first target in the file is assumed.
+
+     - The /target/ ~clean~ removes all compiled Erlang object code files and the
+       file =erl_crash.dump=.
+       * =TODO= =NEXT=
+         The crash dump contains information that can help debug an application.
+         See _Erlang Has Crashed and You Want to Read the Crash Dump, on page 172,_
+         for details.
+       
 ***** TODO Specializing the Makefile Template - 168
     
 *** TODO 10.4 When Things Go Wrong - 169
