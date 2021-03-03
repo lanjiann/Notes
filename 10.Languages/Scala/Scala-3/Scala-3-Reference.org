@@ -1,5 +1,5 @@
 #+TITLE: Scala 3 Reference
-#+VERSION: 3.0.0-RC2-bin-20210218-a633e93-NIGHTLY
+#+VERSION: 3.0.0-RC2-bin-20210226-63a467b-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: overview
 #+STARTUP: entitiespretty
@@ -5895,32 +5895,34 @@
          Since ~run~ runs _ARBITRARY_ code it can ALWAYS produce a /side effect/
          if the code it runs produces one.
 
-**** DONE Example Expansion - =RE-DO= =???= =Code Example Changed???=
+**** DONE Example Expansion - =RE-DO= =???= =Try Code Example=
      CLOSED: [2020-11-30 Mon 23:18]
      Assume we have _two_ /methods/,
-     one ~map~ that takes an ~Expr[Array[T]]~ and a function ~f~
-     and, =FIX= =COMMA=
-     one ~sum~ that performs a sum by delegating to ~map~.
+     one ~map~ that takes an ~Expr[Array[T]]~ and a function ~f~,
+     =FIX= =COMMA=
+     and one ~sum~ that performs a sum by delegating to ~map~.
      =from Jian= I prefer to use ~var acc = 0~ instead of ~var sum = 0~ to avoid same names.
      #+begin_src scala
        object Macros:
-         inline def sum_m(arr: Array[Int]): Int = ${sum('arr)}
-  
+
+         def map[T](arr: Expr[Array[T]], f: Expr[T] => Expr[Unit])
+                   (using Type[T], Quotes): Expr[Unit] = '{
+           var i: Int = 0
+           while i < ($arr).length do
+             val element: T = ($arr)(i)
+             ${f('element)}
+             i += 1
+         }
+
          def sum(arr: Expr[Array[Int]])(using Quotes): Expr[Int] = '{
            var sum = 0
            ${ map(arr, x => '{sum += $x}) }
            sum
          }
 
-         def map[T: Type](arr: Expr[Array[T]], f: Expr[T] => Expr[Unit])
-                         (using Quotes): Expr[Unit] = '{
-           var i: Int = 0
-           while (i < ($arr).length) {
-             val element: T = ($arr)(i)
-             ${f('element)}
-             i += 1
-           }
-         }
+         inline def sum_m(arr: Array[Int]): Int = ${sum('arr)}
+
+       end Macros
      #+end_src
      
      Expand the call to ~sum_m(Array(1, 2, 3))~:
@@ -5935,7 +5937,7 @@
           val arr: Array[Int] = Array.apply(1, [2, 3: Int]: Int*)
 
           var sum = 0
-          ${ map(arr, x => '{ sum += $x }) }
+          ${ map('arr, x => '{ sum += $x }) }
           sum
         #+end_src
         
@@ -5945,10 +5947,9 @@
 
           var sum = 0
           val f = x => '{ sum += $x }
-          ${ _root_.Macros.map(arr, 'f)(using '[Int], quotesInThisContext) }
+          ${ _root_.Macros.map('arr, 'f)('[Int]) }
           sum
         #+end_src
-        =FIX=
         
      4. Expand and /splice/ inside quotes ~map~:
         #+begin_src scala
@@ -5957,11 +5958,11 @@
           var sum = 0
           val f = x => '{ sum += $x }
           var i: Int = 0
-          while (i < (arr).length) {
+          while i < (arr).length do
             val element: Int = (arr)(i)
             sum += element
             i += 1
-          }
+
           sum
         #+end_src
         
@@ -5970,11 +5971,11 @@
           val arr: Array[Int] = Array.apply(1, [2, 3: Int]: Int*)
           var sum = 0
           var i: Int = 0
-          while (i < arr.length) {
+          while i < arr.length do
             val element: Int = arr(i)
             sum += element
             i += 1
-          }
+
           sum
         #+end_src
 
@@ -9283,22 +9284,24 @@
      
 **** DONE Caveats
      CLOSED: [2020-11-14 Sat 02:24]
-     The system
-     - *cannot* handle /static fields/,
+     - The system *CANNOT* provide _safety guarantee_
+       when extending Java or Scala 2 classes.
 
-     - *nor* does it provide _safety guarantee_ when extending /Java or Scala 2
-        classes/.
-     
-     - Calling /methods of Java or Scala 2/ is always *safe*.
+     - /Safe initialization/ of _global objects_ is only partially checked.
+       =TODO= =???=
      
 **** TODO References
-     - Fähndrich, M. and Leino, K.R.M., 2003, July. Heap monotonic typestates.
-       In International Workshop on Aliasing, Confinement and Ownership in
-       object-oriented programming (IWACO).
+     1. Fähndrich, M. and Leino, K.R.M., 2003, July. Heap monotonic typestates.
+        In International Workshop on Aliasing, Confinement and Ownership in
+        object-oriented programming (IWACO).
 
-     - Lucassen, J.M. and Gifford, D.K., 1988, January. Polymorphic effect systems.
-       In Proceedings of the 15th ACM SIGPLAN-SIGACT symposium on Principles of
-       programming languages (pp. 47-57). ACM.
+     2. Lucassen, J.M. and Gifford, D.K., 1988, January. Polymorphic effect systems.
+        In Proceedings of the 15th ACM SIGPLAN-SIGACT symposium on Principles of
+        programming languages (pp. 47-57). ACM.
+        
+     3. Fengyun Liu, Ondřej Lhoták, Aggelos Biboudis, Paolo G. Giarrusso, and
+        Martin Odersky. 2020. A type-and-effect system for object initialization.
+        OOPSLA, 2020.
 
 ** TODO Other Changed Features
 *** DONE Numeric Literals
