@@ -151,11 +151,156 @@
 ** 13.8 A larger example - 289
 ** 13.9 Conclusion - 297
     
-* 14 Enums - 298
-** 14.1 Enumerated data types - 298
-** 14.2 Algebraic data types - 302
-** 14.3 Generalized ADTs - 304
-** 14.4 What makes ADTs algebraic - 305
+* TODO 14 Enums - 298
+  Scala 3 introduced the ~enum~ construct to make the definition of
+  /sealed case class/ hierachies _more concise_.
+
+  - /Enums/ can be used to define both /enums/ in Java, and /enums/ in Haskell.
+  
+** DONE 14.1 Enumerated data types - 298
+   CLOSED: [2021-03-02 Tue 23:02]
+   In this book, we call the  /enumerated data type/ *EDT*, to distinguish it
+   from *ADT*'s.
+   
+   - Example:
+     #+begin_src scala
+       enum Direction:
+         case North, East, South, West
+     #+end_src
+
+   - ~enum~'s build-in methods:
+     * ~ordinal~: start at 0 and increases by one for each case, in the order the
+       cases are defined in the /enum/.
+
+     * ~values~: ~Array[YourEnumType]~
+       
+     * ~valueOf~: Convert a string, which is exactly the same as an enum case name,
+       to that enum value.
+
+   - Give an EDT value parameter(s):
+     #+begin_src scala
+       enum Direction(val degrees: Int):
+         case North extends Direction(0)
+         case East  extends Direction(90)
+         case South extends Direction(180)
+         case West  extends Direction(270)
+     #+end_src
+
+   - You can define a /method/ inside a /enum/:
+     #+begin_src scala
+       enum Direction(val degrees: Int):
+         case North extends Direction(0)
+         case East  extends Direction(90)
+         case South extends Direction(180)
+         case West  extends Direction(270)
+
+         def invert: Direction =
+           this match
+             case North => South
+             case East  => West
+             case South => North
+             case West  => East
+     #+end_src
+     * You can only define /methods/ for a whole /enum/, not for some SPECIFIC
+       /enum case(s)/.
+
+     * *footnote*:
+       Of course, you COULD define /extension methods/ for the case types, but it
+       might be better in that situation to just write out the /sealed case
+       class hierarchy/ by hand.
+     
+   - *Integration with Java enums*
+     #+begin_src scala
+       enum Direction extends java.lang.Enum[Direction]:
+         case North, East, South, West
+     #+end_src
+     
+     Then you can all /Java enums/ /methods/ on these values. For instance,
+     ~Direction.East.compareTo(Direction.South)  // -1~
+     
+** DONE 14.2 Algebraic data types - 302
+   CLOSED: [2021-03-03 Wed 00:53]
+   - Algebraic Data Type (ADT) :: a data type composed of a finite set of cases.
+     
+   - In Scala, a _sealed_ family of /case classes/ forms an /ADT/
+     so long as *AT LEAST _ONE_ of the cases take parameters.*
+     * footnote:
+       By comparison,
+       an EDT is a _sealed_ family of /case classes/ in which *NONE of the cases
+       take parameters.*
+
+   - When you create a case of an /ADT/ by using its /factory method/ (=from Jian=
+     the ~apply~ /method/), the compiler will *widen* its type to the more general
+     ~enum~ type.
+     * If you want the more specific type, use the constructor (~new~ it).
+     
+   - /ADT/'s can be *recursive*.
+     * =from Jian=
+       /EDT/'s can never be recursive, because *NONE of the cases take parameters.*
+
+   - Example:
+     #+begin_src scala
+       enum Seinfeld[+E]:
+         def ::[E2 >: E](o: E2): Seinfeld[E2] = Yada(o, this)
+
+         case Yada(head: E, tail: Seinfeld[E])
+         case Nada
+
+       val xs = 1 :: 2 :: 3 :: Nada
+       // val xs = Yada(1, Yada(2, Yada(3, Nada)))
+     #+end_src
+     
+** DONE 14.3 Generalized ADTs - 304
+   CLOSED: [2021-03-03 Wed 01:44]
+   - Generalized Algebraic Data Types (GADTs) :: ADTs in which the sealed trait
+     takes a /type parameter/ that is filled in by the cases.
+     
+   - Example:
+     #+begin_src scala
+       enum Literal[T]:
+         case IntLit(value: Int)         extends Literal[Int]
+         case LongLit(value: Long)       extends Literal[Long]
+         case CharLit(value: Char)       extends Literal[Char]
+         case FloatLit(value: Float)     extends Literal[Float]
+         case DoubleLit(value: Double)   extends Literal[Double]
+         case BooleanLit(value: Boolean) extends Literal[Boolean]
+         case StringLit(value: String)   extends Literal[String]
+     #+end_src
+     The ~Literal~ /enum/ represents a /GADT/ because it takes a /type parameter/
+     ~T~, which is specified by EACH of its cases in their _extends clauses_.
+
+   - =IMPORTANT=
+     This kind of /sealed type heirarchy/ is given the special name "generalized ADT"
+     because it presents *SPECIAL CHALLENGES to /type checking and inference/.*
+     * Here's an illustrative example:
+       #+begin_src scala
+         import Literal.*
+
+         def valueOfLiteral[T](lit: Literal[T]): T =
+           lit match
+             case IntLit(n)     => n
+             case LongLit(m)    => m
+             case CharLit(c)    => c
+             case FloatLit(f)   => f
+             case DoubleLit(d)  => d
+             case BooleanLit(b) => b
+             case StringLit(s)  => s
+       #+end_src
+       The ~valueOfLiteral~ /method/ passes the /type checker/, despite none of
+       it match alternatives resulting in the required result type, ~T~.
+       + For example,
+         =FIXME= IntList => IntLit
+         the ~case IntLit(n)~ alternative results in ~n~, which has type ~Int~.
+         The challenge is that ~Int~ is not type ~T~, nor is ~Int~ a /subtype/ of ~T~.
+           This /type checks/ only because the compiler notices that for the
+         ~IntLit~ case, ~T~ can be none other than ~Int~.
+           Moreover, this _MORE SPECIFIC_ /type/ is propagated back to the caller.
+         #+begin_src scala
+           valueOfLiteral(BooleanLit(true))  // true: Boolean
+           valueOfLiteral(IntLit(42))        // 42: Int
+         #+end_src
+     
+** 14.4 What makes ADTs algebraic - 305 - =RE-READ= =NOTE=
 ** 14.5 Conclusion - 309
    
 * 15 Working with Lists - 310
