@@ -774,13 +774,130 @@
         
 *** TODO Exercises - 72
     http://erlang.org/doc/man/erlang.html
-    =TODO=
-    =TODO=
-    =TODO=
-    =TODO=
-    =TODO=
-    =TODO=
-    =TODO=
+    1. Modify ~area/1~ to handle more geometry shpaes, circle and right angled triangle.
+       Add ~perimeter/1~, which can handle all geometry shpaes that ~area/1~ can handle.
+       #+begin_src erlang
+         -module(exercise1).
+         -export([area/1, perimeter/1]).
+         -import(math, [pi/0, sqrt/1]).
+
+         area({rectangle, Width, Height})            -> Width * Height;
+         area({square, Side})                        -> Side * Side;
+         area({circle, Radius})                      -> math:pi() * Radius * Radius;
+         area({right_angled_triangle, Base, Height}) -> Base * Height / 2.
+
+         perimeter({rectangle, Width, Height})            -> 2 * (Width + Height);
+         perimeter({square, Side})                        -> 4 * Side;
+         perimeter({circle, Radius})                      -> 2 * math:pi() * Radius;
+         perimeter({right_angled_triangle, Base, Height}) -> Base + Height + sqrt(Base * Base + Height * Height).
+       #+end_src
+
+    2. Create a function that can do the BIF ~tuple_to_list/1~ work:
+       #+begin_src erlang
+         -module(exercise2).
+         -export([my_tuple_to_list/1]).
+
+         aux(0, _, Result) -> Result;
+         aux(Index, Tuple, Result) ->
+             E = element(Index, Tuple),
+             aux(Index - 1, Tuple, [E|Result]).
+
+
+         my_tuple_to_list(Tuple) ->
+             aux(tuple_size(Tuple), Tuple, []).
+       #+end_src
+
+    3. =TODO=
+
+    4. =TODO=
+
+    5. Define ~even/1~ and ~odd/1~.
+       #+NAME: math_functions.erl
+       #+begin_src erlang
+         -module(functions).
+         -export([even/1, odd/1]).
+
+         even(Int) ->
+             Int rem 2 =:= 0.
+
+
+         odd(Int) ->
+             Int rem 2 =/= 0
+       #+end_src
+        
+    6. Add a new function ~filter(Predicate, List)~ to =math_functions.erl=
+       created in question 5.
+       #+NAME: math_functions.erl
+       #+begin_src erlang
+         -module(math_functions).
+         -export([even/1, odd/1, filter/2]).
+         -import(lists, [reverse/1]).
+
+         even(Int) ->
+             Int rem 2 =:= 0.
+
+
+         odd(Int) ->
+             Int rem 2 =/= 0
+
+                 aux_filter(_, [], Result) -> lists:reverse(Result);
+                 aux_filter(Predicate, [H | T], Result) ->
+                          Updated =
+                              case Predicate(H) of 
+                                  true  -> [H | Result];
+                                  false -> Result
+                              end,
+                          aux_filter(Predicate, T, Updated).
+
+
+         filter(Predicate, List) ->
+             aux_filter(Predicate, List, []).
+       #+end_src
+       
+    7. Add a new function ~split(L)~ to =math_functions.erl=, which returns
+       ~{Even_numbers, Odd_numbers}~ in two different ways -- use accumulators
+       or ~filter~ defined in question 6.
+       #+NAME: math_functions.erl
+       #+begin_src erlang
+         -module(math_functions).
+         -export([even/1, odd/1, filter/2, split/1]).
+         -import(lists, [reverse/1]).
+
+         even(Int) ->
+             Int rem 2 =:= 0.
+
+
+         odd(Int) ->
+             Int rem 2 =/= 0
+
+                 aux_filter(_, [], Result) -> lists:reverse(Result);
+                 aux_filter(Predicate, [H | T], Result) ->
+                          Updated =
+                              case Predicate(H) of 
+                                  true  -> [H | Result];
+                                  false -> Result
+                              end,
+                          aux_filter(Predicate, T, Updated).
+
+
+         filter(Predicate, List) ->
+             aux_filter(Predicate, List, []).
+
+         split1(List) ->
+             Evens = filter(fun (N) -> even(N) end, List),
+             Odds = filter(fun (N) -> odd(N) end, List),
+             {Evens, Odds}.
+
+         aux_split2([], Evens, Odds) -> {lists:reverse(Evens), lists:reverse(Odds)};
+         aux_split2([H|T], Evens, Odds) ->
+             case even(H) of
+                 true  -> aux_split2(T, [H|Evens], Odds);
+                 false -> aux_split2(T, Evens, [H|Odds])
+             end.
+
+         split2(List) ->
+             aux_split2(List, [], []).
+       #+end_src
 
 ** DONE 5. Records and Maps - 75 - =TODO= exercises
    CLOSED: [2021-02-08 Mon 00:43]
@@ -2397,20 +2514,305 @@
 * TODO Part III — Concurrent and Distributed Programs
 ** 11. Real-World Concurrency - 177
 ** 12. Concurrent Programming - 181
-*** 12.1 The Concurrency Primitives - 182
-*** 12.2 Introducing Client-Server - 184
-*** 12.3 Processes Are Cheap - 189
-*** 12.4 Receive with a Timeout - 191
+   - Combine /sequential Erlang/ and _THREE new primitives_ (~spawn~, ~send~, and
+     ~receive~) can create concurrent program.
+     * ~spawn~: *create* a /parallel process/.
+     * ~send~: *send* a /message/ to a /process/.
+     * ~receive~: *receive* /messages/.
+     
+   - Erlang concurrency is BASED ON /processes/ -- *small*, *self-contained virtual
+     machines* that can _evaluate_ /Erlang functions/.
+
+   - /Erlang processes/ belong to the programming language and *NOT* the OS.
+       
+   - In Erlang:
+     * CREATING and DESTROYING /processes/ is *very fast*.
+     * SENDING /messages/ between /processes/ is *very fast*.
+     * /Processes/ behave the *same* way on all OSs.
+     * *Very large numbers* of /processes/ can be created.
+     * /Processes/ *share *NO* memory* and are *completely independent*.
+     * The *only* way for /processes/ to INTERACT is through _message passing_.
+     
+     For these reasons Erlang is sometimes called a _PURE message passing language_._
+     
+*** DONE 12.1 The Concurrency Primitives - 182
+    CLOSED: [2021-03-05 Fri 00:40]
+    Everything we've learned about /sequential programming/ is *STILL true* for
+    /concurrent programming/.
+    
+    - Add the following _primitives_ to /sequential programming/, and then we can
+      create /concurrent programs/:
+      * ~Pid = spawn(Mod, Func, Args)~
+        + Create a new /concurrent process/ that evaluates ~apply(Mod, Func, Args)~.
+        + This ~Func~ MUST BE a function that is *exported* by ~Mod~.
+        + When a NEW /process/ is created, the *latest version* of the /module/
+          defining the code is used.
+          
+
+      * ~Pid = spawn(Func)~
+        + Create a new /concurrent process/ that evaluates ~Func()~.
+        + This ~Func~ does NOT have to be *exported* by ~Mod~.
+        + =TODO=
+          The *essential difference* between the _TWO_ forms of ~spawn~ has to do
+          with /dynamic code upgrade/.
+          - =IMPORTANT=
+            How to choose between the two forms of ~spawn~ is discussed later in
+            _Section 12.8, Spawning with MFAs of Funs, on page 197_.
+
+      * ~Pid ! Message~
+        Send ~Message~ to ~Pid~.
+        + ~!~ is called the /send operator/.
+
+        + The value of ~Pid ! Message~ is ~M~,
+          therefore passing one /message/ to MULTIPLE /processes/ can be written as
+          ~Pid1 ! Pid2 ! Pid3 ... ! Message~.
+
+      * ~receive ... end~
+        #+begin_src erlang
+          receive
+              Pattern1 [when Guard1] ->
+                  Expression1;
+              Pattern2 [when Guard2] ->
+                  Expression2;
+
+              ...
+          end
+        #+end_src
+        + *CAUTION*
+          The not matched /message/ will be *saved for later processing* (not
+          _drop_ THIS /message/ silencely or _crash_ this /process/), the /process/
+          waits for the next /message/.
+          =TODO=
+          This is described in more details in _Section 12.5, Selective Receive,
+          on page 193._
+    
+    - EACH /process/ has an *associated* /mailbox/ that is also created when the
+      /process/ is created.
+      * This /mailbox/ will save all the messages passed to its associated /process/.
+      * The _ONLY_ time the /mailbox/ is examined is when your program evaluates
+        a ~receive~ statement.
+
+    - Recast the ~area/1~ function in _Section 4.1, Modules are Where We Store
+      Code, on page 43_ into a process.
+      #+begin_src erlang
+        area({rectangle, Width, Height}) -> Width * Height;
+        area({square, Side})             -> Side * Side.
+      #+end_src
+      
+      * Use /processes/:
+        #+begin_src erlang
+          -module(area_server0).
+          -export([loop/0]).
+
+          loop() ->
+              receive
+                  {rectangle, Width, Ht} ->
+                      io:format("Area of rectangle is ~p~n", [Width * Ht]),
+                      loop();
+
+                  {square, Side} ->
+                      io:format("Area of square is ~p~n", [Side * Side]),
+                      loop()
+              end.
+        #+end_src
+        Run it in Erlang shell:
+        1. ~Pid = spawn(area_server0, loop, []).~
+
+        2. ~Pid ! {rectangle, 6, 10}.~
+           outputs =Area of rectangle is 60=, and returns the sent /message/ as
+           we mentioned.
+    
+        3. ~Pid ! {square, 12}.~
+           outputs =Area of square is 144=, and returns the sent /message/ as
+           we mentioned.
+        
+*** DONE 12.2 Introducing Client-Server - 184
+    CLOSED: [2021-03-05 Fri 01:42]
+    /Client-server architectures/ are *central* to Erlang.
+
+    - Traditionally,
+      * /client-server architectures/ have involved a /network/ that *separates*
+        a /client/ from a /server/.
+
+      * _Most often_ there are 
+        - multiple instances of the /client/
+        - a single /server/
+
+      * The word /server/ often conjures up a mental image of some rather
+        HEAVYWEIGHT software running on a specialized machine.
+    
+    - In our case, a much *light-weight* mechanism is involved.
+      * The /client/  and /server/ are separate /processes/.
+      * Erlang /message passing/ is used for them to communicate.
+      * Both /client/ and /server/ can run on
+        + the SAME machine
+          or
+        + on two DIFFERENT machines.
+      
+    - /client/ role: initiate a computation by sending a /request/ to the /server/.
+    - /server/ role: icompute a reply and send a response to the /client/.
+
+    - Let's write our first client-server application.
+      Start by making some small changes to the program we wrote in the previous section.
+      * Version 0:
+        Rewrite to create an client-server application.
+        #+begin_src erlang
+          -module(area_server0).
+          -export([loop/0]).
+
+          loop() ->
+              receive
+                  {From, {rectangle, Width, Ht}} ->
+                      From ! Width * Ht,
+                      loop();
+
+                  {From, {square, Side}} ->
+                      From ! Side * Side,
+                      loop()
+              end.
+        #+end_src
+        + Change the /message passing/ form, for example,
+          _FROM_ ~Pid ! {rectangle, 6, 10}~ _TO_ ~Pid ! {self(), {rectangle, 6, 10}}~.
+          Then, the /server/ can response.
+
+        + The _response_ is the area value.
+          Stop simply printing a message out.
+      
+      * Version 1:
+        Improve the code.
+        #+begin_src erlang
+          -module(area_server1).
+          -export([loop/0, rpc/2]).
+
+          rpc(Pid, Request) ->
+              Pid ! {self(), Request},
+              receive
+                  Response -> Response
+              end.
+
+          loop() ->
+              receive
+                  {From, {rectangle, Width, Ht}} ->
+                      From ! Width * Ht,
+                      loop();
+
+                  {From, {square, Side}} ->
+                      From ! Side * Side,
+                      loop();
+
+                  {From, Other} ->
+                      From ! {error, Other},
+                      loop()
+              end.
+        #+end_src
+        + the ~rpc~ (short for _remote procedure call_) function to ENCAPULATES
+          sending a _request_ to a /server/ and
+          waiting for a _response_.
+
+        + Add a fallback pattern ~{From, Other}~ to signal unknown _requests_.
+
+        + Use this new version:
+          1. ~Pid = spawn(area_server1, loop, []).~
+
+          2. ~area_server1:rpc(Pid, {rectangle, 6, 8}).~
+             returns ~48~
+           
+          3. ~area_server1:rpc(Pid, {square, 6}).~
+             returns ~36~
+
+          4. ~area_server1:rpc(Pid, socks).~
+             returns ~{error, socks}~
+      
+      * Version 2:
+        Fix the ~rpc/2~ issue.
+        #+begin_src erlang
+          -module(area_server2).
+          -export([loop/0, rpc/2]).
+
+          rpc(Pid, Request) ->
+              Pid ! {self(), Request},
+              receive
+                  {Pid, Response} -> Response
+              end.
+
+          loop() ->
+              receive
+                  {From, {rectangle, Width, Ht}} ->
+                      From ! {self(), Width * Ht},
+                      loop();
+
+                  {From, {square, Side}} ->
+                      From ! {self(), Side * Side},
+                      loop();
+
+                  {From, Other} ->
+                      From ! {self(), {error, Other}},
+                      loop()
+              end.
+        #+end_src
+        One ~rpc~ call should only wait for correponding _response_.
+          The version 1 doesn't distinguish where the _response_ comes from, and
+        we need to fix it by adding ~self()~ to _response_ in ~loop()~, and
+        ~rpc~ only try to receive _responses_ from expected /server/ that has a
+        matched ~Pid~.
+      
+      * Final Version:
+        In the previous version, we need to call ~spawn/3~ and ~rpc/2~ in the
+        Erlang shell, which can be hidden inside the /module/.
+        #+begin_src erlang
+          -module(area_server_final).
+          -export([start/0, area/2, loop/0]).
+
+          start() -> spawn(area_server_final, loop, []).
+
+          area(Pid, What) ->
+              rpc(Pid, What).
+
+          rpc(Pid, Request) ->
+              Pid ! {self(), Request},
+              receive
+                  {Pid, Response} -> Response
+              end.
+
+          loop() ->
+              receive
+                  {From, {rectangle, Width, Ht}} ->
+                      From ! {self(), Width * Ht},
+                      loop();
+
+                  {From, {square, Side}} ->
+                      From ! {self(), Side * Side},
+                      loop();
+
+                  {From, Other} ->
+                      From ! {self(), {error, Other}},
+                      loop()
+              end.
+        #+end_src
+        Then we can use it like:
+        1. ~Pid = area_server_final:start().~
+
+        2. ~area_server_final:area(Pid, {rectangle, 10, 8}).~
+           returns ~80~
+         
+        3. ~area_server_final:area(Pid, {square, 7}).~
+           returns ~49~
+
+        4. ~area_server_final:area(Pid, socks).~
+           returns ~{error, socks}~
+        
+*** TODO 12.3 Processes Are Cheap - 189
+*** TODO 12.4 Receive with a Timeout - 191
 **** Receive with Timeout Value of Zero - 192
 ***** receive with Timeout Value of Infinity - 192
       
 **** Implementation a Timer - 193
     
-*** 12.5 Selective Receive - 193
-*** 12.6 Registered Processes - 194
-*** 12.7 A Word About Tail Recursion - 196
-*** 12.8 Spawning with MFAs or Funs - 197
-*** Exercises - 198
+*** TODO 12.5 Selective Receive - 193
+*** TODO 12.6 Registered Processes - 194
+*** TODO 12.7 A Word About Tail Recursion - 196
+*** TODO 12.8 Spawning with MFAs or Funs - 197
+*** TODO Exercises - 198
 
 ** 13. Errors in Concurrent Programs - 199
 *** 13.1 Error Handling Philosophy - 199
