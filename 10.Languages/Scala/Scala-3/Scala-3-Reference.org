@@ -1,5 +1,5 @@
 #+TITLE: Scala 3 Reference
-#+VERSION: 3.0.0-RC2-bin-20210226-63a467b-NIGHTLY
+#+VERSION: 3.0.0-RC2-bin-20210305-086d1a8-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: overview
 #+STARTUP: entitiespretty
@@ -2426,7 +2426,7 @@
              ~xs.\plus{}:(x)~.
 
 **** DONE Generic Extensions
-     CLOSED: [2021-02-16 Tue 00:23]
+     CLOSED: [2021-03-07 Sun 03:08]
      It is also possible to extend /generic types/ by adding /type parameters/
      to an /extension/.
 
@@ -2445,16 +2445,19 @@
          extension [T](xs: List[T])
             def sumBy[U: Numeric](f: T => U): U = ...
        #+end_src
-       /Type arguments on extensions/ can be passed in two forms:
-       * As /extension methods/:
+       * Type arguments matching method type parameters are passed as usual:
          #+begin_src scala
            List("a", "bb", "ccc").sumBy[Int](_.length)
-           List[String]("a", "bb", "ccc").sumBy[Int](_.length)
          #+end_src
-         
-       * As /non-extension methods/:
+
+       * By contrast, /type arguments/ matching /type parameters/
+         FOLLOWING ~extension~ can be passed _only if_ the /method/ is referenced
+         as a _non-extension method_:
          #+begin_src scala
            sumBy[String](List("a", "bb", "ccc"))[Int](_.length)
+         #+end_src
+         Or, when passing both type arguments:
+         #+begin_src scala
            sumBy[String](List("a", "bb", "ccc"))(_.length)
          #+end_src
 
