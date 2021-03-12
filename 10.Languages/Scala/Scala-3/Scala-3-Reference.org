@@ -1,5 +1,5 @@
 #+TITLE: Scala 3 Reference
-#+VERSION: 3.0.0-RC2-bin-20210305-086d1a8-NIGHTLY
+#+VERSION: 3.0.0-RC2-bin-20210309-95fa9cb-NIGHTLY
 #+AUTHORS: Dotty Contributors
 #+STARTUP: overview
 #+STARTUP: entitiespretty
@@ -8624,7 +8624,7 @@
          use a colon on the end of a line, followed by the actual /type/ on the
          next.
 
-*** TODO Explicit Nulls - =Keep Reading=
+*** TODO Explicit Nulls - =Keep Reading= =Edited recently 2021-03-10=
     /Explicit nulls/ is an /opt-in feature/ (can be enabled via the flag
     ~-Yexplicit-nulls~) that *modifies* /the Scala type system/, which *makes
     /reference types/ (anything that extends ~AnyRef~) non-nullable.*
@@ -8637,7 +8637,13 @@
       Instead, if consider the code above is a piece of Scala 2 code which can
       typecheck, translate it into Scala 3 form:
       #+begin_src scala
-        val x: String | Null = null
+        val x: String | Null = null  // ok
+      #+end_src
+
+    - A /nullable type/ could have ~null~ value during runtime;
+      hence, it is not safe to select a member without checking its nullity.
+      #+begin_src scala
+        x.trim  // error: trim is not member of String | Null
       #+end_src
 
 **** DONE New Type Hierarchy
@@ -8656,14 +8662,40 @@
        all /reference types/
        =from Jian= Implementation details??? =TODO=
 
+**** DONE Working with ~Null~
+     CLOSED: [2021-03-10 Wed 11:23]
+     To make working with /nullable values/ easier,
+     we propose adding a few utilities to the standard library.
+     So far, we have found the following useful:
+     
+     - An /extension method/ ~.nn~ to *"cast away"* _nullability_:
+       #+begin_src scala
+         extension [T](x: T | Null)
+           inline def nn: T =
+             assert(x != null)
+             x.asInstanceOf[T]
+       #+end_src
+       * *DON'T* use ~.nn~ on /mutable variable/ directly,
+         because it may introduce an unknown type into the type of the variable.
+         =from Jian= =TODO=
+         Need a concrete example!
+        
+     - An ~unsafeNulls~ language feature. =FIXME= _period_
+       When imported, ~T | Null~ can be used as ~T~, similar to regular Scala
+       (without /explicit nulls/).
+       =TODO= =NEXT=
+       See the UnsafeNulls (=FIXME= add a inner file link) section for more
+       details.
+
 **** DONE Unsoundness
      CLOSED: [2020-12-30 Wed 16:56]
-     The new type system is unsound with respect to ~null~.
-     Enforcing /sound initialization/, which is can be done, is a non-goal of
-     this proposal.
+     The new type system is *unsound* with respect to ~null~.
+     =from Jian=
+     See the last paragraph of this section, flag ~-Ysafe-init~, and this
+     /unsoundness/ can be caught.
 
-     - The /unsoundness/ happens because uninitialized fields in a class start out
-       as ~null~:
+     - The /unsoundness/ happens because /uninitialized fields/ in a class start
+       out as ~null~:
        #+begin_src scala
          // -Yexplicit-nulls
          class C:
@@ -8675,13 +8707,18 @@
        #+end_src
        
      - The /unsoundness/ above *can be caught* by the compiler with the option
-       ~-Ycheck-init~.
+       ~-Ysafe-init~.
        =TODO= More details can be found in "safe initialization" (next section).
 
 **** DONE Equality
      CLOSED: [2020-12-30 Wed 16:59]
-     *Compare a value of ~AnyRef~ /subtypes/ with ~null~ is not allowed!!!*
-     The related operators are ~==~, ~!=~, ~eq~, and ~ne~.
+     *Compare a value of ~AnyRef~ /subtypes/ with ~null~,
+     by using operators are ~==~, ~!=~, ~eq~, and ~ne~, is not allowed!!!*
+     
+     - ~null~ can *ONLY* be compared with
+       * ~Null~,
+       * nullable union (~T | Null~), or
+       * ~Any~ type.
 
      - ~null~ can _only_ be compared with values of type
        * ~Null~
@@ -8689,64 +8726,37 @@
        * ~Any~ type.
 
      - For some reason,
-       if we really want to compare ~null~ with non-null values,
-       *we can provide a type hint.*
-       For example,
-       #+begin_src scala
-         val x: String = ???
-         val y: String | Null = ???
+       if we really want to compare ~null~ with _non-null values_,
+       *we can provide a type hint (e.g. ~: Any~).*
+       * For example,
+         #+begin_src scala
+           val x: String = ???
+           val y: String | Null = ???
 
-         x == null        // error: Values of types String and Null cannot be compared with == or !=
-         x eq null        // error
-         "hello" == null  // erro
+           x == null        // error: Values of types String and Null cannot be compared with == or !=
+           x eq null        // error
+           "hello" == null  // error
 
-         y == null  // ok
-         y == x     // ok
+           y == null  // ok
+           y == x     // ok
 
-         (x: String | Null) == null  // ok
-         (x: Any) == null            // ok
-       #+end_src
+           (x: String | Null) == null  // ok
+           (x: Any) == null            // ok
+         #+end_src
 
-**** DONE Working with ~Null~
-     CLOSED: [2021-01-19 Tue 02:51]
-     To make working with nullable values easier, we *propose* adding a few
-     utilities to the standard library. So far, we have found the following
-     useful:
-     - An extension method ~.nn~ to "cast away" nullability
-       #+begin_src scala
-         extension [T](x: T | Null) =
-           inline def nn: T =
-             assert(x != null)
-             x.asInstanceOf[T]
-       #+end_src
-       This means that given ~x: String|Null~, ~x.nn~ has type ~String~, so we
-       can call all the usual methods on it. Of course, ~x.nn~ will _throw a
-       NPE_ if ~x~ is ~null~.
-       
-     - *CAUTION*
-       *Don't use ~.nn~ on /mutable variables/ DIRECTLY*, which may introduce
-       unknown value into the type.
-       =WHY=
-       =TODO= =TODO= =TODO= =???=
-       =Examples???=
-
-**** TODO Java Interoperability
+**** DONE Java Interoperability
+     CLOSED: [2021-03-10 Wed 14:32]
      - The Scala compiler can load /Java classes/ in _two_ ways:
-       * from source
-       * from bytecode
-
-     - In either above case, when a /Java class/ is loaded,
-       we "patch" the type of its members to reflect that /Java types/ remain
+       _from SOURCE_ or _from BYTECODE_.
+         In either above case, when a /Java class/ is loaded,
+       we *"patch"* the /type/ of its members to reflect that /Java types/ remain
        implicitly nullable.
-       * Specifically,
-         we patch =FIXME=
-         + the type of fields
-         + the argument type, and
-         + return type of methods.
+       * Specifically, we *patch*
+         + the /type/ of /fields/
+         + the /argument type/, and /return type/ of /methods/.
 
-     - ~UncheckedNull~ is an alias for ~Null~ with magic properties (see below) =TODO=.
-       We illustrate the rules with following examples:
-       * The first two rules are easy:
+     - We illustrate the rules with following examples:
+       * The first _TWO rules_ are easy:
          we *nullify* /reference types/ *but not* /value types/.
          #+begin_src java
            class C {
@@ -8759,7 +8769,7 @@
          
          #+begin_src scala
            class C:
-             val s: String | UncheckedNull
+             val s: String | Null
              val x: Int
          #+end_src
 
@@ -8769,9 +8779,9 @@
          
          ==>
          
-         ~class C[T] { def foo(): T | UncheckedNull }~
+         ~class C[T] { def foo(): T | Null }~
          
-         + Notice
+         + *Notice*
            this rule is _sometimes too conservative_, as witnessed by
            #+begin_src scala
              class InScala:
@@ -8779,7 +8789,8 @@
                val b: Bool = c.foo()  // no longer typechecks, since `foo` now returns `Bool | Null`
            #+end_src
      
-       * This reduces the number of reduntant /nullable types/ we need to add.
+       * We reduce the number of REDUNTANT /nullable types/ we need to add.
+         =FIXME=
          Consider
          #+begin_src java
            class Box<T> {
@@ -8795,16 +8806,31 @@
            
          #+begin_src scala
            class Box[T] {
-               def get() T | UncheckedNull:
+               def get() T | Null:
            }
 
            class BoxFactory[T] {
-               def makeBox(): Box[T] | UncheckedNull
+               def makeBox(): Box[T] | Null
            }
          #+end_src
+
+         + Suppose we have a ~BoxFactory[String]~.
+           Notice that calling ~makeBox()~ on it returns a ~Box[String] | Null~,
+           not a ~Box[String | Null] | Null~.
+           This _SEEMS at first glance /unsound/ ("What if the box itself has
+           ~null~ inside?"),_ but it *sound* because calling ~get()~ on a
+           ~Boxt[T]~ returns a ~T | Null~.
+           
+         * *Notice*
+            we need to *patch ALL* /Java-defined classes/ that transitively
+           appear in the /argument or return type/ of a /field/ or /method/
+           accessible from the Scala code being compiled.
+             Absent crazy reflection magic, we think that ALL such /Java classes/
+           must be visible to the /Typer/ (=???=) in the first place, so they
+           will be patched.
          
-       * We will append UncheckedNull to the type arguments if the generic class
-         is defined in Scala.
+       * We will append ~Null~ to the /type arguments/ if the /generic class/ is
+         defined in Scala.
          #+begin_src java
            class BoxFactory<T> {
                Box<T> makeBox();  // Box is Scala-defined
@@ -8814,15 +8840,111 @@
          
          ==>
          
+         =IMPROVE ME=
          #+begin_src scala
            class BoxFactory[T]:
-             def makeBox(): Box[T | UncheckedNull] | UncheckedNull  // Box is Scala-defined
-             def makeCrazyBoxes(): List[Box[List[T] | UncheckedNull]] | UncheckedNull  // List is Java-defined
+             def makeBox(): Box[T | Null] | Null
+             def makeCrazyBoxes(): java.util.List[Box[java.util.List[T] | Null]] | Null
+         #+end_src
+         + In this case, since ~Box~ is Scala-defined, we will get
+           ~Box[T | Null] | Null~. This is needed because our _nullability function_
+           is only applied (modularly) to the /Java classes/, but not to the Scala
+           ones, so we need a way to tell ~Box~ that it contains a _nullable value_.
+         
+         + The ~java.util.List~ is Java-defined,
+           so we *don't* append ~Null~ to its /type argument/.
+           BUT we still need to nullify its inside.
+
+       * We *don't* nullify /SIMPLE literal constant (~final~) fields/, since they
+         are known to be non-null
+         #+begin_src java
+           class Constants {
+               final String NAME = "name";
+               final int AGE = 0;
+               final char CHAR = 'a';
+
+               final String NAME_GENERATED = getNewName();
+           }
+         #+end_src
+         
+         ==>
+
+         #+begin_src scala
+           class Constants:
+               val NAME: String("name") = "name"
+               val AGE: Int(0) = 0
+               val CHAR: Char('a')  = 'a'
+
+               val NAME_GENERATED: String | Null = getNewName();
+         #+end_src
+         =FIXME=
+         
+       * We don't append ~Null~ to a field nor to a return type of a method which
+         is annotated with a ~NotNull~ annotation.
+         #+begin_src java
+           class C {
+               @NotNull String name;
+               @NotNull List<String> getNames(String prefix);  // List is Java-defined
+               @NotNull Box<String> getBoxedName();  // Box is Scala-defined
+           }
          #+end_src
 
-***** ~UncheckedNull~
+         ==>
 
-**** TODO Flow Typing
+         #+begin_src scala
+           class C {
+               val name: String
+               // we still need to nullify the paramter types
+               def getNames(prefix: String | Null): java.util.List[String]
+               // we don't append `Null` to the outmost level, but still need to nullify inside
+               def getBoxedName(): Box[String | Null]
+           }
+         #+end_src
+         
+         + The /annotation/ must be from the list below to be recognized as
+           ~NotNull~ by the compiler. Check =Definitions.scala= *for an updated
+           list* (=from Jian= can keep changing):
+           #+begin_src scala
+             // A list of annotations that are commonly used to indicate
+             // that a field/method argument or return type is not null.
+             // These annotations are used by the nullification logic in
+             // JavaNullInterop to improve the precision of type nullification.
+             // We don't require that any of these annotations be present
+             // in the class path, but we want to create Symbols for the
+             // ones that are present, so they can be checked during nullification.
+             @tu lazy val NotNullAnnots: List[ClassSymbol] = ctx.getClassesIfDefined(
+               "javax.annotation.Nonnull" ::
+               "edu.umd.cs.findbugs.annotations.NonNull" ::
+               "androidx.annotation.NonNull" ::
+               "android.support.annotation.NonNull" ::
+               "android.annotation.NonNull" ::
+               "com.android.annotations.NonNull" ::
+               "org.eclipse.jdt.annotation.NonNull" ::
+               "org.checkerframework.checker.nullness.qual.NonNull" ::
+               "org.checkerframework.checker.nullness.compatqual.NonNullDecl" ::
+               "org.jetbrains.annotations.NotNull" ::
+               "lombok.NonNull" ::
+               "io.reactivex.annotations.NonNull" :: Nil map PreNamedString)
+           #+end_src
+
+***** Override check
+      - When we check _OVERRIDING *between* /Scala classes/ and /Java classes/,_
+        the rules are relaxed for ~Null~ /type/ with this feature, in order to
+        help users to working with Java libraries.
+        
+      - Suppose we have /Java method/ ~String f(String x)~, we can /override/
+        this /method/ in Scala in any of the following forms:
+        #+begin_src scala
+          def f(x: String | Null): String | Null
+
+          def f(x: String): String | Null
+
+          def f(x: String | Null): String
+
+          def f(x: String): String
+        #+end_src
+
+**** TODO Flow Typing - =START= =KEEP READING=
      We added a simple form of flow-sensitive type inference.
        The idea is that if ~p~ is a /stable path/ or a /trackable variable/,
      then we can know that ~p~ is non-null if it's compared with ~null~. This
@@ -8836,9 +8958,11 @@
          if s != null then
            // s: String
 
+         // Outside the above `if`
          // s: String | Null
 
          assert(s != null)
+         // After this point, the type of `s` is `String`
          // s: String
        #+end_src
        
@@ -8862,12 +8986,20 @@
         val s2: String | Null = ???
 
         if s != null && s2 != null then
+          // s: String
+          // s2: String
+        else
+          // s: String | Null
+          // s2: String | Null
+
+        if s == null || s2 == null then
           // s: String | Null
           // s2: String | Null
         else
           // s: String
           // s2: String
       #+end_src
+      =FIXME= insert one space before and after ~|~.
       
 ***** DONE Inside Conditions
       CLOSED: [2020-12-31 Thu 01:07]
@@ -8896,7 +9028,8 @@
           case _         =>
       #+end_src
       
-***** TODO Mutable Variable
+***** DONE Mutable Variable - =RE-READ=
+      CLOSED: [2021-03-10 Wed 15:17]
       We are able to detect the nullability of some /local mutable variables/.
       
       - A simple example is:
@@ -8916,46 +9049,58 @@
             // xs: C | Null
         #+end_src
         
-      - When dealing with local mutable variables, there are two questions:
-        1. Whether to track a local mutable variable during flow typing.
-           We track a local mutable variable if the variable is not assigned in
-           a closure. For example, in the following code x is assigned to by the
-           closure y, so we do not do flow typing on x.
-           #+begin_src scala
-             var x: String | Null = ???
+      - When dealing with /local mutable variables/, there are _TWO questions_:
+        1. WHETHER to track a /local mutable variable/ during /flow typing/.
+           We track a /local mutable variable/ if the variable is *not assigned in
+           a /closure/.*
+           * For example,
+             in the following code ~x~ is assigned to by the /closure/ ~y~, so we
+             _do *NOT* do /flow typing/ on ~x~._
+             #+begin_src scala
+               var x: String | Null = ???
 
-             def y =
-               x = null
+               def y =
+                 x = null
 
-             if x != null then
-               // y can be called here, which would break the fact
-               val a: String = x  // error: x is captured and mutated by the closure, not trackable
-           #+end_src
-
-        2. Whether to generate and use flow typing on a specific use of a local
-           mutable variable. We only want to do flow typing on a use that
-           belongs to the same method as the definition of the local variable.
-           For example, in the following code, even x is not assigned to by a
-           closure, but we can only use flow typing in one of the occurrences
-           (because the other occurrence happens within a nested closure).
-           #+begin_src scala
-             var x: String | Null = ???
-
-             def y =
                if x != null then
-                 // not safe to use the fact (x != null) here
-                 // since y can be executed at the same time as the outer block
-                 val _: String = x
+                 // y can be called here, which would break the fact
 
-             if x != null then
-               val a: String = x  // ok to use the fact here
-               x = null
-           #+end_src
+                 // error: x is captured and mutated by the closure, not trackable
+                 val a: String = x
+             #+end_src
+
+        2. WHETHER to generate and use /flow typing/ on a specific use of a /local
+           mutable variable/.
+             We only want to do /flow typing/ on a use that belongs to the
+           *SAME /method/* as the definition of the /local variable/.
+
+           * For example,
+             in the following code, even ~x~ is *not* assigned to by a /closure/,
+             +but+ =FIXME= we can only use /flow typing/ in one of the occurrences
+             (because the other occurrence happens within a /nested closure/).
+             #+begin_src scala
+               var x: String | Null = ???
+
+               def y =
+                 if x != null then
+                    // not safe to use the fact (x != null) here
+                    // since y can be executed at the same time as the outer block
+                    val _: String = x
+
+               if x != null then
+                  val a: String = x  // ok to use the fact here
+                  x = null
+             #+end_src
+             =from Jian=
+             I don't quite understand the comment
+             "since y can be executed at the same time as the outer block".
+             =???= =TODO= =???=
            
       - =TODO=
         See more examples in tests/explicit-nulls/neg/var-ref-in-closure.scala.
+        =FIXME= Should use a hyperlink
         
-      - Currently, we are unable to track paths with a mutable variable prefix.
+      - Currently, we are *unable to track* /paths/ with a /mutable variable prefix/.
         For example, ~x.a~ if ~x~ is mutable.
       
 ***** DONE Unsupported Idioms
@@ -8977,11 +9122,109 @@
         =from Jian=
         WHY NOT SUPPORT THIS????????
 
-**** TODO Binary Compatibility
+***** TODO ~UnsafeNulls~
+      - It is difficult to work with many nullable values, we introduce a language
+        feature unsafeNulls. Inside this "unsafe" scope, all ~T | Null~ values can
+        be used as ~T~.
+
+      - Users can import ~scala.language.unsafeNulls~ to create such scopes, or
+        use =-language:unsafeNulls= to enable this feature globally (for migration
+        purpose only).
+        
+      - Assume ~T~ is a /reference type/ (a /subtype/ of ~AnyRef~), the following
+        _unsafe operation rules_ are applied in this /unsafe-nulls scope/:
+        1. the members of ~T~ can be found on ~T | Null~
+
+        2. a value with type ~T~ can be compared with ~T | Null~ and ~Null~
+
+        3. suppose ~T1~ is not a /subtype/ of ~T2~ using /explicit-nulls subtyping/
+           (where ~Null~ is a direct /subtype/ of ~Any~), /extension methods/ and
+           /implicit conversions/ designed for ~T2~ can be used for ~T1~
+           if ~T1~ is a /subtype/ of ~T2~ using /regular subtyping rules/ (where
+           ~Null~ is a /subtype/ of every /reference type/)
+
+        4. suppose ~T1~ is not a /subtype/ of ~T2~ using /explicit-nulls subtyping/,
+           a value with type ~T1~ can be used as ~T2~
+           if ~T1~ is a /subtype/ of ~T2~ using /regular subtyping rules/
+           
+      - Addtionally, null can be used as ~AnyRef~ (~Object~), which means you can
+        select ~.eq~ or ~.toString~ on it.
+        
+      - The program in ~unsafeNulls~ will have a
+        *SIMILAR semantic* as
+        _regular Scala (=FIXME= regular Scala => Scala without ~-Yexplicit-nulls~),_
+        BUT *not equivalent*.
+        
+        * For example,
+          the following code CANNOT be compiled even using *unsafe nulls*. Because
+          of the /Java interoperation/, the /type/ of the get /method/ becomes
+          ~T | Null~.
+          #+begin_src scala
+            def head[T](xs: java.util.List[T]): T = xs.get(0)  // error
+          #+end_src
+          Since the compiler doesn't know whether ~T~ is a /reference type/, it
+          is UNABLE to cast ~T | Null~ to ~T~.
+          + A ~.nn~ need to be inserted after ~xs.get(0)~ by user manually to fix
+            the error, which strips the ~Null~ =FIXME= from its /type/.
+
+      - The intention of this unsafeNulls is to give users a better migration path
+        for explicit nulls. Projects for Scala 2 or regular dotty can try this
+        by adding -Yexplicit-nulls -language:unsafeNulls to the compile options.
+        A small number of manual modifications are expected. To migrate to the
+        full explicit nulls feature in the future, -language:unsafeNulls can be
+        dropped and add import scala.language.unsafeNulls only when needed.
+        #+begin_src scala
+          def f(x: String): String = ???
+          def nullOf[T >: Null]: T = null
+
+          import scala.language.unsafeNulls
+
+          val s: String | Null = ???
+          val a: String = s // unsafely convert String | Null to String
+
+          val b1 = s.trim() // call .trim() on String | Null unsafely
+          val b2 = b1.length()
+
+          f(s).trim() // pass String | Null as an argument of type String unsafely
+
+          val c: String = null // Null to String
+
+          val d1: Array[String] = ???
+          val d2: Array[String | Null] = d1 // unsafely convert Array[String] to Array[String | Null]
+          val d3: Array[String] = Array(null) // unsafe
+
+          class C[T >: Null <: String] // define a type bound with unsafe conflict bound
+
+          val n = nullOf[String] // apply a type bound unsafely
+        #+end_src
+
+      - _WITHOUT the ~unsafeNulls~, all these /unsafe operations/ will *NOT* be
+        type-checked._
+        
+      - ~unsafeNulls~ also works for /extension methods/ and /implicit search/.
+        #+begin_src scala
+          import scala.language.unsafeNulls
+
+          val x = "hello, world!".split(" ").map(_.length)
+
+          given Conversion[String, Array[String]] = _ => ???
+
+          val y: String | Null = ???
+          val z: Array[String | Null] = y
+        #+end_src
+
+**** DONE Binary Compatibility
+     CLOSED: [2021-03-10 Wed 14:35]
+     Our STRATEGY
+     for /binary compatibility/ WITH
+     _Scala binaries that predate explicit nulls_ AND
+     _new libraries compiled WITHOUT the ~-Yexplicit-nulls~ flag_:
+
+     leave the *types unchanged* and be compatible but *unsound*.
 
 *** TODO Safe Initialization - =TODO= =START=
     Dotty implements *experimental* /safe initialization check/, which can be
-    enabled by the compiler option ~-Ycheck-init~.
+    enabled by the compiler option ~-Ysafe-init~.
 
 **** DONE A Quick Glance
      CLOSED: [2020-07-25 Sat 00:58]
